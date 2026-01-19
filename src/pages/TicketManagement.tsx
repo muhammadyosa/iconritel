@@ -304,113 +304,107 @@ export default function TicketManagement() {
           <h1 className="text-3xl font-bold">Ticket Management</h1>
           <p className="text-muted-foreground">Kelola tiket incident NOC</p>
         </div>
-        <div className="flex gap-2">
-          <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
-            <DialogTrigger asChild>
-              <Button>
-                <Plus className="h-4 w-4 mr-2" />
-                Buat Tiket
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-2xl">
-              <DialogHeader>
-                <DialogTitle>Buat Tiket Baru</DialogTitle>
-              </DialogHeader>
-              <div className="space-y-4">
-                <div>
-                  <Label>Ticket ID</Label>
-                  <Input
-                    value={formData.ticketId}
-                    onChange={(e) => setFormData({ ...formData, ticketId: e.target.value })}
-                    placeholder="Masukkan Ticket ID (contoh: INC12345678)"
-                  />
-                </div>
-                <div>
-                  <Label>Serpo / Tim</Label>
-                  <Input
-                    value={formData.serpo}
-                    onChange={(e) => setFormData({ ...formData, serpo: e.target.value })}
-                    placeholder="Masukkan nama tim"
-                  />
-                </div>
-                <div>
-                  <Label>Constraint</Label>
-                  <Select
-                    value={formData.constraint}
-                    onValueChange={(value) => setFormData({ ...formData, constraint: value })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Pilih constraint" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">
-                        RITEL
-                      </div>
-                      {ALL_CONSTRAINTS.filter(c => !FEEDER_CONSTRAINTS_SET.has(c)).map((c) => (
-                        <SelectItem key={c} value={c}>
-                          {c}
-                        </SelectItem>
-                      ))}
-                      <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground border-t mt-1">
-                        FEEDER (PROACTIVE NOC RETAIL)
-                      </div>
-                      {ALL_CONSTRAINTS.filter(c => FEEDER_CONSTRAINTS_SET.has(c)).map((c) => (
-                        <SelectItem key={c} value={c}>
-                          {c}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                {/* Show PORT text input only for PORT DOWN constraint */}
-                {formData.constraint === "PORT DOWN" && (
-                  <div>
-                    <Label>Port Info (Optional)</Label>
-                    <Input
-                      value={formData.portText}
-                      onChange={(e) => setFormData({ ...formData, portText: e.target.value })}
-                      placeholder="Contoh: PORT-1/1/1"
-                    />
-                  </div>
-                )}
-                
-                {/* Preview ticket format */}
-                {formData.constraint && selectedRecord && formData.serpo && (
-                  <div className="p-3 bg-accent/50 rounded-lg space-y-1">
-                    <p className="text-xs font-semibold text-muted-foreground">
-                      Preview Format Tiket:
-                    </p>
-                    <p className="text-sm font-mono">
-                      {generateTicketFormat(
-                        formData.constraint,
-                        String(selectedRecord.customer || ""),
-                        formData.serpo.trim(),
-                        String(selectedRecord.fat || ""),
-                        String(selectedRecord.hostname || ""),
-                        String(selectedRecord.sn || ""),
-                        formData.portText || undefined
-                      )}
-                    </p>
-                  </div>
-                )}
-                {selectedRecord && (
-                  <div className="p-3 bg-secondary/50 rounded-lg space-y-1">
-                    <p className="text-sm font-medium">Selected Record:</p>
-                    <p className="text-xs text-muted-foreground">
-                      Customer: {String(selectedRecord.customer || "")} | Service:{" "}
-                      {String(selectedRecord.service || "")}
-                    </p>
-                  </div>
-                )}
-                <Button onClick={handleSubmitTicket} className="w-full">
-                  Simpan Tiket
-                </Button>
-              </div>
-            </DialogContent>
-          </Dialog>
-        </div>
       </div>
+
+      {/* Dialog for creating ticket from Preview Data */}
+      <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Buat Tiket Baru</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Ticket ID</Label>
+              <Input
+                value={formData.ticketId}
+                onChange={(e) => setFormData({ ...formData, ticketId: e.target.value })}
+                placeholder="Masukkan Ticket ID (contoh: INC12345678)"
+              />
+            </div>
+            <div>
+              <Label>Serpo / Tim</Label>
+              <Input
+                value={formData.serpo}
+                onChange={(e) => setFormData({ ...formData, serpo: e.target.value })}
+                placeholder="Masukkan nama tim"
+              />
+            </div>
+            <div>
+              <Label>Constraint</Label>
+              <Select
+                value={formData.constraint}
+                onValueChange={(value) => setFormData({ ...formData, constraint: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Pilih constraint" />
+                </SelectTrigger>
+                <SelectContent>
+                  <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">
+                    RITEL
+                  </div>
+                  {ALL_CONSTRAINTS.filter(c => !FEEDER_CONSTRAINTS_SET.has(c)).map((c) => (
+                    <SelectItem key={c} value={c}>
+                      {c}
+                    </SelectItem>
+                  ))}
+                  <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground border-t mt-1">
+                    FEEDER (PROACTIVE NOC RETAIL)
+                  </div>
+                  {ALL_CONSTRAINTS.filter(c => FEEDER_CONSTRAINTS_SET.has(c)).map((c) => (
+                    <SelectItem key={c} value={c}>
+                      {c}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            
+            {/* Show PORT text input only for PORT DOWN constraint */}
+            {formData.constraint === "PORT DOWN" && (
+              <div>
+                <Label>Port Info (Optional)</Label>
+                <Input
+                  value={formData.portText}
+                  onChange={(e) => setFormData({ ...formData, portText: e.target.value })}
+                  placeholder="Contoh: PORT-1/1/1"
+                />
+              </div>
+            )}
+            
+            {/* Preview ticket format */}
+            {formData.constraint && selectedRecord && formData.serpo && (
+              <div className="p-3 bg-accent/50 rounded-lg space-y-1">
+                <p className="text-xs font-semibold text-muted-foreground">
+                  Preview Format Tiket:
+                </p>
+                <p className="text-sm font-mono">
+                  {generateTicketFormat(
+                    formData.constraint,
+                    String(selectedRecord.customer || ""),
+                    formData.serpo.trim(),
+                    String(selectedRecord.fat || ""),
+                    String(selectedRecord.hostname || ""),
+                    String(selectedRecord.sn || ""),
+                    formData.portText || undefined
+                  )}
+                </p>
+              </div>
+            )}
+            {selectedRecord && (
+              <div className="p-3 bg-secondary/50 rounded-lg space-y-1">
+                <p className="text-sm font-medium">Selected Record:</p>
+                <p className="text-xs text-muted-foreground">
+                  Customer: {String(selectedRecord.customer || "")} | Service:{" "}
+                  {String(selectedRecord.service || "")}
+                </p>
+              </div>
+            )}
+            <Button onClick={handleSubmitTicket} className="w-full">
+              Simpan Tiket
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <Card className="shadow-card">
         <CardHeader>
