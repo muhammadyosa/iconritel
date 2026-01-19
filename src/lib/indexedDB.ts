@@ -215,4 +215,5 @@ export async function clearAllData(): Promise<void> {
   localStorage.removeItem("ticketUpdates");
   localStorage.removeItem("noc_tickets");
   localStorage.removeItem("ticket_daily_history");
+  localStorage.removeItem("shift_report_daily_history");
 }
