@@ -313,7 +313,7 @@ export default function Dashboard() {
             <CardHeader className="bg-gradient-to-r from-accent/10 via-primary/5 to-accent/10 border-b">
               <CardTitle className="flex items-center gap-2">
                 <TrendingUp className="h-5 w-5 text-accent" />
-                Category Trend (Per Hari)
+                Category Trend
               </CardTitle>
             </CardHeader>
             <CardContent className="p-3 sm:p-4 md:pt-6">
