@@ -686,8 +686,19 @@ export default function Dashboard() {
       <Dialog open={filterDialogOpen} onOpenChange={setFilterDialogOpen}>
         <DialogContent className="w-[95vw] max-w-4xl max-h-[85vh] overflow-hidden flex flex-col p-4 sm:p-6">
           <DialogHeader className="flex-shrink-0">
-            <DialogTitle className="flex items-center gap-2 text-lg">
+            <DialogTitle 
+              className={`flex items-center gap-2 text-lg ${!showOltList && filterDialogTitle.startsWith("Tiket OLT:") ? "cursor-pointer hover:text-primary transition-colors" : ""}`}
+              onClick={() => {
+                if (!showOltList && filterDialogTitle.startsWith("Tiket OLT:")) {
+                  setShowOltList(true);
+                  setFilterDialogTitle("📟 Daftar OLT Terdampak");
+                }
+              }}
+            >
               <BarChart3 className="h-5 w-5 text-primary" />
+              {!showOltList && filterDialogTitle.startsWith("Tiket OLT:") && (
+                <span className="text-muted-foreground hover:text-primary">←</span>
+              )}
               {filterDialogTitle}
               <span className="ml-2 text-sm font-normal text-muted-foreground">
                 ({showOltList 
