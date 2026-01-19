@@ -240,21 +240,21 @@ export default function Dashboard() {
       </div>
 
       {/* Charts Section - Bar Charts */}
-      <div className="grid gap-3 sm:gap-4 grid-cols-1 lg:grid-cols-2 w-full">
+      <div className="grid gap-2 sm:gap-3 grid-cols-1 lg:grid-cols-2 w-full">
         {/* Status Distribution Bar Chart */}
         <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.6, delay: 0.4 }}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.2 }}
         >
-          <Card className="shadow-2xl overflow-hidden border-2 backdrop-blur-lg bg-card/70">
-            <CardHeader className="bg-gradient-to-r from-primary/10 via-accent/5 to-primary/10 border-b">
-              <CardTitle className="flex items-center gap-2">
-                <BarChart3 className="h-5 w-5 text-primary" />
+          <Card className="shadow-lg overflow-hidden border bg-card">
+            <CardHeader className="py-2.5 px-3 sm:px-4 border-b bg-muted/30">
+              <CardTitle className="flex items-center gap-2 text-sm sm:text-base">
+                <BarChart3 className="h-4 w-4 text-primary" />
                 Status Distribution
               </CardTitle>
             </CardHeader>
-            <CardContent className="p-3 sm:p-4 md:pt-6">
+            <CardContent className="p-2 sm:p-3">
               {(() => {
                 const statusData = [
                   { name: "⚙️ On Progress", value: tickets.filter((t) => t.status === "On Progress").length, fill: "hsl(217, 91%, 60%)", status: "On Progress" },
@@ -268,11 +268,11 @@ export default function Dashboard() {
                 };
 
                 return (
-                  <ChartContainer config={chartConfig} className="h-[200px] sm:h-[240px] md:h-[280px] w-full transition-all duration-500 ease-out">
+                  <ChartContainer config={chartConfig} className="h-[160px] sm:h-[180px] md:h-[200px] w-full transition-all duration-300">
                     <BarChart
                       data={statusData}
                       layout="vertical"
-                      margin={{ top: 10, right: 30, left: 10, bottom: 10 }}
+                      margin={{ top: 5, right: 20, left: 5, bottom: 5 }}
                       onClick={(data) => {
                         if (data?.activePayload?.[0]?.payload?.status) {
                           const status = data.activePayload[0].payload.status;
@@ -289,19 +289,22 @@ export default function Dashboard() {
                       <CartesianGrid strokeDasharray="3 3" className="stroke-muted" horizontal={false} />
                       <XAxis 
                         type="number"
-                        tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }}
+                        tick={{ fontSize: 9, fill: "hsl(var(--muted-foreground))" }}
+                        tickLine={false}
                       />
                       <YAxis 
                         type="category"
                         dataKey="name" 
-                        tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }}
-                        width={120}
+                        tick={{ fontSize: 9, fill: "hsl(var(--muted-foreground))" }}
+                        width={100}
+                        tickLine={false}
+                        axisLine={false}
                       />
                       <ChartTooltip
                         content={<ChartTooltipContent />}
                         cursor={{ fill: "hsl(var(--muted))", opacity: 0.3 }}
                       />
-                      <Bar dataKey="value" radius={[0, 6, 6, 0]} cursor="pointer">
+                      <Bar dataKey="value" radius={[0, 4, 4, 0]} cursor="pointer">
                         {statusData.map((entry, index) => (
                           <Cell key={`cell-${index}`} fill={entry.fill} />
                         ))}
@@ -310,8 +313,8 @@ export default function Dashboard() {
                   </ChartContainer>
                 );
               })()}
-              <p className="text-xs text-muted-foreground text-center mt-2">
-                Klik pada bar untuk melihat detail tiket
+              <p className="text-[10px] text-muted-foreground text-center mt-1.5">
+                Klik bar untuk detail
               </p>
             </CardContent>
           </Card>
@@ -319,19 +322,19 @@ export default function Dashboard() {
 
         {/* Category Distribution Line Chart - Daily Trend with History */}
         <motion.div
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.6, delay: 0.5 }}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.3 }}
         >
-          <Card className="shadow-2xl overflow-hidden border-2 backdrop-blur-lg bg-card/70">
-            <CardHeader className="bg-gradient-to-r from-accent/10 via-primary/5 to-accent/10 border-b">
-              <div className="flex items-center justify-between flex-wrap gap-2">
-                <CardTitle className="flex items-center gap-2">
-                  <TrendingUp className="h-5 w-5 text-accent" />
+          <Card className="shadow-lg overflow-hidden border bg-card">
+            <CardHeader className="py-2 px-3 sm:px-4 border-b bg-muted/30">
+              <div className="flex items-center justify-between gap-2">
+                <CardTitle className="flex items-center gap-2 text-sm sm:text-base">
+                  <TrendingUp className="h-4 w-4 text-accent" />
                   Category Trend
                 </CardTitle>
                 <Select value={trendDays.toString()} onValueChange={(v) => setTrendDays(Number(v))}>
-                  <SelectTrigger className="w-[120px] h-8 text-xs">
+                  <SelectTrigger className="w-[90px] h-7 text-[10px]">
                     <SelectValue placeholder="Rentang" />
                   </SelectTrigger>
                   <SelectContent>
@@ -342,7 +345,7 @@ export default function Dashboard() {
                 </Select>
               </div>
             </CardHeader>
-            <CardContent className="p-3 sm:p-4 md:pt-6">
+            <CardContent className="p-2 sm:p-3">
               {(() => {
                 // Use history data for the chart
                 const chartData = getChartData(trendDays);
@@ -363,24 +366,25 @@ export default function Dashboard() {
                 };
 
                 return (
-                  <ChartContainer config={chartConfig} className="h-[200px] sm:h-[240px] md:h-[280px] w-full transition-all duration-500 ease-out">
+                  <ChartContainer config={chartConfig} className="h-[160px] sm:h-[180px] md:h-[200px] w-full transition-all duration-300">
                     <LineChart
                       data={chartData}
-                      margin={{ top: 10, right: 20, left: 10, bottom: 10 }}
+                      margin={{ top: 5, right: 15, left: 5, bottom: 5 }}
                     >
                       <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
                       <XAxis 
                         dataKey="date"
-                        tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }}
+                        tick={{ fontSize: 8, fill: "hsl(var(--muted-foreground))" }}
                         tickLine={false}
                         axisLine={false}
-                        interval={trendDays > 14 ? 2 : trendDays > 7 ? 1 : 0}
+                        interval={trendDays > 14 ? 3 : trendDays > 7 ? 1 : 0}
                       />
                       <YAxis 
-                        tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }}
+                        tick={{ fontSize: 9, fill: "hsl(var(--muted-foreground))" }}
                         tickLine={false}
                         axisLine={false}
                         allowDecimals={false}
+                        width={25}
                       />
                       <ChartTooltip
                         content={<ChartTooltipContent />}
@@ -389,10 +393,10 @@ export default function Dashboard() {
                         type="monotone" 
                         dataKey="ritel" 
                         stroke="hsl(217, 91%, 60%)" 
-                        strokeWidth={3}
-                        dot={{ fill: "hsl(217, 91%, 60%)", strokeWidth: 2, r: trendDays > 14 ? 2 : 4, cursor: "pointer" }}
+                        strokeWidth={2}
+                        dot={{ fill: "hsl(217, 91%, 60%)", strokeWidth: 1, r: trendDays > 14 ? 2 : 3, cursor: "pointer" }}
                         activeDot={{ 
-                          r: 8, 
+                          r: 6, 
                           strokeWidth: 2, 
                           cursor: "pointer",
                           onClick: (_, payload: any) => {
@@ -407,10 +411,10 @@ export default function Dashboard() {
                         type="monotone" 
                         dataKey="feeder" 
                         stroke="hsl(38, 92%, 50%)" 
-                        strokeWidth={3}
-                        dot={{ fill: "hsl(38, 92%, 50%)", strokeWidth: 2, r: trendDays > 14 ? 2 : 4, cursor: "pointer" }}
+                        strokeWidth={2}
+                        dot={{ fill: "hsl(38, 92%, 50%)", strokeWidth: 1, r: trendDays > 14 ? 2 : 3, cursor: "pointer" }}
                         activeDot={{ 
-                          r: 8, 
+                          r: 6, 
                           strokeWidth: 2, 
                           cursor: "pointer",
                           onClick: (_, payload: any) => {
@@ -425,21 +429,19 @@ export default function Dashboard() {
                   </ChartContainer>
                 );
               })()}
-              <div className="flex flex-col items-center gap-2 mt-3">
-                <div className="flex justify-center gap-4">
-                  <div className="flex items-center gap-2 text-xs">
-                    <div className="w-3 h-3 rounded-full bg-accent" />
-                    <span className="text-muted-foreground">🏠 RITEL</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-xs">
-                    <div className="w-3 h-3 rounded-full bg-warning" />
-                    <span className="text-muted-foreground">🏬 FEEDER</span>
-                  </div>
+              <div className="flex items-center justify-center gap-4 mt-1.5">
+                <div className="flex items-center gap-1.5 text-[10px]">
+                  <div className="w-2 h-2 rounded-full bg-accent" />
+                  <span className="text-muted-foreground">🏠 RITEL</span>
                 </div>
-                <p className="text-xs text-muted-foreground">
-                  📊 History tersimpan hingga 30 hari • Klik titik untuk detail
-                </p>
+                <div className="flex items-center gap-1.5 text-[10px]">
+                  <div className="w-2 h-2 rounded-full bg-warning" />
+                  <span className="text-muted-foreground">🏬 FEEDER</span>
+                </div>
               </div>
+              <p className="text-[10px] text-muted-foreground text-center mt-1">
+                Klik titik untuk detail
+              </p>
             </CardContent>
           </Card>
         </motion.div>
