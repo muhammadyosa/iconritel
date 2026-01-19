@@ -318,8 +318,8 @@ export default function Dashboard() {
             </CardHeader>
             <CardContent className="p-3 sm:p-4 md:pt-6">
               {(() => {
-                // Group tickets by date and category
-                const dailyData: Record<string, { date: string; ritel: number; feeder: number }> = {};
+                // Group tickets by date and category with ISO key for filtering
+                const dailyData: Record<string, { date: string; isoDate: string; ritel: number; feeder: number }> = {};
                 
                 // Get last 7 days
                 const today = new Date();
@@ -328,7 +328,7 @@ export default function Dashboard() {
                   date.setDate(date.getDate() - i);
                   const dateStr = date.toISOString().split('T')[0];
                   const displayDate = date.toLocaleDateString('id-ID', { day: '2-digit', month: 'short' });
-                  dailyData[dateStr] = { date: displayDate, ritel: 0, feeder: 0 };
+                  dailyData[dateStr] = { date: displayDate, isoDate: dateStr, ritel: 0, feeder: 0 };
                 }
                 
                 // Count tickets per day per category
@@ -348,6 +348,19 @@ export default function Dashboard() {
                 const chartConfig: ChartConfig = {
                   ritel: { label: "🏠 RITEL", color: "hsl(217, 91%, 60%)" },
                   feeder: { label: "🏬 FEEDER", color: "hsl(38, 92%, 50%)" },
+                };
+
+                const handleDotClick = (category: "RITEL" | "FEEDER", isoDate: string, displayDate: string) => {
+                  const filtered = tickets.filter((t) => {
+                    const ticketDate = new Date(t.createdISO).toISOString().split('T')[0];
+                    return ticketDate === isoDate && t.category === category;
+                  });
+                  setPreviousDialogState(null);
+                  setShowOltList(false);
+                  setInlineSelectedTicket(null);
+                  setFilterDialogTickets(filtered);
+                  setFilterDialogTitle(`${category === "RITEL" ? "🏠" : "🏬"} ${category} - ${displayDate}`);
+                  setFilterDialogOpen(true);
                 };
 
                 return (
@@ -377,8 +390,17 @@ export default function Dashboard() {
                         dataKey="ritel" 
                         stroke="hsl(217, 91%, 60%)" 
                         strokeWidth={3}
-                        dot={{ fill: "hsl(217, 91%, 60%)", strokeWidth: 2, r: 4 }}
-                        activeDot={{ r: 6, strokeWidth: 2 }}
+                        dot={{ fill: "hsl(217, 91%, 60%)", strokeWidth: 2, r: 4, cursor: "pointer" }}
+                        activeDot={{ 
+                          r: 8, 
+                          strokeWidth: 2, 
+                          cursor: "pointer",
+                          onClick: (_, payload: any) => {
+                            if (payload?.payload) {
+                              handleDotClick("RITEL", payload.payload.isoDate, payload.payload.date);
+                            }
+                          }
+                        }}
                         name="🏠 RITEL"
                       />
                       <Line 
@@ -386,23 +408,37 @@ export default function Dashboard() {
                         dataKey="feeder" 
                         stroke="hsl(38, 92%, 50%)" 
                         strokeWidth={3}
-                        dot={{ fill: "hsl(38, 92%, 50%)", strokeWidth: 2, r: 4 }}
-                        activeDot={{ r: 6, strokeWidth: 2 }}
+                        dot={{ fill: "hsl(38, 92%, 50%)", strokeWidth: 2, r: 4, cursor: "pointer" }}
+                        activeDot={{ 
+                          r: 8, 
+                          strokeWidth: 2, 
+                          cursor: "pointer",
+                          onClick: (_, payload: any) => {
+                            if (payload?.payload) {
+                              handleDotClick("FEEDER", payload.payload.isoDate, payload.payload.date);
+                            }
+                          }
+                        }}
                         name="🏬 FEEDER"
                       />
                     </LineChart>
                   </ChartContainer>
                 );
               })()}
-              <div className="flex justify-center gap-4 mt-3">
-                <div className="flex items-center gap-2 text-xs">
-                  <div className="w-3 h-3 rounded-full bg-[hsl(217,91%,60%)]" />
-                  <span className="text-muted-foreground">🏠 RITEL</span>
+              <div className="flex flex-col items-center gap-2 mt-3">
+                <div className="flex justify-center gap-4">
+                  <div className="flex items-center gap-2 text-xs">
+                    <div className="w-3 h-3 rounded-full bg-[hsl(217,91%,60%)]" />
+                    <span className="text-muted-foreground">🏠 RITEL</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs">
+                    <div className="w-3 h-3 rounded-full bg-[hsl(38,92%,50%)]" />
+                    <span className="text-muted-foreground">🏬 FEEDER</span>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2 text-xs">
-                  <div className="w-3 h-3 rounded-full bg-[hsl(38,92%,50%)]" />
-                  <span className="text-muted-foreground">🏬 FEEDER</span>
-                </div>
+                <p className="text-xs text-muted-foreground">
+                  Klik pada titik untuk melihat detail tiket
+                </p>
               </div>
             </CardContent>
           </Card>
