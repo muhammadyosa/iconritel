@@ -280,8 +280,8 @@ export default function Dashboard() {
                       <YAxis 
                         type="category"
                         dataKey="name" 
-                        tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }}
-                        width={100}
+                        tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }}
+                        width={120}
                       />
                       <ChartTooltip
                         content={<ChartTooltipContent />}
