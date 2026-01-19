@@ -298,12 +298,10 @@ export default function TicketManagement() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">🎫 Ticket Management</h1>
-          <p className="text-muted-foreground">Kelola tiket incident NOC</p>
-        </div>
+    <div className="space-y-3 sm:space-y-4">
+      <div className="flex items-center gap-3">
+        <h1 className="text-xl sm:text-2xl font-bold">🎫 Ticket Management</h1>
+        <span className="text-xs text-muted-foreground hidden sm:inline">Kelola tiket incident NOC</span>
       </div>
 
       {/* Dialog for creating ticket from Preview Data */}
@@ -406,22 +404,22 @@ export default function TicketManagement() {
         </DialogContent>
       </Dialog>
 
-      <Card className="shadow-card">
-        <CardHeader>
-          <CardTitle className="flex items-center justify-between">
+      <Card className="shadow-sm border">
+        <CardHeader className="py-2.5 px-3 sm:px-4 border-b bg-muted/30">
+          <CardTitle className="flex items-center justify-between text-sm">
             <div>
               <span>📋 Preview Data User</span>
-              <p className="text-xs text-muted-foreground font-normal mt-1">
+              <p className="text-[10px] text-muted-foreground font-normal mt-0.5">
                 {isLoadingExcel ? (
                   "Memuat data..."
                 ) : excelData.length > 0 ? (
-                  `✓ ${excelData.length} data tersimpan dari Import Master Data`
+                  `✓ ${excelData.length} data tersimpan`
                 ) : (
                   <span className="flex items-center gap-1">
                     <Info className="h-3 w-3" />
-                    Belum ada data. Import melalui{" "}
+                    Import via{" "}
                     <Link to="/settings" className="text-primary underline hover:no-underline">
-                      Settings → Import Master Data
+                      Settings
                     </Link>
                   </span>
                 )}
@@ -429,50 +427,55 @@ export default function TicketManagement() {
             </div>
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="grid gap-4 md:grid-cols-5">
+        <CardContent className="p-2 sm:p-3">
+          <div className="grid gap-2 grid-cols-2 sm:grid-cols-3 lg:grid-cols-5">
             <div>
-              <Label>👨‍💼 Service ID</Label>
+              <Label className="text-[10px]">👨‍💼 Service ID</Label>
               <Input
-                placeholder="Cari Service ID..."
+                placeholder="Cari..."
                 value={searchFilters.service}
                 onChange={(e) => setSearchFilters({ ...searchFilters, service: e.target.value })}
+                className="h-7 text-xs"
               />
             </div>
             <div>
-              <Label>📍 Hostname OLT</Label>
+              <Label className="text-[10px]">📍 Hostname</Label>
               <Input
-                placeholder="Cari Hostname..."
+                placeholder="Cari..."
                 value={searchFilters.hostname}
                 onChange={(e) =>
                   setSearchFilters({ ...searchFilters, hostname: e.target.value })
                 }
+                className="h-7 text-xs"
               />
             </div>
             <div>
-              <Label>🛠️ ID FAT</Label>
+              <Label className="text-[10px]">🛠️ ID FAT</Label>
               <Input
-                placeholder="Cari ID FAT..."
+                placeholder="Cari..."
                 value={searchFilters.fat}
                 onChange={(e) => setSearchFilters({ ...searchFilters, fat: e.target.value })}
+                className="h-7 text-xs"
               />
             </div>
             <div>
-              <Label>💻 SN ONT</Label>
+              <Label className="text-[10px]">💻 SN ONT</Label>
               <Input
-                placeholder="Cari SN ONT..."
+                placeholder="Cari..."
                 value={searchFilters.sn}
                 onChange={(e) => setSearchFilters({ ...searchFilters, sn: e.target.value })}
+                className="h-7 text-xs"
               />
             </div>
             <div>
-              <Label>Customer Name</Label>
+              <Label className="text-[10px]">Customer</Label>
               <Input
-                placeholder="Cari Customer..."
+                placeholder="Cari..."
                 value={searchFilters.customer}
                 onChange={(e) =>
                   setSearchFilters({ ...searchFilters, customer: e.target.value })
                 }
+                className="h-7 text-xs"
               />
             </div>
           </div>
@@ -480,38 +483,39 @@ export default function TicketManagement() {
       </Card>
 
       {isLoadingExcel ? (
-        <Card className="shadow-card">
-          <CardContent className="py-8">
-            <div className="text-center text-muted-foreground">
+        <Card className="shadow-sm border">
+          <CardContent className="py-4">
+            <div className="text-center text-muted-foreground text-xs">
               <p>Memuat data Excel...</p>
             </div>
           </CardContent>
         </Card>
       ) : filteredData.length > 0 && (
-        <Card className="shadow-card">
-          <CardHeader>
-            <CardTitle>Preview Data ({filteredData.length} records)</CardTitle>
+        <Card className="shadow-sm border">
+          <CardHeader className="py-2 px-3 border-b bg-muted/30">
+            <CardTitle className="text-sm">Preview Data ({filteredData.length})</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="rounded-md border overflow-auto max-h-60">
+          <CardContent className="p-2">
+            <div className="rounded-md border overflow-auto max-h-40">
               <Table>
                 <TableHeader>
-                  <TableRow>
-                    <TableHead>Action</TableHead>
-                    <TableHead>👨‍💼 Service ID</TableHead>
-                    <TableHead>📍 Hostname OLT</TableHead>
-                    <TableHead>🛠️ ID FAT</TableHead>
-                    <TableHead>💻 SN ONT</TableHead>
-                    <TableHead>Customer</TableHead>
+                  <TableRow className="h-6">
+                    <TableHead className="px-1.5 py-1 text-[10px]">Action</TableHead>
+                    <TableHead className="px-1.5 py-1 text-[10px]">Service ID</TableHead>
+                    <TableHead className="px-1.5 py-1 text-[10px]">Hostname</TableHead>
+                    <TableHead className="px-1.5 py-1 text-[10px]">ID FAT</TableHead>
+                    <TableHead className="px-1.5 py-1 text-[10px]">SN ONT</TableHead>
+                    <TableHead className="px-1.5 py-1 text-[10px]">Customer</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {filteredData.slice(0, 50).map((record, idx) => (
-                    <TableRow key={idx}>
-                      <TableCell>
+                    <TableRow key={idx} className="h-7">
+                      <TableCell className="px-1.5 py-0.5">
                         <Button
                           size="sm"
                           variant="outline"
+                          className="h-5 text-[9px] px-2"
                           onClick={() => {
                             setSelectedRecord(record);
                             setIsFormOpen(true);
@@ -520,11 +524,11 @@ export default function TicketManagement() {
                           Pilih
                         </Button>
                       </TableCell>
-                      <TableCell className="font-mono text-xs">{String(record.service || "")}</TableCell>
-                      <TableCell className="font-medium">{String(record.hostname || "")}</TableCell>
-                      <TableCell className="font-mono text-xs">{String(record.fat || "")}</TableCell>
-                      <TableCell className="font-mono text-xs">{String(record.sn || "")}</TableCell>
-                      <TableCell>{String(record.customer || "")}</TableCell>
+                      <TableCell className="px-1.5 py-0.5 font-mono text-[10px]">{String(record.service || "")}</TableCell>
+                      <TableCell className="px-1.5 py-0.5 text-[10px] font-medium">{String(record.hostname || "")}</TableCell>
+                      <TableCell className="px-1.5 py-0.5 font-mono text-[10px]">{String(record.fat || "")}</TableCell>
+                      <TableCell className="px-1.5 py-0.5 font-mono text-[10px]">{String(record.sn || "")}</TableCell>
+                      <TableCell className="px-1.5 py-0.5 text-[10px]">{String(record.customer || "")}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -534,15 +538,15 @@ export default function TicketManagement() {
         </Card>
       )}
 
-      <Card className="shadow-card">
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>Daftar Tiket ({filteredTickets.length})</CardTitle>
-          <div className="flex gap-2">
+      <Card className="shadow-sm border">
+        <CardHeader className="py-2 px-3 border-b bg-muted/30 flex flex-row items-center justify-between">
+          <CardTitle className="text-sm">Daftar Tiket ({filteredTickets.length})</CardTitle>
+          <div className="flex gap-1.5">
             <Dialog open={isManualFormOpen} onOpenChange={setIsManualFormOpen}>
               <DialogTrigger asChild>
-                <Button variant="outline" size="sm">
-                  <FileEdit className="h-4 w-4 mr-2" />
-                  Input Manual
+                <Button variant="outline" size="sm" className="h-7 text-[10px] px-2">
+                  <FileEdit className="h-3 w-3 mr-1" />
+                  Manual
                 </Button>
               </DialogTrigger>
               <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -678,23 +682,23 @@ export default function TicketManagement() {
                 </div>
               </DialogContent>
             </Dialog>
-            <Button onClick={handleExportCSV} variant="outline" size="sm">
-              <Download className="h-4 w-4 mr-2" />
-              Export CSV
+            <Button onClick={handleExportCSV} variant="outline" size="sm" className="h-7 text-[10px] px-2">
+              <Download className="h-3 w-3 mr-1" />
+              CSV
             </Button>
           </div>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="p-2 space-y-2">
           {/* Search filter untuk Daftar Tiket */}
-          <div className="flex gap-3 items-end">
-            <div className="w-48">
-              <Label className="text-xs">Search By</Label>
+          <div className="flex gap-2 items-end">
+            <div className="w-32 sm:w-40">
+              <Label className="text-[10px]">Search By</Label>
               <Select value={ticketSearchField} onValueChange={setTicketSearchField}>
-                <SelectTrigger className="h-9">
+                <SelectTrigger className="h-7 text-[10px]">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">Semua Field</SelectItem>
+                  <SelectItem value="all">Semua</SelectItem>
                   <SelectItem value="ticketId">Ticket ID</SelectItem>
                   <SelectItem value="category">Category</SelectItem>
                   <SelectItem value="customerType">Customer/Type</SelectItem>
@@ -707,46 +711,46 @@ export default function TicketManagement() {
               </Select>
             </div>
             <div className="flex-1">
-              <Label className="text-xs">Pencarian</Label>
+              <Label className="text-[10px]">Pencarian</Label>
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3 w-3 text-muted-foreground" />
                 <Input
-                  placeholder={`Cari ${ticketSearchField === "all" ? "di semua field" : ticketSearchField}...`}
+                  placeholder={`Cari...`}
                   value={ticketSearchQuery}
                   onChange={(e) => setTicketSearchQuery(e.target.value)}
-                  className="h-9 pl-9"
+                  className="h-7 text-xs pl-7"
                 />
               </div>
             </div>
           </div>
-          <div className="rounded-md border overflow-auto max-h-96">
+          <div className="rounded-md border overflow-auto max-h-72">
             <Table>
               <TableHeader>
-                <TableRow className="h-7">
-                  <TableHead className="px-2 py-1 text-[11px]">Ticket ID</TableHead>
-                  <TableHead className="px-2 py-1 text-[11px]">Type</TableHead>
-                  <TableHead className="px-2 py-1 text-[11px]">Customer/Type</TableHead>
-                  <TableHead className="px-2 py-1 text-[11px]">Service ID</TableHead>
-                  <TableHead className="px-2 py-1 text-[11px]">Serpo</TableHead>
-                  <TableHead className="px-2 py-1 text-[11px]">Status</TableHead>
-                  <TableHead className="px-2 py-1 text-[11px]">Action</TableHead>
+                <TableRow className="h-6">
+                  <TableHead className="px-1.5 py-1 text-[10px]">Ticket ID</TableHead>
+                  <TableHead className="px-1.5 py-1 text-[10px]">Type</TableHead>
+                  <TableHead className="px-1.5 py-1 text-[10px]">Customer/Type</TableHead>
+                  <TableHead className="px-1.5 py-1 text-[10px]">Service ID</TableHead>
+                  <TableHead className="px-1.5 py-1 text-[10px]">Serpo</TableHead>
+                  <TableHead className="px-1.5 py-1 text-[10px]">Status</TableHead>
+                  <TableHead className="px-1.5 py-1 text-[10px]">Action</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {tickets.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={7} className="text-center text-muted-foreground text-xs">
+                    <TableCell colSpan={7} className="text-center text-muted-foreground text-[10px] py-3">
                       Belum ada tiket
                     </TableCell>
                   </TableRow>
                 ) : (
                   filteredTickets.map((ticket) => (
-                    <TableRow key={ticket.id} className="h-9">
-                      <TableCell className="px-2 py-1 text-[11px] font-medium">{ticket.id}</TableCell>
-                      <TableCell className="px-2 py-1">
+                    <TableRow key={ticket.id} className="h-7">
+                      <TableCell className="px-1.5 py-0.5 text-[10px] font-medium">{ticket.id}</TableCell>
+                      <TableCell className="px-1.5 py-0.5">
                         <div>
                           <Badge
-                            className={`text-[9px] px-1.5 py-0.5 ${
+                            className={`text-[8px] px-1 py-0 h-3.5 ${
                               ticket.category === "FEEDER"
                                 ? "bg-warning text-warning-foreground"
                                 : "bg-primary text-primary-foreground"
@@ -754,45 +758,45 @@ export default function TicketManagement() {
                           >
                             {ticket.category}
                           </Badge>
-                          <div className="text-[9px] text-muted-foreground mt-0.5">
+                          <div className="text-[8px] text-muted-foreground mt-0.5">
                             {ticket.constraint}
                           </div>
                         </div>
                       </TableCell>
-                      <TableCell className="px-2 py-1 text-[11px]">
+                      <TableCell className="px-1.5 py-0.5 text-[10px]">
                         {ticket.category === "FEEDER" ? (
                           ticket.constraint === "OLT DOWN" ? (
                             <span className="font-medium">{ticket.hostname}</span>
                           ) :
                           ticket.constraint === "PORT DOWN" ? (
                             <div>
-                              <div className="font-medium">{ticket.ticketResult.match(/PORT - (.*?) - DOWN/)?.[1] || "PORT INFO"}</div>
-                              <div className="text-muted-foreground text-[9px]">{ticket.hostname}</div>
+                              <div className="font-medium text-[10px]">{ticket.ticketResult.match(/PORT - (.*?) - DOWN/)?.[1] || "PORT"}</div>
+                              <div className="text-muted-foreground text-[8px]">{ticket.hostname}</div>
                             </div>
                           ) :
                           ticket.constraint === "FAT LOSS" || ticket.constraint === "FAT LOW RX" ? (
                             <div>
-                              <div className="font-medium">{ticket.fatId}</div>
-                              <div className="text-muted-foreground text-[9px]">{ticket.hostname}</div>
+                              <div className="font-medium text-[10px]">{ticket.fatId}</div>
+                              <div className="text-muted-foreground text-[8px]">{ticket.hostname}</div>
                             </div>
                           ) : ticket.constraint
                         ) : ticket.customerName}
                       </TableCell>
-                      <TableCell className="px-2 py-1 font-mono text-[11px]">{ticket.serviceId}</TableCell>
-                      <TableCell className="px-2 py-1 text-[11px]">{ticket.serpo}</TableCell>
-                      <TableCell className="px-2 py-1">
+                      <TableCell className="px-1.5 py-0.5 font-mono text-[10px]">{ticket.serviceId}</TableCell>
+                      <TableCell className="px-1.5 py-0.5 text-[10px]">{ticket.serpo}</TableCell>
+                      <TableCell className="px-1.5 py-0.5">
                         <div>
                           <StatusBadge status={ticket.status} />
-                          <div className="text-[9px] text-muted-foreground mt-0.5">
+                          <div className="text-[8px] text-muted-foreground mt-0.5">
                             {ticket.createdAt}
                           </div>
                         </div>
                       </TableCell>
-                      <TableCell>
-                        <div className="flex gap-2">
+                      <TableCell className="px-1.5 py-0.5">
+                        <div className="flex gap-1">
                           <Dialog>
                             <DialogTrigger asChild>
-                              <Button size="sm" variant="outline">
+                              <Button size="sm" variant="outline" className="h-5 text-[8px] px-1.5">
                                 Detail
                               </Button>
                             </DialogTrigger>
