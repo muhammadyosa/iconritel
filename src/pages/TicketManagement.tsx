@@ -500,11 +500,11 @@ export default function TicketManagement() {
               <Table>
                 <TableHeader>
                   <TableRow className="h-5">
-                    <TableHead className="px-1 py-0.5 text-[9px]">⚡</TableHead>
-                    <TableHead className="px-1 py-0.5 text-[9px]">👨‍💼 SVC ID</TableHead>
-                    <TableHead className="px-1 py-0.5 text-[9px]">📍 Host</TableHead>
-                    <TableHead className="px-1 py-0.5 text-[9px]">🛠️ FAT</TableHead>
-                    <TableHead className="px-1 py-0.5 text-[9px]">💻 SN</TableHead>
+                    <TableHead className="px-1 py-0.5 text-[9px]">⚡ Action</TableHead>
+                    <TableHead className="px-1 py-0.5 text-[9px]">👨‍💼 Service ID</TableHead>
+                    <TableHead className="px-1 py-0.5 text-[9px]">📍 Hostname</TableHead>
+                    <TableHead className="px-1 py-0.5 text-[9px]">🛠️ ID FAT</TableHead>
+                    <TableHead className="px-1 py-0.5 text-[9px]">💻 SN ONT</TableHead>
                     <TableHead className="px-1 py-0.5 text-[9px]">👤 Customer</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -727,13 +727,13 @@ export default function TicketManagement() {
             <Table>
               <TableHeader>
                 <TableRow className="h-5">
-                  <TableHead className="px-1 py-0.5 text-[9px]">🎫 ID</TableHead>
+                  <TableHead className="px-1 py-0.5 text-[9px]">🎫 Ticket ID</TableHead>
                   <TableHead className="px-1 py-0.5 text-[9px]">📦 Type</TableHead>
-                  <TableHead className="px-1 py-0.5 text-[9px]">👤 Info</TableHead>
-                  <TableHead className="px-1 py-0.5 text-[9px]">👨‍💼 SVC</TableHead>
+                  <TableHead className="px-1 py-0.5 text-[9px]">👤 Customer/Type</TableHead>
+                  <TableHead className="px-1 py-0.5 text-[9px]">👨‍💼 Service ID</TableHead>
                   <TableHead className="px-1 py-0.5 text-[9px]">👥 Serpo</TableHead>
                   <TableHead className="px-1 py-0.5 text-[9px]">⚙️ Status</TableHead>
-                  <TableHead className="px-1 py-0.5 text-[9px]">⚡</TableHead>
+                  <TableHead className="px-1 py-0.5 text-[9px]">⚡ Action</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
