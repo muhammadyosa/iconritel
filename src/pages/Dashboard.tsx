@@ -46,6 +46,11 @@ export default function Dashboard() {
   const [filterDialogTickets, setFilterDialogTickets] = useState<Ticket[]>([]);
   const [showOltList, setShowOltList] = useState(false);
   const [selectedConstraint, setSelectedConstraint] = useState<string>("all");
+  const [previousDialogState, setPreviousDialogState] = useState<{
+    title: string;
+    tickets: Ticket[];
+    showOltList: boolean;
+  } | null>(null);
 
   // Load shift reports from localStorage
   useEffect(() => {
@@ -163,21 +168,24 @@ export default function Dashboard() {
               let filtered: Ticket[] = [];
               let title = "";
               
+              // Reset previous state when opening new dialog
+              setPreviousDialogState(null);
+              
               if (card.metric === "total") {
                 filtered = tickets;
-                title = "Semua Tiket";
+                title = "🗃️ Semua Tiket";
               } else if (card.metric === "overSLA") {
                 filtered = tickets.filter((t) => {
                   const ageMs = new Date().getTime() - new Date(t.createdISO).getTime();
                   return ageMs > 24 * 60 * 60 * 1000 && t.status !== "Resolved";
                 });
-                title = "Tiket Over SLA (>24h)";
+                title = "⚠️ Tiket Over SLA (>24h)";
               } else if (card.metric === "feeder") {
                 filtered = tickets.filter((t) => FEEDER_CONSTRAINTS_SET.has(t.constraint));
-                title = "Tiket Impact Feeder";
+                title = "⛓️‍💥 Tiket Impact Feeder";
               } else if (card.metric === "olt") {
                 setShowOltList(true);
-                setFilterDialogTitle("Daftar OLT Terdampak");
+                setFilterDialogTitle("📟 Daftar OLT Terdampak");
                 setFilterDialogOpen(true);
                 return;
               }
@@ -253,9 +261,10 @@ export default function Dashboard() {
                           const status = data.activePayload[0].payload.status;
                           setSelectedStatus(selectedStatus === status ? null : status);
                           const filtered = tickets.filter((t) => t.status === status);
+                          setPreviousDialogState(null);
                           setShowOltList(false);
                           setFilterDialogTickets(filtered);
-                          setFilterDialogTitle(`Tiket dengan Status: ${status}`);
+                          setFilterDialogTitle(`⚙️ Tiket dengan Status: ${status}`);
                           setFilterDialogOpen(true);
                         }
                       }}
@@ -325,9 +334,10 @@ export default function Dashboard() {
                           const category = data.activePayload[0].payload.category;
                           setSelectedCategory(selectedCategory === category ? null : category);
                           const filtered = tickets.filter((t) => t.category === category);
+                          setPreviousDialogState(null);
                           setShowOltList(false);
                           setFilterDialogTickets(filtered);
-                          setFilterDialogTitle(`Tiket dengan Category: ${category}`);
+                          setFilterDialogTitle(`🏠 Tiket dengan Category: ${category}`);
                           setFilterDialogOpen(true);
                         }
                       }}
@@ -683,20 +693,25 @@ export default function Dashboard() {
       </Dialog>
 
       {/* Filter Dialog - Shows tickets by Status or Category or OLT List */}
-      <Dialog open={filterDialogOpen} onOpenChange={setFilterDialogOpen}>
+      <Dialog open={filterDialogOpen} onOpenChange={(open) => {
+        setFilterDialogOpen(open);
+        if (!open) setPreviousDialogState(null);
+      }}>
         <DialogContent className="w-[95vw] max-w-4xl max-h-[85vh] overflow-hidden flex flex-col p-4 sm:p-6">
           <DialogHeader className="flex-shrink-0">
             <DialogTitle 
-              className={`flex items-center gap-2 text-lg ${!showOltList && filterDialogTitle.startsWith("Tiket OLT:") ? "cursor-pointer hover:text-primary transition-colors" : ""}`}
+              className={`flex items-center gap-2 text-lg ${previousDialogState ? "cursor-pointer hover:text-primary transition-colors" : ""}`}
               onClick={() => {
-                if (!showOltList && filterDialogTitle.startsWith("Tiket OLT:")) {
-                  setShowOltList(true);
-                  setFilterDialogTitle("📟 Daftar OLT Terdampak");
+                if (previousDialogState) {
+                  setShowOltList(previousDialogState.showOltList);
+                  setFilterDialogTickets(previousDialogState.tickets);
+                  setFilterDialogTitle(previousDialogState.title);
+                  setPreviousDialogState(null);
                 }
               }}
             >
               <BarChart3 className="h-5 w-5 text-primary" />
-              {!showOltList && filterDialogTitle.startsWith("Tiket OLT:") && (
+              {previousDialogState && (
                 <span className="text-muted-foreground hover:text-primary">←</span>
               )}
               {filterDialogTitle}
@@ -743,6 +758,12 @@ export default function Dashboard() {
                           key={hostname} 
                           className="p-3 rounded-lg border bg-card hover:bg-muted/50 cursor-pointer transition-colors"
                           onClick={() => {
+                            // Save current state before drilling down
+                            setPreviousDialogState({
+                              title: filterDialogTitle,
+                              tickets: filterDialogTickets,
+                              showOltList: true
+                            });
                             const oltTickets = tickets.filter(t => t.hostname === hostname);
                             setShowOltList(false);
                             setFilterDialogTickets(oltTickets);
