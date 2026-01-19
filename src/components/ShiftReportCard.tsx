@@ -43,33 +43,33 @@ const IncidentSection = ({
   emoji, 
   label, 
   content, 
-  colorClass 
+  bgClass 
 }: { 
   emoji: string; 
   label: string; 
   content: string; 
-  colorClass: string;
+  bgClass: string;
 }) => {
   const [isOpen, setIsOpen] = useState(true);
   
   return (
     <Collapsible open={isOpen} onOpenChange={setIsOpen}>
       <CollapsibleTrigger asChild>
-        <div className={`${colorClass} p-2.5 rounded-lg border cursor-pointer hover:opacity-90 transition-opacity`}>
+        <div className={`${bgClass} p-2.5 rounded-lg border cursor-pointer hover:opacity-90 transition-opacity`}>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <span className="text-sm">{emoji}</span>
-              <span className="text-[10px] font-bold uppercase tracking-wide">
+              <span className="text-[10px] font-bold uppercase tracking-wide text-foreground">
                 {label}
               </span>
             </div>
-            <ChevronRight className={`h-3.5 w-3.5 transition-transform duration-200 ${isOpen ? 'rotate-90' : ''}`} />
+            <ChevronRight className={`h-3.5 w-3.5 text-muted-foreground transition-transform duration-200 ${isOpen ? 'rotate-90' : ''}`} />
           </div>
         </div>
       </CollapsibleTrigger>
       <CollapsibleContent>
-        <div className={`${colorClass} px-2.5 pb-2.5 rounded-b-lg border border-t-0 -mt-1`}>
-          <pre className="text-[10px] leading-relaxed whitespace-pre-wrap font-sans pt-2">
+        <div className={`${bgClass} px-2.5 pb-2.5 rounded-b-lg border border-t-0 -mt-1`}>
+          <pre className="text-[10px] leading-relaxed whitespace-pre-wrap font-sans pt-2 text-foreground/85">
             {content}
           </pre>
         </div>
@@ -285,7 +285,7 @@ function ReportDetailContent({ report, index, total }: { report: ShiftReport; in
               emoji="📟"
               label="OLT DOWN"
               content={report.oltDown}
-              colorClass="bg-destructive/5 border-destructive/20 text-destructive"
+              bgClass="bg-destructive/5 border-destructive/20"
             />
           )}
           
@@ -294,7 +294,7 @@ function ReportDetailContent({ report, index, total }: { report: ShiftReport; in
               emoji="🔌"
               label="PORT DOWN"
               content={report.portDown}
-              colorClass="bg-warning/5 border-warning/20 text-warning"
+              bgClass="bg-warning/5 border-warning/20"
             />
           )}
           
@@ -303,7 +303,7 @@ function ReportDetailContent({ report, index, total }: { report: ShiftReport; in
               emoji="⛓️‍💥"
               label="FAT LOSS"
               content={report.fatLoss}
-              colorClass="bg-primary/5 border-primary/20 text-primary"
+              bgClass="bg-primary/5 border-primary/20"
             />
           )}
 
@@ -312,7 +312,7 @@ function ReportDetailContent({ report, index, total }: { report: ShiftReport; in
               emoji="⚠️"
               label="PERMASALAHAN"
               content={report.issues}
-              colorClass="bg-warning/5 border-warning/20 text-warning"
+              bgClass="bg-warning/5 border-warning/20"
             />
           )}
 
@@ -321,7 +321,7 @@ function ReportDetailContent({ report, index, total }: { report: ShiftReport; in
               emoji="📝"
               label="CATATAN"
               content={report.notes}
-              colorClass="bg-muted/60 border-border text-muted-foreground"
+              bgClass="bg-muted/60 border-border"
             />
           )}
 
