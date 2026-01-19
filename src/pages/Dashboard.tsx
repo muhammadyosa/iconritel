@@ -257,7 +257,8 @@ export default function Dashboard() {
                   <ChartContainer config={chartConfig} className="h-[200px] sm:h-[240px] md:h-[280px] w-full transition-all duration-500 ease-out">
                     <BarChart
                       data={statusData}
-                      margin={{ top: 10, right: 10, left: 0, bottom: 30 }}
+                      layout="vertical"
+                      margin={{ top: 10, right: 30, left: 10, bottom: 10 }}
                       onClick={(data) => {
                         if (data?.activePayload?.[0]?.payload?.status) {
                           const status = data.activePayload[0].payload.status;
@@ -271,19 +272,22 @@ export default function Dashboard() {
                         }
                       }}
                     >
-                      <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                      <CartesianGrid strokeDasharray="3 3" className="stroke-muted" horizontal={false} />
                       <XAxis 
-                        dataKey="name" 
+                        type="number"
                         tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }}
-                        interval={0}
-                        height={40}
                       />
-                      <YAxis tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} width={30} />
+                      <YAxis 
+                        type="category"
+                        dataKey="name" 
+                        tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }}
+                        width={100}
+                      />
                       <ChartTooltip
                         content={<ChartTooltipContent />}
                         cursor={{ fill: "hsl(var(--muted))", opacity: 0.3 }}
                       />
-                      <Bar dataKey="value" radius={[6, 6, 0, 0]} cursor="pointer">
+                      <Bar dataKey="value" radius={[0, 6, 6, 0]} cursor="pointer">
                         {statusData.map((entry, index) => (
                           <Cell key={`cell-${index}`} fill={entry.fill} />
                         ))}
@@ -330,7 +334,8 @@ export default function Dashboard() {
                   <ChartContainer config={chartConfig} className="h-[200px] sm:h-[240px] md:h-[280px] w-full transition-all duration-500 ease-out">
                     <BarChart
                       data={categoryData}
-                      margin={{ top: 10, right: 10, left: 0, bottom: 20 }}
+                      layout="vertical"
+                      margin={{ top: 10, right: 30, left: 10, bottom: 10 }}
                       onClick={(data) => {
                         if (data?.activePayload?.[0]?.payload?.category) {
                           const category = data.activePayload[0].payload.category;
@@ -344,18 +349,22 @@ export default function Dashboard() {
                         }
                       }}
                     >
-                      <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                      <CartesianGrid strokeDasharray="3 3" className="stroke-muted" horizontal={false} />
                       <XAxis 
+                        type="number"
+                        tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }}
+                      />
+                      <YAxis 
+                        type="category"
                         dataKey="name" 
                         tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }}
-                        interval={0}
+                        width={100}
                       />
-                      <YAxis tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} width={30} />
                       <ChartTooltip
                         content={<ChartTooltipContent />}
                         cursor={{ fill: "hsl(var(--muted))", opacity: 0.3 }}
                       />
-                      <Bar dataKey="value" radius={[6, 6, 0, 0]} cursor="pointer">
+                      <Bar dataKey="value" radius={[0, 6, 6, 0]} cursor="pointer">
                         {categoryData.map((entry, index) => (
                           <Cell key={`cell-${index}`} fill={entry.fill} />
                         ))}
