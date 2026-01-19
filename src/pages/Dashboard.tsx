@@ -1,5 +1,6 @@
 import { Activity, AlertTriangle, Zap, Server, Calendar, Clock, User, ExternalLink, TrendingUp, BarChart3, FileText } from "lucide-react";
 import { useTickets } from "@/hooks/useTickets";
+import { useTicketHistory } from "@/hooks/useTicketHistory";
 import { FEEDER_CONSTRAINTS_SET, Ticket, ALL_CONSTRAINTS } from "@/types/ticket";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -35,6 +36,7 @@ interface ShiftReport {
 
 export default function Dashboard() {
   const { tickets, excelData } = useTickets();
+  const { getChartData, getTicketsForDate } = useTicketHistory(tickets);
   const [shiftReports, setShiftReports] = useState<ShiftReport[]>([]);
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
@@ -47,6 +49,7 @@ export default function Dashboard() {
   const [showOltList, setShowOltList] = useState(false);
   const [selectedConstraint, setSelectedConstraint] = useState<string>("all");
   const [inlineSelectedTicket, setInlineSelectedTicket] = useState<Ticket | null>(null);
+  const [trendDays, setTrendDays] = useState<number>(7);
   const [previousDialogState, setPreviousDialogState] = useState<{
     title: string;
     tickets: Ticket[];
@@ -303,7 +306,7 @@ export default function Dashboard() {
           </Card>
         </motion.div>
 
-        {/* Category Distribution Line Chart - Daily Trend */}
+        {/* Category Distribution Line Chart - Daily Trend with History */}
         <motion.div
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
@@ -311,39 +314,27 @@ export default function Dashboard() {
         >
           <Card className="shadow-2xl overflow-hidden border-2 backdrop-blur-lg bg-card/70">
             <CardHeader className="bg-gradient-to-r from-accent/10 via-primary/5 to-accent/10 border-b">
-              <CardTitle className="flex items-center gap-2">
-                <TrendingUp className="h-5 w-5 text-accent" />
-                Category Trend
-              </CardTitle>
+              <div className="flex items-center justify-between flex-wrap gap-2">
+                <CardTitle className="flex items-center gap-2">
+                  <TrendingUp className="h-5 w-5 text-accent" />
+                  Category Trend
+                </CardTitle>
+                <Select value={trendDays.toString()} onValueChange={(v) => setTrendDays(Number(v))}>
+                  <SelectTrigger className="w-[120px] h-8 text-xs">
+                    <SelectValue placeholder="Rentang" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="7">7 Hari</SelectItem>
+                    <SelectItem value="14">14 Hari</SelectItem>
+                    <SelectItem value="30">30 Hari</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </CardHeader>
             <CardContent className="p-3 sm:p-4 md:pt-6">
               {(() => {
-                // Group tickets by date and category with ISO key for filtering
-                const dailyData: Record<string, { date: string; isoDate: string; ritel: number; feeder: number }> = {};
-                
-                // Get last 7 days
-                const today = new Date();
-                for (let i = 6; i >= 0; i--) {
-                  const date = new Date(today);
-                  date.setDate(date.getDate() - i);
-                  const dateStr = date.toISOString().split('T')[0];
-                  const displayDate = date.toLocaleDateString('id-ID', { day: '2-digit', month: 'short' });
-                  dailyData[dateStr] = { date: displayDate, isoDate: dateStr, ritel: 0, feeder: 0 };
-                }
-                
-                // Count tickets per day per category
-                tickets.forEach((ticket) => {
-                  const ticketDate = new Date(ticket.createdISO).toISOString().split('T')[0];
-                  if (dailyData[ticketDate]) {
-                    if (ticket.category === "RITEL") {
-                      dailyData[ticketDate].ritel++;
-                    } else if (ticket.category === "FEEDER") {
-                      dailyData[ticketDate].feeder++;
-                    }
-                  }
-                });
-                
-                const chartData = Object.values(dailyData);
+                // Use history data for the chart
+                const chartData = getChartData(trendDays);
 
                 const chartConfig: ChartConfig = {
                   ritel: { label: "🏠 RITEL", color: "hsl(217, 91%, 60%)" },
@@ -351,10 +342,7 @@ export default function Dashboard() {
                 };
 
                 const handleDotClick = (category: "RITEL" | "FEEDER", isoDate: string, displayDate: string) => {
-                  const filtered = tickets.filter((t) => {
-                    const ticketDate = new Date(t.createdISO).toISOString().split('T')[0];
-                    return ticketDate === isoDate && t.category === category;
-                  });
+                  const filtered = getTicketsForDate(isoDate, category);
                   setPreviousDialogState(null);
                   setShowOltList(false);
                   setInlineSelectedTicket(null);
@@ -375,6 +363,7 @@ export default function Dashboard() {
                         tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }}
                         tickLine={false}
                         axisLine={false}
+                        interval={trendDays > 14 ? 2 : trendDays > 7 ? 1 : 0}
                       />
                       <YAxis 
                         tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }}
@@ -390,7 +379,7 @@ export default function Dashboard() {
                         dataKey="ritel" 
                         stroke="hsl(217, 91%, 60%)" 
                         strokeWidth={3}
-                        dot={{ fill: "hsl(217, 91%, 60%)", strokeWidth: 2, r: 4, cursor: "pointer" }}
+                        dot={{ fill: "hsl(217, 91%, 60%)", strokeWidth: 2, r: trendDays > 14 ? 2 : 4, cursor: "pointer" }}
                         activeDot={{ 
                           r: 8, 
                           strokeWidth: 2, 
@@ -408,7 +397,7 @@ export default function Dashboard() {
                         dataKey="feeder" 
                         stroke="hsl(38, 92%, 50%)" 
                         strokeWidth={3}
-                        dot={{ fill: "hsl(38, 92%, 50%)", strokeWidth: 2, r: 4, cursor: "pointer" }}
+                        dot={{ fill: "hsl(38, 92%, 50%)", strokeWidth: 2, r: trendDays > 14 ? 2 : 4, cursor: "pointer" }}
                         activeDot={{ 
                           r: 8, 
                           strokeWidth: 2, 
@@ -428,16 +417,16 @@ export default function Dashboard() {
               <div className="flex flex-col items-center gap-2 mt-3">
                 <div className="flex justify-center gap-4">
                   <div className="flex items-center gap-2 text-xs">
-                    <div className="w-3 h-3 rounded-full bg-[hsl(217,91%,60%)]" />
+                    <div className="w-3 h-3 rounded-full bg-accent" />
                     <span className="text-muted-foreground">🏠 RITEL</span>
                   </div>
                   <div className="flex items-center gap-2 text-xs">
-                    <div className="w-3 h-3 rounded-full bg-[hsl(38,92%,50%)]" />
+                    <div className="w-3 h-3 rounded-full bg-warning" />
                     <span className="text-muted-foreground">🏬 FEEDER</span>
                   </div>
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  Klik pada titik untuk melihat detail tiket
+                  📊 History tersimpan hingga 30 hari • Klik titik untuk detail
                 </p>
               </div>
             </CardContent>
