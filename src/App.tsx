@@ -8,7 +8,7 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { PageTransition } from "@/components/PageTransition";
 import { AnimatePresence } from "framer-motion";
-import iconnetLogo from "@/assets/iconnet-logo.png";
+import plnIconPlusLogo from "@/assets/pln-icon-plus.png";
 import Dashboard from "./pages/Dashboard";
 import TicketManagement from "./pages/TicketManagement";
 import Teams from "./pages/Teams";
@@ -61,7 +61,7 @@ const App = () => {
                     <div className="flex h-12 sm:h-14 items-center px-2 sm:px-4 gap-2 sm:gap-3">
                       <SidebarTrigger />
                       <div className="flex items-center gap-2 min-w-0">
-                        <img src={iconnetLogo} alt="Iconnet" className="h-6 sm:h-8 w-auto flex-shrink-0" />
+                        <img src={plnIconPlusLogo} alt="PLN Icon Plus" className="h-8 sm:h-10 w-auto flex-shrink-0 object-contain" />
                         <span className="font-semibold text-sm sm:text-lg truncate">NOC RITEL</span>
                       </div>
                     </div>
