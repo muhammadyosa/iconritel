@@ -15,6 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { motion } from "framer-motion";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip, Cell, LineChart, Line } from "recharts";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ShiftReportCard } from "@/components/ShiftReportCard";
 import {
   ChartContainer,
   ChartTooltip,
@@ -449,355 +450,123 @@ export default function Dashboard() {
           transition={{ duration: 0.6, delay: 0.6 }}
         >
           <Card className="shadow-2xl border-2 bg-gradient-to-br from-primary/5 via-background to-accent/5 border-primary/20">
-            <CardHeader className="border-b border-primary/10 pb-4">
+            <CardHeader className="border-b border-primary/10 pb-3">
               <CardTitle className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                    <FileText className="h-5 w-5 text-primary" />
+                  <div className="h-9 w-9 rounded-xl bg-primary/10 flex items-center justify-center">
+                    <FileText className="h-4 w-4 text-primary" />
                   </div>
                   <div>
-                    <span className="text-lg font-bold">📋 Laporan Shift</span>
-                    <p className="text-xs text-muted-foreground font-normal mt-0.5">
-                      {shiftReports.length} laporan tersedia
+                    <span className="text-base font-bold">📋 Laporan Shift</span>
+                    <p className="text-[10px] text-muted-foreground font-normal mt-0.5">
+                      {shiftReports.length} laporan • {getHistoryRecords().length} hari tercatat
                     </p>
                   </div>
                 </div>
               </CardTitle>
             </CardHeader>
-            <CardContent className="pt-4 pb-5">
-              <Tabs value={shiftReportTab} onValueChange={setShiftReportTab} className="w-full">
-                <TabsList className="grid w-full max-w-md grid-cols-2 mb-4">
-                  <TabsTrigger value="latest" className="flex items-center gap-2">
-                    <FileText className="h-4 w-4" />
+            <CardContent className="pt-3 pb-4">
+              <Tabs value={shiftReportTab} onValueChange={(v) => { setShiftReportTab(v); setSelectedHistoryDate(null); }} className="w-full">
+                <TabsList className="grid w-full max-w-xs grid-cols-2 mb-3 h-8">
+                  <TabsTrigger value="latest" className="flex items-center gap-1.5 text-xs h-7">
+                    <FileText className="h-3.5 w-3.5" />
                     Terbaru
                   </TabsTrigger>
-                  <TabsTrigger value="history" className="flex items-center gap-2">
-                    <History className="h-4 w-4" />
-                    History Harian
+                  <TabsTrigger value="history" className="flex items-center gap-1.5 text-xs h-7">
+                    <History className="h-3.5 w-3.5" />
+                    History
                   </TabsTrigger>
                 </TabsList>
                 
-                <TabsContent value="latest">
-                  <div className="grid gap-4 grid-cols-1 lg:grid-cols-2 xl:grid-cols-3">
-                    {shiftReports.slice(-3).reverse().map((report, index) => (
-                      <div
+                <TabsContent value="latest" className="mt-0">
+                  <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                    {shiftReports.slice(-6).reverse().map((report, index) => (
+                      <ShiftReportCard
                         key={report.id}
-                        className="group relative rounded-xl bg-card border-2 border-border/50 shadow-sm hover:shadow-lg transition-all duration-300 hover:border-primary/40 overflow-hidden"
-                      >
-                        {/* Header dengan gradient */}
-                        <div className="bg-gradient-to-r from-primary/10 via-accent/5 to-primary/10 px-4 py-3 border-b border-border/50">
-                          <div className="flex items-center justify-between mb-2">
-                            <div className="flex items-center gap-2">
-                              <div className="h-8 w-8 rounded-lg bg-primary/20 flex items-center justify-center">
-                                <Calendar className="h-4 w-4 text-primary" />
-                              </div>
-                              <div>
-                                <p className="text-sm font-bold text-foreground">
-                                  {new Date(report.date).toLocaleDateString("id-ID", { 
-                                    weekday: 'long', 
-                                    day: 'numeric',
-                                    month: 'long',
-                                    year: 'numeric'
-                                  })}
-                                </p>
-                              </div>
-                            </div>
-                            <span className="text-xs font-medium text-muted-foreground bg-muted/50 px-2 py-1 rounded-md">
-                              #{shiftReports.length - index}
-                            </span>
-                          </div>
-                          
-                          <div className="flex flex-wrap items-center gap-2 mt-2">
-                            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-primary/15 rounded-lg border border-primary/20">
-                              <Clock className="h-3.5 w-3.5 text-primary" />
-                              <span className="text-xs font-semibold text-primary capitalize">
-                                Shift {report.shift}
-                              </span>
-                            </div>
-                            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-accent/15 rounded-lg border border-accent/20">
-                              <User className="h-3.5 w-3.5 text-accent" />
-                              <span className="text-xs font-semibold text-accent-foreground truncate max-w-[120px]">
-                                {report.officer}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Content sections */}
-                        <div className="p-4 space-y-3 max-h-[320px] overflow-y-auto scrollbar-thin">
-                          {report.oltDown && (
-                            <div className="bg-destructive/5 p-3 rounded-lg border border-destructive/20 hover:bg-destructive/10 transition-colors">
-                              <div className="flex items-center gap-2 mb-2">
-                                <span className="text-sm">📟</span>
-                                <span className="text-[11px] font-bold text-destructive uppercase tracking-wide">
-                                  OLT DOWN
-                                </span>
-                              </div>
-                              <pre className="text-[11px] leading-relaxed whitespace-pre-wrap font-sans text-foreground/85">
-                                {report.oltDown}
-                              </pre>
-                            </div>
-                          )}
-                          
-                          {report.portDown && (
-                            <div className="bg-warning/5 p-3 rounded-lg border border-warning/20 hover:bg-warning/10 transition-colors">
-                              <div className="flex items-center gap-2 mb-2">
-                                <span className="text-sm">🔌</span>
-                                <span className="text-[11px] font-bold text-warning uppercase tracking-wide">
-                                  PORT DOWN
-                                </span>
-                              </div>
-                              <pre className="text-[11px] leading-relaxed whitespace-pre-wrap font-sans text-foreground/85">
-                                {report.portDown}
-                              </pre>
-                            </div>
-                          )}
-                          
-                          {report.fatLoss && (
-                            <div className="bg-primary/5 p-3 rounded-lg border border-primary/20 hover:bg-primary/10 transition-colors">
-                              <div className="flex items-center gap-2 mb-2">
-                                <span className="text-sm">⛓️‍💥</span>
-                                <span className="text-[11px] font-bold text-primary uppercase tracking-wide">
-                                  FAT LOSS
-                                </span>
-                              </div>
-                              <pre className="text-[11px] leading-relaxed whitespace-pre-wrap font-sans text-foreground/85">
-                                {report.fatLoss}
-                              </pre>
-                            </div>
-                          )}
-
-                          {report.issues && (
-                            <div className="bg-warning/5 p-3 rounded-lg border border-warning/20 hover:bg-warning/10 transition-colors">
-                              <div className="flex items-center gap-2 mb-2">
-                                <span className="text-sm">⚠️</span>
-                                <span className="text-[11px] font-bold text-warning uppercase tracking-wide">
-                                  PERMASALAHAN
-                                </span>
-                              </div>
-                              <pre className="text-[11px] leading-relaxed whitespace-pre-wrap font-sans text-foreground/85">
-                                {report.issues}
-                              </pre>
-                            </div>
-                          )}
-
-                          {report.notes && (
-                            <div className="bg-muted/40 p-3 rounded-lg border border-border/60 hover:bg-muted/60 transition-colors">
-                              <div className="flex items-center gap-2 mb-2">
-                                <span className="text-sm">📝</span>
-                                <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wide">
-                                  CATATAN
-                                </span>
-                              </div>
-                              <pre className="text-[11px] leading-relaxed whitespace-pre-wrap font-sans text-muted-foreground">
-                                {report.notes}
-                              </pre>
-                            </div>
-                          )}
-
-                          {/* Empty state */}
-                          {!report.oltDown && !report.portDown && !report.fatLoss && !report.issues && !report.notes && (
-                            <div className="text-center py-6 text-muted-foreground">
-                              <span className="text-2xl mb-2 block">✨</span>
-                              <p className="text-xs">Tidak ada laporan insiden</p>
-                            </div>
-                          )}
-                        </div>
-                      </div>
+                        report={report}
+                        index={index}
+                        total={shiftReports.length}
+                      />
                     ))}
                   </div>
                 </TabsContent>
 
-                <TabsContent value="history">
-                  <div className="space-y-4">
-                    {/* History date list */}
-                    {!selectedHistoryDate ? (
-                      <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                        {getHistoryRecords().map((record) => (
-                          <div
-                            key={record.date}
-                            className="group relative rounded-xl bg-card border-2 border-border/50 shadow-sm hover:shadow-lg transition-all duration-300 hover:border-primary/40 cursor-pointer p-4"
-                            onClick={() => setSelectedHistoryDate(record.date)}
-                          >
-                            <div className="flex items-center gap-3 mb-3">
-                              <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                                <Calendar className="h-5 w-5 text-primary" />
+                <TabsContent value="history" className="mt-0">
+                  {!selectedHistoryDate ? (
+                    <div className="grid gap-2 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                      {getHistoryRecords().map((record, idx) => (
+                        <motion.div
+                          key={record.date}
+                          initial={{ opacity: 0, scale: 0.95 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          transition={{ duration: 0.2, delay: idx * 0.03 }}
+                          className="group relative rounded-lg bg-card border border-border/60 shadow-sm hover:shadow-md hover:border-primary/40 cursor-pointer p-3 transition-all duration-200"
+                          onClick={() => setSelectedHistoryDate(record.date)}
+                        >
+                          <div className="flex items-center justify-between gap-2">
+                            <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                              <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                                <Calendar className="h-4 w-4 text-primary" />
                               </div>
-                              <div>
-                                <p className="text-sm font-bold text-foreground">
-                                  {record.displayDate}
+                              <div className="min-w-0">
+                                <p className="text-xs font-semibold text-foreground truncate">
+                                  {new Date(record.date).toLocaleDateString("id-ID", { 
+                                    weekday: 'short', 
+                                    day: 'numeric',
+                                    month: 'short'
+                                  })}
                                 </p>
-                                <p className="text-xs text-muted-foreground">
-                                  {record.reportCount} laporan
-                                </p>
+                                <div className="flex items-center gap-1.5 mt-0.5">
+                                  <span className="text-[10px] px-1.5 py-0.5 bg-primary/10 text-primary rounded font-medium">
+                                    {record.reportCount} laporan
+                                  </span>
+                                </div>
                               </div>
                             </div>
-                            <div className="flex flex-wrap gap-1.5">
-                              {record.shifts.map((shift, idx) => (
+                            <div className="flex flex-wrap gap-1 justify-end max-w-[80px]">
+                              {record.shifts.slice(0, 3).map((shift, idx) => (
                                 <span
                                   key={idx}
-                                  className="text-[10px] px-2 py-0.5 bg-primary/10 text-primary rounded-full"
+                                  className="text-[9px] px-1.5 py-0.5 bg-accent/10 text-accent-foreground rounded"
                                 >
-                                  Shift {shift.shift}
+                                  S{shift.shift}
                                 </span>
                               ))}
                             </div>
-                            <p className="text-xs text-muted-foreground mt-2">
-                              Klik untuk lihat detail →
-                            </p>
                           </div>
-                        ))}
-                        {getHistoryRecords().length === 0 && (
-                          <div className="col-span-full text-center py-8 text-muted-foreground">
-                            <History className="h-12 w-12 mx-auto mb-2 opacity-50" />
-                            <p className="text-sm">Belum ada history laporan shift</p>
-                          </div>
-                        )}
-                      </div>
-                    ) : (
-                      <div className="space-y-4">
-                        {/* Back button */}
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => setSelectedHistoryDate(null)}
-                          className="mb-2"
-                        >
-                          ← Kembali ke daftar tanggal
-                        </Button>
-                        
-                        {/* Reports for selected date */}
-                        <div className="grid gap-4 grid-cols-1 lg:grid-cols-2 xl:grid-cols-3">
-                          {getReportsForDate(selectedHistoryDate).map((report, index) => (
-                            <div
-                              key={report.id}
-                              className="group relative rounded-xl bg-card border-2 border-border/50 shadow-sm hover:shadow-lg transition-all duration-300 hover:border-primary/40 overflow-hidden"
-                            >
-                              {/* Header dengan gradient */}
-                              <div className="bg-gradient-to-r from-primary/10 via-accent/5 to-primary/10 px-4 py-3 border-b border-border/50">
-                                <div className="flex items-center justify-between mb-2">
-                                  <div className="flex items-center gap-2">
-                                    <div className="h-8 w-8 rounded-lg bg-primary/20 flex items-center justify-center">
-                                      <Calendar className="h-4 w-4 text-primary" />
-                                    </div>
-                                    <div>
-                                      <p className="text-sm font-bold text-foreground">
-                                        {new Date(report.date).toLocaleDateString("id-ID", { 
-                                          weekday: 'long', 
-                                          day: 'numeric',
-                                          month: 'long',
-                                          year: 'numeric'
-                                        })}
-                                      </p>
-                                    </div>
-                                  </div>
-                                  <span className="text-xs font-medium text-muted-foreground bg-muted/50 px-2 py-1 rounded-md">
-                                    #{index + 1}
-                                  </span>
-                                </div>
-                                
-                                <div className="flex flex-wrap items-center gap-2 mt-2">
-                                  <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-primary/15 rounded-lg border border-primary/20">
-                                    <Clock className="h-3.5 w-3.5 text-primary" />
-                                    <span className="text-xs font-semibold text-primary capitalize">
-                                      Shift {report.shift}
-                                    </span>
-                                  </div>
-                                  <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-accent/15 rounded-lg border border-accent/20">
-                                    <User className="h-3.5 w-3.5 text-accent" />
-                                    <span className="text-xs font-semibold text-accent-foreground truncate max-w-[120px]">
-                                      {report.officer}
-                                    </span>
-                                  </div>
-                                </div>
-                              </div>
-
-                              {/* Content sections */}
-                              <div className="p-4 space-y-3 max-h-[320px] overflow-y-auto scrollbar-thin">
-                                {report.oltDown && (
-                                  <div className="bg-destructive/5 p-3 rounded-lg border border-destructive/20 hover:bg-destructive/10 transition-colors">
-                                    <div className="flex items-center gap-2 mb-2">
-                                      <span className="text-sm">📟</span>
-                                      <span className="text-[11px] font-bold text-destructive uppercase tracking-wide">
-                                        OLT DOWN
-                                      </span>
-                                    </div>
-                                    <pre className="text-[11px] leading-relaxed whitespace-pre-wrap font-sans text-foreground/85">
-                                      {report.oltDown}
-                                    </pre>
-                                  </div>
-                                )}
-                                
-                                {report.portDown && (
-                                  <div className="bg-warning/5 p-3 rounded-lg border border-warning/20 hover:bg-warning/10 transition-colors">
-                                    <div className="flex items-center gap-2 mb-2">
-                                      <span className="text-sm">🔌</span>
-                                      <span className="text-[11px] font-bold text-warning uppercase tracking-wide">
-                                        PORT DOWN
-                                      </span>
-                                    </div>
-                                    <pre className="text-[11px] leading-relaxed whitespace-pre-wrap font-sans text-foreground/85">
-                                      {report.portDown}
-                                    </pre>
-                                  </div>
-                                )}
-                                
-                                {report.fatLoss && (
-                                  <div className="bg-primary/5 p-3 rounded-lg border border-primary/20 hover:bg-primary/10 transition-colors">
-                                    <div className="flex items-center gap-2 mb-2">
-                                      <span className="text-sm">⛓️‍💥</span>
-                                      <span className="text-[11px] font-bold text-primary uppercase tracking-wide">
-                                        FAT LOSS
-                                      </span>
-                                    </div>
-                                    <pre className="text-[11px] leading-relaxed whitespace-pre-wrap font-sans text-foreground/85">
-                                      {report.fatLoss}
-                                    </pre>
-                                  </div>
-                                )}
-
-                                {report.issues && (
-                                  <div className="bg-warning/5 p-3 rounded-lg border border-warning/20 hover:bg-warning/10 transition-colors">
-                                    <div className="flex items-center gap-2 mb-2">
-                                      <span className="text-sm">⚠️</span>
-                                      <span className="text-[11px] font-bold text-warning uppercase tracking-wide">
-                                        PERMASALAHAN
-                                      </span>
-                                    </div>
-                                    <pre className="text-[11px] leading-relaxed whitespace-pre-wrap font-sans text-foreground/85">
-                                      {report.issues}
-                                    </pre>
-                                  </div>
-                                )}
-
-                                {report.notes && (
-                                  <div className="bg-muted/40 p-3 rounded-lg border border-border/60 hover:bg-muted/60 transition-colors">
-                                    <div className="flex items-center gap-2 mb-2">
-                                      <span className="text-sm">📝</span>
-                                      <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wide">
-                                        CATATAN
-                                      </span>
-                                    </div>
-                                    <pre className="text-[11px] leading-relaxed whitespace-pre-wrap font-sans text-muted-foreground">
-                                      {report.notes}
-                                    </pre>
-                                  </div>
-                                )}
-
-                                {/* Empty state */}
-                                {!report.oltDown && !report.portDown && !report.fatLoss && !report.issues && !report.notes && (
-                                  <div className="text-center py-6 text-muted-foreground">
-                                    <span className="text-2xl mb-2 block">✨</span>
-                                    <p className="text-xs">Tidak ada laporan insiden</p>
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-                          ))}
+                        </motion.div>
+                      ))}
+                      {getHistoryRecords().length === 0 && (
+                        <div className="col-span-full text-center py-8 text-muted-foreground">
+                          <History className="h-10 w-10 mx-auto mb-2 opacity-50" />
+                          <p className="text-xs">Belum ada history</p>
                         </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setSelectedHistoryDate(null)}
+                        className="h-7 text-xs"
+                      >
+                        ← Kembali
+                      </Button>
+                      
+                      <div className="grid gap-2 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+                        {getReportsForDate(selectedHistoryDate).map((report, index) => (
+                          <ShiftReportCard
+                            key={report.id}
+                            report={report}
+                            index={index}
+                            total={getReportsForDate(selectedHistoryDate).length}
+                            compact
+                          />
+                        ))}
                       </div>
-                    )}
-                  </div>
+                    </div>
+                  )}
                 </TabsContent>
               </Tabs>
             </CardContent>
