@@ -46,10 +46,12 @@ export default function Dashboard() {
   const [filterDialogTickets, setFilterDialogTickets] = useState<Ticket[]>([]);
   const [showOltList, setShowOltList] = useState(false);
   const [selectedConstraint, setSelectedConstraint] = useState<string>("all");
+  const [inlineSelectedTicket, setInlineSelectedTicket] = useState<Ticket | null>(null);
   const [previousDialogState, setPreviousDialogState] = useState<{
     title: string;
     tickets: Ticket[];
     showOltList: boolean;
+    inlineTicket: Ticket | null;
   } | null>(null);
 
   // Load shift reports from localStorage
@@ -695,45 +697,109 @@ export default function Dashboard() {
       {/* Filter Dialog - Shows tickets by Status or Category or OLT List */}
       <Dialog open={filterDialogOpen} onOpenChange={(open) => {
         setFilterDialogOpen(open);
-        if (!open) setPreviousDialogState(null);
+        if (!open) {
+          setPreviousDialogState(null);
+          setInlineSelectedTicket(null);
+        }
       }}>
         <DialogContent className="w-[95vw] max-w-4xl max-h-[85vh] overflow-hidden flex flex-col p-4 sm:p-6">
           <DialogHeader className="flex-shrink-0">
             <DialogTitle 
-              className={`flex items-center gap-2 text-lg ${previousDialogState ? "cursor-pointer hover:text-primary transition-colors" : ""}`}
+              className={`flex items-center gap-2 text-lg ${(previousDialogState || inlineSelectedTicket) ? "cursor-pointer hover:text-primary transition-colors" : ""}`}
               onClick={() => {
-                if (previousDialogState) {
+                if (inlineSelectedTicket) {
+                  // Go back from ticket detail to ticket list
+                  setInlineSelectedTicket(null);
+                } else if (previousDialogState) {
                   setShowOltList(previousDialogState.showOltList);
                   setFilterDialogTickets(previousDialogState.tickets);
                   setFilterDialogTitle(previousDialogState.title);
+                  setInlineSelectedTicket(previousDialogState.inlineTicket);
                   setPreviousDialogState(null);
                 }
               }}
             >
               <BarChart3 className="h-5 w-5 text-primary" />
-              {previousDialogState && (
+              {(previousDialogState || inlineSelectedTicket) && (
                 <span className="text-muted-foreground hover:text-primary">←</span>
               )}
-              {filterDialogTitle}
-              <span className="ml-2 text-sm font-normal text-muted-foreground">
-                ({showOltList 
-                  ? (() => {
-                      const oltMap = new Map<string, number>();
-                      tickets.forEach(ticket => {
-                        if (ticket.hostname) {
-                          oltMap.set(ticket.hostname, (oltMap.get(ticket.hostname) || 0) + 1);
-                        }
-                      });
-                      return oltMap.size;
-                    })()
-                  : filterDialogTickets.length
-                } item)
-              </span>
+              {inlineSelectedTicket ? `🎫 Detail Tiket: ${inlineSelectedTicket.id}` : filterDialogTitle}
+              {!inlineSelectedTicket && (
+                <span className="ml-2 text-sm font-normal text-muted-foreground">
+                  ({showOltList 
+                    ? (() => {
+                        const oltMap = new Map<string, number>();
+                        tickets.forEach(ticket => {
+                          if (ticket.hostname) {
+                            oltMap.set(ticket.hostname, (oltMap.get(ticket.hostname) || 0) + 1);
+                          }
+                        });
+                        return oltMap.size;
+                      })()
+                    : filterDialogTickets.length
+                  } item)
+                </span>
+              )}
             </DialogTitle>
           </DialogHeader>
           
           <div className="mt-3 flex-1 overflow-auto min-h-0">
-            {showOltList ? (
+            {inlineSelectedTicket ? (
+              /* Inline Ticket Detail View */
+              <div className="space-y-4">
+                {/* Header Info */}
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className={`px-2 py-1 rounded text-xs font-medium ${
+                    inlineSelectedTicket.category === "FEEDER"
+                      ? "bg-warning/20 text-warning"
+                      : "bg-primary/20 text-primary"
+                  }`}>
+                    {inlineSelectedTicket.category}
+                  </span>
+                  <span className="px-2 py-1 rounded text-xs font-medium bg-accent/20 text-accent">
+                    {inlineSelectedTicket.constraint}
+                  </span>
+                  <StatusBadge status={inlineSelectedTicket.status} />
+                  <span className="text-xs text-muted-foreground ml-auto">
+                    {new Date(inlineSelectedTicket.createdISO).toLocaleString("id-ID")}
+                  </span>
+                </div>
+
+                {/* Detail Grid */}
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
+                  <div className="p-2 rounded bg-muted/50">
+                    <p className="text-xs text-muted-foreground">Service ID</p>
+                    <p className="font-mono font-medium">{inlineSelectedTicket.serviceId || "-"}</p>
+                  </div>
+                  <div className="p-2 rounded bg-muted/50">
+                    <p className="text-xs text-muted-foreground">Customer</p>
+                    <p className="font-medium truncate">{inlineSelectedTicket.customerName || "-"}</p>
+                  </div>
+                  <div className="p-2 rounded bg-muted/50">
+                    <p className="text-xs text-muted-foreground">SERPO/Tim</p>
+                    <p className="font-medium">{inlineSelectedTicket.serpo}</p>
+                  </div>
+                  <div className="p-2 rounded bg-muted/50">
+                    <p className="text-xs text-muted-foreground">Hostname OLT</p>
+                    <p className="font-mono text-xs truncate">{inlineSelectedTicket.hostname || "-"}</p>
+                  </div>
+                  <div className="p-2 rounded bg-muted/50">
+                    <p className="text-xs text-muted-foreground">ID FAT</p>
+                    <p className="font-mono text-xs">{inlineSelectedTicket.fatId || "-"}</p>
+                  </div>
+                  <div className="p-2 rounded bg-muted/50">
+                    <p className="text-xs text-muted-foreground">SN ONT</p>
+                    <p className="font-mono text-xs">{inlineSelectedTicket.snOnt || "-"}</p>
+                  </div>
+                </div>
+
+                {/* Ticket Result */}
+                <div className="p-3 rounded-lg bg-accent/10 border">
+                  <p className="text-xs font-semibold text-muted-foreground mb-2">Ticket Result:</p>
+                  <p className="text-sm font-mono whitespace-pre-wrap break-all">{inlineSelectedTicket.ticketResult}</p>
+                </div>
+              </div>
+            ) : showOltList ? (
               /* OLT List View - Compact Cards */
               <div className="space-y-2">
                 {(() => {
@@ -762,10 +828,12 @@ export default function Dashboard() {
                             setPreviousDialogState({
                               title: filterDialogTitle,
                               tickets: filterDialogTickets,
-                              showOltList: true
+                              showOltList: true,
+                              inlineTicket: null
                             });
                             const oltTickets = tickets.filter(t => t.hostname === hostname);
                             setShowOltList(false);
+                            setInlineSelectedTicket(null);
                             setFilterDialogTickets(oltTickets);
                             setFilterDialogTitle(`Tiket OLT: ${hostname}`);
                           }}
@@ -810,8 +878,7 @@ export default function Dashboard() {
                       key={ticket.id}
                       className="p-3 rounded-lg border bg-card hover:bg-muted/50 cursor-pointer transition-colors"
                       onClick={() => {
-                        setFilterDialogOpen(false);
-                        setSelectedTicket(ticket);
+                        setInlineSelectedTicket(ticket);
                       }}
                     >
                       {/* Row 1: No, Ticket ID, Status */}
