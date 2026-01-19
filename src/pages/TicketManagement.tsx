@@ -438,6 +438,154 @@ export default function TicketManagement() {
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Daftar Tiket ({filteredTickets.length})</CardTitle>
           <div className="flex gap-2">
+            <Dialog open={isManualFormOpen} onOpenChange={setIsManualFormOpen}>
+              <DialogTrigger asChild>
+                <Button variant="outline" size="sm">
+                  <FileEdit className="h-4 w-4 mr-2" />
+                  Input Manual
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-lg">
+                <DialogHeader>
+                  <DialogTitle>Buat Tiket Manual</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-3 max-h-[70vh] overflow-y-auto pr-2">
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <Label className="text-xs">Ticket ID *</Label>
+                      <Input
+                        value={manualFormData.ticketId}
+                        onChange={(e) => setManualFormData({ ...manualFormData, ticketId: e.target.value })}
+                        placeholder="INC12345678"
+                        className="h-9"
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-xs">Service ID</Label>
+                      <Input
+                        value={manualFormData.serviceId}
+                        onChange={(e) => setManualFormData({ ...manualFormData, serviceId: e.target.value })}
+                        placeholder="SPLT_..."
+                        className="h-9"
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <Label className="text-xs">Customer Name</Label>
+                      <Input
+                        value={manualFormData.customerName}
+                        onChange={(e) => setManualFormData({ ...manualFormData, customerName: e.target.value })}
+                        placeholder="Nama customer"
+                        className="h-9"
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-xs">Serpo / Tim *</Label>
+                      <Input
+                        value={manualFormData.serpo}
+                        onChange={(e) => setManualFormData({ ...manualFormData, serpo: e.target.value })}
+                        placeholder="SERPO KOBA"
+                        className="h-9"
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <Label className="text-xs">Hostname OLT</Label>
+                      <Input
+                        value={manualFormData.hostname}
+                        onChange={(e) => setManualFormData({ ...manualFormData, hostname: e.target.value })}
+                        placeholder="SBS-CABANG..."
+                        className="h-9"
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-xs">ID FAT</Label>
+                      <Input
+                        value={manualFormData.fatId}
+                        onChange={(e) => setManualFormData({ ...manualFormData, fatId: e.target.value })}
+                        placeholder="FAT-..."
+                        className="h-9"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <Label className="text-xs">SN ONT</Label>
+                    <Input
+                      value={manualFormData.snOnt}
+                      onChange={(e) => setManualFormData({ ...manualFormData, snOnt: e.target.value })}
+                      placeholder="48575443..."
+                      className="h-9"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-xs">Constraint *</Label>
+                    <Select
+                      value={manualFormData.constraint}
+                      onValueChange={(value) => setManualFormData({ ...manualFormData, constraint: value })}
+                    >
+                      <SelectTrigger className="h-9">
+                        <SelectValue placeholder="Pilih constraint" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">
+                          RITEL
+                        </div>
+                        {ALL_CONSTRAINTS.filter(c => !FEEDER_CONSTRAINTS_SET.has(c)).map((c) => (
+                          <SelectItem key={c} value={c}>
+                            {c}
+                          </SelectItem>
+                        ))}
+                        <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground border-t mt-1">
+                          FEEDER (PROACTIVE NOC RETAIL)
+                        </div>
+                        {ALL_CONSTRAINTS.filter(c => FEEDER_CONSTRAINTS_SET.has(c)).map((c) => (
+                          <SelectItem key={c} value={c}>
+                            {c}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  {manualFormData.constraint === "PORT DOWN" && (
+                    <div>
+                      <Label className="text-xs">Port Info</Label>
+                      <Input
+                        value={manualFormData.portText}
+                        onChange={(e) => setManualFormData({ ...manualFormData, portText: e.target.value })}
+                        placeholder="PORT-1/1/1"
+                        className="h-9"
+                      />
+                    </div>
+                  )}
+                  
+                  {manualFormData.constraint && manualFormData.serpo && (
+                    <div className="p-2 bg-accent/30 rounded-lg">
+                      <p className="text-[10px] font-semibold text-muted-foreground mb-1">
+                        Preview Format:
+                      </p>
+                      <p className="text-xs font-mono whitespace-pre-wrap break-all">
+                        {generateTicketFormat(
+                          manualFormData.constraint,
+                          manualFormData.customerName.trim(),
+                          manualFormData.serpo.trim(),
+                          manualFormData.fatId.trim(),
+                          manualFormData.hostname.trim(),
+                          manualFormData.snOnt.trim(),
+                          manualFormData.portText || undefined
+                        )}
+                      </p>
+                    </div>
+                  )}
+                  
+                  <Button onClick={handleSubmitManualTicket} className="w-full">
+                    Simpan Tiket
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
             <Button onClick={handleExportCSV} variant="outline" size="sm">
               <Download className="h-4 w-4 mr-2" />
               Export CSV
