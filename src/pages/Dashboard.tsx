@@ -517,7 +517,7 @@ export default function Dashboard() {
                       {report.oltDown && (
                         <div className="bg-destructive/5 p-3 rounded-lg border border-destructive/20 hover:bg-destructive/10 transition-colors">
                           <div className="flex items-center gap-2 mb-2">
-                            <span className="text-sm">📡</span>
+                            <span className="text-sm">📟</span>
                             <span className="text-[11px] font-bold text-destructive uppercase tracking-wide">
                               OLT DOWN
                             </span>
@@ -545,7 +545,7 @@ export default function Dashboard() {
                       {report.fatLoss && (
                         <div className="bg-primary/5 p-3 rounded-lg border border-primary/20 hover:bg-primary/10 transition-colors">
                           <div className="flex items-center gap-2 mb-2">
-                            <span className="text-sm">📊</span>
+                            <span className="text-sm">⛓️‍💥</span>
                             <span className="text-[11px] font-bold text-primary uppercase tracking-wide">
                               FAT LOSS
                             </span>
