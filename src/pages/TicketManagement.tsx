@@ -499,13 +499,13 @@ export default function TicketManagement() {
             <div className="rounded-md border overflow-auto max-h-40">
               <Table>
                 <TableHeader>
-                  <TableRow className="h-6">
-                    <TableHead className="px-1.5 py-1 text-[10px]">Action</TableHead>
-                    <TableHead className="px-1.5 py-1 text-[10px]">Service ID</TableHead>
-                    <TableHead className="px-1.5 py-1 text-[10px]">Hostname</TableHead>
-                    <TableHead className="px-1.5 py-1 text-[10px]">ID FAT</TableHead>
-                    <TableHead className="px-1.5 py-1 text-[10px]">SN ONT</TableHead>
-                    <TableHead className="px-1.5 py-1 text-[10px]">Customer</TableHead>
+                  <TableRow className="h-5">
+                    <TableHead className="px-1 py-0.5 text-[9px]">⚡</TableHead>
+                    <TableHead className="px-1 py-0.5 text-[9px]">👨‍💼 SVC ID</TableHead>
+                    <TableHead className="px-1 py-0.5 text-[9px]">📍 Host</TableHead>
+                    <TableHead className="px-1 py-0.5 text-[9px]">🛠️ FAT</TableHead>
+                    <TableHead className="px-1 py-0.5 text-[9px]">💻 SN</TableHead>
+                    <TableHead className="px-1 py-0.5 text-[9px]">👤 Customer</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -726,20 +726,20 @@ export default function TicketManagement() {
           <div className="rounded-md border overflow-auto max-h-72">
             <Table>
               <TableHeader>
-                <TableRow className="h-6">
-                  <TableHead className="px-1.5 py-1 text-[10px]">Ticket ID</TableHead>
-                  <TableHead className="px-1.5 py-1 text-[10px]">Type</TableHead>
-                  <TableHead className="px-1.5 py-1 text-[10px]">Customer/Type</TableHead>
-                  <TableHead className="px-1.5 py-1 text-[10px]">Service ID</TableHead>
-                  <TableHead className="px-1.5 py-1 text-[10px]">Serpo</TableHead>
-                  <TableHead className="px-1.5 py-1 text-[10px]">Status</TableHead>
-                  <TableHead className="px-1.5 py-1 text-[10px]">Action</TableHead>
+                <TableRow className="h-5">
+                  <TableHead className="px-1 py-0.5 text-[9px]">🎫 ID</TableHead>
+                  <TableHead className="px-1 py-0.5 text-[9px]">📦 Type</TableHead>
+                  <TableHead className="px-1 py-0.5 text-[9px]">👤 Info</TableHead>
+                  <TableHead className="px-1 py-0.5 text-[9px]">👨‍💼 SVC</TableHead>
+                  <TableHead className="px-1 py-0.5 text-[9px]">👥 Serpo</TableHead>
+                  <TableHead className="px-1 py-0.5 text-[9px]">⚙️ Status</TableHead>
+                  <TableHead className="px-1 py-0.5 text-[9px]">⚡</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {tickets.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={7} className="text-center text-muted-foreground text-[10px] py-3">
+                    <TableCell colSpan={7} className="text-center text-muted-foreground text-[9px] py-2">
                       Belum ada tiket
                     </TableCell>
                   </TableRow>
