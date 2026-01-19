@@ -210,8 +210,9 @@ export async function clearAllData(): Promise<void> {
     clearStore(BNG_STORE_NAME, "bng_records"),
   ]);
 
-  // Clear localStorage data (Report data, tickets, etc.)
+  // Clear localStorage data (Report data, tickets, history, etc.)
   localStorage.removeItem("shiftReports");
   localStorage.removeItem("ticketUpdates");
   localStorage.removeItem("noc_tickets");
+  localStorage.removeItem("ticket_daily_history");
 }
