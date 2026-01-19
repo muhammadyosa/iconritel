@@ -11,7 +11,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { motion } from "framer-motion";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip, Cell } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip, Cell, LineChart, Line } from "recharts";
 import {
   ChartContainer,
   ChartTooltip,
@@ -303,7 +303,7 @@ export default function Dashboard() {
           </Card>
         </motion.div>
 
-        {/* Category Distribution Bar Chart */}
+        {/* Category Distribution Line Chart - Daily Trend */}
         <motion.div
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
@@ -312,70 +312,98 @@ export default function Dashboard() {
           <Card className="shadow-2xl overflow-hidden border-2 backdrop-blur-lg bg-card/70">
             <CardHeader className="bg-gradient-to-r from-accent/10 via-primary/5 to-accent/10 border-b">
               <CardTitle className="flex items-center gap-2">
-                <BarChart3 className="h-5 w-5 text-accent" />
-                Category Distribution
+                <TrendingUp className="h-5 w-5 text-accent" />
+                Category Trend (Per Hari)
               </CardTitle>
             </CardHeader>
             <CardContent className="p-3 sm:p-4 md:pt-6">
               {(() => {
-                const ritelCount = tickets.filter((t) => t.category === "RITEL").length;
-                const feederCount = tickets.filter((t) => t.category === "FEEDER").length;
-
-                const categoryData = [
-                  { name: "🏠 RITEL", value: ritelCount, fill: "hsl(217, 91%, 60%)", category: "RITEL" },
-                  { name: "🏬 FEEDER", value: feederCount, fill: "hsl(38, 92%, 50%)", category: "FEEDER" },
-                ];
+                // Group tickets by date and category
+                const dailyData: Record<string, { date: string; ritel: number; feeder: number }> = {};
+                
+                // Get last 7 days
+                const today = new Date();
+                for (let i = 6; i >= 0; i--) {
+                  const date = new Date(today);
+                  date.setDate(date.getDate() - i);
+                  const dateStr = date.toISOString().split('T')[0];
+                  const displayDate = date.toLocaleDateString('id-ID', { day: '2-digit', month: 'short' });
+                  dailyData[dateStr] = { date: displayDate, ritel: 0, feeder: 0 };
+                }
+                
+                // Count tickets per day per category
+                tickets.forEach((ticket) => {
+                  const ticketDate = new Date(ticket.createdISO).toISOString().split('T')[0];
+                  if (dailyData[ticketDate]) {
+                    if (ticket.category === "RITEL") {
+                      dailyData[ticketDate].ritel++;
+                    } else if (ticket.category === "FEEDER") {
+                      dailyData[ticketDate].feeder++;
+                    }
+                  }
+                });
+                
+                const chartData = Object.values(dailyData);
 
                 const chartConfig: ChartConfig = {
-                  value: { label: "Jumlah" },
+                  ritel: { label: "🏠 RITEL", color: "hsl(217, 91%, 60%)" },
+                  feeder: { label: "🏬 FEEDER", color: "hsl(38, 92%, 50%)" },
                 };
 
                 return (
                   <ChartContainer config={chartConfig} className="h-[200px] sm:h-[240px] md:h-[280px] w-full transition-all duration-500 ease-out">
-                    <BarChart
-                      data={categoryData}
-                      layout="vertical"
-                      margin={{ top: 10, right: 30, left: 10, bottom: 10 }}
-                      onClick={(data) => {
-                        if (data?.activePayload?.[0]?.payload?.category) {
-                          const category = data.activePayload[0].payload.category;
-                          setSelectedCategory(selectedCategory === category ? null : category);
-                          const filtered = tickets.filter((t) => t.category === category);
-                          setPreviousDialogState(null);
-                          setShowOltList(false);
-                          setFilterDialogTickets(filtered);
-                          setFilterDialogTitle(`🏠 Tiket dengan Category: ${category}`);
-                          setFilterDialogOpen(true);
-                        }
-                      }}
+                    <LineChart
+                      data={chartData}
+                      margin={{ top: 10, right: 20, left: 10, bottom: 10 }}
                     >
-                      <CartesianGrid strokeDasharray="3 3" className="stroke-muted" horizontal={false} />
+                      <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
                       <XAxis 
-                        type="number"
+                        dataKey="date"
                         tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }}
+                        tickLine={false}
+                        axisLine={false}
                       />
                       <YAxis 
-                        type="category"
-                        dataKey="name" 
-                        tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }}
-                        width={100}
+                        tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }}
+                        tickLine={false}
+                        axisLine={false}
+                        allowDecimals={false}
                       />
                       <ChartTooltip
                         content={<ChartTooltipContent />}
-                        cursor={{ fill: "hsl(var(--muted))", opacity: 0.3 }}
                       />
-                      <Bar dataKey="value" radius={[0, 6, 6, 0]} cursor="pointer">
-                        {categoryData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={entry.fill} />
-                        ))}
-                      </Bar>
-                    </BarChart>
+                      <Line 
+                        type="monotone" 
+                        dataKey="ritel" 
+                        stroke="hsl(217, 91%, 60%)" 
+                        strokeWidth={3}
+                        dot={{ fill: "hsl(217, 91%, 60%)", strokeWidth: 2, r: 4 }}
+                        activeDot={{ r: 6, strokeWidth: 2 }}
+                        name="🏠 RITEL"
+                      />
+                      <Line 
+                        type="monotone" 
+                        dataKey="feeder" 
+                        stroke="hsl(38, 92%, 50%)" 
+                        strokeWidth={3}
+                        dot={{ fill: "hsl(38, 92%, 50%)", strokeWidth: 2, r: 4 }}
+                        activeDot={{ r: 6, strokeWidth: 2 }}
+                        name="🏬 FEEDER"
+                      />
+                    </LineChart>
                   </ChartContainer>
                 );
               })()}
-              <p className="text-xs text-muted-foreground text-center mt-2">
-                Klik pada bar untuk melihat detail tiket
-              </p>
+              <div className="flex justify-center gap-4 mt-3">
+                <div className="flex items-center gap-2 text-xs">
+                  <div className="w-3 h-3 rounded-full bg-[hsl(217,91%,60%)]" />
+                  <span className="text-muted-foreground">🏠 RITEL</span>
+                </div>
+                <div className="flex items-center gap-2 text-xs">
+                  <div className="w-3 h-3 rounded-full bg-[hsl(38,92%,50%)]" />
+                  <span className="text-muted-foreground">🏬 FEEDER</span>
+                </div>
+              </div>
             </CardContent>
           </Card>
         </motion.div>
