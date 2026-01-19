@@ -218,14 +218,21 @@ export default function Dashboard() {
           >
             {/* Content */}
             <div className="relative p-2.5 sm:p-3 md:p-4">
-              <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-3">
+                {/* Emoji/Logo on Left */}
+                <div className="flex flex-col items-center shrink-0">
+                  <span className="text-2xl sm:text-3xl">{card.emoji}</span>
+                </div>
+                
+                {/* Title below emoji, Value on right */}
                 <div className="flex-1 min-w-0">
                   <p className="text-[10px] sm:text-xs text-muted-foreground font-medium truncate">{card.title}</p>
-                  <p className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground">
-                    {card.value}
-                  </p>
                 </div>
-                <span className="text-xl sm:text-2xl md:text-3xl shrink-0">{card.emoji}</span>
+                
+                {/* Value on far right */}
+                <p className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground shrink-0">
+                  {card.value}
+                </p>
               </div>
             </div>
           </motion.div>
