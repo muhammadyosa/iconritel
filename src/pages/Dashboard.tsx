@@ -137,46 +137,46 @@ export default function Dashboard() {
       </motion.div>
 
       {/* KPI Cards Section */}
-      <div className="grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-4 w-full">
+      <div className="grid gap-2 sm:gap-3 grid-cols-2 lg:grid-cols-4 w-full">
         {[
           { 
             title: "Total Incident", 
             value: totalIncidents, 
             emoji: "🗃️", 
             metric: "total",
-            gradient: "from-blue-500 to-blue-700",
-            glowColor: "shadow-blue-500/50"
+            bgClass: "bg-primary/10",
+            borderClass: "border-primary/30"
           },
           { 
             title: "Over SLA (>24h)", 
             value: overSLA, 
             emoji: "⚠️", 
             metric: "overSLA",
-            gradient: "from-red-500 to-red-700",
-            glowColor: "shadow-red-500/50"
+            bgClass: "bg-destructive/10",
+            borderClass: "border-destructive/30"
           },
           { 
             title: "Impact OLT", 
             value: totalOLT, 
             emoji: "📟", 
             metric: "olt",
-            gradient: "from-green-500 to-emerald-700",
-            glowColor: "shadow-green-500/50"
+            bgClass: "bg-success/10",
+            borderClass: "border-success/30"
           },
           { 
             title: "Impact Feeder", 
             value: feederImpact, 
             emoji: "⛓️‍💥", 
             metric: "feeder",
-            gradient: "from-amber-500 to-orange-600",
-            glowColor: "shadow-amber-500/50"
+            bgClass: "bg-warning/10",
+            borderClass: "border-warning/30"
           }
         ].map((card, index) => (
           <motion.div
             key={card.metric}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: index * 0.1 }}
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.3, delay: index * 0.05 }}
             onClick={() => {
               let filtered: Ticket[] = [];
               let title = "";
@@ -210,26 +210,22 @@ export default function Dashboard() {
             }}
             className={`
               relative cursor-pointer group
-              rounded-2xl border-2 overflow-hidden
-              transition-all duration-300
-              hover:scale-105 hover:shadow-2xl ${card.glowColor}
-              hover:border-primary/50
+              rounded-xl ${card.bgClass} ${card.borderClass} border
+              transition-all duration-200
+              hover:scale-[1.02] hover:shadow-lg
+              active:scale-[0.98]
             `}
           >
-            {/* Background Gradient */}
-            <div className={`absolute inset-0 bg-gradient-to-br ${card.gradient} opacity-10 group-hover:opacity-20 transition-opacity`} />
-            
             {/* Content */}
-            <div className="relative p-3 sm:p-4 md:p-6">
-              <div className="flex items-start justify-between mb-2 sm:mb-4">
-                <span className="text-2xl sm:text-3xl drop-shadow-lg">{card.emoji}</span>
-              </div>
-              
-              <div>
-                <p className="text-xs sm:text-sm text-muted-foreground font-medium mb-1 truncate">{card.title}</p>
-                <p className="text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-to-br from-foreground to-foreground/70 bg-clip-text">
-                  {card.value}
-                </p>
+            <div className="relative p-2.5 sm:p-3 md:p-4">
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex-1 min-w-0">
+                  <p className="text-[10px] sm:text-xs text-muted-foreground font-medium truncate">{card.title}</p>
+                  <p className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground">
+                    {card.value}
+                  </p>
+                </div>
+                <span className="text-xl sm:text-2xl md:text-3xl shrink-0">{card.emoji}</span>
               </div>
             </div>
           </motion.div>
