@@ -189,7 +189,7 @@ export default function Settings() {
   const unrecognizedSheets = sheets.filter(s => s.type === null);
 
   return (
-    <div className="min-h-screen space-y-6 p-4 md:p-6 lg:p-8">
+    <div className="space-y-6 w-full max-w-full overflow-x-hidden min-w-0">
       {/* Header */}
       <div className="flex items-center gap-3 mb-6">
         <div>
