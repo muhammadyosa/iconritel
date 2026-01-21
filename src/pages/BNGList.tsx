@@ -221,8 +221,8 @@ const BNGList = () => {
             </div>
           </div>
 
-          <div className="rounded-md border overflow-auto max-h-96">
-            <Table className="text-[10px]">
+          <div className="rounded-md border overflow-x-auto max-h-96">
+            <Table className="text-[10px] min-w-[900px]">
               <TableHeader>
                 <TableRow>
                   <TableHead className="px-1 py-1 whitespace-nowrap">IP RADIUS</TableHead>
