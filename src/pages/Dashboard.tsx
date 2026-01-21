@@ -257,7 +257,7 @@ export default function Dashboard() {
             <CardContent className="p-1.5 sm:p-2 md:p-3">
               {(() => {
                 const statusData = [
-                  { emoji: "⚙️", label: "On Progress", value: tickets.filter((t) => t.status === "On Progress").length, fill: "hsl(217, 91%, 60%)", status: "On Progress" },
+                  { emoji: "⚙️", label: "Progres", value: tickets.filter((t) => t.status === "On Progress").length, fill: "hsl(217, 91%, 60%)", status: "On Progress" },
                   { emoji: "🚨", label: "Critical", value: tickets.filter((t) => t.status === "Critical").length, fill: "hsl(0, 84%, 60%)", status: "Critical" },
                   { emoji: "✅", label: "Resolved", value: tickets.filter((t) => t.status === "Resolved").length, fill: "hsl(142, 71%, 45%)", status: "Resolved" },
                   { emoji: "⏳", label: "Pending", value: tickets.filter((t) => t.status === "Pending").length, fill: "hsl(38, 92%, 50%)", status: "Pending" },
