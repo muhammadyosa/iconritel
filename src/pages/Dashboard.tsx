@@ -257,23 +257,50 @@ export default function Dashboard() {
             <CardContent className="p-1.5 sm:p-2 md:p-3">
               {(() => {
                 const statusData = [
-                  { name: "⚙️ On Progress", shortName: "⚙️ Progress", value: tickets.filter((t) => t.status === "On Progress").length, fill: "hsl(217, 91%, 60%)", status: "On Progress" },
-                  { name: "🚨 Critical", shortName: "🚨 Critical", value: tickets.filter((t) => t.status === "Critical").length, fill: "hsl(0, 84%, 60%)", status: "Critical" },
-                  { name: "✅ Resolved", shortName: "✅ Resolved", value: tickets.filter((t) => t.status === "Resolved").length, fill: "hsl(142, 71%, 45%)", status: "Resolved" },
-                  { name: "⏳ Pending", shortName: "⏳ Pending", value: tickets.filter((t) => t.status === "Pending").length, fill: "hsl(38, 92%, 50%)", status: "Pending" },
+                  { emoji: "⚙️", label: "On Progress", value: tickets.filter((t) => t.status === "On Progress").length, fill: "hsl(217, 91%, 60%)", status: "On Progress" },
+                  { emoji: "🚨", label: "Critical", value: tickets.filter((t) => t.status === "Critical").length, fill: "hsl(0, 84%, 60%)", status: "Critical" },
+                  { emoji: "✅", label: "Resolved", value: tickets.filter((t) => t.status === "Resolved").length, fill: "hsl(142, 71%, 45%)", status: "Resolved" },
+                  { emoji: "⏳", label: "Pending", value: tickets.filter((t) => t.status === "Pending").length, fill: "hsl(38, 92%, 50%)", status: "Pending" },
                 ];
 
                 const chartConfig: ChartConfig = {
                   value: { label: "Jumlah" },
                 };
 
+                // Custom Y-axis tick with emoji above label
+                const CustomYAxisTick = ({ x, y, payload }: any) => {
+                  const item = statusData.find((d) => d.label === payload.value);
+                  return (
+                    <g transform={`translate(${x},${y})`}>
+                      <text
+                        x={-8}
+                        y={-8}
+                        textAnchor="end"
+                        fontSize={14}
+                        className="select-none"
+                      >
+                        {item?.emoji}
+                      </text>
+                      <text
+                        x={-8}
+                        y={6}
+                        textAnchor="end"
+                        fontSize={9}
+                        fill="hsl(var(--muted-foreground))"
+                      >
+                        {payload.value}
+                      </text>
+                    </g>
+                  );
+                };
+
                 return (
-                  <ChartContainer config={chartConfig} className="h-[140px] xs:h-[150px] sm:h-[170px] md:h-[200px] w-full transition-all duration-300">
+                  <ChartContainer config={chartConfig} className="h-[180px] xs:h-[190px] sm:h-[210px] md:h-[240px] w-full transition-all duration-300">
                     <BarChart
                       data={statusData}
                       layout="vertical"
-                      margin={{ top: 2, right: 10, left: 0, bottom: 2 }}
-                      barCategoryGap="18%"
+                      margin={{ top: 8, right: 15, left: 5, bottom: 8 }}
+                      barCategoryGap="25%"
                       onClick={(data) => {
                         if (data?.activePayload?.[0]?.payload?.status) {
                           const status = data.activePayload[0].payload.status;
@@ -293,13 +320,12 @@ export default function Dashboard() {
                         tick={{ fontSize: 8, fill: "hsl(var(--muted-foreground))" }}
                         tickLine={false}
                         axisLine={false}
-                        hide={window.innerWidth < 375}
                       />
                       <YAxis 
                         type="category"
-                        dataKey="shortName" 
-                        tick={{ fontSize: 9, fill: "hsl(var(--muted-foreground))" }}
-                        width={80}
+                        dataKey="label" 
+                        tick={<CustomYAxisTick />}
+                        width={75}
                         tickLine={false}
                         axisLine={false}
                       />
@@ -307,7 +333,7 @@ export default function Dashboard() {
                         content={<ChartTooltipContent />}
                         cursor={{ fill: "hsl(var(--muted))", opacity: 0.3 }}
                       />
-                      <Bar dataKey="value" radius={[0, 4, 4, 0]} cursor="pointer" maxBarSize={24}>
+                      <Bar dataKey="value" radius={[0, 4, 4, 0]} cursor="pointer" maxBarSize={28}>
                         {statusData.map((entry, index) => (
                           <Cell key={`cell-${index}`} fill={entry.fill} />
                         ))}
