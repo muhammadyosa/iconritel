@@ -612,8 +612,8 @@ export default function Dashboard() {
                   Belum ada tiket
                 </p>
               ) : (
-                <div className="rounded-md border overflow-auto max-h-80">
-                  <Table>
+              <div className="rounded-md border overflow-x-auto max-h-80">
+                  <Table className="min-w-[600px]">
                     <TableHeader>
                       <TableRow className="h-7">
                         <TableHead className="px-2 py-1 text-[11px]">Ticket ID</TableHead>

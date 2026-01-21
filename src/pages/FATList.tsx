@@ -172,8 +172,8 @@ const FATList = () => {
             </div>
           </div>
 
-          <div className="rounded-md border overflow-auto max-h-96">
-            <Table className="text-xs">
+          <div className="rounded-md border overflow-x-auto max-h-96">
+            <Table className="text-xs min-w-[500px]">
               <TableHeader>
                 <TableRow>
                   <TableHead className="px-2 py-1.5 whitespace-nowrap">Provinsi</TableHead>
