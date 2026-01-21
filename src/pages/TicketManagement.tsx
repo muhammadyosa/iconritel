@@ -871,7 +871,7 @@ export default function TicketManagement() {
                                       <SelectValue />
                                     </SelectTrigger>
                                     <SelectContent>
-                                      <SelectItem value="On Progress">On Progress</SelectItem>
+                                      <SelectItem value="On Progress">On Progres</SelectItem>
                                       <SelectItem value="Critical">Critical</SelectItem>
                                       <SelectItem value="Resolved">Resolved</SelectItem>
                                       <SelectItem value="Pending">Pending</SelectItem>

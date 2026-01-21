@@ -7,6 +7,8 @@ interface StatusBadgeProps {
 }
 
 export function StatusBadge({ status }: StatusBadgeProps) {
+  const displayLabel = status === "On Progress" ? "On Progres" : status;
+  
   const variants = {
     "On Progress": "bg-warning text-warning-foreground",
     "Critical": "bg-destructive text-destructive-foreground",
@@ -16,7 +18,7 @@ export function StatusBadge({ status }: StatusBadgeProps) {
 
   return (
     <Badge className={`${variants[status] || variants["Pending"]} text-[8px] px-1.5 py-0 h-4 font-medium`}>
-      {status}
+      {displayLabel}
     </Badge>
   );
 }
