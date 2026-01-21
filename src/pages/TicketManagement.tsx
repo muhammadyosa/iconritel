@@ -298,10 +298,10 @@ export default function TicketManagement() {
   };
 
   return (
-    <div className="space-y-3 sm:space-y-4">
-      <div className="flex items-center gap-3">
-        <h1 className="text-xl sm:text-2xl font-bold">🎫 Ticket Management</h1>
-        <span className="text-xs text-muted-foreground hidden sm:inline">Kelola tiket incident NOC</span>
+    <div className="space-y-2 sm:space-y-3 md:space-y-4 max-w-full overflow-x-hidden">
+      <div className="flex flex-col xs:flex-row xs:items-center gap-1 xs:gap-3">
+        <h1 className="text-lg xs:text-xl sm:text-2xl font-bold">🎫 Ticket Management</h1>
+        <span className="text-[10px] xs:text-xs text-muted-foreground">Kelola tiket incident NOC</span>
       </div>
 
       {/* Dialog for creating ticket from Preview Data */}
@@ -405,77 +405,77 @@ export default function TicketManagement() {
       </Dialog>
 
       <Card className="shadow-sm border">
-        <CardHeader className="py-2.5 px-3 sm:px-4 border-b bg-muted/30">
-          <CardTitle className="flex items-center justify-between text-sm">
-            <div>
+        <CardHeader className="py-2 px-2 sm:px-3 md:px-4 border-b bg-muted/30">
+          <CardTitle className="flex items-center justify-between text-xs sm:text-sm">
+            <div className="min-w-0">
               <span>📋 Preview Data User</span>
-              <p className="text-[10px] text-muted-foreground font-normal mt-0.5">
+              <p className="text-[9px] sm:text-[10px] text-muted-foreground font-normal mt-0.5 truncate">
                 {isLoadingExcel ? (
                   "Memuat data..."
                 ) : excelData.length > 0 ? (
                   `✓ ${excelData.length} data tersimpan`
                 ) : (
                   <span className="flex items-center gap-1">
-                    <Info className="h-3 w-3" />
-                    Import via{" "}
+                    <Info className="h-3 w-3 flex-shrink-0" />
+                    <span className="truncate">Import via{" "}
                     <Link to="/settings" className="text-primary underline hover:no-underline">
                       Settings
-                    </Link>
+                    </Link></span>
                   </span>
                 )}
               </p>
             </div>
           </CardTitle>
         </CardHeader>
-        <CardContent className="p-2 sm:p-3">
-          <div className="grid gap-2 grid-cols-2 sm:grid-cols-3 lg:grid-cols-5">
+        <CardContent className="p-1.5 sm:p-2 md:p-3">
+          <div className="grid gap-1.5 sm:gap-2 grid-cols-2 xs:grid-cols-3 sm:grid-cols-4 lg:grid-cols-5">
             <div>
-              <Label className="text-[10px]">👨‍💼 Service ID</Label>
+              <Label className="text-[9px] sm:text-[10px]">👨‍💼 Service ID</Label>
               <Input
                 placeholder="Cari..."
                 value={searchFilters.service}
                 onChange={(e) => setSearchFilters({ ...searchFilters, service: e.target.value })}
-                className="h-7 text-xs"
+                className="h-6 sm:h-7 text-[10px] sm:text-xs"
               />
             </div>
             <div>
-              <Label className="text-[10px]">📍 Hostname</Label>
+              <Label className="text-[9px] sm:text-[10px]">📍 Hostname</Label>
               <Input
                 placeholder="Cari..."
                 value={searchFilters.hostname}
                 onChange={(e) =>
                   setSearchFilters({ ...searchFilters, hostname: e.target.value })
                 }
-                className="h-7 text-xs"
+                className="h-6 sm:h-7 text-[10px] sm:text-xs"
               />
             </div>
             <div>
-              <Label className="text-[10px]">🛠️ ID FAT</Label>
+              <Label className="text-[9px] sm:text-[10px]">🛠️ ID FAT</Label>
               <Input
                 placeholder="Cari..."
                 value={searchFilters.fat}
                 onChange={(e) => setSearchFilters({ ...searchFilters, fat: e.target.value })}
-                className="h-7 text-xs"
+                className="h-6 sm:h-7 text-[10px] sm:text-xs"
               />
             </div>
             <div>
-              <Label className="text-[10px]">💻 SN ONT</Label>
+              <Label className="text-[9px] sm:text-[10px]">💻 SN ONT</Label>
               <Input
                 placeholder="Cari..."
                 value={searchFilters.sn}
                 onChange={(e) => setSearchFilters({ ...searchFilters, sn: e.target.value })}
-                className="h-7 text-xs"
+                className="h-6 sm:h-7 text-[10px] sm:text-xs"
               />
             </div>
-            <div>
-              <Label className="text-[10px]">Customer</Label>
+            <div className="col-span-2 xs:col-span-1">
+              <Label className="text-[9px] sm:text-[10px]">👤 Customer</Label>
               <Input
                 placeholder="Cari..."
                 value={searchFilters.customer}
                 onChange={(e) =>
                   setSearchFilters({ ...searchFilters, customer: e.target.value })
                 }
-                className="h-7 text-xs"
+                className="h-6 sm:h-7 text-[10px] sm:text-xs"
               />
             </div>
           </div>
@@ -484,38 +484,38 @@ export default function TicketManagement() {
 
       {isLoadingExcel ? (
         <Card className="shadow-sm border">
-          <CardContent className="py-4">
-            <div className="text-center text-muted-foreground text-xs">
+          <CardContent className="py-3 sm:py-4">
+            <div className="text-center text-muted-foreground text-[10px] sm:text-xs">
               <p>Memuat data Excel...</p>
             </div>
           </CardContent>
         </Card>
       ) : filteredData.length > 0 && (
         <Card className="shadow-sm border">
-          <CardHeader className="py-2 px-3 border-b bg-muted/30">
-            <CardTitle className="text-sm">Preview Data ({filteredData.length})</CardTitle>
+          <CardHeader className="py-1.5 sm:py-2 px-2 sm:px-3 border-b bg-muted/30">
+            <CardTitle className="text-xs sm:text-sm">Preview Data ({filteredData.length})</CardTitle>
           </CardHeader>
-          <CardContent className="p-2">
-            <div className="rounded-md border overflow-auto max-h-40">
-              <Table>
+          <CardContent className="p-1.5 sm:p-2">
+            <div className="rounded-md border overflow-x-auto max-h-36 sm:max-h-40">
+              <Table className="min-w-[500px]">
                 <TableHeader>
                   <TableRow className="h-5">
-                    <TableHead className="px-1 py-0.5 text-[9px]">⚡ Action</TableHead>
-                    <TableHead className="px-1 py-0.5 text-[9px]">👨‍💼 Service ID</TableHead>
-                    <TableHead className="px-1 py-0.5 text-[9px]">📍 Hostname</TableHead>
-                    <TableHead className="px-1 py-0.5 text-[9px]">🛠️ ID FAT</TableHead>
-                    <TableHead className="px-1 py-0.5 text-[9px]">💻 SN ONT</TableHead>
-                    <TableHead className="px-1 py-0.5 text-[9px]">👤 Customer</TableHead>
+                    <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap">⚡ Action</TableHead>
+                    <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap">👨‍💼 Service ID</TableHead>
+                    <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap">📍 Hostname</TableHead>
+                    <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap">🛠️ ID FAT</TableHead>
+                    <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap">💻 SN ONT</TableHead>
+                    <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap">👤 Customer</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {filteredData.slice(0, 50).map((record, idx) => (
-                    <TableRow key={idx} className="h-7">
-                      <TableCell className="px-1.5 py-0.5">
+                    <TableRow key={idx} className="h-6 sm:h-7">
+                      <TableCell className="px-1 sm:px-1.5 py-0.5">
                         <Button
                           size="sm"
                           variant="outline"
-                          className="h-5 text-[9px] px-2"
+                          className="h-5 text-[8px] sm:text-[9px] px-1.5 sm:px-2"
                           onClick={() => {
                             setSelectedRecord(record);
                             setIsFormOpen(true);
@@ -524,11 +524,11 @@ export default function TicketManagement() {
                           Pilih
                         </Button>
                       </TableCell>
-                      <TableCell className="px-1.5 py-0.5 font-mono text-[10px]">{String(record.service || "")}</TableCell>
-                      <TableCell className="px-1.5 py-0.5 text-[10px] font-medium">{String(record.hostname || "")}</TableCell>
-                      <TableCell className="px-1.5 py-0.5 font-mono text-[10px]">{String(record.fat || "")}</TableCell>
-                      <TableCell className="px-1.5 py-0.5 font-mono text-[10px]">{String(record.sn || "")}</TableCell>
-                      <TableCell className="px-1.5 py-0.5 text-[10px]">{String(record.customer || "")}</TableCell>
+                      <TableCell className="px-1 sm:px-1.5 py-0.5 font-mono text-[9px] sm:text-[10px]">{String(record.service || "")}</TableCell>
+                      <TableCell className="px-1 sm:px-1.5 py-0.5 text-[9px] sm:text-[10px] font-medium">{String(record.hostname || "")}</TableCell>
+                      <TableCell className="px-1 sm:px-1.5 py-0.5 font-mono text-[9px] sm:text-[10px]">{String(record.fat || "")}</TableCell>
+                      <TableCell className="px-1 sm:px-1.5 py-0.5 font-mono text-[9px] sm:text-[10px]">{String(record.sn || "")}</TableCell>
+                      <TableCell className="px-1 sm:px-1.5 py-0.5 text-[9px] sm:text-[10px]">{String(record.customer || "")}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -539,14 +539,15 @@ export default function TicketManagement() {
       )}
 
       <Card className="shadow-sm border">
-        <CardHeader className="py-2 px-3 border-b bg-muted/30 flex flex-row items-center justify-between">
-          <CardTitle className="text-sm">Daftar Tiket ({filteredTickets.length})</CardTitle>
-          <div className="flex gap-1.5">
+        <CardHeader className="py-1.5 sm:py-2 px-2 sm:px-3 border-b bg-muted/30 flex flex-row items-center justify-between gap-2">
+          <CardTitle className="text-xs sm:text-sm whitespace-nowrap">Daftar Tiket ({filteredTickets.length})</CardTitle>
+          <div className="flex gap-1 sm:gap-1.5">
             <Dialog open={isManualFormOpen} onOpenChange={setIsManualFormOpen}>
               <DialogTrigger asChild>
-                <Button variant="outline" size="sm" className="h-7 text-[10px] px-2">
-                  <FileEdit className="h-3 w-3 mr-1" />
-                  Manual
+                <Button variant="outline" size="sm" className="h-6 sm:h-7 text-[9px] sm:text-[10px] px-1.5 sm:px-2">
+                  <FileEdit className="h-3 w-3 mr-0.5 sm:mr-1" />
+                  <span className="hidden xs:inline">Manual</span>
+                  <span className="xs:hidden">+</span>
                 </Button>
               </DialogTrigger>
               <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -682,19 +683,20 @@ export default function TicketManagement() {
                 </div>
               </DialogContent>
             </Dialog>
-            <Button onClick={handleExportCSV} variant="outline" size="sm" className="h-7 text-[10px] px-2">
-              <Download className="h-3 w-3 mr-1" />
-              CSV
+            <Button onClick={handleExportCSV} variant="outline" size="sm" className="h-6 sm:h-7 text-[9px] sm:text-[10px] px-1.5 sm:px-2">
+              <Download className="h-3 w-3 mr-0.5 sm:mr-1" />
+              <span className="hidden xs:inline">CSV</span>
+              <span className="xs:hidden">↓</span>
             </Button>
           </div>
         </CardHeader>
-        <CardContent className="p-2 space-y-2">
+        <CardContent className="p-1.5 sm:p-2 space-y-1.5 sm:space-y-2">
           {/* Search filter untuk Daftar Tiket */}
-          <div className="flex gap-2 items-end">
-            <div className="w-32 sm:w-40">
-              <Label className="text-[10px]">Search By</Label>
+          <div className="flex flex-col xs:flex-row gap-1.5 sm:gap-2 xs:items-end">
+            <div className="w-full xs:w-28 sm:w-40">
+              <Label className="text-[9px] sm:text-[10px]">Search By</Label>
               <Select value={ticketSearchField} onValueChange={setTicketSearchField}>
-                <SelectTrigger className="h-7 text-[10px]">
+                <SelectTrigger className="h-6 sm:h-7 text-[9px] sm:text-[10px]">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -711,46 +713,46 @@ export default function TicketManagement() {
               </Select>
             </div>
             <div className="flex-1">
-              <Label className="text-[10px]">Pencarian</Label>
+              <Label className="text-[9px] sm:text-[10px]">Pencarian</Label>
               <div className="relative">
                 <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3 w-3 text-muted-foreground" />
                 <Input
                   placeholder={`Cari...`}
                   value={ticketSearchQuery}
                   onChange={(e) => setTicketSearchQuery(e.target.value)}
-                  className="h-7 text-xs pl-7"
+                  className="h-6 sm:h-7 text-[10px] sm:text-xs pl-7"
                 />
               </div>
             </div>
           </div>
-          <div className="rounded-md border overflow-auto max-h-72">
-            <Table>
+          <div className="rounded-md border overflow-x-auto max-h-64 sm:max-h-72">
+            <Table className="min-w-[600px]">
               <TableHeader>
                 <TableRow className="h-5">
-                  <TableHead className="px-1 py-0.5 text-[9px]">🎫 Ticket ID</TableHead>
-                  <TableHead className="px-1 py-0.5 text-[9px]">📦 Type</TableHead>
-                  <TableHead className="px-1 py-0.5 text-[9px]">👤 Customer/Type</TableHead>
-                  <TableHead className="px-1 py-0.5 text-[9px]">👨‍💼 Service ID</TableHead>
-                  <TableHead className="px-1 py-0.5 text-[9px]">👥 Serpo</TableHead>
-                  <TableHead className="px-1 py-0.5 text-[9px]">⚙️ Status</TableHead>
-                  <TableHead className="px-1 py-0.5 text-[9px]">⚡ Action</TableHead>
+                  <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap">🎫 Ticket ID</TableHead>
+                  <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap">📦 Type</TableHead>
+                  <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap">👤 Customer/Type</TableHead>
+                  <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap">👨‍💼 Service ID</TableHead>
+                  <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap">👥 Serpo</TableHead>
+                  <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap">⚙️ Status</TableHead>
+                  <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap">⚡ Action</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {tickets.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={7} className="text-center text-muted-foreground text-[9px] py-2">
+                    <TableCell colSpan={7} className="text-center text-muted-foreground text-[8px] sm:text-[9px] py-2">
                       Belum ada tiket
                     </TableCell>
                   </TableRow>
                 ) : (
                   filteredTickets.map((ticket) => (
-                    <TableRow key={ticket.id} className="h-7">
-                      <TableCell className="px-1.5 py-0.5 text-[10px] font-medium">{ticket.id}</TableCell>
-                      <TableCell className="px-1.5 py-0.5">
+                    <TableRow key={ticket.id} className="h-6 sm:h-7">
+                      <TableCell className="px-1 sm:px-1.5 py-0.5 text-[9px] sm:text-[10px] font-medium">{ticket.id}</TableCell>
+                      <TableCell className="px-1 sm:px-1.5 py-0.5">
                         <div>
                           <Badge
-                            className={`text-[8px] px-1 py-0 h-3.5 ${
+                            className={`text-[7px] sm:text-[8px] px-1 py-0 h-3 sm:h-3.5 ${
                               ticket.category === "FEEDER"
                                 ? "bg-warning text-warning-foreground"
                                 : "bg-primary text-primary-foreground"
@@ -758,45 +760,45 @@ export default function TicketManagement() {
                           >
                             {ticket.category}
                           </Badge>
-                          <div className="text-[8px] text-muted-foreground mt-0.5">
+                          <div className="text-[7px] sm:text-[8px] text-muted-foreground mt-0.5 truncate max-w-[80px] sm:max-w-none">
                             {ticket.constraint}
                           </div>
                         </div>
                       </TableCell>
-                      <TableCell className="px-1.5 py-0.5 text-[10px]">
+                      <TableCell className="px-1 sm:px-1.5 py-0.5 text-[9px] sm:text-[10px]">
                         {ticket.category === "FEEDER" ? (
                           ticket.constraint === "OLT DOWN" ? (
                             <span className="font-medium">{ticket.hostname}</span>
                           ) :
                           ticket.constraint === "PORT DOWN" ? (
                             <div>
-                              <div className="font-medium text-[10px]">{ticket.ticketResult.match(/PORT - (.*?) - DOWN/)?.[1] || "PORT"}</div>
-                              <div className="text-muted-foreground text-[8px]">{ticket.hostname}</div>
+                              <div className="font-medium text-[9px] sm:text-[10px]">{ticket.ticketResult.match(/PORT - (.*?) - DOWN/)?.[1] || "PORT"}</div>
+                              <div className="text-muted-foreground text-[7px] sm:text-[8px]">{ticket.hostname}</div>
                             </div>
                           ) :
                           ticket.constraint === "FAT LOSS" || ticket.constraint === "FAT LOW RX" ? (
                             <div>
-                              <div className="font-medium text-[10px]">{ticket.fatId}</div>
-                              <div className="text-muted-foreground text-[8px]">{ticket.hostname}</div>
+                              <div className="font-medium text-[9px] sm:text-[10px]">{ticket.fatId}</div>
+                              <div className="text-muted-foreground text-[7px] sm:text-[8px]">{ticket.hostname}</div>
                             </div>
                           ) : ticket.constraint
                         ) : ticket.customerName}
                       </TableCell>
-                      <TableCell className="px-1.5 py-0.5 font-mono text-[10px]">{ticket.serviceId}</TableCell>
-                      <TableCell className="px-1.5 py-0.5 text-[10px]">{ticket.serpo}</TableCell>
-                      <TableCell className="px-1.5 py-0.5">
+                      <TableCell className="px-1 sm:px-1.5 py-0.5 font-mono text-[9px] sm:text-[10px]">{ticket.serviceId}</TableCell>
+                      <TableCell className="px-1 sm:px-1.5 py-0.5 text-[9px] sm:text-[10px]">{ticket.serpo}</TableCell>
+                      <TableCell className="px-1 sm:px-1.5 py-0.5">
                         <div>
                           <StatusBadge status={ticket.status} />
-                          <div className="text-[8px] text-muted-foreground mt-0.5">
+                          <div className="text-[7px] sm:text-[8px] text-muted-foreground mt-0.5">
                             {ticket.createdAt}
                           </div>
                         </div>
                       </TableCell>
-                      <TableCell className="px-1.5 py-0.5">
+                      <TableCell className="px-1 sm:px-1.5 py-0.5">
                         <div className="flex gap-1">
                           <Dialog>
                             <DialogTrigger asChild>
-                              <Button size="sm" variant="outline" className="h-5 text-[8px] px-1.5">
+                              <Button size="sm" variant="outline" className="h-5 text-[7px] sm:text-[8px] px-1 sm:px-1.5">
                                 Detail
                               </Button>
                             </DialogTrigger>
