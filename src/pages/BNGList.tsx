@@ -147,33 +147,33 @@ const BNGList = () => {
   });
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-3 sm:space-y-4 md:space-y-6 max-w-full overflow-x-hidden">
       <div>
-        <h1 className="text-3xl font-bold">🛰 List BNG</h1>
-        <p className="text-muted-foreground">
-          Data BNG diimport melalui <Link to="/import" className="text-primary underline hover:no-underline">Import Master Data</Link>
+        <h1 className="text-xl sm:text-2xl md:text-3xl font-bold">🛰 List BNG</h1>
+        <p className="text-xs sm:text-sm text-muted-foreground">
+          Data BNG diimport melalui <Link to="/settings" className="text-primary underline hover:no-underline">Settings</Link>
         </p>
       </div>
 
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center justify-between flex-wrap gap-4">
-            <div className="flex items-center gap-2">
-              <Network className="h-5 w-5" />
-              <div>
-                <span>Data BNG</span>
-                <p className="text-xs text-muted-foreground font-normal mt-1">
+        <CardHeader className="p-3 sm:p-4 md:p-6">
+          <CardTitle className="flex flex-col xs:flex-row xs:items-center justify-between gap-2 sm:gap-4">
+            <div className="flex items-center gap-2 min-w-0">
+              <Network className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
+              <div className="min-w-0">
+                <span className="text-sm sm:text-base">Data BNG</span>
+                <p className="text-[10px] sm:text-xs text-muted-foreground font-normal mt-0.5 sm:mt-1">
                   {isLoading ? (
                     "Memuat data BNG..."
                   ) : bngData.length > 0 ? (
                     `✓ ${bngData.length} data tersimpan dari Import Master Data`
                   ) : (
-                    <span className="flex items-center gap-1">
-                      <Info className="h-3 w-3" />
-                      Belum ada data. Import melalui{" "}
-                      <Link to="/import" className="text-primary underline hover:no-underline">
-                        Import Master Data
-                      </Link>
+                    <span className="flex items-center gap-1 flex-wrap">
+                      <Info className="h-3 w-3 flex-shrink-0" />
+                      <span>Belum ada data. Import melalui{" "}
+                      <Link to="/settings" className="text-primary underline hover:no-underline">
+                        Settings
+                      </Link></span>
                     </span>
                   )}
                 </p>
@@ -184,27 +184,29 @@ const BNGList = () => {
               size="sm"
               onClick={handleExport}
               disabled={filteredData.length === 0}
+              className="h-7 sm:h-8 text-[10px] sm:text-xs px-2 sm:px-3 touch-target"
             >
-              <Download className="mr-2 h-4 w-4" />
-              Export Excel
+              <Download className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />
+              <span className="hidden xs:inline">Export Excel</span>
+              <span className="xs:hidden">Export</span>
             </Button>
           </CardTitle>
-          <CardDescription>
+          <CardDescription className="text-[10px] sm:text-xs hidden sm:block">
             Kolom: IP RADIUS, HOSTNAME RADIUS, IP BNG, HOSTNAME BNG, NPE, VLAN, HOSTNAME OLT, UPE, PORT UPE, KOTA/KABUPATEN
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-2 sm:space-y-3 md:space-y-4 p-2 sm:p-4 md:p-6">
           {/* Simplified Search & Filter */}
-          <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
-            <div className="flex items-center gap-2">
-              <FileText className="h-4 w-4 text-muted-foreground" />
+          <div className="flex flex-col xs:flex-row gap-2 sm:gap-3 items-stretch xs:items-center">
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              <FileText className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground flex-shrink-0" />
               <Select value={searchField} onValueChange={setSearchField}>
-                <SelectTrigger className="w-[180px] h-9 bg-background">
+                <SelectTrigger className="w-full xs:w-[140px] sm:w-[180px] h-7 sm:h-9 bg-background text-[10px] sm:text-sm">
                   <SelectValue placeholder="Pilih Field" />
                 </SelectTrigger>
                 <SelectContent className="bg-popover border shadow-lg z-50">
                   {BNG_FIELDS.map((field) => (
-                    <SelectItem key={field.value} value={field.value}>
+                    <SelectItem key={field.value} value={field.value} className="text-[10px] sm:text-sm">
                       {field.label}
                     </SelectItem>
                   ))}
@@ -216,12 +218,12 @@ const BNGList = () => {
                 placeholder={`Cari ${BNG_FIELDS.find(f => f.value === searchField)?.label || "data"}...`}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="h-9"
+                className="h-7 sm:h-9 text-[10px] sm:text-sm"
               />
             </div>
           </div>
 
-          <div className="rounded-md border overflow-x-auto max-h-96">
+          <div className="rounded-md border overflow-x-auto max-h-72 sm:max-h-96 -mx-2 sm:mx-0">
             <Table className="text-[10px] min-w-[900px]">
               <TableHeader>
                 <TableRow>
@@ -272,12 +274,15 @@ const BNGList = () => {
             </Table>
           </div>
 
-          <div className="text-sm text-muted-foreground">
+          <div className="text-[10px] sm:text-xs md:text-sm text-muted-foreground">
             {filteredData.length > 100 ? (
-              <>Menampilkan 100 dari {filteredData.length} hasil pencarian (Total: {bngData.length} data BNG)</>
+              <span className="hidden sm:inline">Menampilkan 100 dari {filteredData.length} hasil pencarian (Total: {bngData.length} data BNG)</span>
             ) : (
-              <>Total: {filteredData.length} dari {bngData.length} data BNG</>
+              <span className="hidden sm:inline">Total: {filteredData.length} dari {bngData.length} data BNG</span>
             )}
+            <span className="sm:hidden">
+              {filteredData.length > 100 ? `100/${filteredData.length}` : `${filteredData.length}/${bngData.length}`} data
+            </span>
           </div>
         </CardContent>
       </Card>
