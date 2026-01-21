@@ -394,7 +394,7 @@ Dibuat: ${new Date(r.createdAt).toLocaleString("id-ID")}
                       <SelectValue placeholder="Pilih status" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="On Progress">On Progress</SelectItem>
+                      <SelectItem value="On Progress">On Progres</SelectItem>
                       <SelectItem value="Pending">Pending</SelectItem>
                       <SelectItem value="Resolved">Resolved</SelectItem>
                       <SelectItem value="Critical">Critical</SelectItem>
