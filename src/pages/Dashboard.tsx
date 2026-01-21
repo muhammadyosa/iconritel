@@ -248,19 +248,19 @@ export default function Dashboard() {
           transition={{ duration: 0.4, delay: 0.2 }}
         >
           <Card className="shadow-lg overflow-hidden border bg-card">
-            <CardHeader className="py-2.5 px-3 sm:px-4 border-b bg-muted/30">
-              <CardTitle className="flex items-center gap-2 text-sm sm:text-base">
-                <BarChart3 className="h-4 w-4 text-primary" />
+            <CardHeader className="py-2 px-2.5 sm:py-2.5 sm:px-4 border-b bg-muted/30">
+              <CardTitle className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm md:text-base">
+                <BarChart3 className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary" />
                 Status Distribution
               </CardTitle>
             </CardHeader>
-            <CardContent className="p-2 sm:p-3">
+            <CardContent className="p-1.5 sm:p-2 md:p-3">
               {(() => {
                 const statusData = [
-                  { name: "⚙️ On Progress", value: tickets.filter((t) => t.status === "On Progress").length, fill: "hsl(217, 91%, 60%)", status: "On Progress" },
-                  { name: "🚨 Critical", value: tickets.filter((t) => t.status === "Critical").length, fill: "hsl(0, 84%, 60%)", status: "Critical" },
-                  { name: "✅ Resolved", value: tickets.filter((t) => t.status === "Resolved").length, fill: "hsl(142, 71%, 45%)", status: "Resolved" },
-                  { name: "⏳ Pending", value: tickets.filter((t) => t.status === "Pending").length, fill: "hsl(38, 92%, 50%)", status: "Pending" },
+                  { name: "⚙️ On Progress", shortName: "⚙️ Progress", value: tickets.filter((t) => t.status === "On Progress").length, fill: "hsl(217, 91%, 60%)", status: "On Progress" },
+                  { name: "🚨 Critical", shortName: "🚨 Critical", value: tickets.filter((t) => t.status === "Critical").length, fill: "hsl(0, 84%, 60%)", status: "Critical" },
+                  { name: "✅ Resolved", shortName: "✅ Resolved", value: tickets.filter((t) => t.status === "Resolved").length, fill: "hsl(142, 71%, 45%)", status: "Resolved" },
+                  { name: "⏳ Pending", shortName: "⏳ Pending", value: tickets.filter((t) => t.status === "Pending").length, fill: "hsl(38, 92%, 50%)", status: "Pending" },
                 ];
 
                 const chartConfig: ChartConfig = {
@@ -268,11 +268,12 @@ export default function Dashboard() {
                 };
 
                 return (
-                  <ChartContainer config={chartConfig} className="h-[160px] sm:h-[180px] md:h-[200px] w-full transition-all duration-300">
+                  <ChartContainer config={chartConfig} className="h-[140px] xs:h-[150px] sm:h-[170px] md:h-[200px] w-full transition-all duration-300">
                     <BarChart
                       data={statusData}
                       layout="vertical"
-                      margin={{ top: 5, right: 20, left: 5, bottom: 5 }}
+                      margin={{ top: 2, right: 10, left: 0, bottom: 2 }}
+                      barCategoryGap="18%"
                       onClick={(data) => {
                         if (data?.activePayload?.[0]?.payload?.status) {
                           const status = data.activePayload[0].payload.status;
@@ -289,14 +290,16 @@ export default function Dashboard() {
                       <CartesianGrid strokeDasharray="3 3" className="stroke-muted" horizontal={false} />
                       <XAxis 
                         type="number"
-                        tick={{ fontSize: 9, fill: "hsl(var(--muted-foreground))" }}
+                        tick={{ fontSize: 8, fill: "hsl(var(--muted-foreground))" }}
                         tickLine={false}
+                        axisLine={false}
+                        hide={window.innerWidth < 375}
                       />
                       <YAxis 
                         type="category"
-                        dataKey="name" 
+                        dataKey="shortName" 
                         tick={{ fontSize: 9, fill: "hsl(var(--muted-foreground))" }}
-                        width={100}
+                        width={80}
                         tickLine={false}
                         axisLine={false}
                       />
@@ -304,7 +307,7 @@ export default function Dashboard() {
                         content={<ChartTooltipContent />}
                         cursor={{ fill: "hsl(var(--muted))", opacity: 0.3 }}
                       />
-                      <Bar dataKey="value" radius={[0, 4, 4, 0]} cursor="pointer">
+                      <Bar dataKey="value" radius={[0, 4, 4, 0]} cursor="pointer" maxBarSize={24}>
                         {statusData.map((entry, index) => (
                           <Cell key={`cell-${index}`} fill={entry.fill} />
                         ))}
@@ -313,7 +316,7 @@ export default function Dashboard() {
                   </ChartContainer>
                 );
               })()}
-              <p className="text-[10px] text-muted-foreground text-center mt-1.5">
+              <p className="text-[9px] sm:text-[10px] text-muted-foreground text-center mt-1">
                 Klik bar untuk detail
               </p>
             </CardContent>
