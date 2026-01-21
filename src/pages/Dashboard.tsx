@@ -116,7 +116,7 @@ export default function Dashboard() {
   });
 
   return (
-    <div className="min-h-screen space-y-4 md:space-y-6 p-3 sm:p-4 md:p-6 lg:p-8 w-full max-w-full overflow-x-hidden">
+    <div className="space-y-4 md:space-y-6 w-full max-w-full overflow-x-hidden min-w-0">
       {/* Header Section */}
       <motion.div 
         initial={{ opacity: 0, y: -20 }}
