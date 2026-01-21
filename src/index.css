@@ -134,6 +134,11 @@ All colors MUST be HSL.
     @apply min-h-[44px] min-w-[44px];
   }
 
+  /* Smaller touch targets for compact UI */
+  .touch-target-sm {
+    @apply min-h-[36px] min-w-[36px];
+  }
+
   /* Responsive text utilities */
   .text-responsive-xs {
     @apply text-[10px] sm:text-xs;
@@ -152,5 +157,26 @@ All colors MUST be HSL.
     padding-left: env(safe-area-inset-left);
     padding-right: env(safe-area-inset-right);
     padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  /* Smooth scrolling for better mobile experience */
+  .smooth-scroll {
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+  }
+
+  /* Hide scrollbar but keep functionality */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Better table scroll on mobile */
+  .table-scroll-mobile {
+    @apply overflow-x-auto -mx-2 sm:mx-0;
+    -webkit-overflow-scrolling: touch;
   }
 }
