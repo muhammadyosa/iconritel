@@ -67,6 +67,15 @@ interface DataCounts {
   fdt: number;
 }
 
+interface ColumnStatus {
+  user: { customer: boolean; service: boolean; hostname: boolean; fat: boolean; sn: boolean };
+  fat: { provinsi: boolean; fatId: boolean; hostname: boolean; tikor: boolean };
+  olt: { provinsi: boolean; idOlt: boolean; hostnameOlt: boolean; hostnameUpe: boolean; ipNmsOlt: boolean; tikorOlt: boolean };
+  upe: { hostnameOLT: boolean; hostnameUPE: boolean };
+  bng: { ipRadius: boolean; hostnameRadius: boolean; ipBng: boolean; hostnameBng: boolean; npe: boolean; vlan: boolean; hostnameOlt: boolean; upe: boolean; portUpe: boolean; kotaKabupaten: boolean };
+  fdt: { provinsi: boolean; area: boolean; idFDT: boolean; tikor: boolean };
+}
+
 // Load UPE data from IndexedDB
 async function loadUPEData(): Promise<any[]> {
   try {
@@ -117,8 +126,16 @@ export default function Settings() {
     bng: 0,
     fdt: 0,
   });
+  const [columnStatus, setColumnStatus] = useState<ColumnStatus>({
+    user: { customer: false, service: false, hostname: false, fat: false, sn: false },
+    fat: { provinsi: false, fatId: false, hostname: false, tikor: false },
+    olt: { provinsi: false, idOlt: false, hostnameOlt: false, hostnameUpe: false, ipNmsOlt: false, tikorOlt: false },
+    upe: { hostnameOLT: false, hostnameUPE: false },
+    bng: { ipRadius: false, hostnameRadius: false, ipBng: false, hostnameBng: false, npe: false, vlan: false, hostnameOlt: false, upe: false, portUpe: false, kotaKabupaten: false },
+    fdt: { provinsi: false, area: false, idFDT: false, tikor: false },
+  });
 
-  // Load data counts from IndexedDB on mount and after import/delete
+  // Load data counts and column status from IndexedDB on mount and after import/delete
   const loadDataCounts = async () => {
     try {
       const [userData, oltData, fatData, upeData, bngData, fdtData] = await Promise.all([
@@ -136,6 +153,57 @@ export default function Settings() {
         upe: upeData.length,
         bng: bngData.length,
         fdt: fdtData.length,
+      });
+
+      // Check column availability for each data type
+      const checkColumnHasData = (data: any[], key: string): boolean => {
+        return data.some((item) => item[key] && String(item[key]).trim() !== "");
+      };
+
+      setColumnStatus({
+        user: {
+          customer: checkColumnHasData(userData, "customer"),
+          service: checkColumnHasData(userData, "service"),
+          hostname: checkColumnHasData(userData, "hostname"),
+          fat: checkColumnHasData(userData, "fat"),
+          sn: checkColumnHasData(userData, "sn"),
+        },
+        fat: {
+          provinsi: checkColumnHasData(fatData, "provinsi"),
+          fatId: checkColumnHasData(fatData, "fatId"),
+          hostname: checkColumnHasData(fatData, "hostname"),
+          tikor: checkColumnHasData(fatData, "tikor"),
+        },
+        olt: {
+          provinsi: checkColumnHasData(oltData, "provinsi"),
+          idOlt: checkColumnHasData(oltData, "idOlt"),
+          hostnameOlt: checkColumnHasData(oltData, "hostnameOlt"),
+          hostnameUpe: checkColumnHasData(oltData, "hostnameUpe"),
+          ipNmsOlt: checkColumnHasData(oltData, "ipNmsOlt"),
+          tikorOlt: checkColumnHasData(oltData, "tikorOlt"),
+        },
+        upe: {
+          hostnameOLT: checkColumnHasData(upeData, "hostnameOLT"),
+          hostnameUPE: checkColumnHasData(upeData, "hostnameUPE"),
+        },
+        bng: {
+          ipRadius: checkColumnHasData(bngData, "ipRadius"),
+          hostnameRadius: checkColumnHasData(bngData, "hostnameRadius"),
+          ipBng: checkColumnHasData(bngData, "ipBng"),
+          hostnameBng: checkColumnHasData(bngData, "hostnameBng"),
+          npe: checkColumnHasData(bngData, "npe"),
+          vlan: checkColumnHasData(bngData, "vlan"),
+          hostnameOlt: checkColumnHasData(bngData, "hostnameOlt"),
+          upe: checkColumnHasData(bngData, "upe"),
+          portUpe: checkColumnHasData(bngData, "portUpe"),
+          kotaKabupaten: checkColumnHasData(bngData, "kotaKabupaten"),
+        },
+        fdt: {
+          provinsi: checkColumnHasData(fdtData, "provinsi"),
+          area: checkColumnHasData(fdtData, "area"),
+          idFDT: checkColumnHasData(fdtData, "idFDT"),
+          tikor: checkColumnHasData(fdtData, "tikor"),
+        },
       });
     } catch (error) {
       if (import.meta.env.DEV) {
@@ -566,12 +634,12 @@ export default function Settings() {
                     </Badge>
                   </div>
                   <p className="text-xs text-muted-foreground mb-2">Kolom yang didukung:</p>
-                  <ul className="text-xs text-muted-foreground list-disc list-inside space-y-0.5">
-                    <li>Customer Name / customer / nama pelanggan</li>
-                    <li>Service ID / service</li>
-                    <li>Hostname OLT / hostname</li>
-                    <li>ID FAT / fat</li>
-                    <li>SN ONT / sn</li>
+                  <ul className="text-xs text-muted-foreground list-none space-y-0.5">
+                    <li>{columnStatus.user.customer ? "✅" : "⛔"} Customer Name / customer / nama pelanggan</li>
+                    <li>{columnStatus.user.service ? "✅" : "⛔"} Service ID / service</li>
+                    <li>{columnStatus.user.hostname ? "✅" : "⛔"} Hostname OLT / hostname</li>
+                    <li>{columnStatus.user.fat ? "✅" : "⛔"} ID FAT / fat</li>
+                    <li>{columnStatus.user.sn ? "✅" : "⛔"} SN ONT / sn</li>
                   </ul>
                 </div>
                 <div className="p-4 rounded-lg border bg-card">
@@ -584,11 +652,11 @@ export default function Settings() {
                     </Badge>
                   </div>
                   <p className="text-xs text-muted-foreground mb-2">Kolom yang didukung:</p>
-                  <ul className="text-xs text-muted-foreground list-disc list-inside space-y-0.5">
-                    <li>Provinsi</li>
-                    <li>ID FAT / FAT ID</li>
-                    <li>Hostname OLT</li>
-                    <li>Tikor FAT / koordinat</li>
+                  <ul className="text-xs text-muted-foreground list-none space-y-0.5">
+                    <li>{columnStatus.fat.provinsi ? "✅" : "⛔"} Provinsi</li>
+                    <li>{columnStatus.fat.fatId ? "✅" : "⛔"} ID FAT / FAT ID</li>
+                    <li>{columnStatus.fat.hostname ? "✅" : "⛔"} Hostname OLT</li>
+                    <li>{columnStatus.fat.tikor ? "✅" : "⛔"} Tikor FAT / koordinat</li>
                   </ul>
                 </div>
                 <div className="p-4 rounded-lg border bg-card">
@@ -601,13 +669,13 @@ export default function Settings() {
                     </Badge>
                   </div>
                   <p className="text-xs text-muted-foreground mb-2">Kolom yang didukung:</p>
-                  <ul className="text-xs text-muted-foreground list-disc list-inside space-y-0.5">
-                    <li>PROVINSI</li>
-                    <li>ID OLT</li>
-                    <li>HOSTNAME OLT</li>
-                    <li>HOSTNAME UPE</li>
-                    <li>IP NMS OLT</li>
-                    <li>TIKOR OLT</li>
+                  <ul className="text-xs text-muted-foreground list-none space-y-0.5">
+                    <li>{columnStatus.olt.provinsi ? "✅" : "⛔"} PROVINSI</li>
+                    <li>{columnStatus.olt.idOlt ? "✅" : "⛔"} ID OLT</li>
+                    <li>{columnStatus.olt.hostnameOlt ? "✅" : "⛔"} HOSTNAME OLT</li>
+                    <li>{columnStatus.olt.hostnameUpe ? "✅" : "⛔"} HOSTNAME UPE</li>
+                    <li>{columnStatus.olt.ipNmsOlt ? "✅" : "⛔"} IP NMS OLT</li>
+                    <li>{columnStatus.olt.tikorOlt ? "✅" : "⛔"} TIKOR OLT</li>
                   </ul>
                 </div>
                 <div className="p-4 rounded-lg border bg-card">
@@ -620,9 +688,9 @@ export default function Settings() {
                     </Badge>
                   </div>
                   <p className="text-xs text-muted-foreground mb-2">Kolom yang didukung:</p>
-                  <ul className="text-xs text-muted-foreground list-disc list-inside space-y-0.5">
-                    <li>Hostname OLT</li>
-                    <li>Hostname UPE</li>
+                  <ul className="text-xs text-muted-foreground list-none space-y-0.5">
+                    <li>{columnStatus.upe.hostnameOLT ? "✅" : "⛔"} Hostname OLT</li>
+                    <li>{columnStatus.upe.hostnameUPE ? "✅" : "⛔"} Hostname UPE</li>
                   </ul>
                 </div>
                 <div className="p-4 rounded-lg border bg-card">
@@ -635,17 +703,17 @@ export default function Settings() {
                     </Badge>
                   </div>
                   <p className="text-xs text-muted-foreground mb-2">Kolom yang didukung:</p>
-                  <ul className="text-xs text-muted-foreground list-disc list-inside space-y-0.5">
-                    <li>IP RADIUS</li>
-                    <li>HOSTNAME RADIUS</li>
-                    <li>IP BNG</li>
-                    <li>HOSTNAME BNG</li>
-                    <li>NPE</li>
-                    <li>VLAN</li>
-                    <li>HOSTNAME OLT</li>
-                    <li>UPE</li>
-                    <li>PORT UPE</li>
-                    <li>KOTA/KABUPATEN</li>
+                  <ul className="text-xs text-muted-foreground list-none space-y-0.5">
+                    <li>{columnStatus.bng.ipRadius ? "✅" : "⛔"} IP RADIUS</li>
+                    <li>{columnStatus.bng.hostnameRadius ? "✅" : "⛔"} HOSTNAME RADIUS</li>
+                    <li>{columnStatus.bng.ipBng ? "✅" : "⛔"} IP BNG</li>
+                    <li>{columnStatus.bng.hostnameBng ? "✅" : "⛔"} HOSTNAME BNG</li>
+                    <li>{columnStatus.bng.npe ? "✅" : "⛔"} NPE</li>
+                    <li>{columnStatus.bng.vlan ? "✅" : "⛔"} VLAN</li>
+                    <li>{columnStatus.bng.hostnameOlt ? "✅" : "⛔"} HOSTNAME OLT</li>
+                    <li>{columnStatus.bng.upe ? "✅" : "⛔"} UPE</li>
+                    <li>{columnStatus.bng.portUpe ? "✅" : "⛔"} PORT UPE</li>
+                    <li>{columnStatus.bng.kotaKabupaten ? "✅" : "⛔"} KOTA/KABUPATEN</li>
                   </ul>
                 </div>
                 <div className="p-4 rounded-lg border bg-card">
@@ -658,11 +726,11 @@ export default function Settings() {
                     </Badge>
                   </div>
                   <p className="text-xs text-muted-foreground mb-2">Kolom yang didukung:</p>
-                  <ul className="text-xs text-muted-foreground list-disc list-inside space-y-0.5">
-                    <li>NAMA PROVINSI</li>
-                    <li>NAMA AREA</li>
-                    <li>ID FDT</li>
-                    <li>TIKOR</li>
+                  <ul className="text-xs text-muted-foreground list-none space-y-0.5">
+                    <li>{columnStatus.fdt.provinsi ? "✅" : "⛔"} NAMA PROVINSI</li>
+                    <li>{columnStatus.fdt.area ? "✅" : "⛔"} NAMA AREA</li>
+                    <li>{columnStatus.fdt.idFDT ? "✅" : "⛔"} ID FDT</li>
+                    <li>{columnStatus.fdt.tikor ? "✅" : "⛔"} TIKOR</li>
                   </ul>
                 </div>
               </div>
