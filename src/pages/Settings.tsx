@@ -627,7 +627,7 @@ export default function Settings() {
                 <div className="p-4 rounded-lg border bg-card">
                   <div className="flex items-center justify-between mb-2">
                     <h4 className="font-medium flex items-center gap-2">
-                      {dataCounts.user > 0 ? "✅" : "⛔"} 📋 List User
+                      {dataCounts.user > 0 ? "♻️" : "⚠️"} 📋 List User
                     </h4>
                     <Badge variant={dataCounts.user > 0 ? "default" : "secondary"} className={dataCounts.user > 0 ? "bg-blue-500" : ""}>
                       {dataCounts.user.toLocaleString()} data
@@ -635,17 +635,17 @@ export default function Settings() {
                   </div>
                   <p className="text-xs text-muted-foreground mb-2">Kolom yang didukung:</p>
                   <ul className="text-xs text-muted-foreground list-none space-y-0.5">
-                    <li>{columnStatus.user.customer ? "✅" : "⛔"} Customer Name / customer / nama pelanggan</li>
-                    <li>{columnStatus.user.service ? "✅" : "⛔"} Service ID / service</li>
-                    <li>{columnStatus.user.hostname ? "✅" : "⛔"} Hostname OLT / hostname</li>
-                    <li>{columnStatus.user.fat ? "✅" : "⛔"} ID FAT / fat</li>
-                    <li>{columnStatus.user.sn ? "✅" : "⛔"} SN ONT / sn</li>
+                    <li>{columnStatus.user.customer ? "♻️" : "⚠️"} Customer Name / customer / nama pelanggan</li>
+                    <li>{columnStatus.user.service ? "♻️" : "⚠️"} Service ID / service</li>
+                    <li>{columnStatus.user.hostname ? "♻️" : "⚠️"} Hostname OLT / hostname</li>
+                    <li>{columnStatus.user.fat ? "♻️" : "⚠️"} ID FAT / fat</li>
+                    <li>{columnStatus.user.sn ? "♻️" : "⚠️"} SN ONT / sn</li>
                   </ul>
                 </div>
                 <div className="p-4 rounded-lg border bg-card">
                   <div className="flex items-center justify-between mb-2">
                     <h4 className="font-medium flex items-center gap-2">
-                      {dataCounts.fat > 0 ? "✅" : "⛔"} 📍 List FAT
+                      {dataCounts.fat > 0 ? "♻️" : "⚠️"} 📍 List FAT
                     </h4>
                     <Badge variant={dataCounts.fat > 0 ? "default" : "secondary"} className={dataCounts.fat > 0 ? "bg-green-500" : ""}>
                       {dataCounts.fat.toLocaleString()} data
@@ -653,16 +653,16 @@ export default function Settings() {
                   </div>
                   <p className="text-xs text-muted-foreground mb-2">Kolom yang didukung:</p>
                   <ul className="text-xs text-muted-foreground list-none space-y-0.5">
-                    <li>{columnStatus.fat.provinsi ? "✅" : "⛔"} Provinsi</li>
-                    <li>{columnStatus.fat.fatId ? "✅" : "⛔"} ID FAT / FAT ID</li>
-                    <li>{columnStatus.fat.hostname ? "✅" : "⛔"} Hostname OLT</li>
-                    <li>{columnStatus.fat.tikor ? "✅" : "⛔"} Tikor FAT / koordinat</li>
+                    <li>{columnStatus.fat.provinsi ? "♻️" : "⚠️"} Provinsi</li>
+                    <li>{columnStatus.fat.fatId ? "♻️" : "⚠️"} ID FAT / FAT ID</li>
+                    <li>{columnStatus.fat.hostname ? "♻️" : "⚠️"} Hostname OLT</li>
+                    <li>{columnStatus.fat.tikor ? "♻️" : "⚠️"} Tikor FAT / koordinat</li>
                   </ul>
                 </div>
                 <div className="p-4 rounded-lg border bg-card">
                   <div className="flex items-center justify-between mb-2">
                     <h4 className="font-medium flex items-center gap-2">
-                      {dataCounts.olt > 0 ? "✅" : "⛔"} 📟 List OLT
+                      {dataCounts.olt > 0 ? "♻️" : "⚠️"} 📟 List OLT
                     </h4>
                     <Badge variant={dataCounts.olt > 0 ? "default" : "secondary"} className={dataCounts.olt > 0 ? "bg-cyan-500" : ""}>
                       {dataCounts.olt.toLocaleString()} data
@@ -670,18 +670,18 @@ export default function Settings() {
                   </div>
                   <p className="text-xs text-muted-foreground mb-2">Kolom yang didukung:</p>
                   <ul className="text-xs text-muted-foreground list-none space-y-0.5">
-                    <li>{columnStatus.olt.provinsi ? "✅" : "⛔"} PROVINSI</li>
-                    <li>{columnStatus.olt.idOlt ? "✅" : "⛔"} ID OLT</li>
-                    <li>{columnStatus.olt.hostnameOlt ? "✅" : "⛔"} HOSTNAME OLT</li>
-                    <li>{columnStatus.olt.hostnameUpe ? "✅" : "⛔"} HOSTNAME UPE</li>
-                    <li>{columnStatus.olt.ipNmsOlt ? "✅" : "⛔"} IP NMS OLT</li>
-                    <li>{columnStatus.olt.tikorOlt ? "✅" : "⛔"} TIKOR OLT</li>
+                    <li>{columnStatus.olt.provinsi ? "♻️" : "⚠️"} PROVINSI</li>
+                    <li>{columnStatus.olt.idOlt ? "♻️" : "⚠️"} ID OLT</li>
+                    <li>{columnStatus.olt.hostnameOlt ? "♻️" : "⚠️"} HOSTNAME OLT</li>
+                    <li>{columnStatus.olt.hostnameUpe ? "♻️" : "⚠️"} HOSTNAME UPE</li>
+                    <li>{columnStatus.olt.ipNmsOlt ? "♻️" : "⚠️"} IP NMS OLT</li>
+                    <li>{columnStatus.olt.tikorOlt ? "♻️" : "⚠️"} TIKOR OLT</li>
                   </ul>
                 </div>
                 <div className="p-4 rounded-lg border bg-card">
                   <div className="flex items-center justify-between mb-2">
                     <h4 className="font-medium flex items-center gap-2">
-                      {dataCounts.upe > 0 ? "✅" : "⛔"} 🔗 List UPE
+                      {dataCounts.upe > 0 ? "♻️" : "⚠️"} 🔗 List UPE
                     </h4>
                     <Badge variant={dataCounts.upe > 0 ? "default" : "secondary"} className={dataCounts.upe > 0 ? "bg-purple-500" : ""}>
                       {dataCounts.upe.toLocaleString()} data
@@ -689,14 +689,14 @@ export default function Settings() {
                   </div>
                   <p className="text-xs text-muted-foreground mb-2">Kolom yang didukung:</p>
                   <ul className="text-xs text-muted-foreground list-none space-y-0.5">
-                    <li>{columnStatus.upe.hostnameOLT ? "✅" : "⛔"} Hostname OLT</li>
-                    <li>{columnStatus.upe.hostnameUPE ? "✅" : "⛔"} Hostname UPE</li>
+                    <li>{columnStatus.upe.hostnameOLT ? "♻️" : "⚠️"} Hostname OLT</li>
+                    <li>{columnStatus.upe.hostnameUPE ? "♻️" : "⚠️"} Hostname UPE</li>
                   </ul>
                 </div>
                 <div className="p-4 rounded-lg border bg-card">
                   <div className="flex items-center justify-between mb-2">
                     <h4 className="font-medium flex items-center gap-2">
-                      {dataCounts.bng > 0 ? "✅" : "⛔"} 🛰 List BNG
+                      {dataCounts.bng > 0 ? "♻️" : "⚠️"} 🛰 List BNG
                     </h4>
                     <Badge variant={dataCounts.bng > 0 ? "default" : "secondary"} className={dataCounts.bng > 0 ? "bg-orange-500" : ""}>
                       {dataCounts.bng.toLocaleString()} data
@@ -704,22 +704,22 @@ export default function Settings() {
                   </div>
                   <p className="text-xs text-muted-foreground mb-2">Kolom yang didukung:</p>
                   <ul className="text-xs text-muted-foreground list-none space-y-0.5">
-                    <li>{columnStatus.bng.ipRadius ? "✅" : "⛔"} IP RADIUS</li>
-                    <li>{columnStatus.bng.hostnameRadius ? "✅" : "⛔"} HOSTNAME RADIUS</li>
-                    <li>{columnStatus.bng.ipBng ? "✅" : "⛔"} IP BNG</li>
-                    <li>{columnStatus.bng.hostnameBng ? "✅" : "⛔"} HOSTNAME BNG</li>
-                    <li>{columnStatus.bng.npe ? "✅" : "⛔"} NPE</li>
-                    <li>{columnStatus.bng.vlan ? "✅" : "⛔"} VLAN</li>
-                    <li>{columnStatus.bng.hostnameOlt ? "✅" : "⛔"} HOSTNAME OLT</li>
-                    <li>{columnStatus.bng.upe ? "✅" : "⛔"} UPE</li>
-                    <li>{columnStatus.bng.portUpe ? "✅" : "⛔"} PORT UPE</li>
-                    <li>{columnStatus.bng.kotaKabupaten ? "✅" : "⛔"} KOTA/KABUPATEN</li>
+                    <li>{columnStatus.bng.ipRadius ? "♻️" : "⚠️"} IP RADIUS</li>
+                    <li>{columnStatus.bng.hostnameRadius ? "♻️" : "⚠️"} HOSTNAME RADIUS</li>
+                    <li>{columnStatus.bng.ipBng ? "♻️" : "⚠️"} IP BNG</li>
+                    <li>{columnStatus.bng.hostnameBng ? "♻️" : "⚠️"} HOSTNAME BNG</li>
+                    <li>{columnStatus.bng.npe ? "♻️" : "⚠️"} NPE</li>
+                    <li>{columnStatus.bng.vlan ? "♻️" : "⚠️"} VLAN</li>
+                    <li>{columnStatus.bng.hostnameOlt ? "♻️" : "⚠️"} HOSTNAME OLT</li>
+                    <li>{columnStatus.bng.upe ? "♻️" : "⚠️"} UPE</li>
+                    <li>{columnStatus.bng.portUpe ? "♻️" : "⚠️"} PORT UPE</li>
+                    <li>{columnStatus.bng.kotaKabupaten ? "♻️" : "⚠️"} KOTA/KABUPATEN</li>
                   </ul>
                 </div>
                 <div className="p-4 rounded-lg border bg-card">
                   <div className="flex items-center justify-between mb-2">
                     <h4 className="font-medium flex items-center gap-2">
-                      {dataCounts.fdt > 0 ? "✅" : "⛔"} 📦 List FDT
+                      {dataCounts.fdt > 0 ? "♻️" : "⚠️"} 📦 List FDT
                     </h4>
                     <Badge variant={dataCounts.fdt > 0 ? "default" : "secondary"} className={dataCounts.fdt > 0 ? "bg-amber-500" : ""}>
                       {dataCounts.fdt.toLocaleString()} data
@@ -727,10 +727,10 @@ export default function Settings() {
                   </div>
                   <p className="text-xs text-muted-foreground mb-2">Kolom yang didukung:</p>
                   <ul className="text-xs text-muted-foreground list-none space-y-0.5">
-                    <li>{columnStatus.fdt.provinsi ? "✅" : "⛔"} NAMA PROVINSI</li>
-                    <li>{columnStatus.fdt.area ? "✅" : "⛔"} NAMA AREA</li>
-                    <li>{columnStatus.fdt.idFDT ? "✅" : "⛔"} ID FDT</li>
-                    <li>{columnStatus.fdt.tikor ? "✅" : "⛔"} TIKOR</li>
+                    <li>{columnStatus.fdt.provinsi ? "♻️" : "⚠️"} NAMA PROVINSI</li>
+                    <li>{columnStatus.fdt.area ? "♻️" : "⚠️"} NAMA AREA</li>
+                    <li>{columnStatus.fdt.idFDT ? "♻️" : "⚠️"} ID FDT</li>
+                    <li>{columnStatus.fdt.tikor ? "♻️" : "⚠️"} TIKOR</li>
                   </ul>
                 </div>
               </div>
