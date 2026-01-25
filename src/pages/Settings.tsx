@@ -23,7 +23,7 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { importMultiSheetExcel, getExcelSheets, ImportResult } from "@/lib/multiSheetImport";
-import { saveExcelData, saveOLTData, saveFATData, openDB, clearAllData } from "@/lib/indexedDB";
+import { saveExcelData, saveOLTData, saveFATData, openDB, clearAllData, saveFDTData } from "@/lib/indexedDB";
 
 const UPE_STORE_NAME = "upe_data";
 const BNG_STORE_NAME = "bng_data";
@@ -126,13 +126,18 @@ export default function Settings() {
 
       if (result.bngRecords.length > 0) {
         await saveBNGData(result.bngRecords);
+        setImportProgress(90);
+      }
+
+      if (result.fdtRecords.length > 0) {
+        await saveFDTData(result.fdtRecords);
         setImportProgress(95);
       }
 
       setImportProgress(100);
       setImportResult(result);
 
-      const totalRecords = result.summary.user + result.summary.olt + result.summary.fat + result.summary.upe + result.summary.bng;
+      const totalRecords = result.summary.user + result.summary.olt + result.summary.fat + result.summary.upe + result.summary.bng + result.summary.fdt;
       toast.success(`Berhasil import ${totalRecords.toLocaleString()} data dari ${result.summary.processedSheets.length} sheet`);
     } catch (error) {
       toast.error("Gagal mengimport data");
@@ -156,6 +161,8 @@ export default function Settings() {
         return { label: "List UPE", color: "bg-purple-500" };
       case "bng":
         return { label: "List BNG", color: "bg-orange-500" };
+      case "fdt":
+        return { label: "List FDT", color: "bg-amber-500" };
       default:
         return { label: "Tidak Dikenali", color: "bg-muted" };
     }
@@ -332,6 +339,7 @@ export default function Settings() {
                                 {sheet.type === "fat" && "→ List FAT"}
                                 {sheet.type === "upe" && "→ List UPE"}
                                 {sheet.type === "bng" && "→ List BNG"}
+                                {sheet.type === "fdt" && "→ List FDT"}
                               </TableCell>
                             </TableRow>
                           );
@@ -381,7 +389,7 @@ export default function Settings() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
                   <div className="bg-blue-50 dark:bg-blue-950 p-4 rounded-lg text-center">
                     <div className="text-2xl font-bold text-blue-600">{importResult.summary.user.toLocaleString()}</div>
                     <div className="text-sm text-muted-foreground">List User → Ticket</div>
@@ -402,6 +410,10 @@ export default function Settings() {
                     <div className="text-2xl font-bold text-orange-600">{importResult.summary.bng.toLocaleString()}</div>
                     <div className="text-sm text-muted-foreground">List BNG → Data BNG</div>
                   </div>
+                  <div className="bg-amber-50 dark:bg-amber-950 p-4 rounded-lg text-center">
+                    <div className="text-2xl font-bold text-amber-600">{importResult.summary.fdt.toLocaleString()}</div>
+                    <div className="text-sm text-muted-foreground">List FDT → Data FDT</div>
+                  </div>
                 </div>
 
                 <div className="p-4 bg-green-50 dark:bg-green-950 rounded-lg border border-green-200 dark:border-green-800">
@@ -414,6 +426,7 @@ export default function Settings() {
                     {importResult.summary.fat > 0 && <li>• List FAT - {importResult.summary.fat.toLocaleString()} data FAT siap digunakan</li>}
                     {importResult.summary.upe > 0 && <li>• List UPE - {importResult.summary.upe.toLocaleString()} data UPE siap digunakan</li>}
                     {importResult.summary.bng > 0 && <li>• List BNG - {importResult.summary.bng.toLocaleString()} data BNG siap digunakan</li>}
+                    {importResult.summary.fdt > 0 && <li>• List FDT - {importResult.summary.fdt.toLocaleString()} data FDT siap digunakan</li>}
                   </ul>
                 </div>
 
@@ -516,6 +529,16 @@ export default function Settings() {
                     <li>KOTA/KABUPATEN</li>
                   </ul>
                 </div>
+                <div>
+                  <h4 className="font-medium mb-2">📦 List FDT (untuk Data FDT)</h4>
+                  <p className="text-sm text-muted-foreground mb-2">Kolom yang didukung:</p>
+                  <ul className="text-sm text-muted-foreground list-disc list-inside space-y-1">
+                    <li>NAMA PROVINSI</li>
+                    <li>NAMA AREA</li>
+                    <li>ID FDT</li>
+                    <li>TIKOR</li>
+                  </ul>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -584,8 +607,10 @@ export default function Settings() {
               <ul className="list-disc list-inside text-sm space-y-1">
                 <li>📋 Data Ticket Management (List User)</li>
                 <li>📍 Data List FAT</li>
+                <li>📟 Data List OLT</li>
                 <li>🔗 Data List UPE</li>
                 <li>🌐 Data List BNG</li>
+                <li>📦 Data List FDT</li>
                 <li>📝 Data Report (Shift Report & Ticket Updates)</li>
               </ul>
               <p className="font-medium text-destructive">Tindakan ini tidak dapat dibatalkan!</p>

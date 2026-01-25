@@ -1,7 +1,8 @@
 export interface FDT {
   id: string;
+  provinsi: string;
+  area: string;
   idFDT: string;
-  hostnameOLT: string;
   tikor: string;
   createdAt: string;
 }
