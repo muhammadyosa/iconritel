@@ -13,6 +13,7 @@ import Dashboard from "./pages/Dashboard";
 import TicketManagement from "./pages/TicketManagement";
 import Teams from "./pages/Teams";
 import FATList from "./pages/FATList";
+import FDTList from "./pages/FDTList";
 import OLTDeviceList from "./pages/OLTDeviceList";
 import UPEList from "./pages/UPEList";
 import BNGList from "./pages/BNGList";
@@ -33,6 +34,7 @@ function AnimatedRoutes() {
         <Route path="/tickets" element={<PageTransition><TicketManagement /></PageTransition>} />
         <Route path="/teams" element={<PageTransition><Teams /></PageTransition>} />
         <Route path="/fat" element={<PageTransition><FATList /></PageTransition>} />
+        <Route path="/fdt" element={<PageTransition><FDTList /></PageTransition>} />
         <Route path="/olt" element={<PageTransition><OLTDeviceList /></PageTransition>} />
         <Route path="/upe" element={<PageTransition><UPEList /></PageTransition>} />
         <Route path="/bng" element={<PageTransition><BNGList /></PageTransition>} />

@@ -19,6 +19,7 @@ const menuItems = [
   { title: "Ticket Management", icon: null, path: "/tickets", emoji: "🎫" },
   { title: "List Team", icon: null, path: "/teams", emoji: "👥" },
   { title: "List FAT", icon: null, path: "/fat", emoji: "📍" },
+  { title: "List FDT", icon: null, path: "/fdt", emoji: "📦" },
   { title: "List OLT", icon: null, path: "/olt", emoji: "📟" },
   { title: "List UPE", icon: null, path: "/upe", emoji: "🔗" },
   { title: "List BNG", icon: null, path: "/bng", emoji: "🛰" },

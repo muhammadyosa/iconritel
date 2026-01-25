@@ -1,14 +1,16 @@
 import { ExcelRecord } from "@/types/ticket";
 import { OLT } from "@/types/olt";
 import { FAT } from "@/types/fat";
+import { FDT } from "@/types/fdt";
 
 const DB_NAME = "NOC_Database";
 const STORE_NAME = "excel_data";
 const OLT_STORE_NAME = "olt_data";
 const FAT_STORE_NAME = "fat_data";
+const FDT_STORE_NAME = "fdt_data";
 const UPE_STORE_NAME = "upe_data";
 const BNG_STORE_NAME = "bng_data";
-const DB_VERSION = 5;
+const DB_VERSION = 6;
 
 let dbInstance: IDBDatabase | null = null;
 
@@ -39,6 +41,9 @@ export function openDB(): Promise<IDBDatabase> {
       }
       if (!db.objectStoreNames.contains(FAT_STORE_NAME)) {
         db.createObjectStore(FAT_STORE_NAME);
+      }
+      if (!db.objectStoreNames.contains(FDT_STORE_NAME)) {
+        db.createObjectStore(FDT_STORE_NAME);
       }
       if (!db.objectStoreNames.contains(UPE_STORE_NAME)) {
         db.createObjectStore(UPE_STORE_NAME);
@@ -187,6 +192,52 @@ export async function clearFATData(): Promise<void> {
   });
 }
 
+// FDT Data functions
+export async function saveFDTData(data: FDT[]): Promise<void> {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction([FDT_STORE_NAME], "readwrite");
+    const store = transaction.objectStore(FDT_STORE_NAME);
+    const request = store.put(data, "fdt_records");
+
+    request.onsuccess = () => resolve();
+    request.onerror = () => reject(request.error);
+  });
+}
+
+export async function loadFDTData(): Promise<FDT[]> {
+  try {
+    const db = await openDB();
+    return new Promise((resolve, reject) => {
+      const transaction = db.transaction([FDT_STORE_NAME], "readonly");
+      const store = transaction.objectStore(FDT_STORE_NAME);
+      const request = store.get("fdt_records");
+
+      request.onsuccess = () => {
+        resolve(request.result || []);
+      };
+      request.onerror = () => reject(request.error);
+    });
+  } catch (error) {
+    if (import.meta.env.DEV) {
+      console.error("Error loading FDT data from IndexedDB:", error);
+    }
+    return [];
+  }
+}
+
+export async function clearFDTData(): Promise<void> {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction([FDT_STORE_NAME], "readwrite");
+    const store = transaction.objectStore(FDT_STORE_NAME);
+    const request = store.delete("fdt_records");
+
+    request.onsuccess = () => resolve();
+    request.onerror = () => reject(request.error);
+  });
+}
+
 // Clear all data from all stores including localStorage
 export async function clearAllData(): Promise<void> {
   const db = await openDB();
@@ -206,6 +257,7 @@ export async function clearAllData(): Promise<void> {
     clearStore(STORE_NAME, "excel_records"),
     clearStore(OLT_STORE_NAME, "olt_records"),
     clearStore(FAT_STORE_NAME, "fat_records"),
+    clearStore(FDT_STORE_NAME, "fdt_records"),
     clearStore(UPE_STORE_NAME, "upe_records"),
     clearStore(BNG_STORE_NAME, "bng_records"),
   ]);
