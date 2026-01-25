@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Settings as SettingsIcon, Info, FileSpreadsheet, FileUp, Check, X, AlertCircle, RefreshCw, Database, Trash2 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -23,7 +23,7 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { importMultiSheetExcel, getExcelSheets, ImportResult } from "@/lib/multiSheetImport";
-import { saveExcelData, saveOLTData, saveFATData, openDB, clearAllData, saveFDTData } from "@/lib/indexedDB";
+import { saveExcelData, saveOLTData, saveFATData, openDB, clearAllData, saveFDTData, loadExcelData, loadOLTData, loadFATData, loadFDTData } from "@/lib/indexedDB";
 
 const UPE_STORE_NAME = "upe_data";
 const BNG_STORE_NAME = "bng_data";
@@ -58,6 +58,47 @@ interface SheetPreview {
   type: string | null;
 }
 
+interface DataCounts {
+  user: number;
+  olt: number;
+  fat: number;
+  upe: number;
+  bng: number;
+  fdt: number;
+}
+
+// Load UPE data from IndexedDB
+async function loadUPEData(): Promise<any[]> {
+  try {
+    const db = await openDB();
+    return new Promise((resolve, reject) => {
+      const transaction = db.transaction([UPE_STORE_NAME], "readonly");
+      const store = transaction.objectStore(UPE_STORE_NAME);
+      const request = store.get("upe_records");
+      request.onsuccess = () => resolve(request.result || []);
+      request.onerror = () => reject(request.error);
+    });
+  } catch {
+    return [];
+  }
+}
+
+// Load BNG data from IndexedDB
+async function loadBNGData(): Promise<any[]> {
+  try {
+    const db = await openDB();
+    return new Promise((resolve, reject) => {
+      const transaction = db.transaction([BNG_STORE_NAME], "readonly");
+      const store = transaction.objectStore(BNG_STORE_NAME);
+      const request = store.get("bng_records");
+      request.onsuccess = () => resolve(request.result || []);
+      request.onerror = () => reject(request.error);
+    });
+  } catch {
+    return [];
+  }
+}
+
 export default function Settings() {
   const [file, setFile] = useState<File | null>(null);
   const [sheets, setSheets] = useState<SheetPreview[]>([]);
@@ -68,6 +109,44 @@ export default function Settings() {
   const [showDeleteAllDialog, setShowDeleteAllDialog] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [importProgress, setImportProgress] = useState(0);
+  const [dataCounts, setDataCounts] = useState<DataCounts>({
+    user: 0,
+    olt: 0,
+    fat: 0,
+    upe: 0,
+    bng: 0,
+    fdt: 0,
+  });
+
+  // Load data counts from IndexedDB on mount and after import/delete
+  const loadDataCounts = async () => {
+    try {
+      const [userData, oltData, fatData, upeData, bngData, fdtData] = await Promise.all([
+        loadExcelData(),
+        loadOLTData(),
+        loadFATData(),
+        loadUPEData(),
+        loadBNGData(),
+        loadFDTData(),
+      ]);
+      setDataCounts({
+        user: userData.length,
+        olt: oltData.length,
+        fat: fatData.length,
+        upe: upeData.length,
+        bng: bngData.length,
+        fdt: fdtData.length,
+      });
+    } catch (error) {
+      if (import.meta.env.DEV) {
+        console.error("Error loading data counts:", error);
+      }
+    }
+  };
+
+  useEffect(() => {
+    loadDataCounts();
+  }, []);
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
@@ -137,6 +216,9 @@ export default function Settings() {
       setImportProgress(100);
       setImportResult(result);
 
+      // Refresh data counts after import
+      await loadDataCounts();
+
       const totalRecords = result.summary.user + result.summary.olt + result.summary.fat + result.summary.upe + result.summary.bng + result.summary.fdt;
       toast.success(`Berhasil import ${totalRecords.toLocaleString()} data dari ${result.summary.processedSheets.length} sheet`);
     } catch (error) {
@@ -182,6 +264,8 @@ export default function Settings() {
       toast.success("Semua data berhasil dihapus");
       setShowDeleteAllDialog(false);
       resetImport();
+      // Refresh data counts after delete
+      await loadDataCounts();
     } catch (error) {
       toast.error("Gagal menghapus data");
       if (import.meta.env.DEV) {
@@ -472,10 +556,17 @@ export default function Settings() {
             </CardHeader>
             <CardContent>
               <div className="grid md:grid-cols-2 gap-6">
-                <div>
-                  <h4 className="font-medium mb-2">📋 List User (untuk Ticket Management)</h4>
-                  <p className="text-sm text-muted-foreground mb-2">Kolom yang didukung:</p>
-                  <ul className="text-sm text-muted-foreground list-disc list-inside space-y-1">
+                <div className="p-4 rounded-lg border bg-card">
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="font-medium flex items-center gap-2">
+                      {dataCounts.user > 0 ? "✅" : "⛔"} 📋 List User
+                    </h4>
+                    <Badge variant={dataCounts.user > 0 ? "default" : "secondary"} className={dataCounts.user > 0 ? "bg-blue-500" : ""}>
+                      {dataCounts.user.toLocaleString()} data
+                    </Badge>
+                  </div>
+                  <p className="text-xs text-muted-foreground mb-2">Kolom yang didukung:</p>
+                  <ul className="text-xs text-muted-foreground list-disc list-inside space-y-0.5">
                     <li>Customer Name / customer / nama pelanggan</li>
                     <li>Service ID / service</li>
                     <li>Hostname OLT / hostname</li>
@@ -483,20 +574,34 @@ export default function Settings() {
                     <li>SN ONT / sn</li>
                   </ul>
                 </div>
-                <div>
-                  <h4 className="font-medium mb-2">📍 List FAT (untuk Data FAT)</h4>
-                  <p className="text-sm text-muted-foreground mb-2">Kolom yang didukung:</p>
-                  <ul className="text-sm text-muted-foreground list-disc list-inside space-y-1">
+                <div className="p-4 rounded-lg border bg-card">
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="font-medium flex items-center gap-2">
+                      {dataCounts.fat > 0 ? "✅" : "⛔"} 📍 List FAT
+                    </h4>
+                    <Badge variant={dataCounts.fat > 0 ? "default" : "secondary"} className={dataCounts.fat > 0 ? "bg-green-500" : ""}>
+                      {dataCounts.fat.toLocaleString()} data
+                    </Badge>
+                  </div>
+                  <p className="text-xs text-muted-foreground mb-2">Kolom yang didukung:</p>
+                  <ul className="text-xs text-muted-foreground list-disc list-inside space-y-0.5">
                     <li>Provinsi</li>
                     <li>ID FAT / FAT ID</li>
                     <li>Hostname OLT</li>
                     <li>Tikor FAT / koordinat</li>
                   </ul>
                 </div>
-                <div>
-                  <h4 className="font-medium mb-2">📟 List OLT (untuk Data OLT)</h4>
-                  <p className="text-sm text-muted-foreground mb-2">Kolom yang didukung:</p>
-                  <ul className="text-sm text-muted-foreground list-disc list-inside space-y-1">
+                <div className="p-4 rounded-lg border bg-card">
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="font-medium flex items-center gap-2">
+                      {dataCounts.olt > 0 ? "✅" : "⛔"} 📟 List OLT
+                    </h4>
+                    <Badge variant={dataCounts.olt > 0 ? "default" : "secondary"} className={dataCounts.olt > 0 ? "bg-cyan-500" : ""}>
+                      {dataCounts.olt.toLocaleString()} data
+                    </Badge>
+                  </div>
+                  <p className="text-xs text-muted-foreground mb-2">Kolom yang didukung:</p>
+                  <ul className="text-xs text-muted-foreground list-disc list-inside space-y-0.5">
                     <li>PROVINSI</li>
                     <li>ID OLT</li>
                     <li>HOSTNAME OLT</li>
@@ -505,18 +610,32 @@ export default function Settings() {
                     <li>TIKOR OLT</li>
                   </ul>
                 </div>
-                <div>
-                  <h4 className="font-medium mb-2">🔗 List UPE (untuk Data UPE)</h4>
-                  <p className="text-sm text-muted-foreground mb-2">Kolom yang didukung:</p>
-                  <ul className="text-sm text-muted-foreground list-disc list-inside space-y-1">
+                <div className="p-4 rounded-lg border bg-card">
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="font-medium flex items-center gap-2">
+                      {dataCounts.upe > 0 ? "✅" : "⛔"} 🔗 List UPE
+                    </h4>
+                    <Badge variant={dataCounts.upe > 0 ? "default" : "secondary"} className={dataCounts.upe > 0 ? "bg-purple-500" : ""}>
+                      {dataCounts.upe.toLocaleString()} data
+                    </Badge>
+                  </div>
+                  <p className="text-xs text-muted-foreground mb-2">Kolom yang didukung:</p>
+                  <ul className="text-xs text-muted-foreground list-disc list-inside space-y-0.5">
                     <li>Hostname OLT</li>
                     <li>Hostname UPE</li>
                   </ul>
                 </div>
-                <div>
-                  <h4 className="font-medium mb-2">🌐 List BNG (untuk Data BNG)</h4>
-                  <p className="text-sm text-muted-foreground mb-2">Kolom yang didukung:</p>
-                  <ul className="text-sm text-muted-foreground list-disc list-inside space-y-1">
+                <div className="p-4 rounded-lg border bg-card">
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="font-medium flex items-center gap-2">
+                      {dataCounts.bng > 0 ? "✅" : "⛔"} 🛰 List BNG
+                    </h4>
+                    <Badge variant={dataCounts.bng > 0 ? "default" : "secondary"} className={dataCounts.bng > 0 ? "bg-orange-500" : ""}>
+                      {dataCounts.bng.toLocaleString()} data
+                    </Badge>
+                  </div>
+                  <p className="text-xs text-muted-foreground mb-2">Kolom yang didukung:</p>
+                  <ul className="text-xs text-muted-foreground list-disc list-inside space-y-0.5">
                     <li>IP RADIUS</li>
                     <li>HOSTNAME RADIUS</li>
                     <li>IP BNG</li>
@@ -529,10 +648,17 @@ export default function Settings() {
                     <li>KOTA/KABUPATEN</li>
                   </ul>
                 </div>
-                <div>
-                  <h4 className="font-medium mb-2">📦 List FDT (untuk Data FDT)</h4>
-                  <p className="text-sm text-muted-foreground mb-2">Kolom yang didukung:</p>
-                  <ul className="text-sm text-muted-foreground list-disc list-inside space-y-1">
+                <div className="p-4 rounded-lg border bg-card">
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="font-medium flex items-center gap-2">
+                      {dataCounts.fdt > 0 ? "✅" : "⛔"} 📦 List FDT
+                    </h4>
+                    <Badge variant={dataCounts.fdt > 0 ? "default" : "secondary"} className={dataCounts.fdt > 0 ? "bg-amber-500" : ""}>
+                      {dataCounts.fdt.toLocaleString()} data
+                    </Badge>
+                  </div>
+                  <p className="text-xs text-muted-foreground mb-2">Kolom yang didukung:</p>
+                  <ul className="text-xs text-muted-foreground list-disc list-inside space-y-0.5">
                     <li>NAMA PROVINSI</li>
                     <li>NAMA AREA</li>
                     <li>ID FDT</li>
