@@ -635,11 +635,11 @@ export default function Settings() {
                   </div>
                   <p className="text-xs text-muted-foreground mb-2">Kolom yang didukung:</p>
                   <ul className="text-xs text-muted-foreground list-none space-y-0.5">
-                    <li>{columnStatus.user.customer ? "♻️" : "⚠️"} Customer Name / customer / nama pelanggan</li>
-                    <li>{columnStatus.user.service ? "♻️" : "⚠️"} Service ID / service</li>
-                    <li>{columnStatus.user.hostname ? "♻️" : "⚠️"} Hostname OLT / hostname</li>
-                    <li>{columnStatus.user.fat ? "♻️" : "⚠️"} ID FAT / fat</li>
-                    <li>{columnStatus.user.sn ? "♻️" : "⚠️"} SN ONT / sn</li>
+                    <li>{columnStatus.user.customer ? "✅" : "⛔"} Customer Name / customer / nama pelanggan</li>
+                    <li>{columnStatus.user.service ? "✅" : "⛔"} Service ID / service</li>
+                    <li>{columnStatus.user.hostname ? "✅" : "⛔"} Hostname OLT / hostname</li>
+                    <li>{columnStatus.user.fat ? "✅" : "⛔"} ID FAT / fat</li>
+                    <li>{columnStatus.user.sn ? "✅" : "⛔"} SN ONT / sn</li>
                   </ul>
                 </div>
                 <div className="p-4 rounded-lg border bg-card">
@@ -653,10 +653,10 @@ export default function Settings() {
                   </div>
                   <p className="text-xs text-muted-foreground mb-2">Kolom yang didukung:</p>
                   <ul className="text-xs text-muted-foreground list-none space-y-0.5">
-                    <li>{columnStatus.fat.provinsi ? "♻️" : "⚠️"} Provinsi</li>
-                    <li>{columnStatus.fat.fatId ? "♻️" : "⚠️"} ID FAT / FAT ID</li>
-                    <li>{columnStatus.fat.hostname ? "♻️" : "⚠️"} Hostname OLT</li>
-                    <li>{columnStatus.fat.tikor ? "♻️" : "⚠️"} Tikor FAT / koordinat</li>
+                    <li>{columnStatus.fat.provinsi ? "✅" : "⛔"} Provinsi</li>
+                    <li>{columnStatus.fat.fatId ? "✅" : "⛔"} ID FAT / FAT ID</li>
+                    <li>{columnStatus.fat.hostname ? "✅" : "⛔"} Hostname OLT</li>
+                    <li>{columnStatus.fat.tikor ? "✅" : "⛔"} Tikor FAT / koordinat</li>
                   </ul>
                 </div>
                 <div className="p-4 rounded-lg border bg-card">
@@ -670,12 +670,12 @@ export default function Settings() {
                   </div>
                   <p className="text-xs text-muted-foreground mb-2">Kolom yang didukung:</p>
                   <ul className="text-xs text-muted-foreground list-none space-y-0.5">
-                    <li>{columnStatus.olt.provinsi ? "♻️" : "⚠️"} PROVINSI</li>
-                    <li>{columnStatus.olt.idOlt ? "♻️" : "⚠️"} ID OLT</li>
-                    <li>{columnStatus.olt.hostnameOlt ? "♻️" : "⚠️"} HOSTNAME OLT</li>
-                    <li>{columnStatus.olt.hostnameUpe ? "♻️" : "⚠️"} HOSTNAME UPE</li>
-                    <li>{columnStatus.olt.ipNmsOlt ? "♻️" : "⚠️"} IP NMS OLT</li>
-                    <li>{columnStatus.olt.tikorOlt ? "♻️" : "⚠️"} TIKOR OLT</li>
+                    <li>{columnStatus.olt.provinsi ? "✅" : "⛔"} PROVINSI</li>
+                    <li>{columnStatus.olt.idOlt ? "✅" : "⛔"} ID OLT</li>
+                    <li>{columnStatus.olt.hostnameOlt ? "✅" : "⛔"} HOSTNAME OLT</li>
+                    <li>{columnStatus.olt.hostnameUpe ? "✅" : "⛔"} HOSTNAME UPE</li>
+                    <li>{columnStatus.olt.ipNmsOlt ? "✅" : "⛔"} IP NMS OLT</li>
+                    <li>{columnStatus.olt.tikorOlt ? "✅" : "⛔"} TIKOR OLT</li>
                   </ul>
                 </div>
                 <div className="p-4 rounded-lg border bg-card">
@@ -689,8 +689,8 @@ export default function Settings() {
                   </div>
                   <p className="text-xs text-muted-foreground mb-2">Kolom yang didukung:</p>
                   <ul className="text-xs text-muted-foreground list-none space-y-0.5">
-                    <li>{columnStatus.upe.hostnameOLT ? "♻️" : "⚠️"} Hostname OLT</li>
-                    <li>{columnStatus.upe.hostnameUPE ? "♻️" : "⚠️"} Hostname UPE</li>
+                    <li>{columnStatus.upe.hostnameOLT ? "✅" : "⛔"} Hostname OLT</li>
+                    <li>{columnStatus.upe.hostnameUPE ? "✅" : "⛔"} Hostname UPE</li>
                   </ul>
                 </div>
                 <div className="p-4 rounded-lg border bg-card">
@@ -704,16 +704,16 @@ export default function Settings() {
                   </div>
                   <p className="text-xs text-muted-foreground mb-2">Kolom yang didukung:</p>
                   <ul className="text-xs text-muted-foreground list-none space-y-0.5">
-                    <li>{columnStatus.bng.ipRadius ? "♻️" : "⚠️"} IP RADIUS</li>
-                    <li>{columnStatus.bng.hostnameRadius ? "♻️" : "⚠️"} HOSTNAME RADIUS</li>
-                    <li>{columnStatus.bng.ipBng ? "♻️" : "⚠️"} IP BNG</li>
-                    <li>{columnStatus.bng.hostnameBng ? "♻️" : "⚠️"} HOSTNAME BNG</li>
-                    <li>{columnStatus.bng.npe ? "♻️" : "⚠️"} NPE</li>
-                    <li>{columnStatus.bng.vlan ? "♻️" : "⚠️"} VLAN</li>
-                    <li>{columnStatus.bng.hostnameOlt ? "♻️" : "⚠️"} HOSTNAME OLT</li>
-                    <li>{columnStatus.bng.upe ? "♻️" : "⚠️"} UPE</li>
-                    <li>{columnStatus.bng.portUpe ? "♻️" : "⚠️"} PORT UPE</li>
-                    <li>{columnStatus.bng.kotaKabupaten ? "♻️" : "⚠️"} KOTA/KABUPATEN</li>
+                    <li>{columnStatus.bng.ipRadius ? "✅" : "⛔"} IP RADIUS</li>
+                    <li>{columnStatus.bng.hostnameRadius ? "✅" : "⛔"} HOSTNAME RADIUS</li>
+                    <li>{columnStatus.bng.ipBng ? "✅" : "⛔"} IP BNG</li>
+                    <li>{columnStatus.bng.hostnameBng ? "✅" : "⛔"} HOSTNAME BNG</li>
+                    <li>{columnStatus.bng.npe ? "✅" : "⛔"} NPE</li>
+                    <li>{columnStatus.bng.vlan ? "✅" : "⛔"} VLAN</li>
+                    <li>{columnStatus.bng.hostnameOlt ? "✅" : "⛔"} HOSTNAME OLT</li>
+                    <li>{columnStatus.bng.upe ? "✅" : "⛔"} UPE</li>
+                    <li>{columnStatus.bng.portUpe ? "✅" : "⛔"} PORT UPE</li>
+                    <li>{columnStatus.bng.kotaKabupaten ? "✅" : "⛔"} KOTA/KABUPATEN</li>
                   </ul>
                 </div>
                 <div className="p-4 rounded-lg border bg-card">
@@ -727,10 +727,10 @@ export default function Settings() {
                   </div>
                   <p className="text-xs text-muted-foreground mb-2">Kolom yang didukung:</p>
                   <ul className="text-xs text-muted-foreground list-none space-y-0.5">
-                    <li>{columnStatus.fdt.provinsi ? "♻️" : "⚠️"} NAMA PROVINSI</li>
-                    <li>{columnStatus.fdt.area ? "♻️" : "⚠️"} NAMA AREA</li>
-                    <li>{columnStatus.fdt.idFDT ? "♻️" : "⚠️"} ID FDT</li>
-                    <li>{columnStatus.fdt.tikor ? "♻️" : "⚠️"} TIKOR</li>
+                    <li>{columnStatus.fdt.provinsi ? "✅" : "⛔"} NAMA PROVINSI</li>
+                    <li>{columnStatus.fdt.area ? "✅" : "⛔"} NAMA AREA</li>
+                    <li>{columnStatus.fdt.idFDT ? "✅" : "⛔"} ID FDT</li>
+                    <li>{columnStatus.fdt.tikor ? "✅" : "⛔"} TIKOR</li>
                   </ul>
                 </div>
               </div>
