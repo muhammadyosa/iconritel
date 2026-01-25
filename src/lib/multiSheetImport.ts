@@ -2,6 +2,7 @@ import * as XLSX from "xlsx";
 import { ExcelRecord } from "@/types/ticket";
 import { OLT } from "@/types/olt";
 import { FAT } from "@/types/fat";
+import { FDT } from "@/types/fdt";
 import { saveExcelData, saveOLTData, saveFATData } from "./indexedDB";
 
 // Types for each data category
@@ -33,12 +34,14 @@ export interface ImportResult {
   fatRecords: FAT[];
   upeRecords: UPERecord[];
   bngRecords: BNGRecord[];
+  fdtRecords: FDT[];
   summary: {
     user: number;
     olt: number;
     fat: number;
     upe: number;
     bng: number;
+    fdt: number;
     totalSheets: number;
     processedSheets: string[];
     skippedSheets: string[];
@@ -52,6 +55,7 @@ const SHEET_PATTERNS = {
   fat: ["list fat", "fat", "data fat"],
   upe: ["sheet list upe", "list upe", "upe", "data upe"],
   bng: ["sheet list bng", "list bng", "bng", "data bng"],
+  fdt: ["list fdt", "fdt", "data fdt", "sheet list fdt", "daftar fdt", "master fdt"],
 };
 
 // Column mapping for each sheet type
@@ -92,6 +96,12 @@ const COLUMN_MAPPINGS = {
     upe: ["UPE", "upe", "hostname upe"],
     portUpe: ["PORT UPE", "port upe", "port_upe", "port"],
     kotaKabupaten: ["KOTA/KABUPATEN", "kota/kabupaten", "kota", "kabupaten", "kota kabupaten"],
+  },
+  fdt: {
+    provinsi: ["NAMA PROVINSI", "Nama Provinsi", "nama provinsi", "PROVINSI", "Provinsi", "provinsi"],
+    area: ["NAMA AREA", "Nama Area", "nama area", "AREA", "Area", "area"],
+    idFdt: ["ID FDT", "id fdt", "ID_FDT", "FDT ID", "fdt id", "FDT_ID", "idfdt", "IDFDT"],
+    tikor: ["TIKOR", "Tikor", "tikor", "KOORDINAT", "Koordinat", "koordinat", "TIKOR FDT", "tikor fdt"],
   },
 };
 
@@ -172,6 +182,13 @@ function detectSheetType(sheetName: string, sampleData: any[]): keyof typeof SHE
     // Check for UPE-specific columns (simpler - just hostname olt + hostname upe)
     if (hasHostnameOlt && hasHostnameUpe && !hasIdOlt && !hasIpNmsOlt && !hasTikorOlt) {
       return "upe";
+    }
+    
+    // Check for FDT data (has ID FDT and Area)
+    const hasFdtId = headers.some(h => h.includes("id fdt") || h.includes("id_fdt") || h.includes("fdt id"));
+    const hasArea = headers.some(h => h.includes("area") || h.includes("nama area"));
+    if (hasFdtId && hasArea) {
+      return "fdt";
     }
     
     // Check for FAT data (has ID FAT or Tikor FAT)
@@ -269,6 +286,20 @@ function processBNGSheet(data: any[]): BNGRecord[] {
     .filter((r) => r.ipRadius || r.hostnameBng || r.hostnameOlt);
 }
 
+// Process FDT sheet
+function processFDTSheet(data: any[]): FDT[] {
+  return data
+    .map((row, index) => ({
+      id: `fdt-${Date.now()}-${index}`,
+      provinsi: getColumnValue(row, COLUMN_MAPPINGS.fdt.provinsi),
+      area: getColumnValue(row, COLUMN_MAPPINGS.fdt.area),
+      idFDT: getColumnValue(row, COLUMN_MAPPINGS.fdt.idFdt),
+      tikor: getColumnValue(row, COLUMN_MAPPINGS.fdt.tikor),
+      createdAt: new Date().toISOString(),
+    }))
+    .filter((r) => r.provinsi || r.area || r.idFDT || r.tikor);
+}
+
 // Main function to import multi-sheet Excel file
 export async function importMultiSheetExcel(file: File): Promise<ImportResult> {
   return new Promise((resolve, reject) => {
@@ -285,12 +316,14 @@ export async function importMultiSheetExcel(file: File): Promise<ImportResult> {
           fatRecords: [],
           upeRecords: [],
           bngRecords: [],
+          fdtRecords: [],
           summary: {
             user: 0,
             olt: 0,
             fat: 0,
             upe: 0,
             bng: 0,
+            fdt: 0,
             totalSheets: workbook.SheetNames.length,
             processedSheets: [],
             skippedSheets: [],
@@ -343,6 +376,12 @@ export async function importMultiSheetExcel(file: File): Promise<ImportResult> {
               result.bngRecords = processBNGSheet(jsonData);
               result.summary.bng = result.bngRecords.length;
               result.summary.processedSheets.push(`${sheetName} → BNG (${result.bngRecords.length})`);
+              break;
+              
+            case "fdt":
+              result.fdtRecords = processFDTSheet(jsonData);
+              result.summary.fdt = result.fdtRecords.length;
+              result.summary.processedSheets.push(`${sheetName} → FDT (${result.fdtRecords.length})`);
               break;
           }
         }

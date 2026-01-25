@@ -29,8 +29,9 @@ const FDT_STORE_NAME = "fdt_data";
 
 const FDT_FIELDS = [
   { value: "all", label: "Semua Field" },
+  { value: "provinsi", label: "Nama Provinsi" },
+  { value: "area", label: "Nama Area" },
   { value: "idFDT", label: "ID FDT" },
-  { value: "hostnameOLT", label: "Hostname OLT" },
   { value: "tikor", label: "Tikor" },
 ];
 
@@ -75,8 +76,9 @@ const FDTList = () => {
     }
 
     const exportData = filteredData.map((fdt) => ({
+      "Nama Provinsi": sanitizeForCSV(fdt.provinsi),
+      "Nama Area": sanitizeForCSV(fdt.area),
       "ID FDT": sanitizeForCSV(fdt.idFDT),
-      "Hostname OLT": sanitizeForCSV(fdt.hostnameOLT),
       "Tikor": sanitizeForCSV(fdt.tikor),
       "Tanggal Import": sanitizeForCSV(new Date(fdt.createdAt).toLocaleString("id-ID")),
     }));
@@ -99,8 +101,9 @@ const FDTList = () => {
     
     if (searchField === "all") {
       return (
+        String(fdt.provinsi || "").toLowerCase().includes(query) ||
+        String(fdt.area || "").toLowerCase().includes(query) ||
         String(fdt.idFDT || "").toLowerCase().includes(query) ||
-        String(fdt.hostnameOLT || "").toLowerCase().includes(query) ||
         String(fdt.tikor || "").toLowerCase().includes(query)
       );
     }
@@ -155,7 +158,7 @@ const FDTList = () => {
             </Button>
           </CardTitle>
           <CardDescription className="text-[10px] sm:text-xs hidden sm:block">
-            Kolom: ID FDT, Hostname OLT, Tikor
+            Kolom: Nama Provinsi, Nama Area, ID FDT, Tikor
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-2 sm:space-y-3 md:space-y-4 p-2 sm:p-4 md:p-6">
@@ -187,24 +190,25 @@ const FDTList = () => {
           </div>
 
           <div className="rounded-md border overflow-x-auto max-h-72 sm:max-h-96 -mx-2 sm:mx-0">
-            <Table className="text-[10px] sm:text-xs min-w-[500px]">
+            <Table className="text-[10px] sm:text-xs min-w-[600px]">
               <TableHeader>
                 <TableRow className="h-6 sm:h-8">
+                  <TableHead className="px-1 sm:px-2 py-1 whitespace-nowrap">Nama Provinsi</TableHead>
+                  <TableHead className="px-1 sm:px-2 py-1 whitespace-nowrap">Nama Area</TableHead>
                   <TableHead className="px-1 sm:px-2 py-1 whitespace-nowrap">ID FDT</TableHead>
-                  <TableHead className="px-1 sm:px-2 py-1 whitespace-nowrap">Hostname OLT</TableHead>
                   <TableHead className="px-1 sm:px-2 py-1 whitespace-nowrap">Tikor</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {isLoading ? (
                   <TableRow>
-                    <TableCell colSpan={3} className="text-center text-muted-foreground px-1 sm:px-2 py-1">
+                    <TableCell colSpan={4} className="text-center text-muted-foreground px-1 sm:px-2 py-1">
                       Memuat data FDT...
                     </TableCell>
                   </TableRow>
                 ) : filteredData.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={3} className="text-center text-muted-foreground px-1 sm:px-2 py-1">
+                    <TableCell colSpan={4} className="text-center text-muted-foreground px-1 sm:px-2 py-1">
                       {fdtData.length === 0
                         ? "Belum ada data FDT. Silakan import file Excel/CSV."
                         : "Tidak ada data yang sesuai dengan pencarian."}
@@ -213,8 +217,9 @@ const FDTList = () => {
                 ) : (
                   filteredData.slice(0, 100).map((fdt) => (
                     <TableRow key={fdt.id} className="h-6 sm:h-8">
+                      <TableCell className="px-1 sm:px-2 py-0.5 sm:py-1">{fdt.provinsi}</TableCell>
+                      <TableCell className="px-1 sm:px-2 py-0.5 sm:py-1">{fdt.area}</TableCell>
                       <TableCell className="font-mono px-1 sm:px-2 py-0.5 sm:py-1">{fdt.idFDT}</TableCell>
-                      <TableCell className="font-mono px-1 sm:px-2 py-0.5 sm:py-1">{fdt.hostnameOLT}</TableCell>
                       <TableCell className="font-mono px-1 sm:px-2 py-0.5 sm:py-1 max-w-[120px] truncate">{fdt.tikor}</TableCell>
                     </TableRow>
                   ))
