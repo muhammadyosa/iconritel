@@ -382,7 +382,7 @@ export default function Dashboard() {
                 const chartConfig: ChartConfig = {
                   ritel: { label: "🏠 RITEL", color: "hsl(217, 91%, 60%)" },
                   feeder: { label: "🏬 FEEDER", color: "hsl(38, 92%, 50%)" },
-                  created: { label: "📥 Total Insident", color: "hsl(262, 83%, 58%)" },
+                  created: { label: "📥Insident", color: "hsl(262, 83%, 58%)" },
                 };
 
                 const handleDotClick = (category: "RITEL" | "FEEDER", isoDate: string, displayDate: string) => {
@@ -401,7 +401,7 @@ export default function Dashboard() {
                   setShowOltList(false);
                   setInlineSelectedTicket(null);
                   setFilterDialogTickets(filtered);
-                  setFilterDialogTitle(`📥 Total Insident - ${displayDate}`);
+                  setFilterDialogTitle(`📥Insident - ${displayDate}`);
                   setFilterDialogOpen(true);
                 };
 
@@ -482,7 +482,7 @@ export default function Dashboard() {
                             }
                           }
                         }}
-                        name="📥 Total Insident"
+                        name="📥Insident"
                       />
                     </LineChart>
                   </ChartContainer>
@@ -499,7 +499,7 @@ export default function Dashboard() {
                 </div>
                 <div className="flex items-center gap-1.5 text-[10px]">
                   <div className="w-2 h-2 rounded-full" style={{ background: "hsl(262, 83%, 58%)" }} />
-                  <span className="text-muted-foreground">📥 Total Insident</span>
+                  <span className="text-muted-foreground">📥Insident</span>
                 </div>
               </div>
               <p className="text-[10px] text-muted-foreground text-center mt-1">
