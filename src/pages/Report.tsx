@@ -520,7 +520,7 @@ Contoh:
                     className="w-full"
                   >
                     <Download className="mr-2 h-4 w-4" />
-                    Salin ke Clipboard
+                    Copy
                   </Button>
                 </div>
               </div>
