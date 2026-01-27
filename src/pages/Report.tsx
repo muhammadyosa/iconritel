@@ -287,7 +287,7 @@ Dibuat: ${new Date(r.createdAt).toLocaleString("id-ID")}
         <TabsContent value="shift" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Report Shift</CardTitle>
+              <CardTitle>🗣️ Report Shift</CardTitle>
               <CardDescription>
                 Buat laporan shift harian untuk monitoring NOC
               </CardDescription>
