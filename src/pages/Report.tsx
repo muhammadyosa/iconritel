@@ -472,8 +472,8 @@ Contoh:
                       <FileText className="mr-2 h-4 w-4" />
                       Generate Format
                     </Button>
-                    <Button variant="outline" onClick={handleSlaClear} className="flex-1 min-w-[100px]">
-                      Bersihkan
+                    <Button variant="outline" onClick={handleSlaClear} className="flex-1 min-w-[80px]">
+                      Clear
                     </Button>
                   </div>
 
