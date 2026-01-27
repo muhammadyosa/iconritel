@@ -382,8 +382,7 @@ export default function Dashboard() {
                 const chartConfig: ChartConfig = {
                   ritel: { label: "🏠 RITEL", color: "hsl(217, 91%, 60%)" },
                   feeder: { label: "🏬 FEEDER", color: "hsl(38, 92%, 50%)" },
-                  created: { label: "📥 Dibuat", color: "hsl(142, 76%, 36%)" },
-                  inProgress: { label: "⚙️ Progres", color: "hsl(262, 83%, 58%)" },
+                  created: { label: "📥 Total Insident", color: "hsl(262, 83%, 58%)" },
                 };
 
                 const handleDotClick = (category: "RITEL" | "FEEDER", isoDate: string, displayDate: string) => {
@@ -396,14 +395,13 @@ export default function Dashboard() {
                   setFilterDialogOpen(true);
                 };
 
-                const handleStatusDotClick = (status: "created" | "inProgress", isoDate: string, displayDate: string) => {
-                  const filtered = getTicketsForDateByStatus(isoDate, status);
+                const handleStatusDotClick = (isoDate: string, displayDate: string) => {
+                  const filtered = getTicketsForDateByStatus(isoDate, "created");
                   setPreviousDialogState(null);
                   setShowOltList(false);
                   setInlineSelectedTicket(null);
                   setFilterDialogTickets(filtered);
-                  const statusLabel = status === "created" ? "📥 Dibuat" : "⚙️ Progres";
-                  setFilterDialogTitle(`${statusLabel} - ${displayDate}`);
+                  setFilterDialogTitle(`📥 Total Insident - ${displayDate}`);
                   setFilterDialogOpen(true);
                 };
 
@@ -470,25 +468,6 @@ export default function Dashboard() {
                       <Line 
                         type="monotone" 
                         dataKey="created" 
-                        stroke="hsl(142, 76%, 36%)" 
-                        strokeWidth={2}
-                        strokeDasharray="5 5"
-                        dot={{ fill: "hsl(142, 76%, 36%)", strokeWidth: 1, r: trendDays > 14 ? 2 : 3, cursor: "pointer" }}
-                        activeDot={{ 
-                          r: 6, 
-                          strokeWidth: 2, 
-                          cursor: "pointer",
-                          onClick: (_, payload: any) => {
-                            if (payload?.payload) {
-                              handleStatusDotClick("created", payload.payload.isoDate, payload.payload.date);
-                            }
-                          }
-                        }}
-                        name="📥 Dibuat"
-                      />
-                      <Line 
-                        type="monotone" 
-                        dataKey="inProgress" 
                         stroke="hsl(262, 83%, 58%)" 
                         strokeWidth={2}
                         strokeDasharray="5 5"
@@ -499,11 +478,11 @@ export default function Dashboard() {
                           cursor: "pointer",
                           onClick: (_, payload: any) => {
                             if (payload?.payload) {
-                              handleStatusDotClick("inProgress", payload.payload.isoDate, payload.payload.date);
+                              handleStatusDotClick(payload.payload.isoDate, payload.payload.date);
                             }
                           }
                         }}
-                        name="⚙️ Progres"
+                        name="📥 Total Insident"
                       />
                     </LineChart>
                   </ChartContainer>
@@ -519,12 +498,8 @@ export default function Dashboard() {
                   <span className="text-muted-foreground">🏬 FEEDER</span>
                 </div>
                 <div className="flex items-center gap-1.5 text-[10px]">
-                  <div className="w-2 h-2 rounded-full" style={{ background: "hsl(142, 76%, 36%)" }} />
-                  <span className="text-muted-foreground">📥 Dibuat</span>
-                </div>
-                <div className="flex items-center gap-1.5 text-[10px]">
                   <div className="w-2 h-2 rounded-full" style={{ background: "hsl(262, 83%, 58%)" }} />
-                  <span className="text-muted-foreground">⚙️ Progres</span>
+                  <span className="text-muted-foreground">📥 Total Insident</span>
                 </div>
               </div>
               <p className="text-[10px] text-muted-foreground text-center mt-1">
