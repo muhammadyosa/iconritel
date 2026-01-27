@@ -34,12 +34,13 @@ const shiftReportSchema = z.object({
   notes: z.string().trim().max(5000, "Catatan maksimal 5000 karakter"),
 });
 
-const ticketUpdateSchema = z.object({
-  ticketId: z.string().trim().min(1, "ID Ticket wajib diisi").max(50, "ID Ticket maksimal 50 karakter"),
-  update: z.string().trim().min(1, "Update wajib diisi").max(5000, "Update maksimal 5000 karakter"),
-  status: z.string().optional(),
-  resolvedBy: z.string().trim().max(100, "Nama petugas maksimal 100 karakter"),
-});
+// Interface for parsed SLA ticket
+interface SLATicket {
+  duration: string;
+  ticketId: string;
+  type: string;
+  description: string;
+}
 
 const Report = () => {
   const [shiftReport, setShiftReport] = useState({
@@ -53,12 +54,10 @@ const Report = () => {
     notes: "",
   });
 
-  const [ticketUpdate, setTicketUpdate] = useState({
-    ticketId: "",
-    update: "",
-    status: "",
-    resolvedBy: "",
-  });
+  // State for SLA Report
+  const [slaInput, setSlaInput] = useState("");
+  const [slaResult, setSlaResult] = useState("");
+  const [parsedSlaTickets, setParsedSlaTickets] = useState<SLATicket[]>([]);
 
   const handleShiftReportSubmit = () => {
     // Validate with Zod schema
@@ -108,39 +107,115 @@ const Report = () => {
     });
   };
 
-  const handleTicketUpdateSubmit = () => {
-    // Validate with Zod schema
-    const result = ticketUpdateSchema.safeParse(ticketUpdate);
-    if (!result.success) {
+  // Parse SLA input and generate formatted output
+  const handleSlaGenerate = () => {
+    if (!slaInput.trim()) {
       toast({
-        title: "Validasi gagal",
-        description: result.error.errors[0].message,
+        title: "Input kosong",
+        description: "Mohon masukkan data tiket OVER SLA.",
         variant: "destructive",
       });
       return;
     }
 
-    // Save to localStorage
-    const updates = JSON.parse(localStorage.getItem("ticketUpdates") || "[]");
-    updates.push({
-      ...ticketUpdate,
-      id: `UPDATE-${Date.now()}`,
-      createdAt: new Date().toISOString(),
-    });
-    localStorage.setItem("ticketUpdates", JSON.stringify(updates));
+    const lines = slaInput.trim().split("\n").filter(line => line.trim());
+    const tickets: SLATicket[] = [];
+
+    for (const line of lines) {
+      // Split by tab character
+      const parts = line.split("\t").map(p => p.trim()).filter(p => p);
+      
+      if (parts.length >= 3) {
+        // Format: DURATION \t TICKET_ID \t TYPE \t DESCRIPTION
+        // or: DURATION \t TICKET_ID \t TYPE+DESCRIPTION (combined)
+        const duration = parts[0];
+        const ticketId = parts[1];
+        
+        // Check if type and description are separate or combined
+        let type = "";
+        let description = "";
+        
+        if (parts.length >= 4) {
+          type = parts[2];
+          description = parts.slice(3).join(" ");
+        } else {
+          // Type and description might be in one field
+          const combined = parts[2];
+          // Try to extract type (FTTH AKSES, FTTH DISTRIBUSI, FTTH FEEDER, FTTH BACKBONE)
+          const typeMatch = combined.match(/^(FTTH\s+(?:AKSES|DISTRIBUSI|FEEDER|BACKBONE))\s*[-–]?\s*/i);
+          if (typeMatch) {
+            type = typeMatch[1];
+            description = combined.substring(typeMatch[0].length).trim();
+          } else {
+            type = combined;
+            description = "";
+          }
+        }
+
+        tickets.push({ duration, ticketId, type, description });
+      }
+    }
+
+    if (tickets.length === 0) {
+      toast({
+        title: "Format tidak valid",
+        description: "Pastikan format input sesuai: DURASI[TAB]ID_TIKET[TAB]TYPE[TAB]DESKRIPSI",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setParsedSlaTickets(tickets);
+
+    // Generate formatted output
+    const formattedOutput = tickets.map(ticket => {
+      return `${ticket.duration}\t
+
+${ticket.ticketId}\t
+
+${ticket.type}\t${ticket.description}
+
+TIKET TERKAIT : 
+
+UPDATE : `;
+    }).join("\n\n");
+
+    setSlaResult(formattedOutput);
 
     toast({
-      title: "Update ticket tersimpan",
-      description: "Update report ticket berhasil disimpan.",
+      title: "Format berhasil",
+      description: `${tickets.length} tiket OVER SLA berhasil diformat.`,
     });
+  };
 
-    // Reset form
-    setTicketUpdate({
-      ticketId: "",
-      update: "",
-      status: "",
-      resolvedBy: "",
+  const handleSlaCopy = () => {
+    if (!slaResult) {
+      toast({
+        title: "Tidak ada hasil",
+        description: "Generate format terlebih dahulu.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    navigator.clipboard.writeText(slaResult).then(() => {
+      toast({
+        title: "Berhasil disalin",
+        description: "Hasil format telah disalin ke clipboard.",
+      });
+    }).catch(() => {
+      toast({
+        title: "Gagal menyalin",
+        description: "Tidak dapat menyalin ke clipboard.",
+        variant: "destructive",
+      });
     });
+  };
+
+  const handleSlaClear = () => {
+    setSlaInput("");
+    setSlaResult("");
+    setParsedSlaTickets([]);
   };
 
   const exportShiftReport = () => {
@@ -208,9 +283,9 @@ Dibuat: ${new Date(r.createdAt).toLocaleString("id-ID")}
       </div>
 
       <Tabs defaultValue="shift" className="w-full">
-        <TabsList className="grid w-full max-w-md grid-cols-2">
+        <TabsList className="grid w-full max-w-lg grid-cols-2">
           <TabsTrigger value="shift">Report Shift</TabsTrigger>
-          <TabsTrigger value="ticket">Update Report Ticket</TabsTrigger>
+          <TabsTrigger value="sla">⏰ Report OVER SLA 7 JAM</TabsTrigger>
         </TabsList>
 
         <TabsContent value="shift" className="space-y-4">
@@ -361,77 +436,117 @@ Dibuat: ${new Date(r.createdAt).toLocaleString("id-ID")}
           </Card>
         </TabsContent>
 
-        <TabsContent value="ticket" className="space-y-4">
+        <TabsContent value="sla" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Update Report Ticket</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <span className="text-xl">⏰</span>
+                Report Ticket OVER SLA 7 JAM
+              </CardTitle>
               <CardDescription>
-                Buat update report untuk ticket yang sedang ditangani
+                Format tiket yang sudah melewati SLA 7 jam untuk laporan
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="ticketId">ID Ticket</Label>
-                  <Input
-                    id="ticketId"
-                    placeholder="Masukkan ID ticket"
-                    value={ticketUpdate.ticketId}
-                    onChange={(e) =>
-                      setTicketUpdate({ ...ticketUpdate, ticketId: e.target.value })
-                    }
-                  />
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                {/* Input Section */}
+                <div className="space-y-3">
+                  <div className="space-y-2">
+                    <Label htmlFor="slaInput" className="flex items-center gap-2">
+                      <span className="text-xs bg-destructive/10 text-destructive px-2 py-0.5 rounded">INPUT</span>
+                      Data Tiket OVER SLA
+                    </Label>
+                    <Textarea
+                      id="slaInput"
+                      placeholder={`Paste data tiket dengan format (pisahkan dengan TAB):
+DURASI[TAB]ID_TIKET[TAB]TYPE[TAB]DESKRIPSI
+
+Contoh:
+3 JAM 56 MENIT	26012107781	FTTH AKSES	RESTI LINK LOSS - SIB PESAWARAN...
+5 JAM 53 MENIT	26012107738	FTTH DISTRIBUSI	(PROAKTIVE NOC RETAIL)...`}
+                      rows={10}
+                      className="font-mono text-xs"
+                      value={slaInput}
+                      onChange={(e) => setSlaInput(e.target.value)}
+                    />
+                  </div>
+                  
+                  <div className="flex gap-2 flex-wrap">
+                    <Button onClick={handleSlaGenerate} className="flex-1 min-w-[120px]">
+                      <FileText className="mr-2 h-4 w-4" />
+                      Generate Format
+                    </Button>
+                    <Button variant="outline" onClick={handleSlaClear} className="flex-1 min-w-[100px]">
+                      Bersihkan
+                    </Button>
+                  </div>
+
+                  {/* Parsed tickets preview */}
+                  {parsedSlaTickets.length > 0 && (
+                    <div className="border rounded-lg p-3 bg-muted/50">
+                      <p className="text-xs font-medium text-muted-foreground mb-2">
+                        📊 {parsedSlaTickets.length} Tiket Terdeteksi:
+                      </p>
+                      <div className="space-y-1 max-h-[150px] overflow-y-auto">
+                        {parsedSlaTickets.map((ticket, idx) => (
+                          <div key={idx} className="text-xs flex items-start gap-2 p-1.5 bg-background rounded border">
+                            <span className="font-mono text-destructive whitespace-nowrap">{ticket.duration}</span>
+                            <span className="font-mono font-medium">{ticket.ticketId}</span>
+                            <span className="text-muted-foreground truncate">{ticket.type}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="status">Status Update</Label>
-                  <Select
-                    value={ticketUpdate.status}
-                    onValueChange={(value) =>
-                      setTicketUpdate({ ...ticketUpdate, status: value })
-                    }
+
+                {/* Output Section */}
+                <div className="space-y-3">
+                  <div className="space-y-2">
+                    <Label htmlFor="slaResult" className="flex items-center gap-2">
+                      <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded">HASIL</span>
+                      Format Report OVER SLA 7 JAM
+                    </Label>
+                    <Textarea
+                      id="slaResult"
+                      placeholder="Hasil format akan muncul di sini..."
+                      rows={10}
+                      className="font-mono text-xs"
+                      value={slaResult}
+                      readOnly
+                    />
+                  </div>
+                  
+                  <Button 
+                    variant="secondary" 
+                    onClick={handleSlaCopy} 
+                    disabled={!slaResult}
+                    className="w-full"
                   >
-                    <SelectTrigger id="status">
-                      <SelectValue placeholder="Pilih status" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="On Progress">On Progres</SelectItem>
-                      <SelectItem value="Pending">Pending</SelectItem>
-                      <SelectItem value="Resolved">Resolved</SelectItem>
-                      <SelectItem value="Critical">Critical</SelectItem>
-                    </SelectContent>
-                  </Select>
+                    <Download className="mr-2 h-4 w-4" />
+                    Salin ke Clipboard
+                  </Button>
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="update">Update/Progress</Label>
-                <Textarea
-                  id="update"
-                  placeholder="Deskripsikan update atau progress penanganan ticket..."
-                  rows={5}
-                  value={ticketUpdate.update}
-                  onChange={(e) =>
-                    setTicketUpdate({ ...ticketUpdate, update: e.target.value })
-                  }
-                />
-              </div>
+              {/* Format Guide */}
+              <div className="border rounded-lg p-3 bg-muted/30">
+                <p className="text-xs font-medium mb-2">📋 Format Input yang Didukung:</p>
+                <code className="text-[10px] text-muted-foreground block whitespace-pre-wrap">
+{`DURASI[TAB]ID_TIKET[TAB]TYPE[TAB]DESKRIPSI
 
-              <div className="space-y-2">
-                <Label htmlFor="resolvedBy">Ditangani Oleh</Label>
-                <Input
-                  id="resolvedBy"
-                  placeholder="Nama teknisi/petugas"
-                  value={ticketUpdate.resolvedBy}
-                  onChange={(e) =>
-                    setTicketUpdate({ ...ticketUpdate, resolvedBy: e.target.value })
-                  }
-                />
-              </div>
+Contoh Input:
+3 JAM 56 MENIT	26012107781	FTTH AKSES	RESTI LINK LOSS - SIB PESAWARAN SPLT_GDTA176...
+5 JAM 53 MENIT	26012107738	FTTH DISTRIBUSI	(PROAKTIVE NOC RETAIL) SPLT_BDLA180...
 
-              <Button onClick={handleTicketUpdateSubmit}>
-                <FileText className="mr-2 h-4 w-4" />
-                Simpan Update
-              </Button>
+Hasil Output:
+3 JAM 56 MENIT	
+26012107781	
+FTTH AKSES	RESTI LINK LOSS - SIB PESAWARAN SPLT_GDTA176...
+TIKET TERKAIT : 
+UPDATE : `}
+                </code>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
