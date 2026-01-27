@@ -280,7 +280,7 @@ Dibuat: ${new Date(r.createdAt).toLocaleString("id-ID")}
 
       <Tabs defaultValue="shift" className="w-full">
         <TabsList className="grid w-full max-w-lg grid-cols-2">
-          <TabsTrigger value="shift">Report Shift</TabsTrigger>
+          <TabsTrigger value="shift">🗣️ Report Shift</TabsTrigger>
           <TabsTrigger value="sla">⏰ Report OVER SLA 7 JAM</TabsTrigger>
         </TabsList>
 
