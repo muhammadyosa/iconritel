@@ -8,6 +8,9 @@ export interface DailyTicketRecord {
   ritel: number;
   feeder: number;
   total: number;
+  created: number; // New tickets created on this day
+  inProgress: number; // Tickets in progress on this day
+  resolved: number; // Tickets resolved on this day
   ticketIds: string[]; // Store ticket IDs for reference
 }
 
@@ -35,18 +38,42 @@ export function useTicketHistory(tickets: Ticket[]) {
 
     const today = new Date().toISOString().split('T')[0];
     
-    // Build a map of all ticket creation dates
-    const ticketsByDate: Record<string, { ritel: number; feeder: number; total: number; ticketIds: string[] }> = {};
+    // Build a map of all ticket creation dates with status counts
+    const ticketsByDate: Record<string, { 
+      ritel: number; 
+      feeder: number; 
+      total: number; 
+      created: number;
+      inProgress: number;
+      resolved: number;
+      ticketIds: string[] 
+    }> = {};
     
     tickets.forEach((ticket) => {
       const ticketDate = new Date(ticket.createdISO).toISOString().split('T')[0];
       
       if (!ticketsByDate[ticketDate]) {
-        ticketsByDate[ticketDate] = { ritel: 0, feeder: 0, total: 0, ticketIds: [] };
+        ticketsByDate[ticketDate] = { 
+          ritel: 0, 
+          feeder: 0, 
+          total: 0, 
+          created: 0,
+          inProgress: 0,
+          resolved: 0,
+          ticketIds: [] 
+        };
       }
       
       ticketsByDate[ticketDate].total++;
+      ticketsByDate[ticketDate].created++; // Count as created on this date
       ticketsByDate[ticketDate].ticketIds.push(ticket.id);
+      
+      // Track status counts
+      if (ticket.status === "On Progress" || ticket.status === "Critical" || ticket.status === "Pending") {
+        ticketsByDate[ticketDate].inProgress++;
+      } else if (ticket.status === "Resolved") {
+        ticketsByDate[ticketDate].resolved++;
+      }
       
       if (FEEDER_CONSTRAINTS_SET.has(ticket.constraint)) {
         ticketsByDate[ticketDate].feeder++;
@@ -66,6 +93,9 @@ export function useTicketHistory(tickets: Ticket[]) {
           ritel: data.ritel,
           feeder: data.feeder,
           total: data.total,
+          created: data.created,
+          inProgress: data.inProgress,
+          resolved: data.resolved,
           ticketIds: data.ticketIds,
         });
       });
@@ -101,7 +131,16 @@ export function useTicketHistory(tickets: Ticket[]) {
 
   // Get data for chart (last N days)
   const getChartData = useCallback((days: number = 7) => {
-    const result: Array<{ date: string; isoDate: string; ritel: number; feeder: number; total: number }> = [];
+    const result: Array<{ 
+      date: string; 
+      isoDate: string; 
+      ritel: number; 
+      feeder: number; 
+      total: number;
+      created: number;
+      inProgress: number;
+      resolved: number;
+    }> = [];
     const today = new Date();
     
     // Create a map for quick lookup
@@ -121,6 +160,9 @@ export function useTicketHistory(tickets: Ticket[]) {
         ritel: record?.ritel || 0,
         feeder: record?.feeder || 0,
         total: record?.total || 0,
+        created: record?.created || 0,
+        inProgress: record?.inProgress || 0,
+        resolved: record?.resolved || 0,
       });
     }
     
@@ -142,6 +184,24 @@ export function useTicketHistory(tickets: Ticket[]) {
     });
   }, [tickets]);
 
+  // Get tickets for a specific date and status
+  const getTicketsForDateByStatus = useCallback((isoDate: string, status: "created" | "inProgress" | "resolved") => {
+    return tickets.filter((ticket) => {
+      const ticketDate = new Date(ticket.createdISO).toISOString().split('T')[0];
+      if (ticketDate !== isoDate) return false;
+      
+      if (status === "created") {
+        return true; // All tickets created on this date
+      } else if (status === "inProgress") {
+        return ticket.status === "On Progress" || ticket.status === "Critical" || ticket.status === "Pending";
+      } else if (status === "resolved") {
+        return ticket.status === "Resolved";
+      }
+      
+      return true;
+    });
+  }, [tickets]);
+
   // Clear history (for use with "Hapus Semua Data")
   const clearHistory = useCallback(() => {
     setHistory({ records: [], lastUpdated: "" });
@@ -152,6 +212,7 @@ export function useTicketHistory(tickets: Ticket[]) {
     history,
     getChartData,
     getTicketsForDate,
+    getTicketsForDateByStatus,
     clearHistory,
   };
 }

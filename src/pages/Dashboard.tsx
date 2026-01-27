@@ -39,7 +39,7 @@ interface ShiftReport {
 
 export default function Dashboard() {
   const { tickets, excelData } = useTickets();
-  const { getChartData, getTicketsForDate } = useTicketHistory(tickets);
+  const { getChartData, getTicketsForDate, getTicketsForDateByStatus } = useTicketHistory(tickets);
   const [shiftReports, setShiftReports] = useState<ShiftReport[]>([]);
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
@@ -382,6 +382,8 @@ export default function Dashboard() {
                 const chartConfig: ChartConfig = {
                   ritel: { label: "🏠 RITEL", color: "hsl(217, 91%, 60%)" },
                   feeder: { label: "🏬 FEEDER", color: "hsl(38, 92%, 50%)" },
+                  created: { label: "📥 Dibuat", color: "hsl(142, 76%, 36%)" },
+                  inProgress: { label: "⚙️ Progres", color: "hsl(262, 83%, 58%)" },
                 };
 
                 const handleDotClick = (category: "RITEL" | "FEEDER", isoDate: string, displayDate: string) => {
@@ -394,8 +396,19 @@ export default function Dashboard() {
                   setFilterDialogOpen(true);
                 };
 
+                const handleStatusDotClick = (status: "created" | "inProgress", isoDate: string, displayDate: string) => {
+                  const filtered = getTicketsForDateByStatus(isoDate, status);
+                  setPreviousDialogState(null);
+                  setShowOltList(false);
+                  setInlineSelectedTicket(null);
+                  setFilterDialogTickets(filtered);
+                  const statusLabel = status === "created" ? "📥 Dibuat" : "⚙️ Progres";
+                  setFilterDialogTitle(`${statusLabel} - ${displayDate}`);
+                  setFilterDialogOpen(true);
+                };
+
                 return (
-                  <ChartContainer config={chartConfig} className="h-[160px] sm:h-[180px] md:h-[200px] w-full transition-all duration-300">
+                  <ChartContainer config={chartConfig} className="h-[200px] sm:h-[220px] md:h-[260px] w-full transition-all duration-300">
                     <LineChart
                       data={chartData}
                       margin={{ top: 5, right: 15, left: 5, bottom: 5 }}
@@ -454,11 +467,49 @@ export default function Dashboard() {
                         }}
                         name="🏬 FEEDER"
                       />
+                      <Line 
+                        type="monotone" 
+                        dataKey="created" 
+                        stroke="hsl(142, 76%, 36%)" 
+                        strokeWidth={2}
+                        strokeDasharray="5 5"
+                        dot={{ fill: "hsl(142, 76%, 36%)", strokeWidth: 1, r: trendDays > 14 ? 2 : 3, cursor: "pointer" }}
+                        activeDot={{ 
+                          r: 6, 
+                          strokeWidth: 2, 
+                          cursor: "pointer",
+                          onClick: (_, payload: any) => {
+                            if (payload?.payload) {
+                              handleStatusDotClick("created", payload.payload.isoDate, payload.payload.date);
+                            }
+                          }
+                        }}
+                        name="📥 Dibuat"
+                      />
+                      <Line 
+                        type="monotone" 
+                        dataKey="inProgress" 
+                        stroke="hsl(262, 83%, 58%)" 
+                        strokeWidth={2}
+                        strokeDasharray="5 5"
+                        dot={{ fill: "hsl(262, 83%, 58%)", strokeWidth: 1, r: trendDays > 14 ? 2 : 3, cursor: "pointer" }}
+                        activeDot={{ 
+                          r: 6, 
+                          strokeWidth: 2, 
+                          cursor: "pointer",
+                          onClick: (_, payload: any) => {
+                            if (payload?.payload) {
+                              handleStatusDotClick("inProgress", payload.payload.isoDate, payload.payload.date);
+                            }
+                          }
+                        }}
+                        name="⚙️ Progres"
+                      />
                     </LineChart>
                   </ChartContainer>
                 );
               })()}
-              <div className="flex items-center justify-center gap-4 mt-1.5">
+              <div className="flex flex-wrap items-center justify-center gap-3 mt-1.5">
                 <div className="flex items-center gap-1.5 text-[10px]">
                   <div className="w-2 h-2 rounded-full bg-accent" />
                   <span className="text-muted-foreground">🏠 RITEL</span>
@@ -466,6 +517,14 @@ export default function Dashboard() {
                 <div className="flex items-center gap-1.5 text-[10px]">
                   <div className="w-2 h-2 rounded-full bg-warning" />
                   <span className="text-muted-foreground">🏬 FEEDER</span>
+                </div>
+                <div className="flex items-center gap-1.5 text-[10px]">
+                  <div className="w-2 h-2 rounded-full" style={{ background: "hsl(142, 76%, 36%)" }} />
+                  <span className="text-muted-foreground">📥 Dibuat</span>
+                </div>
+                <div className="flex items-center gap-1.5 text-[10px]">
+                  <div className="w-2 h-2 rounded-full" style={{ background: "hsl(262, 83%, 58%)" }} />
+                  <span className="text-muted-foreground">⚙️ Progres</span>
                 </div>
               </div>
               <p className="text-[10px] text-muted-foreground text-center mt-1">
