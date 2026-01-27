@@ -97,7 +97,7 @@ export function AppSidebar() {
           {!collapsed && (
             <div className="px-2 sm:px-4 pb-2 sm:pb-4 text-center">
               <p className="text-[10px] sm:text-xs text-sidebar-foreground/50">
-                © RZ Corp. All Rights Reserved
+                © RZ Corp
               </p>
             </div>
           )}
