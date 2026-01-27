@@ -169,14 +169,10 @@ const Report = () => {
 
     // Generate formatted output
     const formattedOutput = tickets.map(ticket => {
-      return `${ticket.duration}\t
-
-${ticket.ticketId}\t
-
+      return `${ticket.duration}
+${ticket.ticketId}
 ${ticket.type}\t${ticket.description}
-
 TIKET TERKAIT : 
-
 UPDATE : `;
     }).join("\n\n");
 
