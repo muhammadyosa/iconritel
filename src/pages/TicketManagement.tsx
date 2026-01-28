@@ -558,7 +558,7 @@ export default function TicketManagement() {
         <TabsContent value="daftar-ticket" className="mt-2 sm:mt-3">
           <Card className="shadow-sm border">
             <CardHeader className="py-1.5 sm:py-2 px-2 sm:px-3 border-b bg-muted/30 flex flex-row items-center justify-between gap-2">
-              <CardTitle className="text-xs sm:text-sm whitespace-nowrap">📋 Daftar Tiket ({filteredTickets.length})</CardTitle>
+              <CardTitle className="text-xs sm:text-sm whitespace-nowrap">📋 Daftar Insident ({filteredTickets.length})</CardTitle>
               <div className="flex gap-1 sm:gap-1.5">
                 <Dialog open={isManualFormOpen} onOpenChange={setIsManualFormOpen}>
                   <DialogTrigger asChild>
