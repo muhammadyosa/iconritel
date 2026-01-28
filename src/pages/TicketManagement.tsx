@@ -504,7 +504,7 @@ export default function TicketManagement() {
                 <CardTitle className="text-xs sm:text-sm">📊 Preview Data ({filteredData.length})</CardTitle>
               </CardHeader>
               <CardContent className="p-1.5 sm:p-2">
-                <div className="rounded-md border overflow-x-auto max-h-64 sm:max-h-72">
+                <div className="rounded-md border overflow-x-auto max-h-48 xs:max-h-56 sm:max-h-72 md:max-h-80 lg:max-h-96">
                   <Table className="min-w-[500px]">
                     <TableHeader>
                       <TableRow className="h-5">
@@ -517,7 +517,7 @@ export default function TicketManagement() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {filteredData.slice(0, 50).map((record, idx) => (
+                      {filteredData.slice(0, 100).map((record, idx) => (
                         <TableRow key={idx} className="h-6 sm:h-7">
                           <TableCell className="px-1 sm:px-1.5 py-0.5">
                             <Button
