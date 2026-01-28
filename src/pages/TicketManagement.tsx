@@ -743,17 +743,17 @@ export default function TicketManagement() {
                   </div>
                 </div>
               </div>
-              <div className="rounded-md border overflow-x-auto max-h-64 sm:max-h-72">
+              <div className="rounded-md border overflow-x-auto overflow-y-auto max-h-[40vh] xs:max-h-[45vh] sm:max-h-[50vh] md:max-h-[55vh] lg:max-h-[60vh]">
                 <Table className="min-w-[600px]">
-                  <TableHeader>
+                  <TableHeader className="sticky top-0 bg-background z-10">
                     <TableRow className="h-5">
-                      <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap">🎫 Ticket ID</TableHead>
-                      <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap">📦 Type</TableHead>
-                      <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap">👤 Customer/Type</TableHead>
-                      <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap">👨‍💼 Service ID</TableHead>
-                      <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap">👥 Serpo</TableHead>
-                      <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap">⚙️ Status</TableHead>
-                      <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap">⚡ Action</TableHead>
+                      <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap bg-muted/80">🎫 Ticket ID</TableHead>
+                      <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap bg-muted/80">📦 Type</TableHead>
+                      <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap bg-muted/80">👤 Customer/Type</TableHead>
+                      <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap bg-muted/80">👨‍💼 Service ID</TableHead>
+                      <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap bg-muted/80">👥 Serpo</TableHead>
+                      <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap bg-muted/80">⚙️ Status</TableHead>
+                      <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap bg-muted/80">⚡ Action</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
