@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Download, Plus, Search, Trash2, Edit, Info, FileEdit } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -538,369 +539,388 @@ export default function TicketManagement() {
         </Card>
       )}
 
-      <Card className="shadow-sm border">
-        <CardHeader className="py-1.5 sm:py-2 px-2 sm:px-3 border-b bg-muted/30 flex flex-row items-center justify-between gap-2">
-          <CardTitle className="text-xs sm:text-sm whitespace-nowrap">Daftar Tiket ({filteredTickets.length})</CardTitle>
-          <div className="flex gap-1 sm:gap-1.5">
-            <Dialog open={isManualFormOpen} onOpenChange={setIsManualFormOpen}>
-              <DialogTrigger asChild>
-                <Button variant="outline" size="sm" className="h-6 sm:h-7 text-[9px] sm:text-[10px] px-1.5 sm:px-2">
-                  <FileEdit className="h-3 w-3 mr-0.5 sm:mr-1" />
-                  <span className="hidden xs:inline">Manual</span>
-                  <span className="xs:hidden">+</span>
+      <Tabs defaultValue="daftar-tiket" className="w-full">
+        <TabsList className="grid w-full max-w-md grid-cols-2">
+          <TabsTrigger value="daftar-tiket">📋 Daftar Tiket</TabsTrigger>
+          <TabsTrigger value="preview">📊 Preview</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="daftar-tiket" className="mt-2 sm:mt-3">
+          <Card className="shadow-sm border">
+            <CardHeader className="py-1.5 sm:py-2 px-2 sm:px-3 border-b bg-muted/30 flex flex-row items-center justify-between gap-2">
+              <CardTitle className="text-xs sm:text-sm whitespace-nowrap">📋 Daftar Tiket ({filteredTickets.length})</CardTitle>
+              <div className="flex gap-1 sm:gap-1.5">
+                <Dialog open={isManualFormOpen} onOpenChange={setIsManualFormOpen}>
+                  <DialogTrigger asChild>
+                    <Button variant="outline" size="sm" className="h-6 sm:h-7 text-[9px] sm:text-[10px] px-1.5 sm:px-2">
+                      <FileEdit className="h-3 w-3 mr-0.5 sm:mr-1" />
+                      <span className="hidden xs:inline">Manual</span>
+                      <span className="xs:hidden">+</span>
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                    <DialogHeader>
+                      <DialogTitle>Input Tiket Manual</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Label>Ticket ID *</Label>
+                          <Input
+                            value={manualFormData.ticketId}
+                            onChange={(e) => setManualFormData({ ...manualFormData, ticketId: e.target.value })}
+                            placeholder="INC12345678"
+                          />
+                        </div>
+                        <div>
+                          <Label>Service ID</Label>
+                          <Input
+                            value={manualFormData.serviceId}
+                            onChange={(e) => setManualFormData({ ...manualFormData, serviceId: e.target.value })}
+                            placeholder="Masukkan Service ID"
+                          />
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Label>Customer Name</Label>
+                          <Input
+                            value={manualFormData.customerName}
+                            onChange={(e) => setManualFormData({ ...manualFormData, customerName: e.target.value })}
+                            placeholder="Nama pelanggan"
+                          />
+                        </div>
+                        <div>
+                          <Label>Serpo / Tim *</Label>
+                          <Input
+                            value={manualFormData.serpo}
+                            onChange={(e) => setManualFormData({ ...manualFormData, serpo: e.target.value })}
+                            placeholder="Nama tim"
+                          />
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Label>Hostname OLT</Label>
+                          <Input
+                            value={manualFormData.hostname}
+                            onChange={(e) => setManualFormData({ ...manualFormData, hostname: e.target.value })}
+                            placeholder="Hostname OLT"
+                          />
+                        </div>
+                        <div>
+                          <Label>ID FAT</Label>
+                          <Input
+                            value={manualFormData.fatId}
+                            onChange={(e) => setManualFormData({ ...manualFormData, fatId: e.target.value })}
+                            placeholder="ID FAT"
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <Label>SN ONT</Label>
+                        <Input
+                          value={manualFormData.snOnt}
+                          onChange={(e) => setManualFormData({ ...manualFormData, snOnt: e.target.value })}
+                          placeholder="SN ONT"
+                        />
+                      </div>
+                      <div>
+                        <Label>Constraint *</Label>
+                        <Select
+                          value={manualFormData.constraint}
+                          onValueChange={(value) => setManualFormData({ ...manualFormData, constraint: value })}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Pilih constraint" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">
+                              RITEL
+                            </div>
+                            {ALL_CONSTRAINTS.filter(c => !FEEDER_CONSTRAINTS_SET.has(c)).map((c) => (
+                              <SelectItem key={c} value={c}>
+                                {c}
+                              </SelectItem>
+                            ))}
+                            <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground border-t mt-1">
+                              FEEDER (PROACTIVE NOC RETAIL)
+                            </div>
+                            {ALL_CONSTRAINTS.filter(c => FEEDER_CONSTRAINTS_SET.has(c)).map((c) => (
+                              <SelectItem key={c} value={c}>
+                                {c}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      
+                      {manualFormData.constraint === "PORT DOWN" && (
+                        <div>
+                          <Label>Port Info (Optional)</Label>
+                          <Input
+                            value={manualFormData.portText}
+                            onChange={(e) => setManualFormData({ ...manualFormData, portText: e.target.value })}
+                            placeholder="Contoh: PORT-1/1/1"
+                          />
+                        </div>
+                      )}
+                      
+                      {manualFormData.constraint && manualFormData.serpo && (
+                        <div className="p-3 bg-accent/50 rounded-lg space-y-1">
+                          <p className="text-xs font-semibold text-muted-foreground">
+                            Preview Format Tiket:
+                          </p>
+                          <p className="text-sm font-mono whitespace-pre-wrap break-all">
+                            {generateTicketFormat(
+                              manualFormData.constraint,
+                              manualFormData.customerName.trim(),
+                              manualFormData.serpo.trim(),
+                              manualFormData.fatId.trim(),
+                              manualFormData.hostname.trim(),
+                              manualFormData.snOnt.trim(),
+                              manualFormData.portText || undefined
+                            )}
+                          </p>
+                        </div>
+                      )}
+                      
+                      <Button onClick={handleSubmitManualTicket} className="w-full">
+                        Simpan Tiket Manual
+                      </Button>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+                <Button onClick={handleExportCSV} variant="outline" size="sm" className="h-6 sm:h-7 text-[9px] sm:text-[10px] px-1.5 sm:px-2">
+                  <Download className="h-3 w-3 mr-0.5 sm:mr-1" />
+                  <span className="hidden xs:inline">CSV</span>
+                  <span className="xs:hidden">↓</span>
                 </Button>
-              </DialogTrigger>
-              <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-                <DialogHeader>
-                  <DialogTitle>Input Tiket Manual</DialogTitle>
-                </DialogHeader>
-                <div className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label>Ticket ID *</Label>
-                      <Input
-                        value={manualFormData.ticketId}
-                        onChange={(e) => setManualFormData({ ...manualFormData, ticketId: e.target.value })}
-                        placeholder="INC12345678"
-                      />
-                    </div>
-                    <div>
-                      <Label>Service ID</Label>
-                      <Input
-                        value={manualFormData.serviceId}
-                        onChange={(e) => setManualFormData({ ...manualFormData, serviceId: e.target.value })}
-                        placeholder="Masukkan Service ID"
-                      />
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label>Customer Name</Label>
-                      <Input
-                        value={manualFormData.customerName}
-                        onChange={(e) => setManualFormData({ ...manualFormData, customerName: e.target.value })}
-                        placeholder="Nama pelanggan"
-                      />
-                    </div>
-                    <div>
-                      <Label>Serpo / Tim *</Label>
-                      <Input
-                        value={manualFormData.serpo}
-                        onChange={(e) => setManualFormData({ ...manualFormData, serpo: e.target.value })}
-                        placeholder="Nama tim"
-                      />
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label>Hostname OLT</Label>
-                      <Input
-                        value={manualFormData.hostname}
-                        onChange={(e) => setManualFormData({ ...manualFormData, hostname: e.target.value })}
-                        placeholder="Hostname OLT"
-                      />
-                    </div>
-                    <div>
-                      <Label>ID FAT</Label>
-                      <Input
-                        value={manualFormData.fatId}
-                        onChange={(e) => setManualFormData({ ...manualFormData, fatId: e.target.value })}
-                        placeholder="ID FAT"
-                      />
-                    </div>
-                  </div>
-                  <div>
-                    <Label>SN ONT</Label>
+              </div>
+            </CardHeader>
+            <CardContent className="p-1.5 sm:p-2 space-y-1.5 sm:space-y-2">
+              {/* Search filter untuk Daftar Tiket */}
+              <div className="flex flex-col xs:flex-row gap-1.5 sm:gap-2 xs:items-end">
+                <div className="w-full xs:w-28 sm:w-40">
+                  <Label className="text-[9px] sm:text-[10px]">Search By</Label>
+                  <Select value={ticketSearchField} onValueChange={setTicketSearchField}>
+                    <SelectTrigger className="h-6 sm:h-7 text-[9px] sm:text-[10px]">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Semua</SelectItem>
+                      <SelectItem value="ticketId">Ticket ID</SelectItem>
+                      <SelectItem value="category">Category</SelectItem>
+                      <SelectItem value="customerType">Customer/Type</SelectItem>
+                      <SelectItem value="serviceId">Service ID</SelectItem>
+                      <SelectItem value="constraint">Constraint</SelectItem>
+                      <SelectItem value="serpo">Serpo</SelectItem>
+                      <SelectItem value="status">Status</SelectItem>
+                      <SelectItem value="created">Created</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="flex-1">
+                  <Label className="text-[9px] sm:text-[10px]">Pencarian</Label>
+                  <div className="relative">
+                    <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3 w-3 text-muted-foreground" />
                     <Input
-                      value={manualFormData.snOnt}
-                      onChange={(e) => setManualFormData({ ...manualFormData, snOnt: e.target.value })}
-                      placeholder="SN ONT"
+                      placeholder={`Cari...`}
+                      value={ticketSearchQuery}
+                      onChange={(e) => setTicketSearchQuery(e.target.value)}
+                      className="h-6 sm:h-7 text-[10px] sm:text-xs pl-7"
                     />
                   </div>
-                  <div>
-                    <Label>Constraint *</Label>
-                    <Select
-                      value={manualFormData.constraint}
-                      onValueChange={(value) => setManualFormData({ ...manualFormData, constraint: value })}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Pilih constraint" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">
-                          RITEL
-                        </div>
-                        {ALL_CONSTRAINTS.filter(c => !FEEDER_CONSTRAINTS_SET.has(c)).map((c) => (
-                          <SelectItem key={c} value={c}>
-                            {c}
-                          </SelectItem>
-                        ))}
-                        <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground border-t mt-1">
-                          FEEDER (PROACTIVE NOC RETAIL)
-                        </div>
-                        {ALL_CONSTRAINTS.filter(c => FEEDER_CONSTRAINTS_SET.has(c)).map((c) => (
-                          <SelectItem key={c} value={c}>
-                            {c}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  
-                  {manualFormData.constraint === "PORT DOWN" && (
-                    <div>
-                      <Label>Port Info (Optional)</Label>
-                      <Input
-                        value={manualFormData.portText}
-                        onChange={(e) => setManualFormData({ ...manualFormData, portText: e.target.value })}
-                        placeholder="Contoh: PORT-1/1/1"
-                      />
-                    </div>
-                  )}
-                  
-                  {manualFormData.constraint && manualFormData.serpo && (
-                    <div className="p-3 bg-accent/50 rounded-lg space-y-1">
-                      <p className="text-xs font-semibold text-muted-foreground">
-                        Preview Format Tiket:
-                      </p>
-                      <p className="text-sm font-mono whitespace-pre-wrap break-all">
-                        {generateTicketFormat(
-                          manualFormData.constraint,
-                          manualFormData.customerName.trim(),
-                          manualFormData.serpo.trim(),
-                          manualFormData.fatId.trim(),
-                          manualFormData.hostname.trim(),
-                          manualFormData.snOnt.trim(),
-                          manualFormData.portText || undefined
-                        )}
-                      </p>
-                    </div>
-                  )}
-                  
-                  <Button onClick={handleSubmitManualTicket} className="w-full">
-                    Simpan Tiket Manual
-                  </Button>
                 </div>
-              </DialogContent>
-            </Dialog>
-            <Button onClick={handleExportCSV} variant="outline" size="sm" className="h-6 sm:h-7 text-[9px] sm:text-[10px] px-1.5 sm:px-2">
-              <Download className="h-3 w-3 mr-0.5 sm:mr-1" />
-              <span className="hidden xs:inline">CSV</span>
-              <span className="xs:hidden">↓</span>
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent className="p-1.5 sm:p-2 space-y-1.5 sm:space-y-2">
-          {/* Search filter untuk Daftar Tiket */}
-          <div className="flex flex-col xs:flex-row gap-1.5 sm:gap-2 xs:items-end">
-            <div className="w-full xs:w-28 sm:w-40">
-              <Label className="text-[9px] sm:text-[10px]">Search By</Label>
-              <Select value={ticketSearchField} onValueChange={setTicketSearchField}>
-                <SelectTrigger className="h-6 sm:h-7 text-[9px] sm:text-[10px]">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Semua</SelectItem>
-                  <SelectItem value="ticketId">Ticket ID</SelectItem>
-                  <SelectItem value="category">Category</SelectItem>
-                  <SelectItem value="customerType">Customer/Type</SelectItem>
-                  <SelectItem value="serviceId">Service ID</SelectItem>
-                  <SelectItem value="constraint">Constraint</SelectItem>
-                  <SelectItem value="serpo">Serpo</SelectItem>
-                  <SelectItem value="status">Status</SelectItem>
-                  <SelectItem value="created">Created</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="flex-1">
-              <Label className="text-[9px] sm:text-[10px]">Pencarian</Label>
-              <div className="relative">
-                <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3 w-3 text-muted-foreground" />
-                <Input
-                  placeholder={`Cari...`}
-                  value={ticketSearchQuery}
-                  onChange={(e) => setTicketSearchQuery(e.target.value)}
-                  className="h-6 sm:h-7 text-[10px] sm:text-xs pl-7"
-                />
               </div>
-            </div>
-          </div>
-          <div className="rounded-md border overflow-x-auto max-h-64 sm:max-h-72">
-            <Table className="min-w-[600px]">
-              <TableHeader>
-                <TableRow className="h-5">
-                  <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap">🎫 Ticket ID</TableHead>
-                  <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap">📦 Type</TableHead>
-                  <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap">👤 Customer/Type</TableHead>
-                  <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap">👨‍💼 Service ID</TableHead>
-                  <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap">👥 Serpo</TableHead>
-                  <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap">⚙️ Status</TableHead>
-                  <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap">⚡ Action</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {tickets.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={7} className="text-center text-muted-foreground text-[8px] sm:text-[9px] py-2">
-                      Belum ada tiket
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  filteredTickets.map((ticket) => (
-                    <TableRow key={ticket.id} className="h-6 sm:h-7">
-                      <TableCell className="px-1 sm:px-1.5 py-0.5 text-[9px] sm:text-[10px] font-medium">{ticket.id}</TableCell>
-                      <TableCell className="px-1 sm:px-1.5 py-0.5">
-                        <div>
-                          <Badge
-                            className={`text-[7px] sm:text-[8px] px-1 py-0 h-3 sm:h-3.5 ${
-                              ticket.category === "FEEDER"
-                                ? "bg-warning text-warning-foreground"
-                                : "bg-primary text-primary-foreground"
-                            }`}
-                          >
-                            {ticket.category}
-                          </Badge>
-                          <div className="text-[7px] sm:text-[8px] text-muted-foreground mt-0.5 truncate max-w-[80px] sm:max-w-none">
-                            {ticket.constraint}
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell className="px-1 sm:px-1.5 py-0.5 text-[9px] sm:text-[10px]">
-                        {ticket.category === "FEEDER" ? (
-                          ticket.constraint === "OLT DOWN" ? (
-                            <span className="font-medium">{ticket.hostname}</span>
-                          ) :
-                          ticket.constraint === "PORT DOWN" ? (
+              <div className="rounded-md border overflow-x-auto max-h-64 sm:max-h-72">
+                <Table className="min-w-[600px]">
+                  <TableHeader>
+                    <TableRow className="h-5">
+                      <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap">🎫 Ticket ID</TableHead>
+                      <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap">📦 Type</TableHead>
+                      <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap">👤 Customer/Type</TableHead>
+                      <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap">👨‍💼 Service ID</TableHead>
+                      <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap">👥 Serpo</TableHead>
+                      <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap">⚙️ Status</TableHead>
+                      <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap">⚡ Action</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {tickets.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={7} className="text-center text-muted-foreground text-[8px] sm:text-[9px] py-2">
+                          Belum ada tiket
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      filteredTickets.map((ticket) => (
+                        <TableRow key={ticket.id} className="h-6 sm:h-7">
+                          <TableCell className="px-1 sm:px-1.5 py-0.5 text-[9px] sm:text-[10px] font-medium">{ticket.id}</TableCell>
+                          <TableCell className="px-1 sm:px-1.5 py-0.5">
                             <div>
-                              <div className="font-medium text-[9px] sm:text-[10px]">{ticket.ticketResult.match(/PORT - (.*?) - DOWN/)?.[1] || "PORT"}</div>
-                              <div className="text-muted-foreground text-[7px] sm:text-[8px]">{ticket.hostname}</div>
+                              <Badge
+                                className={`text-[7px] sm:text-[8px] px-1 py-0 h-3 sm:h-3.5 ${
+                                  ticket.category === "FEEDER"
+                                    ? "bg-warning text-warning-foreground"
+                                    : "bg-primary text-primary-foreground"
+                                }`}
+                              >
+                                {ticket.category}
+                              </Badge>
+                              <div className="text-[7px] sm:text-[8px] text-muted-foreground mt-0.5 truncate max-w-[80px] sm:max-w-none">
+                                {ticket.constraint}
+                              </div>
                             </div>
-                          ) :
-                          ticket.constraint === "FAT LOSS" || ticket.constraint === "FAT LOW RX" ? (
+                          </TableCell>
+                          <TableCell className="px-1 sm:px-1.5 py-0.5 text-[9px] sm:text-[10px]">
+                            {ticket.category === "FEEDER" ? (
+                              ticket.constraint === "OLT DOWN" ? (
+                                <span className="font-medium">{ticket.hostname}</span>
+                              ) :
+                              ticket.constraint === "PORT DOWN" ? (
+                                <div>
+                                  <div className="font-medium text-[9px] sm:text-[10px]">{ticket.ticketResult.match(/PORT - (.*?) - DOWN/)?.[1] || "PORT"}</div>
+                                  <div className="text-muted-foreground text-[7px] sm:text-[8px]">{ticket.hostname}</div>
+                                </div>
+                              ) :
+                              ticket.constraint === "FAT LOSS" || ticket.constraint === "FAT LOW RX" ? (
+                                <div>
+                                  <div className="font-medium text-[9px] sm:text-[10px]">{ticket.fatId}</div>
+                                  <div className="text-muted-foreground text-[7px] sm:text-[8px]">{ticket.hostname}</div>
+                                </div>
+                              ) : ticket.constraint
+                            ) : ticket.customerName}
+                          </TableCell>
+                          <TableCell className="px-1 sm:px-1.5 py-0.5 font-mono text-[9px] sm:text-[10px]">{ticket.serviceId}</TableCell>
+                          <TableCell className="px-1 sm:px-1.5 py-0.5 text-[9px] sm:text-[10px]">{ticket.serpo}</TableCell>
+                          <TableCell className="px-1 sm:px-1.5 py-0.5">
                             <div>
-                              <div className="font-medium text-[9px] sm:text-[10px]">{ticket.fatId}</div>
-                              <div className="text-muted-foreground text-[7px] sm:text-[8px]">{ticket.hostname}</div>
+                              <StatusBadge status={ticket.status} />
+                              <div className="text-[7px] sm:text-[8px] text-muted-foreground mt-0.5">
+                                {ticket.createdAt}
+                              </div>
                             </div>
-                          ) : ticket.constraint
-                        ) : ticket.customerName}
-                      </TableCell>
-                      <TableCell className="px-1 sm:px-1.5 py-0.5 font-mono text-[9px] sm:text-[10px]">{ticket.serviceId}</TableCell>
-                      <TableCell className="px-1 sm:px-1.5 py-0.5 text-[9px] sm:text-[10px]">{ticket.serpo}</TableCell>
-                      <TableCell className="px-1 sm:px-1.5 py-0.5">
-                        <div>
-                          <StatusBadge status={ticket.status} />
-                          <div className="text-[7px] sm:text-[8px] text-muted-foreground mt-0.5">
-                            {ticket.createdAt}
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell className="px-1 sm:px-1.5 py-0.5">
-                        <div className="flex gap-1">
-                          <Dialog>
-                            <DialogTrigger asChild>
-                              <Button size="sm" variant="outline" className="h-5 text-[7px] sm:text-[8px] px-1 sm:px-1.5">
-                                Detail
-                              </Button>
-                            </DialogTrigger>
-                            <DialogContent className="max-w-2xl">
-                              <DialogHeader>
-                                <DialogTitle>Detail Tiket {ticket.id}</DialogTitle>
-                              </DialogHeader>
-                              <div className="space-y-3">
-                                <div className="grid grid-cols-2 gap-3 text-sm">
-                                  <div>
-                                    <span className="text-muted-foreground">Category:</span>
-                                    <p className="font-medium">{ticket.category}</p>
-                                  </div>
-                                  <div>
-                                    <span className="text-muted-foreground">Status:</span>
-                                    <div className="mt-1">
-                                      <StatusBadge status={ticket.status} />
+                          </TableCell>
+                          <TableCell className="px-1 sm:px-1.5 py-0.5">
+                            <div className="flex gap-1">
+                              <Dialog>
+                                <DialogTrigger asChild>
+                                  <Button size="sm" variant="outline" className="h-5 text-[7px] sm:text-[8px] px-1 sm:px-1.5">
+                                    Detail
+                                  </Button>
+                                </DialogTrigger>
+                                <DialogContent className="max-w-2xl">
+                                  <DialogHeader>
+                                    <DialogTitle>Detail Tiket {ticket.id}</DialogTitle>
+                                  </DialogHeader>
+                                  <div className="space-y-3">
+                                    <div className="grid grid-cols-2 gap-3 text-sm">
+                                      <div>
+                                        <span className="text-muted-foreground">Category:</span>
+                                        <p className="font-medium">{ticket.category}</p>
+                                      </div>
+                                      <div>
+                                        <span className="text-muted-foreground">Status:</span>
+                                        <div className="mt-1">
+                                          <StatusBadge status={ticket.status} />
+                                        </div>
+                                      </div>
+                                      <div>
+                                        <span className="text-muted-foreground">Constraint:</span>
+                                        <p className="font-medium">{ticket.constraint}</p>
+                                      </div>
+                                      <div>
+                                        <span className="text-muted-foreground">Serpo/Tim:</span>
+                                        <p className="font-medium">{ticket.serpo}</p>
+                                      </div>
+                                      <div>
+                                        <span className="text-muted-foreground">Customer:</span>
+                                        <p className="font-medium">{ticket.customerName}</p>
+                                      </div>
+                                      <div>
+                                        <span className="text-muted-foreground">Service ID:</span>
+                                        <p className="font-mono text-xs">{ticket.serviceId}</p>
+                                      </div>
+                                      <div>
+                                        <span className="text-muted-foreground">Hostname OLT:</span>
+                                        <p className="font-medium">{ticket.hostname}</p>
+                                      </div>
+                                      <div>
+                                        <span className="text-muted-foreground">ID FAT:</span>
+                                        <p className="font-mono text-xs">{ticket.fatId}</p>
+                                      </div>
+                                      <div>
+                                        <span className="text-muted-foreground">SN ONT:</span>
+                                        <p className="font-mono text-xs">{ticket.snOnt}</p>
+                                      </div>
+                                      <div>
+                                        <span className="text-muted-foreground">Created:</span>
+                                        <p className="text-xs">{ticket.createdAt}</p>
+                                      </div>
+                                    </div>
+                                    <div className="pt-3 border-t">
+                                      <span className="text-muted-foreground text-sm">Format Tiket:</span>
+                                      <div className="mt-2 p-3 bg-muted/50 rounded-lg">
+                                        <p className="font-mono text-sm whitespace-pre-wrap break-all">
+                                          {ticket.ticketResult}
+                                        </p>
+                                      </div>
+                                    </div>
+                                    <div className="flex gap-2 pt-3">
+                                      <Select
+                                        value={ticket.status}
+                                        onValueChange={(value: any) => {
+                                          updateTicket(ticket.id, { status: value });
+                                          toast.success(`Status tiket ${ticket.id} berhasil diubah menjadi ${value}`);
+                                        }}
+                                      >
+                                        <SelectTrigger className="flex-1">
+                                          <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                          <SelectItem value="On Progress">On Progres</SelectItem>
+                                          <SelectItem value="Critical">Critical</SelectItem>
+                                          <SelectItem value="Resolved">Resolved</SelectItem>
+                                          <SelectItem value="Pending">Pending</SelectItem>
+                                        </SelectContent>
+                                      </Select>
+                                      <Button
+                                        variant="destructive"
+                                        onClick={() => {
+                                          deleteTicket(ticket.id);
+                                          toast.success("Tiket dihapus");
+                                        }}
+                                      >
+                                        <Trash2 className="h-4 w-4 mr-2" />
+                                        Hapus
+                                      </Button>
                                     </div>
                                   </div>
-                                  <div>
-                                    <span className="text-muted-foreground">Constraint:</span>
-                                    <p className="font-medium">{ticket.constraint}</p>
-                                  </div>
-                                  <div>
-                                    <span className="text-muted-foreground">Serpo/Tim:</span>
-                                    <p className="font-medium">{ticket.serpo}</p>
-                                  </div>
-                                  <div>
-                                    <span className="text-muted-foreground">Customer:</span>
-                                    <p className="font-medium">{ticket.customerName}</p>
-                                  </div>
-                                  <div>
-                                    <span className="text-muted-foreground">Service ID:</span>
-                                    <p className="font-mono text-xs">{ticket.serviceId}</p>
-                                  </div>
-                                  <div>
-                                    <span className="text-muted-foreground">Hostname OLT:</span>
-                                    <p className="font-medium">{ticket.hostname}</p>
-                                  </div>
-                                  <div>
-                                    <span className="text-muted-foreground">ID FAT:</span>
-                                    <p className="font-mono text-xs">{ticket.fatId}</p>
-                                  </div>
-                                  <div>
-                                    <span className="text-muted-foreground">SN ONT:</span>
-                                    <p className="font-mono text-xs">{ticket.snOnt}</p>
-                                  </div>
-                                  <div>
-                                    <span className="text-muted-foreground">Created:</span>
-                                    <p className="text-xs">{ticket.createdAt}</p>
-                                  </div>
-                                </div>
-                                <div className="pt-3 border-t">
-                                  <span className="text-muted-foreground text-sm">Format Tiket:</span>
-                                  <div className="mt-2 p-3 bg-muted/50 rounded-lg">
-                                    <p className="font-mono text-sm whitespace-pre-wrap break-all">
-                                      {ticket.ticketResult}
-                                    </p>
-                                  </div>
-                                </div>
-                                <div className="flex gap-2 pt-3">
-                                  <Select
-                                    value={ticket.status}
-                                    onValueChange={(value: any) => {
-                                      updateTicket(ticket.id, { status: value });
-                                      toast.success(`Status tiket ${ticket.id} berhasil diubah menjadi ${value}`);
-                                    }}
-                                  >
-                                    <SelectTrigger className="flex-1">
-                                      <SelectValue />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                      <SelectItem value="On Progress">On Progres</SelectItem>
-                                      <SelectItem value="Critical">Critical</SelectItem>
-                                      <SelectItem value="Resolved">Resolved</SelectItem>
-                                      <SelectItem value="Pending">Pending</SelectItem>
-                                    </SelectContent>
-                                  </Select>
-                                  <Button
-                                    variant="destructive"
-                                    onClick={() => {
-                                      deleteTicket(ticket.id);
-                                      toast.success("Tiket dihapus");
-                                    }}
-                                  >
-                                    <Trash2 className="h-4 w-4 mr-2" />
-                                    Hapus
-                                  </Button>
-                                </div>
-                              </div>
-                            </DialogContent>
-                          </Dialog>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          </div>
-        </CardContent>
-      </Card>
+                                </DialogContent>
+                              </Dialog>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="preview" className="mt-2 sm:mt-3">
+          <Card className="shadow-sm border">
+            <CardContent className="p-4 sm:p-6">
+              <div className="text-center text-muted-foreground text-sm">
+                <p>📊 Tab Preview - Konten tambahan dapat ditambahkan di sini</p>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
