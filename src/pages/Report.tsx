@@ -906,8 +906,7 @@ function PendingTicketsList() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <FileText className="h-5 w-5" />
-            Format Tiket Belum Dikerjakan
+            📋Format Tiket Belum Dikerjakan
           </CardTitle>
           <CardDescription>
             Parse dan kelompokkan tiket berdasarkan tim terkait
