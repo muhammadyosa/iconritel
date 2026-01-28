@@ -539,13 +539,13 @@ export default function TicketManagement() {
         </Card>
       )}
 
-      <Tabs defaultValue="daftar-tiket" className="w-full">
+      <Tabs defaultValue="daftar-ticket" className="w-full">
         <TabsList className="grid w-full max-w-md grid-cols-2">
-          <TabsTrigger value="daftar-tiket">📋 Daftar Tiket</TabsTrigger>
+          <TabsTrigger value="daftar-ticket">📑Daftar Ticket</TabsTrigger>
           <TabsTrigger value="preview">📊 Preview</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="daftar-tiket" className="mt-2 sm:mt-3">
+        <TabsContent value="daftar-ticket" className="mt-2 sm:mt-3">
           <Card className="shadow-sm border">
             <CardHeader className="py-1.5 sm:py-2 px-2 sm:px-3 border-b bg-muted/30 flex flex-row items-center justify-between gap-2">
               <CardTitle className="text-xs sm:text-sm whitespace-nowrap">📋 Daftar Tiket ({filteredTickets.length})</CardTitle>
