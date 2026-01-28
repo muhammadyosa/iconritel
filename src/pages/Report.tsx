@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Card,
@@ -19,8 +19,29 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "@/hooks/use-toast";
-import { FileText, Download } from "lucide-react";
+import { FileText, Download, ClipboardList, Trash2 } from "lucide-react";
 import { z } from "zod";
+import { Ticket } from "@/types/ticket";
+import { StatusBadge } from "@/components/StatusBadge";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 // Validation schemas for form inputs
 const shiftReportSchema = z.object({
@@ -279,9 +300,10 @@ Dibuat: ${new Date(r.createdAt).toLocaleString("id-ID")}
       </div>
 
       <Tabs defaultValue="shift" className="w-full">
-        <TabsList className="grid w-full max-w-lg grid-cols-2">
+        <TabsList className="grid w-full max-w-2xl grid-cols-3">
           <TabsTrigger value="shift">🗣️ Report Shift</TabsTrigger>
-          <TabsTrigger value="sla">⏰ Report OVER SLA 7 JAM</TabsTrigger>
+          <TabsTrigger value="sla">⏰ OVER SLA 7 JAM</TabsTrigger>
+          <TabsTrigger value="pending">📋 Belum Dikerjakan</TabsTrigger>
         </TabsList>
 
         <TabsContent value="shift" className="space-y-4">
@@ -546,9 +568,203 @@ UPDATE : `}
             </CardContent>
           </Card>
         </TabsContent>
+
+        <TabsContent value="pending" className="space-y-4">
+          <PendingTicketsList />
+        </TabsContent>
       </Tabs>
     </div>
   );
 };
+
+// Component for Pending Tickets List
+function PendingTicketsList() {
+  const [tickets, setTickets] = useState<Ticket[]>([]);
+  const STORAGE_KEY = "noc_tickets";
+
+  useEffect(() => {
+    const loadTickets = () => {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+          const allTickets: Ticket[] = JSON.parse(saved);
+          const pendingTickets = allTickets.filter(t => t.status === "Pending");
+          setTickets(pendingTickets);
+        }
+      } catch (error) {
+        console.error("Error loading tickets:", error);
+      }
+    };
+
+    loadTickets();
+    
+    // Listen to storage changes
+    const handleStorageChange = () => loadTickets();
+    window.addEventListener("storage", handleStorageChange);
+    
+    return () => window.removeEventListener("storage", handleStorageChange);
+  }, []);
+
+  const handleUpdateStatus = (id: string, newStatus: Ticket["status"]) => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        const allTickets: Ticket[] = JSON.parse(saved);
+        const updated = allTickets.map(t => 
+          t.id === id ? { ...t, status: newStatus } : t
+        );
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+        setTickets(updated.filter(t => t.status === "Pending"));
+        toast({
+          title: "Status diperbarui",
+          description: `Tiket berhasil diubah ke ${newStatus}`,
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Gagal update",
+        description: "Tidak dapat memperbarui status tiket.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDeleteTicket = (id: string) => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        const allTickets: Ticket[] = JSON.parse(saved);
+        const updated = allTickets.filter(t => t.id !== id);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+        setTickets(updated.filter(t => t.status === "Pending"));
+        toast({
+          title: "Tiket dihapus",
+          description: "Tiket berhasil dihapus dari sistem.",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Gagal hapus",
+        description: "Tidak dapat menghapus tiket.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const formatDate = (iso: string) => {
+    const date = new Date(iso);
+    return date.toLocaleDateString("id-ID", {
+      day: "2-digit",
+      month: "short",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <ClipboardList className="h-5 w-5" />
+          List Tiket Belum Dikerjakan
+        </CardTitle>
+        <CardDescription>
+          Daftar tiket dengan status Pending yang belum dikerjakan ({tickets.length} tiket)
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        {tickets.length === 0 ? (
+          <div className="text-center py-8 text-muted-foreground">
+            <ClipboardList className="h-12 w-12 mx-auto mb-3 opacity-50" />
+            <p className="text-sm">Tidak ada tiket pending</p>
+            <p className="text-xs">Semua tiket sudah dalam proses atau selesai</p>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="text-xs w-[80px]">📅 Waktu</TableHead>
+                  <TableHead className="text-xs">👨‍💼 Service ID</TableHead>
+                  <TableHead className="text-xs">👤 Customer</TableHead>
+                  <TableHead className="text-xs w-[80px]">📊 Type</TableHead>
+                  <TableHead className="text-xs w-[80px]">Status</TableHead>
+                  <TableHead className="text-xs w-[120px]">Aksi</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {tickets.map((ticket) => (
+                  <TableRow key={ticket.id}>
+                    <TableCell className="text-xs font-mono">
+                      {formatDate(ticket.createdISO)}
+                    </TableCell>
+                    <TableCell className="text-xs font-mono">
+                      {ticket.serviceId || "-"}
+                    </TableCell>
+                    <TableCell className="text-xs">
+                      {ticket.customerName || "-"}
+                    </TableCell>
+                    <TableCell>
+                      <span className={`text-[10px] px-1.5 py-0.5 rounded ${
+                        ticket.category === "RITEL" 
+                          ? "bg-blue-500/10 text-blue-600" 
+                          : "bg-orange-500/10 text-orange-600"
+                      }`}>
+                        {ticket.category}
+                      </span>
+                    </TableCell>
+                    <TableCell>
+                      <StatusBadge status={ticket.status} />
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex gap-1">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="h-6 text-[10px] px-2"
+                          onClick={() => handleUpdateStatus(ticket.id, "On Progress")}
+                        >
+                          Proses
+                        </Button>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="h-6 w-6 p-0 text-destructive hover:text-destructive"
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Hapus Tiket?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Tiket {ticket.serviceId} akan dihapus permanen. Aksi ini tidak dapat dibatalkan.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Batal</AlertDialogCancel>
+                              <AlertDialogAction
+                                onClick={() => handleDeleteTicket(ticket.id)}
+                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                              >
+                                Hapus
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
 
 export default Report;
