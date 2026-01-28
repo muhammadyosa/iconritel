@@ -408,7 +408,7 @@ export default function TicketManagement() {
       <Tabs defaultValue="preview-data" className="w-full">
         <TabsList className="grid w-full max-w-md grid-cols-2">
           <TabsTrigger value="preview-data">📋 Preview Data</TabsTrigger>
-          <TabsTrigger value="daftar-ticket">📑 Daftar Ticket</TabsTrigger>
+          <TabsTrigger value="daftar-ticket">📑 Daftar Insident</TabsTrigger>
         </TabsList>
 
         <TabsContent value="preview-data" className="mt-2 sm:mt-3 space-y-2 sm:space-y-3">
