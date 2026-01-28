@@ -577,9 +577,91 @@ UPDATE : `}
   );
 };
 
+// Team definitions by region
+const TEAM_REGIONS: Record<string, string[]> = {
+  LAMPUNG: [
+    "SIB PESAWARAN", "SIB PRINGSEWU", "GSP TANGGAMUS", "INTERNAL LAMPUNG",
+    "TTM LAMPUNG TENGAH", "SIB BANDAR LAMPUNG", "SERPO TEGINENENG", "SERPO SUTAMI",
+    "SERPO RAJABASA", "SERPO PRINGSEWU", "SERPO MENGGALA", "SERPO RUMBIA",
+    "SERPO KOTA BUMI", "SERPO KALIANDA", "SERPO PAHAWANG"
+  ],
+  SUMSEL: [
+    "REG7 PALEMBANG 1", "REG7 PALEMBANG 2", "REG7 PALEMBANG 3", "INTERNAL SUMSEL",
+    "IKR OKU TIMUR", "TTM INDRALAYA", "INTERNAL LAHAT", "GSP LUBUK LINGGAU",
+    "GSP PRABU PANGKUL", "SIB BANYUASIN", "SIB MUARA ENIM - TJ ENIM", "SIB PAGARALAM",
+    "SIB LAHAT", "SIB EMPAT LAWANG", "SERPO PALEMBANG KOTA", "SERPO LAHAT",
+    "SERPO PAGAR ALAM", "SERPO BUKIT ASAM", "SERPO PRABUMULIH", "SERPO LINGGAU",
+    "SERPO MARTAPURA", "SERPO SEKAYU", "SERPO TUGUMULYO", "SERPO BATURAJA",
+    "SERPO SUNGAI LILIN", "SERPO BETUNG", "SERPO KAYU AGUNG", "SERPO INDRALAYA",
+    "SERPO TEBING", "SERPO BELITANG", "SERPO DEMANG", "SERPO MASKAREBET", "SERPO JAKABARING"
+  ],
+  JAMBI: [
+    "INTERNAL JAMBI", "TTM SAROLANGUN", "TTM MERANGIN", "GSP MUARA BULIAN",
+    "GSP JAMBI 2", "GSP SUNGAI PENUH", "GSP TEBO", "SERPO BUNGO",
+    "SERPO PAYOSELINCAH", "SERPO JAMBI KOTA", "SERPO SAROLANGUN",
+    "SERPO MUARA BULIAN", "SERPO BANGKO", "SERPO SUNGAI PENUH",
+    "SERPO TEBO", "SERPO KUALA TUNGKAL"
+  ],
+  BENGKULU: [
+    "GSP BENGKULU 1", "GSP BENGKULU 2", "SIB LEBONG", "TTM KAUR BINTUHAN",
+    "SIB CURUP", "GSP MANNA-KAUR", "GSP MUKO-MUKO", "GSP BENTENG-MUARABANGKAHULU",
+    "SERPO SUKAMERINDU", "SERPO ARGA MAKMUR", "SERPO MANNA", "SERPO PEKALONGAN",
+    "SERPO MUKO-MUKO", "SERPO KAUR"
+  ],
+  BANGKA: [
+    "BANGKA REG 7", "TTM SUNGAI LIAT", "SIB BELITUNG", "SIB BANGKA BARAT",
+    "BHMA MUNTOK", "BHMA TOBOALI", "TTM TOBOALI", "SERPO KOBA (Tarapti)",
+    "SERPO PANGKAL PINANG", "SERPO KOBA", "SERPO KELAPA", "SERPO MANGGAR",
+    "SERPO BELITUNG", "SERPO SUNGAI LIAT"
+  ],
+};
+
+// Interface for parsed pending ticket
+interface ParsedPendingTicket {
+  duration: string;
+  durationMinutes: number;
+  ticketId: string;
+  type: string;
+  description: string;
+  team: string;
+  region: string;
+}
+
+// Function to extract team from description
+function extractTeam(description: string): { team: string; region: string } {
+  const normalizedDesc = description.toUpperCase();
+  
+  for (const [region, teams] of Object.entries(TEAM_REGIONS)) {
+    for (const team of teams) {
+      if (normalizedDesc.includes(team.toUpperCase())) {
+        return { team, region };
+      }
+    }
+  }
+  
+  return { team: "UNKNOWN", region: "LAINNYA" };
+}
+
+// Function to parse duration to minutes for sorting
+function parseDurationToMinutes(duration: string): number {
+  let total = 0;
+  const dayMatch = duration.match(/(\d+)\s*HARI/i);
+  const hourMatch = duration.match(/(\d+)\s*JAM/i);
+  const minuteMatch = duration.match(/(\d+)\s*MENIT/i);
+  
+  if (dayMatch) total += parseInt(dayMatch[1]) * 24 * 60;
+  if (hourMatch) total += parseInt(hourMatch[1]) * 60;
+  if (minuteMatch) total += parseInt(minuteMatch[1]);
+  
+  return total;
+}
+
 // Component for Pending Tickets List
 function PendingTicketsList() {
   const [tickets, setTickets] = useState<Ticket[]>([]);
+  const [pendingInput, setPendingInput] = useState("");
+  const [pendingResult, setPendingResult] = useState("");
+  const [parsedPendingTickets, setParsedPendingTickets] = useState<ParsedPendingTicket[]>([]);
   const STORAGE_KEY = "noc_tickets";
 
   useEffect(() => {
@@ -661,109 +743,391 @@ function PendingTicketsList() {
     });
   };
 
+  // Parse pending input and generate formatted output
+  const handlePendingGenerate = () => {
+    if (!pendingInput.trim()) {
+      toast({
+        title: "Input kosong",
+        description: "Mohon masukkan data tiket.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const lines = pendingInput.trim().split("\n").filter(line => line.trim());
+    const parsedTickets: ParsedPendingTicket[] = [];
+
+    for (const line of lines) {
+      // Split by tab character
+      const parts = line.split("\t").map(p => p.trim()).filter(p => p);
+      
+      if (parts.length >= 3) {
+        const duration = parts[0];
+        const durationMinutes = parseDurationToMinutes(duration);
+        
+        // Handle different formats
+        let ticketId = "";
+        let type = "";
+        let description = "";
+        
+        if (parts.length >= 4) {
+          ticketId = parts[1];
+          type = parts[2];
+          description = parts.slice(3).join(" ");
+        } else {
+          // Format: DURATION \t TICKET_ID TYPE \t DESCRIPTION
+          // or: DURATION \t TICKET_ID \t TYPE+DESCRIPTION
+          const secondPart = parts[1];
+          const ticketMatch = secondPart.match(/^(\d+)/);
+          if (ticketMatch) {
+            ticketId = ticketMatch[1];
+            const rest = secondPart.substring(ticketId.length).trim();
+            if (rest) {
+              type = rest;
+            } else {
+              type = parts[2] || "";
+            }
+          } else {
+            ticketId = parts[1];
+            type = parts[2] || "";
+          }
+          description = parts.slice(2).join(" ");
+        }
+
+        const { team, region } = extractTeam(description);
+
+        parsedTickets.push({ 
+          duration, 
+          durationMinutes,
+          ticketId, 
+          type, 
+          description,
+          team,
+          region
+        });
+      }
+    }
+
+    if (parsedTickets.length === 0) {
+      toast({
+        title: "Format tidak valid",
+        description: "Pastikan format input sesuai: DURASI[TAB]ID_TIKET[TAB]TYPE[TAB]DESKRIPSI",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setParsedPendingTickets(parsedTickets);
+
+    // Group tickets by team
+    const ticketsByTeam: Record<string, ParsedPendingTicket[]> = {};
+    for (const ticket of parsedTickets) {
+      if (!ticketsByTeam[ticket.team]) {
+        ticketsByTeam[ticket.team] = [];
+      }
+      ticketsByTeam[ticket.team].push(ticket);
+    }
+
+    // Sort tickets within each team by duration (highest first)
+    for (const team in ticketsByTeam) {
+      ticketsByTeam[team].sort((a, b) => b.durationMinutes - a.durationMinutes);
+    }
+
+    // Generate formatted output grouped by team
+    const today = new Date();
+    const dateStr = today.toLocaleDateString("id-ID", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    }).toUpperCase();
+
+    const teamOrder = Object.keys(ticketsByTeam).sort((a, b) => {
+      // Get max duration for each team for sorting
+      const maxA = Math.max(...ticketsByTeam[a].map(t => t.durationMinutes));
+      const maxB = Math.max(...ticketsByTeam[b].map(t => t.durationMinutes));
+      return maxB - maxA;
+    });
+
+    let formattedOutput = "";
+    for (const team of teamOrder) {
+      const teamTickets = ticketsByTeam[team];
+      formattedOutput += `LIST TIKET YANG BELUM DI KERJAKAN TANGGAL ${dateStr}\n`;
+      formattedOutput += `TIM: ${team}\n\n`;
+      
+      for (const ticket of teamTickets) {
+        formattedOutput += `${ticket.duration}\n`;
+        formattedOutput += `${ticket.ticketId}\n`;
+        formattedOutput += `${ticket.type}\t${ticket.description}\n\n`;
+      }
+      formattedOutput += "\n";
+    }
+
+    setPendingResult(formattedOutput.trim());
+
+    toast({
+      title: "Format berhasil",
+      description: `${parsedTickets.length} tiket dikelompokkan ke ${teamOrder.length} tim.`,
+    });
+  };
+
+  const handlePendingCopy = () => {
+    if (!pendingResult) {
+      toast({
+        title: "Tidak ada hasil",
+        description: "Generate format terlebih dahulu.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    navigator.clipboard.writeText(pendingResult).then(() => {
+      toast({
+        title: "Berhasil disalin",
+        description: "Hasil format telah disalin ke clipboard.",
+      });
+    }).catch(() => {
+      toast({
+        title: "Gagal menyalin",
+        description: "Tidak dapat menyalin ke clipboard.",
+        variant: "destructive",
+      });
+    });
+  };
+
+  const handlePendingClear = () => {
+    setPendingInput("");
+    setPendingResult("");
+    setParsedPendingTickets([]);
+  };
+
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <ClipboardList className="h-5 w-5" />
-          List Tiket Belum Dikerjakan
-        </CardTitle>
-        <CardDescription>
-          Daftar tiket dengan status Pending yang belum dikerjakan ({tickets.length} tiket)
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        {tickets.length === 0 ? (
-          <div className="text-center py-8 text-muted-foreground">
-            <ClipboardList className="h-12 w-12 mx-auto mb-3 opacity-50" />
-            <p className="text-sm">Tidak ada tiket pending</p>
-            <p className="text-xs">Semua tiket sudah dalam proses atau selesai</p>
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="text-xs w-[80px]">📅 Waktu</TableHead>
-                  <TableHead className="text-xs">👨‍💼 Service ID</TableHead>
-                  <TableHead className="text-xs">👤 Customer</TableHead>
-                  <TableHead className="text-xs w-[80px]">📊 Type</TableHead>
-                  <TableHead className="text-xs w-[80px]">Status</TableHead>
-                  <TableHead className="text-xs w-[120px]">Aksi</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {tickets.map((ticket) => (
-                  <TableRow key={ticket.id}>
-                    <TableCell className="text-xs font-mono">
-                      {formatDate(ticket.createdISO)}
-                    </TableCell>
-                    <TableCell className="text-xs font-mono">
-                      {ticket.serviceId || "-"}
-                    </TableCell>
-                    <TableCell className="text-xs">
-                      {ticket.customerName || "-"}
-                    </TableCell>
-                    <TableCell>
-                      <span className={`text-[10px] px-1.5 py-0.5 rounded ${
-                        ticket.category === "RITEL" 
-                          ? "bg-blue-500/10 text-blue-600" 
-                          : "bg-orange-500/10 text-orange-600"
-                      }`}>
-                        {ticket.category}
-                      </span>
-                    </TableCell>
-                    <TableCell>
-                      <StatusBadge status={ticket.status} />
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex gap-1">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="h-6 text-[10px] px-2"
-                          onClick={() => handleUpdateStatus(ticket.id, "On Progress")}
-                        >
-                          Proses
-                        </Button>
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              className="h-6 w-6 p-0 text-destructive hover:text-destructive"
-                            >
-                              <Trash2 className="h-3 w-3" />
-                            </Button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>Hapus Tiket?</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                Tiket {ticket.serviceId} akan dihapus permanen. Aksi ini tidak dapat dibatalkan.
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>Batal</AlertDialogCancel>
-                              <AlertDialogAction
-                                onClick={() => handleDeleteTicket(ticket.id)}
-                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                              >
-                                Hapus
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
+    <div className="space-y-4">
+      {/* Parser Card */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <FileText className="h-5 w-5" />
+            Format Tiket Belum Dikerjakan
+          </CardTitle>
+          <CardDescription>
+            Parse dan kelompokkan tiket berdasarkan tim terkait
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            {/* Input Section */}
+            <div className="space-y-3">
+              <div className="space-y-2">
+                <Label htmlFor="pendingInput" className="flex items-center gap-2">
+                  <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded">INPUT</span>
+                  Data Tiket
+                </Label>
+                <Textarea
+                  id="pendingInput"
+                  placeholder={`Paste data tiket dengan format (pisahkan dengan TAB):
+DURASI[TAB]ID_TIKET[TAB]TYPE[TAB]DESKRIPSI
+
+Contoh:
+1 HARI 2 JAM 57 MENIT	26012107781	FTTH AKSES	RESTI LINK LOSS - SIB PESAWARAN...
+4 JAM 45 MENIT	26012108073	FTTH AKSES	SISWANTO ONT PROBLEM - TTM LAMPUNG TENGAH...`}
+                  rows={8}
+                  className="font-mono text-xs"
+                  value={pendingInput}
+                  onChange={(e) => setPendingInput(e.target.value)}
+                />
+              </div>
+              
+              <div className="flex gap-2 flex-wrap">
+                <Button onClick={handlePendingGenerate} className="flex-1 min-w-[120px]">
+                  <FileText className="mr-2 h-4 w-4" />
+                  Generate
+                </Button>
+                <Button variant="outline" onClick={handlePendingClear} className="flex-1 min-w-[80px]">
+                  Clear
+                </Button>
+              </div>
+
+              {/* Parsed tickets preview */}
+              {parsedPendingTickets.length > 0 && (
+                <div className="border rounded-lg p-3 bg-muted/50">
+                  <p className="text-xs font-medium text-muted-foreground mb-2">
+                    📊 {parsedPendingTickets.length} Tiket Terdeteksi:
+                  </p>
+                  <div className="space-y-1 max-h-[150px] overflow-y-auto">
+                    {parsedPendingTickets.map((ticket, idx) => (
+                      <div key={idx} className="text-xs flex items-start gap-2 p-1.5 bg-background rounded border">
+                        <span className="font-mono text-destructive whitespace-nowrap">{ticket.duration}</span>
+                        <span className="font-mono font-medium">{ticket.ticketId}</span>
+                        <span className="text-primary font-medium">{ticket.team}</span>
                       </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Output Section */}
+            <div className="space-y-3">
+              <div className="space-y-2">
+                <Label htmlFor="pendingResult" className="flex items-center gap-2">
+                  <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded">HASIL</span>
+                  Format per Tim
+                </Label>
+                <Textarea
+                  id="pendingResult"
+                  placeholder="Hasil format akan muncul di sini..."
+                  rows={8}
+                  className="font-mono text-xs"
+                  value={pendingResult}
+                  readOnly
+                />
+              </div>
+              
+              <Button 
+                variant="secondary" 
+                onClick={handlePendingCopy} 
+                disabled={!pendingResult}
+                className="w-full"
+              >
+                <Download className="mr-2 h-4 w-4" />
+                Copy
+              </Button>
+            </div>
           </div>
-        )}
-      </CardContent>
-    </Card>
+
+          {/* Team Reference */}
+          <div className="border rounded-lg p-3 bg-muted/30">
+            <p className="text-xs font-medium mb-2">🗺️ Daftar Tim per Region:</p>
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-2 text-[10px]">
+              <div>
+                <span className="font-semibold text-primary">LAMPUNG:</span>
+                <span className="text-muted-foreground"> SIB PESAWARAN, TTM LAMPUNG TENGAH, dll</span>
+              </div>
+              <div>
+                <span className="font-semibold text-primary">SUMSEL:</span>
+                <span className="text-muted-foreground"> REG7 PALEMBANG, SIB BANYUASIN, dll</span>
+              </div>
+              <div>
+                <span className="font-semibold text-primary">JAMBI:</span>
+                <span className="text-muted-foreground"> INTERNAL JAMBI, GSP TEBO, dll</span>
+              </div>
+              <div>
+                <span className="font-semibold text-primary">BENGKULU:</span>
+                <span className="text-muted-foreground"> GSP BENGKULU, SIB CURUP, dll</span>
+              </div>
+              <div>
+                <span className="font-semibold text-primary">BANGKA:</span>
+                <span className="text-muted-foreground"> BANGKA REG 7, SIB BELITUNG, dll</span>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Existing Pending Tickets Table */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <ClipboardList className="h-5 w-5" />
+            Tiket Pending di Sistem
+          </CardTitle>
+          <CardDescription>
+            Daftar tiket dengan status Pending dari sistem ({tickets.length} tiket)
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {tickets.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">
+              <ClipboardList className="h-12 w-12 mx-auto mb-3 opacity-50" />
+              <p className="text-sm">Tidak ada tiket pending</p>
+              <p className="text-xs">Semua tiket sudah dalam proses atau selesai</p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="text-xs w-[80px]">📅 Waktu</TableHead>
+                    <TableHead className="text-xs">👨‍💼 Service ID</TableHead>
+                    <TableHead className="text-xs">👤 Customer</TableHead>
+                    <TableHead className="text-xs w-[80px]">📊 Type</TableHead>
+                    <TableHead className="text-xs w-[80px]">Status</TableHead>
+                    <TableHead className="text-xs w-[120px]">Aksi</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {tickets.map((ticket) => (
+                    <TableRow key={ticket.id}>
+                      <TableCell className="text-xs font-mono">
+                        {formatDate(ticket.createdISO)}
+                      </TableCell>
+                      <TableCell className="text-xs font-mono">
+                        {ticket.serviceId || "-"}
+                      </TableCell>
+                      <TableCell className="text-xs">
+                        {ticket.customerName || "-"}
+                      </TableCell>
+                      <TableCell>
+                        <span className={`text-[10px] px-1.5 py-0.5 rounded ${
+                          ticket.category === "RITEL" 
+                            ? "bg-blue-500/10 text-blue-600" 
+                            : "bg-orange-500/10 text-orange-600"
+                        }`}>
+                          {ticket.category}
+                        </span>
+                      </TableCell>
+                      <TableCell>
+                        <StatusBadge status={ticket.status} />
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex gap-1">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-6 text-[10px] px-2"
+                            onClick={() => handleUpdateStatus(ticket.id, "On Progress")}
+                          >
+                            Proses
+                          </Button>
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="h-6 w-6 p-0 text-destructive hover:text-destructive"
+                              >
+                                <Trash2 className="h-3 w-3" />
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Hapus Tiket?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Tiket {ticket.serviceId} akan dihapus permanen. Aksi ini tidak dapat dibatalkan.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Batal</AlertDialogCancel>
+                                <AlertDialogAction
+                                  onClick={() => handleDeleteTicket(ticket.id)}
+                                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                >
+                                  Hapus
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
   );
 }
 
