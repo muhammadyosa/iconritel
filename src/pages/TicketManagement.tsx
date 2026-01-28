@@ -405,145 +405,155 @@ export default function TicketManagement() {
         </DialogContent>
       </Dialog>
 
-      <Card className="shadow-sm border">
-        <CardHeader className="py-2 px-2 sm:px-3 md:px-4 border-b bg-muted/30">
-          <CardTitle className="flex items-center justify-between text-xs sm:text-sm">
-            <div className="min-w-0">
-              <span>📋 Preview Data User</span>
-              <p className="text-[9px] sm:text-[10px] text-muted-foreground font-normal mt-0.5 truncate">
-                {isLoadingExcel ? (
-                  "Memuat data..."
-                ) : excelData.length > 0 ? (
-                  `✓ ${excelData.length} data tersimpan`
-                ) : (
-                  <span className="flex items-center gap-1">
-                    <Info className="h-3 w-3 flex-shrink-0" />
-                    <span className="truncate">Import via{" "}
-                    <Link to="/settings" className="text-primary underline hover:no-underline">
-                      Settings
-                    </Link></span>
-                  </span>
-                )}
-              </p>
-            </div>
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-1.5 sm:p-2 md:p-3">
-          <div className="grid gap-1.5 sm:gap-2 grid-cols-2 xs:grid-cols-3 sm:grid-cols-4 lg:grid-cols-5">
-            <div>
-              <Label className="text-[9px] sm:text-[10px]">👨‍💼 Service ID</Label>
-              <Input
-                placeholder="Cari..."
-                value={searchFilters.service}
-                onChange={(e) => setSearchFilters({ ...searchFilters, service: e.target.value })}
-                className="h-6 sm:h-7 text-[10px] sm:text-xs"
-              />
-            </div>
-            <div>
-              <Label className="text-[9px] sm:text-[10px]">📍 Hostname</Label>
-              <Input
-                placeholder="Cari..."
-                value={searchFilters.hostname}
-                onChange={(e) =>
-                  setSearchFilters({ ...searchFilters, hostname: e.target.value })
-                }
-                className="h-6 sm:h-7 text-[10px] sm:text-xs"
-              />
-            </div>
-            <div>
-              <Label className="text-[9px] sm:text-[10px]">🛠️ ID FAT</Label>
-              <Input
-                placeholder="Cari..."
-                value={searchFilters.fat}
-                onChange={(e) => setSearchFilters({ ...searchFilters, fat: e.target.value })}
-                className="h-6 sm:h-7 text-[10px] sm:text-xs"
-              />
-            </div>
-            <div>
-              <Label className="text-[9px] sm:text-[10px]">💻 SN ONT</Label>
-              <Input
-                placeholder="Cari..."
-                value={searchFilters.sn}
-                onChange={(e) => setSearchFilters({ ...searchFilters, sn: e.target.value })}
-                className="h-6 sm:h-7 text-[10px] sm:text-xs"
-              />
-            </div>
-            <div className="col-span-2 xs:col-span-1">
-              <Label className="text-[9px] sm:text-[10px]">👤 Customer</Label>
-              <Input
-                placeholder="Cari..."
-                value={searchFilters.customer}
-                onChange={(e) =>
-                  setSearchFilters({ ...searchFilters, customer: e.target.value })
-                }
-                className="h-6 sm:h-7 text-[10px] sm:text-xs"
-              />
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {isLoadingExcel ? (
-        <Card className="shadow-sm border">
-          <CardContent className="py-3 sm:py-4">
-            <div className="text-center text-muted-foreground text-[10px] sm:text-xs">
-              <p>Memuat data Excel...</p>
-            </div>
-          </CardContent>
-        </Card>
-      ) : filteredData.length > 0 && (
-        <Card className="shadow-sm border">
-          <CardHeader className="py-1.5 sm:py-2 px-2 sm:px-3 border-b bg-muted/30">
-            <CardTitle className="text-xs sm:text-sm">Preview Data ({filteredData.length})</CardTitle>
-          </CardHeader>
-          <CardContent className="p-1.5 sm:p-2">
-            <div className="rounded-md border overflow-x-auto max-h-36 sm:max-h-40">
-              <Table className="min-w-[500px]">
-                <TableHeader>
-                  <TableRow className="h-5">
-                    <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap">⚡ Action</TableHead>
-                    <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap">👨‍💼 Service ID</TableHead>
-                    <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap">📍 Hostname</TableHead>
-                    <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap">🛠️ ID FAT</TableHead>
-                    <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap">💻 SN ONT</TableHead>
-                    <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap">👤 Customer</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredData.slice(0, 50).map((record, idx) => (
-                    <TableRow key={idx} className="h-6 sm:h-7">
-                      <TableCell className="px-1 sm:px-1.5 py-0.5">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="h-5 text-[8px] sm:text-[9px] px-1.5 sm:px-2"
-                          onClick={() => {
-                            setSelectedRecord(record);
-                            setIsFormOpen(true);
-                          }}
-                        >
-                          Pilih
-                        </Button>
-                      </TableCell>
-                      <TableCell className="px-1 sm:px-1.5 py-0.5 font-mono text-[9px] sm:text-[10px]">{String(record.service || "")}</TableCell>
-                      <TableCell className="px-1 sm:px-1.5 py-0.5 text-[9px] sm:text-[10px] font-medium">{String(record.hostname || "")}</TableCell>
-                      <TableCell className="px-1 sm:px-1.5 py-0.5 font-mono text-[9px] sm:text-[10px]">{String(record.fat || "")}</TableCell>
-                      <TableCell className="px-1 sm:px-1.5 py-0.5 font-mono text-[9px] sm:text-[10px]">{String(record.sn || "")}</TableCell>
-                      <TableCell className="px-1 sm:px-1.5 py-0.5 text-[9px] sm:text-[10px]">{String(record.customer || "")}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      <Tabs defaultValue="daftar-ticket" className="w-full">
+      <Tabs defaultValue="preview-data" className="w-full">
         <TabsList className="grid w-full max-w-md grid-cols-2">
-          <TabsTrigger value="daftar-ticket">📑Daftar Ticket</TabsTrigger>
-          <TabsTrigger value="preview">📊 Preview</TabsTrigger>
+          <TabsTrigger value="preview-data">📋 Preview Data</TabsTrigger>
+          <TabsTrigger value="daftar-ticket">📑 Daftar Ticket</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="preview-data" className="mt-2 sm:mt-3 space-y-2 sm:space-y-3">
+          <Card className="shadow-sm border">
+            <CardHeader className="py-2 px-2 sm:px-3 md:px-4 border-b bg-muted/30">
+              <CardTitle className="flex items-center justify-between text-xs sm:text-sm">
+                <div className="min-w-0">
+                  <span>📋 Preview Data User</span>
+                  <p className="text-[9px] sm:text-[10px] text-muted-foreground font-normal mt-0.5 truncate">
+                    {isLoadingExcel ? (
+                      "Memuat data..."
+                    ) : excelData.length > 0 ? (
+                      `✓ ${excelData.length} data tersimpan`
+                    ) : (
+                      <span className="flex items-center gap-1">
+                        <Info className="h-3 w-3 flex-shrink-0" />
+                        <span className="truncate">Import via{" "}
+                        <Link to="/settings" className="text-primary underline hover:no-underline">
+                          Settings
+                        </Link></span>
+                      </span>
+                    )}
+                  </p>
+                </div>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-1.5 sm:p-2 md:p-3">
+              <div className="grid gap-1.5 sm:gap-2 grid-cols-2 xs:grid-cols-3 sm:grid-cols-4 lg:grid-cols-5">
+                <div>
+                  <Label className="text-[9px] sm:text-[10px]">👨‍💼 Service ID</Label>
+                  <Input
+                    placeholder="Cari..."
+                    value={searchFilters.service}
+                    onChange={(e) => setSearchFilters({ ...searchFilters, service: e.target.value })}
+                    className="h-6 sm:h-7 text-[10px] sm:text-xs"
+                  />
+                </div>
+                <div>
+                  <Label className="text-[9px] sm:text-[10px]">📍 Hostname</Label>
+                  <Input
+                    placeholder="Cari..."
+                    value={searchFilters.hostname}
+                    onChange={(e) =>
+                      setSearchFilters({ ...searchFilters, hostname: e.target.value })
+                    }
+                    className="h-6 sm:h-7 text-[10px] sm:text-xs"
+                  />
+                </div>
+                <div>
+                  <Label className="text-[9px] sm:text-[10px]">🛠️ ID FAT</Label>
+                  <Input
+                    placeholder="Cari..."
+                    value={searchFilters.fat}
+                    onChange={(e) => setSearchFilters({ ...searchFilters, fat: e.target.value })}
+                    className="h-6 sm:h-7 text-[10px] sm:text-xs"
+                  />
+                </div>
+                <div>
+                  <Label className="text-[9px] sm:text-[10px]">💻 SN ONT</Label>
+                  <Input
+                    placeholder="Cari..."
+                    value={searchFilters.sn}
+                    onChange={(e) => setSearchFilters({ ...searchFilters, sn: e.target.value })}
+                    className="h-6 sm:h-7 text-[10px] sm:text-xs"
+                  />
+                </div>
+                <div className="col-span-2 xs:col-span-1">
+                  <Label className="text-[9px] sm:text-[10px]">👤 Customer</Label>
+                  <Input
+                    placeholder="Cari..."
+                    value={searchFilters.customer}
+                    onChange={(e) =>
+                      setSearchFilters({ ...searchFilters, customer: e.target.value })
+                    }
+                    className="h-6 sm:h-7 text-[10px] sm:text-xs"
+                  />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {isLoadingExcel ? (
+            <Card className="shadow-sm border">
+              <CardContent className="py-3 sm:py-4">
+                <div className="text-center text-muted-foreground text-[10px] sm:text-xs">
+                  <p>Memuat data Excel...</p>
+                </div>
+              </CardContent>
+            </Card>
+          ) : filteredData.length > 0 ? (
+            <Card className="shadow-sm border">
+              <CardHeader className="py-1.5 sm:py-2 px-2 sm:px-3 border-b bg-muted/30">
+                <CardTitle className="text-xs sm:text-sm">📊 Preview Data ({filteredData.length})</CardTitle>
+              </CardHeader>
+              <CardContent className="p-1.5 sm:p-2">
+                <div className="rounded-md border overflow-x-auto max-h-64 sm:max-h-72">
+                  <Table className="min-w-[500px]">
+                    <TableHeader>
+                      <TableRow className="h-5">
+                        <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap">⚡ Action</TableHead>
+                        <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap">👨‍💼 Service ID</TableHead>
+                        <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap">📍 Hostname</TableHead>
+                        <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap">🛠️ ID FAT</TableHead>
+                        <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap">💻 SN ONT</TableHead>
+                        <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap">👤 Customer</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredData.slice(0, 50).map((record, idx) => (
+                        <TableRow key={idx} className="h-6 sm:h-7">
+                          <TableCell className="px-1 sm:px-1.5 py-0.5">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="h-5 text-[8px] sm:text-[9px] px-1.5 sm:px-2"
+                              onClick={() => {
+                                setSelectedRecord(record);
+                                setIsFormOpen(true);
+                              }}
+                            >
+                              Pilih
+                            </Button>
+                          </TableCell>
+                          <TableCell className="px-1 sm:px-1.5 py-0.5 font-mono text-[9px] sm:text-[10px]">{String(record.service || "")}</TableCell>
+                          <TableCell className="px-1 sm:px-1.5 py-0.5 text-[9px] sm:text-[10px] font-medium">{String(record.hostname || "")}</TableCell>
+                          <TableCell className="px-1 sm:px-1.5 py-0.5 font-mono text-[9px] sm:text-[10px]">{String(record.fat || "")}</TableCell>
+                          <TableCell className="px-1 sm:px-1.5 py-0.5 font-mono text-[9px] sm:text-[10px]">{String(record.sn || "")}</TableCell>
+                          <TableCell className="px-1 sm:px-1.5 py-0.5 text-[9px] sm:text-[10px]">{String(record.customer || "")}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              </CardContent>
+            </Card>
+          ) : (
+            <Card className="shadow-sm border">
+              <CardContent className="py-4 sm:py-6">
+                <div className="text-center text-muted-foreground text-[10px] sm:text-xs">
+                  <p>Belum ada data. Import data Excel via <Link to="/settings" className="text-primary underline hover:no-underline">Settings</Link></p>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
 
         <TabsContent value="daftar-ticket" className="mt-2 sm:mt-3">
           <Card className="shadow-sm border">
@@ -911,15 +921,6 @@ export default function TicketManagement() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="preview" className="mt-2 sm:mt-3">
-          <Card className="shadow-sm border">
-            <CardContent className="p-4 sm:p-6">
-              <div className="text-center text-muted-foreground text-sm">
-                <p>📊 Tab Preview - Konten tambahan dapat ditambahkan di sini</p>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
       </Tabs>
     </div>
   );
