@@ -113,7 +113,7 @@ const FATList = () => {
         <CardHeader className="p-3 sm:p-4 md:p-6">
           <CardTitle className="flex flex-col xs:flex-row xs:items-center justify-between gap-2 sm:gap-4">
             <div className="min-w-0">
-              <span className="text-sm sm:text-base">Data FAT</span>
+              <span className="text-sm sm:text-base">📍 Data FAT</span>
               <p className="text-[10px] sm:text-xs text-muted-foreground font-normal mt-0.5 sm:mt-1">
                 {isLoading ? (
                   "Memuat data FAT..."
