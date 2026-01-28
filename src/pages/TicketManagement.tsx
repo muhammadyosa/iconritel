@@ -504,20 +504,20 @@ export default function TicketManagement() {
                 <CardTitle className="text-xs sm:text-sm">📊 Preview Data ({filteredData.length})</CardTitle>
               </CardHeader>
               <CardContent className="p-1.5 sm:p-2">
-                <div className="rounded-md border overflow-x-auto max-h-48 xs:max-h-56 sm:max-h-72 md:max-h-80 lg:max-h-96">
+                <div className="rounded-md border overflow-x-auto overflow-y-auto max-h-[40vh] xs:max-h-[45vh] sm:max-h-[50vh] md:max-h-[55vh] lg:max-h-[60vh]">
                   <Table className="min-w-[500px]">
-                    <TableHeader>
+                    <TableHeader className="sticky top-0 bg-background z-10">
                       <TableRow className="h-5">
-                        <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap">⚡ Action</TableHead>
-                        <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap">👨‍💼 Service ID</TableHead>
-                        <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap">📍 Hostname</TableHead>
-                        <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap">🛠️ ID FAT</TableHead>
-                        <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap">💻 SN ONT</TableHead>
-                        <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap">👤 Customer</TableHead>
+                        <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap bg-muted/80">⚡ Action</TableHead>
+                        <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap bg-muted/80">👨‍💼 Service ID</TableHead>
+                        <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap bg-muted/80">📍 Hostname</TableHead>
+                        <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap bg-muted/80">🛠️ ID FAT</TableHead>
+                        <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap bg-muted/80">💻 SN ONT</TableHead>
+                        <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap bg-muted/80">👤 Customer</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {filteredData.slice(0, 100).map((record, idx) => (
+                      {filteredData.slice(0, 200).map((record, idx) => (
                         <TableRow key={idx} className="h-6 sm:h-7">
                           <TableCell className="px-1 sm:px-1.5 py-0.5">
                             <Button
