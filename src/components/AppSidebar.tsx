@@ -71,14 +71,14 @@ export function AppSidebar() {
                     <NavLink
                       to={item.path}
                       className={({ isActive }) =>
-                        `flex items-center rounded-md transition-all duration-200 ${
+                        `flex items-center rounded-md transition-all duration-300 ease-out ${
                           collapsed 
-                            ? "h-8 w-8 min-w-8 justify-center" 
-                            : "gap-3 px-3 py-2 w-full justify-start"
+                            ? "h-8 w-8 min-w-8 justify-center hover:scale-110" 
+                            : "gap-3 px-3 py-2 w-full justify-start hover:translate-x-1 hover:scale-[1.02]"
                         } ${
                           isActive
-                            ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                            : "hover:bg-sidebar-accent/50"
+                            ? "bg-sidebar-accent text-sidebar-accent-foreground shadow-sm"
+                            : "hover:bg-sidebar-accent/50 hover:shadow-sm"
                         }`
                       }
                     >
