@@ -321,19 +321,19 @@ export default function Settings() {
   const getTypeLabel = (type: string | null) => {
     switch (type) {
       case "user":
-        return { label: "List User", color: "bg-blue-500" };
+        return { label: "📋 List User", color: "bg-blue-500" };
       case "olt":
-        return { label: "List OLT", color: "bg-cyan-500" };
+        return { label: "📟 List OLT", color: "bg-cyan-500" };
       case "fat":
-        return { label: "List FAT", color: "bg-green-500" };
+        return { label: "📍 List FAT", color: "bg-green-500" };
       case "upe":
-        return { label: "List UPE", color: "bg-purple-500" };
+        return { label: "🔗 List UPE", color: "bg-purple-500" };
       case "bng":
-        return { label: "List BNG", color: "bg-orange-500" };
+        return { label: "🛰 List BNG", color: "bg-orange-500" };
       case "fdt":
-        return { label: "List FDT", color: "bg-amber-500" };
+        return { label: "📦 List FDT", color: "bg-amber-500" };
       case "akv":
-        return { label: "List AKV User", color: "bg-pink-500" };
+        return { label: "🗂️ List AKV User", color: "bg-pink-500" };
       default:
         return { label: "Tidak Dikenali", color: "bg-muted" };
     }
