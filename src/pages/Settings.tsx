@@ -799,7 +799,7 @@ export default function Settings() {
                 </p>
               </div>
               <blockquote className="border-l-4 border-primary pl-4 italic text-sm text-muted-foreground">
-                "When you plan something well, there's no need to rush"
+                "Когда на душе внезапно становится тяжело, но не с кем поговорить, поэтому просто сидишь молча. Но когда все хорошо спланировано, спешить некуда."
               </blockquote>
               <div className="pt-2 text-center space-y-1">
                 <p className="text-sm font-medium">© RZ Corp. All Rights Reserved</p>
