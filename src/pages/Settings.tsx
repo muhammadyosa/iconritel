@@ -799,7 +799,8 @@ export default function Settings() {
                 </p>
               </div>
               <blockquote className="border-l-4 border-primary pl-4 italic text-sm text-muted-foreground">
-                "Когда на душе внезапно становится тяжело, но не с кем поговорить, поэтому просто сидишь молча. Но когда все хорошо спланировано, спешить некуда."
+                <p>"Когда вдруг на душе становится тяжело, но не с кем поговорить, поэтому просто сидишь в тишине. Но когда всё хорошо спланировано, спешить некуда."</p>
+                <p className="mt-2 not-italic font-medium">[The man burdened with glorious purpose]</p>
               </blockquote>
               <div className="pt-2 text-center space-y-1">
                 <p className="text-sm font-medium">© RZ Corp. All Rights Reserved</p>
