@@ -71,10 +71,10 @@ export function AppSidebar() {
                     <NavLink
                       to={item.path}
                       className={({ isActive }) =>
-                        `flex items-center justify-center rounded-md transition-all duration-200 ${
+                        `flex items-center rounded-md transition-all duration-200 ${
                           collapsed 
-                            ? "h-8 w-8 min-w-8" 
-                            : "gap-3 px-2 py-2 w-full !justify-start"
+                            ? "h-8 w-8 min-w-8 justify-center" 
+                            : "gap-3 px-3 py-2 w-full justify-start"
                         } ${
                           isActive
                             ? "bg-sidebar-accent text-sidebar-accent-foreground"
@@ -82,11 +82,11 @@ export function AppSidebar() {
                         }`
                       }
                     >
-                      <span className="text-sm leading-none flex-shrink-0">
+                      <span className="text-sm leading-none flex-shrink-0 w-5 text-center">
                         {item.emoji}
                       </span>
                       {!collapsed && (
-                        <span className="text-sm truncate">{item.title}</span>
+                        <span className="text-sm truncate text-left">{item.title}</span>
                       )}
                     </NavLink>
                   </SidebarMenuButton>
