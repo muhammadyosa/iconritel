@@ -34,10 +34,10 @@ export function AppSidebar() {
   const collapsed = state === "collapsed";
 
   return (
-    <Sidebar className={collapsed ? "w-14" : "w-56 sm:w-60"} collapsible="icon">
-      <SidebarContent className="flex flex-col">
+    <Sidebar className={collapsed ? "w-[52px]" : "w-56 sm:w-60"} collapsible="icon">
+      <SidebarContent className="flex flex-col overflow-x-hidden">
         {/* Header Logo Section */}
-        <div className={`border-b border-sidebar-border ${collapsed ? "py-3" : "p-3 sm:p-4"}`}>
+        <div className={`border-b border-sidebar-border flex-shrink-0 ${collapsed ? "py-3 px-1" : "p-3 sm:p-4"}`}>
           {!collapsed ? (
             <div className="flex items-center gap-2 sm:gap-3">
               <img 
@@ -51,30 +51,30 @@ export function AppSidebar() {
               </div>
             </div>
           ) : (
-            <div className="flex justify-center items-center">
+            <div className="flex justify-center items-center w-full">
               <img 
                 src={iconnetLogo} 
                 alt="Iconnet" 
-                className="h-8 w-8 object-contain" 
+                className="h-7 w-7 object-contain flex-shrink-0" 
               />
             </div>
           )}
         </div>
 
-        <SidebarGroup className="flex-1">
+        <SidebarGroup className="flex-1 overflow-x-hidden">
           {!collapsed && <SidebarGroupLabel className="px-3 text-xs">Menu</SidebarGroupLabel>}
           <SidebarGroupContent>
-            <SidebarMenu className={`gap-1 ${collapsed ? "px-0" : "px-2"}`}>
+            <SidebarMenu className={`gap-0.5 ${collapsed ? "items-center px-1" : "px-2"}`}>
               {menuItems.map((item) => (
-                <SidebarMenuItem key={item.title} className={collapsed ? "flex justify-center" : ""}>
-                  <SidebarMenuButton asChild className={collapsed ? "h-9 w-9 p-0" : "h-9"}>
+                <SidebarMenuItem key={item.title} className={collapsed ? "w-full flex justify-center" : "w-full"}>
+                  <SidebarMenuButton asChild className={collapsed ? "h-8 w-8 min-w-8 p-0" : "h-9"}>
                     <NavLink
                       to={item.path}
                       className={({ isActive }) =>
                         `flex items-center justify-center rounded-md transition-all duration-200 ${
                           collapsed 
-                            ? "h-9 w-9" 
-                            : "gap-3 px-2 py-2 w-full justify-start"
+                            ? "h-8 w-8 min-w-8" 
+                            : "gap-3 px-2 py-2 w-full !justify-start"
                         } ${
                           isActive
                             ? "bg-sidebar-accent text-sidebar-accent-foreground"
@@ -82,7 +82,7 @@ export function AppSidebar() {
                         }`
                       }
                     >
-                      <span className="text-base leading-none">
+                      <span className="text-sm leading-none flex-shrink-0">
                         {item.emoji}
                       </span>
                       {!collapsed && (
@@ -97,17 +97,17 @@ export function AppSidebar() {
         </SidebarGroup>
 
         {/* Footer Section */}
-        <div className="mt-auto border-t border-sidebar-border">
-          <div className={`${collapsed ? "py-2 flex justify-center" : "p-3"}`}>
+        <div className="mt-auto border-t border-sidebar-border flex-shrink-0">
+          <div className={`${collapsed ? "py-2 px-1 flex justify-center" : "p-3"}`}>
             <Button
               variant="ghost"
               size="icon"
               onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
               className={`text-sidebar-foreground hover:bg-sidebar-accent ${
-                collapsed ? "h-9 w-9" : "h-9 w-full justify-start gap-3 px-2"
+                collapsed ? "h-8 w-8 min-w-8" : "h-9 w-full justify-start gap-3 px-2"
               }`}
             >
-              <span className="text-base leading-none">
+              <span className="text-sm leading-none flex-shrink-0">
                 {theme === "dark" ? "☀️" : "🌙"}
               </span>
               {!collapsed && (
