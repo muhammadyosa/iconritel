@@ -51,15 +51,15 @@ export interface ImportResult {
   };
 }
 
-// Sheet detection patterns - exact sheet name matching
+// Sheet detection patterns - prioritized by specificity (most specific first)
 const SHEET_PATTERNS = {
-  user: ["list user", "user", "pelanggan", "customer", "data user"],
-  olt: ["list olt", "data olt", "olt", "sheet list olt", "daftar olt", "master olt", "inventory olt"],
-  fat: ["list fat", "fat", "data fat"],
-  upe: ["sheet list upe", "list upe", "upe", "data upe"],
-  bng: ["sheet list bng", "list bng", "bng", "data bng"],
-  fdt: ["list fdt", "fdt", "data fdt", "sheet list fdt", "daftar fdt", "master fdt"],
-  akv: ["list akv user", "list akv", "akv user", "akv", "data akv"],
+  akv: ["list akv user", "listakv user", "list_akv_user", "listakv", "akv user", "data akv user"],
+  olt: ["list olt", "listolt", "list_olt", "data olt", "sheet list olt", "daftar olt", "master olt", "inventory olt"],
+  fat: ["list fat", "listfat", "list_fat", "data fat", "sheet list fat", "daftar fat", "master fat"],
+  fdt: ["list fdt", "listfdt", "list_fdt", "data fdt", "sheet list fdt", "daftar fdt", "master fdt"],
+  upe: ["list upe", "listupe", "list_upe", "data upe", "sheet list upe", "daftar upe", "master upe"],
+  bng: ["list bng", "listbng", "list_bng", "data bng", "sheet list bng", "daftar bng", "master bng"],
+  user: ["list user", "listuser", "list_user", "data user", "pelanggan", "customer", "daftar pelanggan"],
 };
 
 // Column mapping for each sheet type
@@ -148,36 +148,57 @@ function getColumnValue(row: any, possibleHeaders: string[]): string {
 
 // Helper to detect sheet type based on name or content
 function detectSheetType(sheetName: string, sampleData: any[]): keyof typeof SHEET_PATTERNS | null {
-  const normalizedName = sheetName.toLowerCase().trim();
+  const normalizedName = sheetName.toLowerCase().trim().replace(/\s+/g, ' ');
   
-  // Check by name patterns
-  for (const [type, patterns] of Object.entries(SHEET_PATTERNS)) {
+  // Priority order for matching (most specific first)
+  const priorityOrder: (keyof typeof SHEET_PATTERNS)[] = ['akv', 'fdt', 'olt', 'fat', 'upe', 'bng', 'user'];
+  
+  // Check by exact or close name patterns first
+  for (const type of priorityOrder) {
+    const patterns = SHEET_PATTERNS[type];
     for (const pattern of patterns) {
-      if (normalizedName.includes(pattern) || normalizedName === pattern) {
-        return type as keyof typeof SHEET_PATTERNS;
+      // Exact match or starts with pattern
+      if (normalizedName === pattern || normalizedName.startsWith(pattern) || normalizedName.includes(pattern)) {
+        return type;
       }
     }
   }
   
   // If name doesn't match, try to detect by column headers
   if (sampleData.length > 0) {
-    const headers = Object.keys(sampleData[0]).map(h => h.toLowerCase());
+    const headers = Object.keys(sampleData[0]).map(h => h.toLowerCase().trim());
     
-    // Check for BNG-specific columns first (most specific)
+    // Check for AKV-specific columns (has Customer + Service ID + Contact/Address)
+    const hasCustomer = headers.some(h => h.includes("customer") && !h.includes("name"));
+    const hasServiceId = headers.some(h => h.includes("service id") || h.includes("service_id") || h.includes("serviceid"));
+    const hasContact = headers.some(h => h.includes("contact") || h.includes("kontak") || h.includes("phone") || h.includes("hp"));
+    const hasAddressAkv = headers.some(h => h.includes("address") || h.includes("alamat"));
+    if (hasCustomer && hasServiceId && (hasContact || hasAddressAkv)) {
+      return "akv";
+    }
+    
+    // Check for BNG-specific columns (most specific)
     if (headers.some(h => h.includes("bng") || h.includes("vlan") || h.includes("port upe") || h.includes("radius"))) {
       return "bng";
     }
     
+    // Check for FDT-specific columns (has ID FDT and Area)
+    const hasFdtId = headers.some(h => h.includes("id fdt") || h.includes("id_fdt") || h.includes("fdt id") || h === "idfdt");
+    const hasArea = headers.some(h => h.includes("area") || h.includes("nama area"));
+    if (hasFdtId && hasArea) {
+      return "fdt";
+    }
+    
     // Check for OLT-specific columns (has ID OLT, IP NMS OLT, TIKOR OLT)
-    const hasIdOlt = headers.some(h => h.includes("id olt") || h.includes("id_olt") || h.includes("idolt"));
+    const hasIdOlt = headers.some(h => h.includes("id olt") || h.includes("id_olt") || h.includes("idolt") || h === "id olt");
     const hasIpNmsOlt = headers.some(h => h.includes("ip nms") || h.includes("ip_nms") || h.includes("ipnms"));
     const hasTikorOlt = headers.some(h => 
       (h.includes("tikor") && h.includes("olt")) || 
       h === "tikor olt" || 
       h === "tikor_olt"
     );
-    const hasHostnameOlt = headers.some(h => h.includes("hostname olt") || h.includes("hostname_olt"));
-    const hasHostnameUpe = headers.some(h => h.includes("hostname upe") || h.includes("hostname_upe"));
+    const hasHostnameOlt = headers.some(h => h.includes("hostname olt") || h.includes("hostname_olt") || h.includes("hostnameolt"));
+    const hasHostnameUpe = headers.some(h => h.includes("hostname upe") || h.includes("hostname_upe") || h.includes("hostnameupe"));
     const hasProvinsi = headers.some(h => h.includes("provinsi"));
     
     // OLT sheet: has provinsi, id olt, hostname olt, hostname upe, ip nms, tikor olt
@@ -191,31 +212,25 @@ function detectSheetType(sheetName: string, sampleData: any[]): keyof typeof SHE
       return "olt";
     }
     
-    // Check for UPE-specific columns (simpler - just hostname olt + hostname upe)
+    // Check for FAT-specific columns (has ID FAT and Tikor)
+    const hasFatId = headers.some(h => h.includes("id fat") || h.includes("id_fat") || h.includes("fat id") || h === "idfat");
+    const hasTikorFat = headers.some(h => 
+      (h.includes("tikor") && !h.includes("olt")) || 
+      h === "tikor" || h === "tikor fat"
+    );
+    if (hasProvinsi && hasFatId) {
+      return "fat";
+    }
+    
+    // Check for UPE-specific columns (simpler - just hostname olt + hostname upe without OLT identifiers)
     if (hasHostnameOlt && hasHostnameUpe && !hasIdOlt && !hasIpNmsOlt && !hasTikorOlt) {
       return "upe";
     }
     
-    // Check for FDT data (has ID FDT and Area)
-    const hasFdtId = headers.some(h => h.includes("id fdt") || h.includes("id_fdt") || h.includes("fdt id"));
-    const hasArea = headers.some(h => h.includes("area") || h.includes("nama area"));
-    if (hasFdtId && hasArea) {
-      return "fdt";
-    }
-    
-    // Check for FAT data (has ID FAT or Tikor FAT)
-    const hasFatId = headers.some(h => h.includes("id fat") || h.includes("id_fat") || h.includes("fat id"));
-    const hasTikorFat = headers.some(h => 
-      (h.includes("tikor") && h.includes("fat")) || 
-      (h === "tikor" && !h.includes("olt"))
-    );
-    if (hasProvinsi && (hasFatId || hasTikorFat)) {
-      return "fat";
-    }
-    
-    // Check for User data
-    if (headers.some(h => h.includes("customer") || h.includes("pelanggan")) ||
-        (headers.some(h => h.includes("service")) && headers.some(h => h.includes("sn")))) {
+    // Check for User data (has Customer Name + Service ID + SN ONT)
+    const hasCustomerName = headers.some(h => h.includes("customer name") || h.includes("nama pelanggan"));
+    const hasSn = headers.some(h => h.includes("sn") || h.includes("ont"));
+    if (hasCustomerName || (headers.some(h => h.includes("service")) && hasSn)) {
       return "user";
     }
   }
