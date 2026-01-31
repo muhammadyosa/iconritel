@@ -513,6 +513,7 @@ export default function Settings() {
                                 {sheet.type === "upe" && "→ List UPE"}
                                 {sheet.type === "bng" && "→ List BNG"}
                                 {sheet.type === "fdt" && "→ List FDT"}
+                                {sheet.type === "akv" && "→ List AKV User"}
                               </TableCell>
                             </TableRow>
                           );
