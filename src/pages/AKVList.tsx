@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Download, FileText, Info, Plus, Pencil, Trash2 } from "lucide-react";
+import { Download, FileText, Info, Link } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -18,38 +18,18 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import { Label } from "@/components/ui/label";
 import { toast } from "@/hooks/use-toast";
 import * as XLSX from "xlsx";
 import { AKV } from "@/types/akv";
-import { loadAKVData, saveAKVData } from "@/lib/indexedDB";
+import { loadAKVData } from "@/lib/indexedDB";
 import { sanitizeForCSV } from "@/lib/validation";
 
 const AKV_FIELDS = [
   { value: "all", label: "Semua Field" },
-  { value: "namaUser", label: "Nama User" },
-  { value: "usernameAkv", label: "Username AKV" },
-  { value: "area", label: "Area" },
+  { value: "provinsi", label: "Provinsi" },
+  { value: "customer", label: "Customer" },
+  { value: "serviceId", label: "Service ID" },
+  { value: "contact", label: "Contact" },
 ];
 
 const AKVList = () => {
@@ -57,14 +37,6 @@ const AKVList = () => {
   const [searchField, setSearchField] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(true);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingAkv, setEditingAkv] = useState<AKV | null>(null);
-  const [formData, setFormData] = useState({
-    namaUser: "",
-    usernameAkv: "",
-    passwordAkv: "",
-    area: "",
-  });
 
   useEffect(() => {
     loadAKVData()
@@ -91,11 +63,12 @@ const AKVList = () => {
     }
 
     const exportData = filteredData.map((akv) => ({
-      "Nama User": sanitizeForCSV(akv.namaUser),
-      "Username AKV": sanitizeForCSV(akv.usernameAkv),
-      "Password AKV": sanitizeForCSV(akv.passwordAkv),
-      "Area": sanitizeForCSV(akv.area),
-      "Tanggal Dibuat": sanitizeForCSV(new Date(akv.createdAt).toLocaleString("id-ID")),
+      "Provinsi": sanitizeForCSV(akv.provinsi),
+      "Customer": sanitizeForCSV(akv.customer),
+      "Service ID": sanitizeForCSV(akv.serviceId),
+      "Tikor": sanitizeForCSV(akv.tikor),
+      "Contact": sanitizeForCSV(akv.contact),
+      "Address": sanitizeForCSV(akv.address),
     }));
 
     const ws = XLSX.utils.json_to_sheet(exportData);
@@ -109,96 +82,6 @@ const AKVList = () => {
     });
   };
 
-  const handleSubmit = async () => {
-    if (!formData.namaUser || !formData.usernameAkv || !formData.passwordAkv) {
-      toast({
-        title: "Validasi gagal",
-        description: "Nama User, Username AKV, dan Password AKV wajib diisi.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    try {
-      let updatedData: AKV[];
-      
-      if (editingAkv) {
-        // Update existing
-        updatedData = akvData.map((akv) =>
-          akv.id === editingAkv.id
-            ? { ...akv, ...formData }
-            : akv
-        );
-        toast({
-          title: "Berhasil diupdate",
-          description: "Data AKV User berhasil diperbarui.",
-        });
-      } else {
-        // Add new
-        const newAkv: AKV = {
-          id: crypto.randomUUID(),
-          ...formData,
-          createdAt: new Date().toISOString(),
-        };
-        updatedData = [...akvData, newAkv];
-        toast({
-          title: "Berhasil ditambahkan",
-          description: "Data AKV User baru berhasil ditambahkan.",
-        });
-      }
-
-      await saveAKVData(updatedData);
-      setAkvData(updatedData);
-      setIsDialogOpen(false);
-      resetForm();
-    } catch (error) {
-      toast({
-        title: "Gagal menyimpan",
-        description: "Terjadi kesalahan saat menyimpan data.",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleEdit = (akv: AKV) => {
-    setEditingAkv(akv);
-    setFormData({
-      namaUser: akv.namaUser,
-      usernameAkv: akv.usernameAkv,
-      passwordAkv: akv.passwordAkv,
-      area: akv.area,
-    });
-    setIsDialogOpen(true);
-  };
-
-  const handleDelete = async (id: string) => {
-    try {
-      const updatedData = akvData.filter((akv) => akv.id !== id);
-      await saveAKVData(updatedData);
-      setAkvData(updatedData);
-      toast({
-        title: "Berhasil dihapus",
-        description: "Data AKV User berhasil dihapus.",
-      });
-    } catch (error) {
-      toast({
-        title: "Gagal menghapus",
-        description: "Terjadi kesalahan saat menghapus data.",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const resetForm = () => {
-    setFormData({
-      namaUser: "",
-      usernameAkv: "",
-      passwordAkv: "",
-      area: "",
-    });
-    setEditingAkv(null);
-  };
-
   const filteredData = akvData.filter((akv) => {
     if (!searchQuery) return true;
     
@@ -206,9 +89,11 @@ const AKVList = () => {
     
     if (searchField === "all") {
       return (
-        String(akv.namaUser || "").toLowerCase().includes(query) ||
-        String(akv.usernameAkv || "").toLowerCase().includes(query) ||
-        String(akv.area || "").toLowerCase().includes(query)
+        String(akv.provinsi || "").toLowerCase().includes(query) ||
+        String(akv.customer || "").toLowerCase().includes(query) ||
+        String(akv.serviceId || "").toLowerCase().includes(query) ||
+        String(akv.contact || "").toLowerCase().includes(query) ||
+        String(akv.address || "").toLowerCase().includes(query)
       );
     }
     
@@ -221,7 +106,7 @@ const AKVList = () => {
       <div>
         <h1 className="text-xl sm:text-2xl md:text-3xl font-bold">🗂️ List AKV User</h1>
         <p className="text-xs sm:text-sm text-muted-foreground">
-          Kelola data AKV User untuk akses sistem
+          Data pelanggan AKV dengan informasi lokasi dan kontak
         </p>
       </div>
 
@@ -238,94 +123,29 @@ const AKVList = () => {
                 ) : (
                   <span className="flex items-center gap-1 flex-wrap">
                     <Info className="h-3 w-3 flex-shrink-0" />
-                    <span>Belum ada data. Klik tombol Tambah untuk menambah data.</span>
+                    <span>Belum ada data. Import melalui </span>
+                    <a href="/settings" className="text-primary hover:underline inline-flex items-center gap-0.5">
+                      <Link className="h-3 w-3" />
+                      Settings
+                    </a>
                   </span>
                 )}
               </p>
             </div>
-            <div className="flex gap-2">
-              <Dialog open={isDialogOpen} onOpenChange={(open) => {
-                setIsDialogOpen(open);
-                if (!open) resetForm();
-              }}>
-                <DialogTrigger asChild>
-                  <Button
-                    size="sm"
-                    className="h-7 sm:h-8 text-[10px] sm:text-xs px-2 sm:px-3 touch-target"
-                  >
-                    <Plus className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />
-                    <span className="hidden xs:inline">Tambah</span>
-                    <span className="xs:hidden">+</span>
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="sm:max-w-[425px]">
-                  <DialogHeader>
-                    <DialogTitle>{editingAkv ? "Edit AKV User" : "Tambah AKV User"}</DialogTitle>
-                    <DialogDescription>
-                      {editingAkv ? "Perbarui data AKV User" : "Tambahkan data AKV User baru"}
-                    </DialogDescription>
-                  </DialogHeader>
-                  <div className="grid gap-4 py-4">
-                    <div className="grid gap-2">
-                      <Label htmlFor="namaUser">Nama User *</Label>
-                      <Input
-                        id="namaUser"
-                        value={formData.namaUser}
-                        onChange={(e) => setFormData({ ...formData, namaUser: e.target.value })}
-                        placeholder="Masukkan nama user"
-                      />
-                    </div>
-                    <div className="grid gap-2">
-                      <Label htmlFor="usernameAkv">Username AKV *</Label>
-                      <Input
-                        id="usernameAkv"
-                        value={formData.usernameAkv}
-                        onChange={(e) => setFormData({ ...formData, usernameAkv: e.target.value })}
-                        placeholder="Masukkan username AKV"
-                      />
-                    </div>
-                    <div className="grid gap-2">
-                      <Label htmlFor="passwordAkv">Password AKV *</Label>
-                      <Input
-                        id="passwordAkv"
-                        type="password"
-                        value={formData.passwordAkv}
-                        onChange={(e) => setFormData({ ...formData, passwordAkv: e.target.value })}
-                        placeholder="Masukkan password AKV"
-                      />
-                    </div>
-                    <div className="grid gap-2">
-                      <Label htmlFor="area">Area</Label>
-                      <Input
-                        id="area"
-                        value={formData.area}
-                        onChange={(e) => setFormData({ ...formData, area: e.target.value })}
-                        placeholder="Masukkan area (opsional)"
-                      />
-                    </div>
-                  </div>
-                  <DialogFooter>
-                    <Button type="submit" onClick={handleSubmit}>
-                      {editingAkv ? "Simpan Perubahan" : "Tambah"}
-                    </Button>
-                  </DialogFooter>
-                </DialogContent>
-              </Dialog>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleExport}
-                disabled={filteredData.length === 0}
-                className="h-7 sm:h-8 text-[10px] sm:text-xs px-2 sm:px-3 touch-target"
-              >
-                <Download className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />
-                <span className="hidden xs:inline">Export Excel</span>
-                <span className="xs:hidden">Export</span>
-              </Button>
-            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleExport}
+              disabled={filteredData.length === 0}
+              className="h-7 sm:h-8 text-[10px] sm:text-xs px-2 sm:px-3 touch-target"
+            >
+              <Download className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />
+              <span className="hidden xs:inline">Export Excel</span>
+              <span className="xs:hidden">Export</span>
+            </Button>
           </CardTitle>
           <CardDescription className="text-[10px] sm:text-xs hidden sm:block">
-            Kolom: Nama User, Username AKV, Password AKV, Area
+            Kolom: Provinsi, Customer, Service ID, Tikor, Contact, Address
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-2 sm:space-y-3 md:space-y-4 p-2 sm:p-4 md:p-6">
@@ -357,78 +177,44 @@ const AKVList = () => {
           </div>
 
           <div className="rounded-md border overflow-x-auto max-h-72 sm:max-h-96 -mx-2 sm:mx-0">
-            <Table className="text-[10px] sm:text-xs min-w-[600px]">
+            <Table className="text-[10px] sm:text-xs min-w-[800px]">
               <TableHeader>
                 <TableRow className="h-6 sm:h-8">
-                  <TableHead className="px-1 sm:px-2 py-1 whitespace-nowrap">Nama User</TableHead>
-                  <TableHead className="px-1 sm:px-2 py-1 whitespace-nowrap">Username AKV</TableHead>
-                  <TableHead className="px-1 sm:px-2 py-1 whitespace-nowrap">Password AKV</TableHead>
-                  <TableHead className="px-1 sm:px-2 py-1 whitespace-nowrap">Area</TableHead>
-                  <TableHead className="px-1 sm:px-2 py-1 whitespace-nowrap text-center">Aksi</TableHead>
+                  <TableHead className="px-1 sm:px-2 py-1 whitespace-nowrap sticky top-0 bg-background">Provinsi</TableHead>
+                  <TableHead className="px-1 sm:px-2 py-1 whitespace-nowrap sticky top-0 bg-background">Customer</TableHead>
+                  <TableHead className="px-1 sm:px-2 py-1 whitespace-nowrap sticky top-0 bg-background">Service ID</TableHead>
+                  <TableHead className="px-1 sm:px-2 py-1 whitespace-nowrap sticky top-0 bg-background">Tikor</TableHead>
+                  <TableHead className="px-1 sm:px-2 py-1 whitespace-nowrap sticky top-0 bg-background">Contact</TableHead>
+                  <TableHead className="px-1 sm:px-2 py-1 whitespace-nowrap sticky top-0 bg-background">Address</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {isLoading ? (
                   <TableRow>
-                    <TableCell colSpan={5} className="text-center text-muted-foreground px-1 sm:px-2 py-1">
+                    <TableCell colSpan={6} className="text-center text-muted-foreground px-1 sm:px-2 py-1">
                       Memuat data AKV...
                     </TableCell>
                   </TableRow>
                 ) : filteredData.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={5} className="text-center text-muted-foreground px-1 sm:px-2 py-1">
+                    <TableCell colSpan={6} className="text-center text-muted-foreground px-1 sm:px-2 py-1">
                       {akvData.length === 0
-                        ? "Belum ada data AKV User. Klik tombol Tambah untuk menambahkan."
+                        ? "Belum ada data AKV User. Import data melalui halaman Settings."
                         : "Tidak ada data yang sesuai dengan pencarian."}
                     </TableCell>
                   </TableRow>
                 ) : (
                   filteredData.slice(0, 100).map((akv) => (
                     <TableRow key={akv.id} className="h-6 sm:h-8">
-                      <TableCell className="px-1 sm:px-2 py-0.5 sm:py-1">{akv.namaUser}</TableCell>
-                      <TableCell className="font-mono px-1 sm:px-2 py-0.5 sm:py-1">{akv.usernameAkv}</TableCell>
-                      <TableCell className="font-mono px-1 sm:px-2 py-0.5 sm:py-1">
-                        <span className="blur-sm hover:blur-none transition-all cursor-pointer">
-                          {akv.passwordAkv}
-                        </span>
+                      <TableCell className="px-1 sm:px-2 py-0.5 sm:py-1">{akv.provinsi || "-"}</TableCell>
+                      <TableCell className="px-1 sm:px-2 py-0.5 sm:py-1">{akv.customer || "-"}</TableCell>
+                      <TableCell className="font-mono px-1 sm:px-2 py-0.5 sm:py-1">{akv.serviceId || "-"}</TableCell>
+                      <TableCell className="font-mono px-1 sm:px-2 py-0.5 sm:py-1 max-w-[150px] truncate" title={akv.tikor}>
+                        {akv.tikor || "-"}
                       </TableCell>
-                      <TableCell className="px-1 sm:px-2 py-0.5 sm:py-1">{akv.area || "-"}</TableCell>
-                      <TableCell className="px-1 sm:px-2 py-0.5 sm:py-1">
-                        <div className="flex items-center justify-center gap-1">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-6 w-6"
-                            onClick={() => handleEdit(akv)}
-                          >
-                            <Pencil className="h-3 w-3" />
-                          </Button>
-                          <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-6 w-6 text-destructive hover:text-destructive"
-                              >
-                                <Trash2 className="h-3 w-3" />
-                              </Button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent>
-                              <AlertDialogHeader>
-                                <AlertDialogTitle>Hapus Data AKV User?</AlertDialogTitle>
-                                <AlertDialogDescription>
-                                  Anda yakin ingin menghapus data AKV User "{akv.namaUser}"? Tindakan ini tidak dapat dibatalkan.
-                                </AlertDialogDescription>
-                              </AlertDialogHeader>
-                              <AlertDialogFooter>
-                                <AlertDialogCancel>Batal</AlertDialogCancel>
-                                <AlertDialogAction onClick={() => handleDelete(akv.id)}>
-                                  Hapus
-                                </AlertDialogAction>
-                              </AlertDialogFooter>
-                            </AlertDialogContent>
-                          </AlertDialog>
-                        </div>
+                      <TableCell className="px-1 sm:px-2 py-0.5 sm:py-1">{akv.contact || "-"}</TableCell>
+                      <TableCell className="px-1 sm:px-2 py-0.5 sm:py-1 max-w-[200px] truncate" title={akv.address}>
+                        {akv.address || "-"}
                       </TableCell>
                     </TableRow>
                   ))

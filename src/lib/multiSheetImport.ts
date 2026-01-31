@@ -3,7 +3,8 @@ import { ExcelRecord } from "@/types/ticket";
 import { OLT } from "@/types/olt";
 import { FAT } from "@/types/fat";
 import { FDT } from "@/types/fdt";
-import { saveExcelData, saveOLTData, saveFATData } from "./indexedDB";
+import { saveExcelData, saveOLTData, saveFATData, saveAKVData } from "./indexedDB";
+import { AKV } from "@/types/akv";
 
 // Types for each data category
 export interface UPERecord {
@@ -35,6 +36,7 @@ export interface ImportResult {
   upeRecords: UPERecord[];
   bngRecords: BNGRecord[];
   fdtRecords: FDT[];
+  akvRecords: AKV[];
   summary: {
     user: number;
     olt: number;
@@ -42,6 +44,7 @@ export interface ImportResult {
     upe: number;
     bng: number;
     fdt: number;
+    akv: number;
     totalSheets: number;
     processedSheets: string[];
     skippedSheets: string[];
@@ -56,6 +59,7 @@ const SHEET_PATTERNS = {
   upe: ["sheet list upe", "list upe", "upe", "data upe"],
   bng: ["sheet list bng", "list bng", "bng", "data bng"],
   fdt: ["list fdt", "fdt", "data fdt", "sheet list fdt", "daftar fdt", "master fdt"],
+  akv: ["list akv user", "list akv", "akv user", "akv", "data akv"],
 };
 
 // Column mapping for each sheet type
@@ -102,6 +106,14 @@ const COLUMN_MAPPINGS = {
     area: ["NAMA AREA", "Nama Area", "nama area", "AREA", "Area", "area"],
     idFdt: ["ID FDT", "id fdt", "ID_FDT", "FDT ID", "fdt id", "FDT_ID", "idfdt", "IDFDT"],
     tikor: ["TIKOR", "Tikor", "tikor", "KOORDINAT", "Koordinat", "koordinat", "TIKOR FDT", "tikor fdt"],
+  },
+  akv: {
+    provinsi: ["Provinsi", "provinsi", "PROVINSI", "province"],
+    customer: ["Customer", "customer", "CUSTOMER", "nama customer", "nama pelanggan"],
+    serviceId: ["Service ID", "service id", "SERVICE ID", "service_id", "serviceid"],
+    tikor: ["Tikor", "tikor", "TIKOR", "koordinat", "Koordinat"],
+    contact: ["Contact", "contact", "CONTACT", "kontak", "phone", "telepon", "hp"],
+    address: ["Address", "address", "ADDRESS", "alamat", "Alamat", "ALAMAT"],
   },
 };
 
@@ -300,6 +312,22 @@ function processFDTSheet(data: any[]): FDT[] {
     .filter((r) => r.provinsi || r.area || r.idFDT || r.tikor);
 }
 
+// Process AKV sheet
+function processAKVSheet(data: any[]): AKV[] {
+  return data
+    .map((row, index) => ({
+      id: `akv-${Date.now()}-${index}`,
+      provinsi: getColumnValue(row, COLUMN_MAPPINGS.akv.provinsi),
+      customer: getColumnValue(row, COLUMN_MAPPINGS.akv.customer),
+      serviceId: getColumnValue(row, COLUMN_MAPPINGS.akv.serviceId),
+      tikor: getColumnValue(row, COLUMN_MAPPINGS.akv.tikor),
+      contact: getColumnValue(row, COLUMN_MAPPINGS.akv.contact),
+      address: getColumnValue(row, COLUMN_MAPPINGS.akv.address),
+      createdAt: new Date().toISOString(),
+    }))
+    .filter((r) => r.provinsi || r.customer || r.serviceId || r.tikor || r.contact || r.address);
+}
+
 // Main function to import multi-sheet Excel file
 export async function importMultiSheetExcel(file: File): Promise<ImportResult> {
   return new Promise((resolve, reject) => {
@@ -317,6 +345,7 @@ export async function importMultiSheetExcel(file: File): Promise<ImportResult> {
           upeRecords: [],
           bngRecords: [],
           fdtRecords: [],
+          akvRecords: [],
           summary: {
             user: 0,
             olt: 0,
@@ -324,6 +353,7 @@ export async function importMultiSheetExcel(file: File): Promise<ImportResult> {
             upe: 0,
             bng: 0,
             fdt: 0,
+            akv: 0,
             totalSheets: workbook.SheetNames.length,
             processedSheets: [],
             skippedSheets: [],
@@ -382,6 +412,12 @@ export async function importMultiSheetExcel(file: File): Promise<ImportResult> {
               result.fdtRecords = processFDTSheet(jsonData);
               result.summary.fdt = result.fdtRecords.length;
               result.summary.processedSheets.push(`${sheetName} → FDT (${result.fdtRecords.length})`);
+              break;
+              
+            case "akv":
+              result.akvRecords = processAKVSheet(jsonData);
+              result.summary.akv = result.akvRecords.length;
+              result.summary.processedSheets.push(`${sheetName} → AKV (${result.akvRecords.length})`);
               break;
           }
         }

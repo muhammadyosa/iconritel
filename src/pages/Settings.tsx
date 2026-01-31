@@ -23,7 +23,7 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { importMultiSheetExcel, getExcelSheets, ImportResult } from "@/lib/multiSheetImport";
-import { saveExcelData, saveOLTData, saveFATData, openDB, clearAllData, saveFDTData, loadExcelData, loadOLTData, loadFATData, loadFDTData } from "@/lib/indexedDB";
+import { saveExcelData, saveOLTData, saveFATData, openDB, clearAllData, saveFDTData, saveAKVData, loadExcelData, loadOLTData, loadFATData, loadFDTData, loadAKVData } from "@/lib/indexedDB";
 
 const UPE_STORE_NAME = "upe_data";
 const BNG_STORE_NAME = "bng_data";
@@ -65,6 +65,7 @@ interface DataCounts {
   upe: number;
   bng: number;
   fdt: number;
+  akv: number;
 }
 
 interface ColumnStatus {
@@ -74,6 +75,7 @@ interface ColumnStatus {
   upe: { hostnameOLT: boolean; hostnameUPE: boolean };
   bng: { ipRadius: boolean; hostnameRadius: boolean; ipBng: boolean; hostnameBng: boolean; npe: boolean; vlan: boolean; hostnameOlt: boolean; upe: boolean; portUpe: boolean; kotaKabupaten: boolean };
   fdt: { provinsi: boolean; area: boolean; idFDT: boolean; tikor: boolean };
+  akv: { provinsi: boolean; customer: boolean; serviceId: boolean; tikor: boolean; contact: boolean; address: boolean };
 }
 
 // Load UPE data from IndexedDB
@@ -125,6 +127,7 @@ export default function Settings() {
     upe: 0,
     bng: 0,
     fdt: 0,
+    akv: 0,
   });
   const [columnStatus, setColumnStatus] = useState<ColumnStatus>({
     user: { customer: false, service: false, hostname: false, fat: false, sn: false },
@@ -133,18 +136,20 @@ export default function Settings() {
     upe: { hostnameOLT: false, hostnameUPE: false },
     bng: { ipRadius: false, hostnameRadius: false, ipBng: false, hostnameBng: false, npe: false, vlan: false, hostnameOlt: false, upe: false, portUpe: false, kotaKabupaten: false },
     fdt: { provinsi: false, area: false, idFDT: false, tikor: false },
+    akv: { provinsi: false, customer: false, serviceId: false, tikor: false, contact: false, address: false },
   });
 
   // Load data counts and column status from IndexedDB on mount and after import/delete
   const loadDataCounts = async () => {
     try {
-      const [userData, oltData, fatData, upeData, bngData, fdtData] = await Promise.all([
+      const [userData, oltData, fatData, upeData, bngData, fdtData, akvData] = await Promise.all([
         loadExcelData(),
         loadOLTData(),
         loadFATData(),
         loadUPEData(),
         loadBNGData(),
         loadFDTData(),
+        loadAKVData(),
       ]);
       setDataCounts({
         user: userData.length,
@@ -153,6 +158,7 @@ export default function Settings() {
         upe: upeData.length,
         bng: bngData.length,
         fdt: fdtData.length,
+        akv: akvData.length,
       });
 
       // Check column availability for each data type
@@ -203,6 +209,14 @@ export default function Settings() {
           area: checkColumnHasData(fdtData, "area"),
           idFDT: checkColumnHasData(fdtData, "idFDT"),
           tikor: checkColumnHasData(fdtData, "tikor"),
+        },
+        akv: {
+          provinsi: checkColumnHasData(akvData, "provinsi"),
+          customer: checkColumnHasData(akvData, "customer"),
+          serviceId: checkColumnHasData(akvData, "serviceId"),
+          tikor: checkColumnHasData(akvData, "tikor"),
+          contact: checkColumnHasData(akvData, "contact"),
+          address: checkColumnHasData(akvData, "address"),
         },
       });
     } catch (error) {
@@ -278,7 +292,12 @@ export default function Settings() {
 
       if (result.fdtRecords.length > 0) {
         await saveFDTData(result.fdtRecords);
-        setImportProgress(95);
+        setImportProgress(92);
+      }
+
+      if (result.akvRecords.length > 0) {
+        await saveAKVData(result.akvRecords);
+        setImportProgress(97);
       }
 
       setImportProgress(100);
@@ -287,7 +306,7 @@ export default function Settings() {
       // Refresh data counts after import
       await loadDataCounts();
 
-      const totalRecords = result.summary.user + result.summary.olt + result.summary.fat + result.summary.upe + result.summary.bng + result.summary.fdt;
+      const totalRecords = result.summary.user + result.summary.olt + result.summary.fat + result.summary.upe + result.summary.bng + result.summary.fdt + result.summary.akv;
       toast.success(`Berhasil import ${totalRecords.toLocaleString()} data dari ${result.summary.processedSheets.length} sheet`);
     } catch (error) {
       toast.error("Gagal mengimport data");
@@ -313,6 +332,8 @@ export default function Settings() {
         return { label: "List BNG", color: "bg-orange-500" };
       case "fdt":
         return { label: "List FDT", color: "bg-amber-500" };
+      case "akv":
+        return { label: "List AKV User", color: "bg-pink-500" };
       default:
         return { label: "Tidak Dikenali", color: "bg-muted" };
     }
@@ -733,6 +754,25 @@ export default function Settings() {
                     <li>{columnStatus.fdt.tikor ? "✅" : "⛔"} TIKOR</li>
                   </ul>
                 </div>
+                <div className="p-4 rounded-lg border bg-card">
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="font-medium flex items-center gap-2">
+                      {dataCounts.akv > 0 ? "♻️" : "⚠️"} 🗂️ List AKV User
+                    </h4>
+                    <Badge variant={dataCounts.akv > 0 ? "default" : "secondary"} className={dataCounts.akv > 0 ? "bg-pink-500" : ""}>
+                      {dataCounts.akv.toLocaleString()} data
+                    </Badge>
+                  </div>
+                  <p className="text-xs text-muted-foreground mb-2">Kolom yang didukung:</p>
+                  <ul className="text-xs text-muted-foreground list-none space-y-0.5">
+                    <li>{columnStatus.akv.provinsi ? "✅" : "⛔"} Provinsi</li>
+                    <li>{columnStatus.akv.customer ? "✅" : "⛔"} Customer</li>
+                    <li>{columnStatus.akv.serviceId ? "✅" : "⛔"} Service ID</li>
+                    <li>{columnStatus.akv.tikor ? "✅" : "⛔"} Tikor</li>
+                    <li>{columnStatus.akv.contact ? "✅" : "⛔"} Contact</li>
+                    <li>{columnStatus.akv.address ? "✅" : "⛔"} Address</li>
+                  </ul>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -806,6 +846,7 @@ export default function Settings() {
                 <li>🔗 Data List UPE</li>
                 <li>🌐 Data List BNG</li>
                 <li>📦 Data List FDT</li>
+                <li>🗂️ Data List AKV User</li>
                 <li>📝 Data Report (Shift Report & Ticket Updates)</li>
               </ul>
               <p className="font-medium text-destructive">Tindakan ini tidak dapat dibatalkan!</p>

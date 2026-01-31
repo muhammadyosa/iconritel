@@ -1,8 +1,10 @@
 export interface AKV {
   id: string;
-  namaUser: string;
-  usernameAkv: string;
-  passwordAkv: string;
-  area: string;
+  provinsi: string;
+  customer: string;
+  serviceId: string;
+  tikor: string;
+  contact: string;
+  address: string;
   createdAt: string;
 }
