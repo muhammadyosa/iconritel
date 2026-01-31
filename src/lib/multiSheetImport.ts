@@ -53,7 +53,7 @@ export interface ImportResult {
 
 // Sheet detection patterns - prioritized by specificity (most specific first)
 const SHEET_PATTERNS = {
-  akv: ["list akv user", "listakv user", "list_akv_user", "listakv", "akv user", "data akv user"],
+  akv: ["list akv user", "list_akv_user", "listakv user", "listakvuser", "akv user", "akvuser", "data akv user", "data akv", "list akv"],
   olt: ["list olt", "listolt", "list_olt", "data olt", "sheet list olt", "daftar olt", "master olt", "inventory olt"],
   fat: ["list fat", "listfat", "list_fat", "data fat", "sheet list fat", "daftar fat", "master fat"],
   fdt: ["list fdt", "listfdt", "list_fdt", "data fdt", "sheet list fdt", "daftar fdt", "master fdt"],
