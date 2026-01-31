@@ -35,9 +35,9 @@ export function AppSidebar() {
 
   return (
     <Sidebar className={collapsed ? "w-14" : "w-56 sm:w-60"} collapsible="icon">
-      <SidebarContent>
+      <SidebarContent className="flex flex-col">
         {/* Header Logo Section */}
-        <div className={`border-b border-sidebar-border ${collapsed ? "p-2" : "p-3 sm:p-4"}`}>
+        <div className={`border-b border-sidebar-border ${collapsed ? "py-3" : "p-3 sm:p-4"}`}>
           {!collapsed ? (
             <div className="flex items-center gap-2 sm:gap-3">
               <img 
@@ -51,7 +51,7 @@ export function AppSidebar() {
               </div>
             </div>
           ) : (
-            <div className="flex justify-center items-center h-10">
+            <div className="flex justify-center items-center">
               <img 
                 src={iconnetLogo} 
                 alt="Iconnet" 
@@ -61,24 +61,28 @@ export function AppSidebar() {
           )}
         </div>
 
-        <SidebarGroup>
-          <SidebarGroupLabel className="px-3 text-xs">Menu</SidebarGroupLabel>
+        <SidebarGroup className="flex-1">
+          {!collapsed && <SidebarGroupLabel className="px-3 text-xs">Menu</SidebarGroupLabel>}
           <SidebarGroupContent>
-            <SidebarMenu className="gap-1 px-2">
+            <SidebarMenu className={`gap-1 ${collapsed ? "px-1" : "px-2"}`}>
               {menuItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild className="h-9">
                     <NavLink
                       to={item.path}
                       className={({ isActive }) =>
-                        `flex items-center gap-3 px-2 py-2 rounded-md transition-all duration-200 ${
+                        `flex items-center rounded-md transition-all duration-200 ${
+                          collapsed 
+                            ? "justify-center px-0 py-2" 
+                            : "gap-3 px-2 py-2"
+                        } ${
                           isActive
                             ? "bg-sidebar-accent text-sidebar-accent-foreground"
                             : "hover:bg-sidebar-accent/50"
                         }`
                       }
                     >
-                      <span className="text-base flex-shrink-0 w-5 text-center leading-none">
+                      <span className={`text-base leading-none ${collapsed ? "text-center" : "flex-shrink-0 w-5 text-center"}`}>
                         {item.emoji}
                       </span>
                       {!collapsed && (
@@ -94,14 +98,16 @@ export function AppSidebar() {
 
         {/* Footer Section */}
         <div className="mt-auto border-t border-sidebar-border">
-          <div className={`${collapsed ? "p-2" : "p-3"}`}>
+          <div className={`${collapsed ? "py-2" : "p-3"}`}>
             <Button
               variant="ghost"
               size={collapsed ? "icon" : "default"}
               onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-              className="w-full justify-start text-sidebar-foreground hover:bg-sidebar-accent h-9"
+              className={`w-full text-sidebar-foreground hover:bg-sidebar-accent h-9 ${
+                collapsed ? "justify-center px-0" : "justify-start"
+              }`}
             >
-              <span className="text-base flex-shrink-0 w-5 text-center">
+              <span className={`text-base leading-none ${collapsed ? "" : "flex-shrink-0 w-5 text-center"}`}>
                 {theme === "dark" ? "☀️" : "🌙"}
               </span>
               {!collapsed && (
