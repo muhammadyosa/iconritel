@@ -17,6 +17,7 @@ import FDTList from "./pages/FDTList";
 import OLTDeviceList from "./pages/OLTDeviceList";
 import UPEList from "./pages/UPEList";
 import BNGList from "./pages/BNGList";
+import AKVList from "./pages/AKVList";
 import Report from "./pages/Report";
 import Settings from "./pages/Settings";
 import Install from "./pages/Install";
@@ -33,6 +34,7 @@ function AnimatedRoutes() {
         <Route path="/" element={<PageTransition><Dashboard /></PageTransition>} />
         <Route path="/tickets" element={<PageTransition><TicketManagement /></PageTransition>} />
         <Route path="/teams" element={<PageTransition><Teams /></PageTransition>} />
+        <Route path="/akv" element={<PageTransition><AKVList /></PageTransition>} />
         <Route path="/fat" element={<PageTransition><FATList /></PageTransition>} />
         <Route path="/fdt" element={<PageTransition><FDTList /></PageTransition>} />
         <Route path="/olt" element={<PageTransition><OLTDeviceList /></PageTransition>} />
