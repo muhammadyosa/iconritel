@@ -2,6 +2,7 @@ import { ExcelRecord } from "@/types/ticket";
 import { OLT } from "@/types/olt";
 import { FAT } from "@/types/fat";
 import { FDT } from "@/types/fdt";
+import { AKV } from "@/types/akv";
 
 const DB_NAME = "NOC_Database";
 const STORE_NAME = "excel_data";
@@ -10,7 +11,8 @@ const FAT_STORE_NAME = "fat_data";
 const FDT_STORE_NAME = "fdt_data";
 const UPE_STORE_NAME = "upe_data";
 const BNG_STORE_NAME = "bng_data";
-const DB_VERSION = 6;
+const AKV_STORE_NAME = "akv_data";
+const DB_VERSION = 7;
 
 let dbInstance: IDBDatabase | null = null;
 
@@ -50,6 +52,9 @@ export function openDB(): Promise<IDBDatabase> {
       }
       if (!db.objectStoreNames.contains(BNG_STORE_NAME)) {
         db.createObjectStore(BNG_STORE_NAME);
+      }
+      if (!db.objectStoreNames.contains(AKV_STORE_NAME)) {
+        db.createObjectStore(AKV_STORE_NAME);
       }
     };
   });
@@ -238,6 +243,52 @@ export async function clearFDTData(): Promise<void> {
   });
 }
 
+// AKV Data functions
+export async function saveAKVData(data: AKV[]): Promise<void> {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction([AKV_STORE_NAME], "readwrite");
+    const store = transaction.objectStore(AKV_STORE_NAME);
+    const request = store.put(data, "akv_records");
+
+    request.onsuccess = () => resolve();
+    request.onerror = () => reject(request.error);
+  });
+}
+
+export async function loadAKVData(): Promise<AKV[]> {
+  try {
+    const db = await openDB();
+    return new Promise((resolve, reject) => {
+      const transaction = db.transaction([AKV_STORE_NAME], "readonly");
+      const store = transaction.objectStore(AKV_STORE_NAME);
+      const request = store.get("akv_records");
+
+      request.onsuccess = () => {
+        resolve(request.result || []);
+      };
+      request.onerror = () => reject(request.error);
+    });
+  } catch (error) {
+    if (import.meta.env.DEV) {
+      console.error("Error loading AKV data from IndexedDB:", error);
+    }
+    return [];
+  }
+}
+
+export async function clearAKVData(): Promise<void> {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction([AKV_STORE_NAME], "readwrite");
+    const store = transaction.objectStore(AKV_STORE_NAME);
+    const request = store.delete("akv_records");
+
+    request.onsuccess = () => resolve();
+    request.onerror = () => reject(request.error);
+  });
+}
+
 // Clear all data from all stores including localStorage
 export async function clearAllData(): Promise<void> {
   const db = await openDB();
@@ -260,6 +311,7 @@ export async function clearAllData(): Promise<void> {
     clearStore(FDT_STORE_NAME, "fdt_records"),
     clearStore(UPE_STORE_NAME, "upe_records"),
     clearStore(BNG_STORE_NAME, "bng_records"),
+    clearStore(AKV_STORE_NAME, "akv_records"),
   ]);
 
   // Clear localStorage data (Report data, tickets, history, etc.)
