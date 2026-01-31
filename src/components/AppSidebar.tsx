@@ -64,17 +64,17 @@ export function AppSidebar() {
         <SidebarGroup className="flex-1">
           {!collapsed && <SidebarGroupLabel className="px-3 text-xs">Menu</SidebarGroupLabel>}
           <SidebarGroupContent>
-            <SidebarMenu className={`gap-1 ${collapsed ? "px-1" : "px-2"}`}>
+            <SidebarMenu className={`gap-1 ${collapsed ? "px-0" : "px-2"}`}>
               {menuItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild className="h-9">
+                <SidebarMenuItem key={item.title} className={collapsed ? "flex justify-center" : ""}>
+                  <SidebarMenuButton asChild className={collapsed ? "h-9 w-9 p-0" : "h-9"}>
                     <NavLink
                       to={item.path}
                       className={({ isActive }) =>
-                        `flex items-center rounded-md transition-all duration-200 ${
+                        `flex items-center justify-center rounded-md transition-all duration-200 ${
                           collapsed 
-                            ? "justify-center px-0 py-2" 
-                            : "gap-3 px-2 py-2"
+                            ? "h-9 w-9" 
+                            : "gap-3 px-2 py-2 w-full justify-start"
                         } ${
                           isActive
                             ? "bg-sidebar-accent text-sidebar-accent-foreground"
@@ -82,7 +82,7 @@ export function AppSidebar() {
                         }`
                       }
                     >
-                      <span className={`text-base leading-none ${collapsed ? "text-center" : "flex-shrink-0 w-5 text-center"}`}>
+                      <span className="text-base leading-none">
                         {item.emoji}
                       </span>
                       {!collapsed && (
@@ -98,20 +98,20 @@ export function AppSidebar() {
 
         {/* Footer Section */}
         <div className="mt-auto border-t border-sidebar-border">
-          <div className={`${collapsed ? "py-2" : "p-3"}`}>
+          <div className={`${collapsed ? "py-2 flex justify-center" : "p-3"}`}>
             <Button
               variant="ghost"
-              size={collapsed ? "icon" : "default"}
+              size="icon"
               onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-              className={`w-full text-sidebar-foreground hover:bg-sidebar-accent h-9 ${
-                collapsed ? "justify-center px-0" : "justify-start"
+              className={`text-sidebar-foreground hover:bg-sidebar-accent ${
+                collapsed ? "h-9 w-9" : "h-9 w-full justify-start gap-3 px-2"
               }`}
             >
-              <span className={`text-base leading-none ${collapsed ? "" : "flex-shrink-0 w-5 text-center"}`}>
+              <span className="text-base leading-none">
                 {theme === "dark" ? "☀️" : "🌙"}
               </span>
               {!collapsed && (
-                <span className="ml-2 text-sm truncate">
+                <span className="text-sm truncate">
                   {theme === "dark" ? "Light Mode" : "Dark Mode"}
                 </span>
               )}
