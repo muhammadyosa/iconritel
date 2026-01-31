@@ -82,7 +82,7 @@ export function AppSidebar() {
                         }`
                       }
                     >
-                      <span className="text-sm leading-none flex-shrink-0 w-5 text-center">
+                      <span className="text-sm leading-none flex-shrink-0 w-5 text-left">
                         {item.emoji}
                       </span>
                       {!collapsed && (
