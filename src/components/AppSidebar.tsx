@@ -66,15 +66,15 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu className={`gap-0.5 ${collapsed ? "items-center px-1" : "px-2"}`}>
               {menuItems.map((item) => (
-                <SidebarMenuItem key={item.title} className={collapsed ? "w-full flex justify-center" : "w-full"}>
-                  <SidebarMenuButton asChild className={collapsed ? "h-8 w-8 min-w-8 p-0" : "h-9"}>
+                <SidebarMenuItem key={item.title} className="w-full">
+                  <SidebarMenuButton asChild className={collapsed ? "h-8 w-8 min-w-8 p-0 justify-center" : "h-9 justify-start"}>
                     <NavLink
                       to={item.path}
                       className={({ isActive }) =>
                         `flex items-center rounded-md transition-all duration-300 ease-out ${
                           collapsed 
                             ? "h-8 w-8 min-w-8 justify-center hover:scale-110" 
-                            : "gap-3 px-3 py-2 w-full justify-start hover:translate-x-1 hover:scale-[1.02]"
+                            : "gap-3 px-3 py-2 w-full !justify-start hover:translate-x-1 hover:scale-[1.02]"
                         } ${
                           isActive
                             ? "bg-sidebar-accent text-sidebar-accent-foreground shadow-sm"
@@ -82,11 +82,11 @@ export function AppSidebar() {
                         }`
                       }
                     >
-                      <span className="text-sm leading-none flex-shrink-0 w-5 text-left">
+                      <span className={`text-sm leading-none flex-shrink-0 ${collapsed ? "" : "w-5"}`}>
                         {item.emoji}
                       </span>
                       {!collapsed && (
-                        <span className="text-sm truncate text-left">{item.title}</span>
+                        <span className="text-sm truncate flex-1 text-left">{item.title}</span>
                       )}
                     </NavLink>
                   </SidebarMenuButton>
