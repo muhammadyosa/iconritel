@@ -26,7 +26,7 @@ export interface ExcelRecord {
 // RITEL Constraints - masuk bucket RITEL
 export const RITEL_CONSTRAINTS = [
   "LINK LOSS",
-  "LOW RX",
+  "BAD RX",
   "ONT PROBLEM",
   "GANGGUAN ICONPLAY",
   "GANGGUAN BERULANG",
@@ -37,7 +37,7 @@ export const RITEL_CONSTRAINTS = [
 
 // FEEDER Constraints - masuk bucket FEEDER (PROACTIVE NOC RETAIL)
 export const FEEDER_CONSTRAINTS = [
-  "FAT LOW RX",
+  "FAT BAD RX",
   "FAT LOSS",
   "PORT DOWN",
   "OLT DOWN",
@@ -59,8 +59,8 @@ export function generateTicketFormat(
   portText?: string
 ): string {
   // FEEDER Format
-  if (constraint === "FAT LOW RX") {
-    return `[PROACTIVE NOC RETAIL] FAT LOW RX - ${fatId} - UNDER - ${hostname} - ${serpo}`;
+  if (constraint === "FAT BAD RX") {
+    return `[PROACTIVE NOC RETAIL] FAT BAD RX - ${fatId} - UNDER - ${hostname} - ${serpo}`;
   }
   
   if (constraint === "FAT LOSS") {
