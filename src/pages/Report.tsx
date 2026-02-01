@@ -61,6 +61,7 @@ interface SLATicket {
   ticketId: string;
   type: string;
   description: string;
+  ticketCount: string;
 }
 
 const Report = () => {
@@ -143,25 +144,30 @@ const Report = () => {
     const tickets: SLATicket[] = [];
 
     for (const line of lines) {
-      // Split by tab character
-      const parts = line.split("\t").map(p => p.trim()).filter(p => p);
+      // Split by tab character - keep empty parts to preserve column positions
+      const parts = line.split("\t").map(p => p.trim());
       
-      if (parts.length >= 3) {
-        // Format: DURATION \t TICKET_ID \t TYPE \t DESCRIPTION
-        // or: DURATION \t TICKET_ID \t TYPE+DESCRIPTION (combined)
-        const duration = parts[0];
-        const ticketId = parts[1];
+      // Filter out empty parts but track original positions
+      const nonEmptyParts = parts.filter(p => p);
+      
+      if (nonEmptyParts.length >= 3) {
+        // Format: DURATION \t TICKET_ID \t TYPE \t DESCRIPTION \t TICKET_COUNT
+        const duration = nonEmptyParts[0];
+        const ticketId = nonEmptyParts[1];
         
         // Check if type and description are separate or combined
         let type = "";
         let description = "";
+        let ticketCount = "";
         
-        if (parts.length >= 4) {
-          type = parts[2];
-          description = parts.slice(3).join(" ");
+        if (nonEmptyParts.length >= 4) {
+          type = nonEmptyParts[2];
+          description = nonEmptyParts[3];
+          // Get ticket count from column 5 (index 4) if exists
+          ticketCount = nonEmptyParts[4] || "";
         } else {
           // Type and description might be in one field
-          const combined = parts[2];
+          const combined = nonEmptyParts[2];
           // Try to extract type (FTTH AKSES, FTTH DISTRIBUSI, FTTH FEEDER, FTTH BACKBONE)
           const typeMatch = combined.match(/^(FTTH\s+(?:AKSES|DISTRIBUSI|FEEDER|BACKBONE))\s*[-–]?\s*/i);
           if (typeMatch) {
@@ -171,9 +177,10 @@ const Report = () => {
             type = combined;
             description = "";
           }
+          ticketCount = nonEmptyParts[3] || "";
         }
 
-        tickets.push({ duration, ticketId, type, description });
+        tickets.push({ duration, ticketId, type, description, ticketCount });
       }
     }
 
@@ -193,8 +200,9 @@ const Report = () => {
       return `${ticket.duration}
 ${ticket.ticketId}
 ${ticket.type}\t${ticket.description}
-TIKET TERKAIT : 
-UPDATE : `;
+TIKET TERKAIT : ${ticket.ticketCount}
+UPDATE : 
+KENDALA :`;
     }).join("\n\n");
 
     setSlaResult(formattedOutput);
