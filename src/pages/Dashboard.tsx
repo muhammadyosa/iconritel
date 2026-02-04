@@ -46,7 +46,8 @@ export default function Dashboard() {
   const { 
     isLoading: isLoadingShiftReports, 
     fetchReports: fetchShiftReports, 
-    getFormattedReports 
+    getFormattedReports,
+    updateReport: updateShiftReport,
   } = useCloudShiftReports();
   
   // Get formatted reports for UI
@@ -566,6 +567,9 @@ export default function Dashboard() {
                         report={report}
                         index={index}
                         total={shiftReports.length}
+                        onEdit={async (id, data) => {
+                          return await updateShiftReport(id, data);
+                        }}
                       />
                     ))}
                   </div>
@@ -642,6 +646,9 @@ export default function Dashboard() {
                             index={index}
                             total={getReportsForDate(selectedHistoryDate).length}
                             compact
+                            onEdit={async (id, data) => {
+                              return await updateShiftReport(id, data);
+                            }}
                           />
                         ))}
                       </div>
