@@ -30,6 +30,7 @@ import {
 } from "@/components/ui/dialog";
 import { useTickets } from "@/hooks/useTickets";
 import { useCloudTickets } from "@/hooks/useCloudTickets";
+import { useUserRole } from "@/hooks/useUserRole";
 import {
   Ticket,
   ALL_CONSTRAINTS,
@@ -55,6 +56,9 @@ export default function TicketManagement() {
     deleteTicket,
     refetch: refetchTickets 
   } = useCloudTickets();
+
+  // User role for permission-based UI
+  const { isAdmin } = useUserRole();
 
   const [searchFilters, setSearchFilters] = useState({
     customer: "",
@@ -932,20 +936,22 @@ export default function TicketManagement() {
                                           <SelectItem value="Pending">Pending</SelectItem>
                                         </SelectContent>
                                       </Select>
-                                      <Button
-                                        variant="destructive"
-                                        onClick={async () => {
-                                          try {
-                                            await deleteTicket(ticket.id);
-                                            toast.success("Tiket dihapus dari Cloud");
-                                          } catch (error) {
-                                            // Error already shown by hook
-                                          }
-                                        }}
-                                      >
-                                        <Trash2 className="h-4 w-4 mr-2" />
-                                        Hapus
-                                      </Button>
+                                      {isAdmin && (
+                                        <Button
+                                          variant="destructive"
+                                          onClick={async () => {
+                                            try {
+                                              await deleteTicket(ticket.id);
+                                              toast.success("Tiket dihapus dari Cloud");
+                                            } catch (error) {
+                                              // Error already shown by hook
+                                            }
+                                          }}
+                                        >
+                                          <Trash2 className="h-4 w-4 mr-2" />
+                                          Hapus
+                                        </Button>
+                                      )}
                                     </div>
                                   </div>
                                 </DialogContent>
