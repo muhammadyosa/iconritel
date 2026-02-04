@@ -1,6 +1,8 @@
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { useUserRole } from "@/hooks/useUserRole";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -10,12 +12,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { LogOut, User } from "lucide-react";
+import { LogOut, Shield, User } from "lucide-react";
 import { toast } from "sonner";
 
 export function UserMenu() {
   const navigate = useNavigate();
   const { user, profile, signOut } = useAuth();
+  const { role, isAdmin } = useUserRole();
 
   if (!user) return null;
 
@@ -61,9 +64,18 @@ export function UserMenu() {
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem className="gap-2">
-          <User className="h-4 w-4" />
-          <span>NOC Officer</span>
+        <DropdownMenuItem className="gap-2 cursor-default" disabled>
+          {isAdmin ? (
+            <>
+              <Shield className="h-4 w-4 text-primary" />
+              <Badge variant="default" className="text-xs">Admin</Badge>
+            </>
+          ) : (
+            <>
+              <User className="h-4 w-4 text-muted-foreground" />
+              <Badge variant="secondary" className="text-xs">Operator</Badge>
+            </>
+          )}
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleSignOut} className="gap-2 text-destructive">

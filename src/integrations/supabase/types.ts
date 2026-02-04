@@ -44,6 +44,33 @@ export type Database = {
         }
         Relationships: []
       }
+      role_change_logs: {
+        Row: {
+          changed_by: string
+          created_at: string
+          id: string
+          new_role: string
+          old_role: string | null
+          user_id: string
+        }
+        Insert: {
+          changed_by: string
+          created_at?: string
+          id?: string
+          new_role: string
+          old_role?: string | null
+          user_id: string
+        }
+        Update: {
+          changed_by?: string
+          created_at?: string
+          id?: string
+          new_role?: string
+          old_role?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       shift_reports: {
         Row: {
           created_at: string
