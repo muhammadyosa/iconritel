@@ -119,6 +119,44 @@ export function useCloudShiftReports() {
     }
   }, []);
 
+  // Update a shift report
+  const updateReport = useCallback(async (id: string, input: ShiftReportInput): Promise<boolean> => {
+    try {
+      const { error } = await supabase
+        .from("shift_reports")
+        .update({
+          date: input.date,
+          shift: input.shift,
+          officer: input.officer,
+          olt_down: input.oltDown,
+          port_down: input.portDown,
+          fat_loss: input.fatLoss,
+          issues: input.issues,
+          notes: input.notes,
+        })
+        .eq("id", id);
+
+      if (error) throw error;
+      
+      toast({
+        title: "Report diperbarui",
+        description: "Report shift berhasil diperbarui.",
+      });
+      
+      return true;
+    } catch (error) {
+      if (import.meta.env.DEV) {
+        console.error("Error updating shift report:", error);
+      }
+      toast({
+        title: "Gagal memperbarui",
+        description: "Tidak dapat memperbarui shift report.",
+        variant: "destructive",
+      });
+      return false;
+    }
+  }, []);
+
   // Delete all shift reports
   const deleteAllReports = useCallback(async (): Promise<boolean> => {
     try {
@@ -207,6 +245,7 @@ export function useCloudShiftReports() {
     isLoading,
     fetchReports,
     addReport,
+    updateReport,
     deleteReport,
     deleteAllReports,
     getFormattedReports,

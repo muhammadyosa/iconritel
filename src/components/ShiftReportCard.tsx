@@ -1,9 +1,13 @@
-import { Calendar, Clock, User, ChevronRight, Eye } from "lucide-react";
+import { Calendar, Clock, User, ChevronRight, Eye, Pencil, Save, X } from "lucide-react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Label } from "@/components/ui/label";
 import { useState } from "react";
 
 interface ShiftReport {
@@ -25,6 +29,16 @@ interface ShiftReportCardProps {
   index: number;
   total: number;
   compact?: boolean;
+  onEdit?: (id: string, data: {
+    date: string;
+    shift: string;
+    officer: string;
+    oltDown: string;
+    portDown: string;
+    fatLoss: string;
+    issues: string;
+    notes: string;
+  }) => Promise<boolean>;
 }
 
 // Helper function to count incidents
@@ -78,9 +92,190 @@ const IncidentSection = ({
   );
 };
 
-export function ShiftReportCard({ report, index, total, compact = false }: ShiftReportCardProps) {
+// Edit Form Component
+function EditReportForm({ 
+  report, 
+  onSave, 
+  onCancel,
+  isLoading 
+}: { 
+  report: ShiftReport; 
+  onSave: (data: {
+    date: string;
+    shift: string;
+    officer: string;
+    oltDown: string;
+    portDown: string;
+    fatLoss: string;
+    issues: string;
+    notes: string;
+  }) => void;
+  onCancel: () => void;
+  isLoading: boolean;
+}) {
+  const [formData, setFormData] = useState({
+    date: report.date,
+    shift: report.shift,
+    officer: report.officer,
+    oltDown: report.oltDown || "",
+    portDown: report.portDown || "",
+    fatLoss: report.fatLoss || "",
+    issues: report.issues || "",
+    notes: report.notes || "",
+  });
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSave(formData);
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="grid grid-cols-2 gap-3">
+        <div className="space-y-2">
+          <Label htmlFor="date" className="text-xs">Tanggal</Label>
+          <Input
+            id="date"
+            type="date"
+            value={formData.date}
+            onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+            className="h-9"
+            required
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="shift" className="text-xs">Shift</Label>
+          <Select 
+            value={formData.shift} 
+            onValueChange={(v) => setFormData({ ...formData, shift: v })}
+          >
+            <SelectTrigger className="h-9">
+              <SelectValue placeholder="Pilih Shift" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="1">Shift 1 (Pagi)</SelectItem>
+              <SelectItem value="2">Shift 2 (Siang)</SelectItem>
+              <SelectItem value="3">Shift 3 (Malam)</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="officer" className="text-xs">Petugas</Label>
+        <Input
+          id="officer"
+          value={formData.officer}
+          onChange={(e) => setFormData({ ...formData, officer: e.target.value })}
+          placeholder="Nama petugas"
+          className="h-9"
+          required
+        />
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="oltDown" className="text-xs">📟 OLT DOWN</Label>
+        <Textarea
+          id="oltDown"
+          value={formData.oltDown}
+          onChange={(e) => setFormData({ ...formData, oltDown: e.target.value })}
+          placeholder="Daftar OLT yang down..."
+          className="min-h-[60px] text-xs resize-none"
+        />
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="portDown" className="text-xs">🔌 PORT DOWN</Label>
+        <Textarea
+          id="portDown"
+          value={formData.portDown}
+          onChange={(e) => setFormData({ ...formData, portDown: e.target.value })}
+          placeholder="Daftar port yang down..."
+          className="min-h-[60px] text-xs resize-none"
+        />
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="fatLoss" className="text-xs">⛓️‍💥 FAT LOSS</Label>
+        <Textarea
+          id="fatLoss"
+          value={formData.fatLoss}
+          onChange={(e) => setFormData({ ...formData, fatLoss: e.target.value })}
+          placeholder="Daftar FAT yang loss..."
+          className="min-h-[60px] text-xs resize-none"
+        />
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="issues" className="text-xs">⚠️ PERMASALAHAN</Label>
+        <Textarea
+          id="issues"
+          value={formData.issues}
+          onChange={(e) => setFormData({ ...formData, issues: e.target.value })}
+          placeholder="Permasalahan yang terjadi..."
+          className="min-h-[60px] text-xs resize-none"
+        />
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="notes" className="text-xs">📝 CATATAN</Label>
+        <Textarea
+          id="notes"
+          value={formData.notes}
+          onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+          placeholder="Catatan tambahan..."
+          className="min-h-[60px] text-xs resize-none"
+        />
+      </div>
+
+      <div className="flex justify-end gap-2 pt-2">
+        <Button 
+          type="button" 
+          variant="outline" 
+          size="sm" 
+          onClick={onCancel}
+          disabled={isLoading}
+        >
+          <X className="h-4 w-4 mr-1" />
+          Batal
+        </Button>
+        <Button 
+          type="submit" 
+          size="sm"
+          disabled={isLoading}
+        >
+          <Save className="h-4 w-4 mr-1" />
+          {isLoading ? "Menyimpan..." : "Simpan"}
+        </Button>
+      </div>
+    </form>
+  );
+}
+
+export function ShiftReportCard({ report, index, total, compact = false, onEdit }: ShiftReportCardProps) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const incidentCount = countIncidents(report);
   
+  const handleSave = async (data: {
+    date: string;
+    shift: string;
+    officer: string;
+    oltDown: string;
+    portDown: string;
+    fatLoss: string;
+    issues: string;
+    notes: string;
+  }) => {
+    if (!onEdit) return;
+    setIsSaving(true);
+    const success = await onEdit(report.id, data);
+    setIsSaving(false);
+    if (success) {
+      setIsEditing(false);
+    }
+  };
+
   // Compact card for list view
   if (compact) {
     return (
@@ -128,17 +323,41 @@ export function ShiftReportCard({ report, index, total, compact = false }: Shift
         </DialogTrigger>
         <DialogContent className="max-w-lg max-h-[85vh] p-0">
           <DialogHeader className="p-4 pb-0">
-            <DialogTitle className="flex items-center gap-2 text-base">
-              <Calendar className="h-4 w-4 text-primary" />
-              {new Date(report.date).toLocaleDateString("id-ID", { 
-                weekday: 'long', 
-                day: 'numeric',
-                month: 'long',
-                year: 'numeric'
-              })}
+            <DialogTitle className="flex items-center justify-between gap-2 text-base">
+              <div className="flex items-center gap-2">
+                <Calendar className="h-4 w-4 text-primary" />
+                {new Date(report.date).toLocaleDateString("id-ID", { 
+                  weekday: 'long', 
+                  day: 'numeric',
+                  month: 'long',
+                  year: 'numeric'
+                })}
+              </div>
+              {onEdit && !isEditing && (
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={() => setIsEditing(true)}
+                  className="h-8"
+                >
+                  <Pencil className="h-4 w-4 mr-1" />
+                  Edit
+                </Button>
+              )}
             </DialogTitle>
           </DialogHeader>
-          <ReportDetailContent report={report} index={index} total={total} />
+          {isEditing ? (
+            <ScrollArea className="max-h-[70vh] p-4 pt-2">
+              <EditReportForm
+                report={report}
+                onSave={handleSave}
+                onCancel={() => setIsEditing(false)}
+                isLoading={isSaving}
+              />
+            </ScrollArea>
+          ) : (
+            <ReportDetailContent report={report} index={index} total={total} />
+          )}
         </DialogContent>
       </Dialog>
     );
@@ -238,17 +457,41 @@ export function ShiftReportCard({ report, index, total, compact = false }: Shift
       </DialogTrigger>
       <DialogContent className="max-w-lg max-h-[85vh] p-0">
         <DialogHeader className="p-4 pb-0">
-          <DialogTitle className="flex items-center gap-2 text-base">
-            <Calendar className="h-4 w-4 text-primary" />
-            {new Date(report.date).toLocaleDateString("id-ID", { 
-              weekday: 'long', 
-              day: 'numeric',
-              month: 'long',
-              year: 'numeric'
-            })}
+          <DialogTitle className="flex items-center justify-between gap-2 text-base">
+            <div className="flex items-center gap-2">
+              <Calendar className="h-4 w-4 text-primary" />
+              {new Date(report.date).toLocaleDateString("id-ID", { 
+                weekday: 'long', 
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric'
+              })}
+            </div>
+            {onEdit && !isEditing && (
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => setIsEditing(true)}
+                className="h-8"
+              >
+                <Pencil className="h-4 w-4 mr-1" />
+                Edit
+              </Button>
+            )}
           </DialogTitle>
         </DialogHeader>
-        <ReportDetailContent report={report} index={index} total={total} />
+        {isEditing ? (
+          <ScrollArea className="max-h-[70vh] p-4 pt-2">
+            <EditReportForm
+              report={report}
+              onSave={handleSave}
+              onCancel={() => setIsEditing(false)}
+              isLoading={isSaving}
+            />
+          </ScrollArea>
+        ) : (
+          <ReportDetailContent report={report} index={index} total={total} />
+        )}
       </DialogContent>
     </Dialog>
   );
