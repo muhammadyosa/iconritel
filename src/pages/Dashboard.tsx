@@ -1,5 +1,5 @@
 import { Activity, AlertTriangle, Zap, Server, Calendar, Clock, User, ExternalLink, TrendingUp, BarChart3, FileText, History, RefreshCw, Loader2 } from "lucide-react";
-import { useTickets } from "@/hooks/useTickets";
+import { useCloudTickets } from "@/hooks/useCloudTickets";
 import { useTicketHistory } from "@/hooks/useTicketHistory";
 import { useShiftReportHistory } from "@/hooks/useShiftReportHistory";
 import { useCloudShiftReports } from "@/hooks/useCloudShiftReports";
@@ -39,7 +39,7 @@ interface ShiftReport {
 }
 
 export default function Dashboard() {
-  const { tickets, excelData } = useTickets();
+  const { tickets, isLoading: isLoadingTickets } = useCloudTickets();
   const { getChartData, getTicketsForDate, getTicketsForDateByStatus } = useTicketHistory(tickets);
   
   // Cloud shift reports hook
