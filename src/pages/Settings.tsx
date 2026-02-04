@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Settings as SettingsIcon, Info, FileSpreadsheet, FileUp, Check, X, AlertCircle, RefreshCw, Database, Trash2 } from "lucide-react";
+import { Settings as SettingsIcon, Info, FileSpreadsheet, FileUp, Check, X, AlertCircle, RefreshCw, Database, Trash2, Users } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -24,6 +24,8 @@ import {
 import { toast } from "sonner";
 import { importMultiSheetExcel, getExcelSheets, ImportResult } from "@/lib/multiSheetImport";
 import { saveExcelData, saveOLTData, saveFATData, openDB, clearAllData, saveFDTData, saveAKVData, loadExcelData, loadOLTData, loadFATData, loadFDTData, loadAKVData } from "@/lib/indexedDB";
+import { useUserRole } from "@/hooks/useUserRole";
+import { UserManagement } from "@/components/UserManagement";
 
 const UPE_STORE_NAME = "upe_data";
 const BNG_STORE_NAME = "bng_data";
@@ -111,6 +113,7 @@ async function loadBNGData(): Promise<any[]> {
 }
 
 export default function Settings() {
+  const { isAdmin } = useUserRole();
   const [file, setFile] = useState<File | null>(null);
   const [sheets, setSheets] = useState<SheetPreview[]>([]);
   const [importResult, setImportResult] = useState<ImportResult | null>(null);
@@ -381,15 +384,21 @@ export default function Settings() {
       </div>
 
       <Tabs defaultValue="import" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-2 lg:w-[400px]">
+        <TabsList className={`grid w-full ${isAdmin ? 'grid-cols-3' : 'grid-cols-2'} lg:w-[${isAdmin ? '600' : '400'}px]`}>
           <TabsTrigger value="import" className="flex items-center gap-2">
             <FileSpreadsheet className="h-4 w-4" />
-            Import Master Data
+            Import Data
           </TabsTrigger>
           <TabsTrigger value="info" className="flex items-center gap-2">
             <Info className="h-4 w-4" />
             Informasi
           </TabsTrigger>
+          {isAdmin && (
+            <TabsTrigger value="users" className="flex items-center gap-2">
+              <Users className="h-4 w-4" />
+              Manajemen User
+            </TabsTrigger>
+          )}
         </TabsList>
 
         {/* Import Master Data Tab */}
@@ -813,6 +822,13 @@ export default function Settings() {
             </CardContent>
           </Card>
         </TabsContent>
+
+        {/* User Management Tab - Admin Only */}
+        {isAdmin && (
+          <TabsContent value="users" className="space-y-6">
+            <UserManagement />
+          </TabsContent>
+        )}
       </Tabs>
 
       {/* Confirm Import Dialog */}
