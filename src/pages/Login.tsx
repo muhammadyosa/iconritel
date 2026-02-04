@@ -48,19 +48,23 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden bg-gradient-to-br from-background to-muted/30">
-      {/* Background Map */}
-      <div 
-        className="absolute inset-0 opacity-[0.08] dark:opacity-[0.05]"
-        style={{
-          backgroundImage: `url(${indonesiaMap})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat',
-        }}
-      />
+    <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden bg-gradient-to-b from-primary/5 via-background to-background">
+      {/* Decorative gradient overlay */}
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-accent/5" />
       
-      <Card className="w-full max-w-sm shadow-2xl border-border/50 backdrop-blur-sm relative z-10">
+      {/* Background Map - centered and contained */}
+      <div className="absolute inset-0 flex items-center justify-center">
+        <img 
+          src={indonesiaMap} 
+          alt="" 
+          className="w-[90%] sm:w-[80%] md:w-[70%] lg:w-[60%] max-w-4xl h-auto object-contain opacity-[0.12] dark:opacity-[0.08] select-none pointer-events-none"
+        />
+      </div>
+      
+      {/* Subtle vignette effect */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_0%,hsl(var(--background))_70%)]" />
+      
+      <Card className="w-full max-w-sm shadow-2xl border-border/50 backdrop-blur-md bg-card/95 relative z-10">
         <CardHeader className="text-center space-y-4 pb-2">
           <div className="flex justify-center">
             <img 
