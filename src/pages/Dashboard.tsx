@@ -16,7 +16,6 @@ import { motion } from "framer-motion";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip, Cell, LineChart, Line } from "recharts";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ShiftReportCard } from "@/components/ShiftReportCard";
-import { StatusDistributionChart } from "@/components/StatusDistributionChart";
 import {
   ChartContainer,
   ChartTooltip,
@@ -40,10 +39,9 @@ interface ShiftReport {
 
 export default function Dashboard() {
   const { tickets, excelData } = useTickets();
-  const { getChartData, getStatusChartData, getTicketsForDate, getTicketsForDateByStatus } = useTicketHistory(tickets);
+  const { getChartData, getTicketsForDate, getTicketsForDateByStatus } = useTicketHistory(tickets);
   const [shiftReports, setShiftReports] = useState<ShiftReport[]>([]);
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
-  const [statusTrendDays, setStatusTrendDays] = useState<number>(7);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedMetric, setSelectedMetric] = useState<string | null>(null);
   const [oltData, setOltData] = useState<OLT[]>([]);
@@ -241,45 +239,112 @@ export default function Dashboard() {
         ))}
       </div>
 
-      {/* Charts Section - Line Charts */}
+      {/* Charts Section - Bar Charts */}
       <div className="grid gap-2 sm:gap-3 grid-cols-1 lg:grid-cols-2 w-full">
-        {/* Status Distribution - Modern Infographic */}
+        {/* Status Distribution Bar Chart */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.2 }}
         >
           <Card className="shadow-lg overflow-hidden border bg-card">
-            <CardHeader className="py-2 px-3 sm:px-4 border-b bg-muted/30">
-              <CardTitle className="flex items-center gap-2 text-sm sm:text-base">
-                <BarChart3 className="h-4 w-4 text-primary" />
+            <CardHeader className="py-2 px-2.5 sm:py-2.5 sm:px-4 border-b bg-muted/30">
+              <CardTitle className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm md:text-base">
+                <BarChart3 className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary" />
                 Status Distribution
               </CardTitle>
             </CardHeader>
-            <CardContent className="p-2 sm:p-3">
-              <StatusDistributionChart 
-                tickets={tickets}
-                onStatusClick={(status, filteredTickets) => {
-                  const statusEmoji: Record<string, string> = {
-                    "On Progress": "⚙️",
-                    "Critical": "🚨",
-                    "Resolved": "✅",
-                    "Pending": "⏳"
-                  };
-                  const statusLabel: Record<string, string> = {
-                    "On Progress": "On Progres",
-                    "Critical": "Kritis",
-                    "Resolved": "Selesai",
-                    "Pending": "Tertunda"
-                  };
-                  setPreviousDialogState(null);
-                  setShowOltList(false);
-                  setInlineSelectedTicket(null);
-                  setFilterDialogTickets(filteredTickets);
-                  setFilterDialogTitle(`${statusEmoji[status] || ""} Tiket ${statusLabel[status] || status}`);
-                  setFilterDialogOpen(true);
-                }}
-              />
+            <CardContent className="p-1.5 sm:p-2 md:p-3">
+              {(() => {
+                const statusData = [
+                  { emoji: "⚙️", label: "Progres", value: tickets.filter((t) => t.status === "On Progress").length, fill: "hsl(217, 91%, 60%)", status: "On Progress" },
+                  { emoji: "🚨", label: "Critical", value: tickets.filter((t) => t.status === "Critical").length, fill: "hsl(0, 84%, 60%)", status: "Critical" },
+                  { emoji: "✅", label: "Resolved", value: tickets.filter((t) => t.status === "Resolved").length, fill: "hsl(142, 71%, 45%)", status: "Resolved" },
+                  { emoji: "⏳", label: "Pending", value: tickets.filter((t) => t.status === "Pending").length, fill: "hsl(38, 92%, 50%)", status: "Pending" },
+                ];
+
+                const chartConfig: ChartConfig = {
+                  value: { label: "Jumlah" },
+                };
+
+                // Custom Y-axis tick with emoji above label
+                const CustomYAxisTick = ({ x, y, payload }: any) => {
+                  const item = statusData.find((d) => d.label === payload.value);
+                  return (
+                    <g transform={`translate(${x},${y})`}>
+                      <text
+                        x={-8}
+                        y={-8}
+                        textAnchor="end"
+                        fontSize={14}
+                        className="select-none"
+                      >
+                        {item?.emoji}
+                      </text>
+                      <text
+                        x={-8}
+                        y={6}
+                        textAnchor="end"
+                        fontSize={9}
+                        fill="hsl(var(--muted-foreground))"
+                      >
+                        {payload.value}
+                      </text>
+                    </g>
+                  );
+                };
+
+                return (
+                  <ChartContainer config={chartConfig} className="h-[180px] xs:h-[190px] sm:h-[210px] md:h-[240px] w-full transition-all duration-300">
+                    <BarChart
+                      data={statusData}
+                      layout="vertical"
+                      margin={{ top: 8, right: 15, left: 5, bottom: 8 }}
+                      barCategoryGap="25%"
+                      onClick={(data) => {
+                        if (data?.activePayload?.[0]?.payload?.status) {
+                          const status = data.activePayload[0].payload.status;
+                          setSelectedStatus(selectedStatus === status ? null : status);
+                          const filtered = tickets.filter((t) => t.status === status);
+                          setPreviousDialogState(null);
+                          setShowOltList(false);
+                          setFilterDialogTickets(filtered);
+                          setFilterDialogTitle(`⚙️ Tiket dengan Status: ${status}`);
+                          setFilterDialogOpen(true);
+                        }
+                      }}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" className="stroke-muted" horizontal={false} />
+                      <XAxis 
+                        type="number"
+                        tick={{ fontSize: 8, fill: "hsl(var(--muted-foreground))" }}
+                        tickLine={false}
+                        axisLine={false}
+                      />
+                      <YAxis 
+                        type="category"
+                        dataKey="label" 
+                        tick={<CustomYAxisTick />}
+                        width={75}
+                        tickLine={false}
+                        axisLine={false}
+                      />
+                      <ChartTooltip
+                        content={<ChartTooltipContent />}
+                        cursor={{ fill: "hsl(var(--muted))", opacity: 0.3 }}
+                      />
+                      <Bar dataKey="value" radius={[0, 4, 4, 0]} cursor="pointer" maxBarSize={28}>
+                        {statusData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.fill} />
+                        ))}
+                      </Bar>
+                    </BarChart>
+                  </ChartContainer>
+                );
+              })()}
+              <p className="text-[9px] sm:text-[10px] text-muted-foreground text-center mt-1">
+                Klik bar untuk detail
+              </p>
             </CardContent>
           </Card>
         </motion.div>
