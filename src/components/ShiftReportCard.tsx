@@ -153,9 +153,9 @@ function EditReportForm({
               <SelectValue placeholder="Pilih Shift" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="1">Shift 1 (Pagi)</SelectItem>
-              <SelectItem value="2">Shift 2 (Siang)</SelectItem>
-              <SelectItem value="3">Shift 3 (Malam)</SelectItem>
+              <SelectItem value="pagi">Pagi</SelectItem>
+              <SelectItem value="siang">Siang</SelectItem>
+              <SelectItem value="malam">Malam</SelectItem>
             </SelectContent>
           </Select>
         </div>
