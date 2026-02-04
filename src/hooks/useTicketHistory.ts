@@ -169,6 +169,43 @@ export function useTicketHistory(tickets: Ticket[]) {
     return result;
   }, [history.records]);
 
+  // Get status distribution data for chart (last N days)
+  const getStatusChartData = useCallback((days: number = 7) => {
+    const result: Array<{ 
+      date: string; 
+      isoDate: string; 
+      onProgress: number;
+      critical: number;
+      resolved: number;
+      pending: number;
+    }> = [];
+    const today = new Date();
+    
+    for (let i = days - 1; i >= 0; i--) {
+      const date = new Date(today);
+      date.setDate(date.getDate() - i);
+      const isoDate = date.toISOString().split('T')[0];
+      const displayDate = date.toLocaleDateString('id-ID', { day: '2-digit', month: 'short' });
+      
+      // Filter tickets created on this date and count by status
+      const dayTickets = tickets.filter((ticket) => {
+        const ticketDate = new Date(ticket.createdISO).toISOString().split('T')[0];
+        return ticketDate === isoDate;
+      });
+      
+      result.push({
+        date: displayDate,
+        isoDate,
+        onProgress: dayTickets.filter(t => t.status === "On Progress").length,
+        critical: dayTickets.filter(t => t.status === "Critical").length,
+        resolved: dayTickets.filter(t => t.status === "Resolved").length,
+        pending: dayTickets.filter(t => t.status === "Pending").length,
+      });
+    }
+    
+    return result;
+  }, [tickets]);
+
   // Get tickets for a specific date and category
   const getTicketsForDate = useCallback((isoDate: string, category?: "RITEL" | "FEEDER") => {
     return tickets.filter((ticket) => {
@@ -211,6 +248,7 @@ export function useTicketHistory(tickets: Ticket[]) {
   return {
     history,
     getChartData,
+    getStatusChartData,
     getTicketsForDate,
     getTicketsForDateByStatus,
     clearHistory,
