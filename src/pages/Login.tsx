@@ -15,26 +15,40 @@ export default function Login() {
   const [isSigningIn, setIsSigningIn] = useState(false);
 
   useEffect(() => {
+    // Check if user is authenticated and redirect to dashboard
     if (!isLoading && user) {
-      navigate("/", { replace: true });
+      // Use a small delay to ensure session is fully established
+      const timer = setTimeout(() => {
+        navigate("/", { replace: true });
+      }, 100);
+      return () => clearTimeout(timer);
     }
   }, [user, isLoading, navigate]);
 
   const handleGoogleSignIn = async () => {
     setIsSigningIn(true);
     try {
-      const { error } = await lovable.auth.signInWithOAuth("google", {
+      const result = await lovable.auth.signInWithOAuth("google", {
         redirect_uri: window.location.origin,
       });
 
-      if (error) {
-        console.error("OAuth error:", error);
-        toast.error("Gagal masuk dengan Google. Silakan coba lagi.");
+      // If redirected, the page will reload, no need to handle further
+      if (result.redirected) {
+        return;
       }
+
+      if (result.error) {
+        console.error("OAuth error:", result.error);
+        toast.error("Gagal masuk dengan Google. Silakan coba lagi.");
+        setIsSigningIn(false);
+        return;
+      }
+
+      // If we get here, OAuth was successful, navigate to dashboard
+      navigate("/", { replace: true });
     } catch (error) {
       console.error("Sign in error:", error);
       toast.error("Terjadi kesalahan saat masuk.");
-    } finally {
       setIsSigningIn(false);
     }
   };
