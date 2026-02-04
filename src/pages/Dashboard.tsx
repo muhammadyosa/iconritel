@@ -22,7 +22,6 @@ import {
   ChartTooltipContent,
   type ChartConfig,
 } from "@/components/ui/chart";
-import { HudHeader, HudKpiCard, HudChartCard } from "@/components/dashboard";
 
 interface ShiftReport {
   id: string;
@@ -118,343 +117,397 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-4 md:space-y-6 w-full max-w-full overflow-x-hidden min-w-0">
-      {/* Futuristic HUD Header */}
-      <HudHeader 
-        title="🖥️ Dashboard Overview" 
-        subtitle="SYSTEM ONLINE • NOC RITEL MONITORING"
-      />
+      {/* Header Section */}
+      <motion.div 
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="relative"
+      >
+        <div className="flex items-center gap-3 mb-2">
+          <div>
+            <h1 className="text-3xl font-bold">
+              🖥️ Dashboard Overview
+            </h1>
+            <p className="text-muted-foreground text-sm">
+              Monitoring incident NOC RITEL
+            </p>
+          </div>
+        </div>
+      </motion.div>
 
-      {/* Futuristic KPI Cards Section */}
+      {/* KPI Cards Section */}
       <div className="grid gap-2 sm:gap-3 grid-cols-2 lg:grid-cols-4 w-full">
-        <HudKpiCard
-          title="Total Incident"
-          value={totalIncidents}
-          emoji="🗃️"
-          variant="cyan"
-          index={0}
-          onClick={() => {
-            setPreviousDialogState(null);
-            setShowOltList(false);
-            setFilterDialogTickets(tickets);
-            setFilterDialogTitle("🗃️ Semua Tiket");
-            setFilterDialogOpen(true);
-          }}
-        />
-        <HudKpiCard
-          title="Over SLA (>24h)"
-          value={overSLA}
-          emoji="⚠️"
-          variant="magenta"
-          index={1}
-          onClick={() => {
-            const filtered = tickets.filter((t) => {
-              const ageMs = new Date().getTime() - new Date(t.createdISO).getTime();
-              return ageMs > 24 * 60 * 60 * 1000 && t.status !== "Resolved";
-            });
-            setPreviousDialogState(null);
-            setShowOltList(false);
-            setFilterDialogTickets(filtered);
-            setFilterDialogTitle("⚠️ Tiket Over SLA (>24h)");
-            setFilterDialogOpen(true);
-          }}
-        />
-        <HudKpiCard
-          title="Impact OLT"
-          value={totalOLT}
-          emoji="📟"
-          variant="green"
-          index={2}
-          onClick={() => {
-            setPreviousDialogState(null);
-            setShowOltList(true);
-            setFilterDialogTitle("📟 Daftar OLT Terdampak");
-            setFilterDialogOpen(true);
-          }}
-        />
-        <HudKpiCard
-          title="Impact Feeder"
-          value={feederImpact}
-          emoji="⛓️‍💥"
-          variant="orange"
-          index={3}
-          onClick={() => {
-            const filtered = tickets.filter((t) => FEEDER_CONSTRAINTS_SET.has(t.constraint));
-            setPreviousDialogState(null);
-            setShowOltList(false);
-            setFilterDialogTickets(filtered);
-            setFilterDialogTitle("⛓️‍💥 Tiket Impact Feeder");
-            setFilterDialogOpen(true);
-          }}
-        />
+        {[
+          { 
+            title: "Total Incident", 
+            value: totalIncidents, 
+            emoji: "🗃️", 
+            metric: "total",
+            bgClass: "bg-primary/10",
+            borderClass: "border-primary/30"
+          },
+          { 
+            title: "Over SLA (>24h)", 
+            value: overSLA, 
+            emoji: "⚠️", 
+            metric: "overSLA",
+            bgClass: "bg-destructive/10",
+            borderClass: "border-destructive/30"
+          },
+          { 
+            title: "Impact OLT", 
+            value: totalOLT, 
+            emoji: "📟", 
+            metric: "olt",
+            bgClass: "bg-success/10",
+            borderClass: "border-success/30"
+          },
+          { 
+            title: "Impact Feeder", 
+            value: feederImpact, 
+            emoji: "⛓️‍💥", 
+            metric: "feeder",
+            bgClass: "bg-warning/10",
+            borderClass: "border-warning/30"
+          }
+        ].map((card, index) => (
+          <motion.div
+            key={card.metric}
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.3, delay: index * 0.05 }}
+            onClick={() => {
+              let filtered: Ticket[] = [];
+              let title = "";
+              
+              // Reset previous state when opening new dialog
+              setPreviousDialogState(null);
+              
+              if (card.metric === "total") {
+                filtered = tickets;
+                title = "🗃️ Semua Tiket";
+              } else if (card.metric === "overSLA") {
+                filtered = tickets.filter((t) => {
+                  const ageMs = new Date().getTime() - new Date(t.createdISO).getTime();
+                  return ageMs > 24 * 60 * 60 * 1000 && t.status !== "Resolved";
+                });
+                title = "⚠️ Tiket Over SLA (>24h)";
+              } else if (card.metric === "feeder") {
+                filtered = tickets.filter((t) => FEEDER_CONSTRAINTS_SET.has(t.constraint));
+                title = "⛓️‍💥 Tiket Impact Feeder";
+              } else if (card.metric === "olt") {
+                setShowOltList(true);
+                setFilterDialogTitle("📟 Daftar OLT Terdampak");
+                setFilterDialogOpen(true);
+                return;
+              }
+              
+              setShowOltList(false);
+              setFilterDialogTickets(filtered);
+              setFilterDialogTitle(title);
+              setFilterDialogOpen(true);
+            }}
+            className={`
+              relative cursor-pointer group
+              rounded-xl ${card.bgClass} ${card.borderClass} border
+              transition-all duration-200
+              hover:scale-[1.02] hover:shadow-lg
+              active:scale-[0.98]
+            `}
+          >
+            {/* Content */}
+            <div className="relative p-2.5 sm:p-3 md:p-4">
+              <div className="flex items-center gap-3">
+                {/* Emoji/Logo on Left */}
+                <div className="flex flex-col items-center shrink-0">
+                  <span className="text-2xl sm:text-3xl">{card.emoji}</span>
+                </div>
+                
+                {/* Title below emoji, Value on right */}
+                <div className="flex-1 min-w-0">
+                  <p className="text-[10px] sm:text-xs text-muted-foreground font-medium truncate">{card.title}</p>
+                </div>
+                
+                {/* Value on far right */}
+                <p className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground shrink-0">
+                  {card.value}
+                </p>
+              </div>
+            </div>
+          </motion.div>
+        ))}
       </div>
 
-      {/* Charts Section - Futuristic HUD Style */}
-      <div className="grid gap-3 sm:gap-4 grid-cols-1 lg:grid-cols-2 w-full">
-        {/* Status Distribution Bar Chart - HUD Style */}
-        <HudChartCard
-          title="Status Distribution"
-          subtitle="Real-time status monitoring"
-          icon={BarChart3}
-          variant="cyan"
-          footer={
-            <p className="text-[9px] sm:text-[10px] text-hud-cyan/70">
-              ⚡ Klik bar untuk detail
-            </p>
-          }
+      {/* Charts Section - Bar Charts */}
+      <div className="grid gap-2 sm:gap-3 grid-cols-1 lg:grid-cols-2 w-full">
+        {/* Status Distribution Bar Chart */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.2 }}
         >
-          {(() => {
-            const statusData = [
-              { emoji: "⚙️", label: "Progres", value: tickets.filter((t) => t.status === "On Progress").length, fill: "hsl(185, 100%, 50%)", status: "On Progress" },
-              { emoji: "🚨", label: "Critical", value: tickets.filter((t) => t.status === "Critical").length, fill: "hsl(300, 100%, 60%)", status: "Critical" },
-              { emoji: "✅", label: "Resolved", value: tickets.filter((t) => t.status === "Resolved").length, fill: "hsl(142, 90%, 50%)", status: "Resolved" },
-              { emoji: "⏳", label: "Pending", value: tickets.filter((t) => t.status === "Pending").length, fill: "hsl(30, 100%, 55%)", status: "Pending" },
-            ];
+          <Card className="shadow-lg overflow-hidden border bg-card">
+            <CardHeader className="py-2 px-2.5 sm:py-2.5 sm:px-4 border-b bg-muted/30">
+              <CardTitle className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm md:text-base">
+                <BarChart3 className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary" />
+                Status Distribution
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-1.5 sm:p-2 md:p-3">
+              {(() => {
+                const statusData = [
+                  { emoji: "⚙️", label: "Progres", value: tickets.filter((t) => t.status === "On Progress").length, fill: "hsl(217, 91%, 60%)", status: "On Progress" },
+                  { emoji: "🚨", label: "Critical", value: tickets.filter((t) => t.status === "Critical").length, fill: "hsl(0, 84%, 60%)", status: "Critical" },
+                  { emoji: "✅", label: "Resolved", value: tickets.filter((t) => t.status === "Resolved").length, fill: "hsl(142, 71%, 45%)", status: "Resolved" },
+                  { emoji: "⏳", label: "Pending", value: tickets.filter((t) => t.status === "Pending").length, fill: "hsl(38, 92%, 50%)", status: "Pending" },
+                ];
 
-            const chartConfig: ChartConfig = {
-              value: { label: "Jumlah" },
-            };
+                const chartConfig: ChartConfig = {
+                  value: { label: "Jumlah" },
+                };
 
-            // Custom Y-axis tick with emoji above label - HUD style
-            const CustomYAxisTick = ({ x, y, payload }: any) => {
-              const item = statusData.find((d) => d.label === payload.value);
-              return (
-                <g transform={`translate(${x},${y})`}>
-                  <text
-                    x={-8}
-                    y={-8}
-                    textAnchor="end"
-                    fontSize={14}
-                    className="select-none"
-                  >
-                    {item?.emoji}
-                  </text>
-                  <text
-                    x={-8}
-                    y={6}
-                    textAnchor="end"
-                    fontSize={9}
-                    fill="hsl(185, 100%, 60%)"
-                    fontFamily="monospace"
-                  >
-                    {payload.value}
-                  </text>
-                </g>
-              );
-            };
+                // Custom Y-axis tick with emoji above label
+                const CustomYAxisTick = ({ x, y, payload }: any) => {
+                  const item = statusData.find((d) => d.label === payload.value);
+                  return (
+                    <g transform={`translate(${x},${y})`}>
+                      <text
+                        x={-8}
+                        y={-8}
+                        textAnchor="end"
+                        fontSize={14}
+                        className="select-none"
+                      >
+                        {item?.emoji}
+                      </text>
+                      <text
+                        x={-8}
+                        y={6}
+                        textAnchor="end"
+                        fontSize={9}
+                        fill="hsl(var(--muted-foreground))"
+                      >
+                        {payload.value}
+                      </text>
+                    </g>
+                  );
+                };
 
-            return (
-              <ChartContainer config={chartConfig} className="h-[180px] xs:h-[190px] sm:h-[210px] md:h-[240px] w-full transition-all duration-300">
-                <BarChart
-                  data={statusData}
-                  layout="vertical"
-                  margin={{ top: 8, right: 15, left: 5, bottom: 8 }}
-                  barCategoryGap="25%"
-                  onClick={(data) => {
-                    if (data?.activePayload?.[0]?.payload?.status) {
-                      const status = data.activePayload[0].payload.status;
-                      setSelectedStatus(selectedStatus === status ? null : status);
-                      const filtered = tickets.filter((t) => t.status === status);
-                      setPreviousDialogState(null);
-                      setShowOltList(false);
-                      setFilterDialogTickets(filtered);
-                      setFilterDialogTitle(`⚙️ Tiket dengan Status: ${status}`);
-                      setFilterDialogOpen(true);
-                    }
-                  }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(185, 100%, 30%)" strokeOpacity={0.3} horizontal={false} />
-                  <XAxis 
-                    type="number"
-                    tick={{ fontSize: 8, fill: "hsl(185, 100%, 60%)", fontFamily: "monospace" }}
-                    tickLine={false}
-                    axisLine={false}
-                  />
-                  <YAxis 
-                    type="category"
-                    dataKey="label" 
-                    tick={<CustomYAxisTick />}
-                    width={75}
-                    tickLine={false}
-                    axisLine={false}
-                  />
-                  <ChartTooltip
-                    content={<ChartTooltipContent />}
-                    cursor={{ fill: "hsl(185, 100%, 50%)", opacity: 0.1 }}
-                  />
-                  <Bar dataKey="value" radius={[0, 4, 4, 0]} cursor="pointer" maxBarSize={28}>
-                    {statusData.map((entry, index) => (
-                      <Cell 
-                        key={`cell-${index}`} 
-                        fill={entry.fill}
-                        style={{ filter: "drop-shadow(0 0 4px " + entry.fill + ")" }}
+                return (
+                  <ChartContainer config={chartConfig} className="h-[180px] xs:h-[190px] sm:h-[210px] md:h-[240px] w-full transition-all duration-300">
+                    <BarChart
+                      data={statusData}
+                      layout="vertical"
+                      margin={{ top: 8, right: 15, left: 5, bottom: 8 }}
+                      barCategoryGap="25%"
+                      onClick={(data) => {
+                        if (data?.activePayload?.[0]?.payload?.status) {
+                          const status = data.activePayload[0].payload.status;
+                          setSelectedStatus(selectedStatus === status ? null : status);
+                          const filtered = tickets.filter((t) => t.status === status);
+                          setPreviousDialogState(null);
+                          setShowOltList(false);
+                          setFilterDialogTickets(filtered);
+                          setFilterDialogTitle(`⚙️ Tiket dengan Status: ${status}`);
+                          setFilterDialogOpen(true);
+                        }
+                      }}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" className="stroke-muted" horizontal={false} />
+                      <XAxis 
+                        type="number"
+                        tick={{ fontSize: 8, fill: "hsl(var(--muted-foreground))" }}
+                        tickLine={false}
+                        axisLine={false}
                       />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ChartContainer>
-            );
-          })()}
-        </HudChartCard>
+                      <YAxis 
+                        type="category"
+                        dataKey="label" 
+                        tick={<CustomYAxisTick />}
+                        width={75}
+                        tickLine={false}
+                        axisLine={false}
+                      />
+                      <ChartTooltip
+                        content={<ChartTooltipContent />}
+                        cursor={{ fill: "hsl(var(--muted))", opacity: 0.3 }}
+                      />
+                      <Bar dataKey="value" radius={[0, 4, 4, 0]} cursor="pointer" maxBarSize={28}>
+                        {statusData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.fill} />
+                        ))}
+                      </Bar>
+                    </BarChart>
+                  </ChartContainer>
+                );
+              })()}
+              <p className="text-[9px] sm:text-[10px] text-muted-foreground text-center mt-1">
+                Klik bar untuk detail
+              </p>
+            </CardContent>
+          </Card>
+        </motion.div>
 
-        {/* Category Distribution Line Chart - Daily Trend with HUD Style */}
-        <HudChartCard
-          title="Category Trend"
-          subtitle="Daily incident analysis"
-          icon={TrendingUp}
-          variant="purple"
-          headerAction={
-            <Select value={trendDays.toString()} onValueChange={(v) => setTrendDays(Number(v))}>
-              <SelectTrigger className="w-[90px] h-7 text-[10px] bg-hud-background/50 border-hud-purple/30 text-hud-purple">
-                <SelectValue placeholder="Rentang" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="7">7 Hari</SelectItem>
-                <SelectItem value="14">14 Hari</SelectItem>
-                <SelectItem value="30">30 Hari</SelectItem>
-              </SelectContent>
-            </Select>
-          }
-          footer={
-            <div className="space-y-1">
-              <div className="flex flex-wrap items-center justify-center gap-3">
+        {/* Category Distribution Line Chart - Daily Trend with History */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.3 }}
+        >
+          <Card className="shadow-lg overflow-hidden border bg-card">
+            <CardHeader className="py-2 px-3 sm:px-4 border-b bg-muted/30">
+              <div className="flex items-center justify-between gap-2">
+                <CardTitle className="flex items-center gap-2 text-sm sm:text-base">
+                  <TrendingUp className="h-4 w-4 text-accent" />
+                  Category Trend
+                </CardTitle>
+                <Select value={trendDays.toString()} onValueChange={(v) => setTrendDays(Number(v))}>
+                  <SelectTrigger className="w-[90px] h-7 text-[10px]">
+                    <SelectValue placeholder="Rentang" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="7">7 Hari</SelectItem>
+                    <SelectItem value="14">14 Hari</SelectItem>
+                    <SelectItem value="30">30 Hari</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </CardHeader>
+            <CardContent className="p-2 sm:p-3">
+              {(() => {
+                // Use history data for the chart
+                const chartData = getChartData(trendDays);
+
+                const chartConfig: ChartConfig = {
+                  ritel: { label: "🏠 RITEL", color: "hsl(217, 91%, 60%)" },
+                  feeder: { label: "🏬 FEEDER", color: "hsl(38, 92%, 50%)" },
+                  created: { label: "📥Insident", color: "hsl(262, 83%, 58%)" },
+                };
+
+                const handleDotClick = (category: "RITEL" | "FEEDER", isoDate: string, displayDate: string) => {
+                  const filtered = getTicketsForDate(isoDate, category);
+                  setPreviousDialogState(null);
+                  setShowOltList(false);
+                  setInlineSelectedTicket(null);
+                  setFilterDialogTickets(filtered);
+                  setFilterDialogTitle(`${category === "RITEL" ? "🏠" : "🏬"} ${category} - ${displayDate}`);
+                  setFilterDialogOpen(true);
+                };
+
+                const handleStatusDotClick = (isoDate: string, displayDate: string) => {
+                  const filtered = getTicketsForDateByStatus(isoDate, "created");
+                  setPreviousDialogState(null);
+                  setShowOltList(false);
+                  setInlineSelectedTicket(null);
+                  setFilterDialogTickets(filtered);
+                  setFilterDialogTitle(`📥Insident - ${displayDate}`);
+                  setFilterDialogOpen(true);
+                };
+
+                return (
+                  <ChartContainer config={chartConfig} className="h-[200px] sm:h-[220px] md:h-[260px] w-full transition-all duration-300">
+                    <LineChart
+                      data={chartData}
+                      margin={{ top: 5, right: 15, left: 5, bottom: 5 }}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                      <XAxis 
+                        dataKey="date"
+                        tick={{ fontSize: 8, fill: "hsl(var(--muted-foreground))" }}
+                        tickLine={false}
+                        axisLine={false}
+                        interval={trendDays > 14 ? 3 : trendDays > 7 ? 1 : 0}
+                      />
+                      <YAxis 
+                        tick={{ fontSize: 9, fill: "hsl(var(--muted-foreground))" }}
+                        tickLine={false}
+                        axisLine={false}
+                        allowDecimals={false}
+                        width={25}
+                      />
+                      <ChartTooltip
+                        content={<ChartTooltipContent />}
+                      />
+                      <Line 
+                        type="monotone" 
+                        dataKey="ritel" 
+                        stroke="hsl(217, 91%, 60%)" 
+                        strokeWidth={2}
+                        dot={{ fill: "hsl(217, 91%, 60%)", strokeWidth: 1, r: trendDays > 14 ? 2 : 3, cursor: "pointer" }}
+                        activeDot={{ 
+                          r: 6, 
+                          strokeWidth: 2, 
+                          cursor: "pointer",
+                          onClick: (_, payload: any) => {
+                            if (payload?.payload) {
+                              handleDotClick("RITEL", payload.payload.isoDate, payload.payload.date);
+                            }
+                          }
+                        }}
+                        name="🏠 RITEL"
+                      />
+                      <Line 
+                        type="monotone" 
+                        dataKey="feeder" 
+                        stroke="hsl(38, 92%, 50%)" 
+                        strokeWidth={2}
+                        dot={{ fill: "hsl(38, 92%, 50%)", strokeWidth: 1, r: trendDays > 14 ? 2 : 3, cursor: "pointer" }}
+                        activeDot={{ 
+                          r: 6, 
+                          strokeWidth: 2, 
+                          cursor: "pointer",
+                          onClick: (_, payload: any) => {
+                            if (payload?.payload) {
+                              handleDotClick("FEEDER", payload.payload.isoDate, payload.payload.date);
+                            }
+                          }
+                        }}
+                        name="🏬 FEEDER"
+                      />
+                      <Line 
+                        type="monotone" 
+                        dataKey="created" 
+                        stroke="hsl(262, 83%, 58%)" 
+                        strokeWidth={2}
+                        strokeDasharray="5 5"
+                        dot={{ fill: "hsl(262, 83%, 58%)", strokeWidth: 1, r: trendDays > 14 ? 2 : 3, cursor: "pointer" }}
+                        activeDot={{ 
+                          r: 6, 
+                          strokeWidth: 2, 
+                          cursor: "pointer",
+                          onClick: (_, payload: any) => {
+                            if (payload?.payload) {
+                              handleStatusDotClick(payload.payload.isoDate, payload.payload.date);
+                            }
+                          }
+                        }}
+                        name="📥Insident"
+                      />
+                    </LineChart>
+                  </ChartContainer>
+                );
+              })()}
+              <div className="flex flex-wrap items-center justify-center gap-3 mt-1.5">
                 <div className="flex items-center gap-1.5 text-[10px]">
-                  <div className="w-2 h-2 rounded-full bg-hud-cyan shadow-[0_0_6px_hsl(var(--hud-cyan))]" />
-                  <span className="text-hud-cyan/80 font-mono">🏠 RITEL</span>
+                  <div className="w-2 h-2 rounded-full bg-accent" />
+                  <span className="text-muted-foreground">🏠 RITEL</span>
                 </div>
                 <div className="flex items-center gap-1.5 text-[10px]">
-                  <div className="w-2 h-2 rounded-full bg-hud-orange shadow-[0_0_6px_hsl(var(--hud-orange))]" />
-                  <span className="text-hud-orange/80 font-mono">🏬 FEEDER</span>
+                  <div className="w-2 h-2 rounded-full bg-warning" />
+                  <span className="text-muted-foreground">🏬 FEEDER</span>
                 </div>
                 <div className="flex items-center gap-1.5 text-[10px]">
-                  <div className="w-2 h-2 rounded-full bg-hud-purple shadow-[0_0_6px_hsl(var(--hud-purple))]" />
-                  <span className="text-hud-purple/80 font-mono">📥Insident</span>
+                  <div className="w-2 h-2 rounded-full" style={{ background: "hsl(262, 83%, 58%)" }} />
+                  <span className="text-muted-foreground">📥Insident</span>
                 </div>
               </div>
-              <p className="text-[9px] text-hud-purple/70">
-                ⚡ Klik titik untuk detail
+              <p className="text-[10px] text-muted-foreground text-center mt-1">
+                Klik titik untuk detail
               </p>
-            </div>
-          }
-        >
-          {(() => {
-            const chartData = getChartData(trendDays);
-
-            const chartConfig: ChartConfig = {
-              ritel: { label: "🏠 RITEL", color: "hsl(185, 100%, 50%)" },
-              feeder: { label: "🏬 FEEDER", color: "hsl(30, 100%, 55%)" },
-              created: { label: "📥Insident", color: "hsl(262, 90%, 60%)" },
-            };
-
-            const handleDotClick = (category: "RITEL" | "FEEDER", isoDate: string, displayDate: string) => {
-              const filtered = getTicketsForDate(isoDate, category);
-              setPreviousDialogState(null);
-              setShowOltList(false);
-              setInlineSelectedTicket(null);
-              setFilterDialogTickets(filtered);
-              setFilterDialogTitle(`${category === "RITEL" ? "🏠" : "🏬"} ${category} - ${displayDate}`);
-              setFilterDialogOpen(true);
-            };
-
-            const handleStatusDotClick = (isoDate: string, displayDate: string) => {
-              const filtered = getTicketsForDateByStatus(isoDate, "created");
-              setPreviousDialogState(null);
-              setShowOltList(false);
-              setInlineSelectedTicket(null);
-              setFilterDialogTickets(filtered);
-              setFilterDialogTitle(`📥Insident - ${displayDate}`);
-              setFilterDialogOpen(true);
-            };
-
-            return (
-              <ChartContainer config={chartConfig} className="h-[200px] sm:h-[220px] md:h-[260px] w-full transition-all duration-300">
-                <LineChart
-                  data={chartData}
-                  margin={{ top: 5, right: 15, left: 5, bottom: 5 }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(262, 90%, 30%)" strokeOpacity={0.3} />
-                  <XAxis 
-                    dataKey="date"
-                    tick={{ fontSize: 8, fill: "hsl(262, 90%, 60%)", fontFamily: "monospace" }}
-                    tickLine={false}
-                    axisLine={false}
-                    interval={trendDays > 14 ? 3 : trendDays > 7 ? 1 : 0}
-                  />
-                  <YAxis 
-                    tick={{ fontSize: 9, fill: "hsl(262, 90%, 60%)", fontFamily: "monospace" }}
-                    tickLine={false}
-                    axisLine={false}
-                    allowDecimals={false}
-                    width={25}
-                  />
-                  <ChartTooltip
-                    content={<ChartTooltipContent />}
-                  />
-                  <Line 
-                    type="monotone" 
-                    dataKey="ritel" 
-                    stroke="hsl(185, 100%, 50%)" 
-                    strokeWidth={2}
-                    style={{ filter: "drop-shadow(0 0 6px hsl(185, 100%, 50%))" }}
-                    dot={{ fill: "hsl(185, 100%, 50%)", strokeWidth: 1, r: trendDays > 14 ? 2 : 3, cursor: "pointer" }}
-                    activeDot={{ 
-                      r: 6, 
-                      strokeWidth: 2, 
-                      cursor: "pointer",
-                      style: { filter: "drop-shadow(0 0 8px hsl(185, 100%, 50%))" },
-                      onClick: (_, payload: any) => {
-                        if (payload?.payload) {
-                          handleDotClick("RITEL", payload.payload.isoDate, payload.payload.date);
-                        }
-                      }
-                    }}
-                    name="🏠 RITEL"
-                  />
-                  <Line 
-                    type="monotone" 
-                    dataKey="feeder" 
-                    stroke="hsl(30, 100%, 55%)" 
-                    strokeWidth={2}
-                    style={{ filter: "drop-shadow(0 0 6px hsl(30, 100%, 55%))" }}
-                    dot={{ fill: "hsl(30, 100%, 55%)", strokeWidth: 1, r: trendDays > 14 ? 2 : 3, cursor: "pointer" }}
-                    activeDot={{ 
-                      r: 6, 
-                      strokeWidth: 2, 
-                      cursor: "pointer",
-                      style: { filter: "drop-shadow(0 0 8px hsl(30, 100%, 55%))" },
-                      onClick: (_, payload: any) => {
-                        if (payload?.payload) {
-                          handleDotClick("FEEDER", payload.payload.isoDate, payload.payload.date);
-                        }
-                      }
-                    }}
-                    name="🏬 FEEDER"
-                  />
-                  <Line 
-                    type="monotone" 
-                    dataKey="created" 
-                    stroke="hsl(262, 90%, 60%)" 
-                    strokeWidth={2}
-                    strokeDasharray="5 5"
-                    style={{ filter: "drop-shadow(0 0 6px hsl(262, 90%, 60%))" }}
-                    dot={{ fill: "hsl(262, 90%, 60%)", strokeWidth: 1, r: trendDays > 14 ? 2 : 3, cursor: "pointer" }}
-                    activeDot={{ 
-                      r: 6, 
-                      strokeWidth: 2, 
-                      cursor: "pointer",
-                      style: { filter: "drop-shadow(0 0 8px hsl(262, 90%, 60%))" },
-                      onClick: (_, payload: any) => {
-                        if (payload?.payload) {
-                          handleStatusDotClick(payload.payload.isoDate, payload.payload.date);
-                        }
-                      }
-                    }}
-                    name="📥Insident"
-                  />
-                </LineChart>
-              </ChartContainer>
-            );
-          })()}
-        </HudChartCard>
+            </CardContent>
+          </Card>
+        </motion.div>
       </div>
 
       {/* Shift Reports Section */}
