@@ -52,12 +52,12 @@ export default function Login() {
       {/* Soft gradient base */}
       <div className="absolute inset-0 bg-gradient-to-b from-primary/[0.03] via-transparent to-primary/[0.02]" />
       
-      {/* Background Map - perfectly centered with responsive sizing */}
-      <div className="absolute inset-0 flex items-end justify-center pb-[5vh] sm:pb-[8vh] md:items-center md:pb-0">
+      {/* Background Map - full screen cover */}
+      <div className="absolute inset-0">
         <img 
           src={indonesiaMap} 
           alt="" 
-          className="w-[95vw] sm:w-[85vw] md:w-[75vw] lg:w-[65vw] xl:w-[55vw] max-w-5xl h-auto object-contain opacity-[0.15] dark:opacity-[0.08] select-none pointer-events-none"
+          className="w-full h-full object-cover opacity-[0.12] dark:opacity-[0.06] select-none pointer-events-none"
         />
       </div>
       
