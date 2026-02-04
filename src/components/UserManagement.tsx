@@ -78,6 +78,10 @@ export function UserManagement() {
   const handleRoleChange = async (userId: string, newRole: "admin" | "operator") => {
     setUpdatingUserId(userId);
     try {
+      // Get current role for logging
+      const currentUser = users.find((u) => u.user_id === userId);
+      const oldRole = currentUser?.role || "operator";
+
       // Check if user already has a role entry
       const { data: existingRole } = await supabase
         .from("user_roles")
@@ -100,6 +104,19 @@ export function UserManagement() {
           .insert({ user_id: userId, role: newRole });
 
         if (error) throw error;
+      }
+
+      // Log the role change for audit trail
+      const { data: sessionData } = await supabase.auth.getSession();
+      const changedBy = sessionData?.session?.user?.id;
+      
+      if (changedBy) {
+        await supabase.from("role_change_logs").insert({
+          user_id: userId,
+          changed_by: changedBy,
+          old_role: oldRole,
+          new_role: newRole,
+        });
       }
 
       // Update local state
