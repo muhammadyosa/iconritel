@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Download, Plus, Search, Trash2, Edit, Info, FileEdit } from "lucide-react";
+import { Download, Plus, Search, Trash2, Edit, Info, FileEdit, RefreshCw, Loader2 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -29,6 +29,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { useTickets } from "@/hooks/useTickets";
+import { useCloudTickets } from "@/hooks/useCloudTickets";
 import {
   Ticket,
   ALL_CONSTRAINTS,
@@ -42,8 +43,18 @@ import { sanitizeForCSV } from "@/lib/validation";
 import { Link } from "react-router-dom";
 
 export default function TicketManagement() {
-  const { tickets, excelData, isLoadingExcel, addTicket, updateTicket, deleteTicket } =
-    useTickets();
+  // Local Excel data from IndexedDB
+  const { excelData, isLoadingExcel } = useTickets();
+  
+  // Cloud tickets from Supabase (shared across all users)
+  const { 
+    tickets, 
+    isLoading: isLoadingTickets, 
+    addTicket, 
+    updateTicket, 
+    deleteTicket,
+    refetch: refetchTickets 
+  } = useCloudTickets();
 
   const [searchFilters, setSearchFilters] = useState({
     customer: "",
@@ -138,7 +149,7 @@ export default function TicketManagement() {
     }
   });
 
-  const handleSubmitTicket = () => {
+  const handleSubmitTicket = async () => {
     if (!formData.ticketId.trim()) {
       toast.error("Ticket ID wajib diisi");
       return;
@@ -188,11 +199,15 @@ export default function TicketManagement() {
       createdISO: now.toISOString(),
     };
 
-    addTicket(ticket);
-    toast.success(`Tiket ${category} berhasil dibuat`);
-    setIsFormOpen(false);
-    setFormData({ ticketId: "", serpo: "", constraint: "", portText: "" });
-    setSelectedRecord(null);
+    try {
+      await addTicket(ticket);
+      toast.success(`Tiket ${category} berhasil dibuat & disimpan ke Cloud`);
+      setIsFormOpen(false);
+      setFormData({ ticketId: "", serpo: "", constraint: "", portText: "" });
+      setSelectedRecord(null);
+    } catch (error) {
+      // Error already shown by hook
+    }
   };
 
   const handleExportCSV = () => {
@@ -239,7 +254,7 @@ export default function TicketManagement() {
     toast.success("CSV berhasil diexport");
   };
 
-  const handleSubmitManualTicket = () => {
+  const handleSubmitManualTicket = async () => {
     if (!manualFormData.ticketId.trim()) {
       toast.error("Ticket ID wajib diisi");
       return;
@@ -282,20 +297,24 @@ export default function TicketManagement() {
       createdISO: now.toISOString(),
     };
 
-    addTicket(ticket);
-    toast.success(`Tiket ${category} berhasil dibuat secara manual`);
-    setIsManualFormOpen(false);
-    setManualFormData({
-      ticketId: "",
-      serviceId: "",
-      customerName: "",
-      serpo: "",
-      hostname: "",
-      fatId: "",
-      snOnt: "",
-      constraint: "",
-      portText: "",
-    });
+    try {
+      await addTicket(ticket);
+      toast.success(`Tiket ${category} berhasil dibuat & disimpan ke Cloud`);
+      setIsManualFormOpen(false);
+      setManualFormData({
+        ticketId: "",
+        serviceId: "",
+        customerName: "",
+        serpo: "",
+        hostname: "",
+        fatId: "",
+        snOnt: "",
+        constraint: "",
+        portText: "",
+      });
+    } catch (error) {
+      // Error already shown by hook
+    }
   };
 
   return (
@@ -558,8 +577,22 @@ export default function TicketManagement() {
         <TabsContent value="daftar-ticket" className="mt-2 sm:mt-3">
           <Card className="shadow-sm border">
             <CardHeader className="py-1.5 sm:py-2 px-2 sm:px-3 border-b bg-muted/30 flex flex-row items-center justify-between gap-2">
-              <CardTitle className="text-xs sm:text-sm whitespace-nowrap">📋 Daftar Insident ({filteredTickets.length})</CardTitle>
+              <div className="flex items-center gap-2">
+                <CardTitle className="text-xs sm:text-sm whitespace-nowrap">📋 Daftar Insident ({filteredTickets.length})</CardTitle>
+                {isLoadingTickets && (
+                  <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />
+                )}
+              </div>
               <div className="flex gap-1 sm:gap-1.5">
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="h-6 sm:h-7 text-[9px] sm:text-[10px] px-1.5"
+                  onClick={() => refetchTickets()}
+                  disabled={isLoadingTickets}
+                >
+                  <RefreshCw className={`h-3 w-3 ${isLoadingTickets ? 'animate-spin' : ''}`} />
+                </Button>
                 <Dialog open={isManualFormOpen} onOpenChange={setIsManualFormOpen}>
                   <DialogTrigger asChild>
                     <Button variant="outline" size="sm" className="h-6 sm:h-7 text-[9px] sm:text-[10px] px-1.5 sm:px-2">
@@ -880,9 +913,13 @@ export default function TicketManagement() {
                                     <div className="flex gap-2 pt-3">
                                       <Select
                                         value={ticket.status}
-                                        onValueChange={(value: any) => {
-                                          updateTicket(ticket.id, { status: value });
-                                          toast.success(`Status tiket ${ticket.id} berhasil diubah menjadi ${value}`);
+                                        onValueChange={async (value: any) => {
+                                          try {
+                                            await updateTicket(ticket.id, { status: value });
+                                            toast.success(`Status tiket ${ticket.id} berhasil diubah menjadi ${value}`);
+                                          } catch (error) {
+                                            // Error already shown by hook
+                                          }
                                         }}
                                       >
                                         <SelectTrigger className="flex-1">
@@ -897,9 +934,13 @@ export default function TicketManagement() {
                                       </Select>
                                       <Button
                                         variant="destructive"
-                                        onClick={() => {
-                                          deleteTicket(ticket.id);
-                                          toast.success("Tiket dihapus");
+                                        onClick={async () => {
+                                          try {
+                                            await deleteTicket(ticket.id);
+                                            toast.success("Tiket dihapus dari Cloud");
+                                          } catch (error) {
+                                            // Error already shown by hook
+                                          }
                                         }}
                                       >
                                         <Trash2 className="h-4 w-4 mr-2" />
