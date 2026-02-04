@@ -14,7 +14,54 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      tickets: {
+        Row: {
+          category: string
+          constraint_type: string
+          created_at: string
+          created_iso: string
+          customer_name: string
+          fat_id: string
+          hostname: string
+          id: string
+          serpo: string
+          service_id: string
+          sn_ont: string
+          status: string
+          ticket_result: string
+        }
+        Insert: {
+          category: string
+          constraint_type: string
+          created_at?: string
+          created_iso: string
+          customer_name: string
+          fat_id: string
+          hostname: string
+          id?: string
+          serpo: string
+          service_id: string
+          sn_ont: string
+          status?: string
+          ticket_result: string
+        }
+        Update: {
+          category?: string
+          constraint_type?: string
+          created_at?: string
+          created_iso?: string
+          customer_name?: string
+          fat_id?: string
+          hostname?: string
+          id?: string
+          serpo?: string
+          service_id?: string
+          sn_ont?: string
+          status?: string
+          ticket_result?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
