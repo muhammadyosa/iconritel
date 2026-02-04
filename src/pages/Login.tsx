@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import plnIconPlusLogo from "@/assets/pln-icon-plus.png";
+import indonesiaMap from "@/assets/indonesia-map.png";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -47,8 +48,19 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-muted/20 to-background p-4">
-      <Card className="w-full max-w-sm shadow-2xl border-border/50 backdrop-blur-sm">
+    <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden bg-gradient-to-br from-background to-muted/30">
+      {/* Background Map */}
+      <div 
+        className="absolute inset-0 opacity-[0.08] dark:opacity-[0.05]"
+        style={{
+          backgroundImage: `url(${indonesiaMap})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+        }}
+      />
+      
+      <Card className="w-full max-w-sm shadow-2xl border-border/50 backdrop-blur-sm relative z-10">
         <CardHeader className="text-center space-y-4 pb-2">
           <div className="flex justify-center">
             <img 
