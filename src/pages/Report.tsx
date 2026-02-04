@@ -22,6 +22,7 @@ import { toast } from "@/hooks/use-toast";
 import { FileText, Download, ClipboardList, Trash2, RefreshCw, Loader2 } from "lucide-react";
 import { z } from "zod";
 import { Ticket } from "@/types/ticket";
+import { useUserRole } from "@/hooks/useUserRole";
 import { StatusBadge } from "@/components/StatusBadge";
 import {
   Table,
@@ -85,6 +86,9 @@ const Report = () => {
     addReport, 
     getFormattedReports 
   } = useCloudShiftReports();
+  
+  // User role for permission-based UI
+  const { isAdmin } = useUserRole();
   
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -695,6 +699,9 @@ function PendingTicketsList() {
   const [pendingResult, setPendingResult] = useState("");
   const [parsedPendingTickets, setParsedPendingTickets] = useState<ParsedPendingTicket[]>([]);
   const STORAGE_KEY = "noc_tickets";
+  
+  // User role for permission-based UI
+  const { isAdmin } = useUserRole();
 
   useEffect(() => {
     const loadTickets = () => {
@@ -1120,34 +1127,36 @@ Contoh:
                           >
                             Proses
                           </Button>
-                          <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                className="h-6 w-6 p-0 text-destructive hover:text-destructive"
-                              >
-                                <Trash2 className="h-3 w-3" />
-                              </Button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent>
-                              <AlertDialogHeader>
-                                <AlertDialogTitle>Hapus Tiket?</AlertDialogTitle>
-                                <AlertDialogDescription>
-                                  Tiket {ticket.serviceId} akan dihapus permanen. Aksi ini tidak dapat dibatalkan.
-                                </AlertDialogDescription>
-                              </AlertDialogHeader>
-                              <AlertDialogFooter>
-                                <AlertDialogCancel>Batal</AlertDialogCancel>
-                                <AlertDialogAction
-                                  onClick={() => handleDeleteTicket(ticket.id)}
-                                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                          {isAdmin && (
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  className="h-6 w-6 p-0 text-destructive hover:text-destructive"
                                 >
-                                  Hapus
-                                </AlertDialogAction>
-                              </AlertDialogFooter>
-                            </AlertDialogContent>
-                          </AlertDialog>
+                                  <Trash2 className="h-3 w-3" />
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>Hapus Tiket?</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    Tiket {ticket.serviceId} akan dihapus permanen. Aksi ini tidak dapat dibatalkan.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Batal</AlertDialogCancel>
+                                  <AlertDialogAction
+                                    onClick={() => handleDeleteTicket(ticket.id)}
+                                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                  >
+                                    Hapus
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                          )}
                         </div>
                       </TableCell>
                     </TableRow>
