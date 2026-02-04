@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -13,6 +14,7 @@ import { LogOut, User } from "lucide-react";
 import { toast } from "sonner";
 
 export function UserMenu() {
+  const navigate = useNavigate();
   const { user, profile, signOut } = useAuth();
 
   if (!user) return null;
@@ -30,6 +32,7 @@ export function UserMenu() {
     try {
       await signOut();
       toast.success("Berhasil keluar");
+      navigate("/login", { replace: true });
     } catch (error) {
       console.error("Sign out error:", error);
       toast.error("Gagal keluar");
