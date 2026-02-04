@@ -47,6 +47,10 @@ export default defineConfig(({ mode }) => ({
         ],
       },
       workbox: {
+        // IMPORTANT: allow the platform's OAuth broker routes to be handled by the network/server.
+        // If the service worker serves the SPA fallback for these routes, OAuth will break and
+        // users can end up on the app's 404 page at `/~oauth/*`.
+        navigateFallbackDenylist: [/^\/~oauth\//],
         globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
         runtimeCaching: [
           {
