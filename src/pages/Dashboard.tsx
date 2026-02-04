@@ -16,6 +16,7 @@ import { motion } from "framer-motion";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip, Cell, LineChart, Line } from "recharts";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ShiftReportCard } from "@/components/ShiftReportCard";
+import { StatusDistributionChart } from "@/components/StatusDistributionChart";
 import {
   ChartContainer,
   ChartTooltip,
@@ -242,7 +243,7 @@ export default function Dashboard() {
 
       {/* Charts Section - Line Charts */}
       <div className="grid gap-2 sm:gap-3 grid-cols-1 lg:grid-cols-2 w-full">
-        {/* Status Distribution Trend Chart */}
+        {/* Status Distribution - Modern Infographic */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -250,184 +251,35 @@ export default function Dashboard() {
         >
           <Card className="shadow-lg overflow-hidden border bg-card">
             <CardHeader className="py-2 px-3 sm:px-4 border-b bg-muted/30">
-              <div className="flex items-center justify-between gap-2">
-                <CardTitle className="flex items-center gap-2 text-sm sm:text-base">
-                  <BarChart3 className="h-4 w-4 text-primary" />
-                  Status Trend
-                </CardTitle>
-                <Select value={statusTrendDays.toString()} onValueChange={(v) => setStatusTrendDays(Number(v))}>
-                  <SelectTrigger className="w-[90px] h-7 text-[10px]">
-                    <SelectValue placeholder="Rentang" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="7">7 Hari</SelectItem>
-                    <SelectItem value="14">14 Hari</SelectItem>
-                    <SelectItem value="30">30 Hari</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+              <CardTitle className="flex items-center gap-2 text-sm sm:text-base">
+                <BarChart3 className="h-4 w-4 text-primary" />
+                Status Distribution
+              </CardTitle>
             </CardHeader>
             <CardContent className="p-2 sm:p-3">
-              {(() => {
-                const statusChartData = getStatusChartData(statusTrendDays);
-
-                const statusChartConfig: ChartConfig = {
-                  onProgress: { label: "⚙️ On Progres", color: "hsl(217, 91%, 60%)" },
-                  critical: { label: "🚨 Kritis", color: "hsl(0, 84%, 60%)" },
-                  resolved: { label: "✅ Selesai", color: "hsl(142, 71%, 45%)" },
-                  pending: { label: "⏳ Tertunda", color: "hsl(38, 92%, 50%)" },
-                };
-
-                const handleStatusDotClick = (status: "On Progress" | "Critical" | "Resolved" | "Pending", isoDate: string, displayDate: string) => {
-                  const dayTickets = tickets.filter((ticket) => {
-                    const ticketDate = new Date(ticket.createdISO).toISOString().split('T')[0];
-                    return ticketDate === isoDate && ticket.status === status;
-                  });
-                  
-                  const statusEmoji = {
+              <StatusDistributionChart 
+                tickets={tickets}
+                onStatusClick={(status, filteredTickets) => {
+                  const statusEmoji: Record<string, string> = {
                     "On Progress": "⚙️",
                     "Critical": "🚨",
                     "Resolved": "✅",
                     "Pending": "⏳"
                   };
-                  
-                  const statusLabel = {
+                  const statusLabel: Record<string, string> = {
                     "On Progress": "On Progres",
                     "Critical": "Kritis",
                     "Resolved": "Selesai",
                     "Pending": "Tertunda"
                   };
-                  
                   setPreviousDialogState(null);
                   setShowOltList(false);
                   setInlineSelectedTicket(null);
-                  setFilterDialogTickets(dayTickets);
-                  setFilterDialogTitle(`${statusEmoji[status]} ${statusLabel[status]} - ${displayDate}`);
+                  setFilterDialogTickets(filteredTickets);
+                  setFilterDialogTitle(`${statusEmoji[status] || ""} Tiket ${statusLabel[status] || status}`);
                   setFilterDialogOpen(true);
-                };
-
-                return (
-                  <ChartContainer config={statusChartConfig} className="h-[200px] sm:h-[220px] md:h-[260px] w-full transition-all duration-300">
-                    <LineChart
-                      data={statusChartData}
-                      margin={{ top: 5, right: 15, left: 5, bottom: 5 }}
-                    >
-                      <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                      <XAxis 
-                        dataKey="date"
-                        tick={{ fontSize: 8, fill: "hsl(var(--muted-foreground))" }}
-                        tickLine={false}
-                        axisLine={false}
-                        interval={statusTrendDays > 14 ? 3 : statusTrendDays > 7 ? 1 : 0}
-                      />
-                      <YAxis 
-                        tick={{ fontSize: 9, fill: "hsl(var(--muted-foreground))" }}
-                        tickLine={false}
-                        axisLine={false}
-                        allowDecimals={false}
-                        width={25}
-                      />
-                      <ChartTooltip
-                        content={<ChartTooltipContent />}
-                      />
-                      <Line 
-                        type="monotone" 
-                        dataKey="onProgress" 
-                        stroke="hsl(217, 91%, 60%)" 
-                        strokeWidth={2}
-                        dot={{ fill: "hsl(217, 91%, 60%)", strokeWidth: 1, r: statusTrendDays > 14 ? 2 : 3, cursor: "pointer" }}
-                        activeDot={{ 
-                          r: 6, 
-                          strokeWidth: 2, 
-                          cursor: "pointer",
-                          onClick: (_, payload: any) => {
-                            if (payload?.payload) {
-                              handleStatusDotClick("On Progress", payload.payload.isoDate, payload.payload.date);
-                            }
-                          }
-                        }}
-                        name="⚙️ On Progres"
-                      />
-                      <Line 
-                        type="monotone" 
-                        dataKey="critical" 
-                        stroke="hsl(0, 84%, 60%)" 
-                        strokeWidth={2}
-                        dot={{ fill: "hsl(0, 84%, 60%)", strokeWidth: 1, r: statusTrendDays > 14 ? 2 : 3, cursor: "pointer" }}
-                        activeDot={{ 
-                          r: 6, 
-                          strokeWidth: 2, 
-                          cursor: "pointer",
-                          onClick: (_, payload: any) => {
-                            if (payload?.payload) {
-                              handleStatusDotClick("Critical", payload.payload.isoDate, payload.payload.date);
-                            }
-                          }
-                        }}
-                        name="🚨 Kritis"
-                      />
-                      <Line 
-                        type="monotone" 
-                        dataKey="resolved" 
-                        stroke="hsl(142, 71%, 45%)" 
-                        strokeWidth={2}
-                        dot={{ fill: "hsl(142, 71%, 45%)", strokeWidth: 1, r: statusTrendDays > 14 ? 2 : 3, cursor: "pointer" }}
-                        activeDot={{ 
-                          r: 6, 
-                          strokeWidth: 2, 
-                          cursor: "pointer",
-                          onClick: (_, payload: any) => {
-                            if (payload?.payload) {
-                              handleStatusDotClick("Resolved", payload.payload.isoDate, payload.payload.date);
-                            }
-                          }
-                        }}
-                        name="✅ Selesai"
-                      />
-                      <Line 
-                        type="monotone" 
-                        dataKey="pending" 
-                        stroke="hsl(38, 92%, 50%)" 
-                        strokeWidth={2}
-                        strokeDasharray="5 5"
-                        dot={{ fill: "hsl(38, 92%, 50%)", strokeWidth: 1, r: statusTrendDays > 14 ? 2 : 3, cursor: "pointer" }}
-                        activeDot={{ 
-                          r: 6, 
-                          strokeWidth: 2, 
-                          cursor: "pointer",
-                          onClick: (_, payload: any) => {
-                            if (payload?.payload) {
-                              handleStatusDotClick("Pending", payload.payload.isoDate, payload.payload.date);
-                            }
-                          }
-                        }}
-                        name="⏳ Tertunda"
-                      />
-                    </LineChart>
-                  </ChartContainer>
-                );
-              })()}
-              <div className="flex flex-wrap items-center justify-center gap-3 mt-1.5">
-                <div className="flex items-center gap-1.5 text-[10px]">
-                  <div className="w-2 h-2 rounded-full" style={{ background: "hsl(217, 91%, 60%)" }} />
-                  <span className="text-muted-foreground">⚙️ Progres</span>
-                </div>
-                <div className="flex items-center gap-1.5 text-[10px]">
-                  <div className="w-2 h-2 rounded-full" style={{ background: "hsl(0, 84%, 60%)" }} />
-                  <span className="text-muted-foreground">🚨 Kritis</span>
-                </div>
-                <div className="flex items-center gap-1.5 text-[10px]">
-                  <div className="w-2 h-2 rounded-full" style={{ background: "hsl(142, 71%, 45%)" }} />
-                  <span className="text-muted-foreground">✅ Selesai</span>
-                </div>
-                <div className="flex items-center gap-1.5 text-[10px]">
-                  <div className="w-2 h-2 rounded-full" style={{ background: "hsl(38, 92%, 50%)" }} />
-                  <span className="text-muted-foreground">⏳ Tertunda</span>
-                </div>
-              </div>
-              <p className="text-[10px] text-muted-foreground text-center mt-1">
-                Klik titik untuk detail
-              </p>
+                }}
+              />
             </CardContent>
           </Card>
         </motion.div>
