@@ -1,7 +1,8 @@
-import { Activity, AlertTriangle, Zap, Server, Calendar, Clock, User, ExternalLink, TrendingUp, BarChart3, FileText, History } from "lucide-react";
+import { Activity, AlertTriangle, Zap, Server, Calendar, Clock, User, ExternalLink, TrendingUp, BarChart3, FileText, History, RefreshCw, Loader2 } from "lucide-react";
 import { useTickets } from "@/hooks/useTickets";
 import { useTicketHistory } from "@/hooks/useTicketHistory";
 import { useShiftReportHistory } from "@/hooks/useShiftReportHistory";
+import { useCloudShiftReports } from "@/hooks/useCloudShiftReports";
 import { FEEDER_CONSTRAINTS_SET, Ticket, ALL_CONSTRAINTS } from "@/types/ticket";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -40,7 +41,17 @@ interface ShiftReport {
 export default function Dashboard() {
   const { tickets, excelData } = useTickets();
   const { getChartData, getTicketsForDate, getTicketsForDateByStatus } = useTicketHistory(tickets);
-  const [shiftReports, setShiftReports] = useState<ShiftReport[]>([]);
+  
+  // Cloud shift reports hook
+  const { 
+    isLoading: isLoadingShiftReports, 
+    fetchReports: fetchShiftReports, 
+    getFormattedReports 
+  } = useCloudShiftReports();
+  
+  // Get formatted reports for UI
+  const shiftReports = getFormattedReports();
+  
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedMetric, setSelectedMetric] = useState<string | null>(null);
@@ -60,14 +71,8 @@ export default function Dashboard() {
     inlineTicket: Ticket | null;
   } | null>(null);
 
-  // Load shift reports from localStorage
-  useEffect(() => {
-    const reports = JSON.parse(localStorage.getItem("shiftReports") || "[]");
-    setShiftReports(reports);
-  }, []);
-
-  // Hook for shift report history
-  const { getHistoryRecords, getReportsForDate } = useShiftReportHistory(shiftReports);
+  // Hook for shift report history (using formatted reports)
+  const { getHistoryRecords, getReportsForDate } = useShiftReportHistory(shiftReports as any);
   const [selectedHistoryDate, setSelectedHistoryDate] = useState<string | null>(null);
   const [shiftReportTab, setShiftReportTab] = useState<string>("latest");
 
@@ -531,6 +536,13 @@ export default function Dashboard() {
                     </p>
                   </div>
                 </div>
+                <Button variant="ghost" size="icon" onClick={fetchShiftReports} disabled={isLoadingShiftReports} title="Refresh data">
+                  {isLoadingShiftReports ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <RefreshCw className="h-4 w-4" />
+                  )}
+                </Button>
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-3 pb-4">

@@ -14,6 +14,45 @@ export type Database = {
   }
   public: {
     Tables: {
+      shift_reports: {
+        Row: {
+          created_at: string
+          date: string
+          fat_loss: string | null
+          id: string
+          issues: string | null
+          notes: string | null
+          officer: string
+          olt_down: string | null
+          port_down: string | null
+          shift: string
+        }
+        Insert: {
+          created_at?: string
+          date: string
+          fat_loss?: string | null
+          id?: string
+          issues?: string | null
+          notes?: string | null
+          officer: string
+          olt_down?: string | null
+          port_down?: string | null
+          shift: string
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          fat_loss?: string | null
+          id?: string
+          issues?: string | null
+          notes?: string | null
+          officer?: string
+          olt_down?: string | null
+          port_down?: string | null
+          shift?: string
+        }
+        Relationships: []
+      }
       tickets: {
         Row: {
           category: string
