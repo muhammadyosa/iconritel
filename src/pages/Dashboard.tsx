@@ -39,9 +39,10 @@ interface ShiftReport {
 
 export default function Dashboard() {
   const { tickets, excelData } = useTickets();
-  const { getChartData, getTicketsForDate, getTicketsForDateByStatus } = useTicketHistory(tickets);
+  const { getChartData, getStatusChartData, getTicketsForDate, getTicketsForDateByStatus } = useTicketHistory(tickets);
   const [shiftReports, setShiftReports] = useState<ShiftReport[]>([]);
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
+  const [statusTrendDays, setStatusTrendDays] = useState<number>(7);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedMetric, setSelectedMetric] = useState<string | null>(null);
   const [oltData, setOltData] = useState<OLT[]>([]);
@@ -239,111 +240,193 @@ export default function Dashboard() {
         ))}
       </div>
 
-      {/* Charts Section - Bar Charts */}
+      {/* Charts Section - Line Charts */}
       <div className="grid gap-2 sm:gap-3 grid-cols-1 lg:grid-cols-2 w-full">
-        {/* Status Distribution Bar Chart */}
+        {/* Status Distribution Trend Chart */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.2 }}
         >
           <Card className="shadow-lg overflow-hidden border bg-card">
-            <CardHeader className="py-2 px-2.5 sm:py-2.5 sm:px-4 border-b bg-muted/30">
-              <CardTitle className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm md:text-base">
-                <BarChart3 className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary" />
-                Status Distribution
-              </CardTitle>
+            <CardHeader className="py-2 px-3 sm:px-4 border-b bg-muted/30">
+              <div className="flex items-center justify-between gap-2">
+                <CardTitle className="flex items-center gap-2 text-sm sm:text-base">
+                  <BarChart3 className="h-4 w-4 text-primary" />
+                  Status Trend
+                </CardTitle>
+                <Select value={statusTrendDays.toString()} onValueChange={(v) => setStatusTrendDays(Number(v))}>
+                  <SelectTrigger className="w-[90px] h-7 text-[10px]">
+                    <SelectValue placeholder="Rentang" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="7">7 Hari</SelectItem>
+                    <SelectItem value="14">14 Hari</SelectItem>
+                    <SelectItem value="30">30 Hari</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </CardHeader>
-            <CardContent className="p-1.5 sm:p-2 md:p-3">
+            <CardContent className="p-2 sm:p-3">
               {(() => {
-                const statusData = [
-                  { emoji: "⚙️", label: "Progres", value: tickets.filter((t) => t.status === "On Progress").length, fill: "hsl(217, 91%, 60%)", status: "On Progress" },
-                  { emoji: "🚨", label: "Critical", value: tickets.filter((t) => t.status === "Critical").length, fill: "hsl(0, 84%, 60%)", status: "Critical" },
-                  { emoji: "✅", label: "Resolved", value: tickets.filter((t) => t.status === "Resolved").length, fill: "hsl(142, 71%, 45%)", status: "Resolved" },
-                  { emoji: "⏳", label: "Pending", value: tickets.filter((t) => t.status === "Pending").length, fill: "hsl(38, 92%, 50%)", status: "Pending" },
-                ];
+                const statusChartData = getStatusChartData(statusTrendDays);
 
-                const chartConfig: ChartConfig = {
-                  value: { label: "Jumlah" },
+                const statusChartConfig: ChartConfig = {
+                  onProgress: { label: "⚙️ On Progres", color: "hsl(217, 91%, 60%)" },
+                  critical: { label: "🚨 Kritis", color: "hsl(0, 84%, 60%)" },
+                  resolved: { label: "✅ Selesai", color: "hsl(142, 71%, 45%)" },
+                  pending: { label: "⏳ Tertunda", color: "hsl(38, 92%, 50%)" },
                 };
 
-                // Custom Y-axis tick with emoji above label
-                const CustomYAxisTick = ({ x, y, payload }: any) => {
-                  const item = statusData.find((d) => d.label === payload.value);
-                  return (
-                    <g transform={`translate(${x},${y})`}>
-                      <text
-                        x={-8}
-                        y={-8}
-                        textAnchor="end"
-                        fontSize={14}
-                        className="select-none"
-                      >
-                        {item?.emoji}
-                      </text>
-                      <text
-                        x={-8}
-                        y={6}
-                        textAnchor="end"
-                        fontSize={9}
-                        fill="hsl(var(--muted-foreground))"
-                      >
-                        {payload.value}
-                      </text>
-                    </g>
-                  );
+                const handleStatusDotClick = (status: "On Progress" | "Critical" | "Resolved" | "Pending", isoDate: string, displayDate: string) => {
+                  const dayTickets = tickets.filter((ticket) => {
+                    const ticketDate = new Date(ticket.createdISO).toISOString().split('T')[0];
+                    return ticketDate === isoDate && ticket.status === status;
+                  });
+                  
+                  const statusEmoji = {
+                    "On Progress": "⚙️",
+                    "Critical": "🚨",
+                    "Resolved": "✅",
+                    "Pending": "⏳"
+                  };
+                  
+                  const statusLabel = {
+                    "On Progress": "On Progres",
+                    "Critical": "Kritis",
+                    "Resolved": "Selesai",
+                    "Pending": "Tertunda"
+                  };
+                  
+                  setPreviousDialogState(null);
+                  setShowOltList(false);
+                  setInlineSelectedTicket(null);
+                  setFilterDialogTickets(dayTickets);
+                  setFilterDialogTitle(`${statusEmoji[status]} ${statusLabel[status]} - ${displayDate}`);
+                  setFilterDialogOpen(true);
                 };
 
                 return (
-                  <ChartContainer config={chartConfig} className="h-[180px] xs:h-[190px] sm:h-[210px] md:h-[240px] w-full transition-all duration-300">
-                    <BarChart
-                      data={statusData}
-                      layout="vertical"
-                      margin={{ top: 8, right: 15, left: 5, bottom: 8 }}
-                      barCategoryGap="25%"
-                      onClick={(data) => {
-                        if (data?.activePayload?.[0]?.payload?.status) {
-                          const status = data.activePayload[0].payload.status;
-                          setSelectedStatus(selectedStatus === status ? null : status);
-                          const filtered = tickets.filter((t) => t.status === status);
-                          setPreviousDialogState(null);
-                          setShowOltList(false);
-                          setFilterDialogTickets(filtered);
-                          setFilterDialogTitle(`⚙️ Tiket dengan Status: ${status}`);
-                          setFilterDialogOpen(true);
-                        }
-                      }}
+                  <ChartContainer config={statusChartConfig} className="h-[200px] sm:h-[220px] md:h-[260px] w-full transition-all duration-300">
+                    <LineChart
+                      data={statusChartData}
+                      margin={{ top: 5, right: 15, left: 5, bottom: 5 }}
                     >
-                      <CartesianGrid strokeDasharray="3 3" className="stroke-muted" horizontal={false} />
+                      <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
                       <XAxis 
-                        type="number"
+                        dataKey="date"
                         tick={{ fontSize: 8, fill: "hsl(var(--muted-foreground))" }}
                         tickLine={false}
                         axisLine={false}
+                        interval={statusTrendDays > 14 ? 3 : statusTrendDays > 7 ? 1 : 0}
                       />
                       <YAxis 
-                        type="category"
-                        dataKey="label" 
-                        tick={<CustomYAxisTick />}
-                        width={75}
+                        tick={{ fontSize: 9, fill: "hsl(var(--muted-foreground))" }}
                         tickLine={false}
                         axisLine={false}
+                        allowDecimals={false}
+                        width={25}
                       />
                       <ChartTooltip
                         content={<ChartTooltipContent />}
-                        cursor={{ fill: "hsl(var(--muted))", opacity: 0.3 }}
                       />
-                      <Bar dataKey="value" radius={[0, 4, 4, 0]} cursor="pointer" maxBarSize={28}>
-                        {statusData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={entry.fill} />
-                        ))}
-                      </Bar>
-                    </BarChart>
+                      <Line 
+                        type="monotone" 
+                        dataKey="onProgress" 
+                        stroke="hsl(217, 91%, 60%)" 
+                        strokeWidth={2}
+                        dot={{ fill: "hsl(217, 91%, 60%)", strokeWidth: 1, r: statusTrendDays > 14 ? 2 : 3, cursor: "pointer" }}
+                        activeDot={{ 
+                          r: 6, 
+                          strokeWidth: 2, 
+                          cursor: "pointer",
+                          onClick: (_, payload: any) => {
+                            if (payload?.payload) {
+                              handleStatusDotClick("On Progress", payload.payload.isoDate, payload.payload.date);
+                            }
+                          }
+                        }}
+                        name="⚙️ On Progres"
+                      />
+                      <Line 
+                        type="monotone" 
+                        dataKey="critical" 
+                        stroke="hsl(0, 84%, 60%)" 
+                        strokeWidth={2}
+                        dot={{ fill: "hsl(0, 84%, 60%)", strokeWidth: 1, r: statusTrendDays > 14 ? 2 : 3, cursor: "pointer" }}
+                        activeDot={{ 
+                          r: 6, 
+                          strokeWidth: 2, 
+                          cursor: "pointer",
+                          onClick: (_, payload: any) => {
+                            if (payload?.payload) {
+                              handleStatusDotClick("Critical", payload.payload.isoDate, payload.payload.date);
+                            }
+                          }
+                        }}
+                        name="🚨 Kritis"
+                      />
+                      <Line 
+                        type="monotone" 
+                        dataKey="resolved" 
+                        stroke="hsl(142, 71%, 45%)" 
+                        strokeWidth={2}
+                        dot={{ fill: "hsl(142, 71%, 45%)", strokeWidth: 1, r: statusTrendDays > 14 ? 2 : 3, cursor: "pointer" }}
+                        activeDot={{ 
+                          r: 6, 
+                          strokeWidth: 2, 
+                          cursor: "pointer",
+                          onClick: (_, payload: any) => {
+                            if (payload?.payload) {
+                              handleStatusDotClick("Resolved", payload.payload.isoDate, payload.payload.date);
+                            }
+                          }
+                        }}
+                        name="✅ Selesai"
+                      />
+                      <Line 
+                        type="monotone" 
+                        dataKey="pending" 
+                        stroke="hsl(38, 92%, 50%)" 
+                        strokeWidth={2}
+                        strokeDasharray="5 5"
+                        dot={{ fill: "hsl(38, 92%, 50%)", strokeWidth: 1, r: statusTrendDays > 14 ? 2 : 3, cursor: "pointer" }}
+                        activeDot={{ 
+                          r: 6, 
+                          strokeWidth: 2, 
+                          cursor: "pointer",
+                          onClick: (_, payload: any) => {
+                            if (payload?.payload) {
+                              handleStatusDotClick("Pending", payload.payload.isoDate, payload.payload.date);
+                            }
+                          }
+                        }}
+                        name="⏳ Tertunda"
+                      />
+                    </LineChart>
                   </ChartContainer>
                 );
               })()}
-              <p className="text-[9px] sm:text-[10px] text-muted-foreground text-center mt-1">
-                Klik bar untuk detail
+              <div className="flex flex-wrap items-center justify-center gap-3 mt-1.5">
+                <div className="flex items-center gap-1.5 text-[10px]">
+                  <div className="w-2 h-2 rounded-full" style={{ background: "hsl(217, 91%, 60%)" }} />
+                  <span className="text-muted-foreground">⚙️ Progres</span>
+                </div>
+                <div className="flex items-center gap-1.5 text-[10px]">
+                  <div className="w-2 h-2 rounded-full" style={{ background: "hsl(0, 84%, 60%)" }} />
+                  <span className="text-muted-foreground">🚨 Kritis</span>
+                </div>
+                <div className="flex items-center gap-1.5 text-[10px]">
+                  <div className="w-2 h-2 rounded-full" style={{ background: "hsl(142, 71%, 45%)" }} />
+                  <span className="text-muted-foreground">✅ Selesai</span>
+                </div>
+                <div className="flex items-center gap-1.5 text-[10px]">
+                  <div className="w-2 h-2 rounded-full" style={{ background: "hsl(38, 92%, 50%)" }} />
+                  <span className="text-muted-foreground">⏳ Tertunda</span>
+                </div>
+              </div>
+              <p className="text-[10px] text-muted-foreground text-center mt-1">
+                Klik titik untuk detail
               </p>
             </CardContent>
           </Card>
