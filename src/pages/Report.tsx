@@ -19,7 +19,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "@/hooks/use-toast";
-import { FileText, Download, ClipboardList, Trash2 } from "lucide-react";
+import { FileText, Download, ClipboardList, Trash2, RefreshCw, Loader2 } from "lucide-react";
 import { z } from "zod";
 import { Ticket } from "@/types/ticket";
 import { StatusBadge } from "@/components/StatusBadge";
@@ -31,6 +31,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { useCloudShiftReports, ShiftReportInput } from "@/hooks/useCloudShiftReports";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -76,12 +77,23 @@ const Report = () => {
     notes: "",
   });
 
+  // Cloud shift reports hook
+  const { 
+    reports: cloudReports, 
+    isLoading: isLoadingReports, 
+    fetchReports, 
+    addReport, 
+    getFormattedReports 
+  } = useCloudShiftReports();
+  
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   // State for SLA Report
   const [slaInput, setSlaInput] = useState("");
   const [slaResult, setSlaResult] = useState("");
   const [parsedSlaTickets, setParsedSlaTickets] = useState<SLATicket[]>([]);
 
-  const handleShiftReportSubmit = () => {
+  const handleShiftReportSubmit = async () => {
     // Validate with Zod schema
     const result = shiftReportSchema.safeParse(shiftReport);
     if (!result.success) {
@@ -102,31 +114,36 @@ const Report = () => {
       return;
     }
 
-    // Save to localStorage
-    const reports = JSON.parse(localStorage.getItem("shiftReports") || "[]");
-    reports.push({
-      ...shiftReport,
-      id: `SHIFT-${Date.now()}`,
-      createdAt: new Date().toISOString(),
-    });
-    localStorage.setItem("shiftReports", JSON.stringify(reports));
+    setIsSubmitting(true);
+    
+    // Save to cloud database
+    const reportInput: ShiftReportInput = {
+      date: shiftReport.date,
+      shift: shiftReport.shift,
+      officer: shiftReport.officer,
+      oltDown: shiftReport.oltDown,
+      portDown: shiftReport.portDown,
+      fatLoss: shiftReport.fatLoss,
+      issues: shiftReport.issues,
+      notes: shiftReport.notes,
+    };
+    
+    const success = await addReport(reportInput);
+    setIsSubmitting(false);
 
-    toast({
-      title: "Report shift tersimpan",
-      description: "Report shift berhasil disimpan.",
-    });
-
-    // Reset form
-    setShiftReport({
-      date: new Date().toISOString().split("T")[0],
-      shift: "pagi",
-      officer: "",
-      oltDown: "",
-      portDown: "",
-      fatLoss: "",
-      issues: "",
-      notes: "",
-    });
+    if (success) {
+      // Reset form
+      setShiftReport({
+        date: new Date().toISOString().split("T")[0],
+        shift: "pagi",
+        officer: "",
+        oltDown: "",
+        portDown: "",
+        fatLoss: "",
+        issues: "",
+        notes: "",
+      });
+    }
   };
 
   // Parse SLA input and generate formatted output
@@ -244,8 +261,8 @@ KENDALA :`;
   };
 
   const exportShiftReport = () => {
-    const reports = JSON.parse(localStorage.getItem("shiftReports") || "[]");
-    if (reports.length === 0) {
+    const formattedReports = getFormattedReports();
+    if (formattedReports.length === 0) {
       toast({
         title: "Tidak ada data",
         description: "Belum ada report shift untuk diekspor.",
@@ -254,9 +271,9 @@ KENDALA :`;
       return;
     }
 
-    const text = reports
+    const text = formattedReports
       .map(
-        (r: any) =>
+        (r) =>
           `=== REPORT SHIFT ===
 Tanggal: ${r.date}
 Shift: ${r.shift.toUpperCase()}
@@ -448,14 +465,21 @@ Dibuat: ${new Date(r.createdAt).toLocaleString("id-ID")}
                 />
               </div>
 
-              <div className="flex gap-2">
-                <Button onClick={handleShiftReportSubmit}>
-                  <FileText className="mr-2 h-4 w-4" />
-                  Simpan Report
+              <div className="flex gap-2 flex-wrap">
+                <Button onClick={handleShiftReportSubmit} disabled={isSubmitting}>
+                  {isSubmitting ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <FileText className="mr-2 h-4 w-4" />
+                  )}
+                  {isSubmitting ? "Menyimpan..." : "Simpan Report"}
                 </Button>
-                <Button variant="outline" onClick={exportShiftReport}>
+                <Button variant="outline" onClick={exportShiftReport} disabled={isLoadingReports}>
                   <Download className="mr-2 h-4 w-4" />
                   Export Report
+                </Button>
+                <Button variant="ghost" onClick={fetchReports} disabled={isLoadingReports} title="Refresh data">
+                  <RefreshCw className={`h-4 w-4 ${isLoadingReports ? "animate-spin" : ""}`} />
                 </Button>
               </div>
             </CardContent>
