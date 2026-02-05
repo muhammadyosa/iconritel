@@ -22,6 +22,22 @@ interface DbTicket {
   created_iso: string;
 }
 
+// Type for inserting tickets (excludes auto-generated id)
+interface DbTicketInsert {
+  ticket_id: string;
+  service_id: string;
+  customer_name: string;
+  serpo: string;
+  hostname: string;
+  fat_id: string;
+  sn_ont: string;
+  constraint_type: string;
+  category: string;
+  ticket_result: string;
+  status: string;
+  created_iso: string;
+}
+
 function dbToTicket(db: DbTicket): Ticket {
   return {
     id: db.ticket_id,
@@ -118,8 +134,8 @@ export function useCloudTickets() {
               prev.map((t) => (t.id === updatedTicket.id ? updatedTicket : t))
             );
           } else if (payload.eventType === "DELETE") {
-            const deletedId = (payload.old as { id: string }).id;
-            setTickets((prev) => prev.filter((t) => t.id !== deletedId));
+            const deletedTicketId = (payload.old as { ticket_id: string }).ticket_id;
+            setTickets((prev) => prev.filter((t) => t.id !== deletedTicketId));
           }
         }
       )
@@ -133,7 +149,9 @@ export function useCloudTickets() {
   const addTicket = useCallback(async (ticket: Ticket) => {
     try {
       const dbData = ticketToDb(ticket);
-      const { error } = await supabase.from("tickets").insert(dbData);
+      const { error } = await (supabase
+        .from("tickets")
+        .insert(dbData as never) as unknown as Promise<{ error: Error | null }>);
 
       if (error) throw error;
       // Realtime will handle updating the list
@@ -148,9 +166,9 @@ export function useCloudTickets() {
 
   const updateTicket = useCallback(async (id: string, updates: Partial<Ticket>) => {
     try {
-      const dbUpdates: Partial<DbTicket> = {};
+      const dbUpdates: Record<string, unknown> = {};
       if (updates.id !== undefined) dbUpdates.ticket_id = updates.id;
-       if (updates.serviceId !== undefined) dbUpdates.service_id = updates.serviceId;
+      if (updates.serviceId !== undefined) dbUpdates.service_id = updates.serviceId;
       if (updates.customerName !== undefined) dbUpdates.customer_name = updates.customerName;
       if (updates.serpo !== undefined) dbUpdates.serpo = updates.serpo;
       if (updates.hostname !== undefined) dbUpdates.hostname = updates.hostname;
@@ -161,10 +179,10 @@ export function useCloudTickets() {
       if (updates.ticketResult !== undefined) dbUpdates.ticket_result = updates.ticketResult;
       if (updates.status !== undefined) dbUpdates.status = updates.status;
 
-      const { error } = await supabase
+      const { error } = await (supabase
         .from("tickets")
-        .update(dbUpdates)
-        .eq("ticket_id", id);
+        .update(dbUpdates as never)
+        .eq("ticket_id" as never, id) as unknown as Promise<{ error: Error | null }>);
 
       if (error) throw error;
       // Realtime will handle updating the list
@@ -179,7 +197,10 @@ export function useCloudTickets() {
 
   const deleteTicket = useCallback(async (id: string) => {
     try {
-      const { error } = await supabase.from("tickets").delete().eq("ticket_id", id);
+      const { error } = await (supabase
+        .from("tickets")
+        .delete()
+        .eq("ticket_id" as never, id) as unknown as Promise<{ error: Error | null }>);
 
       if (error) throw error;
       // Realtime will handle updating the list
