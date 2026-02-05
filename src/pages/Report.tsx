@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useRealtimeDate } from "@/hooks/useRealtimeDate";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Card,
@@ -68,8 +69,11 @@ interface SLATicket {
 }
 
 const Report = () => {
+  // Realtime date hook
+  const realtimeDate = useRealtimeDate();
+  
   const [shiftReport, setShiftReport] = useState({
-    date: new Date().toISOString().split("T")[0],
+    date: realtimeDate,
     shift: "pagi",
     officer: "",
     oltDown: "",
@@ -78,6 +82,11 @@ const Report = () => {
     issues: "",
     notes: "",
   });
+  
+  // Keep date in sync with realtime
+  useEffect(() => {
+    setShiftReport(prev => ({ ...prev, date: realtimeDate }));
+  }, [realtimeDate]);
 
   // Cloud shift reports hook
   const { 
@@ -137,9 +146,9 @@ const Report = () => {
     setIsSubmitting(false);
 
     if (success) {
-      // Reset form
+      // Reset form with realtime date
       setShiftReport({
-        date: new Date().toISOString().split("T")[0],
+        date: realtimeDate,
         shift: "pagi",
         officer: "",
         oltDown: "",

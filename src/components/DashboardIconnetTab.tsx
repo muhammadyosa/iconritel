@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRealtimeDate } from "@/hooks/useRealtimeDate";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -61,9 +62,12 @@ const formatDateForDisplay = (dateString: string) => {
 };
 
 export function DashboardIconnetTab() {
+  // Realtime date hook
+  const realtimeDate = useRealtimeDate();
+  
   const [data, setData] = useState<DashboardData>({
     resumeAllTime: "15.00",
-    resumeAllDate: new Date().toISOString().split("T")[0],
+    resumeAllDate: realtimeDate,
     sumselAll: "",
     bangkaBelitungAll: "",
     bengkuluAll: "",
@@ -74,7 +78,7 @@ export function DashboardIconnetTab() {
     totalTiket: "",
     resumeGangguanTime: "15.00",
     retailSbsHari: "",
-    resumeGangguanDate: new Date().toISOString().split("T")[0],
+    resumeGangguanDate: realtimeDate,
     totalGangguan: "",
     sumselGangguan: "",
     bangkaBelitungGangguan: "",
@@ -82,6 +86,15 @@ export function DashboardIconnetTab() {
     jambiGangguan: "",
     lampungGangguan: "",
   });
+  
+  // Keep dates in sync with realtime
+  useEffect(() => {
+    setData(prev => ({
+      ...prev,
+      resumeAllDate: realtimeDate,
+      resumeGangguanDate: realtimeDate,
+    }));
+  }, [realtimeDate]);
 
   const updateField = (field: keyof DashboardData, value: string) => {
     setData(prev => ({ ...prev, [field]: value }));
@@ -138,7 +151,7 @@ Dengan Penyebaran :
   const handleClear = () => {
     setData({
       resumeAllTime: "15.00",
-      resumeAllDate: new Date().toISOString().split("T")[0],
+      resumeAllDate: realtimeDate,
       sumselAll: "",
       bangkaBelitungAll: "",
       bengkuluAll: "",
@@ -149,7 +162,7 @@ Dengan Penyebaran :
       totalTiket: "",
       resumeGangguanTime: "15.00",
       retailSbsHari: "",
-      resumeGangguanDate: new Date().toISOString().split("T")[0],
+      resumeGangguanDate: realtimeDate,
       totalGangguan: "",
       sumselGangguan: "",
       bangkaBelitungGangguan: "",
