@@ -10,6 +10,7 @@ import { ParticleBackground } from "@/components/ParticleBackground";
 import iconnetMascot from "@/assets/iconnet-mascot.png";
 import plnIconPlusLogo from "@/assets/pln-icon-plus-new.png";
 import iconnetLogo from "@/assets/iconnet-logo-new.png";
+import indonesiaMap from "@/assets/indonesia-map.png";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -82,6 +83,16 @@ export default function Login() {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden bg-gradient-to-br from-slate-950 via-[#0a1628] to-slate-950">
+      {/* Indonesia Map Background */}
+      <div className="absolute inset-0 flex items-center justify-center pointer-events-none" style={{ zIndex: 1 }}>
+        <img 
+          src={indonesiaMap} 
+          alt="" 
+          className="w-[90%] max-w-[1400px] h-auto object-contain opacity-[0.08]"
+          style={{ filter: 'brightness(0.6) saturate(0.8)' }}
+        />
+      </div>
+
       {/* Particle Background */}
       <ParticleBackground />
 
@@ -95,7 +106,7 @@ export default function Login() {
         <img 
           src={plnIconPlusLogo} 
           alt="PLN Icon Plus" 
-          className="h-10 sm:h-12 w-auto object-contain drop-shadow-[0_0_10px_rgba(56,189,248,0.3)]" 
+          className="h-8 sm:h-10 w-auto object-contain drop-shadow-[0_0_10px_rgba(56,189,248,0.3)]" 
         />
       </motion.div>
 
@@ -109,7 +120,7 @@ export default function Login() {
         <img 
           src={iconnetLogo} 
           alt="ICONNET" 
-          className="h-10 sm:h-12 w-auto object-contain drop-shadow-[0_0_10px_rgba(56,189,248,0.3)]" 
+          className="h-8 sm:h-10 w-auto object-contain drop-shadow-[0_0_10px_rgba(56,189,248,0.3)]" 
         />
       </motion.div>
 
