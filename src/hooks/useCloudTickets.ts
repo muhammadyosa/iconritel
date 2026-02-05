@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Ticket } from "@/types/ticket";
 import { toast } from "sonner";
@@ -102,7 +102,7 @@ function ticketToDb(ticket: Ticket): DbTicketInsert {
 export function useCloudTickets() {
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [profilesMap, setProfilesMap] = useState<Map<string, ProfileData>>(new Map());
+  const profilesMapRef = useRef<Map<string, ProfileData>>(new Map());
 
   // Fetch all profiles for mapping creator names
   const fetchProfiles = useCallback(async () => {
@@ -117,7 +117,7 @@ export function useCloudTickets() {
       (data || []).forEach((profile) => {
         map.set(profile.user_id, profile as ProfileData);
       });
-      setProfilesMap(map);
+      profilesMapRef.current = map;
       return map;
     } catch (error) {
       if (import.meta.env.DEV) {
@@ -179,10 +179,10 @@ export function useCloudTickets() {
         },
         (payload) => {
           if (payload.eventType === "INSERT") {
-            const newTicket = dbToTicket(payload.new as DbTicket, profilesMap);
+            const newTicket = dbToTicket(payload.new as DbTicket, profilesMapRef.current);
             setTickets((prev) => [newTicket, ...prev]);
           } else if (payload.eventType === "UPDATE") {
-            const updatedTicket = dbToTicket(payload.new as DbTicket, profilesMap);
+            const updatedTicket = dbToTicket(payload.new as DbTicket, profilesMapRef.current);
             setTickets((prev) =>
               prev.map((t) => (t.id === updatedTicket.id ? updatedTicket : t))
             );
@@ -215,7 +215,7 @@ export function useCloudTickets() {
       supabase.removeChannel(ticketsChannel);
       supabase.removeChannel(profilesChannel);
     };
-  }, [fetchTickets, profilesMap]);
+  }, [fetchTickets]);
 
   const addTicket = useCallback(async (ticket: Ticket) => {
     try {
