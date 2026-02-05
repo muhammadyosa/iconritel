@@ -40,6 +40,7 @@ import {
   ExcelRecord,
 } from "@/types/ticket";
 import { StatusBadge } from "@/components/StatusBadge";
+import { TicketDetailDialog } from "@/components/TicketDetailDialog";
 import { toast } from "sonner";
 import { sanitizeForCSV } from "@/lib/validation";
 import { Link } from "react-router-dom";
@@ -792,7 +793,7 @@ export default function TicketManagement() {
                 <Table className="min-w-[600px]">
                   <TableHeader className="sticky top-0 bg-background z-10">
                     <TableRow className="h-5">
-                      <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap bg-muted/80">🎫 Ticket ID</TableHead>
+                      <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap bg-muted/80">🎫 Insident ID</TableHead>
                       <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap bg-muted/80">📦 Type</TableHead>
                       <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap bg-muted/80">👤 Customer/Type</TableHead>
                       <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap bg-muted/80">👨‍💼 Service ID</TableHead>
@@ -863,115 +864,12 @@ export default function TicketManagement() {
                           </TableCell>
                           <TableCell className="px-1 sm:px-1.5 py-0.5">
                             <div className="flex gap-1">
-                              <Dialog>
-                                <DialogTrigger asChild>
-                                  <Button size="sm" variant="outline" className="h-5 text-[7px] sm:text-[8px] px-1 sm:px-1.5">
-                                    Detail
-                                  </Button>
-                                </DialogTrigger>
-                                <DialogContent className="max-w-2xl">
-                                  <DialogHeader>
-                                    <DialogTitle>Detail Tiket {ticket.id}</DialogTitle>
-                                  </DialogHeader>
-                                  <div className="space-y-3">
-                                    <div className="grid grid-cols-2 gap-3 text-sm">
-                                      <div>
-                                        <span className="text-muted-foreground">Category:</span>
-                                        <p className="font-medium">{ticket.category}</p>
-                                      </div>
-                                      <div>
-                                        <span className="text-muted-foreground">Status:</span>
-                                        <div className="mt-1">
-                                          <StatusBadge status={ticket.status} />
-                                        </div>
-                                      </div>
-                                      <div>
-                                        <span className="text-muted-foreground">Constraint:</span>
-                                        <p className="font-medium">{ticket.constraint}</p>
-                                      </div>
-                                      <div>
-                                        <span className="text-muted-foreground">Serpo/Tim:</span>
-                                        <p className="font-medium">{ticket.serpo}</p>
-                                      </div>
-                                      <div>
-                                        <span className="text-muted-foreground">Customer:</span>
-                                        <p className="font-medium">{ticket.customerName}</p>
-                                      </div>
-                                      <div>
-                                        <span className="text-muted-foreground">Service ID:</span>
-                                        <p className="font-mono text-xs">{ticket.serviceId}</p>
-                                      </div>
-                                      <div>
-                                        <span className="text-muted-foreground">Hostname OLT:</span>
-                                        <p className="font-medium">{ticket.hostname}</p>
-                                      </div>
-                                      <div>
-                                        <span className="text-muted-foreground">ID FAT:</span>
-                                        <p className="font-mono text-xs">{ticket.fatId}</p>
-                                      </div>
-                                      <div>
-                                        <span className="text-muted-foreground">SN ONT:</span>
-                                        <p className="font-mono text-xs">{ticket.snOnt}</p>
-                                      </div>
-                                      <div>
-                                        <span className="text-muted-foreground">Create by:</span>
-                                        <p className="font-medium">{ticket.createdByName || "-"}</p>
-                                      </div>
-                                      <div>
-                                        <span className="text-muted-foreground">Created:</span>
-                                        <p className="text-xs">{ticket.createdAt}</p>
-                                      </div>
-                                    </div>
-                                    <div className="pt-3 border-t">
-                                      <span className="text-muted-foreground text-sm">Format Tiket:</span>
-                                      <div className="mt-2 p-3 bg-muted/50 rounded-lg">
-                                        <p className="font-mono text-sm whitespace-pre-wrap break-all">
-                                          {ticket.ticketResult}
-                                        </p>
-                                      </div>
-                                    </div>
-                                    <div className="flex gap-2 pt-3">
-                                      <Select
-                                        value={ticket.status}
-                                        onValueChange={async (value: any) => {
-                                          try {
-                                            await updateTicket(ticket.id, { status: value });
-                                            toast.success(`Status tiket ${ticket.id} berhasil diubah menjadi ${value}`);
-                                          } catch (error) {
-                                            // Error already shown by hook
-                                          }
-                                        }}
-                                      >
-                                        <SelectTrigger className="flex-1">
-                                          <SelectValue />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                          <SelectItem value="On Progress">On Progres</SelectItem>
-                                          <SelectItem value="Critical">Critical</SelectItem>
-                                          <SelectItem value="Resolved">Resolved</SelectItem>
-                                          <SelectItem value="Pending">Pending</SelectItem>
-                                        </SelectContent>
-                                      </Select>
-                                      {isAdmin && (
-                                        <Button
-                                          variant="destructive"
-                                          onClick={async () => {
-                                            try {
-                                              await deleteTicket(ticket.id);
-                                              toast.success("Tiket dihapus dari Cloud");
-                                            } catch (error) {
-                                              // Error already shown by hook
-                                            }
-                                          }}
-                                        >
-                                          <Trash2 className="h-4 w-4 mr-2" />
-                                          Hapus
-                                        </Button>
-                                      )}
-                                    </div>
-                                  </div>
-                                </DialogContent>
-                              </Dialog>
+                              <TicketDetailDialog
+                                ticket={ticket}
+                                isAdmin={isAdmin}
+                                updateTicket={updateTicket}
+                                deleteTicket={deleteTicket}
+                              />
                             </div>
                           </TableCell>
                         </TableRow>
