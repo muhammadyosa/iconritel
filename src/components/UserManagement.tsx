@@ -7,7 +7,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Loader2, RefreshCw, Shield, User, Users, Clock, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Loader2, RefreshCw, Shield, User, Users, Clock, ArrowUpDown, ArrowUp, ArrowDown, Pencil } from "lucide-react";
 import { toast } from "sonner";
 
 interface UserWithRole {
@@ -26,6 +29,9 @@ export function UserManagement() {
   const [users, setUsers] = useState<UserWithRole[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [updatingUserId, setUpdatingUserId] = useState<string | null>(null);
+  const [editingUser, setEditingUser] = useState<UserWithRole | null>(null);
+  const [editDisplayName, setEditDisplayName] = useState("");
+  const [isSavingName, setIsSavingName] = useState(false);
   const [sortOrder, setSortOrder] = useState<"asc" | "desc" | null>(null);
 
   const fetchUsers = async () => {
@@ -135,6 +141,50 @@ export function UserManagement() {
       toast.error("Gagal mengubah role user");
     } finally {
       setUpdatingUserId(null);
+    }
+  };
+
+  const handleEditUser = (user: UserWithRole) => {
+    setEditingUser(user);
+    setEditDisplayName(user.display_name || "");
+  };
+
+  const handleSaveDisplayName = async () => {
+    if (!editingUser) return;
+
+    const trimmedName = editDisplayName.trim();
+    if (!trimmedName) {
+      toast.error("Nama tidak boleh kosong");
+      return;
+    }
+
+    setIsSavingName(true);
+    try {
+      const { error } = await supabase
+        .from("profiles")
+        .update({ display_name: trimmedName })
+        .eq("user_id", editingUser.user_id);
+
+      if (error) throw error;
+
+      // Update local state
+      setUsers((prev) =>
+        prev.map((u) =>
+          u.user_id === editingUser.user_id
+            ? { ...u, display_name: trimmedName }
+            : u
+        )
+      );
+
+      toast.success("Username berhasil diperbarui");
+      setEditingUser(null);
+    } catch (error) {
+      if (import.meta.env.DEV) {
+        console.error("Error updating display name:", error);
+      }
+      toast.error("Gagal memperbarui username");
+    } finally {
+      setIsSavingName(false);
     }
   };
 
@@ -296,10 +346,19 @@ export function UserManagement() {
                       </div>
                     </TableCell>
                     <TableCell>
-                      <div className="flex flex-col">
+                      <div className="flex items-center gap-2">
                         <span className="font-medium text-sm">
                           {user.display_name || "—"}
                         </span>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-6 w-6"
+                          onClick={() => handleEditUser(user)}
+                          title="Edit username"
+                        >
+                          <Pencil className="h-3 w-3" />
+                        </Button>
                       </div>
                     </TableCell>
                     <TableCell className="text-sm text-muted-foreground">
@@ -391,6 +450,43 @@ export function UserManagement() {
             </div>
           </div>
         </div>
+
+        {/* Edit Username Dialog */}
+        <Dialog open={!!editingUser} onOpenChange={(open) => !open && setEditingUser(null)}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Edit Username</DialogTitle>
+              <DialogDescription>
+                Ubah nama tampilan untuk {editingUser?.email}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="displayName">Username</Label>
+                <Input
+                  id="displayName"
+                  value={editDisplayName}
+                  onChange={(e) => setEditDisplayName(e.target.value)}
+                  placeholder="Masukkan nama tampilan"
+                  maxLength={100}
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => setEditingUser(null)}
+                disabled={isSavingName}
+              >
+                Batal
+              </Button>
+              <Button onClick={handleSaveDisplayName} disabled={isSavingName}>
+                {isSavingName && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                Simpan
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </CardContent>
     </Card>
   );
