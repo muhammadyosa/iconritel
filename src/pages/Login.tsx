@@ -8,43 +8,8 @@ import { toast } from "sonner";
 import { motion, useMotionValue, useTransform, useSpring } from "framer-motion";
 import { ParticleBackground } from "@/components/ParticleBackground";
 import iconnetMascot from "@/assets/iconnet-mascot.png";
-
-// Typing animation component
-const TypingText = ({ text, delay = 0 }: { text: string; delay?: number }) => {
-  const [displayedText, setDisplayedText] = useState("");
-  const [showCursor, setShowCursor] = useState(true);
-
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      let currentIndex = 0;
-      const interval = setInterval(() => {
-        if (currentIndex <= text.length) {
-          setDisplayedText(text.slice(0, currentIndex));
-          currentIndex++;
-        } else {
-          clearInterval(interval);
-          // Hide cursor after typing is complete
-          setTimeout(() => setShowCursor(false), 1000);
-        }
-      }, 120);
-      return () => clearInterval(interval);
-    }, delay);
-    return () => clearTimeout(timeout);
-  }, [text, delay]);
-
-  return (
-    <span className="relative">
-      {displayedText}
-      {showCursor && (
-        <motion.span
-          className="inline-block w-0.5 h-[1em] bg-cyan-400 ml-0.5 align-middle"
-          animate={{ opacity: [1, 0, 1] }}
-          transition={{ duration: 0.8, repeat: Infinity }}
-        />
-      )}
-    </span>
-  );
-};
+import plnIconPlusLogo from "@/assets/pln-icon-plus-new.png";
+import iconnetLogo from "@/assets/iconnet-logo-new.png";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -116,23 +81,41 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
-      {/* Grid pattern overlay */}
-      <div 
-        className="absolute inset-0 opacity-[0.03]"
-        style={{
-          backgroundImage: `linear-gradient(rgba(56, 189, 248, 0.3) 1px, transparent 1px),
-                           linear-gradient(90deg, rgba(56, 189, 248, 0.3) 1px, transparent 1px)`,
-          backgroundSize: "50px 50px",
-        }}
-      />
-      
+    <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden bg-gradient-to-br from-slate-950 via-[#0a1628] to-slate-950">
       {/* Particle Background */}
       <ParticleBackground />
 
+      {/* Top Left - PLN Icon Plus Logo */}
+      <motion.div 
+        className="absolute top-4 left-4 sm:top-6 sm:left-6 z-20"
+        initial={{ opacity: 0, x: -20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.6, delay: 0.2 }}
+      >
+        <img 
+          src={plnIconPlusLogo} 
+          alt="PLN Icon Plus" 
+          className="h-10 sm:h-12 w-auto object-contain drop-shadow-[0_0_10px_rgba(56,189,248,0.3)]" 
+        />
+      </motion.div>
+
+      {/* Top Right - ICONNET Logo */}
+      <motion.div 
+        className="absolute top-4 right-4 sm:top-6 sm:right-6 z-20"
+        initial={{ opacity: 0, x: 20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.6, delay: 0.2 }}
+      >
+        <img 
+          src={iconnetLogo} 
+          alt="ICONNET" 
+          className="h-10 sm:h-12 w-auto object-contain drop-shadow-[0_0_10px_rgba(56,189,248,0.3)]" 
+        />
+      </motion.div>
+
       {/* Radial glow behind card */}
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none" style={{ zIndex: 2 }}>
-        <div className="w-[500px] h-[500px] bg-cyan-500/10 rounded-full blur-[100px]" />
+        <div className="w-[600px] h-[600px] bg-cyan-500/8 rounded-full blur-[120px]" />
       </div>
 
       {/* Glass Card with Parallax */}
@@ -152,135 +135,89 @@ export default function Login() {
         onMouseLeave={handleMouseLeave}
       >
         {/* Card glow border effect */}
-        <div className="absolute -inset-[1px] bg-gradient-to-r from-cyan-500/50 via-blue-500/50 to-purple-500/50 rounded-2xl blur-sm opacity-60" />
+        <div className="absolute -inset-[1px] bg-gradient-to-b from-cyan-500/40 via-transparent to-cyan-500/20 rounded-2xl blur-[2px] opacity-80" />
         
         {/* Main card */}
-        <div className="relative bg-slate-900/70 backdrop-blur-xl border border-white/10 rounded-2xl p-8 shadow-2xl">
+        <div className="relative bg-[#0d1f38]/80 backdrop-blur-xl border border-cyan-500/20 rounded-2xl p-8 shadow-2xl">
           {/* Inner glow */}
           <div className="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent rounded-2xl pointer-events-none" />
           
           {/* Content */}
           <div className="relative space-y-6">
-            {/* Logos - Side by side with parallax */}
-            <div className="flex flex-col items-center gap-6">
-              {/* ICONNET Mascot */}
+            {/* ICONNET Mascot */}
+            <div className="flex justify-center">
               <motion.div 
                 className="relative group cursor-pointer"
                 style={{ transform: "translateZ(40px)" }}
                 initial={{ opacity: 0, y: -20, scale: 0.9 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
-                transition={{ duration: 0.7, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
+                transition={{ duration: 0.7, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
                 whileHover={{ scale: 1.08, y: -5, rotate: [0, -3, 3, 0] }}
                 whileTap={{ scale: 0.95 }}
               >
-                <div className="absolute -inset-4 bg-gradient-to-r from-cyan-500/40 via-teal-500/40 to-blue-500/40 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                <div className="absolute -inset-4 bg-gradient-to-r from-cyan-500/30 via-teal-500/30 to-blue-500/30 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                 <img 
                   src={iconnetMascot} 
                   alt="ICONNET Mascot" 
-                  className="relative h-28 sm:h-36 w-auto object-contain drop-shadow-[0_0_25px_rgba(56,189,248,0.5)] transition-all duration-300 group-hover:drop-shadow-[0_0_40px_rgba(56,189,248,0.7)]" 
+                  className="relative h-24 sm:h-28 w-auto object-contain drop-shadow-[0_0_20px_rgba(56,189,248,0.4)] transition-all duration-300 group-hover:drop-shadow-[0_0_35px_rgba(56,189,248,0.6)]" 
                 />
-              </motion.div>
-
-              {/* NOC RITEL Title with Enhanced Hover Animation */}
-              <motion.div 
-                className="text-center space-y-3"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.4, delay: 0.6 }}
-                style={{ transform: "translateZ(30px)" }}
-              >
-                {/* Animated NOC RITEL */}
-                <motion.div className="relative py-2">
-                  {/* Glow effect behind text */}
-                  <motion.div 
-                    className="absolute inset-0 blur-2xl pointer-events-none"
-                    animate={{ 
-                      background: [
-                        'radial-gradient(ellipse at center, rgba(56,189,248,0.3) 0%, transparent 70%)',
-                        'radial-gradient(ellipse at center, rgba(139,92,246,0.3) 0%, transparent 70%)',
-                        'radial-gradient(ellipse at center, rgba(56,189,248,0.3) 0%, transparent 70%)'
-                      ]
-                    }}
-                    transition={{ duration: 4, repeat: Infinity }}
-                  />
-                  <h1 className="relative text-3xl sm:text-4xl font-black tracking-widest flex justify-center">
-                    {"NOC RITEL".split("").map((char, index) => (
-                      <motion.span
-                        key={index}
-                        className="inline-block cursor-pointer select-none"
-                        initial={{ opacity: 0, y: 30, rotateX: -90 }}
-                        animate={{ opacity: 1, y: 0, rotateX: 0 }}
-                        transition={{ 
-                          duration: 0.5, 
-                          delay: 0.8 + index * 0.08,
-                          ease: [0.22, 1, 0.36, 1]
-                        }}
-                        whileHover={{ 
-                          scale: 1.3, 
-                          y: -8,
-                          rotate: [0, -5, 5, 0],
-                          transition: { duration: 0.3 }
-                        }}
-                        whileTap={{ scale: 0.9 }}
-                        style={{
-                          background: 'linear-gradient(180deg, #ffffff 0%, #67e8f9 50%, #06b6d4 100%)',
-                          WebkitBackgroundClip: 'text',
-                          WebkitTextFillColor: 'transparent',
-                          backgroundClip: 'text',
-                          textShadow: 'none',
-                          filter: 'drop-shadow(0 0 8px rgba(56,189,248,0.5))',
-                        }}
-                      >
-                        {char === " " ? "\u00A0\u00A0" : char}
-                      </motion.span>
-                    ))}
-                  </h1>
-                  {/* Animated underline */}
-                  <motion.div 
-                    className="h-0.5 mx-auto mt-3 rounded-full bg-gradient-to-r from-transparent via-cyan-400 to-transparent"
-                    initial={{ width: 0, opacity: 0 }}
-                    animate={{ width: '100%', opacity: 1 }}
-                    transition={{ duration: 0.8, delay: 1.8 }}
-                  />
-                </motion.div>
-
-                <motion.p 
-                  className="text-sm text-slate-400"
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 2.2, duration: 0.5 }}
-                >
-                  Masuk untuk mengakses dashboard
-                </motion.p>
               </motion.div>
             </div>
 
-            {/* Decorative line */}
+            {/* NOC RITEL Title */}
             <motion.div 
-              className="flex items-center gap-3"
+              className="text-center space-y-2"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ delay: 2.2 }}
+              transition={{ duration: 0.4, delay: 0.5 }}
+              style={{ transform: "translateZ(30px)" }}
             >
-              <div className="flex-1 h-px bg-gradient-to-r from-transparent via-slate-600 to-transparent" />
+              <motion.h1 
+                className="text-2xl sm:text-3xl font-bold tracking-[0.3em] text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-cyan-400 to-cyan-300"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.6 }}
+                style={{
+                  textShadow: '0 0 30px rgba(56,189,248,0.4)',
+                }}
+              >
+                NOC RITEL
+              </motion.h1>
+              
+              <motion.p 
+                className="text-sm text-slate-400"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.8, duration: 0.5 }}
+              >
+                Masuk untuk mengakses dashboard
+              </motion.p>
+            </motion.div>
+
+            {/* Decorative dot */}
+            <motion.div 
+              className="flex justify-center"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 1 }}
+            >
               <motion.div 
                 className="w-1.5 h-1.5 rounded-full bg-cyan-400/60"
                 animate={{ scale: [1, 1.3, 1], opacity: [0.6, 1, 0.6] }}
                 transition={{ duration: 2, repeat: Infinity }}
               />
-              <div className="flex-1 h-px bg-gradient-to-r from-transparent via-slate-600 to-transparent" />
             </motion.div>
 
             {/* Login Button */}
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: 2.3 }}
+              transition={{ duration: 0.4, delay: 1.1 }}
             >
               <Button 
                 onClick={handleGoogleSignIn}
                 disabled={isSigningIn}
-                className="w-full h-12 text-sm font-medium gap-3 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 border-0 text-white shadow-lg shadow-cyan-500/25 transition-all duration-300 hover:shadow-cyan-500/40 hover:scale-[1.02] active:scale-[0.98]"
+                className="w-full h-12 text-sm font-medium gap-3 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 border-0 text-white shadow-lg shadow-cyan-500/25 transition-all duration-300 hover:shadow-cyan-500/40 hover:scale-[1.02] active:scale-[0.98] rounded-lg"
               >
                 {isSigningIn ? (
                   <Loader2 className="h-5 w-5 animate-spin" />
@@ -313,7 +250,7 @@ export default function Login() {
               className="flex justify-center gap-1.5 pt-2"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ delay: 2.5 }}
+              transition={{ delay: 1.3 }}
             >
               {[...Array(5)].map((_, i) => (
                 <motion.div
@@ -334,9 +271,6 @@ export default function Login() {
           </div>
         </div>
       </motion.div>
-
-      {/* Bottom gradient fade */}
-      <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-slate-950 to-transparent pointer-events-none" style={{ zIndex: 5 }} />
     </div>
   );
 }
