@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { motion } from "framer-motion";
 import plnIconPlusLogo from "@/assets/pln-icon-plus.png";
 import iconnetLogo from "@/assets/iconnet-logo-full.png";
 import indonesiaMap from "@/assets/indonesia-map.png";
@@ -80,27 +81,45 @@ export default function Login() {
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,transparent_30%,hsl(var(--background)/0.6)_60%,hsl(var(--background))_100%)]" />
       
       <Card className="w-full max-w-sm shadow-2xl border-border/40 backdrop-blur-lg bg-card/90 relative z-10">
-        <CardHeader className="text-center space-y-4 pb-2">
-          <div className="flex justify-center items-center gap-6 sm:gap-8">
-            <img 
-              src={plnIconPlusLogo} 
-              alt="PLN Icon Plus" 
-              className="h-10 sm:h-12 w-auto object-contain" 
-            />
-            <div className="w-px h-8 sm:h-10 bg-border/40" />
-            <img 
-              src={iconnetLogo} 
-              alt="ICONNET" 
-              className="h-7 sm:h-8 w-auto object-contain" 
-            />
-          </div>
-          <div className="space-y-1">
-            <CardTitle className="text-xl sm:text-2xl font-bold tracking-tight">
-              NOC RITEL
-            </CardTitle>
-            <CardDescription className="text-sm text-muted-foreground">
-              Masuk untuk mengakses dashboard
-            </CardDescription>
+        <CardHeader className="text-center space-y-5 pb-2">
+          <div className="flex flex-col items-center gap-4">
+            <div className="flex justify-center items-center gap-5 sm:gap-6">
+              <motion.img 
+                src={plnIconPlusLogo} 
+                alt="PLN Icon Plus" 
+                className="h-10 sm:h-11 w-auto object-contain"
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.5, ease: "easeOut" }}
+              />
+              <motion.div 
+                className="w-px h-8 sm:h-9 bg-border/50"
+                initial={{ opacity: 0, scaleY: 0 }}
+                animate={{ opacity: 1, scaleY: 1 }}
+                transition={{ duration: 0.4, delay: 0.3 }}
+              />
+              <motion.img 
+                src={iconnetLogo} 
+                alt="ICONNET" 
+                className="h-6 sm:h-7 w-auto object-contain"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.5, ease: "easeOut" }}
+              />
+            </div>
+            <motion.div 
+              className="space-y-1"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: 0.2 }}
+            >
+              <CardTitle className="text-xl sm:text-2xl font-bold tracking-tight">
+                NOC RITEL
+              </CardTitle>
+              <CardDescription className="text-sm text-muted-foreground">
+                Masuk untuk mengakses dashboard
+              </CardDescription>
+            </motion.div>
           </div>
         </CardHeader>
         <CardContent className="pt-4 pb-6">
