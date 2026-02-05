@@ -115,6 +115,8 @@ export type Database = {
           category: string
           constraint_type: string
           created_at: string
+          created_by_name: string | null
+          created_by_user_id: string | null
           created_iso: string
           customer_name: string
           fat_id: string
@@ -131,6 +133,8 @@ export type Database = {
           category: string
           constraint_type: string
           created_at?: string
+          created_by_name?: string | null
+          created_by_user_id?: string | null
           created_iso: string
           customer_name: string
           fat_id: string
@@ -147,6 +151,8 @@ export type Database = {
           category?: string
           constraint_type?: string
           created_at?: string
+          created_by_name?: string | null
+          created_by_user_id?: string | null
           created_iso?: string
           customer_name?: string
           fat_id?: string

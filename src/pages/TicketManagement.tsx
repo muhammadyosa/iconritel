@@ -31,6 +31,7 @@ import {
 import { useTickets } from "@/hooks/useTickets";
 import { useCloudTickets } from "@/hooks/useCloudTickets";
 import { useUserRole } from "@/hooks/useUserRole";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   Ticket,
   ALL_CONSTRAINTS,
@@ -59,6 +60,9 @@ export default function TicketManagement() {
 
   // User role for permission-based UI
   const { isAdmin } = useUserRole();
+  
+  // Get current user for tracking who created tickets
+  const { user, profile } = useAuth();
 
   const [searchFilters, setSearchFilters] = useState({
     customer: "",
@@ -201,6 +205,8 @@ export default function TicketManagement() {
       status: "On Progress",
       createdAt: now.toLocaleString("id-ID"),
       createdISO: now.toISOString(),
+      createdByUserId: user?.id,
+      createdByName: profile?.display_name || user?.email?.split("@")[0] || "Unknown",
     };
 
     try {
@@ -299,6 +305,8 @@ export default function TicketManagement() {
       status: "On Progress",
       createdAt: now.toLocaleString("id-ID"),
       createdISO: now.toISOString(),
+      createdByUserId: user?.id,
+      createdByName: profile?.display_name || user?.email?.split("@")[0] || "Unknown",
     };
 
     try {
@@ -422,7 +430,7 @@ export default function TicketManagement() {
               </div>
             )}
             <Button onClick={handleSubmitTicket} className="w-full">
-              Simpan Tiket
+              Simpan Insident
             </Button>
           </div>
         </DialogContent>
@@ -733,7 +741,7 @@ export default function TicketManagement() {
                       )}
                       
                       <Button onClick={handleSubmitManualTicket} className="w-full">
-                        Simpan Tiket Manual
+                        Simpan Insident Manual
                       </Button>
                     </div>
                   </DialogContent>
@@ -789,6 +797,7 @@ export default function TicketManagement() {
                       <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap bg-muted/80">👤 Customer/Type</TableHead>
                       <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap bg-muted/80">👨‍💼 Service ID</TableHead>
                       <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap bg-muted/80">👥 Serpo</TableHead>
+                      <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap bg-muted/80">✍️ Pembuat</TableHead>
                       <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap bg-muted/80">⚙️ Status</TableHead>
                       <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap bg-muted/80">⚡ Action</TableHead>
                     </TableRow>
@@ -796,7 +805,7 @@ export default function TicketManagement() {
                   <TableBody>
                     {tickets.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={7} className="text-center text-muted-foreground text-[8px] sm:text-[9px] py-2">
+                        <TableCell colSpan={8} className="text-center text-muted-foreground text-[8px] sm:text-[9px] py-2">
                           Belum ada tiket
                         </TableCell>
                       </TableRow>
@@ -841,6 +850,9 @@ export default function TicketManagement() {
                           </TableCell>
                           <TableCell className="px-1 sm:px-1.5 py-0.5 font-mono text-[9px] sm:text-[10px]">{ticket.serviceId}</TableCell>
                           <TableCell className="px-1 sm:px-1.5 py-0.5 text-[9px] sm:text-[10px]">{ticket.serpo}</TableCell>
+                          <TableCell className="px-1 sm:px-1.5 py-0.5 text-[9px] sm:text-[10px]">
+                            <span className="text-muted-foreground">{ticket.createdByName || "-"}</span>
+                          </TableCell>
                           <TableCell className="px-1 sm:px-1.5 py-0.5">
                             <div>
                               <StatusBadge status={ticket.status} />
@@ -900,6 +912,10 @@ export default function TicketManagement() {
                                       <div>
                                         <span className="text-muted-foreground">SN ONT:</span>
                                         <p className="font-mono text-xs">{ticket.snOnt}</p>
+                                      </div>
+                                      <div>
+                                        <span className="text-muted-foreground">Pembuat:</span>
+                                        <p className="font-medium">{ticket.createdByName || "-"}</p>
                                       </div>
                                       <div>
                                         <span className="text-muted-foreground">Created:</span>

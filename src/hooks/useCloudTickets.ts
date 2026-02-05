@@ -20,6 +20,8 @@ interface DbTicket {
   status: string;
   created_at: string;
   created_iso: string;
+  created_by_user_id: string | null;
+  created_by_name: string | null;
 }
 
 // Type for inserting tickets (excludes auto-generated id)
@@ -36,6 +38,8 @@ interface DbTicketInsert {
   ticket_result: string;
   status: string;
   created_iso: string;
+  created_by_user_id?: string;
+  created_by_name?: string;
 }
 
 function dbToTicket(db: DbTicket): Ticket {
@@ -53,6 +57,8 @@ function dbToTicket(db: DbTicket): Ticket {
     status: db.status as Ticket["status"],
     createdAt: new Date(db.created_at).toLocaleString("id-ID"),
     createdISO: db.created_iso,
+    createdByUserId: db.created_by_user_id || undefined,
+    createdByName: db.created_by_name || undefined,
   };
 }
 
@@ -72,6 +78,8 @@ function ticketToDb(ticket: Ticket): DbTicketInsert {
     ticket_result: ticket.ticketResult,
     status: ticket.status,
     created_iso: ticket.createdISO,
+    created_by_user_id: ticket.createdByUserId,
+    created_by_name: ticket.createdByName,
   };
 }
 
