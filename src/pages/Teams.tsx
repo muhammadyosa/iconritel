@@ -1,4 +1,4 @@
-import { Users, Eye } from "lucide-react";
+import { Users, Eye, CalendarIcon, X } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Sheet,
@@ -31,6 +31,23 @@ import {
 } from "@/components/ui/chart";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Cell } from "recharts";
 import { useState } from "react";
+import { format, isWithinInterval, startOfDay, endOfDay, subDays } from "date-fns";
+import { id as localeId } from "date-fns/locale";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import type { DateRange } from "react-day-picker";
 
 const chartConfig = {
   total: {
@@ -54,8 +71,33 @@ const chartConfig = {
 export default function Teams() {
   const { tickets, isLoading } = useCloudTickets();
   const [selectedTeam, setSelectedTeam] = useState<string | null>(null);
+  const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
+  const [periodPreset, setPeriodPreset] = useState<string>("all");
 
-  const teamStats = tickets.reduce((acc, ticket) => {
+  // Handle period preset change
+  const handlePeriodChange = (value: string) => {
+    setPeriodPreset(value);
+    if (value === "all") {
+      setDateRange(undefined);
+    } else if (value === "7d") {
+      setDateRange({ from: subDays(new Date(), 7), to: new Date() });
+    } else if (value === "14d") {
+      setDateRange({ from: subDays(new Date(), 14), to: new Date() });
+    } else if (value === "30d") {
+      setDateRange({ from: subDays(new Date(), 30), to: new Date() });
+    }
+  };
+
+  // Filter tickets by date range
+  const filteredTickets = tickets.filter((ticket) => {
+    if (!dateRange?.from) return true;
+    const ticketDate = new Date(ticket.createdISO);
+    const from = startOfDay(dateRange.from);
+    const to = dateRange.to ? endOfDay(dateRange.to) : endOfDay(dateRange.from);
+    return isWithinInterval(ticketDate, { start: from, end: to });
+  });
+
+  const teamStats = filteredTickets.reduce((acc, ticket) => {
     if (!ticket.serpo) return acc;
     if (!acc[ticket.serpo]) {
       acc[ticket.serpo] = {
@@ -91,6 +133,81 @@ export default function Teams() {
       <div>
         <h1 className="text-xl sm:text-2xl md:text-3xl font-bold">👥 List Team</h1>
         <p className="text-muted-foreground text-xs sm:text-sm">Statistik ticket per tim dalam bentuk grafik batang</p>
+      </div>
+
+      {/* Date Filter */}
+      <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+        <Select value={periodPreset} onValueChange={handlePeriodChange}>
+          <SelectTrigger className="w-[140px] sm:w-[160px] h-9 text-xs sm:text-sm">
+            <SelectValue placeholder="Pilih Periode" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Semua Data</SelectItem>
+            <SelectItem value="7d">7 Hari Terakhir</SelectItem>
+            <SelectItem value="14d">14 Hari Terakhir</SelectItem>
+            <SelectItem value="30d">30 Hari Terakhir</SelectItem>
+            <SelectItem value="custom">Kustom</SelectItem>
+          </SelectContent>
+        </Select>
+
+        {periodPreset === "custom" && (
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                className={cn(
+                  "h-9 justify-start text-left font-normal text-xs sm:text-sm",
+                  !dateRange && "text-muted-foreground"
+                )}
+              >
+                <CalendarIcon className="mr-2 h-4 w-4" />
+                {dateRange?.from ? (
+                  dateRange.to ? (
+                    <>
+                      {format(dateRange.from, "dd MMM", { locale: localeId })} -{" "}
+                      {format(dateRange.to, "dd MMM yyyy", { locale: localeId })}
+                    </>
+                  ) : (
+                    format(dateRange.from, "dd MMM yyyy", { locale: localeId })
+                  )
+                ) : (
+                  <span>Pilih tanggal</span>
+                )}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+              <Calendar
+                initialFocus
+                mode="range"
+                defaultMonth={dateRange?.from}
+                selected={dateRange}
+                onSelect={setDateRange}
+                numberOfMonths={1}
+                className={cn("p-3 pointer-events-auto")}
+              />
+            </PopoverContent>
+          </Popover>
+        )}
+
+        {dateRange && (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-9 px-2"
+            onClick={() => {
+              setDateRange(undefined);
+              setPeriodPreset("all");
+            }}
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        )}
+
+        {dateRange && (
+          <Badge variant="secondary" className="text-xs">
+            {filteredTickets.length} tiket
+          </Badge>
+        )}
       </div>
 
       {Object.keys(teamStats).length === 0 ? (
