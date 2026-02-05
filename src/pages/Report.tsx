@@ -964,7 +964,7 @@ function PendingTicketsList() {
             <div className="space-y-3">
               <div className="space-y-2">
                 <Label htmlFor="pendingInput" className="flex items-center gap-2">
-                  <span className="text-xs bg-muted text-muted-foreground px-2 py-0.5 rounded">INPUT</span>
+                  <span className="text-xs bg-destructive/10 text-destructive px-2 py-0.5 rounded">INPUT</span>
                   Data Tiket
                 </Label>
                 <Textarea
