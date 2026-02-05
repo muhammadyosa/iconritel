@@ -12,6 +12,8 @@ export interface Ticket {
   status: "On Progress" | "Critical" | "Resolved" | "Pending";
   createdAt: string;
   createdISO: string;
+  createdByUserId?: string;
+  createdByName?: string;
 }
 
 export interface ExcelRecord {
