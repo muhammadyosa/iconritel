@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import plnIconPlusLogo from "@/assets/pln-icon-plus.png";
+import iconnetLogo from "@/assets/iconnet-logo-full.png";
 import indonesiaMap from "@/assets/indonesia-map.png";
 
 export default function Login() {
@@ -80,11 +81,17 @@ export default function Login() {
       
       <Card className="w-full max-w-sm shadow-2xl border-border/40 backdrop-blur-lg bg-card/90 relative z-10">
         <CardHeader className="text-center space-y-4 pb-2">
-          <div className="flex justify-center">
+          <div className="flex justify-center items-center gap-3 sm:gap-4">
             <img 
               src={plnIconPlusLogo} 
               alt="PLN Icon Plus" 
-              className="h-14 sm:h-16 w-auto object-contain" 
+              className="h-12 sm:h-14 w-auto object-contain" 
+            />
+            <div className="w-px h-10 sm:h-12 bg-border/60" />
+            <img 
+              src={iconnetLogo} 
+              alt="ICONNET" 
+              className="h-10 sm:h-12 w-auto object-contain" 
             />
           </div>
           <div className="space-y-1">
