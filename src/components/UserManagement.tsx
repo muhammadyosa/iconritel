@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Loader2, RefreshCw, Shield, User, Users, Clock } from "lucide-react";
+import { Loader2, RefreshCw, Shield, User, Users, Clock, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 import { toast } from "sonner";
 
 interface UserWithRole {
@@ -26,6 +26,7 @@ export function UserManagement() {
   const [users, setUsers] = useState<UserWithRole[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [updatingUserId, setUpdatingUserId] = useState<string | null>(null);
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc" | null>(null);
 
   const fetchUsers = async () => {
     setIsLoading(true);
@@ -149,6 +150,15 @@ export function UserManagement() {
     return email.slice(0, 2).toUpperCase();
   };
 
+  const isUserOnline = (dateString: string | null) => {
+    if (!dateString) return false;
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / (1000 * 60));
+    return diffMins < 5;
+  };
+
   const formatLastOnline = (dateString: string) => {
     const date = new Date(dateString);
     const now = new Date();
@@ -172,6 +182,29 @@ export function UserManagement() {
       });
     }
   };
+
+  const toggleSort = () => {
+    if (sortOrder === null) {
+      setSortOrder("desc"); // Most recent first
+    } else if (sortOrder === "desc") {
+      setSortOrder("asc"); // Oldest first
+    } else {
+      setSortOrder(null); // Reset to default
+    }
+  };
+
+  const sortedUsers = [...users].sort((a, b) => {
+    if (sortOrder === null) return 0;
+    
+    const aTime = a.last_online ? new Date(a.last_online).getTime() : 0;
+    const bTime = b.last_online ? new Date(b.last_online).getTime() : 0;
+    
+    if (sortOrder === "desc") {
+      return bTime - aTime; // Most recent first
+    } else {
+      return aTime - bTime; // Oldest first
+    }
+  });
 
   if (!isAdmin) {
     return (
@@ -230,20 +263,37 @@ export function UserManagement() {
                   <TableHead>User</TableHead>
                   <TableHead>Email</TableHead>
                   <TableHead className="w-[120px]">Role</TableHead>
-                  <TableHead className="w-[130px]">Last Online</TableHead>
+                  <TableHead className="w-[150px]">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-auto p-0 font-medium hover:bg-transparent"
+                      onClick={toggleSort}
+                    >
+                      Last Online
+                      {sortOrder === null && <ArrowUpDown className="ml-1 h-3 w-3" />}
+                      {sortOrder === "desc" && <ArrowDown className="ml-1 h-3 w-3" />}
+                      {sortOrder === "asc" && <ArrowUp className="ml-1 h-3 w-3" />}
+                    </Button>
+                  </TableHead>
                   <TableHead className="w-[100px]">Bergabung</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {users.map((user) => (
+                {sortedUsers.map((user) => (
                   <TableRow key={user.id}>
                     <TableCell>
-                      <Avatar className="h-8 w-8">
-                        <AvatarImage src={user.avatar_url || undefined} />
-                        <AvatarFallback className="text-xs">
-                          {getInitials(user.display_name, user.email)}
-                        </AvatarFallback>
-                      </Avatar>
+                      <div className="relative">
+                        <Avatar className="h-8 w-8">
+                          <AvatarImage src={user.avatar_url || undefined} />
+                          <AvatarFallback className="text-xs">
+                            {getInitials(user.display_name, user.email)}
+                          </AvatarFallback>
+                        </Avatar>
+                        {isUserOnline(user.last_online) && (
+                          <span className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full bg-green-500 border-2 border-background" />
+                        )}
+                      </div>
                     </TableCell>
                     <TableCell>
                       <div className="flex flex-col">
@@ -288,10 +338,17 @@ export function UserManagement() {
                     </TableCell>
                     <TableCell className="text-xs text-muted-foreground">
                       {user.last_online ? (
-                        <div className="flex items-center gap-1">
-                          <Clock className="h-3 w-3" />
-                          {formatLastOnline(user.last_online)}
-                        </div>
+                        isUserOnline(user.last_online) ? (
+                          <Badge variant="outline" className="bg-green-500/10 text-green-600 border-green-500/30">
+                            <span className="h-1.5 w-1.5 rounded-full bg-green-500 mr-1.5 animate-pulse" />
+                            Online
+                          </Badge>
+                        ) : (
+                          <div className="flex items-center gap-1">
+                            <Clock className="h-3 w-3" />
+                            {formatLastOnline(user.last_online)}
+                          </div>
+                        )
                       ) : (
                         <span className="text-muted-foreground/50">—</span>
                       )}
