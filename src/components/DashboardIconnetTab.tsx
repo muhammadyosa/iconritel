@@ -176,21 +176,22 @@ Dengan Penyebaran :
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Resume All Section */}
-        <div className="space-y-4">
+        <div className="space-y-3">
           <div className="flex items-center gap-2">
-            <div className="h-6 w-1 bg-primary rounded-full" />
-            <h3 className="font-semibold text-lg">Resume All</h3>
+            <div className="h-5 w-1 bg-primary rounded-full" />
+            <h3 className="font-semibold">Resume All</h3>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="resumeAllTime">Pukul</Label>
+          {/* Header Fields - Compact Inline */}
+          <div className="flex flex-wrap gap-2 items-center">
+            <div className="flex items-center gap-1.5 bg-muted/50 rounded-md px-2 py-1">
+              <span className="text-xs text-muted-foreground">Pukul</span>
               <Select
                 value={data.resumeAllTime}
                 onValueChange={(value) => updateField("resumeAllTime", value)}
               >
-                <SelectTrigger id="resumeAllTime">
-                  <SelectValue placeholder="Pilih waktu" />
+                <SelectTrigger className="h-7 w-[70px] text-sm px-2">
+                  <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   {SHIFT_OPTIONS.map((option) => (
@@ -201,11 +202,11 @@ Dengan Penyebaran :
                 </SelectContent>
               </Select>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="resumeAllDate">Tanggal</Label>
+            <div className="flex items-center gap-1.5 bg-muted/50 rounded-md px-2 py-1">
+              <span className="text-xs text-muted-foreground">Tanggal</span>
               <Input
-                id="resumeAllDate"
                 type="date"
+                className="h-7 w-[130px] text-sm px-2"
                 value={data.resumeAllDate}
                 onChange={(e) => updateField("resumeAllDate", e.target.value)}
               />
@@ -213,8 +214,8 @@ Dengan Penyebaran :
           </div>
 
           {/* Dengan Penyebaran - Compact Inline Layout */}
-          <div className="space-y-3">
-            <p className="text-sm font-medium text-muted-foreground">Dengan Penyebaran :</p>
+          <div className="space-y-2">
+            <p className="text-xs font-medium text-muted-foreground">Dengan Penyebaran :</p>
             <div className="flex flex-wrap gap-2">
               {[
                 { id: "sumselAll", label: "Sumsel", field: "sumselAll" as const },
@@ -237,33 +238,30 @@ Dengan Penyebaran :
             </div>
           </div>
 
-          {/* Posisi Section - Compact */}
-          <div className="flex flex-wrap gap-3">
-            <div className="flex items-center gap-2 flex-1 min-w-[200px]">
+          {/* Posisi Section - Compact Inline */}
+          <div className="flex flex-wrap gap-2 items-center">
+            <div className="flex items-center gap-1.5 bg-muted/50 rounded-md px-2 py-1">
               <span className="text-xs text-muted-foreground whitespace-nowrap">NOC Ritel SBU =</span>
               <Input
-                id="posisiNocRitel"
-                className="h-8 text-sm flex-1"
+                className="h-7 w-16 text-center text-sm px-1"
                 placeholder="-"
                 value={data.posisiNocRitel}
                 onChange={(e) => updateField("posisiNocRitel", e.target.value)}
               />
             </div>
-            <div className="flex items-center gap-2 flex-1 min-w-[200px]">
+            <div className="flex items-center gap-1.5 bg-muted/50 rounded-md px-2 py-1">
               <span className="text-xs text-muted-foreground whitespace-nowrap">Outbond, dll =</span>
               <Input
-                id="posisiTiketOutbond"
-                className="h-8 text-sm flex-1"
+                className="h-7 w-16 text-center text-sm px-1"
                 placeholder="-"
                 value={data.posisiTiketOutbond}
                 onChange={(e) => updateField("posisiTiketOutbond", e.target.value)}
               />
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 bg-muted/50 rounded-md px-2 py-1">
               <span className="text-xs text-muted-foreground whitespace-nowrap">Total =</span>
               <Input
-                id="totalTiket"
-                className="h-8 w-20 text-center text-sm"
+                className="h-7 w-14 text-center text-sm px-1"
                 placeholder="-"
                 value={data.totalTiket}
                 onChange={(e) => updateField("totalTiket", e.target.value)}
@@ -275,21 +273,22 @@ Dengan Penyebaran :
         <Separator />
 
         {/* Resume Gangguan Section */}
-        <div className="space-y-4">
+        <div className="space-y-3">
           <div className="flex items-center gap-2">
-            <div className="h-6 w-1 bg-destructive rounded-full" />
-            <h3 className="font-semibold text-lg">Resume Gangguan</h3>
+            <div className="h-5 w-1 bg-destructive rounded-full" />
+            <h3 className="font-semibold">Resume Gangguan</h3>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="resumeGangguanTime">Pukul</Label>
+          {/* Header Fields - Compact Inline */}
+          <div className="flex flex-wrap gap-2 items-center">
+            <div className="flex items-center gap-1.5 bg-muted/50 rounded-md px-2 py-1">
+              <span className="text-xs text-muted-foreground">Pukul</span>
               <Select
                 value={data.resumeGangguanTime}
                 onValueChange={(value) => updateField("resumeGangguanTime", value)}
               >
-                <SelectTrigger id="resumeGangguanTime">
-                  <SelectValue placeholder="Pilih waktu" />
+                <SelectTrigger className="h-7 w-[70px] text-sm px-2">
+                  <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   {SHIFT_OPTIONS.map((option) => (
@@ -300,14 +299,14 @@ Dengan Penyebaran :
                 </SelectContent>
               </Select>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="retailSbsHari">Retail SBS (hari)</Label>
+            <div className="flex items-center gap-1.5 bg-muted/50 rounded-md px-2 py-1">
+              <span className="text-xs text-muted-foreground">Retail SBS</span>
               <Select
                 value={data.retailSbsHari}
                 onValueChange={(value) => updateField("retailSbsHari", value)}
               >
-                <SelectTrigger id="retailSbsHari">
-                  <SelectValue placeholder="Pilih hari" />
+                <SelectTrigger className="h-7 w-[80px] text-sm px-2">
+                  <SelectValue placeholder="-" />
                 </SelectTrigger>
                 <SelectContent>
                   {HARI_OPTIONS.map((option) => (
@@ -318,19 +317,19 @@ Dengan Penyebaran :
                 </SelectContent>
               </Select>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="resumeGangguanDate">Tanggal</Label>
+            <div className="flex items-center gap-1.5 bg-muted/50 rounded-md px-2 py-1">
+              <span className="text-xs text-muted-foreground">Tanggal</span>
               <Input
-                id="resumeGangguanDate"
                 type="date"
+                className="h-7 w-[130px] text-sm px-2"
                 value={data.resumeGangguanDate}
                 onChange={(e) => updateField("resumeGangguanDate", e.target.value)}
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="totalGangguan">Total Gangguan</Label>
+            <div className="flex items-center gap-1.5 bg-muted/50 rounded-md px-2 py-1">
+              <span className="text-xs text-muted-foreground whitespace-nowrap">Total Gangguan =</span>
               <Input
-                id="totalGangguan"
+                className="h-7 w-14 text-center text-sm px-1"
                 placeholder="-"
                 value={data.totalGangguan}
                 onChange={(e) => updateField("totalGangguan", e.target.value)}
@@ -339,8 +338,8 @@ Dengan Penyebaran :
           </div>
 
           {/* Dengan Penyebaran - Compact Inline Layout */}
-          <div className="space-y-3">
-            <p className="text-sm font-medium text-muted-foreground">Dengan Penyebaran :</p>
+          <div className="space-y-2">
+            <p className="text-xs font-medium text-muted-foreground">Dengan Penyebaran :</p>
             <div className="flex flex-wrap gap-2">
               {[
                 { id: "sumselGangguan", label: "Sumsel", field: "sumselGangguan" as const },
