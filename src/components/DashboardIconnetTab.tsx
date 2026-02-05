@@ -212,80 +212,58 @@ Dengan Penyebaran :
             </div>
           </div>
 
-          <div className="bg-muted/50 p-4 rounded-lg space-y-3">
+          {/* Dengan Penyebaran - Compact Inline Layout */}
+          <div className="space-y-3">
             <p className="text-sm font-medium text-muted-foreground">Dengan Penyebaran :</p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-              <div className="space-y-1">
-                <Label htmlFor="sumselAll" className="text-xs">Sumsel</Label>
-                <Input
-                  id="sumselAll"
-                  placeholder="-"
-                  value={data.sumselAll}
-                  onChange={(e) => updateField("sumselAll", e.target.value)}
-                />
-              </div>
-              <div className="space-y-1">
-                <Label htmlFor="bangkaBelitungAll" className="text-xs">Bangka Belitung</Label>
-                <Input
-                  id="bangkaBelitungAll"
-                  placeholder="-"
-                  value={data.bangkaBelitungAll}
-                  onChange={(e) => updateField("bangkaBelitungAll", e.target.value)}
-                />
-              </div>
-              <div className="space-y-1">
-                <Label htmlFor="bengkuluAll" className="text-xs">Bengkulu</Label>
-                <Input
-                  id="bengkuluAll"
-                  placeholder="-"
-                  value={data.bengkuluAll}
-                  onChange={(e) => updateField("bengkuluAll", e.target.value)}
-                />
-              </div>
-              <div className="space-y-1">
-                <Label htmlFor="jambiAll" className="text-xs">Jambi</Label>
-                <Input
-                  id="jambiAll"
-                  placeholder="-"
-                  value={data.jambiAll}
-                  onChange={(e) => updateField("jambiAll", e.target.value)}
-                />
-              </div>
-              <div className="space-y-1">
-                <Label htmlFor="lampungAll" className="text-xs">Lampung</Label>
-                <Input
-                  id="lampungAll"
-                  placeholder="-"
-                  value={data.lampungAll}
-                  onChange={(e) => updateField("lampungAll", e.target.value)}
-                />
-              </div>
+            <div className="flex flex-wrap gap-2">
+              {[
+                { id: "sumselAll", label: "Sumsel", field: "sumselAll" as const },
+                { id: "bangkaBelitungAll", label: "Babel", field: "bangkaBelitungAll" as const },
+                { id: "bengkuluAll", label: "Bengkulu", field: "bengkuluAll" as const },
+                { id: "jambiAll", label: "Jambi", field: "jambiAll" as const },
+                { id: "lampungAll", label: "Lampung", field: "lampungAll" as const },
+              ].map((item) => (
+                <div key={item.id} className="flex items-center gap-1 bg-muted/50 rounded-md px-2 py-1">
+                  <span className="text-xs text-muted-foreground whitespace-nowrap">{item.label} =</span>
+                  <Input
+                    id={item.id}
+                    className="h-7 w-14 text-center text-sm px-1"
+                    placeholder="-"
+                    value={data[item.field]}
+                    onChange={(e) => updateField(item.field, e.target.value)}
+                  />
+                </div>
+              ))}
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="posisiNocRitel">Posisi NOC Ritel SBU</Label>
+          {/* Posisi Section - Compact */}
+          <div className="flex flex-wrap gap-3">
+            <div className="flex items-center gap-2 flex-1 min-w-[200px]">
+              <span className="text-xs text-muted-foreground whitespace-nowrap">NOC Ritel SBU =</span>
               <Input
                 id="posisiNocRitel"
+                className="h-8 text-sm flex-1"
                 placeholder="-"
                 value={data.posisiNocRitel}
                 onChange={(e) => updateField("posisiNocRitel", e.target.value)}
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="posisiTiketOutbond" className="text-xs">Posisi Tiket Outbond, Back office, dll</Label>
+            <div className="flex items-center gap-2 flex-1 min-w-[200px]">
+              <span className="text-xs text-muted-foreground whitespace-nowrap">Outbond, dll =</span>
               <Input
                 id="posisiTiketOutbond"
+                className="h-8 text-sm flex-1"
                 placeholder="-"
                 value={data.posisiTiketOutbond}
                 onChange={(e) => updateField("posisiTiketOutbond", e.target.value)}
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="totalTiket">Total Tiket</Label>
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-muted-foreground whitespace-nowrap">Total =</span>
               <Input
                 id="totalTiket"
+                className="h-8 w-20 text-center text-sm"
                 placeholder="-"
                 value={data.totalTiket}
                 onChange={(e) => updateField("totalTiket", e.target.value)}
@@ -360,54 +338,28 @@ Dengan Penyebaran :
             </div>
           </div>
 
-          <div className="bg-muted/50 p-4 rounded-lg space-y-3">
+          {/* Dengan Penyebaran - Compact Inline Layout */}
+          <div className="space-y-3">
             <p className="text-sm font-medium text-muted-foreground">Dengan Penyebaran :</p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-              <div className="space-y-1">
-                <Label htmlFor="sumselGangguan" className="text-xs">Sumsel</Label>
-                <Input
-                  id="sumselGangguan"
-                  placeholder="-"
-                  value={data.sumselGangguan}
-                  onChange={(e) => updateField("sumselGangguan", e.target.value)}
-                />
-              </div>
-              <div className="space-y-1">
-                <Label htmlFor="bangkaBelitungGangguan" className="text-xs">Bangka Belitung</Label>
-                <Input
-                  id="bangkaBelitungGangguan"
-                  placeholder="-"
-                  value={data.bangkaBelitungGangguan}
-                  onChange={(e) => updateField("bangkaBelitungGangguan", e.target.value)}
-                />
-              </div>
-              <div className="space-y-1">
-                <Label htmlFor="bengkuluGangguan" className="text-xs">Bengkulu</Label>
-                <Input
-                  id="bengkuluGangguan"
-                  placeholder="-"
-                  value={data.bengkuluGangguan}
-                  onChange={(e) => updateField("bengkuluGangguan", e.target.value)}
-                />
-              </div>
-              <div className="space-y-1">
-                <Label htmlFor="jambiGangguan" className="text-xs">Jambi</Label>
-                <Input
-                  id="jambiGangguan"
-                  placeholder="-"
-                  value={data.jambiGangguan}
-                  onChange={(e) => updateField("jambiGangguan", e.target.value)}
-                />
-              </div>
-              <div className="space-y-1">
-                <Label htmlFor="lampungGangguan" className="text-xs">Lampung</Label>
-                <Input
-                  id="lampungGangguan"
-                  placeholder="-"
-                  value={data.lampungGangguan}
-                  onChange={(e) => updateField("lampungGangguan", e.target.value)}
-                />
-              </div>
+            <div className="flex flex-wrap gap-2">
+              {[
+                { id: "sumselGangguan", label: "Sumsel", field: "sumselGangguan" as const },
+                { id: "bangkaBelitungGangguan", label: "Babel", field: "bangkaBelitungGangguan" as const },
+                { id: "bengkuluGangguan", label: "Bengkulu", field: "bengkuluGangguan" as const },
+                { id: "jambiGangguan", label: "Jambi", field: "jambiGangguan" as const },
+                { id: "lampungGangguan", label: "Lampung", field: "lampungGangguan" as const },
+              ].map((item) => (
+                <div key={item.id} className="flex items-center gap-1 bg-muted/50 rounded-md px-2 py-1">
+                  <span className="text-xs text-muted-foreground whitespace-nowrap">{item.label} =</span>
+                  <Input
+                    id={item.id}
+                    className="h-7 w-14 text-center text-sm px-1"
+                    placeholder="-"
+                    value={data[item.field]}
+                    onChange={(e) => updateField(item.field, e.target.value)}
+                  />
+                </div>
+              ))}
             </div>
           </div>
         </div>
