@@ -56,7 +56,9 @@ function dbToTicket(db: DbTicket): Ticket {
   };
 }
 
-function ticketToDb(ticket: Ticket): Omit<DbTicket, "id" | "created_at"> {
+function ticketToDb(ticket: Ticket): DbTicketInsert {
+  // IMPORTANT: Never write to the UUID primary key column `id`.
+  // The app-level Ticket.id is a user-provided string, and is stored in `ticket_id`.
   return {
     ticket_id: ticket.id,
     service_id: ticket.serviceId,
@@ -148,10 +150,13 @@ export function useCloudTickets() {
 
   const addTicket = useCallback(async (ticket: Ticket) => {
     try {
-      const dbData = ticketToDb(ticket);
-      const { error } = await (supabase
-        .from("tickets")
-        .insert(dbData as never) as unknown as Promise<{ error: Error | null }>);
+      const dbData: DbTicketInsert = ticketToDb(ticket);
+
+      // Extra guard: ensure we never accidentally send a string ticket id into the UUID PK column.
+      // (Helps avoid "invalid input syntax for type uuid" errors if any future refactor spreads objects.)
+      delete (dbData as unknown as { id?: unknown }).id;
+
+      const { error } = await supabase.from("tickets").insert(dbData as never);
 
       if (error) throw error;
       // Realtime will handle updating the list
@@ -159,7 +164,13 @@ export function useCloudTickets() {
       if (import.meta.env.DEV) {
         console.error("Error adding ticket:", error);
       }
-      toast.error("Gagal menyimpan tiket ke database");
+
+      // Show a more actionable message (still generic enough for end users).
+      const message =
+        typeof error === "object" && error !== null && "message" in error
+          ? String((error as { message?: unknown }).message)
+          : "Unknown error";
+      toast.error(`Gagal menyimpan tiket ke database: ${message}`);
       throw error;
     }
   }, []);
