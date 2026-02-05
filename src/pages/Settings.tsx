@@ -459,20 +459,22 @@ export default function Settings() {
                   </div>
                 )}
 
-                {/* Delete All Data Button */}
-                <div className="pt-4 border-t">
-                  <Button
-                    variant="destructive"
-                    onClick={() => setShowDeleteAllDialog(true)}
-                    disabled={isImporting || isDeleting}
-                  >
-                    <Trash2 className="h-4 w-4 mr-2" />
-                    Hapus Semua Data
-                  </Button>
-                  <p className="text-xs text-muted-foreground mt-2">
-                    Menghapus semua data: Ticket Management, List FAT, List UPE, List BNG, dan Report
-                  </p>
-                </div>
+                {/* Delete All Data Button - Admin Only */}
+                {isAdmin && (
+                  <div className="pt-4 border-t">
+                    <Button
+                      variant="destructive"
+                      onClick={() => setShowDeleteAllDialog(true)}
+                      disabled={isImporting || isDeleting}
+                    >
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Hapus Semua Data
+                    </Button>
+                    <p className="text-xs text-muted-foreground mt-2">
+                      Menghapus semua data: Ticket Management, List FAT, List UPE, List BNG, dan Report
+                    </p>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
