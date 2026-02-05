@@ -165,7 +165,7 @@ export default function Login() {
             {/* Logos - Side by side with parallax */}
             <div className="flex flex-col items-center gap-5">
               <motion.div 
-                className="flex justify-center items-center gap-5 sm:gap-8"
+                className="flex justify-center items-center gap-6 sm:gap-10"
                 style={{ transform: "translateZ(40px)" }}
               >
                 {/* PLN Icon Plus Logo */}
@@ -182,24 +182,6 @@ export default function Login() {
                     src={plnIconPlusLogo} 
                     alt="PLN Icon Plus" 
                     className="relative h-14 sm:h-16 w-auto object-contain drop-shadow-[0_0_15px_rgba(56,189,248,0.5)] transition-all duration-300 group-hover:drop-shadow-[0_0_25px_rgba(56,189,248,0.7)]" 
-                  />
-                </motion.div>
-
-                {/* Animated Vertical Divider */}
-                <motion.div 
-                  className="relative h-14 sm:h-16 flex items-center"
-                  initial={{ opacity: 0, scaleY: 0 }}
-                  animate={{ opacity: 1, scaleY: 1 }}
-                  transition={{ duration: 0.5, delay: 0.4 }}
-                >
-                  <div className="w-px h-full bg-gradient-to-b from-transparent via-cyan-400/60 to-transparent" />
-                  <motion.div 
-                    className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-cyan-400"
-                    animate={{ 
-                      boxShadow: ['0 0 8px rgba(56,189,248,0.6)', '0 0 16px rgba(56,189,248,0.9)', '0 0 8px rgba(56,189,248,0.6)'],
-                      scale: [1, 1.2, 1]
-                    }}
-                    transition={{ duration: 2, repeat: Infinity }}
                   />
                 </motion.div>
 
