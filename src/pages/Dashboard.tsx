@@ -585,27 +585,63 @@ export default function Dashboard() {
                     </TabsTrigger>
                   </TabsList>
                   
-                  {shiftReportTab === "latest" && (
-                    <p className="text-[10px] text-muted-foreground hidden sm:block">
-                      Menampilkan 6 laporan terakhir
-                    </p>
-                  )}
+                  {shiftReportTab === "latest" && (() => {
+                    // Get latest date from shift reports
+                    const latestDate = shiftReports.length > 0 
+                      ? new Date(Math.max(...shiftReports.map(r => new Date(r.date).getTime()))).toISOString().split('T')[0]
+                      : null;
+                    const latestReports = latestDate 
+                      ? shiftReports.filter(r => new Date(r.date).toISOString().split('T')[0] === latestDate)
+                      : [];
+                    
+                    return (
+                      <p className="text-[10px] text-muted-foreground hidden sm:block">
+                        📅 {latestDate ? new Date(latestDate).toLocaleDateString("id-ID", { 
+                          weekday: 'short', 
+                          day: 'numeric', 
+                          month: 'short' 
+                        }) : '-'} ({latestReports.length} laporan)
+                      </p>
+                    );
+                  })()}
                 </div>
                 
                 <TabsContent value="latest" className="mt-0">
-                  <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-                    {shiftReports.slice(-6).reverse().map((report, index) => (
-                      <ShiftReportCard
-                        key={report.id}
-                        report={report}
-                        index={index}
-                        total={shiftReports.length}
-                        onEdit={async (id, data) => {
-                          return await updateShiftReport(id, data);
-                        }}
-                      />
-                    ))}
-                  </div>
+                  {(() => {
+                    // Get latest date from shift reports
+                    const latestDate = shiftReports.length > 0 
+                      ? new Date(Math.max(...shiftReports.map(r => new Date(r.date).getTime()))).toISOString().split('T')[0]
+                      : null;
+                    const latestReports = latestDate 
+                      ? shiftReports.filter(r => new Date(r.date).toISOString().split('T')[0] === latestDate)
+                      : [];
+                    
+                    if (latestReports.length === 0) {
+                      return (
+                        <div className="text-center py-10 text-muted-foreground bg-muted/30 rounded-xl border border-dashed">
+                          <FileText className="h-12 w-12 mx-auto mb-3 opacity-40" />
+                          <p className="text-sm font-medium">Belum ada laporan hari ini</p>
+                          <p className="text-xs opacity-70 mt-1">Buat laporan shift baru di tab Report</p>
+                        </div>
+                      );
+                    }
+                    
+                    return (
+                      <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+                        {latestReports.reverse().map((report, index) => (
+                          <ShiftReportCard
+                            key={report.id}
+                            report={report}
+                            index={index}
+                            total={latestReports.length}
+                            onEdit={async (id, data) => {
+                              return await updateShiftReport(id, data);
+                            }}
+                          />
+                        ))}
+                      </div>
+                    );
+                  })()}
                 </TabsContent>
 
                 <TabsContent value="history" className="mt-0">
