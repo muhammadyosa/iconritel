@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Loader2, RefreshCw, Shield, User, Users } from "lucide-react";
+import { Loader2, RefreshCw, Shield, User, Users, Clock } from "lucide-react";
 import { toast } from "sonner";
 
 interface UserWithRole {
@@ -17,6 +17,7 @@ interface UserWithRole {
   display_name: string | null;
   avatar_url: string | null;
   created_at: string;
+  last_online: string | null;
   role: "admin" | "operator";
 }
 
@@ -54,6 +55,7 @@ export function UserManagement() {
           display_name: profile.display_name,
           avatar_url: profile.avatar_url,
           created_at: profile.created_at,
+          last_online: profile.last_online as string | null,
           role: (userRole?.role as "admin" | "operator") || "operator",
         };
       });
@@ -147,6 +149,30 @@ export function UserManagement() {
     return email.slice(0, 2).toUpperCase();
   };
 
+  const formatLastOnline = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / (1000 * 60));
+    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+    if (diffMins < 5) {
+      return "Online";
+    } else if (diffMins < 60) {
+      return `${diffMins} menit lalu`;
+    } else if (diffHours < 24) {
+      return `${diffHours} jam lalu`;
+    } else if (diffDays < 7) {
+      return `${diffDays} hari lalu`;
+    } else {
+      return date.toLocaleDateString("id-ID", {
+        day: "numeric",
+        month: "short",
+      });
+    }
+  };
+
   if (!isAdmin) {
     return (
       <Card>
@@ -204,6 +230,7 @@ export function UserManagement() {
                   <TableHead>User</TableHead>
                   <TableHead>Email</TableHead>
                   <TableHead className="w-[120px]">Role</TableHead>
+                  <TableHead className="w-[130px]">Last Online</TableHead>
                   <TableHead className="w-[100px]">Bergabung</TableHead>
                 </TableRow>
               </TableHeader>
@@ -258,6 +285,16 @@ export function UserManagement() {
                           </SelectItem>
                         </SelectContent>
                       </Select>
+                    </TableCell>
+                    <TableCell className="text-xs text-muted-foreground">
+                      {user.last_online ? (
+                        <div className="flex items-center gap-1">
+                          <Clock className="h-3 w-3" />
+                          {formatLastOnline(user.last_online)}
+                        </div>
+                      ) : (
+                        <span className="text-muted-foreground/50">—</span>
+                      )}
                     </TableCell>
                     <TableCell className="text-xs text-muted-foreground">
                       {new Date(user.created_at).toLocaleDateString("id-ID", {
