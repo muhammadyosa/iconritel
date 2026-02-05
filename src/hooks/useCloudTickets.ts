@@ -24,6 +24,12 @@ interface DbTicket {
   created_by_name: string | null;
 }
 
+interface ProfileData {
+  user_id: string;
+  display_name: string | null;
+  email: string;
+}
+
 // Type for inserting tickets (excludes auto-generated id)
 interface DbTicketInsert {
   ticket_id: string;
@@ -42,7 +48,17 @@ interface DbTicketInsert {
   created_by_name?: string;
 }
 
-function dbToTicket(db: DbTicket): Ticket {
+function dbToTicket(db: DbTicket, profilesMap: Map<string, ProfileData>): Ticket {
+  // Get the current display name from profiles, fallback to stored name
+  let currentDisplayName = db.created_by_name || undefined;
+  
+  if (db.created_by_user_id) {
+    const profile = profilesMap.get(db.created_by_user_id);
+    if (profile) {
+      currentDisplayName = profile.display_name || profile.email.split("@")[0];
+    }
+  }
+  
   return {
     id: db.ticket_id,
     serviceId: db.service_id,
@@ -58,7 +74,7 @@ function dbToTicket(db: DbTicket): Ticket {
     createdAt: new Date(db.created_at).toLocaleString("id-ID"),
     createdISO: db.created_iso,
     createdByUserId: db.created_by_user_id || undefined,
-    createdByName: db.created_by_name || undefined,
+    createdByName: currentDisplayName,
   };
 }
 
@@ -86,10 +102,37 @@ function ticketToDb(ticket: Ticket): DbTicketInsert {
 export function useCloudTickets() {
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [profilesMap, setProfilesMap] = useState<Map<string, ProfileData>>(new Map());
+
+  // Fetch all profiles for mapping creator names
+  const fetchProfiles = useCallback(async () => {
+    try {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("user_id, display_name, email");
+
+      if (error) throw error;
+
+      const map = new Map<string, ProfileData>();
+      (data || []).forEach((profile) => {
+        map.set(profile.user_id, profile as ProfileData);
+      });
+      setProfilesMap(map);
+      return map;
+    } catch (error) {
+      if (import.meta.env.DEV) {
+        console.error("Error fetching profiles:", error);
+      }
+      return new Map<string, ProfileData>();
+    }
+  }, []);
 
   // Fetch tickets from database
   const fetchTickets = useCallback(async () => {
     try {
+      // Fetch profiles first to get current display names
+      const currentProfilesMap = await fetchProfiles();
+
       const { data, error } = await supabase
         .from("tickets")
         .select("*")
@@ -99,7 +142,7 @@ export function useCloudTickets() {
 
       const now = new Date().getTime();
       const processedTickets = (data || []).map((db) => {
-        const ticket = dbToTicket(db as DbTicket);
+        const ticket = dbToTicket(db as DbTicket, currentProfilesMap);
         // Check SLA for non-resolved tickets
         if (ticket.status !== "Resolved" && ticket.status !== "Critical") {
           const ticketAge = now - new Date(ticket.createdISO).getTime();
@@ -119,13 +162,13 @@ export function useCloudTickets() {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [fetchProfiles]);
 
   // Subscribe to realtime changes
   useEffect(() => {
     fetchTickets();
 
-    const channel = supabase
+    const ticketsChannel = supabase
       .channel("tickets-realtime")
       .on(
         "postgres_changes",
@@ -136,10 +179,10 @@ export function useCloudTickets() {
         },
         (payload) => {
           if (payload.eventType === "INSERT") {
-            const newTicket = dbToTicket(payload.new as DbTicket);
+            const newTicket = dbToTicket(payload.new as DbTicket, profilesMap);
             setTickets((prev) => [newTicket, ...prev]);
           } else if (payload.eventType === "UPDATE") {
-            const updatedTicket = dbToTicket(payload.new as DbTicket);
+            const updatedTicket = dbToTicket(payload.new as DbTicket, profilesMap);
             setTickets((prev) =>
               prev.map((t) => (t.id === updatedTicket.id ? updatedTicket : t))
             );
@@ -151,10 +194,28 @@ export function useCloudTickets() {
       )
       .subscribe();
 
+    // Subscribe to profile changes to update creator names in real-time
+    const profilesChannel = supabase
+      .channel("profiles-realtime-tickets")
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "profiles",
+        },
+        () => {
+          // Refetch all data when a profile is updated
+          fetchTickets();
+        }
+      )
+      .subscribe();
+
     return () => {
-      supabase.removeChannel(channel);
+      supabase.removeChannel(ticketsChannel);
+      supabase.removeChannel(profilesChannel);
     };
-  }, [fetchTickets]);
+  }, [fetchTickets, profilesMap]);
 
   const addTicket = useCallback(async (ticket: Ticket) => {
     try {
