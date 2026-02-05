@@ -158,19 +158,19 @@ export default function Login() {
             {/* ICONNET Mascot */}
             <div className="flex justify-center">
               <motion.div 
-                className="relative group cursor-pointer"
+                className="relative group cursor-pointer -mt-8 -mb-2"
                 style={{ transform: "translateZ(40px)" }}
                 initial={{ opacity: 0, y: -20, scale: 0.9 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 transition={{ duration: 0.7, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
-                whileHover={{ scale: 1.08, y: -5, rotate: [0, -3, 3, 0] }}
+                whileHover={{ scale: 1.1, y: -8, rotate: [0, -2, 2, 0] }}
                 whileTap={{ scale: 0.95 }}
               >
                 <div className="absolute -inset-4 bg-gradient-to-r from-cyan-500/30 via-teal-500/30 to-blue-500/30 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                 <img 
                   src={iconnetMascot} 
                   alt="ICONNET Mascot" 
-                  className="relative h-16 sm:h-20 w-auto object-contain drop-shadow-[0_0_15px_rgba(56,189,248,0.4)] transition-all duration-300 group-hover:drop-shadow-[0_0_30px_rgba(56,189,248,0.6)]" 
+                  className="relative h-24 sm:h-28 w-auto object-contain drop-shadow-[0_0_20px_rgba(56,189,248,0.5)] transition-all duration-300 group-hover:drop-shadow-[0_0_35px_rgba(56,189,248,0.7)]" 
                 />
               </motion.div>
             </div>
@@ -184,12 +184,14 @@ export default function Login() {
               style={{ transform: "translateZ(30px)" }}
             >
               <motion.h1 
-                className="text-xl sm:text-2xl font-bold tracking-[0.25em] text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-cyan-400 to-cyan-300"
+                className="text-lg sm:text-xl font-extrabold tracking-[0.35em] uppercase text-transparent bg-clip-text bg-gradient-to-r from-cyan-200 via-cyan-400 to-teal-300"
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.6 }}
                 style={{
-                  textShadow: '0 0 25px rgba(56,189,248,0.3)',
+                  textShadow: '0 0 20px rgba(56,189,248,0.25)',
+                  fontFamily: "'Inter', system-ui, sans-serif",
+                  letterSpacing: '0.35em',
                 }}
               >
                 NOC RITEL
