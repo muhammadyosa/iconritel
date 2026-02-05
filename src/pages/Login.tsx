@@ -93,63 +93,55 @@ export default function Login() {
           
           {/* Content */}
           <div className="relative space-y-6">
-            {/* Logos - Stacked vertically with hover effects */}
-            <div className="flex flex-col items-center gap-6">
-              {/* PLN Icon Plus Logo */}
-              <motion.div
-                className="relative group cursor-pointer"
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.2 }}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                <div className="absolute -inset-3 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 rounded-xl blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                <img 
-                  src={plnIconPlusLogo} 
-                  alt="PLN Icon Plus" 
-                  className="relative h-14 sm:h-16 w-auto object-contain drop-shadow-[0_0_15px_rgba(56,189,248,0.4)] transition-all duration-300 group-hover:drop-shadow-[0_0_25px_rgba(56,189,248,0.6)]" 
-                />
-              </motion.div>
+            {/* Logos - Side by side */}
+            <div className="flex flex-col items-center gap-5">
+              <div className="flex justify-center items-center gap-4 sm:gap-6">
+                {/* PLN Icon Plus Logo */}
+                <motion.div
+                  className="relative group cursor-pointer"
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.5, delay: 0.2 }}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <div className="absolute -inset-2 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 rounded-lg blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                  <img 
+                    src={plnIconPlusLogo} 
+                    alt="PLN Icon Plus" 
+                    className="relative h-10 sm:h-12 w-auto object-contain drop-shadow-[0_0_12px_rgba(56,189,248,0.4)] transition-all duration-300 group-hover:drop-shadow-[0_0_20px_rgba(56,189,248,0.6)]" 
+                  />
+                </motion.div>
 
-              {/* Decorative connector */}
-              <motion.div 
-                className="flex items-center gap-2"
-                initial={{ opacity: 0, scale: 0 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.4, delay: 0.4 }}
-              >
-                <div className="w-8 h-px bg-gradient-to-r from-transparent to-cyan-400/60" />
+                {/* Vertical Divider */}
                 <motion.div 
-                  className="w-2 h-2 rounded-full bg-cyan-400/80"
-                  animate={{ 
-                    boxShadow: ['0 0 10px rgba(56,189,248,0.5)', '0 0 20px rgba(56,189,248,0.8)', '0 0 10px rgba(56,189,248,0.5)']
-                  }}
-                  transition={{ duration: 2, repeat: Infinity }}
+                  className="h-10 sm:h-12 w-px bg-gradient-to-b from-transparent via-cyan-400/50 to-transparent"
+                  initial={{ opacity: 0, scaleY: 0 }}
+                  animate={{ opacity: 1, scaleY: 1 }}
+                  transition={{ duration: 0.4, delay: 0.4 }}
                 />
-                <div className="w-8 h-px bg-gradient-to-l from-transparent to-cyan-400/60" />
-              </motion.div>
 
-              {/* ICONNET Logo */}
-              <motion.div
-                className="relative group cursor-pointer"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.3 }}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                <div className="absolute -inset-3 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-xl blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                <img 
-                  src={iconnetLogo} 
-                  alt="ICONNET" 
-                  className="relative h-10 sm:h-12 w-auto object-contain drop-shadow-[0_0_15px_rgba(59,130,246,0.4)] transition-all duration-300 group-hover:drop-shadow-[0_0_25px_rgba(59,130,246,0.6)]" 
-                />
-              </motion.div>
+                {/* ICONNET Logo */}
+                <motion.div
+                  className="relative group cursor-pointer"
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.5, delay: 0.2 }}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <div className="absolute -inset-2 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-lg blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                  <img 
+                    src={iconnetLogo} 
+                    alt="ICONNET" 
+                    className="relative h-6 sm:h-7 w-auto object-contain drop-shadow-[0_0_12px_rgba(59,130,246,0.4)] transition-all duration-300 group-hover:drop-shadow-[0_0_20px_rgba(59,130,246,0.6)]" 
+                  />
+                </motion.div>
+              </div>
 
               {/* Title */}
               <motion.div 
-                className="text-center space-y-2"
+                className="text-center space-y-1.5"
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4, delay: 0.5 }}
