@@ -141,7 +141,8 @@ export default function TicketManagement() {
         ticket.constraint.toLowerCase().includes(query) ||
         ticket.serpo.toLowerCase().includes(query) ||
         ticket.status.toLowerCase().includes(query) ||
-        ticket.createdAt.toLowerCase().includes(query)
+        ticket.createdAt.toLowerCase().includes(query) ||
+        (ticket.createdByName || "").toLowerCase().includes(query)
       );
     }
 
@@ -154,6 +155,7 @@ export default function TicketManagement() {
       case "serpo": return ticket.serpo.toLowerCase().includes(query);
       case "status": return ticket.status.toLowerCase().includes(query);
       case "created": return ticket.createdAt.toLowerCase().includes(query);
+      case "createdBy": return (ticket.createdByName || "").toLowerCase().includes(query);
       default: return true;
     }
   });
@@ -771,6 +773,7 @@ export default function TicketManagement() {
                       <SelectItem value="serviceId">Service ID</SelectItem>
                       <SelectItem value="constraint">Constraint</SelectItem>
                       <SelectItem value="serpo">Serpo</SelectItem>
+                      <SelectItem value="createdBy">Created By</SelectItem>
                       <SelectItem value="status">Status</SelectItem>
                       <SelectItem value="created">Created</SelectItem>
                     </SelectContent>
