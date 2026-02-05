@@ -124,6 +124,7 @@ export type Database = {
           service_id: string
           sn_ont: string
           status: string
+          ticket_id: string
           ticket_result: string
         }
         Insert: {
@@ -139,6 +140,7 @@ export type Database = {
           service_id: string
           sn_ont: string
           status?: string
+          ticket_id: string
           ticket_result: string
         }
         Update: {
@@ -154,6 +156,7 @@ export type Database = {
           service_id?: string
           sn_ont?: string
           status?: string
+          ticket_id?: string
           ticket_result?: string
         }
         Relationships: []
