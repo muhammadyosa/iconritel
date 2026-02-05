@@ -7,8 +7,8 @@ import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
 import { ParticleBackground } from "@/components/ParticleBackground";
-import plnIconPlusLogo from "@/assets/pln-icon-plus.png";
-import iconnetLogo from "@/assets/iconnet-logo-full.png";
+import plnIconPlusLogo from "@/assets/pln-icon-plus-new.png";
+import iconnetLogo from "@/assets/iconnet-logo-new.png";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -93,51 +93,66 @@ export default function Login() {
           
           {/* Content */}
           <div className="relative space-y-6">
-            {/* Logos */}
-            <div className="flex flex-col items-center gap-5">
-              <div className="flex justify-center items-center gap-5">
-                <motion.div
-                  className="relative"
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.5, delay: 0.2 }}
-                >
-                  <div className="absolute inset-0 bg-cyan-400/20 blur-xl rounded-full" />
-                  <img 
-                    src={plnIconPlusLogo} 
-                    alt="PLN Icon Plus" 
-                    className="relative h-11 w-auto object-contain drop-shadow-[0_0_10px_rgba(56,189,248,0.3)]" 
-                  />
-                </motion.div>
-                
-                <motion.div 
-                  className="w-px h-10 bg-gradient-to-b from-transparent via-cyan-400/60 to-transparent"
-                  initial={{ opacity: 0, scaleY: 0 }}
-                  animate={{ opacity: 1, scaleY: 1 }}
-                  transition={{ duration: 0.4, delay: 0.4 }}
+            {/* Logos - Stacked vertically with hover effects */}
+            <div className="flex flex-col items-center gap-6">
+              {/* PLN Icon Plus Logo */}
+              <motion.div
+                className="relative group cursor-pointer"
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.2 }}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <div className="absolute -inset-3 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 rounded-xl blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                <img 
+                  src={plnIconPlusLogo} 
+                  alt="PLN Icon Plus" 
+                  className="relative h-14 sm:h-16 w-auto object-contain drop-shadow-[0_0_15px_rgba(56,189,248,0.4)] transition-all duration-300 group-hover:drop-shadow-[0_0_25px_rgba(56,189,248,0.6)]" 
                 />
-                
-                <motion.div
-                  className="relative"
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.5, delay: 0.2 }}
-                >
-                  <div className="absolute inset-0 bg-blue-400/20 blur-xl rounded-full" />
-                  <img 
-                    src={iconnetLogo} 
-                    alt="ICONNET" 
-                    className="relative h-7 w-auto object-contain drop-shadow-[0_0_10px_rgba(59,130,246,0.3)]" 
-                  />
-                </motion.div>
-              </div>
+              </motion.div>
+
+              {/* Decorative connector */}
+              <motion.div 
+                className="flex items-center gap-2"
+                initial={{ opacity: 0, scale: 0 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.4, delay: 0.4 }}
+              >
+                <div className="w-8 h-px bg-gradient-to-r from-transparent to-cyan-400/60" />
+                <motion.div 
+                  className="w-2 h-2 rounded-full bg-cyan-400/80"
+                  animate={{ 
+                    boxShadow: ['0 0 10px rgba(56,189,248,0.5)', '0 0 20px rgba(56,189,248,0.8)', '0 0 10px rgba(56,189,248,0.5)']
+                  }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                />
+                <div className="w-8 h-px bg-gradient-to-l from-transparent to-cyan-400/60" />
+              </motion.div>
+
+              {/* ICONNET Logo */}
+              <motion.div
+                className="relative group cursor-pointer"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.3 }}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <div className="absolute -inset-3 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-xl blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                <img 
+                  src={iconnetLogo} 
+                  alt="ICONNET" 
+                  className="relative h-10 sm:h-12 w-auto object-contain drop-shadow-[0_0_15px_rgba(59,130,246,0.4)] transition-all duration-300 group-hover:drop-shadow-[0_0_25px_rgba(59,130,246,0.6)]" 
+                />
+              </motion.div>
 
               {/* Title */}
               <motion.div 
                 className="text-center space-y-2"
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: 0.3 }}
+                transition={{ duration: 0.4, delay: 0.5 }}
               >
                 <h1 className="text-2xl sm:text-3xl font-bold tracking-tight bg-gradient-to-r from-white via-cyan-100 to-white bg-clip-text text-transparent">
                   NOC RITEL
