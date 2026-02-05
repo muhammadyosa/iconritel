@@ -7,8 +7,7 @@ import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { motion, useMotionValue, useTransform, useSpring } from "framer-motion";
 import { ParticleBackground } from "@/components/ParticleBackground";
-import plnIconPlusLogo from "@/assets/pln-icon-plus-new.png";
-import iconnetLogo from "@/assets/iconnet-logo-new.png";
+import iconnetMascot from "@/assets/iconnet-mascot.png";
 
 // Typing animation component
 const TypingText = ({ text, delay = 0 }: { text: string; delay?: number }) => {
@@ -164,44 +163,22 @@ export default function Login() {
           <div className="relative space-y-6">
             {/* Logos - Side by side with parallax */}
             <div className="flex flex-col items-center gap-6">
-              {/* Combined PLN Icon Plus & ICONNET Logos */}
+              {/* ICONNET Mascot */}
               <motion.div 
-                className="relative flex items-center justify-center gap-6 sm:gap-8"
+                className="relative group cursor-pointer"
                 style={{ transform: "translateZ(40px)" }}
                 initial={{ opacity: 0, y: -20, scale: 0.9 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 transition={{ duration: 0.7, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
+                whileHover={{ scale: 1.08, y: -5, rotate: [0, -3, 3, 0] }}
+                whileTap={{ scale: 0.95 }}
               >
-                {/* PLN Icon Plus Logo */}
-                <motion.div
-                  className="relative group cursor-pointer"
-                  whileHover={{ scale: 1.05, y: -2 }}
-                  whileTap={{ scale: 0.98 }}
-                >
-                  <div className="absolute -inset-3 bg-gradient-to-r from-yellow-500/30 via-cyan-500/30 to-blue-500/30 rounded-xl blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                  <img 
-                    src={plnIconPlusLogo} 
-                    alt="PLN Icon Plus" 
-                    className="relative h-14 sm:h-16 w-auto object-contain drop-shadow-[0_0_15px_rgba(56,189,248,0.4)] transition-all duration-300 group-hover:drop-shadow-[0_0_25px_rgba(56,189,248,0.6)]" 
-                  />
-                </motion.div>
-
-                {/* Divider */}
-                <div className="h-12 sm:h-14 w-px bg-gradient-to-b from-transparent via-cyan-400/50 to-transparent" />
-
-                {/* ICONNET Logo */}
-                <motion.div
-                  className="relative group cursor-pointer"
-                  whileHover={{ scale: 1.05, y: -2 }}
-                  whileTap={{ scale: 0.98 }}
-                >
-                  <div className="absolute -inset-3 bg-gradient-to-r from-cyan-500/30 via-teal-500/30 to-blue-500/30 rounded-xl blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                  <img 
-                    src={iconnetLogo} 
-                    alt="ICONNET" 
-                    className="relative h-14 sm:h-16 w-auto object-contain drop-shadow-[0_0_15px_rgba(56,189,248,0.4)] transition-all duration-300 group-hover:drop-shadow-[0_0_25px_rgba(56,189,248,0.6)]" 
-                  />
-                </motion.div>
+                <div className="absolute -inset-4 bg-gradient-to-r from-cyan-500/40 via-teal-500/40 to-blue-500/40 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                <img 
+                  src={iconnetMascot} 
+                  alt="ICONNET Mascot" 
+                  className="relative h-28 sm:h-36 w-auto object-contain drop-shadow-[0_0_25px_rgba(56,189,248,0.5)] transition-all duration-300 group-hover:drop-shadow-[0_0_40px_rgba(56,189,248,0.7)]" 
+                />
               </motion.div>
 
               {/* NOC RITEL Title with Enhanced Hover Animation */}
