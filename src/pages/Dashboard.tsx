@@ -523,9 +523,9 @@ export default function Dashboard() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.6 }}
         >
-          <Card className="shadow-2xl border-2 bg-gradient-to-br from-primary/5 via-background to-accent/5 border-primary/20 overflow-hidden">
+          <Card className="overflow-hidden">
             {/* Header with Stats Summary */}
-            <CardHeader className="border-b border-primary/10 pb-4 bg-gradient-to-r from-primary/5 to-transparent">
+            <CardHeader className="pb-4">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="flex items-center gap-3">
                   <div className="h-11 w-11 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center shadow-sm">
