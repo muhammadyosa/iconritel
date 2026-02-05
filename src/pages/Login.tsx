@@ -1,19 +1,79 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { lovable } from "@/integrations/lovable/index";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import { motion } from "framer-motion";
+import { motion, useMotionValue, useTransform, useSpring } from "framer-motion";
 import { ParticleBackground } from "@/components/ParticleBackground";
 import plnIconPlusLogo from "@/assets/pln-icon-plus-new.png";
 import iconnetLogo from "@/assets/iconnet-logo-new.png";
+
+// Typing animation component
+const TypingText = ({ text, delay = 0 }: { text: string; delay?: number }) => {
+  const [displayedText, setDisplayedText] = useState("");
+  const [showCursor, setShowCursor] = useState(true);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      let currentIndex = 0;
+      const interval = setInterval(() => {
+        if (currentIndex <= text.length) {
+          setDisplayedText(text.slice(0, currentIndex));
+          currentIndex++;
+        } else {
+          clearInterval(interval);
+          // Hide cursor after typing is complete
+          setTimeout(() => setShowCursor(false), 1000);
+        }
+      }, 120);
+      return () => clearInterval(interval);
+    }, delay);
+    return () => clearTimeout(timeout);
+  }, [text, delay]);
+
+  return (
+    <span className="relative">
+      {displayedText}
+      {showCursor && (
+        <motion.span
+          className="inline-block w-0.5 h-[1em] bg-cyan-400 ml-0.5 align-middle"
+          animate={{ opacity: [1, 0, 1] }}
+          transition={{ duration: 0.8, repeat: Infinity }}
+        />
+      )}
+    </span>
+  );
+};
 
 export default function Login() {
   const navigate = useNavigate();
   const { user, isLoading } = useAuth();
   const [isSigningIn, setIsSigningIn] = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  // Parallax effect
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+
+  const springConfig = { stiffness: 150, damping: 20 };
+  const rotateX = useSpring(useTransform(mouseY, [-0.5, 0.5], [8, -8]), springConfig);
+  const rotateY = useSpring(useTransform(mouseX, [-0.5, 0.5], [-8, 8]), springConfig);
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!cardRef.current) return;
+    const rect = cardRef.current.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / rect.width - 0.5;
+    const y = (e.clientY - rect.top) / rect.height - 0.5;
+    mouseX.set(x);
+    mouseY.set(y);
+  };
+
+  const handleMouseLeave = () => {
+    mouseX.set(0);
+    mouseY.set(0);
+  };
 
   useEffect(() => {
     if (!isLoading && user) {
@@ -76,12 +136,21 @@ export default function Login() {
         <div className="w-[500px] h-[500px] bg-cyan-500/10 rounded-full blur-[100px]" />
       </div>
 
-      {/* Glass Card */}
+      {/* Glass Card with Parallax */}
       <motion.div
+        ref={cardRef}
         className="relative z-10 w-full max-w-sm"
         initial={{ opacity: 0, y: 30, scale: 0.95 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+        style={{
+          rotateX,
+          rotateY,
+          transformStyle: "preserve-3d",
+          perspective: 1000,
+        }}
+        onMouseMove={handleMouseMove}
+        onMouseLeave={handleMouseLeave}
       >
         {/* Card glow border effect */}
         <div className="absolute -inset-[1px] bg-gradient-to-r from-cyan-500/50 via-blue-500/50 to-purple-500/50 rounded-2xl blur-sm opacity-60" />
@@ -93,65 +162,84 @@ export default function Login() {
           
           {/* Content */}
           <div className="relative space-y-6">
-            {/* Logos - Side by side */}
+            {/* Logos - Side by side with parallax */}
             <div className="flex flex-col items-center gap-5">
-              <div className="flex justify-center items-center gap-4 sm:gap-6">
+              <motion.div 
+                className="flex justify-center items-center gap-5 sm:gap-8"
+                style={{ transform: "translateZ(40px)" }}
+              >
                 {/* PLN Icon Plus Logo */}
                 <motion.div
                   className="relative group cursor-pointer"
-                  initial={{ opacity: 0, x: -20 }}
+                  initial={{ opacity: 0, x: -30 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.5, delay: 0.2 }}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.98 }}
+                  transition={{ duration: 0.6, delay: 0.2 }}
+                  whileHover={{ scale: 1.08, y: -2 }}
+                  whileTap={{ scale: 0.95 }}
                 >
-                  <div className="absolute -inset-2 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 rounded-lg blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                  <div className="absolute -inset-3 bg-gradient-to-r from-cyan-500/30 to-blue-500/30 rounded-xl blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                   <img 
                     src={plnIconPlusLogo} 
                     alt="PLN Icon Plus" 
-                    className="relative h-10 sm:h-12 w-auto object-contain drop-shadow-[0_0_12px_rgba(56,189,248,0.4)] transition-all duration-300 group-hover:drop-shadow-[0_0_20px_rgba(56,189,248,0.6)]" 
+                    className="relative h-14 sm:h-16 w-auto object-contain drop-shadow-[0_0_15px_rgba(56,189,248,0.5)] transition-all duration-300 group-hover:drop-shadow-[0_0_25px_rgba(56,189,248,0.7)]" 
                   />
                 </motion.div>
 
-                {/* Vertical Divider */}
+                {/* Animated Vertical Divider */}
                 <motion.div 
-                  className="h-10 sm:h-12 w-px bg-gradient-to-b from-transparent via-cyan-400/50 to-transparent"
+                  className="relative h-14 sm:h-16 flex items-center"
                   initial={{ opacity: 0, scaleY: 0 }}
                   animate={{ opacity: 1, scaleY: 1 }}
-                  transition={{ duration: 0.4, delay: 0.4 }}
-                />
+                  transition={{ duration: 0.5, delay: 0.4 }}
+                >
+                  <div className="w-px h-full bg-gradient-to-b from-transparent via-cyan-400/60 to-transparent" />
+                  <motion.div 
+                    className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-cyan-400"
+                    animate={{ 
+                      boxShadow: ['0 0 8px rgba(56,189,248,0.6)', '0 0 16px rgba(56,189,248,0.9)', '0 0 8px rgba(56,189,248,0.6)'],
+                      scale: [1, 1.2, 1]
+                    }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                  />
+                </motion.div>
 
                 {/* ICONNET Logo */}
                 <motion.div
                   className="relative group cursor-pointer"
-                  initial={{ opacity: 0, x: 20 }}
+                  initial={{ opacity: 0, x: 30 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.5, delay: 0.2 }}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.98 }}
+                  transition={{ duration: 0.6, delay: 0.2 }}
+                  whileHover={{ scale: 1.08, y: -2 }}
+                  whileTap={{ scale: 0.95 }}
                 >
-                  <div className="absolute -inset-2 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-lg blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                  <div className="absolute -inset-3 bg-gradient-to-r from-blue-500/30 to-purple-500/30 rounded-xl blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                   <img 
                     src={iconnetLogo} 
                     alt="ICONNET" 
-                    className="relative h-6 sm:h-7 w-auto object-contain drop-shadow-[0_0_12px_rgba(59,130,246,0.4)] transition-all duration-300 group-hover:drop-shadow-[0_0_20px_rgba(59,130,246,0.6)]" 
+                    className="relative h-10 sm:h-12 w-auto object-contain drop-shadow-[0_0_15px_rgba(59,130,246,0.5)] transition-all duration-300 group-hover:drop-shadow-[0_0_25px_rgba(59,130,246,0.7)]" 
                   />
                 </motion.div>
-              </div>
+              </motion.div>
 
-              {/* Title */}
+              {/* Title with Typing Animation */}
               <motion.div 
                 className="text-center space-y-1.5"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: 0.5 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.4, delay: 0.6 }}
+                style={{ transform: "translateZ(20px)" }}
               >
                 <h1 className="text-2xl sm:text-3xl font-bold tracking-tight bg-gradient-to-r from-white via-cyan-100 to-white bg-clip-text text-transparent">
-                  NOC RITEL
+                  <TypingText text="NOC RITEL" delay={800} />
                 </h1>
-                <p className="text-sm text-slate-400">
+                <motion.p 
+                  className="text-sm text-slate-400"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 2 }}
+                >
                   Masuk untuk mengakses dashboard
-                </p>
+                </motion.p>
               </motion.div>
             </div>
 
@@ -160,10 +248,14 @@ export default function Login() {
               className="flex items-center gap-3"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ delay: 0.5 }}
+              transition={{ delay: 2.2 }}
             >
               <div className="flex-1 h-px bg-gradient-to-r from-transparent via-slate-600 to-transparent" />
-              <div className="w-1.5 h-1.5 rounded-full bg-cyan-400/60" />
+              <motion.div 
+                className="w-1.5 h-1.5 rounded-full bg-cyan-400/60"
+                animate={{ scale: [1, 1.3, 1], opacity: [0.6, 1, 0.6] }}
+                transition={{ duration: 2, repeat: Infinity }}
+              />
               <div className="flex-1 h-px bg-gradient-to-r from-transparent via-slate-600 to-transparent" />
             </motion.div>
 
@@ -171,7 +263,7 @@ export default function Login() {
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: 0.5 }}
+              transition={{ duration: 0.4, delay: 2.3 }}
             >
               <Button 
                 onClick={handleGoogleSignIn}
@@ -209,7 +301,7 @@ export default function Login() {
               className="flex justify-center gap-1.5 pt-2"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ delay: 0.7 }}
+              transition={{ delay: 2.5 }}
             >
               {[...Array(5)].map((_, i) => (
                 <motion.div
