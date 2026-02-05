@@ -81,17 +81,17 @@ export default function Login() {
       
       <Card className="w-full max-w-sm shadow-2xl border-border/40 backdrop-blur-lg bg-card/90 relative z-10">
         <CardHeader className="text-center space-y-4 pb-2">
-          <div className="flex justify-center items-center gap-3 sm:gap-4">
+          <div className="flex justify-center items-center gap-6 sm:gap-8">
             <img 
               src={plnIconPlusLogo} 
               alt="PLN Icon Plus" 
-              className="h-12 sm:h-14 w-auto object-contain" 
+              className="h-10 sm:h-12 w-auto object-contain" 
             />
-            <div className="w-px h-10 sm:h-12 bg-border/60" />
+            <div className="w-px h-8 sm:h-10 bg-border/40" />
             <img 
               src={iconnetLogo} 
               alt="ICONNET" 
-              className="h-10 sm:h-12 w-auto object-contain" 
+              className="h-7 sm:h-8 w-auto object-contain" 
             />
           </div>
           <div className="space-y-1">
