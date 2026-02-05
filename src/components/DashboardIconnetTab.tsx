@@ -4,8 +4,28 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Copy, Trash2 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+
+const SHIFT_OPTIONS = [
+  { value: "07.00", label: "07.00" },
+  { value: "15.00", label: "15.00" },
+  { value: "22.00", label: "22.00" },
+];
+
+const HARI_OPTIONS = [
+  { value: "1", label: "1 Hari" },
+  { value: "2", label: "2 Hari" },
+  { value: "3", label: "3 Hari" },
+  { value: "4", label: "4 Hari" },
+];
 
 interface DashboardData {
   // Resume All
@@ -31,18 +51,19 @@ interface DashboardData {
   lampungGangguan: string;
 }
 
-const getDefaultDate = () => {
-  const today = new Date();
-  const day = today.getDate();
-  const month = today.getMonth() + 1;
-  const year = today.getFullYear();
-  return `${day}/${month.toString().padStart(2, '0')}/${year}`;
+const formatDateForDisplay = (dateString: string) => {
+  if (!dateString) return "-";
+  const date = new Date(dateString);
+  const day = date.getDate();
+  const month = (date.getMonth() + 1).toString().padStart(2, '0');
+  const year = date.getFullYear();
+  return `${day}/${month}/${year}`;
 };
 
 export function DashboardIconnetTab() {
   const [data, setData] = useState<DashboardData>({
     resumeAllTime: "15.00",
-    resumeAllDate: getDefaultDate(),
+    resumeAllDate: new Date().toISOString().split("T")[0],
     sumselAll: "",
     bangkaBelitungAll: "",
     bengkuluAll: "",
@@ -53,7 +74,7 @@ export function DashboardIconnetTab() {
     totalTiket: "",
     resumeGangguanTime: "15.00",
     retailSbsHari: "",
-    resumeGangguanDate: getDefaultDate(),
+    resumeGangguanDate: new Date().toISOString().split("T")[0],
     totalGangguan: "",
     sumselGangguan: "",
     bangkaBelitungGangguan: "",
@@ -68,9 +89,10 @@ export function DashboardIconnetTab() {
 
   const generateOutput = () => {
     const formatValue = (val: string) => val.trim() || "-";
+    const hariLabel = data.retailSbsHari ? HARI_OPTIONS.find(o => o.value === data.retailSbsHari)?.label.replace(" Hari", "") || "-" : "-";
     
     return `Resume All pukul ${formatValue(data.resumeAllTime)}
-Gangguan Retail SBS Tanggal ${formatValue(data.resumeAllDate)}
+Gangguan Retail SBS Tanggal ${formatDateForDisplay(data.resumeAllDate)}
 
 Dengan Penyebaran :
 * Sumsel = ${formatValue(data.sumselAll)}
@@ -85,8 +107,8 @@ Total Tiket = ${formatValue(data.totalTiket)}
 
 =================================
 Resume Gangguan Pukul ${formatValue(data.resumeGangguanTime)}
-Retail SBS = ${formatValue(data.retailSbsHari)} hari
-Gangguan Retail SBS Tanggal ${formatValue(data.resumeGangguanDate)}
+Retail SBS = ${hariLabel} hari
+Gangguan Retail SBS Tanggal ${formatDateForDisplay(data.resumeGangguanDate)}
 Total gangguan = ${formatValue(data.totalGangguan)}
 
 Dengan Penyebaran : 
@@ -116,7 +138,7 @@ Dengan Penyebaran :
   const handleClear = () => {
     setData({
       resumeAllTime: "15.00",
-      resumeAllDate: getDefaultDate(),
+      resumeAllDate: new Date().toISOString().split("T")[0],
       sumselAll: "",
       bangkaBelitungAll: "",
       bengkuluAll: "",
@@ -127,7 +149,7 @@ Dengan Penyebaran :
       totalTiket: "",
       resumeGangguanTime: "15.00",
       retailSbsHari: "",
-      resumeGangguanDate: getDefaultDate(),
+      resumeGangguanDate: new Date().toISOString().split("T")[0],
       totalGangguan: "",
       sumselGangguan: "",
       bangkaBelitungGangguan: "",
@@ -163,18 +185,27 @@ Dengan Penyebaran :
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="resumeAllTime">Pukul</Label>
-              <Input
-                id="resumeAllTime"
-                placeholder="15.00"
+              <Select
                 value={data.resumeAllTime}
-                onChange={(e) => updateField("resumeAllTime", e.target.value)}
-              />
+                onValueChange={(value) => updateField("resumeAllTime", value)}
+              >
+                <SelectTrigger id="resumeAllTime">
+                  <SelectValue placeholder="Pilih waktu" />
+                </SelectTrigger>
+                <SelectContent>
+                  {SHIFT_OPTIONS.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="resumeAllDate">Tanggal (D/MM/YYYY)</Label>
+              <Label htmlFor="resumeAllDate">Tanggal</Label>
               <Input
                 id="resumeAllDate"
-                placeholder="4/02/2026"
+                type="date"
                 value={data.resumeAllDate}
                 onChange={(e) => updateField("resumeAllDate", e.target.value)}
               />
@@ -275,27 +306,45 @@ Dengan Penyebaran :
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="space-y-2">
               <Label htmlFor="resumeGangguanTime">Pukul</Label>
-              <Input
-                id="resumeGangguanTime"
-                placeholder="15.00"
+              <Select
                 value={data.resumeGangguanTime}
-                onChange={(e) => updateField("resumeGangguanTime", e.target.value)}
-              />
+                onValueChange={(value) => updateField("resumeGangguanTime", value)}
+              >
+                <SelectTrigger id="resumeGangguanTime">
+                  <SelectValue placeholder="Pilih waktu" />
+                </SelectTrigger>
+                <SelectContent>
+                  {SHIFT_OPTIONS.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div className="space-y-2">
               <Label htmlFor="retailSbsHari">Retail SBS (hari)</Label>
-              <Input
-                id="retailSbsHari"
-                placeholder="-"
+              <Select
                 value={data.retailSbsHari}
-                onChange={(e) => updateField("retailSbsHari", e.target.value)}
-              />
+                onValueChange={(value) => updateField("retailSbsHari", value)}
+              >
+                <SelectTrigger id="retailSbsHari">
+                  <SelectValue placeholder="Pilih hari" />
+                </SelectTrigger>
+                <SelectContent>
+                  {HARI_OPTIONS.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="resumeGangguanDate">Tanggal (D/MM/YYYY)</Label>
+              <Label htmlFor="resumeGangguanDate">Tanggal</Label>
               <Input
                 id="resumeGangguanDate"
-                placeholder="4/02/2026"
+                type="date"
                 value={data.resumeGangguanDate}
                 onChange={(e) => updateField("resumeGangguanDate", e.target.value)}
               />
