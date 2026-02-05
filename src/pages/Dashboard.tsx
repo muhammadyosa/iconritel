@@ -516,51 +516,84 @@ export default function Dashboard() {
         </motion.div>
       </div>
 
-      {/* Shift Reports Section */}
+      {/* Shift Reports Section - Enhanced Layout */}
       {shiftReports.length > 0 && (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.6 }}
         >
-          <Card className="shadow-2xl border-2 bg-gradient-to-br from-primary/5 via-background to-accent/5 border-primary/20">
-            <CardHeader className="border-b border-primary/10 pb-3">
-              <CardTitle className="flex items-center justify-between">
+          <Card className="shadow-2xl border-2 bg-gradient-to-br from-primary/5 via-background to-accent/5 border-primary/20 overflow-hidden">
+            {/* Header with Stats Summary */}
+            <CardHeader className="border-b border-primary/10 pb-4 bg-gradient-to-r from-primary/5 to-transparent">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="flex items-center gap-3">
-                  <div className="h-9 w-9 rounded-xl bg-primary/10 flex items-center justify-center">
-                    <FileText className="h-4 w-4 text-primary" />
+                  <div className="h-11 w-11 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center shadow-sm">
+                    <FileText className="h-5 w-5 text-primary" />
                   </div>
                   <div>
-                    <span className="text-base font-bold">📋 Laporan Shift</span>
-                    <p className="text-[10px] text-muted-foreground font-normal mt-0.5">
-                      {shiftReports.length} laporan • {getHistoryRecords().length} hari tercatat
+                    <h3 className="text-lg font-bold flex items-center gap-2">
+                      📋 Laporan Shift
+                    </h3>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      Rekap aktivitas shift harian tim NOC
                     </p>
                   </div>
                 </div>
-                <Button variant="ghost" size="icon" onClick={fetchShiftReports} disabled={isLoadingShiftReports} title="Refresh data">
-                  {isLoadingShiftReports ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <RefreshCw className="h-4 w-4" />
-                  )}
-                </Button>
-              </CardTitle>
+                
+                {/* Quick Stats */}
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-primary/10 border border-primary/20">
+                    <FileText className="h-3.5 w-3.5 text-primary" />
+                    <span className="text-xs font-semibold text-primary">{shiftReports.length}</span>
+                    <span className="text-[10px] text-muted-foreground">Laporan</span>
+                  </div>
+                  <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-accent/10 border border-accent/20">
+                    <Calendar className="h-3.5 w-3.5 text-accent" />
+                    <span className="text-xs font-semibold text-accent-foreground">{getHistoryRecords().length}</span>
+                    <span className="text-[10px] text-muted-foreground">Hari</span>
+                  </div>
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    onClick={fetchShiftReports} 
+                    disabled={isLoadingShiftReports} 
+                    title="Refresh data"
+                    className="h-9 w-9"
+                  >
+                    {isLoadingShiftReports ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <RefreshCw className="h-4 w-4" />
+                    )}
+                  </Button>
+                </div>
+              </div>
             </CardHeader>
-            <CardContent className="pt-3 pb-4">
+            
+            <CardContent className="pt-4 pb-5">
               <Tabs value={shiftReportTab} onValueChange={(v) => { setShiftReportTab(v); setSelectedHistoryDate(null); }} className="w-full">
-                <TabsList className="grid w-full max-w-xs grid-cols-2 mb-3 h-8">
-                  <TabsTrigger value="latest" className="flex items-center gap-1.5 text-xs h-7">
-                    <FileText className="h-3.5 w-3.5" />
-                    Terbaru
-                  </TabsTrigger>
-                  <TabsTrigger value="history" className="flex items-center gap-1.5 text-xs h-7">
-                    <History className="h-3.5 w-3.5" />
-                    History
-                  </TabsTrigger>
-                </TabsList>
+                <div className="flex items-center justify-between mb-4">
+                  <TabsList className="grid w-full max-w-[240px] grid-cols-2 h-9 bg-muted/50">
+                    <TabsTrigger value="latest" className="flex items-center gap-2 text-xs h-8 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                      <Zap className="h-3.5 w-3.5" />
+                      Terbaru
+                    </TabsTrigger>
+                    <TabsTrigger value="history" className="flex items-center gap-2 text-xs h-8 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                      <History className="h-3.5 w-3.5" />
+                      Riwayat
+                    </TabsTrigger>
+                  </TabsList>
+                  
+                  {shiftReportTab === "latest" && (
+                    <p className="text-[10px] text-muted-foreground hidden sm:block">
+                      Menampilkan 6 laporan terakhir
+                    </p>
+                  )}
+                </div>
                 
                 <TabsContent value="latest" className="mt-0">
-                  <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                  <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
                     {shiftReports.slice(-6).reverse().map((report, index) => (
                       <ShiftReportCard
                         key={report.id}
@@ -577,68 +610,110 @@ export default function Dashboard() {
 
                 <TabsContent value="history" className="mt-0">
                   {!selectedHistoryDate ? (
-                    <div className="grid gap-2 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                      {getHistoryRecords().map((record, idx) => (
-                        <motion.div
-                          key={record.date}
-                          initial={{ opacity: 0, scale: 0.95 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          transition={{ duration: 0.2, delay: idx * 0.03 }}
-                          className="group relative rounded-lg bg-card border border-border/60 shadow-sm hover:shadow-md hover:border-primary/40 cursor-pointer p-3 transition-all duration-200"
-                          onClick={() => setSelectedHistoryDate(record.date)}
-                        >
-                          <div className="flex items-center justify-between gap-2">
-                            <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                              <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                                <Calendar className="h-4 w-4 text-primary" />
-                              </div>
-                              <div className="min-w-0">
-                                <p className="text-xs font-semibold text-foreground truncate">
-                                  {new Date(record.date).toLocaleDateString("id-ID", { 
-                                    weekday: 'short', 
-                                    day: 'numeric',
-                                    month: 'short'
-                                  })}
-                                </p>
-                                <div className="flex items-center gap-1.5 mt-0.5">
-                                  <span className="text-[10px] px-1.5 py-0.5 bg-primary/10 text-primary rounded font-medium">
-                                    {record.reportCount} laporan
+                    <div className="space-y-4">
+                      {/* Timeline-style history */}
+                      <div className="grid gap-2 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                        {getHistoryRecords().map((record, idx) => {
+                          // Calculate shift summary
+                          const shiftSummary = record.shifts.reduce((acc, s) => {
+                            acc[s.shift] = (acc[s.shift] || 0) + 1;
+                            return acc;
+                          }, {} as Record<string, number>);
+                          
+                          return (
+                            <motion.div
+                              key={record.date}
+                              initial={{ opacity: 0, y: 10 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{ duration: 0.2, delay: idx * 0.03 }}
+                              className="group relative rounded-xl bg-card border border-border/60 shadow-sm hover:shadow-lg hover:border-primary/40 cursor-pointer transition-all duration-200 overflow-hidden"
+                              onClick={() => setSelectedHistoryDate(record.date)}
+                            >
+                              {/* Date Header */}
+                              <div className="bg-gradient-to-r from-primary/10 to-transparent px-3 py-2 border-b border-border/50">
+                                <div className="flex items-center justify-between">
+                                  <div className="flex items-center gap-2">
+                                    <Calendar className="h-4 w-4 text-primary" />
+                                    <span className="text-sm font-semibold text-foreground">
+                                      {new Date(record.date).toLocaleDateString("id-ID", { 
+                                        weekday: 'short', 
+                                        day: 'numeric',
+                                        month: 'short'
+                                      })}
+                                    </span>
+                                  </div>
+                                  <span className="text-xs font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full">
+                                    {record.reportCount}
                                   </span>
                                 </div>
                               </div>
-                            </div>
-                            <div className="flex flex-wrap gap-1 justify-end max-w-[80px]">
-                              {record.shifts.slice(0, 3).map((shift, idx) => (
-                                <span
-                                  key={idx}
-                                  className="text-[9px] px-1.5 py-0.5 bg-accent/10 text-accent-foreground rounded"
-                                >
-                                  S{shift.shift}
-                                </span>
-                              ))}
-                            </div>
+                              
+                              {/* Shift Badges */}
+                              <div className="p-3">
+                                <div className="flex flex-wrap gap-1.5">
+                                  {shiftSummary['pagi'] && (
+                                    <span className="text-[10px] px-2 py-1 bg-warning/15 text-warning border border-warning/30 rounded-md font-medium flex items-center gap-1">
+                                      🌅 Pagi
+                                      {shiftSummary['pagi'] > 1 && <span className="text-[9px] opacity-75">×{shiftSummary['pagi']}</span>}
+                                    </span>
+                                  )}
+                                  {shiftSummary['siang'] && (
+                                    <span className="text-[10px] px-2 py-1 bg-primary/15 text-primary border border-primary/30 rounded-md font-medium flex items-center gap-1">
+                                      ☀️ Siang
+                                      {shiftSummary['siang'] > 1 && <span className="text-[9px] opacity-75">×{shiftSummary['siang']}</span>}
+                                    </span>
+                                  )}
+                                  {shiftSummary['malam'] && (
+                                    <span className="text-[10px] px-2 py-1 bg-accent/15 text-accent-foreground border border-accent/30 rounded-md font-medium flex items-center gap-1">
+                                      🌙 Malam
+                                      {shiftSummary['malam'] > 1 && <span className="text-[9px] opacity-75">×{shiftSummary['malam']}</span>}
+                                    </span>
+                                  )}
+                                </div>
+                                <p className="text-[10px] text-muted-foreground mt-2 group-hover:text-primary transition-colors flex items-center gap-1">
+                                  <ExternalLink className="h-3 w-3" />
+                                  Klik untuk detail
+                                </p>
+                              </div>
+                            </motion.div>
+                          );
+                        })}
+                        {getHistoryRecords().length === 0 && (
+                          <div className="col-span-full text-center py-10 text-muted-foreground bg-muted/30 rounded-xl border border-dashed">
+                            <History className="h-12 w-12 mx-auto mb-3 opacity-40" />
+                            <p className="text-sm font-medium">Belum ada riwayat</p>
+                            <p className="text-xs opacity-70 mt-1">Laporan akan muncul setelah disimpan</p>
                           </div>
-                        </motion.div>
-                      ))}
-                      {getHistoryRecords().length === 0 && (
-                        <div className="col-span-full text-center py-8 text-muted-foreground">
-                          <History className="h-10 w-10 mx-auto mb-2 opacity-50" />
-                          <p className="text-xs">Belum ada history</p>
-                        </div>
-                      )}
+                        )}
+                      </div>
                     </div>
                   ) : (
-                    <div className="space-y-3">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setSelectedHistoryDate(null)}
-                        className="h-7 text-xs"
-                      >
-                        ← Kembali
-                      </Button>
+                    <div className="space-y-4">
+                      {/* Back button with date info */}
+                      <div className="flex items-center justify-between">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setSelectedHistoryDate(null)}
+                          className="h-8 text-xs gap-2"
+                        >
+                          <span>←</span>
+                          Kembali ke Riwayat
+                        </Button>
+                        <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-primary/10">
+                          <Calendar className="h-3.5 w-3.5 text-primary" />
+                          <span className="text-xs font-semibold text-primary">
+                            {new Date(selectedHistoryDate).toLocaleDateString("id-ID", { 
+                              weekday: 'long', 
+                              day: 'numeric',
+                              month: 'long',
+                              year: 'numeric'
+                            })}
+                          </span>
+                        </div>
+                      </div>
                       
-                      <div className="grid gap-2 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+                      <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
                         {getReportsForDate(selectedHistoryDate).map((report, index) => (
                           <ShiftReportCard
                             key={report.id}
