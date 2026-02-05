@@ -88,8 +88,8 @@ export default function Login() {
         <img 
           src={indonesiaMap} 
           alt="" 
-          className="w-[90%] max-w-[1400px] h-auto object-contain opacity-[0.08]"
-          style={{ filter: 'brightness(0.6) saturate(0.8)' }}
+          className="w-[90%] max-w-[1400px] h-auto object-contain opacity-[0.12]"
+          style={{ filter: 'brightness(0.7) saturate(0.9)' }}
         />
       </div>
 
@@ -146,15 +146,15 @@ export default function Login() {
         onMouseLeave={handleMouseLeave}
       >
         {/* Card glow border effect */}
-        <div className="absolute -inset-[1px] bg-gradient-to-b from-cyan-500/25 via-transparent to-cyan-500/15 rounded-2xl blur-[2px] opacity-60" />
+        <div className="absolute -inset-[1px] bg-gradient-to-b from-cyan-500/20 via-transparent to-cyan-500/10 rounded-xl blur-[1px] opacity-50" />
         
         {/* Main card */}
-        <div className="relative bg-[#0d1f38]/50 backdrop-blur-xl border border-cyan-500/15 rounded-2xl p-6 shadow-2xl">
+        <div className="relative bg-[#0a1525]/40 backdrop-blur-xl border border-cyan-500/10 rounded-xl p-5 shadow-2xl">
           {/* Inner glow */}
           <div className="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent rounded-2xl pointer-events-none" />
           
           {/* Content */}
-          <div className="relative space-y-5">
+          <div className="relative space-y-4">
             {/* ICONNET Mascot */}
             <div className="flex justify-center">
               <motion.div 
@@ -170,7 +170,7 @@ export default function Login() {
                 <img 
                   src={iconnetMascot} 
                   alt="ICONNET Mascot" 
-                  className="relative h-20 sm:h-24 w-auto object-contain drop-shadow-[0_0_20px_rgba(56,189,248,0.4)] transition-all duration-300 group-hover:drop-shadow-[0_0_35px_rgba(56,189,248,0.6)]" 
+                  className="relative h-16 sm:h-20 w-auto object-contain drop-shadow-[0_0_15px_rgba(56,189,248,0.4)] transition-all duration-300 group-hover:drop-shadow-[0_0_30px_rgba(56,189,248,0.6)]" 
                 />
               </motion.div>
             </div>
@@ -184,19 +184,19 @@ export default function Login() {
               style={{ transform: "translateZ(30px)" }}
             >
               <motion.h1 
-                className="text-2xl sm:text-3xl font-bold tracking-[0.3em] text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-cyan-400 to-cyan-300"
+                className="text-xl sm:text-2xl font-bold tracking-[0.25em] text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-cyan-400 to-cyan-300"
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.6 }}
                 style={{
-                  textShadow: '0 0 30px rgba(56,189,248,0.4)',
+                  textShadow: '0 0 25px rgba(56,189,248,0.3)',
                 }}
               >
                 NOC RITEL
               </motion.h1>
               
               <motion.p 
-                className="text-sm text-slate-400"
+                className="text-xs text-slate-400"
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.8, duration: 0.5 }}
@@ -228,7 +228,7 @@ export default function Login() {
               <Button 
                 onClick={handleGoogleSignIn}
                 disabled={isSigningIn}
-                className="w-full h-12 text-sm font-medium gap-3 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 border-0 text-white shadow-lg shadow-cyan-500/25 transition-all duration-300 hover:shadow-cyan-500/40 hover:scale-[1.02] active:scale-[0.98] rounded-lg"
+                className="w-full h-10 text-xs font-medium gap-2 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 border-0 text-white shadow-lg shadow-cyan-500/20 transition-all duration-300 hover:shadow-cyan-500/35 hover:scale-[1.02] active:scale-[0.98] rounded-lg"
               >
                 {isSigningIn ? (
                   <Loader2 className="h-5 w-5 animate-spin" />
