@@ -7,8 +7,7 @@ import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { motion, useMotionValue, useTransform, useSpring } from "framer-motion";
 import { ParticleBackground } from "@/components/ParticleBackground";
-import plnIconPlusLogo from "@/assets/pln-icon-plus-new.png";
-import iconnetLogo from "@/assets/iconnet-logo-new.png";
+import plnIconnetLogo from "@/assets/pln-iconnet-logo.png";
 
 // Typing animation component
 const TypingText = ({ text, delay = 0 }: { text: string; delay?: number }) => {
@@ -164,43 +163,23 @@ export default function Login() {
           <div className="relative space-y-6">
             {/* Logos - Side by side with parallax */}
             <div className="flex flex-col items-center gap-6">
+              {/* Combined PLN Icon Plus & ICONNET Logo */}
               <motion.div 
-                className="flex justify-center items-center gap-6 sm:gap-8"
+                className="relative group cursor-pointer flex items-center justify-center"
                 style={{ transform: "translateZ(40px)" }}
+                initial={{ opacity: 0, y: -20, scale: 0.9 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                transition={{ duration: 0.7, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
+                whileHover={{ scale: 1.05, y: -3 }}
+                whileTap={{ scale: 0.98 }}
               >
-                {/* PLN Icon Plus Logo */}
-                <motion.div
-                  className="relative group cursor-pointer flex items-center justify-center"
-                  initial={{ opacity: 0, x: -30, rotateY: -15 }}
-                  animate={{ opacity: 1, x: 0, rotateY: 0 }}
-                  transition={{ duration: 0.7, delay: 0.2 }}
-                  whileHover={{ scale: 1.08, y: -3 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <div className="absolute -inset-3 bg-gradient-to-r from-cyan-500/40 to-blue-500/40 rounded-xl blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                  <img 
-                    src={plnIconPlusLogo} 
-                    alt="PLN Icon Plus" 
-                    className="relative h-12 sm:h-14 w-auto max-w-[120px] sm:max-w-[140px] object-contain drop-shadow-[0_0_15px_rgba(56,189,248,0.5)] transition-all duration-300 group-hover:drop-shadow-[0_0_25px_rgba(56,189,248,0.7)]" 
-                  />
-                </motion.div>
-
-                {/* ICONNET Logo */}
-                <motion.div
-                  className="relative group cursor-pointer flex items-center justify-center"
-                  initial={{ opacity: 0, x: 30, rotateY: 15 }}
-                  animate={{ opacity: 1, x: 0, rotateY: 0 }}
-                  transition={{ duration: 0.7, delay: 0.2 }}
-                  whileHover={{ scale: 1.08, y: -3 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <div className="absolute -inset-3 bg-gradient-to-r from-blue-500/40 to-teal-500/40 rounded-xl blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                  <img 
-                    src={iconnetLogo} 
-                    alt="ICONNET" 
-                    className="relative h-12 sm:h-14 w-auto max-w-[120px] sm:max-w-[140px] object-contain drop-shadow-[0_0_15px_rgba(59,130,246,0.5)] transition-all duration-300 group-hover:drop-shadow-[0_0_25px_rgba(59,130,246,0.7)]" 
-                  />
-                </motion.div>
+                <div className="absolute -inset-4 bg-gradient-to-r from-cyan-500/30 via-blue-500/30 to-teal-500/30 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                <img 
+                  src={plnIconnetLogo} 
+                  alt="PLN Icon Plus & ICONNET" 
+                  className="relative h-20 sm:h-24 w-auto max-w-[320px] sm:max-w-[380px] object-contain drop-shadow-[0_0_20px_rgba(56,189,248,0.4)] transition-all duration-300 group-hover:drop-shadow-[0_0_30px_rgba(56,189,248,0.6)]" 
+                  style={{ filter: 'brightness(1.05)' }}
+                />
               </motion.div>
 
               {/* NOC RITEL Title with Enhanced Hover Animation */}
