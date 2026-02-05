@@ -3,13 +3,12 @@ import { useNavigate } from "react-router-dom";
 import { lovable } from "@/integrations/lovable/index";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
+import { ParticleBackground } from "@/components/ParticleBackground";
 import plnIconPlusLogo from "@/assets/pln-icon-plus.png";
 import iconnetLogo from "@/assets/iconnet-logo-full.png";
-import indonesiaMap from "@/assets/indonesia-map.png";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -17,9 +16,7 @@ export default function Login() {
   const [isSigningIn, setIsSigningIn] = useState(false);
 
   useEffect(() => {
-    // Check if user is authenticated and redirect to dashboard
     if (!isLoading && user) {
-      // Use a small delay to ensure session is fully established
       const timer = setTimeout(() => {
         navigate("/", { replace: true });
       }, 100);
@@ -34,10 +31,7 @@ export default function Login() {
         redirect_uri: window.location.origin,
       });
 
-      // If redirected, the page will reload, no need to handle further
-      if (result.redirected) {
-        return;
-      }
+      if (result.redirected) return;
 
       if (result.error) {
         console.error("OAuth error:", result.error);
@@ -46,7 +40,6 @@ export default function Login() {
         return;
       }
 
-      // If we get here, OAuth was successful, navigate to dashboard
       navigate("/", { replace: true });
     } catch (error) {
       console.error("Sign in error:", error);
@@ -57,104 +50,182 @@ export default function Login() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <div className="min-h-screen flex items-center justify-center bg-slate-950">
+        <Loader2 className="h-8 w-8 animate-spin text-cyan-400" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden bg-background">
-      {/* Soft gradient base */}
-      <div className="absolute inset-0 bg-gradient-to-b from-primary/[0.03] via-transparent to-primary/[0.02]" />
+    <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
+      {/* Grid pattern overlay */}
+      <div 
+        className="absolute inset-0 opacity-[0.03]"
+        style={{
+          backgroundImage: `linear-gradient(rgba(56, 189, 248, 0.3) 1px, transparent 1px),
+                           linear-gradient(90deg, rgba(56, 189, 248, 0.3) 1px, transparent 1px)`,
+          backgroundSize: "50px 50px",
+        }}
+      />
       
-      {/* Background Map - full screen cover */}
-      <div className="absolute inset-0">
-        <img 
-          src={indonesiaMap} 
-          alt="" 
-          className="w-full h-full object-cover opacity-[0.12] dark:opacity-[0.06] select-none pointer-events-none"
-        />
+      {/* Particle Background */}
+      <ParticleBackground />
+
+      {/* Radial glow behind card */}
+      <div className="absolute inset-0 flex items-center justify-center pointer-events-none" style={{ zIndex: 2 }}>
+        <div className="w-[500px] h-[500px] bg-cyan-500/10 rounded-full blur-[100px]" />
       </div>
-      
-      {/* Radial fade for card focus */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,transparent_30%,hsl(var(--background)/0.6)_60%,hsl(var(--background))_100%)]" />
-      
-      <Card className="w-full max-w-sm shadow-2xl border-border/40 backdrop-blur-lg bg-card/90 relative z-10">
-        <CardHeader className="text-center space-y-5 pb-2">
-          <div className="flex flex-col items-center gap-4">
-            <div className="flex justify-center items-center gap-5 sm:gap-6">
-              <motion.img 
-                src={plnIconPlusLogo} 
-                alt="PLN Icon Plus" 
-                className="h-10 sm:h-11 w-auto object-contain"
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.5, ease: "easeOut" }}
-              />
+
+      {/* Glass Card */}
+      <motion.div
+        className="relative z-10 w-full max-w-sm"
+        initial={{ opacity: 0, y: 30, scale: 0.95 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+      >
+        {/* Card glow border effect */}
+        <div className="absolute -inset-[1px] bg-gradient-to-r from-cyan-500/50 via-blue-500/50 to-purple-500/50 rounded-2xl blur-sm opacity-60" />
+        
+        {/* Main card */}
+        <div className="relative bg-slate-900/70 backdrop-blur-xl border border-white/10 rounded-2xl p-8 shadow-2xl">
+          {/* Inner glow */}
+          <div className="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent rounded-2xl pointer-events-none" />
+          
+          {/* Content */}
+          <div className="relative space-y-6">
+            {/* Logos */}
+            <div className="flex flex-col items-center gap-5">
+              <div className="flex justify-center items-center gap-5">
+                <motion.div
+                  className="relative"
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.5, delay: 0.2 }}
+                >
+                  <div className="absolute inset-0 bg-cyan-400/20 blur-xl rounded-full" />
+                  <img 
+                    src={plnIconPlusLogo} 
+                    alt="PLN Icon Plus" 
+                    className="relative h-11 w-auto object-contain drop-shadow-[0_0_10px_rgba(56,189,248,0.3)]" 
+                  />
+                </motion.div>
+                
+                <motion.div 
+                  className="w-px h-10 bg-gradient-to-b from-transparent via-cyan-400/60 to-transparent"
+                  initial={{ opacity: 0, scaleY: 0 }}
+                  animate={{ opacity: 1, scaleY: 1 }}
+                  transition={{ duration: 0.4, delay: 0.4 }}
+                />
+                
+                <motion.div
+                  className="relative"
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.5, delay: 0.2 }}
+                >
+                  <div className="absolute inset-0 bg-blue-400/20 blur-xl rounded-full" />
+                  <img 
+                    src={iconnetLogo} 
+                    alt="ICONNET" 
+                    className="relative h-7 w-auto object-contain drop-shadow-[0_0_10px_rgba(59,130,246,0.3)]" 
+                  />
+                </motion.div>
+              </div>
+
+              {/* Title */}
               <motion.div 
-                className="w-px h-8 sm:h-9 bg-border/50"
-                initial={{ opacity: 0, scaleY: 0 }}
-                animate={{ opacity: 1, scaleY: 1 }}
+                className="text-center space-y-2"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4, delay: 0.3 }}
-              />
-              <motion.img 
-                src={iconnetLogo} 
-                alt="ICONNET" 
-                className="h-6 sm:h-7 w-auto object-contain"
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.5, ease: "easeOut" }}
-              />
+              >
+                <h1 className="text-2xl sm:text-3xl font-bold tracking-tight bg-gradient-to-r from-white via-cyan-100 to-white bg-clip-text text-transparent">
+                  NOC RITEL
+                </h1>
+                <p className="text-sm text-slate-400">
+                  Masuk untuk mengakses dashboard
+                </p>
+              </motion.div>
             </div>
+
+            {/* Decorative line */}
             <motion.div 
-              className="space-y-1"
+              className="flex items-center gap-3"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.5 }}
+            >
+              <div className="flex-1 h-px bg-gradient-to-r from-transparent via-slate-600 to-transparent" />
+              <div className="w-1.5 h-1.5 rounded-full bg-cyan-400/60" />
+              <div className="flex-1 h-px bg-gradient-to-r from-transparent via-slate-600 to-transparent" />
+            </motion.div>
+
+            {/* Login Button */}
+            <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: 0.2 }}
+              transition={{ duration: 0.4, delay: 0.5 }}
             >
-              <CardTitle className="text-xl sm:text-2xl font-bold tracking-tight">
-                NOC RITEL
-              </CardTitle>
-              <CardDescription className="text-sm text-muted-foreground">
-                Masuk untuk mengakses dashboard
-              </CardDescription>
+              <Button 
+                onClick={handleGoogleSignIn}
+                disabled={isSigningIn}
+                className="w-full h-12 text-sm font-medium gap-3 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 border-0 text-white shadow-lg shadow-cyan-500/25 transition-all duration-300 hover:shadow-cyan-500/40 hover:scale-[1.02] active:scale-[0.98]"
+              >
+                {isSigningIn ? (
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                ) : (
+                  <svg className="h-5 w-5" viewBox="0 0 24 24">
+                    <path
+                      fill="#fff"
+                      d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                    />
+                    <path
+                      fill="#fff"
+                      d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                    />
+                    <path
+                      fill="#fff"
+                      d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                    />
+                    <path
+                      fill="#fff"
+                      d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                    />
+                  </svg>
+                )}
+                {isSigningIn ? "Memproses..." : "Masuk dengan Google"}
+              </Button>
+            </motion.div>
+
+            {/* Footer decoration */}
+            <motion.div 
+              className="flex justify-center gap-1.5 pt-2"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.7 }}
+            >
+              {[...Array(5)].map((_, i) => (
+                <motion.div
+                  key={i}
+                  className="w-1 h-1 rounded-full bg-cyan-400/40"
+                  animate={{
+                    opacity: [0.4, 1, 0.4],
+                    scale: [1, 1.2, 1],
+                  }}
+                  transition={{
+                    duration: 2,
+                    repeat: Infinity,
+                    delay: i * 0.2,
+                  }}
+                />
+              ))}
             </motion.div>
           </div>
-        </CardHeader>
-        <CardContent className="pt-4 pb-6">
-          <Button 
-            onClick={handleGoogleSignIn}
-            disabled={isSigningIn}
-            className="w-full h-11 text-sm font-medium gap-3 transition-all hover:scale-[1.02] active:scale-[0.98]"
-            variant="outline"
-          >
-            {isSigningIn ? (
-              <Loader2 className="h-5 w-5 animate-spin" />
-            ) : (
-              <svg className="h-5 w-5" viewBox="0 0 24 24">
-                <path
-                  fill="#4285F4"
-                  d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                />
-                <path
-                  fill="#34A853"
-                  d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                />
-                <path
-                  fill="#FBBC05"
-                  d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-                />
-                <path
-                  fill="#EA4335"
-                  d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-                />
-              </svg>
-            )}
-            {isSigningIn ? "Memproses..." : "Masuk dengan Google"}
-          </Button>
-        </CardContent>
-      </Card>
+        </div>
+      </motion.div>
+
+      {/* Bottom gradient fade */}
+      <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-slate-950 to-transparent pointer-events-none" style={{ zIndex: 5 }} />
     </div>
   );
 }
