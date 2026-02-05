@@ -7,6 +7,7 @@ const SLA_THRESHOLD_MS = 24 * 60 * 60 * 1000; // 24 hours
 
 interface DbTicket {
   id: string;
+  ticket_id: string;
   service_id: string;
   customer_name: string;
   serpo: string;
@@ -23,7 +24,7 @@ interface DbTicket {
 
 function dbToTicket(db: DbTicket): Ticket {
   return {
-    id: db.id,
+    id: db.ticket_id,
     serviceId: db.service_id,
     customerName: db.customer_name,
     serpo: db.serpo,
@@ -39,9 +40,9 @@ function dbToTicket(db: DbTicket): Ticket {
   };
 }
 
-function ticketToDb(ticket: Ticket): Omit<DbTicket, "created_at"> {
+function ticketToDb(ticket: Ticket): Omit<DbTicket, "id" | "created_at"> {
   return {
-    id: ticket.id,
+    ticket_id: ticket.id,
     service_id: ticket.serviceId,
     customer_name: ticket.customerName,
     serpo: ticket.serpo,
@@ -148,7 +149,8 @@ export function useCloudTickets() {
   const updateTicket = useCallback(async (id: string, updates: Partial<Ticket>) => {
     try {
       const dbUpdates: Partial<DbTicket> = {};
-      if (updates.serviceId !== undefined) dbUpdates.service_id = updates.serviceId;
+      if (updates.id !== undefined) dbUpdates.ticket_id = updates.id;
+       if (updates.serviceId !== undefined) dbUpdates.service_id = updates.serviceId;
       if (updates.customerName !== undefined) dbUpdates.customer_name = updates.customerName;
       if (updates.serpo !== undefined) dbUpdates.serpo = updates.serpo;
       if (updates.hostname !== undefined) dbUpdates.hostname = updates.hostname;
@@ -162,7 +164,7 @@ export function useCloudTickets() {
       const { error } = await supabase
         .from("tickets")
         .update(dbUpdates)
-        .eq("id", id);
+        .eq("ticket_id", id);
 
       if (error) throw error;
       // Realtime will handle updating the list
@@ -177,7 +179,7 @@ export function useCloudTickets() {
 
   const deleteTicket = useCallback(async (id: string) => {
     try {
-      const { error } = await supabase.from("tickets").delete().eq("id", id);
+      const { error } = await supabase.from("tickets").delete().eq("ticket_id", id);
 
       if (error) throw error;
       // Realtime will handle updating the list
