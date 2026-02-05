@@ -132,7 +132,7 @@ export default function Login() {
       {/* Glass Card with Parallax */}
       <motion.div
         ref={cardRef}
-        className="relative z-10 w-full max-w-sm"
+        className="relative z-10 w-full max-w-xs"
         initial={{ opacity: 0, y: 30, scale: 0.95 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
@@ -146,15 +146,15 @@ export default function Login() {
         onMouseLeave={handleMouseLeave}
       >
         {/* Card glow border effect */}
-        <div className="absolute -inset-[1px] bg-gradient-to-b from-cyan-500/40 via-transparent to-cyan-500/20 rounded-2xl blur-[2px] opacity-80" />
+        <div className="absolute -inset-[1px] bg-gradient-to-b from-cyan-500/25 via-transparent to-cyan-500/15 rounded-2xl blur-[2px] opacity-60" />
         
         {/* Main card */}
-        <div className="relative bg-[#0d1f38]/80 backdrop-blur-xl border border-cyan-500/20 rounded-2xl p-8 shadow-2xl">
+        <div className="relative bg-[#0d1f38]/50 backdrop-blur-xl border border-cyan-500/15 rounded-2xl p-6 shadow-2xl">
           {/* Inner glow */}
           <div className="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent rounded-2xl pointer-events-none" />
           
           {/* Content */}
-          <div className="relative space-y-6">
+          <div className="relative space-y-5">
             {/* ICONNET Mascot */}
             <div className="flex justify-center">
               <motion.div 
@@ -170,7 +170,7 @@ export default function Login() {
                 <img 
                   src={iconnetMascot} 
                   alt="ICONNET Mascot" 
-                  className="relative h-24 sm:h-28 w-auto object-contain drop-shadow-[0_0_20px_rgba(56,189,248,0.4)] transition-all duration-300 group-hover:drop-shadow-[0_0_35px_rgba(56,189,248,0.6)]" 
+                  className="relative h-20 sm:h-24 w-auto object-contain drop-shadow-[0_0_20px_rgba(56,189,248,0.4)] transition-all duration-300 group-hover:drop-shadow-[0_0_35px_rgba(56,189,248,0.6)]" 
                 />
               </motion.div>
             </div>
