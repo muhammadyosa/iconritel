@@ -284,8 +284,20 @@ export function ShiftReportCard({ report, index, total, compact = false, onEdit 
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.2, delay: index * 0.05 }}
-            className="group relative rounded-lg bg-card border border-border/60 shadow-sm hover:shadow-md hover:border-primary/40 cursor-pointer p-3 transition-all duration-200"
+            whileHover={{ 
+              scale: 1.03, 
+              y: -3,
+              boxShadow: "0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)"
+            }}
+            whileTap={{ scale: 0.98 }}
+            transition={{ 
+              duration: 0.15, 
+              delay: index * 0.05,
+              type: "spring",
+              stiffness: 500,
+              damping: 30
+            }}
+            className="group relative rounded-lg bg-card border border-border/60 shadow-sm hover:border-primary/50 cursor-pointer p-3"
           >
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-2.5 min-w-0 flex-1">
@@ -370,8 +382,20 @@ export function ShiftReportCard({ report, index, total, compact = false, onEdit 
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3, delay: index * 0.1 }}
-          className="group relative rounded-xl bg-card border-2 border-border/50 shadow-sm hover:shadow-lg transition-all duration-300 hover:border-primary/40 overflow-hidden cursor-pointer"
+          whileHover={{ 
+            scale: 1.02, 
+            y: -4,
+            boxShadow: "0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)"
+          }}
+          whileTap={{ scale: 0.98 }}
+          transition={{ 
+            duration: 0.2, 
+            delay: index * 0.1,
+            type: "spring",
+            stiffness: 400,
+            damping: 25
+          }}
+          className="group relative rounded-xl bg-card border-2 border-border/50 shadow-sm hover:border-primary/50 overflow-hidden cursor-pointer"
         >
           {/* Compact Header */}
           <div className="bg-gradient-to-r from-primary/10 via-accent/5 to-primary/10 px-3 py-2.5 border-b border-border/50">
