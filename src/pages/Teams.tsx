@@ -19,7 +19,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { StatusBadge } from "@/components/StatusBadge";
-import { useTickets } from "@/hooks/useTickets";
+import { useCloudTickets } from "@/hooks/useCloudTickets";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   ChartContainer,
@@ -52,7 +52,7 @@ const chartConfig = {
 } satisfies ChartConfig;
 
 export default function Teams() {
-  const { tickets } = useTickets();
+  const { tickets, isLoading } = useCloudTickets();
   const [selectedTeam, setSelectedTeam] = useState<string | null>(null);
 
   const teamStats = tickets.reduce((acc, ticket) => {
@@ -97,8 +97,14 @@ export default function Teams() {
         <Card className="shadow-card">
           <CardContent className="pt-6">
             <div className="text-center text-muted-foreground py-8">
+              {isLoading ? (
+                <p className="text-sm">Memuat data tim...</p>
+              ) : (
+                <>
               <Users className="h-10 sm:h-12 w-10 sm:w-12 mx-auto mb-4 opacity-50" />
               <p className="text-sm">Belum ada data tim. Buat tiket untuk melihat statistik tim.</p>
+                </>
+              )}
             </div>
           </CardContent>
         </Card>
