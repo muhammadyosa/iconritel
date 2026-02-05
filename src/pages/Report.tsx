@@ -346,27 +346,28 @@ Dibuat: ${new Date(r.createdAt).toLocaleString("id-ID")}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="date">Tanggal</Label>
+              {/* Header Fields - Compact Inline */}
+              <div className="flex flex-wrap gap-2 items-center">
+                <div className="flex items-center gap-1.5 bg-muted/50 rounded-md px-2 py-1">
+                  <span className="text-xs text-muted-foreground">Tanggal</span>
                   <Input
-                    id="date"
                     type="date"
+                    className="h-7 w-[130px] text-sm px-2"
                     value={shiftReport.date}
                     onChange={(e) =>
                       setShiftReport({ ...shiftReport, date: e.target.value })
                     }
                   />
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="shift">Shift</Label>
+                <div className="flex items-center gap-1.5 bg-muted/50 rounded-md px-2 py-1">
+                  <span className="text-xs text-muted-foreground">Shift</span>
                   <Select
                     value={shiftReport.shift}
                     onValueChange={(value) =>
                       setShiftReport({ ...shiftReport, shift: value })
                     }
                   >
-                    <SelectTrigger id="shift">
+                    <SelectTrigger className="h-7 w-[80px] text-sm px-2">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -376,10 +377,10 @@ Dibuat: ${new Date(r.createdAt).toLocaleString("id-ID")}
                     </SelectContent>
                   </Select>
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="officer">Petugas</Label>
+                <div className="flex items-center gap-1.5 bg-muted/50 rounded-md px-2 py-1 flex-1 min-w-[180px]">
+                  <span className="text-xs text-muted-foreground whitespace-nowrap">Petugas</span>
                   <Input
-                    id="officer"
+                    className="h-7 text-sm px-2 flex-1"
                     placeholder="Nama petugas shift"
                     value={shiftReport.officer}
                     onChange={(e) =>
