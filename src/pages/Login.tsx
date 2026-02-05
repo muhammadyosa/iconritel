@@ -163,62 +163,105 @@ export default function Login() {
           {/* Content */}
           <div className="relative space-y-6">
             {/* Logos - Side by side with parallax */}
-            <div className="flex flex-col items-center gap-5">
+            <div className="flex flex-col items-center gap-6">
               <motion.div 
-                className="flex justify-center items-center gap-6 sm:gap-10"
+                className="flex justify-center items-center gap-8 sm:gap-12"
                 style={{ transform: "translateZ(40px)" }}
               >
                 {/* PLN Icon Plus Logo */}
                 <motion.div
                   className="relative group cursor-pointer"
-                  initial={{ opacity: 0, x: -30 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.6, delay: 0.2 }}
-                  whileHover={{ scale: 1.08, y: -2 }}
+                  initial={{ opacity: 0, x: -30, rotateY: -15 }}
+                  animate={{ opacity: 1, x: 0, rotateY: 0 }}
+                  transition={{ duration: 0.7, delay: 0.2 }}
+                  whileHover={{ scale: 1.1, y: -4 }}
                   whileTap={{ scale: 0.95 }}
                 >
-                  <div className="absolute -inset-3 bg-gradient-to-r from-cyan-500/30 to-blue-500/30 rounded-xl blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                  <div className="absolute -inset-4 bg-gradient-to-r from-cyan-500/40 to-blue-500/40 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                   <img 
                     src={plnIconPlusLogo} 
                     alt="PLN Icon Plus" 
-                    className="relative h-14 sm:h-16 w-auto object-contain drop-shadow-[0_0_15px_rgba(56,189,248,0.5)] transition-all duration-300 group-hover:drop-shadow-[0_0_25px_rgba(56,189,248,0.7)]" 
+                    className="relative h-16 sm:h-20 w-auto object-contain drop-shadow-[0_0_20px_rgba(56,189,248,0.6)] transition-all duration-300 group-hover:drop-shadow-[0_0_30px_rgba(56,189,248,0.8)]" 
                   />
                 </motion.div>
 
                 {/* ICONNET Logo */}
                 <motion.div
                   className="relative group cursor-pointer"
-                  initial={{ opacity: 0, x: 30 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.6, delay: 0.2 }}
-                  whileHover={{ scale: 1.08, y: -2 }}
+                  initial={{ opacity: 0, x: 30, rotateY: 15 }}
+                  animate={{ opacity: 1, x: 0, rotateY: 0 }}
+                  transition={{ duration: 0.7, delay: 0.2 }}
+                  whileHover={{ scale: 1.1, y: -4 }}
                   whileTap={{ scale: 0.95 }}
                 >
-                  <div className="absolute -inset-3 bg-gradient-to-r from-blue-500/30 to-purple-500/30 rounded-xl blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                  <div className="absolute -inset-4 bg-gradient-to-r from-blue-500/40 to-teal-500/40 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                   <img 
                     src={iconnetLogo} 
                     alt="ICONNET" 
-                    className="relative h-10 sm:h-12 w-auto object-contain drop-shadow-[0_0_15px_rgba(59,130,246,0.5)] transition-all duration-300 group-hover:drop-shadow-[0_0_25px_rgba(59,130,246,0.7)]" 
+                    className="relative h-16 sm:h-20 w-auto object-contain drop-shadow-[0_0_20px_rgba(59,130,246,0.6)] transition-all duration-300 group-hover:drop-shadow-[0_0_30px_rgba(59,130,246,0.8)]" 
                   />
                 </motion.div>
               </motion.div>
 
-              {/* Title with Typing Animation */}
+              {/* NOC RITEL Title with Enhanced Animation */}
               <motion.div 
-                className="text-center space-y-1.5"
+                className="text-center space-y-3"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.4, delay: 0.6 }}
-                style={{ transform: "translateZ(20px)" }}
+                style={{ transform: "translateZ(30px)" }}
               >
-                <h1 className="text-2xl sm:text-3xl font-bold tracking-tight bg-gradient-to-r from-white via-cyan-100 to-white bg-clip-text text-transparent">
-                  <TypingText text="NOC RITEL" delay={800} />
-                </h1>
+                {/* Animated NOC RITEL */}
+                <motion.div className="relative">
+                  {/* Glow effect behind text */}
+                  <motion.div 
+                    className="absolute inset-0 blur-2xl"
+                    animate={{ 
+                      background: [
+                        'radial-gradient(ellipse at center, rgba(56,189,248,0.3) 0%, transparent 70%)',
+                        'radial-gradient(ellipse at center, rgba(139,92,246,0.3) 0%, transparent 70%)',
+                        'radial-gradient(ellipse at center, rgba(56,189,248,0.3) 0%, transparent 70%)'
+                      ]
+                    }}
+                    transition={{ duration: 4, repeat: Infinity }}
+                  />
+                  <h1 className="relative text-3xl sm:text-4xl font-black tracking-wider">
+                    {"NOC RITEL".split("").map((char, index) => (
+                      <motion.span
+                        key={index}
+                        className="inline-block bg-gradient-to-b from-white via-cyan-200 to-cyan-400 bg-clip-text text-transparent drop-shadow-[0_0_10px_rgba(56,189,248,0.5)]"
+                        initial={{ opacity: 0, y: 20, rotateX: -90 }}
+                        animate={{ opacity: 1, y: 0, rotateX: 0 }}
+                        transition={{ 
+                          duration: 0.5, 
+                          delay: 0.8 + index * 0.08,
+                          ease: [0.22, 1, 0.36, 1]
+                        }}
+                        whileHover={{ 
+                          scale: 1.2, 
+                          color: '#22d3ee',
+                          textShadow: '0 0 20px rgba(34,211,238,0.8)'
+                        }}
+                        style={{ cursor: 'default' }}
+                      >
+                        {char === " " ? "\u00A0" : char}
+                      </motion.span>
+                    ))}
+                  </h1>
+                  {/* Animated underline */}
+                  <motion.div 
+                    className="h-0.5 mx-auto mt-2 bg-gradient-to-r from-transparent via-cyan-400 to-transparent"
+                    initial={{ width: 0, opacity: 0 }}
+                    animate={{ width: '80%', opacity: 1 }}
+                    transition={{ duration: 0.8, delay: 1.8 }}
+                  />
+                </motion.div>
+
                 <motion.p 
                   className="text-sm text-slate-400"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 2 }}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 2.2, duration: 0.5 }}
                 >
                   Masuk untuk mengakses dashboard
                 </motion.p>
