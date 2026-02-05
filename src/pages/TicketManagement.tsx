@@ -797,7 +797,7 @@ export default function TicketManagement() {
                       <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap bg-muted/80">👤 Customer/Type</TableHead>
                       <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap bg-muted/80">👨‍💼 Service ID</TableHead>
                       <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap bg-muted/80">👥 Serpo</TableHead>
-                      <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap bg-muted/80">✍️ Pembuat</TableHead>
+                      <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap bg-muted/80">✍️ Create by</TableHead>
                       <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap bg-muted/80">⚙️ Status</TableHead>
                       <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap bg-muted/80">⚡ Action</TableHead>
                     </TableRow>
@@ -914,7 +914,7 @@ export default function TicketManagement() {
                                         <p className="font-mono text-xs">{ticket.snOnt}</p>
                                       </div>
                                       <div>
-                                        <span className="text-muted-foreground">Pembuat:</span>
+                                        <span className="text-muted-foreground">Create by:</span>
                                         <p className="font-medium">{ticket.createdByName || "-"}</p>
                                       </div>
                                       <div>
