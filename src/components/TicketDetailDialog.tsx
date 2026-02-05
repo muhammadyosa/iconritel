@@ -11,6 +11,17 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -305,20 +316,39 @@ export function TicketDetailDialog({
                   </SelectContent>
                 </Select>
                 {isAdmin && (
-                  <Button
-                    variant="destructive"
-                    onClick={async () => {
-                      try {
-                        await deleteTicket(ticket.id);
-                        toast.success("Insident dihapus dari Cloud");
-                      } catch (error) {
-                        // Error already shown by hook
-                      }
-                    }}
-                  >
-                    <Trash2 className="h-4 w-4 mr-2" />
-                    Hapus
-                  </Button>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button variant="destructive">
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Hapus
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Hapus Insident?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Anda yakin ingin menghapus insident <strong>{ticket.id}</strong>? 
+                          Tindakan ini tidak dapat dibatalkan dan data akan dihapus permanen dari sistem.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Batal</AlertDialogCancel>
+                        <AlertDialogAction
+                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                          onClick={async () => {
+                            try {
+                              await deleteTicket(ticket.id);
+                              toast.success("Insident dihapus dari Cloud");
+                            } catch (error) {
+                              // Error already shown by hook
+                            }
+                          }}
+                        >
+                          Ya, Hapus
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 )}
               </div>
             </>
