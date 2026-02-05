@@ -22,6 +22,7 @@ import { toast } from "@/hooks/use-toast";
 import { FileText, Download, ClipboardList, Trash2, RefreshCw, Loader2 } from "lucide-react";
 import { z } from "zod";
 import { Ticket } from "@/types/ticket";
+import { DashboardIconnetTab } from "@/components/DashboardIconnetTab";
 import { useUserRole } from "@/hooks/useUserRole";
 import { StatusBadge } from "@/components/StatusBadge";
 import {
@@ -329,10 +330,11 @@ Dibuat: ${new Date(r.createdAt).toLocaleString("id-ID")}
       </div>
 
       <Tabs defaultValue="shift" className="w-full">
-        <TabsList className="grid w-full max-w-2xl grid-cols-3">
+        <TabsList className="grid w-full max-w-3xl grid-cols-4">
           <TabsTrigger value="shift">🗣️ Report Shift</TabsTrigger>
           <TabsTrigger value="sla">⏰ OVER SLA 7 JAM</TabsTrigger>
           <TabsTrigger value="pending">📋 Belum Dikerjakan</TabsTrigger>
+          <TabsTrigger value="dashboard-iconnet">📊 Dashboard Iconnet</TabsTrigger>
         </TabsList>
 
         <TabsContent value="shift" className="space-y-4">
@@ -607,6 +609,10 @@ UPDATE : `}
 
         <TabsContent value="pending" className="space-y-4">
           <PendingTicketsList />
+        </TabsContent>
+
+        <TabsContent value="dashboard-iconnet" className="space-y-4">
+          <DashboardIconnetTab />
         </TabsContent>
       </Tabs>
     </div>
