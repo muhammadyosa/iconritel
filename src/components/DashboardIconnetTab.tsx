@@ -105,12 +105,12 @@ export function DashboardIconnetTab() {
     setData(prev => ({ ...prev, posisiNocRitel: hasAnyValue ? String(sum) : "" }));
   }, [data.sumselAll, data.bangkaBelitungAll, data.bengkuluAll, data.jambiAll, data.lampungAll]);
 
-  // Auto-calculate Total Tiket = Outbond dll + NOC Ritel SBU
+  // Auto-calculate Total Tiket = Outbond dll - NOC Ritel SBU
   useEffect(() => {
     const outbond = parseInt(data.posisiTiketOutbond) || 0;
     const nocRitel = parseInt(data.posisiNocRitel) || 0;
     const hasAnyValue = data.posisiTiketOutbond.trim() !== "" || data.posisiNocRitel.trim() !== "";
-    setData(prev => ({ ...prev, totalTiket: hasAnyValue ? String(outbond + nocRitel) : "" }));
+    setData(prev => ({ ...prev, totalTiket: hasAnyValue ? String(outbond - nocRitel) : "" }));
   }, [data.posisiTiketOutbond, data.posisiNocRitel]);
 
   // Auto-calculate Total Gangguan = Sumsel + Babel + Bengkulu + Jambi + Lampung
