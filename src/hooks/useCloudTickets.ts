@@ -22,6 +22,7 @@ interface DbTicket {
   created_iso: string;
   created_by_user_id: string | null;
   created_by_name: string | null;
+  resolved_at: string | null;
 }
 
 interface ProfileData {
@@ -46,6 +47,7 @@ interface DbTicketInsert {
   created_iso: string;
   created_by_user_id?: string;
   created_by_name?: string;
+  resolved_at?: string | null;
 }
 
 function dbToTicket(db: DbTicket, profilesMap: Map<string, ProfileData>): Ticket {
@@ -75,6 +77,7 @@ function dbToTicket(db: DbTicket, profilesMap: Map<string, ProfileData>): Ticket
     createdISO: db.created_iso,
     createdByUserId: db.created_by_user_id || undefined,
     createdByName: currentDisplayName,
+    resolvedAt: db.resolved_at || undefined,
   };
 }
 
@@ -96,6 +99,7 @@ function ticketToDb(ticket: Ticket): DbTicketInsert {
     created_iso: ticket.createdISO,
     created_by_user_id: ticket.createdByUserId,
     created_by_name: ticket.createdByName,
+    resolved_at: ticket.resolvedAt || null,
   };
 }
 
@@ -127,9 +131,35 @@ export function useCloudTickets() {
     }
   }, []);
 
+  // Delete resolved tickets older than 24 hours from the database
+  const cleanupResolvedTickets = useCallback(async () => {
+    try {
+      const cutoff = new Date(Date.now() - SLA_THRESHOLD_MS).toISOString();
+      const { error } = await supabase
+        .from("tickets")
+        .delete()
+        .eq("status" as never, "Resolved" as never)
+        .not("resolved_at" as never, "is" as never, null as never)
+        .lt("resolved_at" as never, cutoff as never) as unknown as { error: Error | null };
+
+      if (error) {
+        if (import.meta.env.DEV) {
+          console.error("Error cleaning up resolved tickets:", error);
+        }
+      }
+    } catch (error) {
+      if (import.meta.env.DEV) {
+        console.error("Error in cleanup:", error);
+      }
+    }
+  }, []);
+
   // Fetch tickets from database
   const fetchTickets = useCallback(async () => {
     try {
+      // Clean up old resolved tickets first
+      await cleanupResolvedTickets();
+
       // Fetch profiles first to get current display names
       const currentProfilesMap = await fetchProfiles();
 
@@ -162,11 +192,19 @@ export function useCloudTickets() {
     } finally {
       setIsLoading(false);
     }
-  }, [fetchProfiles]);
+  }, [fetchProfiles, cleanupResolvedTickets]);
 
-  // Subscribe to realtime changes
+  // Subscribe to realtime changes + periodic cleanup
   useEffect(() => {
     fetchTickets();
+
+    // Periodic cleanup every minute for resolved tickets > 24h
+    const cleanupInterval = setInterval(() => {
+      cleanupResolvedTickets().then(() => {
+        // After cleanup, refetch to sync state
+        fetchTickets();
+      });
+    }, 60 * 1000);
 
     const ticketsChannel = supabase
       .channel("tickets-realtime")
@@ -212,10 +250,11 @@ export function useCloudTickets() {
       .subscribe();
 
     return () => {
+      clearInterval(cleanupInterval);
       supabase.removeChannel(ticketsChannel);
       supabase.removeChannel(profilesChannel);
     };
-  }, [fetchTickets]);
+  }, [fetchTickets, cleanupResolvedTickets]);
 
   const addTicket = useCallback(async (ticket: Ticket) => {
     try {
@@ -257,7 +296,15 @@ export function useCloudTickets() {
       if (updates.constraint !== undefined) dbUpdates.constraint_type = updates.constraint;
       if (updates.category !== undefined) dbUpdates.category = updates.category;
       if (updates.ticketResult !== undefined) dbUpdates.ticket_result = updates.ticketResult;
-      if (updates.status !== undefined) dbUpdates.status = updates.status;
+      if (updates.status !== undefined) {
+        dbUpdates.status = updates.status;
+        // Set resolved_at when status changes to Resolved, clear it otherwise
+        if (updates.status === "Resolved") {
+          dbUpdates.resolved_at = new Date().toISOString();
+        } else {
+          dbUpdates.resolved_at = null;
+        }
+      }
 
       const { error } = await (supabase
         .from("tickets")

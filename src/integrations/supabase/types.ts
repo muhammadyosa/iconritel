@@ -125,6 +125,7 @@ export type Database = {
           fat_id: string
           hostname: string
           id: string
+          resolved_at: string | null
           serpo: string
           service_id: string
           sn_ont: string
@@ -143,6 +144,7 @@ export type Database = {
           fat_id: string
           hostname: string
           id?: string
+          resolved_at?: string | null
           serpo: string
           service_id: string
           sn_ont: string
@@ -161,6 +163,7 @@ export type Database = {
           fat_id?: string
           hostname?: string
           id?: string
+          resolved_at?: string | null
           serpo?: string
           service_id?: string
           sn_ont?: string
