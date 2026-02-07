@@ -105,13 +105,13 @@ export function DashboardIconnetTab() {
     setData(prev => ({ ...prev, posisiNocRitel: hasAnyValue ? String(sum) : "" }));
   }, [data.sumselAll, data.bangkaBelitungAll, data.bengkuluAll, data.jambiAll, data.lampungAll]);
 
-  // Auto-calculate Total Tiket = Outbond dll - NOC Ritel SBU
+  // Auto-calculate Outbond dll = Total - NOC Ritel SBU
   useEffect(() => {
-    const outbond = parseInt(data.posisiTiketOutbond) || 0;
+    const total = parseInt(data.totalTiket) || 0;
     const nocRitel = parseInt(data.posisiNocRitel) || 0;
-    const hasAnyValue = data.posisiTiketOutbond.trim() !== "" || data.posisiNocRitel.trim() !== "";
-    setData(prev => ({ ...prev, totalTiket: hasAnyValue ? String(outbond - nocRitel) : "" }));
-  }, [data.posisiTiketOutbond, data.posisiNocRitel]);
+    const hasAnyValue = data.totalTiket.trim() !== "" || data.posisiNocRitel.trim() !== "";
+    setData(prev => ({ ...prev, posisiTiketOutbond: hasAnyValue ? String(total - nocRitel) : "" }));
+  }, [data.totalTiket, data.posisiNocRitel]);
 
   // Auto-calculate Total Gangguan = Sumsel + Babel + Bengkulu + Jambi + Lampung
   useEffect(() => {
@@ -289,20 +289,20 @@ Dengan Penyebaran :
               />
             </div>
             <div className="flex items-center gap-1.5 bg-muted/50 rounded-md px-2 py-1">
-              <span className="text-xs text-muted-foreground whitespace-nowrap">Outbond, dll =</span>
+              <span className="text-xs text-muted-foreground whitespace-nowrap">Total =</span>
               <Input
                 className="h-7 w-16 text-center text-sm px-1"
                 placeholder="-"
-                value={data.posisiTiketOutbond}
-                onChange={(e) => updateField("posisiTiketOutbond", e.target.value)}
+                value={data.totalTiket}
+                onChange={(e) => updateField("totalTiket", e.target.value)}
               />
             </div>
             <div className="flex items-center gap-1.5 bg-primary/10 rounded-md px-2 py-1 border border-primary/20">
-              <span className="text-xs font-medium text-primary whitespace-nowrap">Total =</span>
+              <span className="text-xs font-medium text-primary whitespace-nowrap">Outbond, dll =</span>
               <Input
                 className="h-7 w-14 text-center text-sm px-1 font-semibold"
                 placeholder="-"
-                value={data.totalTiket}
+                value={data.posisiTiketOutbond}
                 readOnly
               />
             </div>
