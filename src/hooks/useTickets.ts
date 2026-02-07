@@ -51,11 +51,11 @@ export function useTickets() {
         let hasChanges = false;
         let deletedCount = 0;
         
-        // First, filter out resolved tickets older than 24 hours
+        // First, filter out resolved tickets older than 24 hours since resolved
         const afterCleanup = prev.filter((ticket) => {
-          if (ticket.status === "Resolved") {
-            const ticketAge = now - new Date(ticket.createdISO).getTime();
-            if (ticketAge >= SLA_THRESHOLD_MS) {
+          if (ticket.status === "Resolved" && ticket.resolvedAt) {
+            const resolvedAge = now - new Date(ticket.resolvedAt).getTime();
+            if (resolvedAge >= SLA_THRESHOLD_MS) {
               deletedCount++;
               hasChanges = true;
               return false;
@@ -120,7 +120,17 @@ export function useTickets() {
 
   const updateTicket = (id: string, updates: Partial<Ticket>) => {
     setTickets((prev) =>
-      prev.map((ticket) => (ticket.id === id ? { ...ticket, ...updates } : ticket))
+      prev.map((ticket) => {
+        if (ticket.id !== id) return ticket;
+        const merged = { ...ticket, ...updates };
+        // Track when ticket is resolved
+        if (updates.status === "Resolved" && ticket.status !== "Resolved") {
+          merged.resolvedAt = new Date().toISOString();
+        } else if (updates.status && updates.status !== "Resolved") {
+          merged.resolvedAt = undefined;
+        }
+        return merged;
+      })
     );
   };
 
