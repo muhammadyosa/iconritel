@@ -96,6 +96,32 @@ export function DashboardIconnetTab() {
     }));
   }, [realtimeDate]);
 
+  // Auto-calculate NOC Ritel SBU = Sumsel + Babel + Bengkulu + Jambi + Lampung
+  useEffect(() => {
+    const sum = [data.sumselAll, data.bangkaBelitungAll, data.bengkuluAll, data.jambiAll, data.lampungAll]
+      .reduce((acc, val) => acc + (parseInt(val) || 0), 0);
+    const hasAnyValue = [data.sumselAll, data.bangkaBelitungAll, data.bengkuluAll, data.jambiAll, data.lampungAll]
+      .some(v => v.trim() !== "");
+    setData(prev => ({ ...prev, posisiNocRitel: hasAnyValue ? String(sum) : "" }));
+  }, [data.sumselAll, data.bangkaBelitungAll, data.bengkuluAll, data.jambiAll, data.lampungAll]);
+
+  // Auto-calculate Total Tiket = Outbond dll + NOC Ritel SBU
+  useEffect(() => {
+    const outbond = parseInt(data.posisiTiketOutbond) || 0;
+    const nocRitel = parseInt(data.posisiNocRitel) || 0;
+    const hasAnyValue = data.posisiTiketOutbond.trim() !== "" || data.posisiNocRitel.trim() !== "";
+    setData(prev => ({ ...prev, totalTiket: hasAnyValue ? String(outbond + nocRitel) : "" }));
+  }, [data.posisiTiketOutbond, data.posisiNocRitel]);
+
+  // Auto-calculate Total Gangguan = Sumsel + Babel + Bengkulu + Jambi + Lampung
+  useEffect(() => {
+    const sum = [data.sumselGangguan, data.bangkaBelitungGangguan, data.bengkuluGangguan, data.jambiGangguan, data.lampungGangguan]
+      .reduce((acc, val) => acc + (parseInt(val) || 0), 0);
+    const hasAnyValue = [data.sumselGangguan, data.bangkaBelitungGangguan, data.bengkuluGangguan, data.jambiGangguan, data.lampungGangguan]
+      .some(v => v.trim() !== "");
+    setData(prev => ({ ...prev, totalGangguan: hasAnyValue ? String(sum) : "" }));
+  }, [data.sumselGangguan, data.bangkaBelitungGangguan, data.bengkuluGangguan, data.jambiGangguan, data.lampungGangguan]);
+
   const updateField = (field: keyof DashboardData, value: string) => {
     setData(prev => ({ ...prev, [field]: value }));
   };
@@ -253,13 +279,13 @@ Dengan Penyebaran :
 
           {/* Posisi Section - Compact Inline */}
           <div className="flex flex-wrap gap-2 items-center">
-            <div className="flex items-center gap-1.5 bg-muted/50 rounded-md px-2 py-1">
-              <span className="text-xs text-muted-foreground whitespace-nowrap">NOC Ritel SBU =</span>
+            <div className="flex items-center gap-1.5 bg-primary/10 rounded-md px-2 py-1 border border-primary/20">
+              <span className="text-xs font-medium text-primary whitespace-nowrap">NOC Ritel SBU =</span>
               <Input
-                className="h-7 w-16 text-center text-sm px-1"
+                className="h-7 w-16 text-center text-sm px-1 font-semibold"
                 placeholder="-"
                 value={data.posisiNocRitel}
-                onChange={(e) => updateField("posisiNocRitel", e.target.value)}
+                readOnly
               />
             </div>
             <div className="flex items-center gap-1.5 bg-muted/50 rounded-md px-2 py-1">
@@ -271,13 +297,13 @@ Dengan Penyebaran :
                 onChange={(e) => updateField("posisiTiketOutbond", e.target.value)}
               />
             </div>
-            <div className="flex items-center gap-1.5 bg-muted/50 rounded-md px-2 py-1">
-              <span className="text-xs text-muted-foreground whitespace-nowrap">Total =</span>
+            <div className="flex items-center gap-1.5 bg-primary/10 rounded-md px-2 py-1 border border-primary/20">
+              <span className="text-xs font-medium text-primary whitespace-nowrap">Total =</span>
               <Input
-                className="h-7 w-14 text-center text-sm px-1"
+                className="h-7 w-14 text-center text-sm px-1 font-semibold"
                 placeholder="-"
                 value={data.totalTiket}
-                onChange={(e) => updateField("totalTiket", e.target.value)}
+                readOnly
               />
             </div>
           </div>
@@ -339,13 +365,13 @@ Dengan Penyebaran :
                 onChange={(e) => updateField("resumeGangguanDate", e.target.value)}
               />
             </div>
-            <div className="flex items-center gap-1.5 bg-muted/50 rounded-md px-2 py-1">
-              <span className="text-xs text-muted-foreground whitespace-nowrap">Total Gangguan =</span>
+            <div className="flex items-center gap-1.5 bg-destructive/10 rounded-md px-2 py-1 border border-destructive/20">
+              <span className="text-xs font-medium text-destructive whitespace-nowrap">Total Gangguan =</span>
               <Input
-                className="h-7 w-14 text-center text-sm px-1"
+                className="h-7 w-14 text-center text-sm px-1 font-semibold"
                 placeholder="-"
                 value={data.totalGangguan}
-                onChange={(e) => updateField("totalGangguan", e.target.value)}
+                readOnly
               />
             </div>
           </div>
