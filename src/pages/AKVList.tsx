@@ -140,7 +140,7 @@ const AKVList = () => {
               className="h-7 sm:h-8 text-[10px] sm:text-xs px-2 sm:px-3 touch-target"
             >
               <Download className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />
-              <span className="hidden xs:inline">Export Excel</span>
+              <span className="hidden xs:inline">Excel</span>
               <span className="xs:hidden">Export</span>
             </Button>
           </CardTitle>

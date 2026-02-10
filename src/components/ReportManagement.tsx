@@ -375,7 +375,7 @@ export function ReportManagement() {
           <DropdownMenuContent align="start">
             <DropdownMenuItem onClick={handleExportExcel} disabled={filteredReports.length === 0}>
               <Download className="h-4 w-4 mr-2" />
-              Export Excel (.xlsx)
+              Excel (.xlsx)
             </DropdownMenuItem>
             <DropdownMenuItem onClick={handleExportCSV} disabled={filteredReports.length === 0}>
               <Download className="h-4 w-4 mr-2" />
