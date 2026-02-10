@@ -42,7 +42,7 @@ import {
 import { StatusBadge } from "@/components/StatusBadge";
 import { TicketDetailDialog } from "@/components/TicketDetailDialog";
 import { toast } from "sonner";
-import { sanitizeForCSV } from "@/lib/validation";
+
 import { Link } from "react-router-dom";
 
 export default function TicketManagement() {
@@ -223,48 +223,34 @@ export default function TicketManagement() {
     }
   };
 
-  const handleExportCSV = () => {
-    const headers = [
-      "Ticket ID",
-      "Category",
-      "Service ID",
-      "Customer Name",
-      "Serpo",
-      "Hostname OLT",
-      "ID FAT",
-      "SN ONT",
-      "Constraint",
-      "Status",
-      "Created",
-      "Ticket Result",
-    ];
-    const rows = tickets.map((t) => [
-      sanitizeForCSV(t.id),
-      sanitizeForCSV(t.category),
-      sanitizeForCSV(t.serviceId),
-      sanitizeForCSV(t.customerName),
-      sanitizeForCSV(t.serpo),
-      sanitizeForCSV(t.hostname),
-      sanitizeForCSV(t.fatId),
-      sanitizeForCSV(t.snOnt),
-      sanitizeForCSV(t.constraint),
-      sanitizeForCSV(t.status),
-      sanitizeForCSV(t.createdAt),
-      sanitizeForCSV(t.ticketResult),
-    ]);
-    const csv = [
-      headers.join(","),
-      ...rows.map((r) => r.map((x) => `"${String(x).replace(/"/g, '""')}"`).join(",")),
-    ].join("\n");
+  const handleExportExcel = () => {
+    const data = tickets.map((t, idx) => ({
+      "No": idx + 1,
+      "Ticket ID": t.id,
+      "Category": t.category,
+      "Service ID": t.serviceId,
+      "Customer Name": t.customerName,
+      "Serpo": t.serpo,
+      "Hostname OLT": t.hostname,
+      "ID FAT": t.fatId,
+      "SN ONT": t.snOnt,
+      "Constraint": t.constraint,
+      "Status": t.status,
+      "Created": t.createdAt,
+      "Ticket Result": t.ticketResult,
+    }));
 
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `noc_tickets_${Date.now()}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
-    toast.success("CSV berhasil diexport");
+    import("xlsx").then((XLSX) => {
+      const ws = XLSX.utils.json_to_sheet(data);
+      const colWidths = Object.keys(data[0] || {}).map((key) => ({
+        wch: Math.max(key.length, ...data.map((r) => String((r as Record<string, unknown>)[key] || "").length)).toString().length > 40 ? 40 : Math.max(key.length + 2, ...data.map((r) => String((r as Record<string, unknown>)[key] || "").length)),
+      }));
+      ws["!cols"] = colWidths;
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Daftar Insident");
+      XLSX.writeFile(wb, `noc_insident_${Date.now()}.xlsx`);
+      toast.success("Excel berhasil diexport");
+    });
   };
 
   const handleSubmitManualTicket = async () => {
@@ -749,9 +735,9 @@ export default function TicketManagement() {
                     </div>
                   </DialogContent>
                 </Dialog>
-                <Button onClick={handleExportCSV} variant="outline" size="sm" className="h-6 sm:h-7 text-[9px] sm:text-[10px] px-1.5 sm:px-2">
+                <Button onClick={handleExportExcel} variant="outline" size="sm" className="h-6 sm:h-7 text-[9px] sm:text-[10px] px-1.5 sm:px-2">
                   <Download className="h-3 w-3 mr-0.5 sm:mr-1" />
-                  <span className="hidden xs:inline">CSV</span>
+                  <span className="hidden xs:inline">Excel</span>
                   <span className="xs:hidden">↓</span>
                 </Button>
               </div>
