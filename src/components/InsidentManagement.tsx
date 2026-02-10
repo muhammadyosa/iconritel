@@ -304,6 +304,7 @@ export function InsidentManagement() {
                   <TableHead className="text-xs">Customer</TableHead>
                   <TableHead className="text-xs">Kendala</TableHead>
                   <TableHead className="text-xs">Status</TableHead>
+                  <TableHead className="text-xs">✍️ Create by</TableHead>
                   <TableHead className="text-xs">Dibuat</TableHead>
                   <TableHead className="text-xs">Auto-Delete</TableHead>
                 </TableRow>
@@ -311,7 +312,7 @@ export function InsidentManagement() {
               <TableBody>
                 {filteredTickets.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={8} className="text-center text-muted-foreground py-8">
+                    <TableCell colSpan={9} className="text-center text-muted-foreground py-8">
                       Tidak ada insident ditemukan
                     </TableCell>
                   </TableRow>
@@ -329,6 +330,7 @@ export function InsidentManagement() {
                       <TableCell className="text-xs max-w-[150px] truncate">{ticket.customerName}</TableCell>
                       <TableCell className="text-xs">{ticket.constraint}</TableCell>
                       <TableCell>{statusBadge(ticket.status)}</TableCell>
+                      <TableCell className="text-xs max-w-[120px] truncate">{ticket.createdByName || "—"}</TableCell>
                       <TableCell className="text-xs text-muted-foreground">{ticket.createdAt}</TableCell>
                       <TableCell className="text-xs">
                         {ticket.status === "Resolved" && ticket.resolvedAt ? (
