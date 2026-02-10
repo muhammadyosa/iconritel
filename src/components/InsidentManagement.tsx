@@ -22,7 +22,7 @@ const STATUS_OPTIONS = ["All", "On Progress", "Critical", "Resolved", "Pending"]
 
 function getTimeRemaining(resolvedAt: string): string {
   const resolvedTime = new Date(resolvedAt).getTime();
-  const deleteAt = resolvedTime + 24 * 60 * 60 * 1000;
+  const deleteAt = resolvedTime + 8 * 60 * 60 * 1000;
   const remaining = deleteAt - Date.now();
   if (remaining <= 0) return "Segera dihapus";
   const hours = Math.floor(remaining / (1000 * 60 * 60));
@@ -244,7 +244,7 @@ export function InsidentManagement() {
             <Trash2 className="h-4 w-4" />
             <span>
               <strong>Auto-delete:</strong> Insident berstatus <Badge variant="outline" className="text-xs mx-1">Resolved</Badge> 
-              otomatis dihapus <strong>24 jam</strong> setelah waktu penyelesaian.
+              otomatis dihapus <strong>8 jam</strong> setelah waktu penyelesaian.
             </span>
           </div>
         </CardContent>
@@ -304,7 +304,7 @@ export function InsidentManagement() {
                   <TableHead className="text-xs">Customer</TableHead>
                   <TableHead className="text-xs">Kendala</TableHead>
                   <TableHead className="text-xs">Status</TableHead>
-                  <TableHead className="text-xs">✍️ Create by</TableHead>
+                  <TableHead className="text-xs">Create by</TableHead>
                   <TableHead className="text-xs">Dibuat</TableHead>
                   <TableHead className="text-xs">Auto-Delete</TableHead>
                 </TableRow>

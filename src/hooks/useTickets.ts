@@ -5,7 +5,7 @@ import { loadExcelData, saveExcelData } from "@/lib/indexedDB";
 
 const STORAGE_KEY = "noc_tickets";
 const AUTO_CHECK_INTERVAL = 60 * 1000; // Check every minute
-const SLA_THRESHOLD_MS = 24 * 60 * 60 * 1000; // 24 hours
+const SLA_THRESHOLD_MS = 8 * 60 * 60 * 1000; // 8 hours
 
 export function useTickets() {
   const [tickets, setTickets] = useState<Ticket[]>(() => {
