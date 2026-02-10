@@ -385,7 +385,7 @@ export default function Settings() {
       </div>
 
       <Tabs defaultValue="import" className="space-y-6">
-        <TabsList className={`grid w-full ${isAdmin ? 'grid-cols-4' : 'grid-cols-2'} lg:w-[${isAdmin ? '800' : '400'}px]`}>
+        <TabsList className={`grid w-full ${isAdmin ? 'grid-cols-5' : 'grid-cols-2'} lg:w-[${isAdmin ? '1000' : '400'}px]`}>
           <TabsTrigger value="import" className="flex items-center gap-2">
             📥 Import Data
           </TabsTrigger>
@@ -395,6 +395,11 @@ export default function Settings() {
           {isAdmin && (
             <TabsTrigger value="incidents" className="flex items-center gap-2">
               📋 Insident Management
+            </TabsTrigger>
+          )}
+          {isAdmin && (
+            <TabsTrigger value="reports" className="flex items-center gap-2">
+              🗣️ Report Management
             </TabsTrigger>
           )}
           {isAdmin && (
@@ -831,6 +836,25 @@ export default function Settings() {
         {isAdmin && (
           <TabsContent value="incidents" className="space-y-6">
             <InsidentManagement />
+          </TabsContent>
+        )}
+
+        {/* Report Management Tab - Admin Only */}
+        {isAdmin && (
+          <TabsContent value="reports" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  🗣️ Report Management
+                </CardTitle>
+                <CardDescription>
+                  Kelola dan monitor semua data report shift
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground">Fitur Report Management akan segera tersedia.</p>
+              </CardContent>
+            </Card>
           </TabsContent>
         )}
 
