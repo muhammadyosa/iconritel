@@ -27,6 +27,7 @@ import { saveExcelData, saveOLTData, saveFATData, openDB, clearAllData, saveFDTD
 import { useUserRole } from "@/hooks/useUserRole";
 import { UserManagement } from "@/components/UserManagement";
 import { InsidentManagement } from "@/components/InsidentManagement";
+import { ReportManagement } from "@/components/ReportManagement";
 
 const UPE_STORE_NAME = "upe_data";
 const BNG_STORE_NAME = "bng_data";
@@ -842,19 +843,7 @@ export default function Settings() {
         {/* Report Management Tab - Admin Only */}
         {isAdmin && (
           <TabsContent value="reports" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  🗣️ Report Management
-                </CardTitle>
-                <CardDescription>
-                  Kelola dan monitor semua data report shift
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground">Fitur Report Management akan segera tersedia.</p>
-              </CardContent>
-            </Card>
+            <ReportManagement />
           </TabsContent>
         )}
 
