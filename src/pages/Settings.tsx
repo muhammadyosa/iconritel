@@ -387,23 +387,19 @@ export default function Settings() {
       <Tabs defaultValue="import" className="space-y-6">
         <TabsList className={`grid w-full ${isAdmin ? 'grid-cols-4' : 'grid-cols-2'} lg:w-[${isAdmin ? '800' : '400'}px]`}>
           <TabsTrigger value="import" className="flex items-center gap-2">
-            <FileSpreadsheet className="h-4 w-4" />
-            Import Data
+            📥 Import Data
           </TabsTrigger>
           <TabsTrigger value="info" className="flex items-center gap-2">
-            <Info className="h-4 w-4" />
-            Informasi
+            📌 Informasi
           </TabsTrigger>
           {isAdmin && (
             <TabsTrigger value="incidents" className="flex items-center gap-2">
-              <ClipboardList className="h-4 w-4" />
               📋 Insident
             </TabsTrigger>
           )}
           {isAdmin && (
             <TabsTrigger value="users" className="flex items-center gap-2">
-              <Users className="h-4 w-4" />
-              Manajemen User
+              💻 Manajemen User
             </TabsTrigger>
           )}
         </TabsList>
