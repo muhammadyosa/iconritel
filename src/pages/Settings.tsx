@@ -390,16 +390,16 @@ export default function Settings() {
             📥 Import Data
           </TabsTrigger>
           <TabsTrigger value="info" className="flex items-center gap-2">
-            📌 Informasi
+            📌 Information
           </TabsTrigger>
           {isAdmin && (
             <TabsTrigger value="incidents" className="flex items-center gap-2">
-              📋 Insident
+              📋 Insident Management
             </TabsTrigger>
           )}
           {isAdmin && (
             <TabsTrigger value="users" className="flex items-center gap-2">
-              💻 Manajemen User
+              💻 User Management
             </TabsTrigger>
           )}
         </TabsList>
