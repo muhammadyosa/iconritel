@@ -1,5 +1,5 @@
-import { useState, useMemo } from "react";
-import { Trash2, RefreshCw, Loader2, Calendar, Clock, User, FileText } from "lucide-react";
+import { useState, useMemo, useCallback } from "react";
+import { Trash2, RefreshCw, Loader2, Calendar, Clock, User, FileText, Download } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -14,8 +14,8 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import { useCloudShiftReports } from "@/hooks/useCloudShiftReports";
-
+import { useCloudShiftReports, CloudShiftReport } from "@/hooks/useCloudShiftReports";
+import * as XLSX from "xlsx";
 const SHIFT_FILTER_OPTIONS = ["All", "pagi", "siang", "malam"] as const;
 
 const shiftLabel = (shift: string) => {
@@ -160,6 +160,56 @@ export function ReportManagement() {
       ? reports.length
       : reports.filter((r) => r.shift === deleteShiftFilter).length;
 
+  const buildExportData = useCallback((data: CloudShiftReport[]) => {
+    return data.map((r, idx) => ({
+      "No": idx + 1,
+      "Tanggal": r.date,
+      "Shift": r.shift === "pagi" ? "Pagi" : r.shift === "siang" ? "Siang" : r.shift === "malam" ? "Malam" : r.shift,
+      "Petugas": r.officer,
+      "OLT Down": r.olt_down || "-",
+      "Port Down": r.port_down || "-",
+      "FAT Loss": r.fat_loss || "-",
+      "Permasalahan": r.issues || "-",
+      "Catatan": r.notes || "-",
+      "Dibuat": new Date(r.created_at).toLocaleString("id-ID"),
+    }));
+  }, []);
+
+  const handleExportExcel = useCallback(() => {
+    const data = buildExportData(filteredReports);
+    if (data.length === 0) {
+      toast.info("Tidak ada data untuk diexport");
+      return;
+    }
+    const ws = XLSX.utils.json_to_sheet(data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Report Shift");
+    // Auto column widths
+    ws["!cols"] = Object.keys(data[0]).map((key) => ({
+      wch: Math.max(key.length, ...data.map((r) => String((r as any)[key]).length).slice(0, 50)) + 2,
+    }));
+    XLSX.writeFile(wb, `Report_Shift_${new Date().toISOString().split("T")[0]}.xlsx`);
+    toast.success(`${data.length} report berhasil diexport ke Excel`);
+  }, [filteredReports, buildExportData]);
+
+  const handleExportCSV = useCallback(() => {
+    const data = buildExportData(filteredReports);
+    if (data.length === 0) {
+      toast.info("Tidak ada data untuk diexport");
+      return;
+    }
+    const ws = XLSX.utils.json_to_sheet(data);
+    const csv = XLSX.utils.sheet_to_csv(ws);
+    const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `Report_Shift_${new Date().toISOString().split("T")[0]}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast.success(`${data.length} report berhasil diexport ke CSV`);
+  }, [filteredReports, buildExportData]);
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -260,6 +310,15 @@ export function ReportManagement() {
           Refresh
         </Button>
 
+        <Button variant="outline" size="sm" onClick={handleExportExcel} disabled={filteredReports.length === 0}>
+          <Download className="h-3.5 w-3.5 mr-1.5" />
+          Export Excel
+        </Button>
+
+        <Button variant="outline" size="sm" onClick={handleExportCSV} disabled={filteredReports.length === 0}>
+          <Download className="h-3.5 w-3.5 mr-1.5" />
+          Export CSV
+        </Button>
         <div className="flex-1" />
 
         <Button
