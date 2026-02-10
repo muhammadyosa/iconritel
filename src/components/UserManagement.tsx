@@ -276,8 +276,7 @@ export function UserManagement() {
         <div className="flex items-center justify-between">
           <div>
             <CardTitle className="flex items-center gap-2">
-              <Users className="h-5 w-5" />
-              Manajemen User
+              💻 User Management
             </CardTitle>
             <CardDescription>
               Kelola user dan role akses sistem ({users.length} user terdaftar)

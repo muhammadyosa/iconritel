@@ -410,8 +410,7 @@ export default function Settings() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <FileSpreadsheet className="h-5 w-5" />
-                Upload File Excel
+                📥 Upload File Excel
               </CardTitle>
               <CardDescription>
                 Pilih file Excel (.xlsx, .xls) - data tersimpan permanen di aplikasi (hanya perlu upload 1x)
