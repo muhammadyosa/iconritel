@@ -117,7 +117,6 @@ const OLTDeviceList = () => {
         <CardHeader className="p-3 sm:p-4 md:p-6">
           <CardTitle className="flex flex-col xs:flex-row xs:items-center justify-between gap-2 sm:gap-4">
             <div className="flex items-center gap-2 min-w-0">
-              <Server className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
               <div className="min-w-0">
                 <span className="text-sm sm:text-base">📟 Data OLT</span>
                 <p className="text-[10px] sm:text-xs text-muted-foreground font-normal mt-0.5 sm:mt-1">

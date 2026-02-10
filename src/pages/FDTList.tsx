@@ -115,7 +115,7 @@ const FDTList = () => {
   return (
     <div className="space-y-3 sm:space-y-4 md:space-y-6 w-full max-w-full overflow-x-hidden min-w-0">
       <div>
-        <h1 className="text-xl sm:text-2xl md:text-3xl font-bold">📦 List FDT</h1>
+        <h1 className="text-xl sm:text-2xl md:text-3xl font-bold">📦 Data FDT</h1>
         <p className="text-xs sm:text-sm text-muted-foreground">
           Data FDT diimport melalui <Link to="/settings" className="text-primary underline hover:no-underline">Settings</Link>
         </p>
@@ -125,7 +125,6 @@ const FDTList = () => {
         <CardHeader className="p-3 sm:p-4 md:p-6">
           <CardTitle className="flex flex-col xs:flex-row xs:items-center justify-between gap-2 sm:gap-4">
             <div className="flex items-center gap-2 min-w-0">
-              <Server className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
               <div className="min-w-0">
                 <span className="text-sm sm:text-base">📦 Data FDT</span>
                 <p className="text-[10px] sm:text-xs text-muted-foreground font-normal mt-0.5 sm:mt-1">
