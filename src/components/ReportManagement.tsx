@@ -1,5 +1,5 @@
-import { useState, useMemo, useCallback } from "react";
-import { Trash2, RefreshCw, Loader2, Calendar, Clock, User, FileText, Download } from "lucide-react";
+import { useState, useMemo, useCallback, useRef } from "react";
+import { Trash2, RefreshCw, Loader2, Calendar, Clock, User, FileText, Download, Upload, FileDown } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -13,6 +13,9 @@ import {
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
+import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
 import { useCloudShiftReports, CloudShiftReport } from "@/hooks/useCloudShiftReports";
 import * as XLSX from "xlsx";
@@ -41,13 +44,15 @@ const shiftBadge = (shift: string) => {
 };
 
 export function ReportManagement() {
-  const { reports, isLoading, fetchReports, deleteReport, deleteAllReports } = useCloudShiftReports();
+  const { reports, isLoading, fetchReports, addReport, deleteReport, deleteAllReports } = useCloudShiftReports();
   const [shiftFilter, setShiftFilter] = useState<string>("All");
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isImporting, setIsImporting] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<"selected" | "shift" | "all">("selected");
   const [deleteShiftFilter, setDeleteShiftFilter] = useState<string>("pagi");
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const filteredReports = useMemo(() => {
     if (shiftFilter === "All") return reports;
@@ -210,6 +215,48 @@ export function ReportManagement() {
     toast.success(`${data.length} report berhasil diexport ke CSV`);
   }, [filteredReports, buildExportData]);
 
+  const handleImportFile = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setIsImporting(true);
+    try {
+      const data = await file.arrayBuffer();
+      const wb = XLSX.read(data);
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json<Record<string, string>>(ws);
+      
+      if (rows.length === 0) {
+        toast.error("File tidak memiliki data");
+        return;
+      }
+
+      let successCount = 0;
+      for (const row of rows) {
+        const shiftRaw = (row["Shift"] || "").toLowerCase().trim();
+        const shift = ["pagi", "siang", "malam"].includes(shiftRaw) ? shiftRaw : "pagi";
+        const success = await addReport({
+          date: row["Tanggal"] || new Date().toISOString().split("T")[0],
+          shift,
+          officer: row["Petugas"] || "-",
+          oltDown: row["OLT Down"] === "-" ? "" : (row["OLT Down"] || ""),
+          portDown: row["Port Down"] === "-" ? "" : (row["Port Down"] || ""),
+          fatLoss: row["FAT Loss"] === "-" ? "" : (row["FAT Loss"] || ""),
+          issues: row["Permasalahan"] === "-" ? "" : (row["Permasalahan"] || ""),
+          notes: row["Catatan"] === "-" ? "" : (row["Catatan"] || ""),
+        });
+        if (success) successCount++;
+      }
+      toast.success(`${successCount} report shift berhasil diimport`);
+      fetchReports();
+    } catch (error) {
+      toast.error("Gagal mengimport file");
+      if (import.meta.env.DEV) console.error("Import error:", error);
+    } finally {
+      setIsImporting(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  }, [addReport, fetchReports]);
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -310,15 +357,37 @@ export function ReportManagement() {
           Refresh
         </Button>
 
-        <Button variant="outline" size="sm" onClick={handleExportExcel} disabled={filteredReports.length === 0}>
-          <Download className="h-3.5 w-3.5 mr-1.5" />
-          Export Excel
-        </Button>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept=".xlsx,.xls,.csv"
+          onChange={handleImportFile}
+          className="hidden"
+        />
 
-        <Button variant="outline" size="sm" onClick={handleExportCSV} disabled={filteredReports.length === 0}>
-          <Download className="h-3.5 w-3.5 mr-1.5" />
-          Export CSV
-        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" size="sm" disabled={isImporting}>
+              <FileDown className="h-3.5 w-3.5 mr-1.5" />
+              {isImporting ? "Importing..." : "Export / Import"}
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start">
+            <DropdownMenuItem onClick={handleExportExcel} disabled={filteredReports.length === 0}>
+              <Download className="h-4 w-4 mr-2" />
+              Export Excel (.xlsx)
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={handleExportCSV} disabled={filteredReports.length === 0}>
+              <Download className="h-4 w-4 mr-2" />
+              Export CSV (.csv)
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => fileInputRef.current?.click()}>
+              <Upload className="h-4 w-4 mr-2" />
+              Import Excel / CSV
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
         <div className="flex-1" />
 
         <Button
