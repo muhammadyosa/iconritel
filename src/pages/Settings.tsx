@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Settings as SettingsIcon, Info, FileSpreadsheet, FileUp, Check, X, AlertCircle, RefreshCw, Database, Trash2, Users } from "lucide-react";
+import { Settings as SettingsIcon, Info, FileSpreadsheet, FileUp, Check, X, AlertCircle, RefreshCw, Database, Trash2, Users, ClipboardList } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -26,6 +26,7 @@ import { importMultiSheetExcel, getExcelSheets, ImportResult } from "@/lib/multi
 import { saveExcelData, saveOLTData, saveFATData, openDB, clearAllData, saveFDTData, saveAKVData, loadExcelData, loadOLTData, loadFATData, loadFDTData, loadAKVData } from "@/lib/indexedDB";
 import { useUserRole } from "@/hooks/useUserRole";
 import { UserManagement } from "@/components/UserManagement";
+import { InsidentManagement } from "@/components/InsidentManagement";
 
 const UPE_STORE_NAME = "upe_data";
 const BNG_STORE_NAME = "bng_data";
@@ -384,7 +385,7 @@ export default function Settings() {
       </div>
 
       <Tabs defaultValue="import" className="space-y-6">
-        <TabsList className={`grid w-full ${isAdmin ? 'grid-cols-3' : 'grid-cols-2'} lg:w-[${isAdmin ? '600' : '400'}px]`}>
+        <TabsList className={`grid w-full ${isAdmin ? 'grid-cols-4' : 'grid-cols-2'} lg:w-[${isAdmin ? '800' : '400'}px]`}>
           <TabsTrigger value="import" className="flex items-center gap-2">
             <FileSpreadsheet className="h-4 w-4" />
             Import Data
@@ -393,6 +394,12 @@ export default function Settings() {
             <Info className="h-4 w-4" />
             Informasi
           </TabsTrigger>
+          {isAdmin && (
+            <TabsTrigger value="incidents" className="flex items-center gap-2">
+              <ClipboardList className="h-4 w-4" />
+              📋 Insident
+            </TabsTrigger>
+          )}
           {isAdmin && (
             <TabsTrigger value="users" className="flex items-center gap-2">
               <Users className="h-4 w-4" />
@@ -824,6 +831,13 @@ export default function Settings() {
             </CardContent>
           </Card>
         </TabsContent>
+
+        {/* Insident Management Tab - Admin Only */}
+        {isAdmin && (
+          <TabsContent value="incidents" className="space-y-6">
+            <InsidentManagement />
+          </TabsContent>
+        )}
 
         {/* User Management Tab - Admin Only */}
         {isAdmin && (
