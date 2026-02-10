@@ -1,5 +1,5 @@
-import { useState, useMemo } from "react";
-import { Trash2, RefreshCw, ClipboardList, Clock, AlertTriangle, CheckCircle, Loader2, Timer } from "lucide-react";
+import { useState, useMemo, useCallback, useRef } from "react";
+import { Trash2, RefreshCw, ClipboardList, Clock, AlertTriangle, CheckCircle, Loader2, Timer, FileDown, Download, Upload } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -13,10 +13,14 @@ import {
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
+import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
 import { useCloudTickets } from "@/hooks/useCloudTickets";
 import { Ticket } from "@/types/ticket";
 import { supabase } from "@/integrations/supabase/client";
+import * as XLSX from "xlsx";
 
 const STATUS_OPTIONS = ["All", "On Progress", "Critical", "Resolved", "Pending"] as const;
 
@@ -31,13 +35,15 @@ function getTimeRemaining(resolvedAt: string): string {
 }
 
 export function InsidentManagement() {
-  const { tickets, isLoading, refetch } = useCloudTickets();
+  const { tickets, isLoading, refetch, addTicket } = useCloudTickets();
   const [statusFilter, setStatusFilter] = useState<string>("All");
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isImporting, setIsImporting] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<"selected" | "status">("selected");
   const [deleteStatusFilter, setDeleteStatusFilter] = useState<string>("Resolved");
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const filteredTickets = useMemo(() => {
     if (statusFilter === "All") return tickets;
@@ -145,6 +151,96 @@ export function InsidentManagement() {
     deleteTarget === "selected"
       ? selectedIds.size
       : tickets.filter((t) => t.status === deleteStatusFilter).length;
+
+  const buildExportData = useCallback((data: typeof tickets) => {
+    return data.map((t, idx) => ({
+      "No": idx + 1,
+      "Ticket ID": t.id,
+      "Customer": t.customerName,
+      "Service ID": t.serviceId,
+      "Hostname": t.hostname,
+      "FAT ID": t.fatId,
+      "SN ONT": t.snOnt,
+      "SERPO": t.serpo,
+      "Kendala": t.constraint,
+      "Kategori": t.category,
+      "Status": t.status,
+      "Create by": t.createdByName || "-",
+      "Dibuat": t.createdAt,
+      "Hasil": t.ticketResult,
+    }));
+  }, []);
+
+  const handleExportExcel = useCallback(() => {
+    const data = buildExportData(filteredTickets);
+    if (data.length === 0) { toast.info("Tidak ada data untuk diexport"); return; }
+    const ws = XLSX.utils.json_to_sheet(data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Insident");
+    ws["!cols"] = Object.keys(data[0]).map((key) => ({
+      wch: Math.max(key.length, ...data.map((r) => String((r as any)[key]).length).slice(0, 50)) + 2,
+    }));
+    XLSX.writeFile(wb, `Insident_${new Date().toISOString().split("T")[0]}.xlsx`);
+    toast.success(`${data.length} insident berhasil diexport ke Excel`);
+  }, [filteredTickets, buildExportData]);
+
+  const handleExportCSV = useCallback(() => {
+    const data = buildExportData(filteredTickets);
+    if (data.length === 0) { toast.info("Tidak ada data untuk diexport"); return; }
+    const ws = XLSX.utils.json_to_sheet(data);
+    const csv = XLSX.utils.sheet_to_csv(ws);
+    const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `Insident_${new Date().toISOString().split("T")[0]}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast.success(`${data.length} insident berhasil diexport ke CSV`);
+  }, [filteredTickets, buildExportData]);
+
+  const handleImportFile = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setIsImporting(true);
+    try {
+      const data = await file.arrayBuffer();
+      const wb = XLSX.read(data);
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json<Record<string, string>>(ws);
+      if (rows.length === 0) { toast.error("File tidak memiliki data"); return; }
+
+      let successCount = 0;
+      for (const row of rows) {
+        try {
+          await addTicket({
+            id: row["Ticket ID"] || `IMP-${Date.now()}-${successCount}`,
+            serviceId: row["Service ID"] || "-",
+            customerName: row["Customer"] || "-",
+            serpo: row["SERPO"] || "-",
+            hostname: row["Hostname"] || "-",
+            fatId: row["FAT ID"] || "-",
+            snOnt: row["SN ONT"] || "-",
+            constraint: row["Kendala"] || "-",
+            category: row["Kategori"] || "RITEL",
+            ticketResult: row["Hasil"] || "-",
+            status: (row["Status"] as any) || "On Progress",
+            createdAt: row["Dibuat"] || new Date().toLocaleString("id-ID"),
+            createdISO: new Date().toISOString(),
+          });
+          successCount++;
+        } catch { /* skip failed rows */ }
+      }
+      toast.success(`${successCount} insident berhasil diimport`);
+      refetch();
+    } catch (error) {
+      toast.error("Gagal mengimport file");
+      if (import.meta.env.DEV) console.error("Import error:", error);
+    } finally {
+      setIsImporting(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  }, [addTicket, refetch]);
 
   const statusBadge = (status: string) => {
     switch (status) {
@@ -267,6 +363,38 @@ export function InsidentManagement() {
           <RefreshCw className="h-3.5 w-3.5 mr-1.5" />
           Refresh
         </Button>
+
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept=".xlsx,.xls,.csv"
+          onChange={handleImportFile}
+          className="hidden"
+        />
+
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" size="sm" disabled={isImporting}>
+              <FileDown className="h-3.5 w-3.5 mr-1.5" />
+              {isImporting ? "Importing..." : "Export / Import"}
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start">
+            <DropdownMenuItem onClick={handleExportExcel} disabled={filteredTickets.length === 0}>
+              <Download className="h-4 w-4 mr-2" />
+              Export Excel (.xlsx)
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={handleExportCSV} disabled={filteredTickets.length === 0}>
+              <Download className="h-4 w-4 mr-2" />
+              Export CSV (.csv)
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => fileInputRef.current?.click()}>
+              <Upload className="h-4 w-4 mr-2" />
+              Import Excel / CSV
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
 
         <div className="flex-1" />
 
