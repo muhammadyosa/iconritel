@@ -374,27 +374,27 @@ export function InsidentManagement() {
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="sm" disabled={isImporting}>
-              <FileDown className="h-3.5 w-3.5 mr-1.5" />
-              {isImporting ? "Importing..." : "Export / Import"}
+            <Button variant="outline" size="sm" disabled={filteredTickets.length === 0}>
+              <Download className="h-3.5 w-3.5 mr-1.5" />
+              Export Excel / CSV
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start">
-            <DropdownMenuItem onClick={handleExportExcel} disabled={filteredTickets.length === 0}>
+            <DropdownMenuItem onClick={handleExportExcel}>
               <Download className="h-4 w-4 mr-2" />
               Excel (.xlsx)
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={handleExportCSV} disabled={filteredTickets.length === 0}>
+            <DropdownMenuItem onClick={handleExportCSV}>
               <Download className="h-4 w-4 mr-2" />
               CSV (.csv)
             </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => fileInputRef.current?.click()}>
-              <Upload className="h-4 w-4 mr-2" />
-              Import Excel / CSV
-            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
+
+        <Button variant="outline" size="sm" disabled={isImporting} onClick={() => fileInputRef.current?.click()}>
+          <Upload className="h-3.5 w-3.5 mr-1.5" />
+          {isImporting ? "Importing..." : "Import"}
+        </Button>
 
         <div className="flex-1" />
 
