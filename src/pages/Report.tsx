@@ -330,21 +330,23 @@ Dibuat: ${new Date(r.createdAt).toLocaleString("id-ID")}
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-3 sm:space-y-4 md:space-y-6 max-w-full overflow-x-hidden">
       <div>
-        <h1 className="text-3xl font-bold">📝 Report</h1>
-        <p className="text-muted-foreground">
+        <h1 className="text-xl sm:text-2xl md:text-3xl font-bold">📝 Report</h1>
+        <p className="text-muted-foreground text-[11px] sm:text-sm">
           Kelola report shift dan update ticket
         </p>
       </div>
 
       <Tabs defaultValue="shift" className="w-full">
-        <TabsList className="grid w-full max-w-3xl grid-cols-4">
-          <TabsTrigger value="shift">🗣️ Report Shift</TabsTrigger>
-          <TabsTrigger value="sla">⏰ OVER SLA 7 JAM</TabsTrigger>
-          <TabsTrigger value="pending">📋 Belum Dikerjakan</TabsTrigger>
-          <TabsTrigger value="dashboard-iconnet">📊 Dashboard Iconnet</TabsTrigger>
-        </TabsList>
+        <div className="overflow-x-auto scrollbar-hide -mx-2 px-2 sm:mx-0 sm:px-0">
+          <TabsList className="inline-flex w-auto min-w-full sm:min-w-0 gap-1 h-auto flex-wrap sm:flex-nowrap p-1">
+            <TabsTrigger value="shift" className="text-[11px] sm:text-sm px-2.5 sm:px-3 py-1.5 sm:py-2 whitespace-nowrap">🗣️ Report Shift</TabsTrigger>
+            <TabsTrigger value="sla" className="text-[11px] sm:text-sm px-2.5 sm:px-3 py-1.5 sm:py-2 whitespace-nowrap">⏰ SLA 7 JAM</TabsTrigger>
+            <TabsTrigger value="pending" className="text-[11px] sm:text-sm px-2.5 sm:px-3 py-1.5 sm:py-2 whitespace-nowrap">📋 Pending</TabsTrigger>
+            <TabsTrigger value="dashboard-iconnet" className="text-[11px] sm:text-sm px-2.5 sm:px-3 py-1.5 sm:py-2 whitespace-nowrap">📊 Iconnet</TabsTrigger>
+          </TabsList>
+        </div>
 
         <TabsContent value="shift" className="space-y-4">
           <Card>
