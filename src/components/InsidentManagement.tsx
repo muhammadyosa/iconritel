@@ -374,27 +374,27 @@ export function InsidentManagement() {
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="sm" disabled={filteredTickets.length === 0}>
-              <Download className="h-3.5 w-3.5 mr-1.5" />
-              Export Excel / CSV
+            <Button variant="outline" size="sm" disabled={isImporting}>
+              <FileDown className="h-3.5 w-3.5 mr-1.5" />
+              {isImporting ? "Importing..." : "Export / Import"}
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="start">
-            <DropdownMenuItem onClick={handleExportExcel}>
+          <DropdownMenuContent align="start" className="bg-popover border shadow-lg z-50">
+            <DropdownMenuItem onClick={handleExportExcel} disabled={filteredTickets.length === 0}>
               <Download className="h-4 w-4 mr-2" />
-              Excel (.xlsx)
+              Export Excel / CSV (.xlsx)
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={handleExportCSV}>
+            <DropdownMenuItem onClick={handleExportCSV} disabled={filteredTickets.length === 0}>
               <Download className="h-4 w-4 mr-2" />
-              CSV (.csv)
+              Export Excel / CSV (.csv)
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => fileInputRef.current?.click()}>
+              <Upload className="h-4 w-4 mr-2" />
+              Import Excel / CSV
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
-
-        <Button variant="outline" size="sm" disabled={isImporting} onClick={() => fileInputRef.current?.click()}>
-          <Upload className="h-3.5 w-3.5 mr-1.5" />
-          {isImporting ? "Importing..." : "Import"}
-        </Button>
 
         <div className="flex-1" />
 
