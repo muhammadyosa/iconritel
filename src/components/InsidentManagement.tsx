@@ -382,11 +382,7 @@ export function InsidentManagement() {
           <DropdownMenuContent align="start" className="bg-popover border shadow-lg z-50">
             <DropdownMenuItem onClick={handleExportExcel} disabled={filteredTickets.length === 0}>
               <Download className="h-4 w-4 mr-2" />
-              Export Excel / CSV (.xlsx)
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={handleExportCSV} disabled={filteredTickets.length === 0}>
-              <Download className="h-4 w-4 mr-2" />
-              Export Excel / CSV (.csv)
+              Export Excel / CSV
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => fileInputRef.current?.click()}>
