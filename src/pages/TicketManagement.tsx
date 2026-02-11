@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Download, Plus, Search, Trash2, Edit, Info, FileEdit, RefreshCw, Loader2 } from "lucide-react";
+import { Download, Plus, Search, Trash2, Edit, Info, FileEdit, RefreshCw, Loader2, FileDown } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,6 +28,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useTickets } from "@/hooks/useTickets";
 import { useCloudTickets } from "@/hooks/useCloudTickets";
 import { useUserRole } from "@/hooks/useUserRole";
@@ -250,6 +251,37 @@ export default function TicketManagement() {
       XLSX.utils.book_append_sheet(wb, ws, "Daftar Insident");
       XLSX.writeFile(wb, `noc_insident_${Date.now()}.xlsx`);
       toast.success("Excel berhasil diexport");
+    });
+  };
+
+  const handleExportCSV = () => {
+    const data = tickets.map((t, idx) => ({
+      "No": idx + 1,
+      "Ticket ID": t.id,
+      "Category": t.category,
+      "Service ID": t.serviceId,
+      "Customer Name": t.customerName,
+      "Serpo": t.serpo,
+      "Hostname OLT": t.hostname,
+      "ID FAT": t.fatId,
+      "SN ONT": t.snOnt,
+      "Constraint": t.constraint,
+      "Status": t.status,
+      "Created": t.createdAt,
+      "Ticket Result": t.ticketResult,
+    }));
+
+    import("xlsx").then((XLSX) => {
+      const ws = XLSX.utils.json_to_sheet(data);
+      const csv = XLSX.utils.sheet_to_csv(ws);
+      const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `noc_insident_${Date.now()}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+      toast.success("CSV berhasil diexport");
     });
   };
 
@@ -735,11 +767,25 @@ export default function TicketManagement() {
                     </div>
                   </DialogContent>
                 </Dialog>
-                <Button onClick={handleExportExcel} variant="outline" size="sm" className="h-6 sm:h-7 text-[9px] sm:text-[10px] px-1.5 sm:px-2">
-                  <Download className="h-3 w-3 mr-0.5 sm:mr-1" />
-                  <span className="hidden xs:inline">Excel</span>
-                  <span className="xs:hidden">↓</span>
-                </Button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" size="sm" className="h-6 sm:h-7 text-[9px] sm:text-[10px] px-1.5 sm:px-2">
+                      <FileDown className="h-3 w-3 mr-0.5 sm:mr-1" />
+                      <span className="hidden xs:inline">Excel / CSV</span>
+                      <span className="xs:hidden">↓</span>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={handleExportExcel}>
+                      <Download className="h-4 w-4 mr-2" />
+                      Excel (.xlsx)
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={handleExportCSV}>
+                      <Download className="h-4 w-4 mr-2" />
+                      CSV (.csv)
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             </CardHeader>
             <CardContent className="p-1.5 sm:p-2 space-y-1.5 sm:space-y-2">
