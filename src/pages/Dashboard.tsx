@@ -132,10 +132,10 @@ export default function Dashboard() {
       >
         <div className="flex items-center gap-3 mb-2">
           <div>
-            <h1 className="text-3xl font-bold">
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold">
               🖥️ Dashboard Overview
             </h1>
-            <p className="text-muted-foreground text-sm">
+            <p className="text-muted-foreground text-[11px] sm:text-sm">
               Monitoring incident NOC RITEL
             </p>
           </div>
@@ -779,12 +779,12 @@ export default function Dashboard() {
         transition={{ duration: 0.6, delay: 0.7 }}
       >
         <Card className="shadow-2xl border-2">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-            <CardTitle>Recent Tickets</CardTitle>
+          <CardHeader className="flex flex-col xs:flex-row xs:items-center justify-between space-y-2 xs:space-y-0 pb-3 sm:pb-4">
+            <CardTitle className="text-sm sm:text-base">Recent Tickets</CardTitle>
             <div className="flex items-center gap-2">
-              <FileText className="h-4 w-4 text-muted-foreground" />
+              <FileText className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground" />
               <Select value={selectedConstraint} onValueChange={setSelectedConstraint}>
-                <SelectTrigger className="w-[180px] h-9">
+                <SelectTrigger className="w-[140px] sm:w-[180px] h-7 sm:h-9 text-[11px] sm:text-sm">
                   <SelectValue placeholder="Filter Constraint" />
                 </SelectTrigger>
                 <SelectContent>

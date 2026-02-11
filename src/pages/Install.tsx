@@ -56,7 +56,7 @@ const Install = () => {
             <Zap className="h-12 w-12 text-primary" />
           </div>
         </div>
-        <h1 className="text-3xl font-bold">Install NOC RITEL</h1>
+        <h1 className="text-xl sm:text-2xl md:text-3xl font-bold">Install NOC RITEL</h1>
         <p className="text-muted-foreground mt-2">
           Pasang aplikasi untuk akses cepat dan penggunaan offline
         </p>

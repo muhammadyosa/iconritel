@@ -376,39 +376,41 @@ export default function Settings() {
   return (
     <div className="space-y-6 w-full max-w-full overflow-x-hidden min-w-0">
       {/* Header */}
-      <div className="flex items-center gap-3 mb-6">
+      <div className="flex items-center gap-3 mb-4 sm:mb-6">
         <div>
-          <h1 className="text-3xl font-bold">🛠 Settings</h1>
-          <p className="text-muted-foreground text-sm">
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold">🛠 Settings</h1>
+          <p className="text-muted-foreground text-[11px] sm:text-sm">
             Konfigurasi aplikasi dan import data
           </p>
         </div>
       </div>
 
       <Tabs defaultValue="import" className="space-y-6">
-        <TabsList className={`grid w-full ${isAdmin ? 'grid-cols-5' : 'grid-cols-2'} lg:w-[${isAdmin ? '1000' : '400'}px]`}>
-          <TabsTrigger value="import" className="flex items-center gap-2">
-            📥 Import Data
-          </TabsTrigger>
-          <TabsTrigger value="info" className="flex items-center gap-2">
-            📌 Information
-          </TabsTrigger>
-          {isAdmin && (
-            <TabsTrigger value="incidents" className="flex items-center gap-2">
-              📋 Insident Management
+        <div className="overflow-x-auto scrollbar-hide -mx-2 px-2 sm:mx-0 sm:px-0">
+          <TabsList className={`inline-flex w-auto min-w-full sm:min-w-0 gap-1 h-auto flex-wrap sm:flex-nowrap p-1`}>
+            <TabsTrigger value="import" className="text-[11px] sm:text-sm px-2.5 sm:px-3 py-1.5 sm:py-2 whitespace-nowrap">
+              📥 Import
             </TabsTrigger>
-          )}
-          {isAdmin && (
-            <TabsTrigger value="reports" className="flex items-center gap-2">
-              🗣️ Report Management
+            <TabsTrigger value="info" className="text-[11px] sm:text-sm px-2.5 sm:px-3 py-1.5 sm:py-2 whitespace-nowrap">
+              📌 Info
             </TabsTrigger>
-          )}
-          {isAdmin && (
-            <TabsTrigger value="users" className="flex items-center gap-2">
-              💻 User Management
-            </TabsTrigger>
-          )}
-        </TabsList>
+            {isAdmin && (
+              <TabsTrigger value="incidents" className="text-[11px] sm:text-sm px-2.5 sm:px-3 py-1.5 sm:py-2 whitespace-nowrap">
+                📋 Insident
+              </TabsTrigger>
+            )}
+            {isAdmin && (
+              <TabsTrigger value="reports" className="text-[11px] sm:text-sm px-2.5 sm:px-3 py-1.5 sm:py-2 whitespace-nowrap">
+                🗣️ Report
+              </TabsTrigger>
+            )}
+            {isAdmin && (
+              <TabsTrigger value="users" className="text-[11px] sm:text-sm px-2.5 sm:px-3 py-1.5 sm:py-2 whitespace-nowrap">
+                💻 Users
+              </TabsTrigger>
+            )}
+          </TabsList>
+        </div>
 
         {/* Import Master Data Tab */}
         <TabsContent value="import" className="space-y-6">
