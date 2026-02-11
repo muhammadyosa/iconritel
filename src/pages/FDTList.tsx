@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
-import { Download, Server, FileText, Info } from "lucide-react";
+import { Download, Server, FileText, Info, FileDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import {
   Table,
   TableBody,
@@ -65,33 +66,45 @@ const FDTList = () => {
       .catch(() => setIsLoading(false));
   }, []);
 
-  const handleExport = () => {
-    if (filteredData.length === 0) {
-      toast({
-        title: "Tidak ada data",
-        description: "Tidak ada data untuk diekspor.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    const exportData = filteredData.map((fdt) => ({
+  const buildExportData = () => {
+    return filteredData.map((fdt) => ({
       "Nama Provinsi": sanitizeForCSV(fdt.provinsi),
       "Nama Area": sanitizeForCSV(fdt.area),
       "ID FDT": sanitizeForCSV(fdt.idFDT),
       "Tikor": sanitizeForCSV(fdt.tikor),
       "Tanggal Import": sanitizeForCSV(new Date(fdt.createdAt).toLocaleString("id-ID")),
     }));
+  };
 
+  const handleExportExcel = () => {
+    const exportData = buildExportData();
+    if (exportData.length === 0) {
+      toast({ title: "Tidak ada data", description: "Tidak ada data untuk diekspor.", variant: "destructive" });
+      return;
+    }
     const ws = XLSX.utils.json_to_sheet(exportData);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "List FDT");
     XLSX.writeFile(wb, `List_FDT_${new Date().toISOString().split("T")[0]}.xlsx`);
+    toast({ title: "Export berhasil", description: "Data FDT berhasil diekspor ke Excel." });
+  };
 
-    toast({
-      title: "Export berhasil",
-      description: "Data FDT berhasil diekspor ke Excel.",
-    });
+  const handleExportCSV = () => {
+    const exportData = buildExportData();
+    if (exportData.length === 0) {
+      toast({ title: "Tidak ada data", description: "Tidak ada data untuk diekspor.", variant: "destructive" });
+      return;
+    }
+    const ws = XLSX.utils.json_to_sheet(exportData);
+    const csv = XLSX.utils.sheet_to_csv(ws);
+    const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `List_FDT_${new Date().toISOString().split("T")[0]}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast({ title: "Export berhasil", description: "Data FDT berhasil diekspor ke CSV." });
   };
 
   const filteredData = fdtData.filter((fdt) => {
@@ -144,17 +157,25 @@ const FDTList = () => {
                 </p>
               </div>
             </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleExport}
-              disabled={filteredData.length === 0}
-              className="h-7 sm:h-8 text-[10px] sm:text-xs px-2 sm:px-3 touch-target"
-            >
-              <Download className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />
-              <span className="hidden xs:inline">Excel</span>
-              <span className="xs:hidden">Export</span>
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" disabled={filteredData.length === 0} className="h-7 sm:h-8 text-[10px] sm:text-xs px-2 sm:px-3 touch-target">
+                  <FileDown className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />
+                  <span className="hidden xs:inline">Excel / CSV</span>
+                  <span className="xs:hidden">Export</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={handleExportExcel}>
+                  <Download className="h-4 w-4 mr-2" />
+                  Excel (.xlsx)
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleExportCSV}>
+                  <Download className="h-4 w-4 mr-2" />
+                  CSV (.csv)
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </CardTitle>
           <CardDescription className="text-[10px] sm:text-xs hidden sm:block">
             Kolom: Nama Provinsi, Nama Area, ID FDT, Tikor

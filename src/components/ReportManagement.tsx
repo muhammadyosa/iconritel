@@ -379,7 +379,7 @@ export function ReportManagement() {
             </DropdownMenuItem>
             <DropdownMenuItem onClick={handleExportCSV} disabled={filteredReports.length === 0}>
               <Download className="h-4 w-4 mr-2" />
-              Export CSV (.csv)
+              CSV (.csv)
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => fileInputRef.current?.click()}>

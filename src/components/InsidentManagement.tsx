@@ -386,7 +386,7 @@ export function InsidentManagement() {
             </DropdownMenuItem>
             <DropdownMenuItem onClick={handleExportCSV} disabled={filteredTickets.length === 0}>
               <Download className="h-4 w-4 mr-2" />
-              Export CSV (.csv)
+              CSV (.csv)
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => fileInputRef.current?.click()}>
