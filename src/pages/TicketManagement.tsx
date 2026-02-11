@@ -778,11 +778,7 @@ export default function TicketManagement() {
                   <DropdownMenuContent align="end">
                     <DropdownMenuItem onClick={handleExportExcel}>
                       <Download className="h-4 w-4 mr-2" />
-                      Excel (.xlsx)
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={handleExportCSV}>
-                      <Download className="h-4 w-4 mr-2" />
-                      CSV (.csv)
+                      Export Excel / CSV
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
