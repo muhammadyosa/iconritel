@@ -184,20 +184,6 @@ export function InsidentManagement() {
     toast.success(`${data.length} insident berhasil diexport ke Excel`);
   }, [filteredTickets, buildExportData]);
 
-  const handleExportCSV = useCallback(() => {
-    const data = buildExportData(filteredTickets);
-    if (data.length === 0) { toast.info("Tidak ada data untuk diexport"); return; }
-    const ws = XLSX.utils.json_to_sheet(data);
-    const csv = XLSX.utils.sheet_to_csv(ws);
-    const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `Insident_${new Date().toISOString().split("T")[0]}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
-    toast.success(`${data.length} insident berhasil diexport ke CSV`);
-  }, [filteredTickets, buildExportData]);
 
   const handleImportFile = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];

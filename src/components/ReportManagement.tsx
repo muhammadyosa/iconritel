@@ -197,23 +197,6 @@ export function ReportManagement() {
     toast.success(`${data.length} report berhasil diexport ke Excel`);
   }, [filteredReports, buildExportData]);
 
-  const handleExportCSV = useCallback(() => {
-    const data = buildExportData(filteredReports);
-    if (data.length === 0) {
-      toast.info("Tidak ada data untuk diexport");
-      return;
-    }
-    const ws = XLSX.utils.json_to_sheet(data);
-    const csv = XLSX.utils.sheet_to_csv(ws);
-    const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `Report_Shift_${new Date().toISOString().split("T")[0]}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
-    toast.success(`${data.length} report berhasil diexport ke CSV`);
-  }, [filteredReports, buildExportData]);
 
   const handleImportFile = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];

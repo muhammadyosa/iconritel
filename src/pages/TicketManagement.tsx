@@ -254,36 +254,6 @@ export default function TicketManagement() {
     });
   };
 
-  const handleExportCSV = () => {
-    const data = tickets.map((t, idx) => ({
-      "No": idx + 1,
-      "Ticket ID": t.id,
-      "Category": t.category,
-      "Service ID": t.serviceId,
-      "Customer Name": t.customerName,
-      "Serpo": t.serpo,
-      "Hostname OLT": t.hostname,
-      "ID FAT": t.fatId,
-      "SN ONT": t.snOnt,
-      "Constraint": t.constraint,
-      "Status": t.status,
-      "Created": t.createdAt,
-      "Ticket Result": t.ticketResult,
-    }));
-
-    import("xlsx").then((XLSX) => {
-      const ws = XLSX.utils.json_to_sheet(data);
-      const csv = XLSX.utils.sheet_to_csv(ws);
-      const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `noc_insident_${Date.now()}.csv`;
-      a.click();
-      URL.revokeObjectURL(url);
-      toast.success("CSV berhasil diexport");
-    });
-  };
 
   const handleSubmitManualTicket = async () => {
     if (!manualFormData.ticketId.trim()) {
