@@ -88,7 +88,7 @@ export default function Login() {
         <img 
           src={indonesiaMap} 
           alt="" 
-          className="w-[90%] max-w-[1400px] h-auto object-contain opacity-[0.12]"
+          className="w-full h-full object-cover opacity-[0.12]"
           style={{ filter: 'brightness(0.7) saturate(0.9)' }}
         />
       </div>
