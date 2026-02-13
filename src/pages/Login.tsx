@@ -132,7 +132,7 @@ export default function Login() {
       {/* Content with Parallax */}
       <motion.div
         ref={cardRef}
-        className="relative z-10 w-full max-w-sm flex flex-col items-center gap-6"
+        className="relative z-10 flex flex-col items-center gap-4"
         initial={{ opacity: 0, y: 30, scale: 0.95 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
@@ -159,20 +159,20 @@ export default function Login() {
           <img 
             src={iconnetMascot} 
             alt="ICONNET Mascot" 
-            className="relative h-28 sm:h-36 w-auto object-contain drop-shadow-[0_0_25px_rgba(56,189,248,0.5)] transition-all duration-300 group-hover:drop-shadow-[0_0_35px_rgba(56,189,248,0.7)]" 
+            className="relative h-20 sm:h-24 w-auto object-contain drop-shadow-[0_0_25px_rgba(56,189,248,0.5)] transition-all duration-300 group-hover:drop-shadow-[0_0_35px_rgba(56,189,248,0.7)]" 
           />
         </motion.div>
 
         {/* NOC RITEL Title */}
         <motion.div 
-          className="text-center space-y-2"
+          className="text-center space-y-1"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.4, delay: 0.5 }}
           style={{ transform: "translateZ(30px)" }}
         >
           <motion.h1 
-            className="text-2xl sm:text-3xl font-extrabold tracking-[0.35em] uppercase text-transparent bg-clip-text bg-gradient-to-r from-cyan-200 via-cyan-400 to-teal-300"
+            className="text-xl sm:text-2xl font-extrabold tracking-[0.35em] uppercase text-transparent bg-clip-text bg-gradient-to-r from-cyan-200 via-cyan-400 to-teal-300"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.6 }}
@@ -185,7 +185,7 @@ export default function Login() {
           </motion.h1>
           
           <motion.p 
-            className="text-sm text-slate-400"
+            className="text-xs text-slate-400"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.8, duration: 0.5 }}
@@ -197,7 +197,7 @@ export default function Login() {
 
         {/* Login Button */}
         <motion.div
-          className="w-full max-w-[280px]"
+          className="w-full max-w-[240px]"
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 1.1 }}
@@ -205,7 +205,7 @@ export default function Login() {
           <Button 
             onClick={handleGoogleSignIn}
             disabled={isSigningIn}
-            className="w-full h-12 text-sm font-semibold gap-3 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 border border-cyan-400/20 text-white shadow-[0_0_30px_rgba(6,182,212,0.25)] transition-all duration-300 hover:shadow-[0_0_40px_rgba(6,182,212,0.4)] hover:scale-[1.03] active:scale-[0.97] rounded-xl"
+            className="w-full h-10 text-xs font-semibold gap-2 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 border border-cyan-400/20 text-white shadow-[0_0_20px_rgba(6,182,212,0.2)] transition-all duration-300 hover:shadow-[0_0_30px_rgba(6,182,212,0.35)] hover:scale-[1.03] active:scale-[0.97] rounded-lg"
           >
             {isSigningIn ? (
               <Loader2 className="h-5 w-5 animate-spin" />
