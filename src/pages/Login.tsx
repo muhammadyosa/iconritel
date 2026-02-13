@@ -149,7 +149,7 @@ export default function Login() {
         <div className="absolute -inset-[1px] bg-gradient-to-b from-cyan-500/20 via-transparent to-cyan-500/10 rounded-xl blur-[1px] opacity-50" />
         
         {/* Main card */}
-        <div className="relative bg-[#0a1525]/20 backdrop-blur-md border border-cyan-500/10 rounded-xl p-5 shadow-2xl">
+        <div className="relative bg-[#0a1525]/30 backdrop-blur-lg border border-cyan-500/10 rounded-xl p-5 shadow-2xl">
           {/* Inner glow */}
           <div className="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent rounded-2xl pointer-events-none" />
           
