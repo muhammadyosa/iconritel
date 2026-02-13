@@ -816,12 +816,12 @@ export default function Dashboard() {
                       <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap bg-muted/80">👥 Serpo</TableHead>
                       <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap bg-muted/80">✍️ Create by</TableHead>
                       <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap bg-muted/80">⚙️ Status</TableHead>
-                      <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap bg-muted/80">⚡ Action</TableHead>
+                      
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {recentTickets.map((ticket) => (
-                      <TableRow key={ticket.id} className="h-6 sm:h-7">
+                      <TableRow key={ticket.id} className="h-6 sm:h-7 cursor-pointer hover:bg-muted/70" onClick={() => setSelectedTicket(ticket)}>
                         <TableCell className="px-1 sm:px-1.5 py-0.5 text-[9px] sm:text-[10px] font-medium">{ticket.id}</TableCell>
                         <TableCell className="px-1 sm:px-1.5 py-0.5">
                           <div>
@@ -870,16 +870,6 @@ export default function Dashboard() {
                               {ticket.createdAt}
                             </div>
                           </div>
-                        </TableCell>
-                        <TableCell className="px-1 sm:px-1.5 py-0.5">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="h-5 px-1.5 text-[7px] sm:text-[8px]"
-                            onClick={() => setSelectedTicket(ticket)}
-                          >
-                            Detail
-                          </Button>
                         </TableCell>
                       </TableRow>
                     ))}
