@@ -84,12 +84,12 @@ export default function Login() {
   return (
     <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden bg-gradient-to-br from-slate-950 via-[#0a1628] to-slate-950">
       {/* Indonesia Map Background */}
-      <div className="absolute inset-0 flex items-center justify-center pointer-events-none" style={{ zIndex: 1 }}>
+      <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 1 }}>
         <img 
           src={indonesiaMap} 
           alt="" 
-          className="w-full h-full object-cover opacity-[0.12]"
-          style={{ filter: 'brightness(0.7) saturate(0.9)' }}
+          className="w-full h-full object-fit opacity-[0.12]"
+          style={{ filter: 'brightness(0.7) saturate(0.9)', objectFit: 'contain', objectPosition: 'center' }}
         />
       </div>
 
