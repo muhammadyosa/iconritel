@@ -150,9 +150,17 @@ export default function Login() {
           className="relative group cursor-pointer"
           style={{ transform: "translateZ(40px)" }}
           initial={{ opacity: 0, y: -20, scale: 0.9 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          transition={{ duration: 0.7, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
-          whileHover={{ scale: 1.1, y: -8, rotate: [0, -2, 2, 0] }}
+          animate={{ 
+            opacity: 1, 
+            y: [0, -8, 0], 
+            scale: 1,
+          }}
+          transition={{ 
+            opacity: { duration: 0.7, delay: 0.3 },
+            scale: { duration: 0.7, delay: 0.3 },
+            y: { duration: 3, repeat: Infinity, ease: "easeInOut", delay: 1 },
+          }}
+          whileHover={{ scale: 1.1, rotate: [0, -2, 2, 0] }}
           whileTap={{ scale: 0.95 }}
         >
           <div className="absolute -inset-4 bg-gradient-to-r from-cyan-500/30 via-teal-500/30 to-blue-500/30 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
