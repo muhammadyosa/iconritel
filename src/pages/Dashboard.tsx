@@ -890,6 +890,9 @@ export default function Dashboard() {
                       hour: "2-digit",
                       minute: "2-digit",
                     })}
+                    {selectedTicket.createdByName && (
+                      <span className="ml-2 text-muted-foreground">• Create by <span className="font-medium text-foreground">{selectedTicket.createdByName}</span></span>
+                    )}
                   </p>
                 </div>
                 <StatusBadge status={selectedTicket.status} />
