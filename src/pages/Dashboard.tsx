@@ -805,86 +805,90 @@ export default function Dashboard() {
                 Belum ada tiket
               </p>
             ) : (
-              <div className="max-h-[55vh] overflow-auto">
-                <Table className="min-w-[600px]">
-                  <TableHeader className="sticky top-0 bg-background z-10">
-                    <TableRow className="h-5">
-                      <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap bg-muted/80">🎫 Insident ID</TableHead>
-                      <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap bg-muted/80">📦 Type</TableHead>
-                      <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap bg-muted/80">👤 Customer/Type</TableHead>
-                      <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap bg-muted/80">👨‍💼 Service ID</TableHead>
-                      <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap bg-muted/80">👥 Serpo</TableHead>
-                      <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap bg-muted/80">✍️ Create by</TableHead>
-                      <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap bg-muted/80">⚙️ Status</TableHead>
-                      <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap bg-muted/80">⚡ Action</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {recentTickets.map((ticket) => (
-                      <TableRow key={ticket.id} className="h-6 sm:h-7">
-                        <TableCell className="px-1 sm:px-1.5 py-0.5 text-[9px] sm:text-[10px] font-medium">{ticket.id}</TableCell>
-                        <TableCell className="px-1 sm:px-1.5 py-0.5">
-                          <div>
-                            <Badge
-                              className={`text-[7px] sm:text-[8px] px-1 py-0 h-3 sm:h-3.5 ${
-                                ticket.category === "FEEDER"
-                                  ? "bg-warning text-warning-foreground"
-                                  : "bg-primary text-primary-foreground"
-                              }`}
+              <div className="overflow-x-auto rounded-md border">
+                <table className="w-full min-w-[600px] caption-bottom text-sm">
+                  <thead className="bg-muted/80 [&_tr]:border-b">
+                    <tr className="h-5 border-b">
+                      <th className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap text-left align-middle font-medium text-muted-foreground">🎫 Insident ID</th>
+                      <th className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap text-left align-middle font-medium text-muted-foreground">📦 Type</th>
+                      <th className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap text-left align-middle font-medium text-muted-foreground">👤 Customer/Type</th>
+                      <th className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap text-left align-middle font-medium text-muted-foreground">👨‍💼 Service ID</th>
+                      <th className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap text-left align-middle font-medium text-muted-foreground">👥 Serpo</th>
+                      <th className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap text-left align-middle font-medium text-muted-foreground">✍️ Create by</th>
+                      <th className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap text-left align-middle font-medium text-muted-foreground">⚙️ Status</th>
+                      <th className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap text-left align-middle font-medium text-muted-foreground">⚡ Action</th>
+                    </tr>
+                  </thead>
+                </table>
+                <div className="max-h-[50vh] overflow-y-auto">
+                  <table className="w-full min-w-[600px] caption-bottom text-sm">
+                    <tbody className="[&_tr:last-child]:border-0">
+                      {recentTickets.map((ticket) => (
+                        <tr key={ticket.id} className="h-6 sm:h-7 border-b transition-colors hover:bg-muted/50">
+                          <td className="px-1 sm:px-1.5 py-0.5 text-[9px] sm:text-[10px] font-medium align-middle">{ticket.id}</td>
+                          <td className="px-1 sm:px-1.5 py-0.5 align-middle">
+                            <div>
+                              <Badge
+                                className={`text-[7px] sm:text-[8px] px-1 py-0 h-3 sm:h-3.5 ${
+                                  ticket.category === "FEEDER"
+                                    ? "bg-warning text-warning-foreground"
+                                    : "bg-primary text-primary-foreground"
+                                }`}
+                              >
+                                {ticket.category}
+                              </Badge>
+                              <div className="text-[7px] sm:text-[8px] text-muted-foreground mt-0.5 truncate max-w-[80px] sm:max-w-none">
+                                {ticket.constraint}
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-1 sm:px-1.5 py-0.5 text-[9px] sm:text-[10px] align-middle">
+                            {ticket.category === "FEEDER" ? (
+                              ticket.constraint === "OLT DOWN" ? (
+                                <span className="font-medium">{ticket.hostname}</span>
+                              ) :
+                              ticket.constraint === "PORT DOWN" ? (
+                                <div>
+                                  <div className="font-medium text-[9px] sm:text-[10px]">{ticket.ticketResult.match(/PORT - (.*?) - DOWN/)?.[1] || "PORT"}</div>
+                                  <div className="text-muted-foreground text-[7px] sm:text-[8px]">{ticket.hostname}</div>
+                                </div>
+                              ) :
+                              ticket.constraint === "FAT LOSS" || ticket.constraint === "FAT BAD RX" ? (
+                                <div>
+                                  <div className="font-medium text-[9px] sm:text-[10px]">{ticket.fatId}</div>
+                                  <div className="text-muted-foreground text-[7px] sm:text-[8px]">{ticket.hostname}</div>
+                                </div>
+                              ) : ticket.constraint
+                            ) : ticket.customerName}
+                          </td>
+                          <td className="px-1 sm:px-1.5 py-0.5 font-mono text-[9px] sm:text-[10px] align-middle">{ticket.serviceId}</td>
+                          <td className="px-1 sm:px-1.5 py-0.5 text-[9px] sm:text-[10px] align-middle">{ticket.serpo}</td>
+                          <td className="px-1 sm:px-1.5 py-0.5 text-[9px] sm:text-[10px] align-middle">
+                            <span className="text-muted-foreground">{ticket.createdByName || "-"}</span>
+                          </td>
+                          <td className="px-1 sm:px-1.5 py-0.5 align-middle">
+                            <div>
+                              <StatusBadge status={ticket.status} />
+                              <div className="text-[7px] sm:text-[8px] text-muted-foreground mt-0.5">
+                                {ticket.createdAt}
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-1 sm:px-1.5 py-0.5 align-middle">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-5 px-1.5 text-[8px] sm:text-[9px] text-primary hover:text-primary"
+                              onClick={() => setSelectedTicket(ticket)}
                             >
-                              {ticket.category}
-                            </Badge>
-                            <div className="text-[7px] sm:text-[8px] text-muted-foreground mt-0.5 truncate max-w-[80px] sm:max-w-none">
-                              {ticket.constraint}
-                            </div>
-                          </div>
-                        </TableCell>
-                        <TableCell className="px-1 sm:px-1.5 py-0.5 text-[9px] sm:text-[10px]">
-                          {ticket.category === "FEEDER" ? (
-                            ticket.constraint === "OLT DOWN" ? (
-                              <span className="font-medium">{ticket.hostname}</span>
-                            ) :
-                            ticket.constraint === "PORT DOWN" ? (
-                              <div>
-                                <div className="font-medium text-[9px] sm:text-[10px]">{ticket.ticketResult.match(/PORT - (.*?) - DOWN/)?.[1] || "PORT"}</div>
-                                <div className="text-muted-foreground text-[7px] sm:text-[8px]">{ticket.hostname}</div>
-                              </div>
-                            ) :
-                            ticket.constraint === "FAT LOSS" || ticket.constraint === "FAT BAD RX" ? (
-                              <div>
-                                <div className="font-medium text-[9px] sm:text-[10px]">{ticket.fatId}</div>
-                                <div className="text-muted-foreground text-[7px] sm:text-[8px]">{ticket.hostname}</div>
-                              </div>
-                            ) : ticket.constraint
-                          ) : ticket.customerName}
-                        </TableCell>
-                        <TableCell className="px-1 sm:px-1.5 py-0.5 font-mono text-[9px] sm:text-[10px]">{ticket.serviceId}</TableCell>
-                        <TableCell className="px-1 sm:px-1.5 py-0.5 text-[9px] sm:text-[10px]">{ticket.serpo}</TableCell>
-                        <TableCell className="px-1 sm:px-1.5 py-0.5 text-[9px] sm:text-[10px]">
-                          <span className="text-muted-foreground">{ticket.createdByName || "-"}</span>
-                        </TableCell>
-                        <TableCell className="px-1 sm:px-1.5 py-0.5">
-                          <div>
-                            <StatusBadge status={ticket.status} />
-                            <div className="text-[7px] sm:text-[8px] text-muted-foreground mt-0.5">
-                              {ticket.createdAt}
-                            </div>
-                          </div>
-                        </TableCell>
-                        <TableCell className="px-1 sm:px-1.5 py-0.5">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-5 px-1.5 text-[8px] sm:text-[9px] text-primary hover:text-primary"
-                            onClick={() => setSelectedTicket(ticket)}
-                          >
-                            Detail
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                              Detail
+                            </Button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             )}
             {recentTickets.length > 200 && (
