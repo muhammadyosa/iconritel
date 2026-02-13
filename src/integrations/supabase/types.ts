@@ -14,6 +14,45 @@ export type Database = {
   }
   public: {
     Tables: {
+      daily_ticket_history: {
+        Row: {
+          created: number
+          created_at: string
+          date: string
+          feeder: number
+          id: string
+          in_progress: number
+          resolved: number
+          ritel: number
+          total: number
+          updated_at: string
+        }
+        Insert: {
+          created?: number
+          created_at?: string
+          date: string
+          feeder?: number
+          id?: string
+          in_progress?: number
+          resolved?: number
+          ritel?: number
+          total?: number
+          updated_at?: string
+        }
+        Update: {
+          created?: number
+          created_at?: string
+          date?: string
+          feeder?: number
+          id?: string
+          in_progress?: number
+          resolved?: number
+          ritel?: number
+          total?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
