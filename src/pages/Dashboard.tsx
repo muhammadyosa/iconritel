@@ -1029,6 +1029,9 @@ export default function Dashboard() {
                   <StatusBadge status={inlineSelectedTicket.status} />
                   <span className="text-xs text-muted-foreground ml-auto">
                     {new Date(inlineSelectedTicket.createdISO).toLocaleString("id-ID")}
+                    {inlineSelectedTicket.createdByName && (
+                      <span className="ml-2">• Create by <span className="font-medium text-foreground">{inlineSelectedTicket.createdByName}</span></span>
+                    )}
                   </span>
                 </div>
 
