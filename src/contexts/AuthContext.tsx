@@ -72,6 +72,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setTimeout(() => {
             fetchProfile(session.user.id);
             updateLastOnline(session.user.id);
+            // Log login activity
+            if (event === 'SIGNED_IN') {
+              supabase.from("user_activity_logs").insert({
+                user_id: session.user.id,
+                action: "login",
+                detail: null,
+              } as never).then(() => {});
+            }
           }, 0);
         } else {
           setProfile(null);

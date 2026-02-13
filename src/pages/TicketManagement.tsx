@@ -43,6 +43,7 @@ import {
 import { StatusBadge } from "@/components/StatusBadge";
 import { TicketDetailDialog } from "@/components/TicketDetailDialog";
 import { toast } from "sonner";
+import { useActivityLog } from "@/hooks/useActivityLog";
 
 import { Link } from "react-router-dom";
 
@@ -65,6 +66,7 @@ export default function TicketManagement() {
   
   // Get current user for tracking who created tickets
   const { user, profile } = useAuth();
+  const { logActivity } = useActivityLog();
 
   const [searchFilters, setSearchFilters] = useState({
     customer: "",
@@ -215,6 +217,7 @@ export default function TicketManagement() {
 
     try {
       await addTicket(ticket);
+      logActivity("create_ticket", `Tiket ${ticket.id} - ${ticket.customerName}`);
       toast.success(`Tiket ${category} berhasil dibuat & disimpan ke Cloud`);
       setIsFormOpen(false);
       setFormData({ ticketId: "", serpo: "", constraint: "", portText: "" });
@@ -302,6 +305,7 @@ export default function TicketManagement() {
 
     try {
       await addTicket(ticket);
+      logActivity("create_ticket", `Tiket manual ${ticket.id} - ${ticket.customerName}`);
       toast.success(`Tiket ${category} berhasil dibuat & disimpan ke Cloud`);
       setIsManualFormOpen(false);
       setManualFormData({
