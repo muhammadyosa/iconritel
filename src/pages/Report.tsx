@@ -226,19 +226,24 @@ const Report = () => {
 
     // Sort by duration descending (longest first)
     const parseDurationToMinutes = (dur: string): number => {
-      let total = 0;
-      const dayMatch = dur.match(/(\d+)\s*(?:d|day|hari)/i);
-      const hourMatch = dur.match(/(\d+)\s*(?:h|jam|hour|:)/i);
-      const minMatch = dur.match(/(\d+)\s*(?:m|min|menit)/i);
-      // Handle HH:MM:SS format
+      // Handle HH:MM:SS or H:MM:SS format first
       const timeMatch = dur.match(/(\d+):(\d+):(\d+)/);
       if (timeMatch) {
-        total = parseInt(timeMatch[1]) * 60 + parseInt(timeMatch[2]) + parseInt(timeMatch[3]) / 60;
-      } else {
-        if (dayMatch) total += parseInt(dayMatch[1]) * 1440;
-        if (hourMatch) total += parseInt(hourMatch[1]) * 60;
-        if (minMatch) total += parseInt(minMatch[1]);
+        return parseInt(timeMatch[1]) * 60 + parseInt(timeMatch[2]) + parseInt(timeMatch[3]) / 60;
       }
+      // Handle HH:MM format (no seconds)
+      const hmMatch = dur.match(/^(\d+):(\d+)$/);
+      if (hmMatch) {
+        return parseInt(hmMatch[1]) * 60 + parseInt(hmMatch[2]);
+      }
+      // Handle text-based durations like "2d 5h 30m", "7 jam", "45 menit"
+      let total = 0;
+      const dayMatch = dur.match(/(\d+)\s*(?:d|day|hari)/i);
+      const hourMatch = dur.match(/(\d+)\s*(?:h|jam|hour)/i);
+      const minMatch = dur.match(/(\d+)\s*(?:m|min|menit)/i);
+      if (dayMatch) total += parseInt(dayMatch[1]) * 1440;
+      if (hourMatch) total += parseInt(hourMatch[1]) * 60;
+      if (minMatch) total += parseInt(minMatch[1]);
       return total;
     };
 
