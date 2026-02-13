@@ -10,8 +10,16 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Loader2, RefreshCw, Shield, User, Users, Clock, ArrowUpDown, ArrowUp, ArrowDown, Pencil } from "lucide-react";
+import { Loader2, RefreshCw, Shield, User, Users, Clock, ArrowUpDown, ArrowUp, ArrowDown, Pencil, Activity } from "lucide-react";
 import { toast } from "sonner";
+import { getActionLabel, useActivityLog } from "@/hooks/useActivityLog";
+
+interface UserActivity {
+  user_id: string;
+  action: string;
+  detail: string | null;
+  created_at: string;
+}
 
 interface UserWithRole {
   id: string;
@@ -22,6 +30,7 @@ interface UserWithRole {
   created_at: string;
   last_online: string | null;
   role: "admin" | "operator";
+  lastAction?: UserActivity;
 }
 
 export function UserManagement() {
@@ -33,28 +42,35 @@ export function UserManagement() {
   const [editDisplayName, setEditDisplayName] = useState("");
   const [isSavingName, setIsSavingName] = useState(false);
   const [sortOrder, setSortOrder] = useState<"asc" | "desc" | null>(null);
+  const { logActivity } = useActivityLog();
 
   const fetchUsers = async () => {
     setIsLoading(true);
     try {
-      // Fetch profiles
-      const { data: profiles, error: profilesError } = await supabase
-        .from("profiles")
-        .select("*")
-        .order("created_at", { ascending: false });
+      // Fetch profiles, roles, and latest activity in parallel
+      const [profilesResult, rolesResult, activityResult] = await Promise.all([
+        supabase.from("profiles").select("*").order("created_at", { ascending: false }),
+        supabase.from("user_roles").select("*"),
+        supabase.from("user_activity_logs").select("*").order("created_at", { ascending: false }).limit(1000),
+      ]);
 
-      if (profilesError) throw profilesError;
+      if (profilesResult.error) throw profilesResult.error;
+      if (rolesResult.error) throw rolesResult.error;
 
-      // Fetch roles
-      const { data: roles, error: rolesError } = await supabase
-        .from("user_roles")
-        .select("*");
+      // Build a map of latest activity per user
+      const latestActivityMap = new Map<string, UserActivity>();
+      if (!activityResult.error && activityResult.data) {
+        for (const log of activityResult.data) {
+          const activity = log as unknown as UserActivity;
+          if (!latestActivityMap.has(activity.user_id)) {
+            latestActivityMap.set(activity.user_id, activity);
+          }
+        }
+      }
 
-      if (rolesError) throw rolesError;
-
-      // Merge profiles with roles
-      const usersWithRoles: UserWithRole[] = (profiles || []).map((profile) => {
-        const userRole = roles?.find((r) => r.user_id === profile.user_id);
+      // Merge profiles with roles and activity
+      const usersWithRoles: UserWithRole[] = (profilesResult.data || []).map((profile) => {
+        const userRole = rolesResult.data?.find((r) => r.user_id === profile.user_id);
         return {
           id: profile.id,
           user_id: profile.user_id,
@@ -64,6 +80,7 @@ export function UserManagement() {
           created_at: profile.created_at,
           last_online: profile.last_online as string | null,
           role: (userRole?.role as "admin" | "operator") || "operator",
+          lastAction: latestActivityMap.get(profile.user_id),
         };
       });
 
@@ -134,6 +151,7 @@ export function UserManagement() {
       );
 
       toast.success(`Role berhasil diubah ke ${newRole}`);
+      logActivity("change_role", `${currentUser?.email} → ${newRole}`);
     } catch (error) {
       if (import.meta.env.DEV) {
         console.error("Error updating role:", error);
@@ -177,6 +195,7 @@ export function UserManagement() {
       );
 
       toast.success("Username berhasil diperbarui");
+      logActivity("edit_username", `${editingUser.email} → ${trimmedName}`);
       setEditingUser(null);
     } catch (error) {
       if (import.meta.env.DEV) {
@@ -325,6 +344,12 @@ export function UserManagement() {
                       {sortOrder === "asc" && <ArrowUp className="ml-1 h-3 w-3" />}
                     </Button>
                   </TableHead>
+                  <TableHead className="w-[200px]">
+                    <div className="flex items-center gap-1">
+                      <Activity className="h-3 w-3" />
+                      Last Action
+                    </div>
+                  </TableHead>
                   <TableHead className="w-[100px]">Bergabung</TableHead>
                 </TableRow>
               </TableHeader>
@@ -407,6 +432,25 @@ export function UserManagement() {
                             {formatLastOnline(user.last_online)}
                           </div>
                         )
+                      ) : (
+                        <span className="text-muted-foreground/50">—</span>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-xs">
+                      {user.lastAction ? (
+                        <div className="space-y-0.5">
+                          <div className="font-medium text-foreground">
+                            {getActionLabel(user.lastAction.action)}
+                          </div>
+                          {user.lastAction.detail && (
+                            <div className="text-muted-foreground truncate max-w-[180px]" title={user.lastAction.detail}>
+                              {user.lastAction.detail}
+                            </div>
+                          )}
+                          <div className="text-muted-foreground/70">
+                            {formatLastOnline(user.lastAction.created_at)}
+                          </div>
+                        </div>
                       ) : (
                         <span className="text-muted-foreground/50">—</span>
                       )}

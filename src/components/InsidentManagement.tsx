@@ -21,6 +21,7 @@ import { useCloudTickets } from "@/hooks/useCloudTickets";
 import { Ticket } from "@/types/ticket";
 import { supabase } from "@/integrations/supabase/client";
 import * as XLSX from "xlsx";
+import { useActivityLog } from "@/hooks/useActivityLog";
 
 const STATUS_OPTIONS = ["All", "On Progress", "Critical", "Resolved", "Pending"] as const;
 
@@ -36,6 +37,7 @@ function getTimeRemaining(resolvedAt: string): string {
 
 export function InsidentManagement() {
   const { tickets, isLoading, refetch, addTicket } = useCloudTickets();
+  const { logActivity } = useActivityLog();
   const [statusFilter, setStatusFilter] = useState<string>("All");
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -122,6 +124,7 @@ export function InsidentManagement() {
       }
 
       toast.success(`${idsToDelete.length} insident berhasil dihapus`);
+      logActivity("bulk_delete_tickets", `${idsToDelete.length} tiket dihapus`);
       setSelectedIds(new Set());
       setShowDeleteDialog(false);
       refetch();
@@ -182,6 +185,7 @@ export function InsidentManagement() {
     }));
     XLSX.writeFile(wb, `Insident_${new Date().toISOString().split("T")[0]}.xlsx`);
     toast.success(`${data.length} insident berhasil diexport ke Excel`);
+    logActivity("export_data", `Export ${data.length} insident ke Excel`);
   }, [filteredTickets, buildExportData]);
 
 
@@ -218,6 +222,7 @@ export function InsidentManagement() {
         } catch { /* skip failed rows */ }
       }
       toast.success(`${successCount} insident berhasil diimport`);
+      logActivity("import_tickets", `${successCount} tiket diimport`);
       refetch();
     } catch (error) {
       toast.error("Gagal mengimport file");

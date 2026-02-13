@@ -19,6 +19,7 @@ import {
 import { toast } from "sonner";
 import { useCloudShiftReports, CloudShiftReport } from "@/hooks/useCloudShiftReports";
 import * as XLSX from "xlsx";
+import { useActivityLog } from "@/hooks/useActivityLog";
 const SHIFT_FILTER_OPTIONS = ["All", "pagi", "siang", "malam"] as const;
 
 const shiftLabel = (shift: string) => {
@@ -45,6 +46,7 @@ const shiftBadge = (shift: string) => {
 
 export function ReportManagement() {
   const { reports, isLoading, fetchReports, addReport, deleteReport, deleteAllReports } = useCloudShiftReports();
+  const { logActivity } = useActivityLog();
   const [shiftFilter, setShiftFilter] = useState<string>("All");
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -128,6 +130,7 @@ export function ReportManagement() {
 
       if (successCount > 0) {
         toast.success(`${successCount} report shift berhasil dihapus`);
+        logActivity("delete_shift_report", `${successCount} report dihapus`);
       }
       setSelectedIds(new Set());
       setShowDeleteDialog(false);
@@ -195,6 +198,7 @@ export function ReportManagement() {
     }));
     XLSX.writeFile(wb, `Report_Shift_${new Date().toISOString().split("T")[0]}.xlsx`);
     toast.success(`${data.length} report berhasil diexport ke Excel`);
+    logActivity("export_data", `Export ${data.length} report shift ke Excel`);
   }, [filteredReports, buildExportData]);
 
 
