@@ -873,9 +873,9 @@ export default function Dashboard() {
                         </TableCell>
                         <TableCell className="px-1 sm:px-1.5 py-0.5">
                           <Button
-                            variant="ghost"
+                            variant="outline"
                             size="sm"
-                            className="h-5 px-1.5 text-[8px] sm:text-[9px] text-primary hover:text-primary"
+                            className="h-5 px-1.5 text-[7px] sm:text-[8px]"
                             onClick={() => setSelectedTicket(ticket)}
                           >
                             Detail
