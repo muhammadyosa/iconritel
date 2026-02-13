@@ -221,22 +221,6 @@ export default function Login() {
           </Button>
         </motion.div>
 
-        {/* Footer dots */}
-        <motion.div 
-          className="flex justify-center gap-2 pt-1"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1.3 }}
-        >
-          {[...Array(5)].map((_, i) => (
-            <motion.div
-              key={i}
-              className="w-1 h-1 rounded-full bg-cyan-400/40"
-              animate={{ opacity: [0.4, 1, 0.4], scale: [1, 1.2, 1] }}
-              transition={{ duration: 2, repeat: Infinity, delay: i * 0.2 }}
-            />
-          ))}
-        </motion.div>
       </motion.div>
     </div>
   );
