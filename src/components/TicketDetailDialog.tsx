@@ -37,6 +37,8 @@ interface TicketDetailDialogProps {
   isAdmin: boolean;
   updateTicket: (id: string, updates: Partial<Ticket>) => Promise<void>;
   deleteTicket: (id: string) => Promise<void>;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
 export function TicketDetailDialog({
@@ -44,6 +46,8 @@ export function TicketDetailDialog({
   isAdmin,
   updateTicket,
   deleteTicket,
+  open: controlledOpen,
+  onOpenChange,
 }: TicketDetailDialogProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState({
@@ -104,12 +108,14 @@ export function TicketDetailDialog({
   };
 
   return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <Button size="sm" variant="outline" className="h-5 text-[7px] sm:text-[8px] px-1 sm:px-1.5">
-          Detail
-        </Button>
-      </DialogTrigger>
+    <Dialog open={controlledOpen} onOpenChange={onOpenChange}>
+      {controlledOpen === undefined && (
+        <DialogTrigger asChild>
+          <Button size="sm" variant="outline" className="h-5 text-[7px] sm:text-[8px] px-1 sm:px-1.5">
+            Detail
+          </Button>
+        </DialogTrigger>
+      )}
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center justify-between">
