@@ -194,13 +194,6 @@ export default function Login() {
           </motion.p>
         </motion.div>
 
-        {/* Decorative line */}
-        <motion.div 
-          className="w-16 h-[1px] bg-gradient-to-r from-transparent via-cyan-400/50 to-transparent"
-          initial={{ opacity: 0, scaleX: 0 }}
-          animate={{ opacity: 1, scaleX: 1 }}
-          transition={{ delay: 1, duration: 0.5 }}
-        />
 
         {/* Login Button */}
         <motion.div
