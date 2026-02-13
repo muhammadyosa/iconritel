@@ -86,19 +86,39 @@ export function useTicketHistory(tickets: Ticket[]) {
       // Merge existing history with new data
       const existingRecords = new Map(prev.records.map(r => [r.date, r]));
       
-      // Update with current ticket data
+      // Update with current ticket data, preserving historical peak counts
       Object.entries(ticketsByDate).forEach(([date, data]) => {
-        existingRecords.set(date, {
-          date,
-          ritel: data.ritel,
-          feeder: data.feeder,
-          total: data.total,
-          created: data.created,
-          inProgress: data.inProgress,
-          resolved: data.resolved,
-          ticketIds: data.ticketIds,
-        });
+        const existing = existingRecords.get(date);
+        if (existing && date < today) {
+          // For past dates, keep the maximum counts to preserve history
+          // even after tickets are auto-deleted
+          existingRecords.set(date, {
+            date,
+            ritel: Math.max(existing.ritel, data.ritel),
+            feeder: Math.max(existing.feeder, data.feeder),
+            total: Math.max(existing.total, data.total),
+            created: Math.max(existing.created, data.created),
+            inProgress: Math.max(existing.inProgress, data.inProgress),
+            resolved: Math.max(existing.resolved, data.resolved),
+            ticketIds: data.ticketIds.length >= existing.ticketIds.length ? data.ticketIds : existing.ticketIds,
+          });
+        } else {
+          // For today or new dates, use current data
+          existingRecords.set(date, {
+            date,
+            ritel: data.ritel,
+            feeder: data.feeder,
+            total: data.total,
+            created: data.created,
+            inProgress: data.inProgress,
+            resolved: data.resolved,
+            ticketIds: data.ticketIds,
+          });
+        }
       });
+      
+      // Also preserve existing past records that no longer have tickets
+      // (all tickets for that date were deleted)
       
       // Convert back to array and sort by date
       const newRecords = Array.from(existingRecords.values())
