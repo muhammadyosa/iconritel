@@ -88,8 +88,8 @@ export default function Login() {
         <img 
           src={indonesiaMap} 
           alt="" 
-          className="w-full h-full opacity-[0.22]"
-          style={{ filter: 'brightness(0.7) saturate(0.9)', objectFit: 'contain', objectPosition: 'center' }}
+          className="w-full h-full opacity-[0.30]"
+          style={{ filter: 'brightness(0.8) saturate(1)', objectFit: 'contain', objectPosition: 'center' }}
         />
       </div>
 
@@ -149,7 +149,7 @@ export default function Login() {
         <div className="absolute -inset-[1px] bg-gradient-to-b from-cyan-500/20 via-transparent to-cyan-500/10 rounded-xl blur-[1px] opacity-50" />
         
         {/* Main card */}
-        <div className="relative bg-[#0a1525]/40 backdrop-blur-xl border border-cyan-500/10 rounded-xl p-5 shadow-2xl">
+        <div className="relative bg-[#0a1525]/20 backdrop-blur-md border border-cyan-500/10 rounded-xl p-5 shadow-2xl">
           {/* Inner glow */}
           <div className="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent rounded-2xl pointer-events-none" />
           
