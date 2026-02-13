@@ -224,6 +224,26 @@ const Report = () => {
       return;
     }
 
+    // Sort by duration descending (longest first)
+    const parseDurationToMinutes = (dur: string): number => {
+      let total = 0;
+      const dayMatch = dur.match(/(\d+)\s*(?:d|day|hari)/i);
+      const hourMatch = dur.match(/(\d+)\s*(?:h|jam|hour|:)/i);
+      const minMatch = dur.match(/(\d+)\s*(?:m|min|menit)/i);
+      // Handle HH:MM:SS format
+      const timeMatch = dur.match(/(\d+):(\d+):(\d+)/);
+      if (timeMatch) {
+        total = parseInt(timeMatch[1]) * 60 + parseInt(timeMatch[2]) + parseInt(timeMatch[3]) / 60;
+      } else {
+        if (dayMatch) total += parseInt(dayMatch[1]) * 1440;
+        if (hourMatch) total += parseInt(hourMatch[1]) * 60;
+        if (minMatch) total += parseInt(minMatch[1]);
+      }
+      return total;
+    };
+
+    tickets.sort((a, b) => parseDurationToMinutes(b.duration) - parseDurationToMinutes(a.duration));
+
     setParsedSlaTickets(tickets);
 
     // Generate formatted output
