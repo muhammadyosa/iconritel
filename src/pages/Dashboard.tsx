@@ -798,95 +798,70 @@ export default function Dashboard() {
               </Select>
             </div>
           </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {recentTickets.length === 0 ? (
-                <p className="text-sm text-muted-foreground text-center py-4">
-                  Belum ada tiket
-                </p>
-              ) : (
-              <div className="rounded-md border overflow-x-auto max-h-80">
-                  <Table className="min-w-[600px]">
-                    <TableHeader>
-                      <TableRow className="h-7">
-                        <TableHead className="px-2 py-1 text-[11px]">Ticket ID</TableHead>
-                        <TableHead className="px-2 py-1 text-[11px]">Type</TableHead>
-                        <TableHead className="px-2 py-1 text-[11px]">Customer/Type</TableHead>
-                        <TableHead className="px-2 py-1 text-[11px]">Service ID</TableHead>
-                        <TableHead className="px-2 py-1 text-[11px]">Serpo</TableHead>
-                        <TableHead className="px-2 py-1 text-[11px]">Status</TableHead>
+          <CardContent className="p-0">
+            {recentTickets.length === 0 ? (
+              <p className="text-sm text-muted-foreground text-center py-8">
+                Belum ada tiket
+              </p>
+            ) : (
+              <div className="max-h-[55vh] overflow-auto">
+                <Table>
+                  <TableHeader className="sticky top-0 z-10 bg-background">
+                    <TableRow>
+                      <TableHead className="text-xs">No</TableHead>
+                      <TableHead className="text-xs">Ticket ID</TableHead>
+                      <TableHead className="text-xs">Customer</TableHead>
+                      <TableHead className="text-xs">Kendala</TableHead>
+                      <TableHead className="text-xs">Status</TableHead>
+                      <TableHead className="text-xs">Create by</TableHead>
+                      <TableHead className="text-xs">Dibuat</TableHead>
+                      <TableHead className="text-xs">Auto-Delete</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {recentTickets.map((ticket, idx) => (
+                      <TableRow 
+                        key={ticket.id}
+                        className="cursor-pointer hover:bg-muted/50 transition-colors"
+                        onClick={() => setSelectedTicket(ticket)}
+                      >
+                        <TableCell className="text-xs text-muted-foreground">{idx + 1}</TableCell>
+                        <TableCell className="text-xs font-mono">{ticket.id}</TableCell>
+                        <TableCell className="text-xs max-w-[150px] truncate">{ticket.customerName}</TableCell>
+                        <TableCell className="text-xs">{ticket.constraint}</TableCell>
+                        <TableCell>
+                          <StatusBadge status={ticket.status} />
+                        </TableCell>
+                        <TableCell className="text-xs max-w-[120px] truncate">{ticket.createdByName || "—"}</TableCell>
+                        <TableCell className="text-xs text-muted-foreground">{ticket.createdAt}</TableCell>
+                        <TableCell className="text-xs">
+                          {ticket.status === "Resolved" && ticket.resolvedAt ? (
+                            <span className="text-warning font-medium">
+                              {(() => {
+                                const resolvedTime = new Date(ticket.resolvedAt).getTime();
+                                const deleteAt = resolvedTime + 8 * 60 * 60 * 1000;
+                                const remaining = deleteAt - Date.now();
+                                if (remaining <= 0) return "Segera dihapus";
+                                const hours = Math.floor(remaining / (1000 * 60 * 60));
+                                const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
+                                return `${hours}j ${minutes}m`;
+                              })()}
+                            </span>
+                          ) : (
+                            <span className="text-muted-foreground">—</span>
+                          )}
+                        </TableCell>
                       </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {recentTickets.map((ticket) => (
-                        <TableRow 
-                          key={ticket.id}
-                          className="cursor-pointer hover:bg-muted/50 transition-colors h-9"
-                          onClick={() => setSelectedTicket(ticket)}
-                        >
-                          <TableCell className="px-2 py-1 text-[11px] font-medium">{ticket.id}</TableCell>
-                          <TableCell className="px-2 py-1">
-                            <div>
-                              <span
-                                className={`text-[9px] px-1.5 py-0.5 rounded font-semibold ${
-                                  ticket.category === "FEEDER"
-                                    ? "bg-warning text-warning-foreground"
-                                    : "bg-primary text-primary-foreground"
-                                }`}
-                              >
-                                {ticket.category}
-                              </span>
-                              <div className="text-[9px] text-muted-foreground mt-0.5">
-                                {ticket.constraint}
-                              </div>
-                            </div>
-                          </TableCell>
-                          <TableCell className="px-2 py-1">
-                            {ticket.category === "FEEDER" ? (
-                              ticket.constraint === "OLT DOWN" ? (
-                                <span className="text-[11px] font-medium">{ticket.hostname}</span>
-                              ) :
-                              ticket.constraint === "PORT DOWN" ? (
-                                <div className="text-[11px]">
-                                  <div className="font-medium">{ticket.ticketResult.match(/PORT - (.*?) - DOWN/)?.[1] || "PORT INFO"}</div>
-                                  <div className="text-muted-foreground text-[9px]">{ticket.hostname}</div>
-                                </div>
-                              ) :
-                              ticket.constraint === "FAT LOSS" || ticket.constraint === "FAT LOW RX" ? (
-                                <div className="text-[11px]">
-                                  <div className="font-medium">{ticket.fatId}</div>
-                                  <div className="text-muted-foreground text-[9px]">{ticket.hostname}</div>
-                                </div>
-                              ) : (
-                                <span className="text-[11px] font-medium">{ticket.constraint}</span>
-                              )
-                            ) : (
-                              <span className="text-[11px] font-medium">{ticket.customerName || "-"}</span>
-                            )}
-                          </TableCell>
-                          <TableCell className="px-2 py-1 font-mono text-[11px]">{ticket.serviceId}</TableCell>
-                          <TableCell className="px-2 py-1 text-[11px]">{ticket.serpo}</TableCell>
-                          <TableCell className="px-2 py-1">
-                            <div>
-                              <StatusBadge status={ticket.status} />
-                              <div className="text-[9px] text-muted-foreground mt-0.5">
-                                {new Date(ticket.createdISO).toLocaleString("id-ID", {
-                                  day: "numeric",
-                                  month: "numeric",
-                                  year: "2-digit",
-                                  hour: "2-digit",
-                                  minute: "2-digit",
-                                })}
-                              </div>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
-              )}
-            </div>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            )}
+            {recentTickets.length > 200 && (
+              <p className="text-xs text-muted-foreground text-center py-2">
+                Menampilkan 200 dari {recentTickets.length} insident
+              </p>
+            )}
           </CardContent>
         </Card>
       </motion.div>
