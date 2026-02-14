@@ -405,14 +405,14 @@ export default function Settings() {
                 🗣️ Report
               </TabsTrigger>
             )}
+            <TabsTrigger value="history" className="text-[11px] sm:text-sm px-2.5 sm:px-3 py-1.5 sm:py-2 whitespace-nowrap">
+              📊 Histori
+            </TabsTrigger>
             {isAdmin && (
               <TabsTrigger value="users" className="text-[11px] sm:text-sm px-2.5 sm:px-3 py-1.5 sm:py-2 whitespace-nowrap">
                 💻 Users
               </TabsTrigger>
             )}
-            <TabsTrigger value="history" className="text-[11px] sm:text-sm px-2.5 sm:px-3 py-1.5 sm:py-2 whitespace-nowrap">
-              📊 Histori
-            </TabsTrigger>
           </TabsList>
         </div>
 
