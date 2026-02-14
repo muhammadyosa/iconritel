@@ -28,6 +28,7 @@ import { useUserRole } from "@/hooks/useUserRole";
 import { UserManagement } from "@/components/UserManagement";
 import { InsidentManagement } from "@/components/InsidentManagement";
 import { ReportManagement } from "@/components/ReportManagement";
+import { TicketHistoryExport } from "@/components/TicketHistoryExport";
 
 const UPE_STORE_NAME = "upe_data";
 const BNG_STORE_NAME = "bng_data";
@@ -409,6 +410,9 @@ export default function Settings() {
                 💻 Users
               </TabsTrigger>
             )}
+            <TabsTrigger value="history" className="text-[11px] sm:text-sm px-2.5 sm:px-3 py-1.5 sm:py-2 whitespace-nowrap">
+              📊 Histori
+            </TabsTrigger>
           </TabsList>
         </div>
 
@@ -855,6 +859,11 @@ export default function Settings() {
             <UserManagement />
           </TabsContent>
         )}
+
+        {/* Ticket History Export Tab */}
+        <TabsContent value="history" className="space-y-6">
+          <TicketHistoryExport />
+        </TabsContent>
       </Tabs>
 
       {/* Confirm Import Dialog */}
