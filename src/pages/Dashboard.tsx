@@ -14,7 +14,7 @@ import { loadOLTData } from "@/lib/indexedDB";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip, Cell, LineChart, Line } from "recharts";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ShiftReportCard } from "@/components/ShiftReportCard";
@@ -1011,9 +1011,17 @@ export default function Dashboard() {
           </DialogHeader>
           
           <div className="mt-3 flex-1 overflow-auto min-h-0">
+            <AnimatePresence mode="wait">
             {inlineSelectedTicket ? (
               /* Inline Ticket Detail View */
-              <div className="space-y-4">
+              <motion.div
+                key="ticket-detail"
+                initial={{ opacity: 0, x: 30 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -30 }}
+                transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+                className="space-y-4"
+              >
                 {/* Header Info */}
                 <div className="flex flex-wrap items-center gap-2">
                   <span className={`px-2 py-1 rounded text-xs font-medium ${
@@ -1068,10 +1076,17 @@ export default function Dashboard() {
                   <p className="text-xs font-semibold text-muted-foreground mb-2">Ticket Result:</p>
                   <p className="text-sm font-mono whitespace-pre-wrap break-all">{inlineSelectedTicket.ticketResult}</p>
                 </div>
-              </div>
+              </motion.div>
             ) : showOltList ? (
               /* OLT List View - Compact Cards */
-              <div className="space-y-2">
+              <motion.div
+                key="olt-list"
+                initial={{ opacity: 0, x: -30 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 30 }}
+                transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+                className="space-y-2"
+              >
                 {(() => {
                   const oltMap = new Map<string, number>();
                   tickets.forEach(ticket => {
@@ -1134,15 +1149,28 @@ export default function Dashboard() {
                     </div>
                   );
                 })()}
-              </div>
+              </motion.div>
             ) : (
               /* Ticket List View - Compact Cards */
               filterDialogTickets.length === 0 ? (
-                <p className="text-sm text-muted-foreground text-center py-8">
+                <motion.p
+                  key="empty-list"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="text-sm text-muted-foreground text-center py-8"
+                >
                   Tidak ada tiket dalam kategori ini
-                </p>
+                </motion.p>
               ) : (
-                <div className="space-y-2">
+                <motion.div
+                  key="ticket-list"
+                  initial={{ opacity: 0, x: -30 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 30 }}
+                  transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+                  className="space-y-2"
+                >
                   {filterDialogTickets.map((ticket, index) => (
                     <div 
                       key={ticket.id}
@@ -1209,9 +1237,10 @@ export default function Dashboard() {
                       </div>
                     </div>
                   ))}
-                </div>
+                </motion.div>
               )
             )}
+            </AnimatePresence>
           </div>
           
           <div className="flex justify-end pt-3 border-t mt-3 flex-shrink-0">
