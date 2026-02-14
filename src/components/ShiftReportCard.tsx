@@ -41,6 +41,16 @@ interface ShiftReportCardProps {
   }) => Promise<boolean>;
 }
 
+// Helper to get shift emoji
+const getShiftEmoji = (shift: string) => {
+  switch (shift.toLowerCase()) {
+    case 'pagi': return '🌅';
+    case 'siang': return '☀️';
+    case 'malam': return '🌙';
+    default: return '🕐';
+  }
+};
+
 // Helper function to count incidents
 const countIncidents = (report: ShiftReport) => {
   let count = 0;
@@ -314,7 +324,7 @@ export function ShiftReportCard({ report, index, total, compact = false, onEdit 
                   </p>
                   <div className="flex items-center gap-1.5 mt-0.5">
                     <span className="text-[10px] px-1.5 py-0.5 bg-primary/10 text-primary rounded font-medium">
-                      Shift {report.shift}
+                      {getShiftEmoji(report.shift)} Shift {report.shift}
                     </span>
                     <span className="text-[10px] text-muted-foreground truncate max-w-[80px]">
                       {report.officer}
@@ -350,8 +360,7 @@ export function ShiftReportCard({ report, index, total, compact = false, onEdit 
             </DialogHeader>
             <div className="flex items-center gap-2 mt-2.5 flex-wrap">
               <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 bg-primary/20 text-primary rounded-full border border-primary/30">
-                <Clock className="h-3 w-3" />
-                Shift {report.shift.charAt(0).toUpperCase() + report.shift.slice(1)}
+                {getShiftEmoji(report.shift)} Shift {report.shift.charAt(0).toUpperCase() + report.shift.slice(1)}
               </span>
               <span className="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 bg-muted text-foreground rounded-full border border-border">
                 <User className="h-3 w-3 text-muted-foreground" />
@@ -434,7 +443,7 @@ export function ShiftReportCard({ report, index, total, compact = false, onEdit 
             
             <div className="flex flex-wrap items-center gap-1.5 mt-2">
               <div className="inline-flex items-center gap-1 px-2 py-0.5 bg-primary/15 rounded border border-primary/20">
-                <Clock className="h-3 w-3 text-primary" />
+                <span className="text-sm">{getShiftEmoji(report.shift)}</span>
                 <span className="text-[10px] font-semibold text-primary capitalize">
                   Shift {report.shift}
                 </span>
@@ -508,8 +517,7 @@ export function ShiftReportCard({ report, index, total, compact = false, onEdit 
           </DialogHeader>
           <div className="flex items-center gap-2 mt-2.5 flex-wrap">
             <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 bg-primary/20 text-primary rounded-full border border-primary/30">
-              <Clock className="h-3 w-3" />
-              Shift {report.shift.charAt(0).toUpperCase() + report.shift.slice(1)}
+              {getShiftEmoji(report.shift)} Shift {report.shift.charAt(0).toUpperCase() + report.shift.slice(1)}
             </span>
             <span className="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 bg-muted text-foreground rounded-full border border-border">
               <User className="h-3 w-3 text-muted-foreground" />
