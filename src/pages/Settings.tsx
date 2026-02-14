@@ -824,7 +824,7 @@ export default function Settings() {
                 </p>
               </div>
               <blockquote className="border-l-4 border-primary pl-4 italic text-sm text-muted-foreground bg-gradient-to-r from-primary/5 to-transparent p-4 rounded-r-lg transition-all duration-300 ease-out hover:border-l-[6px] hover:from-primary/10 hover:shadow-md hover:translate-x-1 cursor-default group">
-                <p className="leading-relaxed transition-colors duration-300 group-hover:text-foreground/80">"Когда вдруг на душе становится тяжело, но не с кем поговорить, поэтому просто сидишь в тишине. Но когда всё хорошо спланировано, спешить некуда."</p>
+                <p className="leading-relaxed transition-colors duration-300 group-hover:text-foreground/80">"Если все хорошо спланировать, спешить не нужно."</p>
                 <p className="mt-3 not-italic font-semibold text-primary text-xs tracking-wider uppercase flex items-center gap-2 transition-all duration-300 group-hover:gap-3">
                   <span className="inline-block w-8 h-px bg-primary/50 transition-all duration-300 group-hover:w-12 group-hover:bg-primary"></span>
                   The man burdened with glorious purpose
