@@ -376,7 +376,7 @@ export default function Teams() {
                                     <div className="min-w-0 flex-1">
                                       <p className="font-bold text-xs sm:text-sm truncate">{ticket.id}</p>
                                       <p className="text-[10px] sm:text-xs text-muted-foreground mt-1">
-                                        {ticket.createdAt}
+                                        {ticket.createdAt}{ticket.createdByName ? ` • Create by ${ticket.createdByName}` : ""}
                                       </p>
                                     </div>
                                     <div className="flex flex-col gap-1 flex-shrink-0">
