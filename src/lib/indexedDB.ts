@@ -289,8 +289,8 @@ export async function clearAKVData(): Promise<void> {
   });
 }
 
-// Clear all data from all stores including localStorage
-export async function clearAllData(): Promise<void> {
+// Clear only inventory/list data from IndexedDB (excludes tickets and reports)
+export async function clearListData(): Promise<void> {
   const db = await openDB();
   
   const clearStore = (storeName: string, key: string): Promise<void> => {
@@ -303,7 +303,7 @@ export async function clearAllData(): Promise<void> {
     });
   };
 
-  // Clear IndexedDB stores
+  // Clear only inventory/list IndexedDB stores
   await Promise.all([
     clearStore(STORE_NAME, "excel_records"),
     clearStore(OLT_STORE_NAME, "olt_records"),
@@ -313,6 +313,11 @@ export async function clearAllData(): Promise<void> {
     clearStore(BNG_STORE_NAME, "bng_records"),
     clearStore(AKV_STORE_NAME, "akv_records"),
   ]);
+}
+
+// Clear all data from all stores including localStorage
+export async function clearAllData(): Promise<void> {
+  await clearListData();
 
   // Clear localStorage data (Report data, tickets, history, etc.)
   localStorage.removeItem("shiftReports");
