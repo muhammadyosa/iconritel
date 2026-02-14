@@ -333,33 +333,45 @@ export function ShiftReportCard({ report, index, total, compact = false, onEdit 
             </div>
           </motion.div>
         </DialogTrigger>
-        <DialogContent className="max-w-lg max-h-[85vh] p-0">
-          <DialogHeader className="p-4 pb-0 pr-12">
-            <DialogTitle className="flex items-center gap-2 text-base">
-              <Calendar className="h-4 w-4 text-primary" />
-              {new Date(report.date).toLocaleDateString("id-ID", { 
-                weekday: 'long', 
-                day: 'numeric',
-                month: 'long',
-                year: 'numeric'
-              })}
-            </DialogTitle>
-            {onEdit && !isEditing && (
-              <div className="flex justify-start pt-1">
+        <DialogContent className="max-w-lg max-h-[85vh] p-0 overflow-hidden">
+          <div className="bg-gradient-to-r from-primary/15 via-primary/10 to-accent/10 px-4 pt-4 pb-3 pr-12 border-b border-border/50">
+            <DialogHeader className="p-0">
+              <DialogTitle className="flex items-center gap-2.5 text-base font-bold text-foreground">
+                <div className="h-8 w-8 rounded-lg bg-primary/20 flex items-center justify-center shrink-0">
+                  <Calendar className="h-4 w-4 text-primary" />
+                </div>
+                {new Date(report.date).toLocaleDateString("id-ID", { 
+                  weekday: 'long', 
+                  day: 'numeric',
+                  month: 'long',
+                  year: 'numeric'
+                })}
+              </DialogTitle>
+            </DialogHeader>
+            <div className="flex items-center gap-2 mt-2.5 flex-wrap">
+              <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 bg-primary/20 text-primary rounded-full border border-primary/30">
+                <Clock className="h-3 w-3" />
+                Shift {report.shift.charAt(0).toUpperCase() + report.shift.slice(1)}
+              </span>
+              <span className="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 bg-muted text-foreground rounded-full border border-border">
+                <User className="h-3 w-3 text-muted-foreground" />
+                {report.officer}
+              </span>
+              {onEdit && !isEditing && (
                 <Button 
                   variant="outline" 
                   size="sm" 
                   onClick={() => setIsEditing(true)}
-                  className="h-7 text-xs"
+                  className="h-7 text-xs ml-auto rounded-full"
                 >
-                  <Pencil className="h-3.5 w-3.5 mr-1" />
+                  <Pencil className="h-3 w-3 mr-1" />
                   Edit
                 </Button>
-              </div>
-            )}
-          </DialogHeader>
+              )}
+            </div>
+          </div>
           {isEditing ? (
-            <ScrollArea className="max-h-[70vh] p-4 pt-2">
+            <ScrollArea className="max-h-[70vh] p-4 pt-3">
               <EditReportForm
                 report={report}
                 onSave={handleSave}
@@ -479,33 +491,48 @@ export function ShiftReportCard({ report, index, total, compact = false, onEdit 
           </div>
         </motion.div>
       </DialogTrigger>
-      <DialogContent className="max-w-lg max-h-[85vh] p-0">
-        <DialogHeader className="p-4 pb-0 pr-12">
-          <DialogTitle className="flex items-center gap-2 text-base">
-            <Calendar className="h-4 w-4 text-primary" />
-            {new Date(report.date).toLocaleDateString("id-ID", { 
-              weekday: 'long', 
-              day: 'numeric',
-              month: 'long',
-              year: 'numeric'
-            })}
-          </DialogTitle>
-          {onEdit && !isEditing && (
-            <div className="flex justify-start pt-1">
+      <DialogContent className="max-w-lg max-h-[85vh] p-0 overflow-hidden">
+        <div className="bg-gradient-to-r from-primary/15 via-primary/10 to-accent/10 px-4 pt-4 pb-3 pr-12 border-b border-border/50">
+          <DialogHeader className="p-0">
+            <DialogTitle className="flex items-center gap-2.5 text-base font-bold text-foreground">
+              <div className="h-8 w-8 rounded-lg bg-primary/20 flex items-center justify-center shrink-0">
+                <Calendar className="h-4 w-4 text-primary" />
+              </div>
+              {new Date(report.date).toLocaleDateString("id-ID", { 
+                weekday: 'long', 
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric'
+              })}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="flex items-center gap-2 mt-2.5 flex-wrap">
+            <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 bg-primary/20 text-primary rounded-full border border-primary/30">
+              <Clock className="h-3 w-3" />
+              Shift {report.shift.charAt(0).toUpperCase() + report.shift.slice(1)}
+            </span>
+            <span className="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 bg-muted text-foreground rounded-full border border-border">
+              <User className="h-3 w-3 text-muted-foreground" />
+              {report.officer}
+            </span>
+            <span className="text-[10px] text-muted-foreground bg-muted/80 px-2 py-0.5 rounded-full border border-border/50">
+              Laporan #{total - index}
+            </span>
+            {onEdit && !isEditing && (
               <Button 
                 variant="outline" 
                 size="sm" 
                 onClick={() => setIsEditing(true)}
-                className="h-7 text-xs"
+                className="h-7 text-xs ml-auto rounded-full"
               >
-                <Pencil className="h-3.5 w-3.5 mr-1" />
+                <Pencil className="h-3 w-3 mr-1" />
                 Edit
               </Button>
-            </div>
-          )}
-        </DialogHeader>
+            )}
+          </div>
+        </div>
         {isEditing ? (
-          <ScrollArea className="max-h-[70vh] p-4 pt-2">
+          <ScrollArea className="max-h-[70vh] p-4 pt-3">
             <EditReportForm
               report={report}
               onSave={handleSave}
@@ -525,26 +552,7 @@ export function ShiftReportCard({ report, index, total, compact = false, onEdit 
 function ReportDetailContent({ report, index, total }: { report: ShiftReport; index: number; total: number }) {
   return (
     <ScrollArea className="max-h-[70vh]">
-      <div className="p-4 pt-2 space-y-3">
-        {/* Meta info */}
-        <div className="flex flex-wrap items-center gap-2">
-          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-primary/15 rounded-lg border border-primary/20">
-            <Clock className="h-3.5 w-3.5 text-primary" />
-            <span className="text-xs font-semibold text-primary capitalize">
-              Shift {report.shift}
-            </span>
-          </div>
-          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-accent/15 rounded-lg border border-accent/20">
-            <User className="h-3.5 w-3.5 text-accent" />
-            <span className="text-xs font-semibold text-accent-foreground">
-              {report.officer}
-            </span>
-          </div>
-          <span className="text-[10px] text-muted-foreground bg-muted px-2 py-0.5 rounded">
-            Laporan #{total - index}
-          </span>
-        </div>
-
+      <div className="p-4 pt-3 space-y-2.5">
         {/* Content sections with collapsible */}
         <div className="space-y-2">
           {report.oltDown && (
