@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Download, FileSpreadsheet, FileText } from "lucide-react";
+import { FileDown, Download, FileSpreadsheet, FileText } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import * as XLSX from "xlsx";
@@ -122,14 +123,24 @@ export function TicketHistoryExport() {
                   <SelectItem value="30">30 Hari</SelectItem>
                 </SelectContent>
               </Select>
-              <Button variant="outline" size="sm" onClick={handleExportExcel} disabled={records.length === 0}>
-                <FileSpreadsheet className="h-4 w-4 mr-1" />
-                Excel
-              </Button>
-              <Button variant="outline" size="sm" onClick={handleExportCSV} disabled={records.length === 0}>
-                <FileText className="h-4 w-4 mr-1" />
-                CSV
-              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm" disabled={records.length === 0}>
+                    <FileDown className="h-4 w-4 mr-1" />
+                    Export
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={handleExportExcel}>
+                    <FileSpreadsheet className="h-4 w-4 mr-2" />
+                    Export Excel
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={handleExportCSV}>
+                    <FileText className="h-4 w-4 mr-2" />
+                    Export CSV
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </div>
         </CardHeader>
