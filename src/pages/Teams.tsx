@@ -146,7 +146,7 @@ export default function Teams() {
             <SelectItem value="7d">7 Hari Terakhir</SelectItem>
             <SelectItem value="14d">14 Hari Terakhir</SelectItem>
             <SelectItem value="30d">30 Hari Terakhir</SelectItem>
-            <SelectItem value="custom">Kustom</SelectItem>
+            <SelectItem value="custom">Custom</SelectItem>
           </SelectContent>
         </Select>
 
