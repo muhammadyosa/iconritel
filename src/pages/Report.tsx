@@ -373,50 +373,65 @@ Dibuat: ${new Date(r.createdAt).toLocaleString("id-ID")}
           </TabsList>
         </div>
 
-        <TabsContent value="shift" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>🗣️ Report Shift</CardTitle>
-              <CardDescription>
-                Buat laporan shift harian untuk monitoring NOC
-              </CardDescription>
+        <TabsContent value="shift" className="space-y-3 sm:space-y-4">
+          {/* Header Info Card */}
+          <Card className="border-primary/20">
+            <CardHeader className="pb-3 pt-4 px-3 sm:px-6">
+              <div className="flex items-center justify-between flex-wrap gap-2">
+                <div>
+                  <CardTitle className="text-base sm:text-lg">🗣️ Report Shift</CardTitle>
+                  <CardDescription className="text-[11px] sm:text-sm mt-0.5">
+                    Buat laporan shift harian untuk monitoring NOC
+                  </CardDescription>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <Button variant="outline" size="sm" onClick={exportShiftReport} disabled={isLoadingReports} className="h-8 text-xs px-2.5">
+                    <Download className="h-3.5 w-3.5 mr-1.5" />
+                    Export
+                  </Button>
+                  <Button variant="ghost" size="sm" onClick={fetchReports} disabled={isLoadingReports} title="Refresh data" className="h-8 w-8 p-0">
+                    <RefreshCw className={`h-3.5 w-3.5 ${isLoadingReports ? "animate-spin" : ""}`} />
+                  </Button>
+                </div>
+              </div>
             </CardHeader>
-            <CardContent className="space-y-4">
-              {/* Header Fields - Compact Inline */}
-              <div className="flex flex-wrap gap-2 items-center">
-                <div className="flex items-center gap-1.5 bg-muted/50 rounded-md px-2 py-1">
-                  <span className="text-xs text-muted-foreground">Tanggal</span>
+
+            <CardContent className="space-y-4 px-3 sm:px-6 pb-4 sm:pb-6">
+              {/* Shift Info Row */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3">
+                <div className="space-y-1">
+                  <Label className="text-[11px] text-muted-foreground">📅 Tanggal</Label>
                   <Input
                     type="date"
-                    className="h-7 w-[130px] text-sm px-2"
+                    className="h-9 text-sm"
                     value={shiftReport.date}
                     onChange={(e) =>
                       setShiftReport({ ...shiftReport, date: e.target.value })
                     }
                   />
                 </div>
-                <div className="flex items-center gap-1.5 bg-muted/50 rounded-md px-2 py-1">
-                  <span className="text-xs text-muted-foreground">Shift</span>
+                <div className="space-y-1">
+                  <Label className="text-[11px] text-muted-foreground">⏰ Shift</Label>
                   <Select
                     value={shiftReport.shift}
                     onValueChange={(value) =>
                       setShiftReport({ ...shiftReport, shift: value })
                     }
                   >
-                    <SelectTrigger className="h-7 w-[80px] text-sm px-2">
+                    <SelectTrigger className="h-9 text-sm">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="pagi">Pagi</SelectItem>
-                      <SelectItem value="siang">Siang</SelectItem>
-                      <SelectItem value="malam">Malam</SelectItem>
+                      <SelectItem value="pagi">🌅 Pagi</SelectItem>
+                      <SelectItem value="siang">☀️ Siang</SelectItem>
+                      <SelectItem value="malam">🌙 Malam</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
-                <div className="flex items-center gap-1.5 bg-muted/50 rounded-md px-2 py-1 flex-1 min-w-[180px]">
-                  <span className="text-xs text-muted-foreground whitespace-nowrap">Petugas</span>
+                <div className="space-y-1">
+                  <Label className="text-[11px] text-muted-foreground">👤 Petugas</Label>
                   <Input
-                    className="h-7 text-sm px-2 flex-1"
+                    className="h-9 text-sm"
                     placeholder="Nama petugas shift"
                     value={shiftReport.officer}
                     onChange={(e) =>
@@ -426,105 +441,105 @@ Dibuat: ${new Date(r.createdAt).toLocaleString("id-ID")}
                 </div>
               </div>
 
-              <div className="space-y-4">
-                <div className="border-l-4 border-primary pl-4">
-                  <h3 className="font-semibold mb-3 text-primary">Ringkasan Shift</h3>
-                  
-                  <div className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="oltDown" className="flex items-center gap-2">
-                        <span className="text-xs bg-destructive/10 text-destructive px-2 py-0.5 rounded">OLT DOWN</span>
-                        Laporan OLT Down
-                      </Label>
-                      <Textarea
-                        id="oltDown"
-                        placeholder="Laporan OLT yang mengalami down..."
-                        rows={3}
-                        value={shiftReport.oltDown}
-                        onChange={(e) =>
-                          setShiftReport({ ...shiftReport, oltDown: e.target.value })
-                        }
-                      />
-                    </div>
+              {/* Incident Reports Section */}
+              <div className="space-y-3">
+                <h3 className="text-xs sm:text-sm font-semibold text-primary flex items-center gap-1.5">
+                  📟 Ringkasan Shift
+                </h3>
+                <div className="grid grid-cols-1 gap-3">
+                  <div className="space-y-1.5 rounded-lg border border-destructive/20 bg-destructive/5 p-2.5 sm:p-3">
+                    <Label htmlFor="oltDown" className="text-xs font-medium flex items-center gap-1.5">
+                      <span className="inline-flex items-center justify-center rounded bg-destructive/10 text-destructive text-[10px] font-semibold px-1.5 py-0.5">OLT DOWN</span>
+                    </Label>
+                    <Textarea
+                      id="oltDown"
+                      placeholder="Laporan OLT yang mengalami down..."
+                      rows={2}
+                      className="text-sm resize-none bg-background/80"
+                      value={shiftReport.oltDown}
+                      onChange={(e) =>
+                        setShiftReport({ ...shiftReport, oltDown: e.target.value })
+                      }
+                    />
+                  </div>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="portDown" className="flex items-center gap-2">
-                        <span className="text-xs bg-warning/10 text-warning px-2 py-0.5 rounded">PORT DOWN</span>
-                        Laporan Port Down
-                      </Label>
-                      <Textarea
-                        id="portDown"
-                        placeholder="Laporan port yang mengalami down..."
-                        rows={3}
-                        value={shiftReport.portDown}
-                        onChange={(e) =>
-                          setShiftReport({ ...shiftReport, portDown: e.target.value })
-                        }
-                      />
-                    </div>
+                  <div className="space-y-1.5 rounded-lg border border-yellow-500/20 bg-yellow-500/5 p-2.5 sm:p-3">
+                    <Label htmlFor="portDown" className="text-xs font-medium flex items-center gap-1.5">
+                      <span className="inline-flex items-center justify-center rounded bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 text-[10px] font-semibold px-1.5 py-0.5">PORT DOWN</span>
+                    </Label>
+                    <Textarea
+                      id="portDown"
+                      placeholder="Laporan port yang mengalami down..."
+                      rows={2}
+                      className="text-sm resize-none bg-background/80"
+                      value={shiftReport.portDown}
+                      onChange={(e) =>
+                        setShiftReport({ ...shiftReport, portDown: e.target.value })
+                      }
+                    />
+                  </div>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="fatLoss" className="flex items-center gap-2">
-                        <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded">FAT LOSS</span>
-                        Laporan FAT Loss
-                      </Label>
-                      <Textarea
-                        id="fatLoss"
-                        placeholder="Laporan FAT loss..."
-                        rows={3}
-                        value={shiftReport.fatLoss}
-                        onChange={(e) =>
-                          setShiftReport({ ...shiftReport, fatLoss: e.target.value })
-                        }
-                      />
-                    </div>
+                  <div className="space-y-1.5 rounded-lg border border-primary/20 bg-primary/5 p-2.5 sm:p-3">
+                    <Label htmlFor="fatLoss" className="text-xs font-medium flex items-center gap-1.5">
+                      <span className="inline-flex items-center justify-center rounded bg-primary/10 text-primary text-[10px] font-semibold px-1.5 py-0.5">FAT LOSS</span>
+                    </Label>
+                    <Textarea
+                      id="fatLoss"
+                      placeholder="Laporan FAT loss..."
+                      rows={2}
+                      className="text-sm resize-none bg-background/80"
+                      value={shiftReport.fatLoss}
+                      onChange={(e) =>
+                        setShiftReport({ ...shiftReport, fatLoss: e.target.value })
+                      }
+                    />
                   </div>
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="issues">Kendala/Masalah</Label>
-                <Textarea
-                  id="issues"
-                  placeholder="Kendala atau masalah yang ditemui..."
-                  rows={3}
-                  value={shiftReport.issues}
-                  onChange={(e) =>
-                    setShiftReport({ ...shiftReport, issues: e.target.value })
-                  }
-                />
+              {/* Additional Notes Section */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <Label htmlFor="issues" className="text-xs font-medium flex items-center gap-1.5">
+                    ⚠️ Kendala / Masalah
+                  </Label>
+                  <Textarea
+                    id="issues"
+                    placeholder="Kendala atau masalah yang ditemui..."
+                    rows={3}
+                    className="text-sm resize-none"
+                    value={shiftReport.issues}
+                    onChange={(e) =>
+                      setShiftReport({ ...shiftReport, issues: e.target.value })
+                    }
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="notes" className="text-xs font-medium flex items-center gap-1.5">
+                    📝 Catatan
+                  </Label>
+                  <Textarea
+                    id="notes"
+                    placeholder="Catatan tambahan..."
+                    rows={3}
+                    className="text-sm resize-none"
+                    value={shiftReport.notes}
+                    onChange={(e) =>
+                      setShiftReport({ ...shiftReport, notes: e.target.value })
+                    }
+                  />
+                </div>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="notes">Catatan</Label>
-                <Textarea
-                  id="notes"
-                  placeholder="Catatan tambahan..."
-                  rows={2}
-                  value={shiftReport.notes}
-                  onChange={(e) =>
-                    setShiftReport({ ...shiftReport, notes: e.target.value })
-                  }
-                />
-              </div>
-
-              <div className="flex gap-2 flex-wrap">
-                <Button onClick={handleShiftReportSubmit} disabled={isSubmitting}>
-                  {isSubmitting ? (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  ) : (
-                    <FileText className="mr-2 h-4 w-4" />
-                  )}
-                  {isSubmitting ? "Menyimpan..." : "Simpan Report"}
-                </Button>
-                <Button variant="outline" onClick={exportShiftReport} disabled={isLoadingReports}>
-                  <Download className="mr-2 h-4 w-4" />
-                  Export Report
-                </Button>
-                <Button variant="ghost" onClick={fetchReports} disabled={isLoadingReports} title="Refresh data">
-                  <RefreshCw className={`h-4 w-4 ${isLoadingReports ? "animate-spin" : ""}`} />
-                </Button>
-              </div>
+              {/* Submit Button */}
+              <Button onClick={handleShiftReportSubmit} disabled={isSubmitting} className="w-full sm:w-auto h-10">
+                {isSubmitting ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <FileText className="mr-2 h-4 w-4" />
+                )}
+                {isSubmitting ? "Menyimpan..." : "Simpan Report"}
+              </Button>
             </CardContent>
           </Card>
         </TabsContent>
