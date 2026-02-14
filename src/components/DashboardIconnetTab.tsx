@@ -405,10 +405,8 @@ Dengan Penyebaran :
               </div>
             </div>
 
-            <Separator />
-
-            {/* Action Buttons */}
-            <div className="flex gap-2 flex-wrap">
+            {/* Action Buttons - Mobile only */}
+            <div className="flex gap-2 flex-wrap lg:hidden">
               <Button onClick={handleCopy}>
                 <Copy className="mr-2 h-4 w-4" />
                 Salin ke Clipboard
@@ -421,10 +419,22 @@ Dengan Penyebaran :
           </div>
 
           {/* Right: Preview Output */}
-          <div className="space-y-2 lg:sticky lg:top-4 lg:self-start">
-            <Label>Preview Output</Label>
-            <div className="bg-muted p-4 rounded-lg">
-              <pre className="text-sm whitespace-pre-wrap font-mono text-foreground">
+          <div className="space-y-3 lg:sticky lg:top-4 lg:self-start">
+            <div className="flex items-center justify-between">
+              <Label className="text-sm font-semibold">Preview Output</Label>
+              <div className="flex gap-1.5">
+                <Button size="sm" variant="outline" className="h-7 text-xs" onClick={handleCopy}>
+                  <Copy className="h-3 w-3 mr-1" />
+                  Salin
+                </Button>
+                <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={handleClear}>
+                  <Trash2 className="h-3 w-3 mr-1" />
+                  Reset
+                </Button>
+              </div>
+            </div>
+            <div className="bg-muted/70 border rounded-lg p-4 max-h-[70vh] overflow-y-auto">
+              <pre className="text-xs sm:text-sm whitespace-pre-wrap font-mono text-foreground leading-relaxed">
                 {generateOutput()}
               </pre>
             </div>
