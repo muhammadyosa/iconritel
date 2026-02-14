@@ -147,7 +147,8 @@ export default function Dashboard() {
             emoji: "🗃️", 
             metric: "total",
             bgClass: "bg-primary/8 hover:bg-primary/15",
-            borderClass: "border-primary/20 hover:border-primary/40"
+            borderClass: "border-primary/30 hover:border-primary/50",
+            valueClass: "text-primary"
           },
           { 
             title: "Over SLA (>24h)", 
@@ -155,7 +156,8 @@ export default function Dashboard() {
             emoji: "⚠️", 
             metric: "overSLA",
             bgClass: "bg-destructive/8 hover:bg-destructive/15",
-            borderClass: "border-destructive/20 hover:border-destructive/40"
+            borderClass: "border-destructive/30 hover:border-destructive/50",
+            valueClass: "text-destructive"
           },
           { 
             title: "Impact OLT", 
@@ -163,7 +165,8 @@ export default function Dashboard() {
             emoji: "📟", 
             metric: "olt",
             bgClass: "bg-success/8 hover:bg-success/15",
-            borderClass: "border-success/20 hover:border-success/40"
+            borderClass: "border-success/30 hover:border-success/50",
+            valueClass: "text-success"
           },
           { 
             title: "Impact Feeder", 
@@ -171,7 +174,8 @@ export default function Dashboard() {
             emoji: "⛓️‍💥", 
             metric: "feeder",
             bgClass: "bg-warning/8 hover:bg-warning/15",
-            borderClass: "border-warning/20 hover:border-warning/40"
+            borderClass: "border-warning/30 hover:border-warning/50",
+            valueClass: "text-warning"
           }
         ].map((card, index) => (
           <motion.div
@@ -222,7 +226,7 @@ export default function Dashboard() {
                   <span className="text-xl sm:text-2xl">{card.emoji}</span>
                   <p className="text-[10px] sm:text-xs text-muted-foreground font-medium truncate">{card.title}</p>
                 </div>
-                <p className="text-2xl sm:text-3xl font-bold text-foreground shrink-0 tabular-nums">
+                <p className={`text-2xl sm:text-3xl font-bold shrink-0 tabular-nums ${card.valueClass}`}>
                   {card.value}
                 </p>
               </div>
