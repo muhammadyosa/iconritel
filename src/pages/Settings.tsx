@@ -23,7 +23,7 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { importMultiSheetExcel, getExcelSheets, ImportResult } from "@/lib/multiSheetImport";
-import { saveExcelData, saveOLTData, saveFATData, openDB, clearAllData, saveFDTData, saveAKVData, loadExcelData, loadOLTData, loadFATData, loadFDTData, loadAKVData } from "@/lib/indexedDB";
+import { saveExcelData, saveOLTData, saveFATData, openDB, clearListData, saveFDTData, saveAKVData, loadExcelData, loadOLTData, loadFATData, loadFDTData, loadAKVData } from "@/lib/indexedDB";
 import { useUserRole } from "@/hooks/useUserRole";
 import { UserManagement } from "@/components/UserManagement";
 import { InsidentManagement } from "@/components/InsidentManagement";
@@ -355,8 +355,8 @@ export default function Settings() {
   const handleDeleteAllData = async () => {
     setIsDeleting(true);
     try {
-      await clearAllData();
-      toast.success("Semua data berhasil dihapus");
+      await clearListData();
+      toast.success("Data list berhasil dihapus");
       setShowDeleteAllDialog(false);
       resetImport();
       // Refresh data counts after delete
@@ -482,10 +482,10 @@ export default function Settings() {
                       disabled={isImporting || isDeleting}
                     >
                       <Trash2 className="h-4 w-4 mr-2" />
-                      Hapus Semua Data
+                      Hapus Data List
                     </Button>
                     <p className="text-xs text-muted-foreground mt-2">
-                      Menghapus semua data: Ticket Management, List FAT, List UPE, List BNG, dan Report
+                      Menghapus data list inventaris (User, OLT, FAT, UPE, BNG, FDT, AKV). Tidak menghapus 📋 Daftar Insident dan 📝 Report.
                     </p>
                   </div>
                 )}
@@ -892,20 +892,20 @@ export default function Settings() {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-destructive">
               <Trash2 className="h-5 w-5" />
-              Hapus Semua Data
+              Hapus Data List
             </DialogTitle>
             <DialogDescription className="space-y-2">
-              <p>Apakah Anda yakin ingin menghapus semua data? Tindakan ini akan menghapus:</p>
+              <p>Apakah Anda yakin ingin menghapus data list inventaris? Tindakan ini akan menghapus:</p>
               <ul className="list-disc list-inside text-sm space-y-1">
-                <li>📋 Data Ticket Management (List User)</li>
+                <li>📋 Data List User</li>
                 <li>📍 Data List FAT</li>
                 <li>📟 Data List OLT</li>
                 <li>🔗 Data List UPE</li>
                 <li>🌐 Data List BNG</li>
                 <li>📦 Data List FDT</li>
                 <li>🗂️ Data List AKV User</li>
-                <li>📝 Data Report (Shift Report & Ticket Updates)</li>
               </ul>
+              <p className="text-sm text-muted-foreground">📋 Daftar Insident dan 📝 Report <strong>tidak akan dihapus</strong>.</p>
               <p className="font-medium text-destructive">Tindakan ini tidak dapat dibatalkan!</p>
             </DialogDescription>
           </DialogHeader>
@@ -914,7 +914,7 @@ export default function Settings() {
               Batal
             </Button>
             <Button variant="destructive" onClick={handleDeleteAllData} disabled={isDeleting}>
-              {isDeleting ? "Menghapus..." : "Ya, Hapus Semua"}
+              {isDeleting ? "Menghapus..." : "Ya, Hapus Data List"}
             </Button>
           </DialogFooter>
         </DialogContent>
