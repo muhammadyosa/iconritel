@@ -969,25 +969,27 @@ export default function Dashboard() {
       }}>
         <DialogContent className="w-[95vw] max-w-4xl max-h-[85vh] overflow-hidden flex flex-col p-4 sm:p-6">
           <DialogHeader className="flex-shrink-0">
-            <DialogTitle 
-              className={`flex items-center gap-2 text-lg ${(previousDialogState || inlineSelectedTicket) ? "cursor-pointer hover:text-primary transition-colors" : ""}`}
-              onClick={() => {
-                if (inlineSelectedTicket) {
-                  // Go back from ticket detail to ticket list
-                  setInlineSelectedTicket(null);
-                } else if (previousDialogState) {
-                  setShowOltList(previousDialogState.showOltList);
-                  setFilterDialogTickets(previousDialogState.tickets);
-                  setFilterDialogTitle(previousDialogState.title);
-                  setInlineSelectedTicket(previousDialogState.inlineTicket);
-                  setPreviousDialogState(null);
-                }
-              }}
-            >
+            {(previousDialogState || inlineSelectedTicket) && (
+              <button
+                onClick={() => {
+                  if (inlineSelectedTicket) {
+                    setInlineSelectedTicket(null);
+                  } else if (previousDialogState) {
+                    setShowOltList(previousDialogState.showOltList);
+                    setFilterDialogTickets(previousDialogState.tickets);
+                    setFilterDialogTitle(previousDialogState.title);
+                    setInlineSelectedTicket(previousDialogState.inlineTicket);
+                    setPreviousDialogState(null);
+                  }
+                }}
+                className="inline-flex items-center gap-1.5 text-xs font-medium text-primary hover:text-primary/80 bg-primary/10 hover:bg-primary/15 border border-primary/20 rounded-full px-3 py-1 w-fit transition-all duration-200 active:scale-95 mb-1"
+              >
+                <span className="text-sm">←</span>
+                Kembali
+              </button>
+            )}
+            <DialogTitle className="flex items-center gap-2 text-lg">
               <BarChart3 className="h-5 w-5 text-primary" />
-              {(previousDialogState || inlineSelectedTicket) && (
-                <span className="text-muted-foreground hover:text-primary">←</span>
-              )}
               {inlineSelectedTicket ? `🎫 Detail Tiket: ${inlineSelectedTicket.id}` : filterDialogTitle}
               {!inlineSelectedTicket && (
                 <span className="ml-2 text-sm font-normal text-muted-foreground">
