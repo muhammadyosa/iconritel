@@ -482,7 +482,7 @@ export default function Settings() {
                       disabled={isImporting || isDeleting}
                     >
                       <Trash2 className="h-4 w-4 mr-2" />
-                      Hapus Data List
+                      Delete Data List
                     </Button>
                     <p className="text-xs text-muted-foreground mt-2">
                       Menghapus data list inventaris (User, OLT, FAT, UPE, BNG, FDT, AKV). Tidak menghapus 📋 Daftar Insident dan 📝 Report.
@@ -892,7 +892,7 @@ export default function Settings() {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-destructive">
               <Trash2 className="h-5 w-5" />
-              Hapus Data List
+              Delete Data List
             </DialogTitle>
             <DialogDescription className="space-y-2">
               <p>Apakah Anda yakin ingin menghapus data list inventaris? Tindakan ini akan menghapus:</p>
@@ -914,7 +914,7 @@ export default function Settings() {
               Batal
             </Button>
             <Button variant="destructive" onClick={handleDeleteAllData} disabled={isDeleting}>
-              {isDeleting ? "Menghapus..." : "Ya, Hapus Data List"}
+              {isDeleting ? "Menghapus..." : "Ya, Delete Data List"}
             </Button>
           </DialogFooter>
         </DialogContent>
