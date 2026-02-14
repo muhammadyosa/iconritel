@@ -176,16 +176,16 @@ const AKVList = () => {
             </div>
           </div>
 
-          <div className="rounded-md border overflow-x-auto max-h-72 sm:max-h-96 -mx-2 sm:mx-0">
+          <div className="rounded-md border overflow-x-auto overflow-y-auto max-h-[50vh] sm:max-h-[60vh] md:max-h-[65vh] lg:max-h-[70vh] -mx-2 sm:mx-0">
             <Table className="text-[10px] sm:text-xs min-w-[800px]">
-              <TableHeader>
+              <TableHeader className="sticky top-0 bg-background z-10">
                 <TableRow className="h-6 sm:h-8">
-                  <TableHead className="px-1 sm:px-2 py-1 whitespace-nowrap sticky top-0 bg-background">Provinsi</TableHead>
-                  <TableHead className="px-1 sm:px-2 py-1 whitespace-nowrap sticky top-0 bg-background">Customer</TableHead>
-                  <TableHead className="px-1 sm:px-2 py-1 whitespace-nowrap sticky top-0 bg-background">Service ID</TableHead>
-                  <TableHead className="px-1 sm:px-2 py-1 whitespace-nowrap sticky top-0 bg-background">Tikor</TableHead>
-                  <TableHead className="px-1 sm:px-2 py-1 whitespace-nowrap sticky top-0 bg-background">Contact</TableHead>
-                  <TableHead className="px-1 sm:px-2 py-1 whitespace-nowrap sticky top-0 bg-background">Address</TableHead>
+                  <TableHead className="px-1 sm:px-2 py-1 whitespace-nowrap bg-muted/80">Provinsi</TableHead>
+                  <TableHead className="px-1 sm:px-2 py-1 whitespace-nowrap bg-muted/80">Customer</TableHead>
+                  <TableHead className="px-1 sm:px-2 py-1 whitespace-nowrap bg-muted/80">Service ID</TableHead>
+                  <TableHead className="px-1 sm:px-2 py-1 whitespace-nowrap bg-muted/80">Tikor</TableHead>
+                  <TableHead className="px-1 sm:px-2 py-1 whitespace-nowrap bg-muted/80">Contact</TableHead>
+                  <TableHead className="px-1 sm:px-2 py-1 whitespace-nowrap bg-muted/80">Address</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
