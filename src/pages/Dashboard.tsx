@@ -123,24 +123,19 @@ export default function Dashboard() {
   });
 
   return (
-    <div className="space-y-4 md:space-y-6 w-full max-w-full overflow-x-hidden min-w-0">
+    <div className="space-y-3 sm:space-y-4 md:space-y-6 w-full max-w-full overflow-x-hidden min-w-0">
       {/* Header Section */}
       <motion.div 
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="relative"
       >
-        <div className="flex items-center gap-3 mb-2">
-          <div>
-            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold">
-              🖥️ Dashboard Overview
-            </h1>
-            <p className="text-muted-foreground text-[11px] sm:text-sm">
-              Monitoring incident NOC RITEL
-            </p>
-          </div>
-        </div>
+        <h1 className="text-xl sm:text-2xl md:text-3xl font-bold">
+          🖥️ Dashboard Overview
+        </h1>
+        <p className="text-muted-foreground text-[11px] sm:text-sm">
+          Monitoring incident NOC RITEL
+        </p>
       </motion.div>
 
       {/* KPI Cards Section */}
@@ -151,44 +146,43 @@ export default function Dashboard() {
             value: totalIncidents, 
             emoji: "🗃️", 
             metric: "total",
-            bgClass: "bg-primary/10",
-            borderClass: "border-primary/30"
+            bgClass: "bg-primary/8 hover:bg-primary/15",
+            borderClass: "border-primary/20 hover:border-primary/40"
           },
           { 
             title: "Over SLA (>24h)", 
             value: overSLA, 
             emoji: "⚠️", 
             metric: "overSLA",
-            bgClass: "bg-destructive/10",
-            borderClass: "border-destructive/30"
+            bgClass: "bg-destructive/8 hover:bg-destructive/15",
+            borderClass: "border-destructive/20 hover:border-destructive/40"
           },
           { 
             title: "Impact OLT", 
             value: totalOLT, 
             emoji: "📟", 
             metric: "olt",
-            bgClass: "bg-success/10",
-            borderClass: "border-success/30"
+            bgClass: "bg-success/8 hover:bg-success/15",
+            borderClass: "border-success/20 hover:border-success/40"
           },
           { 
             title: "Impact Feeder", 
             value: feederImpact, 
             emoji: "⛓️‍💥", 
             metric: "feeder",
-            bgClass: "bg-warning/10",
-            borderClass: "border-warning/30"
+            bgClass: "bg-warning/8 hover:bg-warning/15",
+            borderClass: "border-warning/20 hover:border-warning/40"
           }
         ].map((card, index) => (
           <motion.div
             key={card.metric}
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3, delay: index * 0.05 }}
             onClick={() => {
               let filtered: Ticket[] = [];
               let title = "";
               
-              // Reset previous state when opening new dialog
               setPreviousDialogState(null);
               
               if (card.metric === "total") {
@@ -219,25 +213,16 @@ export default function Dashboard() {
               relative cursor-pointer group
               rounded-xl ${card.bgClass} ${card.borderClass} border
               transition-all duration-200
-              hover:scale-[1.02] hover:shadow-lg
-              active:scale-[0.98]
+              hover:shadow-md active:scale-[0.97]
             `}
           >
-            {/* Content */}
-            <div className="relative p-2.5 sm:p-3 md:p-4">
-              <div className="flex items-center gap-3">
-                {/* Emoji/Logo on Left */}
-                <div className="flex flex-col items-center shrink-0">
-                  <span className="text-2xl sm:text-3xl">{card.emoji}</span>
-                </div>
-                
-                {/* Title below emoji, Value on right */}
-                <div className="flex-1 min-w-0">
+            <div className="p-3 sm:p-4">
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <span className="text-xl sm:text-2xl">{card.emoji}</span>
                   <p className="text-[10px] sm:text-xs text-muted-foreground font-medium truncate">{card.title}</p>
                 </div>
-                
-                {/* Value on far right */}
-                <p className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground shrink-0">
+                <p className="text-2xl sm:text-3xl font-bold text-foreground shrink-0 tabular-nums">
                   {card.value}
                 </p>
               </div>
@@ -246,7 +231,7 @@ export default function Dashboard() {
         ))}
       </div>
 
-      {/* Charts Section - Bar Charts */}
+      {/* Charts Section */}
       <div className="grid gap-2 sm:gap-3 grid-cols-1 lg:grid-cols-2 w-full">
         {/* Status Distribution Bar Chart */}
         <motion.div
@@ -254,14 +239,14 @@ export default function Dashboard() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.2 }}
         >
-          <Card className="shadow-lg overflow-hidden border bg-card">
-            <CardHeader className="py-2 px-2.5 sm:py-2.5 sm:px-4 border-b bg-muted/30">
-              <CardTitle className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm md:text-base">
+          <Card className="overflow-hidden border">
+            <CardHeader className="py-2 px-3 sm:px-4 border-b bg-muted/20">
+              <CardTitle className="flex items-center gap-1.5 text-xs sm:text-sm">
                 <BarChart3 className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary" />
                 Status Distribution
               </CardTitle>
             </CardHeader>
-            <CardContent className="p-1.5 sm:p-2 md:p-3">
+            <CardContent className="p-2 sm:p-3">
               {(() => {
                 const statusData = [
                   { emoji: "⚙️", label: "Progres", value: tickets.filter((t) => t.status === "On Progress").length, fill: "hsl(217, 91%, 60%)", status: "On Progress" },
@@ -362,10 +347,10 @@ export default function Dashboard() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.3 }}
         >
-          <Card className="shadow-lg overflow-hidden border bg-card">
-            <CardHeader className="py-2 px-3 sm:px-4 border-b bg-muted/30">
+          <Card className="overflow-hidden border">
+            <CardHeader className="py-2 px-3 sm:px-4 border-b bg-muted/20">
               <div className="flex items-center justify-between gap-2">
-                <CardTitle className="flex items-center gap-2 text-sm sm:text-base">
+                <CardTitle className="flex items-center gap-2 text-xs sm:text-sm">
                   <TrendingUp className="h-4 w-4 text-accent" />
                   Category Trend
                 </CardTitle>
@@ -524,48 +509,34 @@ export default function Dashboard() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.6 }}
         >
-          <Card className="overflow-hidden">
-            {/* Header with Stats Summary */}
-            <CardHeader className="pb-4">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div className="flex items-center gap-3">
-                  <div className="h-11 w-11 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center shadow-sm">
-                    <FileText className="h-5 w-5 text-primary" />
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-bold flex items-center gap-2">
-                      📋 Report Shift
-                    </h3>
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      Rekap aktivitas shift harian tim NOC
-                    </p>
-                  </div>
+          <Card className="overflow-hidden border">
+            <CardHeader className="py-3 px-3 sm:px-6 border-b bg-muted/20">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                  <h3 className="text-sm sm:text-base font-bold">📋 Report Shift</h3>
+                  <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5">
+                    Rekap aktivitas shift harian tim NOC
+                  </p>
                 </div>
-                
-                {/* Quick Stats */}
-                <div className="flex items-center gap-3">
-                  <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-primary/10 border border-primary/20">
-                    <FileText className="h-3.5 w-3.5 text-primary" />
-                    <span className="text-xs font-semibold text-primary">{shiftReports.length}</span>
-                    <span className="text-[10px] text-muted-foreground">Laporan</span>
-                  </div>
-                  <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-accent/10 border border-accent/20">
-                    <Calendar className="h-3.5 w-3.5 text-accent" />
-                    <span className="text-xs font-semibold text-accent-foreground">{getHistoryRecords().length}</span>
-                    <span className="text-[10px] text-muted-foreground">Hari</span>
-                  </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] px-2 py-1 rounded-md bg-primary/10 border border-primary/20 font-medium text-primary">
+                    {shiftReports.length} Laporan
+                  </span>
+                  <span className="text-[10px] px-2 py-1 rounded-md bg-muted border font-medium text-muted-foreground">
+                    {getHistoryRecords().length} Hari
+                  </span>
                   <Button 
                     variant="ghost" 
                     size="icon" 
                     onClick={fetchShiftReports} 
                     disabled={isLoadingShiftReports} 
                     title="Refresh data"
-                    className="h-9 w-9"
+                    className="h-8 w-8"
                   >
                     {isLoadingShiftReports ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
                     ) : (
-                      <RefreshCw className="h-4 w-4" />
+                      <RefreshCw className="h-3.5 w-3.5" />
                     )}
                   </Button>
                 </div>
@@ -779,13 +750,12 @@ export default function Dashboard() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, delay: 0.7 }}
       >
-        <Card className="shadow-2xl border-2">
-          <CardHeader className="flex flex-col xs:flex-row xs:items-center justify-between space-y-2 xs:space-y-0 pb-3 sm:pb-4">
-            <CardTitle className="text-sm sm:text-base">Recent Tickets</CardTitle>
+        <Card className="overflow-hidden border">
+          <CardHeader className="py-3 px-3 sm:px-6 border-b bg-muted/20 flex flex-col xs:flex-row xs:items-center justify-between space-y-2 xs:space-y-0">
+            <CardTitle className="text-xs sm:text-sm">Recent Tickets</CardTitle>
             <div className="flex items-center gap-2">
-              <FileText className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground" />
               <Select value={selectedConstraint} onValueChange={setSelectedConstraint}>
-                <SelectTrigger className="w-[140px] sm:w-[180px] h-7 sm:h-9 text-[11px] sm:text-sm">
+                <SelectTrigger className="w-[140px] sm:w-[170px] h-7 sm:h-8 text-[10px] sm:text-xs">
                   <SelectValue placeholder="Filter Constraint" />
                 </SelectTrigger>
                 <SelectContent>
