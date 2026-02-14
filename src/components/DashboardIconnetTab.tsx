@@ -213,216 +213,221 @@ Dengan Penyebaran :
           Isi data resume gangguan untuk Dashboard Iconnet
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-6">
-        {/* Resume All Section */}
-        <div className="space-y-3">
-          <div className="flex items-center gap-2">
-            <div className="h-5 w-1 bg-primary rounded-full" />
-            <h3 className="font-semibold">Resume All</h3>
-          </div>
-          
-          {/* Header Fields - Compact Inline */}
-          <div className="flex flex-wrap gap-2 items-center">
-            <div className="flex items-center gap-1.5 bg-muted/50 rounded-md px-2 py-1">
-              <span className="text-xs text-muted-foreground">Pukul</span>
-              <Select
-                value={data.resumeAllTime}
-                onValueChange={(value) => updateField("resumeAllTime", value)}
-              >
-                <SelectTrigger className="h-7 w-[70px] text-sm px-2">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {SHIFT_OPTIONS.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="flex items-center gap-1.5 bg-muted/50 rounded-md px-2 py-1">
-              <span className="text-xs text-muted-foreground">Tanggal</span>
-              <Input
-                type="date"
-                className="h-7 w-[130px] text-sm px-2"
-                value={data.resumeAllDate}
-                onChange={(e) => updateField("resumeAllDate", e.target.value)}
-              />
-            </div>
-          </div>
-
-          {/* Dengan Penyebaran - Compact Inline Layout */}
-          <div className="space-y-2">
-            <p className="text-xs font-medium text-muted-foreground">Dengan Penyebaran :</p>
-            <div className="flex flex-wrap gap-2">
-              {[
-                { id: "sumselAll", label: "Sumsel", field: "sumselAll" as const },
-                { id: "bangkaBelitungAll", label: "Babel", field: "bangkaBelitungAll" as const },
-                { id: "bengkuluAll", label: "Bengkulu", field: "bengkuluAll" as const },
-                { id: "jambiAll", label: "Jambi", field: "jambiAll" as const },
-                { id: "lampungAll", label: "Lampung", field: "lampungAll" as const },
-              ].map((item) => (
-                <div key={item.id} className="flex items-center gap-1 bg-muted/50 rounded-md px-2 py-1">
-                  <span className="text-xs text-muted-foreground whitespace-nowrap">{item.label} =</span>
+      <CardContent>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Left: Input Form */}
+          <div className="space-y-6">
+            {/* Resume All Section */}
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <div className="h-5 w-1 bg-primary rounded-full" />
+                <h3 className="font-semibold">Resume All</h3>
+              </div>
+              
+              {/* Header Fields - Compact Inline */}
+              <div className="flex flex-wrap gap-2 items-center">
+                <div className="flex items-center gap-1.5 bg-muted/50 rounded-md px-2 py-1">
+                  <span className="text-xs text-muted-foreground">Pukul</span>
+                  <Select
+                    value={data.resumeAllTime}
+                    onValueChange={(value) => updateField("resumeAllTime", value)}
+                  >
+                    <SelectTrigger className="h-7 w-[70px] text-sm px-2">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {SHIFT_OPTIONS.map((option) => (
+                        <SelectItem key={option.value} value={option.value}>
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="flex items-center gap-1.5 bg-muted/50 rounded-md px-2 py-1">
+                  <span className="text-xs text-muted-foreground">Tanggal</span>
                   <Input
-                    id={item.id}
-                    className="h-7 w-14 text-center text-sm px-1"
-                    placeholder="-"
-                    value={data[item.field]}
-                    onChange={(e) => updateField(item.field, e.target.value)}
+                    type="date"
+                    className="h-7 w-[130px] text-sm px-2"
+                    value={data.resumeAllDate}
+                    onChange={(e) => updateField("resumeAllDate", e.target.value)}
                   />
                 </div>
-              ))}
-            </div>
-          </div>
+              </div>
 
-          {/* Posisi Section - Compact Inline */}
-          <div className="flex flex-wrap gap-2 items-center">
-            <div className="flex items-center gap-1.5 bg-primary/10 rounded-md px-2 py-1 border border-primary/20">
-              <span className="text-xs font-medium text-primary whitespace-nowrap">NOC Ritel SBU =</span>
-              <Input
-                className="h-7 w-16 text-center text-sm px-1 font-semibold"
-                placeholder="-"
-                value={data.posisiNocRitel}
-                readOnly
-              />
-            </div>
-            <div className="flex items-center gap-1.5 bg-muted/50 rounded-md px-2 py-1">
-              <span className="text-xs text-muted-foreground whitespace-nowrap">Total =</span>
-              <Input
-                className="h-7 w-16 text-center text-sm px-1"
-                placeholder="-"
-                value={data.totalTiket}
-                onChange={(e) => updateField("totalTiket", e.target.value)}
-              />
-            </div>
-            <div className="flex items-center gap-1.5 bg-primary/10 rounded-md px-2 py-1 border border-primary/20">
-              <span className="text-xs font-medium text-primary whitespace-nowrap">Outbond, dll =</span>
-              <Input
-                className="h-7 w-14 text-center text-sm px-1 font-semibold"
-                placeholder="-"
-                value={data.posisiTiketOutbond}
-                readOnly
-              />
-            </div>
-          </div>
-        </div>
-
-        <Separator />
-
-        {/* Resume Gangguan Section */}
-        <div className="space-y-3">
-          <div className="flex items-center gap-2">
-            <div className="h-5 w-1 bg-destructive rounded-full" />
-            <h3 className="font-semibold">Resume Gangguan</h3>
-          </div>
-
-          {/* Header Fields - Compact Inline */}
-          <div className="flex flex-wrap gap-2 items-center">
-            <div className="flex items-center gap-1.5 bg-muted/50 rounded-md px-2 py-1">
-              <span className="text-xs text-muted-foreground">Pukul</span>
-              <Select
-                value={data.resumeGangguanTime}
-                onValueChange={(value) => updateField("resumeGangguanTime", value)}
-              >
-                <SelectTrigger className="h-7 w-[70px] text-sm px-2">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {SHIFT_OPTIONS.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
+              {/* Dengan Penyebaran - Compact Inline Layout */}
+              <div className="space-y-2">
+                <p className="text-xs font-medium text-muted-foreground">Dengan Penyebaran :</p>
+                <div className="flex flex-wrap gap-2">
+                  {[
+                    { id: "sumselAll", label: "Sumsel", field: "sumselAll" as const },
+                    { id: "bangkaBelitungAll", label: "Babel", field: "bangkaBelitungAll" as const },
+                    { id: "bengkuluAll", label: "Bengkulu", field: "bengkuluAll" as const },
+                    { id: "jambiAll", label: "Jambi", field: "jambiAll" as const },
+                    { id: "lampungAll", label: "Lampung", field: "lampungAll" as const },
+                  ].map((item) => (
+                    <div key={item.id} className="flex items-center gap-1 bg-muted/50 rounded-md px-2 py-1">
+                      <span className="text-xs text-muted-foreground whitespace-nowrap">{item.label} =</span>
+                      <Input
+                        id={item.id}
+                        className="h-7 w-14 text-center text-sm px-1"
+                        placeholder="-"
+                        value={data[item.field]}
+                        onChange={(e) => updateField(item.field, e.target.value)}
+                      />
+                    </div>
                   ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="flex items-center gap-1.5 bg-muted/50 rounded-md px-2 py-1">
-              <span className="text-xs text-muted-foreground">Retail SBS</span>
-              <Select
-                value={data.retailSbsHari}
-                onValueChange={(value) => updateField("retailSbsHari", value)}
-              >
-                <SelectTrigger className="h-7 w-[80px] text-sm px-2">
-                  <SelectValue placeholder="-" />
-                </SelectTrigger>
-                <SelectContent>
-                  {HARI_OPTIONS.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="flex items-center gap-1.5 bg-muted/50 rounded-md px-2 py-1">
-              <span className="text-xs text-muted-foreground">Tanggal</span>
-              <Input
-                type="date"
-                className="h-7 w-[130px] text-sm px-2"
-                value={data.resumeGangguanDate}
-                onChange={(e) => updateField("resumeGangguanDate", e.target.value)}
-              />
-            </div>
-            <div className="flex items-center gap-1.5 bg-destructive/10 rounded-md px-2 py-1 border border-destructive/20">
-              <span className="text-xs font-medium text-destructive whitespace-nowrap">Total Gangguan =</span>
-              <Input
-                className="h-7 w-14 text-center text-sm px-1 font-semibold"
-                placeholder="-"
-                value={data.totalGangguan}
-                readOnly
-              />
-            </div>
-          </div>
+                </div>
+              </div>
 
-          {/* Dengan Penyebaran - Compact Inline Layout */}
-          <div className="space-y-2">
-            <p className="text-xs font-medium text-muted-foreground">Dengan Penyebaran :</p>
-            <div className="flex flex-wrap gap-2">
-              {[
-                { id: "sumselGangguan", label: "Sumsel", field: "sumselGangguan" as const },
-                { id: "bangkaBelitungGangguan", label: "Babel", field: "bangkaBelitungGangguan" as const },
-                { id: "bengkuluGangguan", label: "Bengkulu", field: "bengkuluGangguan" as const },
-                { id: "jambiGangguan", label: "Jambi", field: "jambiGangguan" as const },
-                { id: "lampungGangguan", label: "Lampung", field: "lampungGangguan" as const },
-              ].map((item) => (
-                <div key={item.id} className="flex items-center gap-1 bg-muted/50 rounded-md px-2 py-1">
-                  <span className="text-xs text-muted-foreground whitespace-nowrap">{item.label} =</span>
+              {/* Posisi Section - Compact Inline */}
+              <div className="flex flex-wrap gap-2 items-center">
+                <div className="flex items-center gap-1.5 bg-primary/10 rounded-md px-2 py-1 border border-primary/20">
+                  <span className="text-xs font-medium text-primary whitespace-nowrap">NOC Ritel SBU =</span>
                   <Input
-                    id={item.id}
-                    className="h-7 w-14 text-center text-sm px-1"
+                    className="h-7 w-16 text-center text-sm px-1 font-semibold"
                     placeholder="-"
-                    value={data[item.field]}
-                    onChange={(e) => updateField(item.field, e.target.value)}
+                    value={data.posisiNocRitel}
+                    readOnly
                   />
                 </div>
-              ))}
+                <div className="flex items-center gap-1.5 bg-muted/50 rounded-md px-2 py-1">
+                  <span className="text-xs text-muted-foreground whitespace-nowrap">Total =</span>
+                  <Input
+                    className="h-7 w-16 text-center text-sm px-1"
+                    placeholder="-"
+                    value={data.totalTiket}
+                    onChange={(e) => updateField("totalTiket", e.target.value)}
+                  />
+                </div>
+                <div className="flex items-center gap-1.5 bg-primary/10 rounded-md px-2 py-1 border border-primary/20">
+                  <span className="text-xs font-medium text-primary whitespace-nowrap">Outbond, dll =</span>
+                  <Input
+                    className="h-7 w-14 text-center text-sm px-1 font-semibold"
+                    placeholder="-"
+                    value={data.posisiTiketOutbond}
+                    readOnly
+                  />
+                </div>
+              </div>
+            </div>
+
+            <Separator />
+
+            {/* Resume Gangguan Section */}
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <div className="h-5 w-1 bg-destructive rounded-full" />
+                <h3 className="font-semibold">Resume Gangguan</h3>
+              </div>
+
+              {/* Header Fields - Compact Inline */}
+              <div className="flex flex-wrap gap-2 items-center">
+                <div className="flex items-center gap-1.5 bg-muted/50 rounded-md px-2 py-1">
+                  <span className="text-xs text-muted-foreground">Pukul</span>
+                  <Select
+                    value={data.resumeGangguanTime}
+                    onValueChange={(value) => updateField("resumeGangguanTime", value)}
+                  >
+                    <SelectTrigger className="h-7 w-[70px] text-sm px-2">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {SHIFT_OPTIONS.map((option) => (
+                        <SelectItem key={option.value} value={option.value}>
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="flex items-center gap-1.5 bg-muted/50 rounded-md px-2 py-1">
+                  <span className="text-xs text-muted-foreground">Retail SBS</span>
+                  <Select
+                    value={data.retailSbsHari}
+                    onValueChange={(value) => updateField("retailSbsHari", value)}
+                  >
+                    <SelectTrigger className="h-7 w-[80px] text-sm px-2">
+                      <SelectValue placeholder="-" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {HARI_OPTIONS.map((option) => (
+                        <SelectItem key={option.value} value={option.value}>
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="flex items-center gap-1.5 bg-muted/50 rounded-md px-2 py-1">
+                  <span className="text-xs text-muted-foreground">Tanggal</span>
+                  <Input
+                    type="date"
+                    className="h-7 w-[130px] text-sm px-2"
+                    value={data.resumeGangguanDate}
+                    onChange={(e) => updateField("resumeGangguanDate", e.target.value)}
+                  />
+                </div>
+                <div className="flex items-center gap-1.5 bg-destructive/10 rounded-md px-2 py-1 border border-destructive/20">
+                  <span className="text-xs font-medium text-destructive whitespace-nowrap">Total Gangguan =</span>
+                  <Input
+                    className="h-7 w-14 text-center text-sm px-1 font-semibold"
+                    placeholder="-"
+                    value={data.totalGangguan}
+                    readOnly
+                  />
+                </div>
+              </div>
+
+              {/* Dengan Penyebaran - Compact Inline Layout */}
+              <div className="space-y-2">
+                <p className="text-xs font-medium text-muted-foreground">Dengan Penyebaran :</p>
+                <div className="flex flex-wrap gap-2">
+                  {[
+                    { id: "sumselGangguan", label: "Sumsel", field: "sumselGangguan" as const },
+                    { id: "bangkaBelitungGangguan", label: "Babel", field: "bangkaBelitungGangguan" as const },
+                    { id: "bengkuluGangguan", label: "Bengkulu", field: "bengkuluGangguan" as const },
+                    { id: "jambiGangguan", label: "Jambi", field: "jambiGangguan" as const },
+                    { id: "lampungGangguan", label: "Lampung", field: "lampungGangguan" as const },
+                  ].map((item) => (
+                    <div key={item.id} className="flex items-center gap-1 bg-muted/50 rounded-md px-2 py-1">
+                      <span className="text-xs text-muted-foreground whitespace-nowrap">{item.label} =</span>
+                      <Input
+                        id={item.id}
+                        className="h-7 w-14 text-center text-sm px-1"
+                        placeholder="-"
+                        value={data[item.field]}
+                        onChange={(e) => updateField(item.field, e.target.value)}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <Separator />
+
+            {/* Action Buttons */}
+            <div className="flex gap-2 flex-wrap">
+              <Button onClick={handleCopy}>
+                <Copy className="mr-2 h-4 w-4" />
+                Salin ke Clipboard
+              </Button>
+              <Button variant="outline" onClick={handleClear}>
+                <Trash2 className="mr-2 h-4 w-4" />
+                Hapus Data
+              </Button>
             </div>
           </div>
-        </div>
 
-        <Separator />
-
-        {/* Action Buttons */}
-        <div className="flex gap-2 flex-wrap">
-          <Button onClick={handleCopy}>
-            <Copy className="mr-2 h-4 w-4" />
-            Salin ke Clipboard
-          </Button>
-          <Button variant="outline" onClick={handleClear}>
-            <Trash2 className="mr-2 h-4 w-4" />
-            Hapus Data
-          </Button>
-        </div>
-
-        {/* Preview */}
-        <div className="space-y-2">
-          <Label>Preview Output</Label>
-          <div className="bg-muted p-4 rounded-lg">
-            <pre className="text-sm whitespace-pre-wrap font-mono text-foreground">
-              {generateOutput()}
-            </pre>
+          {/* Right: Preview Output */}
+          <div className="space-y-2 lg:sticky lg:top-4 lg:self-start">
+            <Label>Preview Output</Label>
+            <div className="bg-muted p-4 rounded-lg">
+              <pre className="text-sm whitespace-pre-wrap font-mono text-foreground">
+                {generateOutput()}
+              </pre>
+            </div>
           </div>
         </div>
       </CardContent>
