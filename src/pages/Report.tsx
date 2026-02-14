@@ -20,7 +20,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "@/hooks/use-toast";
-import { FileText, Download, ClipboardList, Trash2, RefreshCw, Loader2 } from "lucide-react";
+import { FileText, Download, ClipboardList, Trash2, RefreshCw, Loader2, CalendarIcon } from "lucide-react";
+import { format, parse } from "date-fns";
+import { id as idLocale } from "date-fns/locale";
+import { cn } from "@/lib/utils";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { z } from "zod";
 import { Ticket } from "@/types/ticket";
 import { DashboardIconnetTab } from "@/components/DashboardIconnetTab";
@@ -401,14 +406,35 @@ Dibuat: ${new Date(r.createdAt).toLocaleString("id-ID")}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3">
                 <div className="space-y-1">
                   <Label className="text-[11px] text-muted-foreground">📅 Tanggal</Label>
-                  <Input
-                    type="date"
-                    className="h-9 text-sm"
-                    value={shiftReport.date}
-                    onChange={(e) =>
-                      setShiftReport({ ...shiftReport, date: e.target.value })
-                    }
-                  />
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "h-9 w-full justify-start text-left text-sm font-normal",
+                          !shiftReport.date && "text-muted-foreground"
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-3.5 w-3.5 opacity-60" />
+                        {shiftReport.date
+                          ? format(parse(shiftReport.date, "yyyy-MM-dd", new Date()), "dd MMMM yyyy", { locale: idLocale })
+                          : "Pilih tanggal"}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={shiftReport.date ? parse(shiftReport.date, "yyyy-MM-dd", new Date()) : undefined}
+                        onSelect={(date) => {
+                          if (date) {
+                            setShiftReport({ ...shiftReport, date: format(date, "yyyy-MM-dd") });
+                          }
+                        }}
+                        initialFocus
+                        className={cn("p-3 pointer-events-auto")}
+                      />
+                    </PopoverContent>
+                  </Popover>
                 </div>
                 <div className="space-y-1">
                   <Label className="text-[11px] text-muted-foreground">⏰ Shift</Label>
