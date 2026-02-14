@@ -534,7 +534,7 @@ export default function Dashboard() {
                   </div>
                   <div>
                     <h3 className="text-lg font-bold flex items-center gap-2">
-                      📋 Laporan Shift
+                      📋 Report Shift
                     </h3>
                     <p className="text-xs text-muted-foreground mt-0.5">
                       Rekap aktivitas shift harian tim NOC
