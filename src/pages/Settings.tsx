@@ -485,7 +485,7 @@ export default function Settings() {
                       Delete Data List
                     </Button>
                     <p className="text-xs text-muted-foreground mt-2">
-                      Menghapus data list inventaris (User, OLT, FAT, UPE, BNG, FDT, AKV). Tidak menghapus 📋 Daftar Insident dan 📝 Report.
+                      Menghapus data list inventaris (User, OLT, FAT, UPE, BNG, FDT, AKV). Tidak menghapus 📋 List Incident dan 📝 Report.
                     </p>
                   </div>
                 )}
@@ -905,7 +905,7 @@ export default function Settings() {
                 <li>📦 Data List FDT</li>
                 <li>🗂️ Data List AKV User</li>
               </ul>
-              <p className="text-sm text-muted-foreground">📋 Daftar Insident dan 📝 Report <strong>tidak akan dihapus</strong>.</p>
+              <p className="text-sm text-muted-foreground">📋 List Incident dan 📝 Report <strong>tidak akan dihapus</strong>.</p>
               <p className="font-medium text-destructive">Tindakan ini tidak dapat dibatalkan!</p>
             </DialogDescription>
           </DialogHeader>

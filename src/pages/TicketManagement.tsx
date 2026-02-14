@@ -251,7 +251,7 @@ export default function TicketManagement() {
       }));
       ws["!cols"] = colWidths;
       const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, "Daftar Insident");
+      XLSX.utils.book_append_sheet(wb, ws, "List Incident");
       XLSX.writeFile(wb, `noc_insident_${Date.now()}.xlsx`);
       toast.success("Excel berhasil diexport");
     });
@@ -435,7 +435,7 @@ export default function TicketManagement() {
       <Tabs defaultValue="preview-data" className="w-full">
         <TabsList className="grid w-full max-w-md grid-cols-2">
           <TabsTrigger value="preview-data">📋 Preview Data</TabsTrigger>
-          <TabsTrigger value="daftar-ticket">📑 Daftar Insident</TabsTrigger>
+          <TabsTrigger value="daftar-ticket">📑 List Incident</TabsTrigger>
         </TabsList>
 
         <TabsContent value="preview-data" className="mt-2 sm:mt-3 space-y-2 sm:space-y-3">
@@ -586,7 +586,7 @@ export default function TicketManagement() {
           <Card className="shadow-sm border">
             <CardHeader className="py-1.5 sm:py-2 px-2 sm:px-3 border-b bg-muted/30 flex flex-row items-center justify-between gap-2">
               <div className="flex items-center gap-2">
-                <CardTitle className="text-xs sm:text-sm whitespace-nowrap">📋 Daftar Insident ({filteredTickets.length})</CardTitle>
+                <CardTitle className="text-xs sm:text-sm whitespace-nowrap">📋 List Incident ({filteredTickets.length})</CardTitle>
                 {isLoadingTickets && (
                   <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />
                 )}
