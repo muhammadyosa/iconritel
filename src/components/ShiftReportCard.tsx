@@ -334,29 +334,29 @@ export function ShiftReportCard({ report, index, total, compact = false, onEdit 
           </motion.div>
         </DialogTrigger>
         <DialogContent className="max-w-lg max-h-[85vh] p-0">
-          <DialogHeader className="p-4 pb-0">
-            <DialogTitle className="flex items-center justify-between gap-2 text-base">
-              <div className="flex items-center gap-2">
-                <Calendar className="h-4 w-4 text-primary" />
-                {new Date(report.date).toLocaleDateString("id-ID", { 
-                  weekday: 'long', 
-                  day: 'numeric',
-                  month: 'long',
-                  year: 'numeric'
-                })}
-              </div>
-              {onEdit && !isEditing && (
+          <DialogHeader className="p-4 pb-0 pr-12">
+            <DialogTitle className="flex items-center gap-2 text-base">
+              <Calendar className="h-4 w-4 text-primary" />
+              {new Date(report.date).toLocaleDateString("id-ID", { 
+                weekday: 'long', 
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric'
+              })}
+            </DialogTitle>
+            {onEdit && !isEditing && (
+              <div className="flex justify-start pt-1">
                 <Button 
-                  variant="ghost" 
+                  variant="outline" 
                   size="sm" 
                   onClick={() => setIsEditing(true)}
-                  className="h-8"
+                  className="h-7 text-xs"
                 >
-                  <Pencil className="h-4 w-4 mr-1" />
+                  <Pencil className="h-3.5 w-3.5 mr-1" />
                   Edit
                 </Button>
-              )}
-            </DialogTitle>
+              </div>
+            )}
           </DialogHeader>
           {isEditing ? (
             <ScrollArea className="max-h-[70vh] p-4 pt-2">
@@ -480,29 +480,29 @@ export function ShiftReportCard({ report, index, total, compact = false, onEdit 
         </motion.div>
       </DialogTrigger>
       <DialogContent className="max-w-lg max-h-[85vh] p-0">
-        <DialogHeader className="p-4 pb-0">
-          <DialogTitle className="flex items-center justify-between gap-2 text-base">
-            <div className="flex items-center gap-2">
-              <Calendar className="h-4 w-4 text-primary" />
-              {new Date(report.date).toLocaleDateString("id-ID", { 
-                weekday: 'long', 
-                day: 'numeric',
-                month: 'long',
-                year: 'numeric'
-              })}
-            </div>
-            {onEdit && !isEditing && (
+        <DialogHeader className="p-4 pb-0 pr-12">
+          <DialogTitle className="flex items-center gap-2 text-base">
+            <Calendar className="h-4 w-4 text-primary" />
+            {new Date(report.date).toLocaleDateString("id-ID", { 
+              weekday: 'long', 
+              day: 'numeric',
+              month: 'long',
+              year: 'numeric'
+            })}
+          </DialogTitle>
+          {onEdit && !isEditing && (
+            <div className="flex justify-start pt-1">
               <Button 
-                variant="ghost" 
+                variant="outline" 
                 size="sm" 
                 onClick={() => setIsEditing(true)}
-                className="h-8"
+                className="h-7 text-xs"
               >
-                <Pencil className="h-4 w-4 mr-1" />
+                <Pencil className="h-3.5 w-3.5 mr-1" />
                 Edit
               </Button>
-            )}
-          </DialogTitle>
+            </div>
+          )}
         </DialogHeader>
         {isEditing ? (
           <ScrollArea className="max-h-[70vh] p-4 pt-2">
