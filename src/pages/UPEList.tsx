@@ -190,9 +190,9 @@ const UPEList = () => {
             </div>
           </div>
 
-          <div className="rounded-md border overflow-x-auto max-h-72 sm:max-h-96 -mx-2 sm:mx-0">
+          <div className="rounded-md border overflow-x-auto overflow-y-auto max-h-[50vh] sm:max-h-[60vh] md:max-h-[65vh] lg:max-h-[70vh] -mx-2 sm:mx-0">
             <Table className="text-[10px] sm:text-xs min-w-[400px]">
-              <TableHeader>
+              <TableHeader className="sticky top-0 bg-background z-10">
                 <TableRow className="h-6 sm:h-8">
                   <TableHead className="px-1 sm:px-2 py-1 whitespace-nowrap">Hostname UPE</TableHead>
                   <TableHead className="px-1 sm:px-2 py-1 whitespace-nowrap">Hostname OLT</TableHead>
