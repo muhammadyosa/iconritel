@@ -148,7 +148,8 @@ export default function Dashboard() {
             metric: "total",
             bgClass: "bg-primary/8 hover:bg-primary/15",
             borderClass: "border-primary/30 hover:border-primary/50",
-            valueClass: "text-primary"
+            valueClass: "text-primary",
+            glowClass: "hover:shadow-[0_0_20px_-4px_hsl(var(--primary)/0.4)]"
           },
           { 
             title: "Over SLA (>24h)", 
@@ -157,7 +158,8 @@ export default function Dashboard() {
             metric: "overSLA",
             bgClass: "bg-destructive/8 hover:bg-destructive/15",
             borderClass: "border-destructive/30 hover:border-destructive/50",
-            valueClass: "text-destructive"
+            valueClass: "text-destructive",
+            glowClass: "hover:shadow-[0_0_20px_-4px_hsl(var(--destructive)/0.4)]"
           },
           { 
             title: "Impact OLT", 
@@ -166,7 +168,8 @@ export default function Dashboard() {
             metric: "olt",
             bgClass: "bg-success/8 hover:bg-success/15",
             borderClass: "border-success/30 hover:border-success/50",
-            valueClass: "text-success"
+            valueClass: "text-success",
+            glowClass: "hover:shadow-[0_0_20px_-4px_hsl(var(--success)/0.4)]"
           },
           { 
             title: "Impact Feeder", 
@@ -175,7 +178,8 @@ export default function Dashboard() {
             metric: "feeder",
             bgClass: "bg-warning/8 hover:bg-warning/15",
             borderClass: "border-warning/30 hover:border-warning/50",
-            valueClass: "text-warning"
+            valueClass: "text-warning",
+            glowClass: "hover:shadow-[0_0_20px_-4px_hsl(var(--warning)/0.4)]"
           }
         ].map((card, index) => (
           <motion.div
@@ -216,8 +220,8 @@ export default function Dashboard() {
             className={`
               relative cursor-pointer group
               rounded-xl ${card.bgClass} ${card.borderClass} border
-              transition-all duration-200
-              hover:shadow-md active:scale-[0.97]
+              transition-all duration-300
+              ${card.glowClass} active:scale-[0.97]
             `}
           >
             <div className="p-3 sm:p-4">
