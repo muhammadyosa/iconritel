@@ -1,4 +1,5 @@
 import { Activity, AlertTriangle, Zap, Server, Calendar, Clock, User, ExternalLink, TrendingUp, BarChart3, FileText, History, RefreshCw, Loader2 } from "lucide-react";
+import { MonthlyAnalytics } from "@/components/MonthlyAnalytics";
 import { useCloudTickets } from "@/hooks/useCloudTickets";
 import { useTicketHistory } from "@/hooks/useTicketHistory";
 import { useShiftReportHistory } from "@/hooks/useShiftReportHistory";
@@ -509,6 +510,19 @@ export default function Dashboard() {
           </Card>
         </motion.div>
       </div>
+
+      {/* Monthly Analytics Section */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 0.3 }}
+      >
+        <Card>
+          <CardContent className="p-3 sm:p-4">
+            <MonthlyAnalytics tickets={tickets} />
+          </CardContent>
+        </Card>
+      </motion.div>
 
       {/* Shift Reports Section - Enhanced Layout */}
       {shiftReports.length > 0 && (

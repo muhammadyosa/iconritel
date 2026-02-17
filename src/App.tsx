@@ -11,6 +11,8 @@ import { AnimatePresence } from "framer-motion";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { UserMenu } from "@/components/UserMenu";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { useTicketNotifications } from "@/hooks/useTicketNotifications";
 import plnIconPlusLogo from "@/assets/pln-icon-plus.png";
 import Dashboard from "./pages/Dashboard";
 import TicketManagement from "./pages/TicketManagement";
@@ -52,6 +54,11 @@ function AnimatedRoutes() {
       </Routes>
     </AnimatePresence>
   );
+}
+
+function TicketNotificationProvider({ children }: { children: React.ReactNode }) {
+  useTicketNotifications();
+  return <>{children}</>;
 }
 
 function AppLayout() {
@@ -96,19 +103,23 @@ function AppLayout() {
 
 const App = () => {
   return (
-    <QueryClientProvider client={queryClient}>
-      <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
-        <TooltipProvider>
-          <AuthProvider>
-            <Toaster />
-            <Sonner position="top-right" />
-            <BrowserRouter>
-              <AppLayout />
-            </BrowserRouter>
-          </AuthProvider>
-        </TooltipProvider>
-      </ThemeProvider>
-    </QueryClientProvider>
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
+          <TooltipProvider>
+            <AuthProvider>
+              <Toaster />
+              <Sonner position="top-right" />
+              <BrowserRouter>
+                <TicketNotificationProvider>
+                  <AppLayout />
+                </TicketNotificationProvider>
+              </BrowserRouter>
+            </AuthProvider>
+          </TooltipProvider>
+        </ThemeProvider>
+      </QueryClientProvider>
+    </ErrorBoundary>
   );
 };
 
