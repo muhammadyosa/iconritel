@@ -173,37 +173,6 @@ export function MonthlyAnalytics({ tickets }: MonthlyAnalyticsProps) {
       const { default: jsPDF } = await import("jspdf");
       const { default: autoTable } = await import("jspdf-autotable");
 
-      // Load logo as base64
-      const logoUrl = "/pln-icon-plus-logo.png";
-      let logoBase64: string | null = null;
-      try {
-        const resp = await fetch(logoUrl);
-        if (resp.ok) {
-          const blob = await resp.blob();
-          logoBase64 = await new Promise<string>((resolve) => {
-            const reader = new FileReader();
-            reader.onloadend = () => resolve(reader.result as string);
-            reader.readAsDataURL(blob);
-          });
-        }
-      } catch { /* logo optional */ }
-
-      // Fallback: try imported asset
-      if (!logoBase64) {
-        try {
-          const { default: logoImport } = await import("@/assets/pln-icon-plus-new.png");
-          const resp = await fetch(logoImport);
-          if (resp.ok) {
-            const blob = await resp.blob();
-            logoBase64 = await new Promise<string>((resolve) => {
-              const reader = new FileReader();
-              reader.onloadend = () => resolve(reader.result as string);
-              reader.readAsDataURL(blob);
-            });
-          }
-        } catch { /* fallback optional */ }
-      }
-
       const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
       const pageWidth = doc.internal.pageSize.getWidth();
       const margin = 14;
@@ -212,31 +181,19 @@ export function MonthlyAnalytics({ tickets }: MonthlyAnalyticsProps) {
       // === HEADER BRANDING ===
       doc.setFillColor(30, 64, 144);
       doc.rect(0, 0, pageWidth, 28, "F");
-
-      // Add logo if available
-      const logoWidth = 22;
-      const logoHeight = 10;
-      let textStartX = margin;
-      if (logoBase64) {
-        try {
-          doc.addImage(logoBase64, "PNG", margin, y - 2, logoWidth, logoHeight);
-          textStartX = margin + logoWidth + 3;
-        } catch { /* if logo fails, just use text */ }
-      }
-
       doc.setTextColor(255, 255, 255);
-      doc.setFontSize(14);
+      doc.setFontSize(16);
       doc.setFont("helvetica", "bold");
-      doc.text("PLN ICON PLUS", textStartX, y + 5);
-      doc.setFontSize(7.5);
-      doc.setFont("helvetica", "normal");
-      doc.text("Network Operation Center — Retail", textStartX, y + 10.5);
-      doc.setFontSize(10);
-      doc.setFont("helvetica", "bold");
-      doc.text("LAPORAN PERFORMA BULANAN", pageWidth - margin, y + 5, { align: "right" });
+      doc.text("PLN ICON PLUS", margin, y + 6);
       doc.setFontSize(8);
       doc.setFont("helvetica", "normal");
-      doc.text(selectedMonthLabel, pageWidth - margin, y + 11, { align: "right" });
+      doc.text("Network Operation Center — Retail", margin, y + 12);
+      doc.setFontSize(10);
+      doc.setFont("helvetica", "bold");
+      doc.text("LAPORAN PERFORMA BULANAN", pageWidth - margin, y + 6, { align: "right" });
+      doc.setFontSize(8);
+      doc.setFont("helvetica", "normal");
+      doc.text(selectedMonthLabel, pageWidth - margin, y + 12, { align: "right" });
       y = 34;
       doc.setFillColor(46, 134, 222);
       doc.rect(0, 28, pageWidth, 1.5, "F");
