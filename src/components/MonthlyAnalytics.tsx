@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
@@ -7,8 +7,9 @@ import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/StatusBadge";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip, LineChart, Line, Cell } from "recharts";
 import { Ticket, FEEDER_CONSTRAINTS_SET } from "@/types/ticket";
-import { TrendingUp, Clock, CheckCircle, BarChart3, ArrowLeft } from "lucide-react";
+import { TrendingUp, Clock, CheckCircle, BarChart3, ArrowLeft, FileDown } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { toast } from "sonner";
 import {
   ChartContainer,
   ChartTooltip,
@@ -99,6 +100,8 @@ export function MonthlyAnalytics({ tickets }: MonthlyAnalyticsProps) {
     return { total: monthTickets.length, resolved: resolved.length, avgResolutionHours, slaRate, slaCompliant, ritel, feeder };
   }, [monthTickets]);
 
+  const selectedMonthLabel = monthOptions.find((o) => o.value === selectedMonth)?.label || selectedMonth;
+
   const categoryData = useMemo(() => {
     const map = new Map<string, number>();
     monthTickets.forEach((t) => {
@@ -164,6 +167,185 @@ export function MonthlyAnalytics({ tickets }: MonthlyAnalyticsProps) {
     }
   };
 
+  const handleExportPDF = useCallback(async () => {
+    try {
+      toast.loading("Generating PDF...", { id: "pdf-export" });
+      const { default: jsPDF } = await import("jspdf");
+      const { default: autoTable } = await import("jspdf-autotable");
+
+      const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const margin = 14;
+      let y = 12;
+
+      // === HEADER BRANDING ===
+      doc.setFillColor(30, 64, 144);
+      doc.rect(0, 0, pageWidth, 28, "F");
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(16);
+      doc.setFont("helvetica", "bold");
+      doc.text("PLN ICON PLUS", margin, y + 6);
+      doc.setFontSize(8);
+      doc.setFont("helvetica", "normal");
+      doc.text("Network Operation Center — Retail", margin, y + 12);
+      doc.setFontSize(10);
+      doc.setFont("helvetica", "bold");
+      doc.text("LAPORAN PERFORMA BULANAN", pageWidth - margin, y + 6, { align: "right" });
+      doc.setFontSize(8);
+      doc.setFont("helvetica", "normal");
+      doc.text(selectedMonthLabel, pageWidth - margin, y + 12, { align: "right" });
+      y = 34;
+      doc.setFillColor(46, 134, 222);
+      doc.rect(0, 28, pageWidth, 1.5, "F");
+
+      // === KPI SUMMARY ===
+      y += 2;
+      doc.setTextColor(30, 64, 144);
+      doc.setFontSize(11);
+      doc.setFont("helvetica", "bold");
+      doc.text("Ringkasan KPI", margin, y);
+      y += 6;
+
+      const kpiBoxWidth = (pageWidth - margin * 2 - 9) / 4;
+      const kpiItems = [
+        { label: "Total Tiket", value: String(kpis.total), sub: `R:${kpis.ritel} | F:${kpis.feeder}`, color: [30, 64, 144] as const },
+        { label: "Resolved", value: String(kpis.resolved), sub: `${kpis.total > 0 ? Math.round((kpis.resolved / kpis.total) * 100) : 0}%`, color: [39, 174, 96] as const },
+        { label: "Avg Resolusi", value: `${kpis.avgResolutionHours}h`, sub: "rata-rata", color: [243, 156, 18] as const },
+        { label: "SLA Rate", value: `${kpis.slaRate}%`, sub: `${kpis.slaCompliant} OK`, color: (kpis.slaRate >= 80 ? [39, 174, 96] : [231, 76, 60]) as readonly [number, number, number] },
+      ];
+
+      kpiItems.forEach((kpi, i) => {
+        const x = margin + i * (kpiBoxWidth + 3);
+        doc.setFillColor(245, 247, 252);
+        doc.roundedRect(x, y, kpiBoxWidth, 20, 2, 2, "F");
+        doc.setFillColor(kpi.color[0], kpi.color[1], kpi.color[2]);
+        doc.rect(x, y, kpiBoxWidth, 1.5, "F");
+        doc.setTextColor(100, 100, 100);
+        doc.setFontSize(7);
+        doc.setFont("helvetica", "normal");
+        doc.text(kpi.label, x + kpiBoxWidth / 2, y + 5.5, { align: "center" });
+        doc.setTextColor(kpi.color[0], kpi.color[1], kpi.color[2]);
+        doc.setFontSize(14);
+        doc.setFont("helvetica", "bold");
+        doc.text(kpi.value, x + kpiBoxWidth / 2, y + 13, { align: "center" });
+        doc.setTextColor(140, 140, 140);
+        doc.setFontSize(6);
+        doc.setFont("helvetica", "normal");
+        doc.text(kpi.sub, x + kpiBoxWidth / 2, y + 17.5, { align: "center" });
+      });
+      y += 28;
+
+      // === CATEGORY TABLE ===
+      doc.setTextColor(30, 64, 144);
+      doc.setFontSize(11);
+      doc.setFont("helvetica", "bold");
+      doc.text("Tiket per Kategori", margin, y);
+      y += 3;
+
+      if (categoryData.length > 0) {
+        autoTable(doc, {
+          startY: y,
+          margin: { left: margin, right: margin },
+          head: [["No", "Kategori", "Tipe", "Jumlah", "%"]],
+          body: categoryData.map((cat, i) => [
+            String(i + 1), cat.name,
+            FEEDER_CONSTRAINTS_SET.has(cat.name) ? "Feeder" : "Ritel",
+            String(cat.value),
+            `${kpis.total > 0 ? Math.round((cat.value / kpis.total) * 100) : 0}%`,
+          ]),
+          headStyles: { fillColor: [30, 64, 144], fontSize: 7, cellPadding: 2 },
+          bodyStyles: { fontSize: 7, cellPadding: 1.8 },
+          alternateRowStyles: { fillColor: [245, 247, 252] },
+          columnStyles: { 0: { cellWidth: 10, halign: "center" }, 3: { cellWidth: 18, halign: "center" }, 4: { cellWidth: 16, halign: "center" } },
+        });
+        y = (doc as any).lastAutoTable.finalY + 6;
+      }
+
+      // === DAILY TREND TABLE ===
+      if (y > 230) { doc.addPage(); y = 14; }
+      doc.setTextColor(30, 64, 144);
+      doc.setFontSize(11);
+      doc.setFont("helvetica", "bold");
+      doc.text("Tren Harian & SLA", margin, y);
+      y += 3;
+
+      const trendRows = dailyTrend.filter((d) => d.total > 0);
+      if (trendRows.length > 0) {
+        autoTable(doc, {
+          startY: y,
+          margin: { left: margin, right: margin },
+          head: [["Tgl", "Total", "Resolved", "SLA OK", "SLA %"]],
+          body: trendRows.map((d) => [
+            d.day, String(d.total), String(d.resolved), String(d.slaOk),
+            `${d.total > 0 ? Math.round((d.slaOk / d.total) * 100) : 0}%`,
+          ]),
+          headStyles: { fillColor: [30, 64, 144], fontSize: 7, cellPadding: 2 },
+          bodyStyles: { fontSize: 7, cellPadding: 1.5 },
+          alternateRowStyles: { fillColor: [245, 247, 252] },
+          columnStyles: { 0: { cellWidth: 12, halign: "center" }, 1: { halign: "center" }, 2: { halign: "center" }, 3: { halign: "center" }, 4: { halign: "center" } },
+        });
+        y = (doc as any).lastAutoTable.finalY + 6;
+      }
+
+      // === TICKET LIST ===
+      if (y > 200) { doc.addPage(); y = 14; }
+      doc.setTextColor(30, 64, 144);
+      doc.setFontSize(11);
+      doc.setFont("helvetica", "bold");
+      doc.text(`Daftar Tiket (${monthTickets.length})`, margin, y);
+      y += 3;
+
+      if (monthTickets.length > 0) {
+        autoTable(doc, {
+          startY: y,
+          margin: { left: margin, right: margin },
+          head: [["No", "ID", "Customer/Host", "Kendala", "Status", "Tanggal"]],
+          body: monthTickets.map((t, i) => [
+            String(i + 1), t.id,
+            FEEDER_CONSTRAINTS_SET.has(t.constraint) ? t.hostname : t.customerName,
+            t.constraint, t.status,
+            new Date(t.createdISO).toLocaleDateString("id-ID", { day: "2-digit", month: "short" }),
+          ]),
+          headStyles: { fillColor: [30, 64, 144], fontSize: 6.5, cellPadding: 1.8 },
+          bodyStyles: { fontSize: 6, cellPadding: 1.5 },
+          alternateRowStyles: { fillColor: [245, 247, 252] },
+          columnStyles: { 0: { cellWidth: 8, halign: "center" }, 4: { cellWidth: 20, halign: "center" }, 5: { cellWidth: 20, halign: "center" } },
+          didParseCell: (data: any) => {
+            if (data.section === "body" && data.column.index === 4) {
+              const s = data.cell.raw;
+              if (s === "Resolved") data.cell.styles.textColor = [39, 174, 96];
+              else if (s === "Critical") data.cell.styles.textColor = [231, 76, 60];
+              else if (s === "On Progress") data.cell.styles.textColor = [243, 156, 18];
+            }
+          },
+        });
+      }
+
+      // === FOOTER ===
+      const totalPages = doc.getNumberOfPages();
+      for (let p = 1; p <= totalPages; p++) {
+        doc.setPage(p);
+        const footerY = doc.internal.pageSize.getHeight() - 8;
+        doc.setFillColor(245, 247, 252);
+        doc.rect(0, footerY - 3, pageWidth, 12, "F");
+        doc.setDrawColor(30, 64, 144);
+        doc.setLineWidth(0.3);
+        doc.line(margin, footerY - 3, pageWidth - margin, footerY - 3);
+        doc.setTextColor(100, 100, 100);
+        doc.setFontSize(6);
+        doc.text(`PLN ICON PLUS — Laporan ${selectedMonthLabel}`, margin, footerY + 1);
+        doc.text(`Hal ${p}/${totalPages}`, pageWidth - margin, footerY + 1, { align: "right" });
+        doc.text(`Dicetak: ${new Date().toLocaleString("id-ID")}`, pageWidth / 2, footerY + 1, { align: "center" });
+      }
+
+      doc.save(`Laporan-Performa-${selectedMonth}-PLN-IconPlus.pdf`);
+      toast.success("PDF berhasil diunduh!", { id: "pdf-export" });
+    } catch (err) {
+      console.error("PDF export error:", err);
+      toast.error("Gagal generate PDF", { id: "pdf-export" });
+    }
+  }, [monthTickets, kpis, categoryData, dailyTrend, selectedMonth, selectedMonthLabel]);
+
   // Custom Y-axis tick with emoji-style for category chart
   const CustomCategoryTick = ({ x, y, payload }: any) => {
     const isFeeder = FEEDER_CONSTRAINTS_SET.has(payload.value);
@@ -179,7 +361,7 @@ export function MonthlyAnalytics({ tickets }: MonthlyAnalyticsProps) {
     );
   };
 
-  const selectedMonthLabel = monthOptions.find((o) => o.value === selectedMonth)?.label || selectedMonth;
+  
 
   return (
     <div className="space-y-3">
@@ -189,18 +371,31 @@ export function MonthlyAnalytics({ tickets }: MonthlyAnalyticsProps) {
           <BarChart3 className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary" />
           Analisis Performa Bulanan
         </h3>
-        <Select value={selectedMonth} onValueChange={setSelectedMonth}>
-          <SelectTrigger className="w-[140px] sm:w-[170px] h-7 text-[10px] sm:text-xs">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {monthOptions.map((opt) => (
-              <SelectItem key={opt.value} value={opt.value} className="text-xs">
-                {opt.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <div className="flex items-center gap-1.5">
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-7 text-[10px] sm:text-xs px-2 sm:px-3"
+            onClick={handleExportPDF}
+            disabled={monthTickets.length === 0}
+          >
+            <FileDown className="h-3 w-3 sm:h-3.5 sm:w-3.5 mr-1" />
+            <span className="hidden sm:inline">Export PDF</span>
+            <span className="sm:hidden">PDF</span>
+          </Button>
+          <Select value={selectedMonth} onValueChange={setSelectedMonth}>
+            <SelectTrigger className="w-[120px] sm:w-[170px] h-7 text-[10px] sm:text-xs">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {monthOptions.map((opt) => (
+                <SelectItem key={opt.value} value={opt.value} className="text-xs">
+                  {opt.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       {/* KPI Summary - compact cards with glow effect matching Dashboard KPI */}
