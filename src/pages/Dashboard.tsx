@@ -517,11 +517,7 @@ export default function Dashboard() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, delay: 0.3 }}
       >
-        <Card>
-          <CardContent className="p-3 sm:p-4">
-            <MonthlyAnalytics tickets={tickets} />
-          </CardContent>
-        </Card>
+        <MonthlyAnalytics tickets={tickets} />
       </motion.div>
 
       {/* Shift Reports Section - Enhanced Layout */}
