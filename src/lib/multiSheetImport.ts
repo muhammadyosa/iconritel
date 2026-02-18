@@ -120,7 +120,7 @@ const COLUMN_MAPPINGS = {
     address: ["Address", "address", "ADDRESS", "alamat", "Alamat", "ALAMAT"],
   },
   team: {
-    teamName: ["TEAM", "Team", "team", "TIM", "Tim", "tim", "NAMA TEAM", "Nama Team", "nama team", "NAMA TIM", "Nama Tim", "nama tim", "SERPO", "Serpo", "serpo"],
+    teamName: ["NAMA MITRA", "Nama Mitra", "nama mitra", "MITRA", "Mitra", "mitra", "TEAM", "Team", "team", "TIM", "Tim", "tim", "NAMA TEAM", "Nama Team", "nama team", "NAMA TIM", "Nama Tim", "nama tim", "SERPO", "Serpo", "serpo"],
     hostnameOlt: ["HOSTNAME OLT", "Hostname OLT", "hostname olt", "hostname_olt", "HOSTNAME_OLT", "hostnameolt", "OLT", "olt"],
     category: ["KATEGORI", "Kategori", "kategori", "CATEGORY", "Category", "category", "TYPE", "Type", "type", "TIPE", "Tipe", "tipe", "JENIS", "Jenis", "jenis"],
   },
