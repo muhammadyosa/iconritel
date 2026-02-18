@@ -379,43 +379,25 @@ export default function TicketManagement() {
               </Select>
             </div>
 
-            {/* Serpo/Tim - dropdown from team data matched by hostname OLT */}
+            {/* Serpo/Tim - fixed based on category */}
             {formData.categoryFilter && (
               <div>
                 <Label>Serpo / Tim *</Label>
-                {(() => {
-                  const hostname = selectedRecord ? String(selectedRecord.hostname || "") : "";
-                  const matchedTeams = hostname
-                    ? getTeamsByHostname(hostname, formData.categoryFilter as "RITEL" | "FEEDER")
-                    : getTeamsByCategory(formData.categoryFilter as "RITEL" | "FEEDER");
-                  
-                  return matchedTeams.length > 0 ? (
-                    <Select
-                      value={formData.serpo}
-                      onValueChange={(value) => setFormData({ ...formData, serpo: value })}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Pilih tim" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {matchedTeams.map((team) => (
-                          <SelectItem key={team} value={team}>{team}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  ) : (
-                    <Input
-                      value={formData.serpo}
-                      onChange={(e) => setFormData({ ...formData, serpo: e.target.value })}
-                      placeholder="Masukkan nama tim (belum ada data team)"
-                    />
-                  );
-                })()}
-                {teamData.length === 0 && (
-                  <p className="text-[10px] text-muted-foreground mt-1">
-                    💡 Import sheet "List Team" via <Link to="/settings" className="text-primary underline">Settings</Link> untuk dropdown otomatis
-                  </p>
-                )}
+                <Select
+                  value={formData.serpo}
+                  onValueChange={(value) => setFormData({ ...formData, serpo: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Pilih Serpo/Tim" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {formData.categoryFilter === "FEEDER" ? (
+                      <SelectItem value="SERPO FEEDER SUMATERA SELATAN">SERPO FEEDER SUMATERA SELATAN</SelectItem>
+                    ) : (
+                      <SelectItem value="RITEL SUMATERA SELATAN">RITEL SUMATERA SELATAN</SelectItem>
+                    )}
+                  </SelectContent>
+                </Select>
               </div>
             )}
 
@@ -765,37 +747,25 @@ export default function TicketManagement() {
                         </Select>
                       </div>
 
-                      {/* Serpo/Tim - dropdown from team data */}
+                      {/* Serpo/Tim - fixed based on category */}
                       {manualFormData.categoryFilter && (
                         <div>
                           <Label>Serpo / Tim *</Label>
-                          {(() => {
-                            const matchedTeams = manualFormData.hostname
-                              ? getTeamsByHostname(manualFormData.hostname, manualFormData.categoryFilter as "RITEL" | "FEEDER")
-                              : getTeamsByCategory(manualFormData.categoryFilter as "RITEL" | "FEEDER");
-                            
-                            return matchedTeams.length > 0 ? (
-                              <Select
-                                value={manualFormData.serpo}
-                                onValueChange={(value) => setManualFormData({ ...manualFormData, serpo: value })}
-                              >
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Pilih tim" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {matchedTeams.map((team) => (
-                                    <SelectItem key={team} value={team}>{team}</SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                            ) : (
-                              <Input
-                                value={manualFormData.serpo}
-                                onChange={(e) => setManualFormData({ ...manualFormData, serpo: e.target.value })}
-                                placeholder="Masukkan nama tim"
-                              />
-                            );
-                          })()}
+                          <Select
+                            value={manualFormData.serpo}
+                            onValueChange={(value) => setManualFormData({ ...manualFormData, serpo: value })}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Pilih Serpo/Tim" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {manualFormData.categoryFilter === "FEEDER" ? (
+                                <SelectItem value="SERPO FEEDER SUMATERA SELATAN">SERPO FEEDER SUMATERA SELATAN</SelectItem>
+                              ) : (
+                                <SelectItem value="RITEL SUMATERA SELATAN">RITEL SUMATERA SELATAN</SelectItem>
+                              )}
+                            </SelectContent>
+                          </Select>
                         </div>
                       )}
 
