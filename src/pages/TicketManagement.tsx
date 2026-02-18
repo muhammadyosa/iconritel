@@ -33,9 +33,11 @@ import { useTickets } from "@/hooks/useTickets";
 import { useCloudTickets } from "@/hooks/useCloudTickets";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useAuth } from "@/contexts/AuthContext";
+import { useTeamData } from "@/hooks/useTeamData";
 import {
   Ticket,
-  ALL_CONSTRAINTS,
+  RITEL_CONSTRAINTS,
+  FEEDER_CONSTRAINTS,
   FEEDER_CONSTRAINTS_SET,
   generateTicketFormat,
   ExcelRecord,
@@ -67,6 +69,7 @@ export default function TicketManagement() {
   // Get current user for tracking who created tickets
   const { user, profile } = useAuth();
   const { logActivity } = useActivityLog();
+  const { teamData, getTeamsByHostname, getTeamsByCategory } = useTeamData();
 
   const [searchFilters, setSearchFilters] = useState({
     customer: "",
@@ -85,7 +88,10 @@ export default function TicketManagement() {
     ticketId: "",
     serpo: "",
     constraint: "",
-    portText: "", // For PORT DOWN constraint
+    portText: "",
+    categoryFilter: "" as "" | "RITEL" | "FEEDER",
+    manualConstraint: "",
+    useManualConstraint: false,
   });
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingTicket, setEditingTicket] = useState<Ticket | null>(null);
@@ -100,6 +106,9 @@ export default function TicketManagement() {
     snOnt: "",
     constraint: "",
     portText: "",
+    categoryFilter: "" as "" | "RITEL" | "FEEDER",
+    manualConstraint: "",
+    useManualConstraint: false,
   });
 
   const filteredData = excelData.filter((r) => {
@@ -168,8 +177,9 @@ export default function TicketManagement() {
       toast.error("Ticket ID wajib diisi");
       return;
     }
-    if (!formData.constraint) {
-      toast.error("Constraint wajib dipilih");
+    const effectiveConstraint = formData.useManualConstraint ? formData.manualConstraint.trim() : formData.constraint;
+    if (!effectiveConstraint) {
+      toast.error("Constraint wajib diisi");
       return;
     }
     if (!selectedRecord) {
@@ -184,11 +194,11 @@ export default function TicketManagement() {
     const now = new Date();
     
     // Determine category based on constraint
-    const category = FEEDER_CONSTRAINTS_SET.has(formData.constraint) ? "FEEDER" : "RITEL";
+    const category = FEEDER_CONSTRAINTS_SET.has(effectiveConstraint) ? "FEEDER" : (formData.categoryFilter || "RITEL");
     
     // Auto-generate ticket format
     const ticketResult = generateTicketFormat(
-      formData.constraint,
+      effectiveConstraint,
       String(selectedRecord.customer || ""),
       formData.serpo.trim(),
       String(selectedRecord.fat || ""),
@@ -205,7 +215,7 @@ export default function TicketManagement() {
       hostname: String(selectedRecord.hostname || ""),
       fatId: String(selectedRecord.fat || ""),
       snOnt: String(selectedRecord.sn || ""),
-      constraint: formData.constraint,
+      constraint: effectiveConstraint,
       category,
       ticketResult,
       status: "On Progress",
@@ -220,7 +230,7 @@ export default function TicketManagement() {
       logActivity("create_ticket", `Tiket ${ticket.id} - ${ticket.customerName}`);
       toast.success(`Tiket ${category} berhasil dibuat & disimpan ke Cloud`);
       setIsFormOpen(false);
-      setFormData({ ticketId: "", serpo: "", constraint: "", portText: "" });
+      setFormData({ ticketId: "", serpo: "", constraint: "", portText: "", categoryFilter: "", manualConstraint: "", useManualConstraint: false });
       setSelectedRecord(null);
     } catch (error) {
       // Error already shown by hook
@@ -264,8 +274,9 @@ export default function TicketManagement() {
       toast.error("Ticket ID wajib diisi");
       return;
     }
-    if (!manualFormData.constraint) {
-      toast.error("Constraint wajib dipilih");
+    const effectiveConstraint = manualFormData.useManualConstraint ? manualFormData.manualConstraint.trim() : manualFormData.constraint;
+    if (!effectiveConstraint) {
+      toast.error("Constraint wajib diisi");
       return;
     }
     if (!manualFormData.serpo.trim()) {
@@ -274,10 +285,10 @@ export default function TicketManagement() {
     }
 
     const now = new Date();
-    const category = FEEDER_CONSTRAINTS_SET.has(manualFormData.constraint) ? "FEEDER" : "RITEL";
+    const category = FEEDER_CONSTRAINTS_SET.has(effectiveConstraint) ? "FEEDER" : (manualFormData.categoryFilter || "RITEL");
     
     const ticketResult = generateTicketFormat(
-      manualFormData.constraint,
+      effectiveConstraint,
       manualFormData.customerName.trim(),
       manualFormData.serpo.trim(),
       manualFormData.fatId.trim(),
@@ -294,7 +305,7 @@ export default function TicketManagement() {
       hostname: manualFormData.hostname.trim(),
       fatId: manualFormData.fatId.trim(),
       snOnt: manualFormData.snOnt.trim(),
-      constraint: manualFormData.constraint,
+      constraint: effectiveConstraint,
       category,
       ticketResult,
       status: "On Progress",
@@ -319,6 +330,9 @@ export default function TicketManagement() {
         snOnt: "",
         constraint: "",
         portText: "",
+        categoryFilter: "",
+        manualConstraint: "",
+        useManualConstraint: false,
       });
     } catch (error) {
       // Error already shown by hook
@@ -334,7 +348,7 @@ export default function TicketManagement() {
 
       {/* Dialog for creating ticket from Preview Data */}
       <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Buat Tiket Baru</DialogTitle>
           </DialogHeader>
@@ -347,46 +361,111 @@ export default function TicketManagement() {
                 placeholder="Masukkan Ticket ID (contoh: INC12345678)"
               />
             </div>
+
+            {/* Category Filter: Ritel / Feeder */}
             <div>
-              <Label>Serpo / Tim</Label>
-              <Input
-                value={formData.serpo}
-                onChange={(e) => setFormData({ ...formData, serpo: e.target.value })}
-                placeholder="Masukkan nama tim"
-              />
-            </div>
-            <div>
-              <Label>Constraint</Label>
+              <Label>Kategori *</Label>
               <Select
-                value={formData.constraint}
-                onValueChange={(value) => setFormData({ ...formData, constraint: value })}
+                value={formData.categoryFilter}
+                onValueChange={(value) => setFormData({ ...formData, categoryFilter: value as "RITEL" | "FEEDER", serpo: "", constraint: "", useManualConstraint: false, manualConstraint: "" })}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Pilih constraint" />
+                  <SelectValue placeholder="Pilih kategori" />
                 </SelectTrigger>
                 <SelectContent>
-                  <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">
-                    RITEL
-                  </div>
-                  {ALL_CONSTRAINTS.filter(c => !FEEDER_CONSTRAINTS_SET.has(c)).map((c) => (
-                    <SelectItem key={c} value={c}>
-                      {c}
-                    </SelectItem>
-                  ))}
-                  <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground border-t mt-1">
-                    FEEDER (PROACTIVE NOC RETAIL)
-                  </div>
-                  {ALL_CONSTRAINTS.filter(c => FEEDER_CONSTRAINTS_SET.has(c)).map((c) => (
-                    <SelectItem key={c} value={c}>
-                      {c}
-                    </SelectItem>
-                  ))}
+                  <SelectItem value="RITEL">RITEL</SelectItem>
+                  <SelectItem value="FEEDER">FEEDER</SelectItem>
                 </SelectContent>
               </Select>
             </div>
+
+            {/* Serpo/Tim - dropdown from team data matched by hostname OLT */}
+            {formData.categoryFilter && (
+              <div>
+                <Label>Serpo / Tim *</Label>
+                {(() => {
+                  const hostname = selectedRecord ? String(selectedRecord.hostname || "") : "";
+                  const matchedTeams = hostname
+                    ? getTeamsByHostname(hostname, formData.categoryFilter as "RITEL" | "FEEDER")
+                    : getTeamsByCategory(formData.categoryFilter as "RITEL" | "FEEDER");
+                  
+                  return matchedTeams.length > 0 ? (
+                    <Select
+                      value={formData.serpo}
+                      onValueChange={(value) => setFormData({ ...formData, serpo: value })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Pilih tim" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {matchedTeams.map((team) => (
+                          <SelectItem key={team} value={team}>{team}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  ) : (
+                    <Input
+                      value={formData.serpo}
+                      onChange={(e) => setFormData({ ...formData, serpo: e.target.value })}
+                      placeholder="Masukkan nama tim (belum ada data team)"
+                    />
+                  );
+                })()}
+                {teamData.length === 0 && (
+                  <p className="text-[10px] text-muted-foreground mt-1">
+                    💡 Import sheet "List Team" via <Link to="/settings" className="text-primary underline">Settings</Link> untuk dropdown otomatis
+                  </p>
+                )}
+              </div>
+            )}
+
+            {/* Constraint */}
+            {formData.categoryFilter && (
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <Label>Constraint *</Label>
+                  <label className="flex items-center gap-1.5 text-[10px] text-muted-foreground cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={formData.useManualConstraint}
+                      onChange={(e) => setFormData({ ...formData, useManualConstraint: e.target.checked, constraint: "", manualConstraint: "" })}
+                      className="rounded"
+                    />
+                    Input Manual
+                  </label>
+                </div>
+                {formData.useManualConstraint ? (
+                  <Input
+                    value={formData.manualConstraint}
+                    onChange={(e) => setFormData({ ...formData, manualConstraint: e.target.value })}
+                    placeholder="Ketik constraint manual"
+                  />
+                ) : (
+                  <Select
+                    value={formData.constraint}
+                    onValueChange={(value) => setFormData({ ...formData, constraint: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Pilih constraint" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {formData.categoryFilter === "RITEL" ? (
+                        RITEL_CONSTRAINTS.map((c) => (
+                          <SelectItem key={c} value={c}>{c}</SelectItem>
+                        ))
+                      ) : (
+                        FEEDER_CONSTRAINTS.map((c) => (
+                          <SelectItem key={c} value={c}>{c}</SelectItem>
+                        ))
+                      )}
+                    </SelectContent>
+                  </Select>
+                )}
+              </div>
+            )}
             
             {/* Show PORT text input only for PORT DOWN constraint */}
-            {formData.constraint === "PORT DOWN" && (
+            {(formData.constraint === "PORT DOWN" || formData.manualConstraint.toUpperCase().includes("PORT")) && (
               <div>
                 <Label>Port Info (Optional)</Label>
                 <Input
@@ -398,14 +477,14 @@ export default function TicketManagement() {
             )}
             
             {/* Preview ticket format */}
-            {formData.constraint && selectedRecord && formData.serpo && (
+            {(formData.constraint || formData.manualConstraint) && selectedRecord && formData.serpo && (
               <div className="p-3 bg-accent/50 rounded-lg space-y-1">
                 <p className="text-xs font-semibold text-muted-foreground">
                   Preview Format Tiket:
                 </p>
-                <p className="text-sm font-mono">
+                <p className="text-sm font-mono whitespace-pre-wrap break-all">
                   {generateTicketFormat(
-                    formData.constraint,
+                    formData.useManualConstraint ? formData.manualConstraint.trim() : formData.constraint,
                     String(selectedRecord.customer || ""),
                     formData.serpo.trim(),
                     String(selectedRecord.fat || ""),
@@ -421,7 +500,7 @@ export default function TicketManagement() {
                 <p className="text-sm font-medium">Selected Record:</p>
                 <p className="text-xs text-muted-foreground">
                   Customer: {String(selectedRecord.customer || "")} | Service:{" "}
-                  {String(selectedRecord.service || "")}
+                  {String(selectedRecord.service || "")} | Hostname: {String(selectedRecord.hostname || "")}
                 </p>
               </div>
             )}
@@ -642,16 +721,6 @@ export default function TicketManagement() {
                           />
                         </div>
                         <div>
-                          <Label>Serpo / Tim *</Label>
-                          <Input
-                            value={manualFormData.serpo}
-                            onChange={(e) => setManualFormData({ ...manualFormData, serpo: e.target.value })}
-                            placeholder="Nama tim"
-                          />
-                        </div>
-                      </div>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
                           <Label>Hostname OLT</Label>
                           <Input
                             value={manualFormData.hostname}
@@ -659,6 +728,8 @@ export default function TicketManagement() {
                             placeholder="Hostname OLT"
                           />
                         </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
                         <div>
                           <Label>ID FAT</Label>
                           <Input
@@ -667,46 +738,113 @@ export default function TicketManagement() {
                             placeholder="ID FAT"
                           />
                         </div>
+                        <div>
+                          <Label>SN ONT</Label>
+                          <Input
+                            value={manualFormData.snOnt}
+                            onChange={(e) => setManualFormData({ ...manualFormData, snOnt: e.target.value })}
+                            placeholder="SN ONT"
+                          />
+                        </div>
                       </div>
+
+                      {/* Category Filter: Ritel / Feeder */}
                       <div>
-                        <Label>SN ONT</Label>
-                        <Input
-                          value={manualFormData.snOnt}
-                          onChange={(e) => setManualFormData({ ...manualFormData, snOnt: e.target.value })}
-                          placeholder="SN ONT"
-                        />
-                      </div>
-                      <div>
-                        <Label>Constraint *</Label>
+                        <Label>Kategori *</Label>
                         <Select
-                          value={manualFormData.constraint}
-                          onValueChange={(value) => setManualFormData({ ...manualFormData, constraint: value })}
+                          value={manualFormData.categoryFilter}
+                          onValueChange={(value) => setManualFormData({ ...manualFormData, categoryFilter: value as "RITEL" | "FEEDER", serpo: "", constraint: "", useManualConstraint: false, manualConstraint: "" })}
                         >
                           <SelectTrigger>
-                            <SelectValue placeholder="Pilih constraint" />
+                            <SelectValue placeholder="Pilih kategori" />
                           </SelectTrigger>
                           <SelectContent>
-                            <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">
-                              RITEL
-                            </div>
-                            {ALL_CONSTRAINTS.filter(c => !FEEDER_CONSTRAINTS_SET.has(c)).map((c) => (
-                              <SelectItem key={c} value={c}>
-                                {c}
-                              </SelectItem>
-                            ))}
-                            <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground border-t mt-1">
-                              FEEDER (PROACTIVE NOC RETAIL)
-                            </div>
-                            {ALL_CONSTRAINTS.filter(c => FEEDER_CONSTRAINTS_SET.has(c)).map((c) => (
-                              <SelectItem key={c} value={c}>
-                                {c}
-                              </SelectItem>
-                            ))}
+                            <SelectItem value="RITEL">RITEL</SelectItem>
+                            <SelectItem value="FEEDER">FEEDER</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
+
+                      {/* Serpo/Tim - dropdown from team data */}
+                      {manualFormData.categoryFilter && (
+                        <div>
+                          <Label>Serpo / Tim *</Label>
+                          {(() => {
+                            const matchedTeams = manualFormData.hostname
+                              ? getTeamsByHostname(manualFormData.hostname, manualFormData.categoryFilter as "RITEL" | "FEEDER")
+                              : getTeamsByCategory(manualFormData.categoryFilter as "RITEL" | "FEEDER");
+                            
+                            return matchedTeams.length > 0 ? (
+                              <Select
+                                value={manualFormData.serpo}
+                                onValueChange={(value) => setManualFormData({ ...manualFormData, serpo: value })}
+                              >
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Pilih tim" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {matchedTeams.map((team) => (
+                                    <SelectItem key={team} value={team}>{team}</SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            ) : (
+                              <Input
+                                value={manualFormData.serpo}
+                                onChange={(e) => setManualFormData({ ...manualFormData, serpo: e.target.value })}
+                                placeholder="Masukkan nama tim"
+                              />
+                            );
+                          })()}
+                        </div>
+                      )}
+
+                      {/* Constraint */}
+                      {manualFormData.categoryFilter && (
+                        <div>
+                          <div className="flex items-center justify-between mb-1">
+                            <Label>Constraint *</Label>
+                            <label className="flex items-center gap-1.5 text-[10px] text-muted-foreground cursor-pointer">
+                              <input
+                                type="checkbox"
+                                checked={manualFormData.useManualConstraint}
+                                onChange={(e) => setManualFormData({ ...manualFormData, useManualConstraint: e.target.checked, constraint: "", manualConstraint: "" })}
+                                className="rounded"
+                              />
+                              Input Manual
+                            </label>
+                          </div>
+                          {manualFormData.useManualConstraint ? (
+                            <Input
+                              value={manualFormData.manualConstraint}
+                              onChange={(e) => setManualFormData({ ...manualFormData, manualConstraint: e.target.value })}
+                              placeholder="Ketik constraint manual"
+                            />
+                          ) : (
+                            <Select
+                              value={manualFormData.constraint}
+                              onValueChange={(value) => setManualFormData({ ...manualFormData, constraint: value })}
+                            >
+                              <SelectTrigger>
+                                <SelectValue placeholder="Pilih constraint" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {manualFormData.categoryFilter === "RITEL" ? (
+                                  RITEL_CONSTRAINTS.map((c) => (
+                                    <SelectItem key={c} value={c}>{c}</SelectItem>
+                                  ))
+                                ) : (
+                                  FEEDER_CONSTRAINTS.map((c) => (
+                                    <SelectItem key={c} value={c}>{c}</SelectItem>
+                                  ))
+                                )}
+                              </SelectContent>
+                            </Select>
+                          )}
+                        </div>
+                      )}
                       
-                      {manualFormData.constraint === "PORT DOWN" && (
+                      {(manualFormData.constraint === "PORT DOWN" || manualFormData.manualConstraint.toUpperCase().includes("PORT")) && (
                         <div>
                           <Label>Port Info (Optional)</Label>
                           <Input
@@ -717,14 +855,14 @@ export default function TicketManagement() {
                         </div>
                       )}
                       
-                      {manualFormData.constraint && manualFormData.serpo && (
+                      {(manualFormData.constraint || manualFormData.manualConstraint) && manualFormData.serpo && (
                         <div className="p-3 bg-accent/50 rounded-lg space-y-1">
                           <p className="text-xs font-semibold text-muted-foreground">
                             Preview Format Tiket:
                           </p>
                           <p className="text-sm font-mono whitespace-pre-wrap break-all">
                             {generateTicketFormat(
-                              manualFormData.constraint,
+                              manualFormData.useManualConstraint ? manualFormData.manualConstraint.trim() : manualFormData.constraint,
                               manualFormData.customerName.trim(),
                               manualFormData.serpo.trim(),
                               manualFormData.fatId.trim(),
