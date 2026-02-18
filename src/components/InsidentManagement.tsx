@@ -235,7 +235,7 @@ export function InsidentManagement() {
 
   const statusBadge = (status: string) => {
     switch (status) {
-      case "On Progress": return <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30 text-xs">On Progress</Badge>;
+      case "On Progress": return <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30 text-xs">Progres</Badge>;
       case "Critical": return <Badge className="bg-red-500/20 text-red-400 border-red-500/30 text-xs">Critical</Badge>;
       case "Resolved": return <Badge className="bg-green-500/20 text-green-400 border-green-500/30 text-xs">Resolved</Badge>;
       case "Pending": return <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30 text-xs">Pending</Badge>;
@@ -272,7 +272,7 @@ export function InsidentManagement() {
             <div className="flex items-center gap-2">
               <Clock className="h-4 w-4 text-blue-400" />
               <div>
-                <p className="text-xs text-muted-foreground">On Progress</p>
+                <p className="text-xs text-muted-foreground">Progres</p>
                 <p className="text-lg font-bold text-blue-400">{stats.onProgress}</p>
               </div>
             </div>
@@ -345,7 +345,7 @@ export function InsidentManagement() {
           </SelectTrigger>
           <SelectContent>
             {STATUS_OPTIONS.map((s) => (
-              <SelectItem key={s} value={s}>{s === "All" ? "Semua Status" : s}</SelectItem>
+              <SelectItem key={s} value={s}>{s === "All" ? "Semua Status" : s === "On Progress" ? "Progres" : s}</SelectItem>
             ))}
           </SelectContent>
         </Select>

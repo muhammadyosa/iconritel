@@ -7,7 +7,7 @@ interface StatusBadgeProps {
 }
 
 export function StatusBadge({ status }: StatusBadgeProps) {
-  const displayLabel = status === "On Progress" ? "On Progres" : status;
+  const displayLabel = status === "On Progress" ? "Progres" : status;
   
   const variants = {
     "On Progress": "bg-warning text-warning-foreground",
