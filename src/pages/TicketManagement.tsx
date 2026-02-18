@@ -379,7 +379,7 @@ export default function TicketManagement() {
               </Select>
             </div>
 
-            {/* Serpo/Tim - fixed based on category */}
+            {/* Serpo/Tim - from List Team based on hostname + category */}
             {formData.categoryFilter && (
               <div>
                 <Label>Serpo / Tim *</Label>
@@ -391,11 +391,16 @@ export default function TicketManagement() {
                     <SelectValue placeholder="Pilih Serpo/Tim" />
                   </SelectTrigger>
                   <SelectContent>
-                    {formData.categoryFilter === "FEEDER" ? (
-                      <SelectItem value="SERPO FEEDER SUMATERA SELATAN">SERPO FEEDER SUMATERA SELATAN</SelectItem>
-                    ) : (
-                      <SelectItem value="RITEL SUMATERA SELATAN">RITEL SUMATERA SELATAN</SelectItem>
-                    )}
+                    {(() => {
+                      const hostname = selectedRecord ? String(selectedRecord.hostname || "") : "";
+                      const teams = hostname ? getTeamsByHostname(hostname, formData.categoryFilter) : getTeamsByCategory(formData.categoryFilter);
+                      if (teams.length === 0) {
+                        return <SelectItem value="_no_match" disabled>Tidak ada tim yang cocok</SelectItem>;
+                      }
+                      return teams.map((t) => (
+                        <SelectItem key={t} value={t}>{t}</SelectItem>
+                      ));
+                    })()}
                   </SelectContent>
                 </Select>
               </div>
@@ -747,7 +752,7 @@ export default function TicketManagement() {
                         </Select>
                       </div>
 
-                      {/* Serpo/Tim - fixed based on category */}
+                      {/* Serpo/Tim - from List Team based on hostname + category */}
                       {manualFormData.categoryFilter && (
                         <div>
                           <Label>Serpo / Tim *</Label>
@@ -759,11 +764,16 @@ export default function TicketManagement() {
                               <SelectValue placeholder="Pilih Serpo/Tim" />
                             </SelectTrigger>
                             <SelectContent>
-                              {manualFormData.categoryFilter === "FEEDER" ? (
-                                <SelectItem value="SERPO FEEDER SUMATERA SELATAN">SERPO FEEDER SUMATERA SELATAN</SelectItem>
-                              ) : (
-                                <SelectItem value="RITEL SUMATERA SELATAN">RITEL SUMATERA SELATAN</SelectItem>
-                              )}
+                              {(() => {
+                                const hostname = manualFormData.hostname.trim();
+                                const teams = hostname ? getTeamsByHostname(hostname, manualFormData.categoryFilter) : getTeamsByCategory(manualFormData.categoryFilter);
+                                if (teams.length === 0) {
+                                  return <SelectItem value="_no_match" disabled>Tidak ada tim yang cocok</SelectItem>;
+                                }
+                                return teams.map((t) => (
+                                  <SelectItem key={t} value={t}>{t}</SelectItem>
+                                ));
+                              })()}
                             </SelectContent>
                           </Select>
                         </div>
