@@ -3,6 +3,7 @@ import { OLT } from "@/types/olt";
 import { FAT } from "@/types/fat";
 import { FDT } from "@/types/fdt";
 import { AKV } from "@/types/akv";
+import { Team } from "@/types/team";
 
 const DB_NAME = "NOC_Database";
 const STORE_NAME = "excel_data";
@@ -12,7 +13,8 @@ const FDT_STORE_NAME = "fdt_data";
 const UPE_STORE_NAME = "upe_data";
 const BNG_STORE_NAME = "bng_data";
 const AKV_STORE_NAME = "akv_data";
-const DB_VERSION = 7;
+const TEAM_STORE_NAME = "team_data";
+const DB_VERSION = 8;
 
 let dbInstance: IDBDatabase | null = null;
 
@@ -55,6 +57,9 @@ export function openDB(): Promise<IDBDatabase> {
       }
       if (!db.objectStoreNames.contains(AKV_STORE_NAME)) {
         db.createObjectStore(AKV_STORE_NAME);
+      }
+      if (!db.objectStoreNames.contains(TEAM_STORE_NAME)) {
+        db.createObjectStore(TEAM_STORE_NAME);
       }
     };
   });
@@ -289,6 +294,47 @@ export async function clearAKVData(): Promise<void> {
   });
 }
 
+// Team Data functions
+export async function saveTeamData(data: Team[]): Promise<void> {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction([TEAM_STORE_NAME], "readwrite");
+    const store = transaction.objectStore(TEAM_STORE_NAME);
+    const request = store.put(data, "team_records");
+    request.onsuccess = () => resolve();
+    request.onerror = () => reject(request.error);
+  });
+}
+
+export async function loadTeamData(): Promise<Team[]> {
+  try {
+    const db = await openDB();
+    return new Promise((resolve, reject) => {
+      const transaction = db.transaction([TEAM_STORE_NAME], "readonly");
+      const store = transaction.objectStore(TEAM_STORE_NAME);
+      const request = store.get("team_records");
+      request.onsuccess = () => resolve(request.result || []);
+      request.onerror = () => reject(request.error);
+    });
+  } catch (error) {
+    if (import.meta.env.DEV) {
+      console.error("Error loading Team data from IndexedDB:", error);
+    }
+    return [];
+  }
+}
+
+export async function clearTeamData(): Promise<void> {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction([TEAM_STORE_NAME], "readwrite");
+    const store = transaction.objectStore(TEAM_STORE_NAME);
+    const request = store.delete("team_records");
+    request.onsuccess = () => resolve();
+    request.onerror = () => reject(request.error);
+  });
+}
+
 // Clear only inventory/list data from IndexedDB (excludes tickets and reports)
 export async function clearListData(): Promise<void> {
   const db = await openDB();
@@ -312,6 +358,7 @@ export async function clearListData(): Promise<void> {
     clearStore(UPE_STORE_NAME, "upe_records"),
     clearStore(BNG_STORE_NAME, "bng_records"),
     clearStore(AKV_STORE_NAME, "akv_records"),
+    clearStore(TEAM_STORE_NAME, "team_records"),
   ]);
 }
 

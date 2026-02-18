@@ -3,7 +3,8 @@ import { ExcelRecord } from "@/types/ticket";
 import { OLT } from "@/types/olt";
 import { FAT } from "@/types/fat";
 import { FDT } from "@/types/fdt";
-import { saveExcelData, saveOLTData, saveFATData, saveAKVData } from "./indexedDB";
+import { Team } from "@/types/team";
+import { saveExcelData, saveOLTData, saveFATData, saveAKVData, saveTeamData } from "./indexedDB";
 import { AKV } from "@/types/akv";
 
 // Types for each data category
@@ -37,6 +38,7 @@ export interface ImportResult {
   bngRecords: BNGRecord[];
   fdtRecords: FDT[];
   akvRecords: AKV[];
+  teamRecords: Team[];
   summary: {
     user: number;
     olt: number;
@@ -45,6 +47,7 @@ export interface ImportResult {
     bng: number;
     fdt: number;
     akv: number;
+    team: number;
     totalSheets: number;
     processedSheets: string[];
     skippedSheets: string[];
@@ -53,6 +56,7 @@ export interface ImportResult {
 
 // Sheet detection patterns - prioritized by specificity (most specific first)
 const SHEET_PATTERNS = {
+  team: ["list team", "listteam", "list_team", "data team", "sheet list team", "daftar team", "master team", "tim", "list tim", "daftar tim"],
   akv: ["list akv user", "list_akv_user", "listakv user", "listakvuser", "akv user", "akvuser", "data akv user", "data akv", "list akv"],
   olt: ["list olt", "listolt", "list_olt", "data olt", "sheet list olt", "daftar olt", "master olt", "inventory olt"],
   fat: ["list fat", "listfat", "list_fat", "data fat", "sheet list fat", "daftar fat", "master fat"],
@@ -115,6 +119,11 @@ const COLUMN_MAPPINGS = {
     contact: ["Contact", "contact", "CONTACT", "kontak", "phone", "telepon", "hp"],
     address: ["Address", "address", "ADDRESS", "alamat", "Alamat", "ALAMAT"],
   },
+  team: {
+    teamName: ["TEAM", "Team", "team", "TIM", "Tim", "tim", "NAMA TEAM", "Nama Team", "nama team", "NAMA TIM", "Nama Tim", "nama tim", "SERPO", "Serpo", "serpo"],
+    hostnameOlt: ["HOSTNAME OLT", "Hostname OLT", "hostname olt", "hostname_olt", "HOSTNAME_OLT", "hostnameolt", "OLT", "olt"],
+    category: ["KATEGORI", "Kategori", "kategori", "CATEGORY", "Category", "category", "TYPE", "Type", "type", "TIPE", "Tipe", "tipe", "JENIS", "Jenis", "jenis"],
+  },
 };
 
 // Helper to find column value with multiple possible headers
@@ -151,7 +160,7 @@ function detectSheetType(sheetName: string, sampleData: any[]): keyof typeof SHE
   const normalizedName = sheetName.toLowerCase().trim().replace(/\s+/g, ' ');
   
   // Priority order for matching (most specific first)
-  const priorityOrder: (keyof typeof SHEET_PATTERNS)[] = ['akv', 'fdt', 'olt', 'fat', 'upe', 'bng', 'user'];
+  const priorityOrder: (keyof typeof SHEET_PATTERNS)[] = ['team', 'akv', 'fdt', 'olt', 'fat', 'upe', 'bng', 'user'];
   
   // Check by exact or close name patterns first
   for (const type of priorityOrder) {
@@ -343,6 +352,26 @@ function processAKVSheet(data: any[]): AKV[] {
     .filter((r) => r.provinsi || r.customer || r.serviceId || r.tikor || r.contact || r.address);
 }
 
+// Process Team sheet
+function processTeamSheet(data: any[]): Team[] {
+  return data
+    .map((row, index) => {
+      const categoryRaw = getColumnValue(row, COLUMN_MAPPINGS.team.category).toUpperCase().trim();
+      let category: "RITEL" | "FEEDER" = "RITEL";
+      if (categoryRaw.includes("FEEDER") || categoryRaw.includes("FDR")) {
+        category = "FEEDER";
+      }
+      return {
+        id: `team-${Date.now()}-${index}`,
+        teamName: getColumnValue(row, COLUMN_MAPPINGS.team.teamName),
+        hostnameOlt: getColumnValue(row, COLUMN_MAPPINGS.team.hostnameOlt),
+        category,
+        createdAt: new Date().toISOString(),
+      };
+    })
+    .filter((r) => r.teamName || r.hostnameOlt);
+}
+
 // Main function to import multi-sheet Excel file
 export async function importMultiSheetExcel(file: File): Promise<ImportResult> {
   return new Promise((resolve, reject) => {
@@ -361,6 +390,7 @@ export async function importMultiSheetExcel(file: File): Promise<ImportResult> {
           bngRecords: [],
           fdtRecords: [],
           akvRecords: [],
+          teamRecords: [],
           summary: {
             user: 0,
             olt: 0,
@@ -369,6 +399,7 @@ export async function importMultiSheetExcel(file: File): Promise<ImportResult> {
             bng: 0,
             fdt: 0,
             akv: 0,
+            team: 0,
             totalSheets: workbook.SheetNames.length,
             processedSheets: [],
             skippedSheets: [],
@@ -433,6 +464,12 @@ export async function importMultiSheetExcel(file: File): Promise<ImportResult> {
               result.akvRecords = processAKVSheet(jsonData);
               result.summary.akv = result.akvRecords.length;
               result.summary.processedSheets.push(`${sheetName} → AKV (${result.akvRecords.length})`);
+              break;
+              
+            case "team":
+              result.teamRecords = processTeamSheet(jsonData);
+              result.summary.team = result.teamRecords.length;
+              result.summary.processedSheets.push(`${sheetName} → Team (${result.teamRecords.length})`);
               break;
           }
         }
