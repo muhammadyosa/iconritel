@@ -403,7 +403,6 @@ export function MonthlyAnalytics({ tickets }: MonthlyAnalyticsProps) {
         {[
           {
             emoji: "🗃️", title: "Total Tiket", value: kpis.total,
-            sub: <div className="flex gap-1 justify-center mt-0.5"><Badge variant="outline" className="text-[9px] px-1 h-4">R:{kpis.ritel}</Badge><Badge variant="outline" className="text-[9px] px-1 h-4">F:{kpis.feeder}</Badge></div>,
             bgClass: "bg-primary/8 hover:bg-primary/15", borderClass: "border-primary/30 hover:border-primary/50",
             valueClass: "text-primary", glowClass: "hover:shadow-[0_0_15px_-4px_hsl(var(--primary)/0.3)]",
           },
@@ -431,7 +430,7 @@ export function MonthlyAnalytics({ tickets }: MonthlyAnalyticsProps) {
               <p className="text-[9px] sm:text-[10px] text-muted-foreground font-medium truncate">{card.title}</p>
             </div>
             <p className={`text-xl sm:text-2xl font-bold tabular-nums text-center ${card.valueClass}`}>{card.value}</p>
-            {card.sub}
+            
           </div>
         ))}
       </div>
