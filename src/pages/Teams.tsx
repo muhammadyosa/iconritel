@@ -245,7 +245,7 @@ export default function Teams() {
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="mb-4">
           <TabsTrigger value="team-stats" className="text-xs sm:text-sm gap-1.5">
-            👥 Team Stats
+            👥 Team Ritel/Serpo
           </TabsTrigger>
           <TabsTrigger value="team-noc" className="text-xs sm:text-sm gap-1.5">
             💻 Team NOC
@@ -278,7 +278,7 @@ export default function Teams() {
                 <CardHeader className="p-3 sm:p-6">
                   <CardTitle className="flex items-center gap-2 text-sm sm:text-base">
                     <Users className="h-4 w-4 sm:h-5 sm:w-5" />
-                    Statistik Ticket per Tim
+                    👥 Statistik Insident Tim
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="p-2 sm:p-6 pt-0">
