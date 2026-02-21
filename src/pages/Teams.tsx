@@ -277,7 +277,6 @@ export default function Teams() {
               <Card className="shadow-card lg:col-span-2 overflow-hidden">
                 <CardHeader className="p-3 sm:p-6">
                   <CardTitle className="flex items-center gap-2 text-sm sm:text-base">
-                    <Users className="h-4 w-4 sm:h-5 sm:w-5" />
                     👥 Statistik Insident Tim
                   </CardTitle>
                 </CardHeader>
