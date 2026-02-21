@@ -84,6 +84,7 @@ export default function Teams() {
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
   const [periodPreset, setPeriodPreset] = useState<string>("all");
   const [activeTab, setActiveTab] = useState("team-stats");
+  const [selectedUser, setSelectedUser] = useState<string | null>(null);
 
   // Handle period preset change
   const handlePeriodChange = (value: string) => {
@@ -542,6 +543,11 @@ export default function Teams() {
                       margin={{ top: 10, right: 20, left: 10, bottom: 10 }}
                       barCategoryGap="20%"
                       barGap={2}
+                      onClick={(data) => {
+                        if (data?.activePayload?.[0]?.payload?.name) {
+                          setSelectedUser(data.activePayload[0].payload.name);
+                        }
+                      }}
                     >
                       <CartesianGrid strokeDasharray="3 3" className="stroke-muted" horizontal={false} />
                       <XAxis
@@ -562,51 +568,207 @@ export default function Teams() {
                         content={<ChartTooltipContent labelFormatter={(v) => `User: ${v}`} />}
                       />
                       <ChartLegend content={<ChartLegendContent />} verticalAlign="top" />
-                      <Bar dataKey="total" name="Total" fill="hsl(var(--primary))" radius={[0, 3, 3, 0]} maxBarSize={16} />
-                      <Bar dataKey="resolved" name="Resolved" fill="hsl(var(--success))" radius={[0, 3, 3, 0]} maxBarSize={16} />
-                      <Bar dataKey="pending" name="Pending" fill="hsl(var(--warning))" radius={[0, 3, 3, 0]} maxBarSize={16} />
-                      <Bar dataKey="critical" name="Critical" fill="hsl(var(--destructive))" radius={[0, 3, 3, 0]} maxBarSize={16} />
+                      <Bar dataKey="total" name="Total" fill="hsl(var(--primary))" radius={[0, 3, 3, 0]} cursor="pointer" maxBarSize={16} />
+                      <Bar dataKey="resolved" name="Resolved" fill="hsl(var(--success))" radius={[0, 3, 3, 0]} cursor="pointer" maxBarSize={16} />
+                      <Bar dataKey="pending" name="Pending" fill="hsl(var(--warning))" radius={[0, 3, 3, 0]} cursor="pointer" maxBarSize={16} />
+                      <Bar dataKey="critical" name="Critical" fill="hsl(var(--destructive))" radius={[0, 3, 3, 0]} cursor="pointer" maxBarSize={16} />
                     </BarChart>
                   </ChartContainer>
+                  <p className="text-[10px] sm:text-xs text-muted-foreground text-center mt-2">
+                    Klik pada bar untuk melihat detail incident user
+                  </p>
+                </CardContent>
+              </Card>
+
+              {/* Detail Panel per User */}
+              <Card className="shadow-card">
+                <CardHeader className="p-3 sm:p-6">
+                  <CardTitle className="flex items-center gap-2 text-sm sm:text-base">
+                    <Eye className="h-4 w-4 sm:h-5 sm:w-5" />
+                    <span className="truncate">{selectedUser ? `Detail: ${selectedUser}` : "Detail User"}</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-3 sm:p-6 pt-0">
+                  {(() => {
+                    const userData = userStats.find(u => u.name === selectedUser);
+                    if (!userData) {
+                      return (
+                        <div className="text-center text-muted-foreground py-6 sm:py-8">
+                          <Monitor className="h-10 w-10 sm:h-12 sm:w-12 mx-auto mb-3 sm:mb-4 opacity-50" />
+                          <p className="text-xs sm:text-sm">Klik pada grafik untuk melihat detail user</p>
+                        </div>
+                      );
+                    }
+                    return (
+                      <div className="space-y-3 sm:space-y-4">
+                        <div className="space-y-2">
+                          <div className="flex justify-between text-xs sm:text-sm">
+                            <span className="text-muted-foreground">Total Incidents:</span>
+                            <span className="font-bold">{userData.total}</span>
+                          </div>
+                          <div className="flex justify-between text-xs sm:text-sm">
+                            <span className="text-success">Resolved:</span>
+                            <span className="font-medium text-success">{userData.resolved}</span>
+                          </div>
+                          <div className="flex justify-between text-xs sm:text-sm">
+                            <span className="text-warning">In Progress/Pending:</span>
+                            <span className="font-medium text-warning">{userData.pending}</span>
+                          </div>
+                          <div className="flex justify-between text-xs sm:text-sm">
+                            <span className="text-destructive">Critical:</span>
+                            <span className="font-medium text-destructive">{userData.critical}</span>
+                          </div>
+                          <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t">
+                            <div className="flex justify-between text-xs sm:text-sm font-medium">
+                              <span>Resolution Rate:</span>
+                              <span className="text-primary">
+                                {userData.total > 0
+                                  ? Math.round((userData.resolved / userData.total) * 100)
+                                  : 0}%
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <Sheet>
+                          <SheetTrigger asChild>
+                            <Button variant="outline" size="sm" className="w-full mt-3 sm:mt-4 text-xs sm:text-sm">
+                              <Eye className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                              Lihat Detail Incidents
+                            </Button>
+                          </SheetTrigger>
+                          <SheetContent side="right" className="w-full sm:max-w-lg md:max-w-2xl p-3 sm:p-6">
+                            <SheetHeader>
+                              <SheetTitle className="text-base sm:text-lg">Detail Incidents - {selectedUser}</SheetTitle>
+                              <SheetDescription className="text-xs sm:text-sm">
+                                Daftar semua incident yang dibuat oleh {selectedUser}
+                              </SheetDescription>
+                            </SheetHeader>
+                            <ScrollArea className="h-[calc(100vh-150px)] sm:h-[calc(100vh-120px)] mt-4 sm:mt-6">
+                              <div className="space-y-3 sm:space-y-4 pr-2 sm:pr-4">
+                                {userData.tickets.map((ticket: any) => (
+                                  <Card key={ticket.id} className="shadow-sm">
+                                    <CardContent className="p-3 sm:pt-4">
+                                      <div className="space-y-2 sm:space-y-3">
+                                        <div className="flex items-start justify-between gap-2">
+                                          <div className="min-w-0 flex-1">
+                                            <p className="font-bold text-xs sm:text-sm truncate">{ticket.ticketId || ticket.id}</p>
+                                            <p className="text-[10px] sm:text-xs text-muted-foreground mt-1">
+                                              {ticket.createdAt} • {ticket.serpo}
+                                            </p>
+                                          </div>
+                                          <div className="flex flex-col gap-1 flex-shrink-0">
+                                            <StatusBadge status={ticket.status} />
+                                            <Badge
+                                              variant="outline"
+                                              className={`text-[10px] sm:text-xs ${
+                                                ticket.category === "FEEDER"
+                                                  ? "bg-warning/10 text-warning border-warning/20"
+                                                  : "bg-primary/10 text-primary border-primary/20"
+                                              }`}
+                                            >
+                                              {ticket.category}
+                                            </Badge>
+                                          </div>
+                                        </div>
+
+                                        <div className="grid grid-cols-2 gap-1.5 sm:gap-2 text-[10px] sm:text-xs">
+                                          <div className="min-w-0">
+                                            <span className="text-muted-foreground">Customer:</span>
+                                            <p className="font-medium truncate">{ticket.customerName}</p>
+                                          </div>
+                                          <div className="min-w-0">
+                                            <span className="text-muted-foreground">Service ID:</span>
+                                            <p className="font-medium font-mono truncate">{ticket.serviceId}</p>
+                                          </div>
+                                          <div className="min-w-0">
+                                            <span className="text-muted-foreground">Constraint:</span>
+                                            <p className="font-medium truncate">{ticket.constraint}</p>
+                                          </div>
+                                          <div className="min-w-0">
+                                            <span className="text-muted-foreground">Serpo:</span>
+                                            <p className="font-medium truncate">{ticket.serpo}</p>
+                                          </div>
+                                          <div className="min-w-0">
+                                            <span className="text-muted-foreground">Hostname:</span>
+                                            <p className="font-medium font-mono text-[9px] sm:text-[10px] truncate">{ticket.hostname}</p>
+                                          </div>
+                                          <div className="min-w-0">
+                                            <span className="text-muted-foreground">FAT ID:</span>
+                                            <p className="font-medium font-mono truncate">{ticket.fatId}</p>
+                                          </div>
+                                          <div className="min-w-0">
+                                            <span className="text-muted-foreground">SN ONT:</span>
+                                            <p className="font-medium font-mono truncate">{ticket.snOnt}</p>
+                                          </div>
+                                          <div className="min-w-0">
+                                            <span className="text-muted-foreground">Ticket ID:</span>
+                                            <p className="font-medium font-mono truncate">{ticket.ticketId}</p>
+                                          </div>
+                                        </div>
+
+                                        <div className="pt-2 border-t">
+                                          <span className="text-[10px] sm:text-xs text-muted-foreground">Ticket Result:</span>
+                                          <p className="text-[10px] sm:text-xs font-mono mt-1 p-1.5 sm:p-2 bg-muted/50 rounded break-all">
+                                            {ticket.ticketResult}
+                                          </p>
+                                        </div>
+                                      </div>
+                                    </CardContent>
+                                  </Card>
+                                ))}
+                              </div>
+                            </ScrollArea>
+                          </SheetContent>
+                        </Sheet>
+                      </div>
+                    );
+                  })()}
                 </CardContent>
               </Card>
 
               {/* Table Ranking */}
-              <Card className="shadow-card">
-                <CardHeader className="p-3 sm:p-6">
-                  <CardTitle className="flex items-center gap-2 text-sm sm:text-base">
-                    🏆 Ranking User
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="p-3 sm:p-6 pt-0">
-                  <ScrollArea className="h-[320px] sm:h-[380px]">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead className="text-xs w-8">#</TableHead>
-                          <TableHead className="text-xs">User</TableHead>
-                          <TableHead className="text-xs text-right">Total</TableHead>
-                          <TableHead className="text-xs text-right">Resolved</TableHead>
-                          <TableHead className="text-xs text-right">Rate</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {userStats.map((u, i) => (
-                          <TableRow key={u.name}>
-                            <TableCell className="text-xs font-medium">{i + 1}</TableCell>
-                            <TableCell className="text-xs font-medium truncate max-w-[100px]">{u.name}</TableCell>
-                            <TableCell className="text-xs text-right font-bold">{u.total}</TableCell>
-                            <TableCell className="text-xs text-right text-success">{u.resolved}</TableCell>
-                            <TableCell className="text-xs text-right text-primary font-medium">
-                              {u.total > 0 ? Math.round((u.resolved / u.total) * 100) : 0}%
-                            </TableCell>
+              <div className="lg:col-span-3">
+                <Card className="shadow-card">
+                  <CardHeader className="p-3 sm:p-6">
+                    <CardTitle className="flex items-center gap-2 text-sm sm:text-base">
+                      🏆 Ranking User
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-3 sm:p-6 pt-0">
+                    <ScrollArea className="h-[320px] sm:h-[380px]">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead className="text-xs w-8">#</TableHead>
+                            <TableHead className="text-xs">User</TableHead>
+                            <TableHead className="text-xs text-right">Total</TableHead>
+                            <TableHead className="text-xs text-right">Resolved</TableHead>
+                            <TableHead className="text-xs text-right">Rate</TableHead>
                           </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </ScrollArea>
-                </CardContent>
-              </Card>
+                        </TableHeader>
+                        <TableBody>
+                          {userStats.map((u, i) => (
+                            <TableRow
+                              key={u.name}
+                              className={cn("cursor-pointer", selectedUser === u.name && "bg-muted")}
+                              onClick={() => setSelectedUser(u.name)}
+                            >
+                              <TableCell className="text-xs font-medium">{i + 1}</TableCell>
+                              <TableCell className="text-xs font-medium truncate max-w-[100px]">{u.name}</TableCell>
+                              <TableCell className="text-xs text-right font-bold">{u.total}</TableCell>
+                              <TableCell className="text-xs text-right text-success">{u.resolved}</TableCell>
+                              <TableCell className="text-xs text-right text-primary font-medium">
+                                {u.total > 0 ? Math.round((u.resolved / u.total) * 100) : 0}%
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </ScrollArea>
+                  </CardContent>
+                </Card>
+              </div>
             </div>
           )}
         </TabsContent>
