@@ -876,7 +876,7 @@ export default function Dashboard() {
 
       {/* Ticket Detail Dialog */}
       <Dialog open={!!selectedTicket} onOpenChange={() => setSelectedTicket(null)}>
-        <DialogContent className="max-w-2xl p-4">
+        <DialogContent className="w-[95vw] max-w-2xl p-3 sm:p-4">
           <DialogHeader className="pb-2">
             <DialogTitle className="flex items-center gap-2 text-base">
               <Activity className="h-4 w-4 text-primary" />
@@ -923,32 +923,32 @@ export default function Dashboard() {
               </div>
 
               {/* Combined Info Grid */}
-              <div className="grid grid-cols-3 gap-2 text-xs">
-                <div className="p-2 bg-muted/30 rounded">
-                  <p className="text-muted-foreground mb-0.5">Service ID</p>
-                  <p className="font-mono font-medium truncate">{selectedTicket.serviceId}</p>
-                </div>
-                <div className="p-2 bg-muted/30 rounded">
-                  <p className="text-muted-foreground mb-0.5">Customer</p>
-                  <p className="font-medium truncate">{selectedTicket.customerName || "-"}</p>
-                </div>
-                <div className="p-2 bg-muted/30 rounded">
-                  <p className="text-muted-foreground mb-0.5">SERPO</p>
-                  <p className="font-medium truncate">{selectedTicket.serpo}</p>
-                </div>
-                <div className="p-2 bg-muted/30 rounded">
-                  <p className="text-muted-foreground mb-0.5">Hostname</p>
-                  <p className="font-mono font-medium truncate">{selectedTicket.hostname}</p>
-                </div>
-                <div className="p-2 bg-muted/30 rounded">
-                  <p className="text-muted-foreground mb-0.5">FAT ID</p>
-                  <p className="font-mono font-medium truncate">{selectedTicket.fatId}</p>
-                </div>
-                <div className="p-2 bg-muted/30 rounded">
-                  <p className="text-muted-foreground mb-0.5">SN ONT</p>
-                  <p className="font-mono font-medium truncate">{selectedTicket.snOnt}</p>
-                </div>
-              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs">
+                 <div className="p-2 bg-muted/30 rounded">
+                   <p className="text-muted-foreground mb-0.5">Service ID</p>
+                   <p className="font-mono font-medium truncate">{selectedTicket.serviceId}</p>
+                 </div>
+                 <div className="p-2 bg-muted/30 rounded">
+                   <p className="text-muted-foreground mb-0.5">Customer</p>
+                   <p className="font-medium truncate">{selectedTicket.customerName || "-"}</p>
+                 </div>
+                 <div className="p-2 bg-muted/30 rounded">
+                   <p className="text-muted-foreground mb-0.5">SERPO</p>
+                   <p className="font-medium truncate">{selectedTicket.serpo}</p>
+                 </div>
+                 <div className="p-2 bg-muted/30 rounded">
+                   <p className="text-muted-foreground mb-0.5">Hostname</p>
+                   <p className="font-mono font-medium truncate">{selectedTicket.hostname}</p>
+                 </div>
+                 <div className="p-2 bg-muted/30 rounded">
+                   <p className="text-muted-foreground mb-0.5">FAT ID</p>
+                   <p className="font-mono font-medium truncate">{selectedTicket.fatId}</p>
+                 </div>
+                 <div className="p-2 bg-muted/30 rounded">
+                   <p className="text-muted-foreground mb-0.5">SN ONT</p>
+                   <p className="font-mono font-medium truncate">{selectedTicket.snOnt}</p>
+                 </div>
+               </div>
 
               {/* Ticket Result - Compact */}
               <div className="p-2 bg-success/5 rounded border border-success/20">

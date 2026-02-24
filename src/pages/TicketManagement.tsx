@@ -334,7 +334,7 @@ export default function TicketManagement() {
 
       {/* Dialog for creating ticket from Preview Data */}
       <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="w-[95vw] max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Buat Tiket Baru</DialogTitle>
           </DialogHeader>
@@ -609,12 +609,12 @@ export default function TicketManagement() {
                       <span className="xs:hidden">+</span>
                     </Button>
                   </DialogTrigger>
-                  <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                  <DialogContent className="w-[95vw] max-w-2xl max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
                       <DialogTitle>Input Tiket Manual</DialogTitle>
                     </DialogHeader>
                     <div className="space-y-4">
-                      <div className="grid grid-cols-2 gap-4">
+                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                         <div>
                           <Label>Ticket ID *</Label>
                           <Input
@@ -632,7 +632,7 @@ export default function TicketManagement() {
                           />
                         </div>
                       </div>
-                      <div className="grid grid-cols-2 gap-4">
+                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                         <div>
                           <Label>Customer Name</Label>
                           <Input
@@ -650,7 +650,7 @@ export default function TicketManagement() {
                           />
                         </div>
                       </div>
-                      <div className="grid grid-cols-2 gap-4">
+                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                         <div>
                           <Label>Hostname OLT</Label>
                           <Input
