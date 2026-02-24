@@ -116,7 +116,7 @@ export function TicketDetailDialog({
           </Button>
         </DialogTrigger>
       )}
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="w-[95vw] max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center justify-between pr-8">
             <span>Detail Insident {ticket.id}</span>
@@ -132,7 +132,7 @@ export function TicketDetailDialog({
           {isEditing ? (
             // Edit Mode
             <div className="space-y-3">
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <Label className="text-xs">Customer</Label>
                   <Input
@@ -243,7 +243,7 @@ export function TicketDetailDialog({
           ) : (
             // View Mode
             <>
-              <div className="grid grid-cols-2 gap-3 text-sm">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
                 <div>
                   <span className="text-muted-foreground">Category:</span>
                   <p className="font-medium">{ticket.category}</p>

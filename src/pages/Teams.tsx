@@ -302,14 +302,14 @@ export default function Teams() {
                         axisLine={false}
                         tickLine={false}
                       />
-                      <YAxis 
+                       <YAxis 
                         type="category"
                         dataKey="team"
-                        tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }}
+                        tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }}
                         axisLine={false}
                         tickLine={false}
-                        width={100}
-                      />
+                        width={80}
+                       />
                       <ChartTooltip
                         content={
                           <ChartTooltipContent
@@ -556,14 +556,14 @@ export default function Teams() {
                         axisLine={false}
                         tickLine={false}
                       />
-                      <YAxis
+                       <YAxis
                         type="category"
                         dataKey="name"
-                        tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }}
+                        tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }}
                         axisLine={false}
                         tickLine={false}
-                        width={100}
-                      />
+                        width={80}
+                       />
                       <ChartTooltip
                         content={<ChartTooltipContent labelFormatter={(v) => `User: ${v}`} />}
                       />
