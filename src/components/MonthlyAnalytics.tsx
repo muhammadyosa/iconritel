@@ -48,6 +48,8 @@ export function MonthlyAnalytics({ tickets }: MonthlyAnalyticsProps) {
     return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
   });
 
+  const [trendDays, setTrendDays] = useState<number>(7);
+
   // Drill-down state
   const [drillOpen, setDrillOpen] = useState(false);
   const [drillTitle, setDrillTitle] = useState("");
@@ -104,25 +106,28 @@ export function MonthlyAnalytics({ tickets }: MonthlyAnalyticsProps) {
 
   const categoryData = useMemo(() => {
     const map = new Map<string, number>();
-    monthTickets.forEach((t) => {
+    tickets.forEach((t) => {
       map.set(t.constraint, (map.get(t.constraint) || 0) + 1);
     });
     return Array.from(map.entries())
       .map(([name, value]) => ({ name, value }))
       .sort((a, b) => b.value - a.value);
-  }, [monthTickets]);
+  }, [tickets]);
 
   const dailyTrend = useMemo(() => {
-    const [year, month] = selectedMonth.split("-").map(Number);
-    const daysInMonth = new Date(year, month, 0).getDate();
     const today = new Date();
-    const maxDay = year === today.getFullYear() && month === today.getMonth() + 1
-      ? today.getDate()
-      : daysInMonth;
-
-    const data: { day: string; dayNum: number; total: number; resolved: number; slaOk: number }[] = [];
-    for (let d = 1; d <= maxDay; d++) {
-      const dayTickets = monthTickets.filter((t) => new Date(t.createdISO).getDate() === d);
+    const data: { day: string; isoDate: string; dayNum: number; total: number; resolved: number; slaOk: number }[] = [];
+    
+    for (let i = trendDays - 1; i >= 0; i--) {
+      const date = new Date(today);
+      date.setDate(date.getDate() - i);
+      const isoDate = date.toISOString().split('T')[0];
+      const displayDay = date.toLocaleDateString('id-ID', { day: '2-digit', month: 'short' });
+      
+      const dayTickets = tickets.filter((t) => {
+        const tDate = new Date(t.createdISO).toISOString().split('T')[0];
+        return tDate === isoDate;
+      });
       const resolvedDay = dayTickets.filter((t) => t.status === "Resolved");
       const slaOk = resolvedDay.filter((t) => {
         if (t.resolvedAt) {
@@ -131,10 +136,10 @@ export function MonthlyAnalytics({ tickets }: MonthlyAnalyticsProps) {
         }
         return false;
       }).length;
-      data.push({ day: String(d), dayNum: d, total: dayTickets.length, resolved: resolvedDay.length, slaOk });
+      data.push({ day: displayDay, isoDate, dayNum: date.getDate(), total: dayTickets.length, resolved: resolvedDay.length, slaOk });
     }
     return data;
-  }, [monthTickets, selectedMonth]);
+  }, [tickets, trendDays]);
 
   const trendConfig: ChartConfig = {
     total: { label: "Total", color: "hsl(var(--primary))" },
@@ -146,7 +151,7 @@ export function MonthlyAnalytics({ tickets }: MonthlyAnalyticsProps) {
   const handleCategoryClick = (data: any) => {
     if (data?.activePayload?.[0]?.payload?.name) {
       const constraint = data.activePayload[0].payload.name;
-      const filtered = monthTickets.filter((t) => t.constraint === constraint);
+      const filtered = tickets.filter((t) => t.constraint === constraint);
       setDrillSelectedTicket(null);
       setDrillTickets(filtered);
       setDrillTitle(`📊 ${constraint} — ${filtered.length} tiket`);
@@ -155,14 +160,15 @@ export function MonthlyAnalytics({ tickets }: MonthlyAnalyticsProps) {
   };
 
   const handleTrendDotClick = (data: any) => {
-    if (data?.activePayload?.[0]?.payload?.dayNum) {
-      const dayNum = data.activePayload[0].payload.dayNum;
-      const filtered = monthTickets.filter((t) => new Date(t.createdISO).getDate() === dayNum);
-      const [, month] = selectedMonth.split("-").map(Number);
-      const monthName = new Date(2026, month - 1).toLocaleDateString("id-ID", { month: "short" });
+    if (data?.activePayload?.[0]?.payload?.isoDate) {
+      const { isoDate, day } = data.activePayload[0].payload;
+      const filtered = tickets.filter((t) => {
+        const tDate = new Date(t.createdISO).toISOString().split('T')[0];
+        return tDate === isoDate;
+      });
       setDrillSelectedTicket(null);
       setDrillTickets(filtered);
-      setDrillTitle(`📅 ${dayNum} ${monthName} — ${filtered.length} tiket`);
+      setDrillTitle(`📅 ${day} — ${filtered.length} tiket`);
       setDrillOpen(true);
     }
   };
@@ -251,7 +257,7 @@ export function MonthlyAnalytics({ tickets }: MonthlyAnalyticsProps) {
             String(i + 1), cat.name,
             FEEDER_CONSTRAINTS_SET.has(cat.name) ? "Feeder" : "Ritel",
             String(cat.value),
-            `${kpis.total > 0 ? Math.round((cat.value / kpis.total) * 100) : 0}%`,
+            `${tickets.length > 0 ? Math.round((cat.value / tickets.length) * 100) : 0}%`,
           ]),
           headStyles: { fillColor: [30, 64, 144], fontSize: 7, cellPadding: 2 },
           bodyStyles: { fontSize: 7, cellPadding: 1.8 },
@@ -447,7 +453,7 @@ export function MonthlyAnalytics({ tickets }: MonthlyAnalyticsProps) {
           </CardHeader>
           <CardContent className="p-2 sm:p-3">
             {categoryData.length === 0 ? (
-              <p className="text-xs text-muted-foreground text-center py-8">Tidak ada data bulan ini</p>
+              <p className="text-xs text-muted-foreground text-center py-8">Tidak ada data</p>
             ) : (
               <>
                 <ChartContainer
@@ -483,14 +489,26 @@ export function MonthlyAnalytics({ tickets }: MonthlyAnalyticsProps) {
         {/* Daily Trend */}
         <Card className="overflow-hidden border">
           <CardHeader className="py-2 px-3 sm:px-4 border-b bg-muted/20">
-            <CardTitle className="flex items-center gap-1.5 text-xs sm:text-sm">
-              <TrendingUp className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary" />
-              Tren Harian & SLA Compliance
-            </CardTitle>
+            <div className="flex items-center justify-between gap-2">
+              <CardTitle className="flex items-center gap-1.5 text-xs sm:text-sm">
+                <TrendingUp className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary" />
+                Tren Harian & SLA Compliance
+              </CardTitle>
+              <Select value={trendDays.toString()} onValueChange={(v) => setTrendDays(Number(v))}>
+                <SelectTrigger className="w-[90px] h-7 text-[10px]">
+                  <SelectValue placeholder="Rentang" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="7">7 Hari</SelectItem>
+                  <SelectItem value="14">14 Hari</SelectItem>
+                  <SelectItem value="30">30 Hari</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </CardHeader>
           <CardContent className="p-2 sm:p-3">
             {dailyTrend.length === 0 ? (
-              <p className="text-xs text-muted-foreground text-center py-8">Tidak ada data bulan ini</p>
+              <p className="text-xs text-muted-foreground text-center py-8">Tidak ada data</p>
             ) : (
               <>
                 <ChartContainer config={trendConfig} className="h-[180px] xs:h-[190px] sm:h-[210px] md:h-[240px] w-full transition-all duration-300">
@@ -500,7 +518,7 @@ export function MonthlyAnalytics({ tickets }: MonthlyAnalyticsProps) {
                     onClick={handleTrendDotClick}
                   >
                     <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                    <XAxis dataKey="day" tick={{ fontSize: 8, fill: "hsl(var(--muted-foreground))" }} tickLine={false} axisLine={false} interval="preserveStartEnd" />
+                    <XAxis dataKey="day" tick={{ fontSize: 8, fill: "hsl(var(--muted-foreground))" }} tickLine={false} axisLine={false} interval={trendDays > 14 ? 3 : trendDays > 7 ? 1 : 0} />
                     <YAxis tick={{ fontSize: 9, fill: "hsl(var(--muted-foreground))" }} width={25} tickLine={false} axisLine={false} />
                     <ChartTooltip content={<ChartTooltipContent />} />
                     <Line type="monotone" dataKey="total" stroke="var(--color-total)" strokeWidth={2} dot={{ r: 2, cursor: "pointer" }} activeDot={{ r: 5, cursor: "pointer" }} />
