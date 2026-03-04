@@ -337,6 +337,145 @@ export default function Teams() {
                 </Card>
               </div>
 
+              {/* Statistik Incident per Bagian */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Ritel Incident Stats */}
+                <Card className="shadow-card overflow-hidden">
+                  <CardHeader className="py-3 px-4 border-b bg-primary/5">
+                    <CardTitle className="flex items-center gap-2 text-sm">
+                      <Badge className="bg-primary text-primary-foreground text-[10px] px-2">RITEL</Badge>
+                      Statistik Incident Ritel
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-4">
+                    {teamStatsByCategory.ritel.length > 0 ? (
+                      <div className="space-y-4">
+                        <div className="grid grid-cols-3 gap-2 text-center">
+                          <div className="p-2 rounded-lg bg-success/10">
+                            <p className="text-lg sm:text-xl font-bold text-success">{teamStatsByCategory.ritelResolved}</p>
+                            <p className="text-[9px] sm:text-[10px] text-muted-foreground">Resolved</p>
+                          </div>
+                          <div className="p-2 rounded-lg bg-warning/10">
+                            <p className="text-lg sm:text-xl font-bold text-warning">{teamStatsByCategory.ritelTotal - teamStatsByCategory.ritelResolved - teamStatsByCategory.ritel.reduce((s, t) => s + t.critical, 0)}</p>
+                            <p className="text-[9px] sm:text-[10px] text-muted-foreground">Pending</p>
+                          </div>
+                          <div className="p-2 rounded-lg bg-destructive/10">
+                            <p className="text-lg sm:text-xl font-bold text-destructive">{teamStatsByCategory.ritel.reduce((s, t) => s + t.critical, 0)}</p>
+                            <p className="text-[9px] sm:text-[10px] text-muted-foreground">Critical</p>
+                          </div>
+                        </div>
+                        <ChartContainer config={chartConfig} className="h-[180px] w-full">
+                          <PieChart>
+                            <Pie
+                              data={[
+                                { name: "Resolved", value: teamStatsByCategory.ritelResolved, fill: "hsl(var(--success))" },
+                                { name: "Pending", value: teamStatsByCategory.ritelTotal - teamStatsByCategory.ritelResolved - teamStatsByCategory.ritel.reduce((s, t) => s + t.critical, 0), fill: "hsl(var(--warning))" },
+                                { name: "Critical", value: teamStatsByCategory.ritel.reduce((s, t) => s + t.critical, 0), fill: "hsl(var(--destructive))" },
+                              ].filter(d => d.value > 0)}
+                              cx="50%"
+                              cy="50%"
+                              innerRadius={40}
+                              outerRadius={70}
+                              paddingAngle={3}
+                              dataKey="value"
+                              label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                            >
+                            </Pie>
+                            <ChartTooltip content={<ChartTooltipContent />} />
+                          </PieChart>
+                        </ChartContainer>
+                        {/* Top 5 Ritel teams mini ranking */}
+                        <div className="space-y-1.5">
+                          <p className="text-[10px] sm:text-xs font-semibold text-muted-foreground">Top 5 Tim Ritel</p>
+                          {teamStatsByCategory.ritel.slice(0, 5).map((t, i) => {
+                            const rate = t.total > 0 ? Math.round((t.resolved / t.total) * 100) : 0;
+                            return (
+                              <div key={t.team} className="flex items-center gap-2">
+                                <span className="text-[10px] font-bold text-muted-foreground w-4">{i + 1}</span>
+                                <span className="text-[10px] sm:text-xs font-medium truncate flex-1">{t.team}</span>
+                                <span className="text-[10px] font-mono">{t.total}</span>
+                                <Progress value={rate} className="h-1.5 w-16" />
+                                <span className={cn("text-[9px] font-bold w-7 text-right", rate >= 70 ? "text-success" : rate >= 40 ? "text-warning" : "text-destructive")}>{rate}%</span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    ) : (
+                      <p className="text-xs text-muted-foreground text-center py-6">Belum ada data Ritel</p>
+                    )}
+                  </CardContent>
+                </Card>
+
+                {/* Serpo/Feeder Incident Stats */}
+                <Card className="shadow-card overflow-hidden">
+                  <CardHeader className="py-3 px-4 border-b bg-warning/5">
+                    <CardTitle className="flex items-center gap-2 text-sm">
+                      <Badge className="bg-warning text-warning-foreground text-[10px] px-2">FEEDER</Badge>
+                      Statistik Incident Serpo
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-4">
+                    {teamStatsByCategory.feeder.length > 0 ? (
+                      <div className="space-y-4">
+                        <div className="grid grid-cols-3 gap-2 text-center">
+                          <div className="p-2 rounded-lg bg-success/10">
+                            <p className="text-lg sm:text-xl font-bold text-success">{teamStatsByCategory.feederResolved}</p>
+                            <p className="text-[9px] sm:text-[10px] text-muted-foreground">Resolved</p>
+                          </div>
+                          <div className="p-2 rounded-lg bg-warning/10">
+                            <p className="text-lg sm:text-xl font-bold text-warning">{teamStatsByCategory.feederTotal - teamStatsByCategory.feederResolved - teamStatsByCategory.feeder.reduce((s, t) => s + t.critical, 0)}</p>
+                            <p className="text-[9px] sm:text-[10px] text-muted-foreground">Pending</p>
+                          </div>
+                          <div className="p-2 rounded-lg bg-destructive/10">
+                            <p className="text-lg sm:text-xl font-bold text-destructive">{teamStatsByCategory.feeder.reduce((s, t) => s + t.critical, 0)}</p>
+                            <p className="text-[9px] sm:text-[10px] text-muted-foreground">Critical</p>
+                          </div>
+                        </div>
+                        <ChartContainer config={chartConfig} className="h-[180px] w-full">
+                          <PieChart>
+                            <Pie
+                              data={[
+                                { name: "Resolved", value: teamStatsByCategory.feederResolved, fill: "hsl(var(--success))" },
+                                { name: "Pending", value: teamStatsByCategory.feederTotal - teamStatsByCategory.feederResolved - teamStatsByCategory.feeder.reduce((s, t) => s + t.critical, 0), fill: "hsl(var(--warning))" },
+                                { name: "Critical", value: teamStatsByCategory.feeder.reduce((s, t) => s + t.critical, 0), fill: "hsl(var(--destructive))" },
+                              ].filter(d => d.value > 0)}
+                              cx="50%"
+                              cy="50%"
+                              innerRadius={40}
+                              outerRadius={70}
+                              paddingAngle={3}
+                              dataKey="value"
+                              label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                            >
+                            </Pie>
+                            <ChartTooltip content={<ChartTooltipContent />} />
+                          </PieChart>
+                        </ChartContainer>
+                        {/* Top 5 Serpo teams mini ranking */}
+                        <div className="space-y-1.5">
+                          <p className="text-[10px] sm:text-xs font-semibold text-muted-foreground">Top 5 Tim Serpo</p>
+                          {teamStatsByCategory.feeder.slice(0, 5).map((t, i) => {
+                            const rate = t.total > 0 ? Math.round((t.resolved / t.total) * 100) : 0;
+                            return (
+                              <div key={t.team} className="flex items-center gap-2">
+                                <span className="text-[10px] font-bold text-muted-foreground w-4">{i + 1}</span>
+                                <span className="text-[10px] sm:text-xs font-medium truncate flex-1">{t.team}</span>
+                                <span className="text-[10px] font-mono">{t.total}</span>
+                                <Progress value={rate} className="h-1.5 w-16" />
+                                <span className={cn("text-[9px] font-bold w-7 text-right", rate >= 70 ? "text-success" : rate >= 40 ? "text-warning" : "text-destructive")}>{rate}%</span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    ) : (
+                      <p className="text-xs text-muted-foreground text-center py-6">Belum ada data Serpo</p>
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
+
               {/* Team Ritel Section */}
               {teamStatsByCategory.ritel.length > 0 && (
                 <Card className="shadow-card overflow-hidden">
