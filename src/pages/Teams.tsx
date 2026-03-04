@@ -604,8 +604,8 @@ export default function Teams() {
                             return (
                               <TableRow
                                 key={t.team}
-                                className={cn("cursor-pointer transition-colors", selectedTeam === t.team && "bg-primary/5")}
-                                onClick={() => setSelectedTeam(t.team)}
+                                className={cn("cursor-pointer transition-colors hover:bg-primary/5", selectedTeam === t.team && "bg-primary/5")}
+                                onClick={() => setStatsSheetTeam({ team: t.team, category: "ritel" })}
                               >
                                 <TableCell className="text-xs font-medium text-muted-foreground">{i + 1}</TableCell>
                                 <TableCell>
@@ -717,8 +717,8 @@ export default function Teams() {
                             return (
                               <TableRow
                                 key={t.team}
-                                className={cn("cursor-pointer transition-colors", selectedTeam === t.team && "bg-warning/5")}
-                                onClick={() => setSelectedTeam(t.team)}
+                                className={cn("cursor-pointer transition-colors hover:bg-warning/5", selectedTeam === t.team && "bg-warning/5")}
+                                onClick={() => setStatsSheetTeam({ team: t.team, category: "feeder" })}
                               >
                                 <TableCell className="text-xs font-medium text-muted-foreground">{i + 1}</TableCell>
                                 <TableCell>
