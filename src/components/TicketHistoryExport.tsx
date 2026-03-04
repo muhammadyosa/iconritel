@@ -169,9 +169,9 @@ export function TicketHistoryExport() {
               Belum ada data historis tiket
             </div>
           ) : (
-            <div className="overflow-x-auto rounded-lg border">
+            <div className="overflow-auto rounded-lg border max-h-[50vh]">
               <Table>
-                <TableHeader>
+                <TableHeader className="sticky top-0 z-10 bg-background shadow-sm">
                   <TableRow>
                     <TableHead className="text-xs">Tanggal</TableHead>
                     <TableHead className="text-xs text-center">Ritel</TableHead>
