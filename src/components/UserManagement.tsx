@@ -323,9 +323,9 @@ export function UserManagement() {
             <p>Tidak ada user terdaftar</p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
+          <div className="overflow-auto max-h-[60vh]">
             <Table>
-              <TableHeader>
+              <TableHeader className="sticky top-0 z-10 bg-background shadow-sm">
                 <TableRow>
                   <TableHead className="w-[50px]"></TableHead>
                   <TableHead>User</TableHead>
