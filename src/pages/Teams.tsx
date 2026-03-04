@@ -86,6 +86,7 @@ export default function Teams() {
   const [periodPreset, setPeriodPreset] = useState<string>("all");
   const [activeTab, setActiveTab] = useState("team-stats");
   const [selectedUser, setSelectedUser] = useState<string | null>(null);
+  const [statsSheetTeam, setStatsSheetTeam] = useState<{ team: string; category: "ritel" | "feeder" } | null>(null);
 
   // Handle period preset change
   const handlePeriodChange = (value: string) => {
@@ -391,15 +392,22 @@ export default function Teams() {
                           {teamStatsByCategory.ritel.slice(0, 5).map((t, i) => {
                             const rate = t.total > 0 ? Math.round((t.resolved / t.total) * 100) : 0;
                             return (
-                              <div key={t.team} className="flex items-center gap-1.5 sm:gap-2">
+                              <div
+                                key={t.team}
+                                className="flex items-center gap-1.5 sm:gap-2 cursor-pointer hover:bg-primary/5 rounded-md px-1 py-0.5 transition-colors"
+                                onClick={() => setStatsSheetTeam({ team: t.team, category: "ritel" })}
+                              >
                                 <span className="text-[9px] sm:text-[10px] font-bold text-muted-foreground w-3 sm:w-4">{i + 1}</span>
-                                <span className="text-[9px] sm:text-xs font-medium truncate flex-1 min-w-0">{t.team}</span>
+                                <span className="text-[9px] sm:text-xs font-medium truncate flex-1 min-w-0 text-primary underline-offset-2 hover:underline">{t.team}</span>
                                 <span className="text-[9px] sm:text-[10px] font-mono shrink-0">{t.total}</span>
                                 <Progress value={rate} className="h-1 sm:h-1.5 w-10 sm:w-16 shrink-0" />
                                 <span className={cn("text-[8px] sm:text-[9px] font-bold w-6 sm:w-7 text-right shrink-0", rate >= 70 ? "text-success" : rate >= 40 ? "text-warning" : "text-destructive")}>{rate}%</span>
                               </div>
                             );
                           })}
+                          {teamStatsByCategory.ritel.length > 5 && (
+                            <p className="text-[8px] sm:text-[9px] text-muted-foreground text-center pt-1">+ {teamStatsByCategory.ritel.length - 5} tim lainnya di tabel bawah</p>
+                          )}
                         </div>
                       </div>
                     ) : (
@@ -460,15 +468,22 @@ export default function Teams() {
                           {teamStatsByCategory.feeder.slice(0, 5).map((t, i) => {
                             const rate = t.total > 0 ? Math.round((t.resolved / t.total) * 100) : 0;
                             return (
-                              <div key={t.team} className="flex items-center gap-1.5 sm:gap-2">
+                              <div
+                                key={t.team}
+                                className="flex items-center gap-1.5 sm:gap-2 cursor-pointer hover:bg-warning/5 rounded-md px-1 py-0.5 transition-colors"
+                                onClick={() => setStatsSheetTeam({ team: t.team, category: "feeder" })}
+                              >
                                 <span className="text-[9px] sm:text-[10px] font-bold text-muted-foreground w-3 sm:w-4">{i + 1}</span>
-                                <span className="text-[9px] sm:text-xs font-medium truncate flex-1 min-w-0">{t.team}</span>
+                                <span className="text-[9px] sm:text-xs font-medium truncate flex-1 min-w-0 text-primary underline-offset-2 hover:underline">{t.team}</span>
                                 <span className="text-[9px] sm:text-[10px] font-mono shrink-0">{t.total}</span>
                                 <Progress value={rate} className="h-1 sm:h-1.5 w-10 sm:w-16 shrink-0" />
                                 <span className={cn("text-[8px] sm:text-[9px] font-bold w-6 sm:w-7 text-right shrink-0", rate >= 70 ? "text-success" : rate >= 40 ? "text-warning" : "text-destructive")}>{rate}%</span>
                               </div>
                             );
                           })}
+                          {teamStatsByCategory.feeder.length > 5 && (
+                            <p className="text-[8px] sm:text-[9px] text-muted-foreground text-center pt-1">+ {teamStatsByCategory.feeder.length - 5} tim lainnya di tabel bawah</p>
+                          )}
                         </div>
                       </div>
                     ) : (
@@ -477,6 +492,81 @@ export default function Teams() {
                   </CardContent>
                 </Card>
               </div>
+
+              {/* Stats Sheet - Controlled */}
+              <Sheet open={!!statsSheetTeam} onOpenChange={(open) => !open && setStatsSheetTeam(null)}>
+                <SheetContent side="right" className="w-full sm:max-w-lg md:max-w-2xl p-3 sm:p-6">
+                  {statsSheetTeam && (() => {
+                    const source = statsSheetTeam.category === "ritel" ? teamStatsByCategory.ritel : teamStatsByCategory.feeder;
+                    const teamData = source.find(t => t.team === statsSheetTeam.team);
+                    if (!teamData) return null;
+                    const rate = teamData.total > 0 ? Math.round((teamData.resolved / teamData.total) * 100) : 0;
+                    const isRitel = statsSheetTeam.category === "ritel";
+                    return (
+                      <>
+                        <SheetHeader>
+                          <SheetTitle className="text-base sm:text-lg flex items-center gap-2">
+                            <Badge className={cn("text-[10px]", isRitel ? "bg-primary text-primary-foreground" : "bg-warning text-warning-foreground")}>
+                              {isRitel ? "RITEL" : "FEEDER"}
+                            </Badge>
+                            {statsSheetTeam.team}
+                          </SheetTitle>
+                          <SheetDescription className="text-xs sm:text-sm">
+                            {teamData.total} total insident • {teamData.resolved} resolved • Rate: {rate}%
+                          </SheetDescription>
+                        </SheetHeader>
+                        {/* Summary mini cards */}
+                        <div className="grid grid-cols-4 gap-2 mt-4">
+                          <div className="p-2 rounded-lg bg-muted/50 text-center">
+                            <p className="text-sm sm:text-lg font-bold">{teamData.total}</p>
+                            <p className="text-[8px] sm:text-[10px] text-muted-foreground">Total</p>
+                          </div>
+                          <div className="p-2 rounded-lg bg-success/10 text-center">
+                            <p className="text-sm sm:text-lg font-bold text-success">{teamData.resolved}</p>
+                            <p className="text-[8px] sm:text-[10px] text-muted-foreground">Resolved</p>
+                          </div>
+                          <div className="p-2 rounded-lg bg-warning/10 text-center">
+                            <p className="text-sm sm:text-lg font-bold text-warning">{teamData.pending}</p>
+                            <p className="text-[8px] sm:text-[10px] text-muted-foreground">Pending</p>
+                          </div>
+                          <div className="p-2 rounded-lg bg-destructive/10 text-center">
+                            <p className="text-sm sm:text-lg font-bold text-destructive">{teamData.critical}</p>
+                            <p className="text-[8px] sm:text-[10px] text-muted-foreground">Critical</p>
+                          </div>
+                        </div>
+                        <ScrollArea className="h-[calc(100vh-250px)] mt-4">
+                          <div className="space-y-3 pr-2">
+                            {teamData.tickets.map((ticket: any) => (
+                              <Card key={ticket.id} className="shadow-sm">
+                                <CardContent className="p-3">
+                                  <div className="space-y-2">
+                                    <div className="flex items-start justify-between gap-2">
+                                      <div className="min-w-0 flex-1">
+                                        <p className="font-bold text-xs sm:text-sm truncate">{ticket.ticketId || ticket.id}</p>
+                                        <p className="text-[10px] text-muted-foreground mt-0.5">{ticket.createdAt}{ticket.createdByName ? ` • ${ticket.createdByName}` : ""}</p>
+                                      </div>
+                                      <StatusBadge status={ticket.status} />
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-1.5 text-[10px] sm:text-xs">
+                                      <div><span className="text-muted-foreground">Customer:</span><p className="font-medium truncate">{ticket.customerName}</p></div>
+                                      <div><span className="text-muted-foreground">Service ID:</span><p className="font-medium font-mono truncate">{ticket.serviceId}</p></div>
+                                      <div><span className="text-muted-foreground">Constraint:</span><p className="font-medium truncate">{ticket.constraint}</p></div>
+                                      <div><span className="text-muted-foreground">Hostname:</span><p className="font-medium font-mono text-[9px] truncate">{ticket.hostname}</p></div>
+                                    </div>
+                                    <div className="pt-1.5 border-t">
+                                      <p className="text-[10px] font-mono p-1.5 bg-muted/50 rounded break-all">{ticket.ticketResult}</p>
+                                    </div>
+                                  </div>
+                                </CardContent>
+                              </Card>
+                            ))}
+                          </div>
+                        </ScrollArea>
+                      </>
+                    );
+                  })()}
+                </SheetContent>
+              </Sheet>
 
               {/* Team Ritel Section */}
               {teamStatsByCategory.ritel.length > 0 && (
