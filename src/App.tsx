@@ -14,44 +14,64 @@ import { UserMenu } from "@/components/UserMenu";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { useTicketNotifications } from "@/hooks/useTicketNotifications";
 import plnIconPlusLogo from "@/assets/pln-icon-plus.png";
-import Dashboard from "./pages/Dashboard";
-import TicketManagement from "./pages/TicketManagement";
-import Teams from "./pages/Teams";
-import FATList from "./pages/FATList";
-import FDTList from "./pages/FDTList";
-import OLTDeviceList from "./pages/OLTDeviceList";
-import UPEList from "./pages/UPEList";
-import BNGList from "./pages/BNGList";
-import AKVList from "./pages/AKVList";
-import Report from "./pages/Report";
-import Settings from "./pages/Settings";
-import Install from "./pages/Install";
-import Login from "./pages/Login";
-import NotFound from "./pages/NotFound";
+import React, { Suspense } from "react";
+import { Loader2 } from "lucide-react";
 
-const queryClient = new QueryClient();
+const Dashboard = React.lazy(() => import("./pages/Dashboard"));
+const TicketManagement = React.lazy(() => import("./pages/TicketManagement"));
+const Teams = React.lazy(() => import("./pages/Teams"));
+const FATList = React.lazy(() => import("./pages/FATList"));
+const FDTList = React.lazy(() => import("./pages/FDTList"));
+const OLTDeviceList = React.lazy(() => import("./pages/OLTDeviceList"));
+const UPEList = React.lazy(() => import("./pages/UPEList"));
+const BNGList = React.lazy(() => import("./pages/BNGList"));
+const AKVList = React.lazy(() => import("./pages/AKVList"));
+const Report = React.lazy(() => import("./pages/Report"));
+const Settings = React.lazy(() => import("./pages/Settings"));
+const Install = React.lazy(() => import("./pages/Install"));
+const Login = React.lazy(() => import("./pages/Login"));
+const NotFound = React.lazy(() => import("./pages/NotFound"));
+
+const PageLoader = () => (
+  <div className="flex items-center justify-center min-h-[50vh]">
+    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+  </div>
+);
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000,
+      gcTime: 10 * 60 * 1000,
+      retry: 1,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 function AnimatedRoutes() {
   const location = useLocation();
 
   return (
     <AnimatePresence mode="wait">
-      <Routes location={location} key={location.pathname}>
-        <Route path="/login" element={<PageTransition><Login /></PageTransition>} />
-        <Route path="/" element={<ProtectedRoute><PageTransition><Dashboard /></PageTransition></ProtectedRoute>} />
-        <Route path="/tickets" element={<ProtectedRoute><PageTransition><TicketManagement /></PageTransition></ProtectedRoute>} />
-        <Route path="/teams" element={<ProtectedRoute><PageTransition><Teams /></PageTransition></ProtectedRoute>} />
-        <Route path="/akv" element={<ProtectedRoute><PageTransition><AKVList /></PageTransition></ProtectedRoute>} />
-        <Route path="/fat" element={<ProtectedRoute><PageTransition><FATList /></PageTransition></ProtectedRoute>} />
-        <Route path="/fdt" element={<ProtectedRoute><PageTransition><FDTList /></PageTransition></ProtectedRoute>} />
-        <Route path="/olt" element={<ProtectedRoute><PageTransition><OLTDeviceList /></PageTransition></ProtectedRoute>} />
-        <Route path="/upe" element={<ProtectedRoute><PageTransition><UPEList /></PageTransition></ProtectedRoute>} />
-        <Route path="/bng" element={<ProtectedRoute><PageTransition><BNGList /></PageTransition></ProtectedRoute>} />
-        <Route path="/report" element={<ProtectedRoute><PageTransition><Report /></PageTransition></ProtectedRoute>} />
-        <Route path="/settings" element={<ProtectedRoute><PageTransition><Settings /></PageTransition></ProtectedRoute>} />
-        <Route path="/install" element={<ProtectedRoute><PageTransition><Install /></PageTransition></ProtectedRoute>} />
-        <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
-      </Routes>
+      <Suspense fallback={<PageLoader />}>
+        <Routes location={location} key={location.pathname}>
+          <Route path="/login" element={<PageTransition><Login /></PageTransition>} />
+          <Route path="/" element={<ProtectedRoute><PageTransition><Dashboard /></PageTransition></ProtectedRoute>} />
+          <Route path="/tickets" element={<ProtectedRoute><PageTransition><TicketManagement /></PageTransition></ProtectedRoute>} />
+          <Route path="/teams" element={<ProtectedRoute><PageTransition><Teams /></PageTransition></ProtectedRoute>} />
+          <Route path="/akv" element={<ProtectedRoute><PageTransition><AKVList /></PageTransition></ProtectedRoute>} />
+          <Route path="/fat" element={<ProtectedRoute><PageTransition><FATList /></PageTransition></ProtectedRoute>} />
+          <Route path="/fdt" element={<ProtectedRoute><PageTransition><FDTList /></PageTransition></ProtectedRoute>} />
+          <Route path="/olt" element={<ProtectedRoute><PageTransition><OLTDeviceList /></PageTransition></ProtectedRoute>} />
+          <Route path="/upe" element={<ProtectedRoute><PageTransition><UPEList /></PageTransition></ProtectedRoute>} />
+          <Route path="/bng" element={<ProtectedRoute><PageTransition><BNGList /></PageTransition></ProtectedRoute>} />
+          <Route path="/report" element={<ProtectedRoute><PageTransition><Report /></PageTransition></ProtectedRoute>} />
+          <Route path="/settings" element={<ProtectedRoute><PageTransition><Settings /></PageTransition></ProtectedRoute>} />
+          <Route path="/install" element={<ProtectedRoute><PageTransition><Install /></PageTransition></ProtectedRoute>} />
+          <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
+        </Routes>
+      </Suspense>
     </AnimatePresence>
   );
 }

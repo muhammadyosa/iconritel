@@ -20,7 +20,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { toast } from "@/hooks/use-toast";
-import * as XLSX from "xlsx";
+import type * as XLSXType from "xlsx";
 import { loadOLTData } from "@/lib/indexedDB";
 import { sanitizeForCSV } from "@/lib/validation";
 import { Link } from "react-router-dom";
@@ -63,12 +63,13 @@ const OLTDeviceList = () => {
     }));
   };
 
-  const handleExportExcel = () => {
+  const handleExportExcel = async () => {
     const exportData = buildExportData();
     if (exportData.length === 0) {
       toast({ title: "Tidak ada data", description: "Tidak ada data untuk diekspor.", variant: "destructive" });
       return;
     }
+    const XLSX = await import("xlsx");
     const ws = XLSX.utils.json_to_sheet(exportData);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "List OLT");
