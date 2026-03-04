@@ -595,7 +595,6 @@ export default function Teams() {
                             <TableHead className="text-[10px] sm:text-xs text-center text-warning">Pending</TableHead>
                             <TableHead className="text-[10px] sm:text-xs text-center text-destructive">Critical</TableHead>
                             <TableHead className="text-[10px] sm:text-xs w-[120px] sm:w-[160px]">Progress</TableHead>
-                            <TableHead className="text-[10px] sm:text-xs w-8"></TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -622,54 +621,6 @@ export default function Teams() {
                                     <Progress value={rate} className="h-2 flex-1" />
                                     <span className={cn("text-[10px] sm:text-xs font-bold min-w-[32px] text-right", rate >= 70 ? "text-success" : rate >= 40 ? "text-warning" : "text-destructive")}>{rate}%</span>
                                   </div>
-                                </TableCell>
-                                <TableCell>
-                                  <Sheet>
-                                    <SheetTrigger asChild>
-                                      <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={(e) => { e.stopPropagation(); setSelectedTeam(t.team); }}>
-                                        <Eye className="h-3.5 w-3.5" />
-                                      </Button>
-                                    </SheetTrigger>
-                                    <SheetContent side="right" className="w-full sm:max-w-lg md:max-w-2xl p-3 sm:p-6">
-                                      <SheetHeader>
-                                        <SheetTitle className="text-base sm:text-lg flex items-center gap-2">
-                                          <Badge className="bg-primary text-primary-foreground text-[10px]">RITEL</Badge>
-                                          {t.team}
-                                        </SheetTitle>
-                                        <SheetDescription className="text-xs sm:text-sm">
-                                          {t.total} total insident • {t.resolved} resolved • Rate: {rate}%
-                                        </SheetDescription>
-                                      </SheetHeader>
-                                      <ScrollArea className="h-[calc(100vh-150px)] mt-4">
-                                        <div className="space-y-3 pr-2">
-                                          {t.tickets.map((ticket: any) => (
-                                            <Card key={ticket.id} className="shadow-sm">
-                                              <CardContent className="p-3">
-                                                <div className="space-y-2">
-                                                  <div className="flex items-start justify-between gap-2">
-                                                    <div className="min-w-0 flex-1">
-                                                      <p className="font-bold text-xs sm:text-sm truncate">{ticket.ticketId || ticket.id}</p>
-                                                      <p className="text-[10px] text-muted-foreground mt-0.5">{ticket.createdAt}{ticket.createdByName ? ` • ${ticket.createdByName}` : ""}</p>
-                                                    </div>
-                                                    <StatusBadge status={ticket.status} />
-                                                  </div>
-                                                  <div className="grid grid-cols-2 gap-1.5 text-[10px] sm:text-xs">
-                                                    <div><span className="text-muted-foreground">Customer:</span><p className="font-medium truncate">{ticket.customerName}</p></div>
-                                                    <div><span className="text-muted-foreground">Service ID:</span><p className="font-medium font-mono truncate">{ticket.serviceId}</p></div>
-                                                    <div><span className="text-muted-foreground">Constraint:</span><p className="font-medium truncate">{ticket.constraint}</p></div>
-                                                    <div><span className="text-muted-foreground">Hostname:</span><p className="font-medium font-mono text-[9px] truncate">{ticket.hostname}</p></div>
-                                                  </div>
-                                                  <div className="pt-1.5 border-t">
-                                                    <p className="text-[10px] font-mono p-1.5 bg-muted/50 rounded break-all">{ticket.ticketResult}</p>
-                                                  </div>
-                                                </div>
-                                              </CardContent>
-                                            </Card>
-                                          ))}
-                                        </div>
-                                      </ScrollArea>
-                                    </SheetContent>
-                                  </Sheet>
                                 </TableCell>
                               </TableRow>
                             );
@@ -708,7 +659,6 @@ export default function Teams() {
                             <TableHead className="text-[10px] sm:text-xs text-center text-warning">Pending</TableHead>
                             <TableHead className="text-[10px] sm:text-xs text-center text-destructive">Critical</TableHead>
                             <TableHead className="text-[10px] sm:text-xs w-[120px] sm:w-[160px]">Progress</TableHead>
-                            <TableHead className="text-[10px] sm:text-xs w-8"></TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -735,59 +685,6 @@ export default function Teams() {
                                     <Progress value={rate} className="h-2 flex-1" />
                                     <span className={cn("text-[10px] sm:text-xs font-bold min-w-[32px] text-right", rate >= 70 ? "text-success" : rate >= 40 ? "text-warning" : "text-destructive")}>{rate}%</span>
                                   </div>
-                                </TableCell>
-                                <TableCell>
-                                  <Sheet>
-                                    <SheetTrigger asChild>
-                                      <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={(e) => { e.stopPropagation(); setSelectedTeam(t.team); }}>
-                                        <Eye className="h-3.5 w-3.5" />
-                                      </Button>
-                                    </SheetTrigger>
-                                    <SheetContent side="right" className="w-full sm:max-w-lg md:max-w-2xl p-3 sm:p-6">
-                                      <SheetHeader>
-                                        <SheetTitle className="text-base sm:text-lg flex items-center gap-2">
-                                          <Badge className="bg-warning text-warning-foreground text-[10px]">FEEDER</Badge>
-                                          {t.team}
-                                        </SheetTitle>
-                                        <SheetDescription className="text-xs sm:text-sm">
-                                          {t.total} total insident • {t.resolved} resolved • Rate: {rate}%
-                                        </SheetDescription>
-                                      </SheetHeader>
-                                      <ScrollArea className="h-[calc(100vh-150px)] mt-4">
-                                        <div className="space-y-3 pr-2">
-                                          {t.tickets.map((ticket: any) => (
-                                            <Card key={ticket.id} className="shadow-sm">
-                                              <CardContent className="p-3">
-                                                <div className="space-y-2">
-                                                  <div className="flex items-start justify-between gap-2">
-                                                    <div className="min-w-0 flex-1">
-                                                      <p className="font-bold text-xs sm:text-sm truncate">{ticket.ticketId || ticket.id}</p>
-                                                      <p className="text-[10px] text-muted-foreground mt-0.5">{ticket.createdAt}{ticket.createdByName ? ` • ${ticket.createdByName}` : ""}</p>
-                                                    </div>
-                                                    <StatusBadge status={ticket.status} />
-                                                  </div>
-                                                  <div className="grid grid-cols-2 gap-1.5 text-[10px] sm:text-xs">
-                                                    <div><span className="text-muted-foreground">Type:</span><p className="font-medium truncate">
-                                                      {ticket.constraint === "OLT DOWN" ? ticket.hostname :
-                                                       ticket.constraint === "PORT DOWN" ? (ticket.ticketResult.match(/PORT - (.*?) - DOWN/)?.[1] || "PORT INFO") :
-                                                       ticket.constraint === "FAT LOSS" || ticket.constraint === "FAT LOW RX" ? ticket.fatId :
-                                                       ticket.constraint}
-                                                    </p></div>
-                                                    <div><span className="text-muted-foreground">Service ID:</span><p className="font-medium font-mono truncate">{ticket.serviceId}</p></div>
-                                                    <div><span className="text-muted-foreground">Constraint:</span><p className="font-medium truncate">{ticket.constraint}</p></div>
-                                                    <div><span className="text-muted-foreground">Hostname:</span><p className="font-medium font-mono text-[9px] truncate">{ticket.hostname}</p></div>
-                                                  </div>
-                                                  <div className="pt-1.5 border-t">
-                                                    <p className="text-[10px] font-mono p-1.5 bg-muted/50 rounded break-all">{ticket.ticketResult}</p>
-                                                  </div>
-                                                </div>
-                                              </CardContent>
-                                            </Card>
-                                          ))}
-                                        </div>
-                                      </ScrollArea>
-                                    </SheetContent>
-                                  </Sheet>
                                 </TableCell>
                               </TableRow>
                             );
