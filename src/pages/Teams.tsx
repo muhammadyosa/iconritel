@@ -88,6 +88,8 @@ export default function Teams() {
   const [selectedUser, setSelectedUser] = useState<string | null>(null);
   const [statsSheetTeam, setStatsSheetTeam] = useState<{ team: string; category: "ritel" | "feeder" } | null>(null);
   const [statusSheet, setStatusSheet] = useState<{ category: "ritel" | "feeder"; status: "Resolved" | "Pending" | "Critical" } | null>(null);
+  const [nocStatusSheet, setNocStatusSheet] = useState<{ status: "Resolved" | "Pending" | "Critical" } | null>(null);
+  const [nocUserSheet, setNocUserSheet] = useState<string | null>(null);
 
   // Handle period preset change
   const handlePeriodChange = (value: string) => {
@@ -187,6 +189,12 @@ export default function Teams() {
       .map(([name, s]) => ({ name, ...s }))
       .sort((a, b) => b.total - a.total);
   }, [filteredTickets]);
+
+  const nocTotals = useMemo(() => {
+    const t = { total: 0, resolved: 0, pending: 0, critical: 0 };
+    userStats.forEach(u => { t.total += u.total; t.resolved += u.resolved; t.pending += u.pending; t.critical += u.critical; });
+    return t;
+  }, [userStats]);
 
   // Date filter component (shared)
   const dateFilter = (
@@ -826,280 +834,322 @@ export default function Teams() {
               </CardContent>
             </Card>
           ) : (
-            <div className="grid gap-4 sm:gap-6 grid-cols-1 lg:grid-cols-3">
+            <div className="space-y-6">
               {/* Summary Cards */}
-              <div className="lg:col-span-3 grid grid-cols-2 sm:grid-cols-4 gap-3">
-                <Card className="shadow-card">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <Card className="shadow-card border-l-4 border-l-primary">
                   <CardContent className="p-3 sm:p-4">
                     <p className="text-[10px] sm:text-xs text-muted-foreground">Total User Aktif</p>
                     <p className="text-lg sm:text-2xl font-bold mt-1">{userStats.length}</p>
                   </CardContent>
                 </Card>
-                <Card className="shadow-card">
+                <Card className="shadow-card border-l-4 border-l-muted-foreground">
                   <CardContent className="p-3 sm:p-4">
                     <p className="text-[10px] sm:text-xs text-muted-foreground">Total Incident</p>
-                    <p className="text-lg sm:text-2xl font-bold mt-1">{filteredTickets.length}</p>
+                    <p className="text-lg sm:text-2xl font-bold mt-1">{nocTotals.total}</p>
                   </CardContent>
                 </Card>
-                <Card className="shadow-card">
+                <Card className="shadow-card border-l-4 border-l-success">
                   <CardContent className="p-3 sm:p-4">
-                    <p className="text-[10px] sm:text-xs text-muted-foreground">Top Creator</p>
-                    <p className="text-sm sm:text-base font-bold mt-1 truncate">{userStats[0]?.name || "-"}</p>
-                    <p className="text-[10px] text-muted-foreground">{userStats[0]?.total || 0} tiket</p>
+                    <p className="text-[10px] sm:text-xs text-muted-foreground">Total Resolved</p>
+                    <p className="text-lg sm:text-2xl font-bold text-success mt-1">{nocTotals.resolved}</p>
                   </CardContent>
                 </Card>
-                <Card className="shadow-card">
+                <Card className="shadow-card border-l-4 border-l-destructive">
                   <CardContent className="p-3 sm:p-4">
-                    <p className="text-[10px] sm:text-xs text-muted-foreground">Rata-rata/User</p>
-                    <p className="text-lg sm:text-2xl font-bold mt-1">
-                      {userStats.length > 0 ? Math.round(filteredTickets.length / userStats.length) : 0}
+                    <p className="text-[10px] sm:text-xs text-muted-foreground">Resolution Rate</p>
+                    <p className="text-lg sm:text-2xl font-bold text-primary mt-1">
+                      {nocTotals.total > 0 ? Math.round((nocTotals.resolved / nocTotals.total) * 100) : 0}%
                     </p>
                   </CardContent>
                 </Card>
               </div>
 
-              {/* Bar Chart per User */}
-              <Card className="shadow-card lg:col-span-2 overflow-hidden">
-                <CardHeader className="p-3 sm:p-6">
-                  <CardTitle className="flex items-center gap-2 text-sm sm:text-base">
-                    <Monitor className="h-4 w-4 sm:h-5 sm:w-5" />
-                    Statistik Incident per User
+              {/* Statistik Incident NOC Card */}
+              <Card className="shadow-card overflow-hidden">
+                <CardHeader className="py-2.5 px-3 sm:px-4 border-b bg-accent/5">
+                  <CardTitle className="flex items-center justify-between text-xs sm:text-sm">
+                    <div className="flex items-center gap-2">
+                      <Badge className="bg-accent text-accent-foreground text-[9px] sm:text-[10px] px-1.5 sm:px-2">NOC</Badge>
+                      <span>Statistik Incident</span>
+                    </div>
+                    <span className="text-[10px] sm:text-xs text-muted-foreground font-normal">{nocTotals.total} total</span>
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="p-2 sm:p-6 pt-0">
-                  <ChartContainer config={chartConfig} className="h-[300px] sm:h-[400px] w-full">
-                    <BarChart
-                      data={userStats}
-                      layout="vertical"
-                      margin={{ top: 10, right: 20, left: 10, bottom: 10 }}
-                      barCategoryGap="20%"
-                      barGap={2}
-                      onClick={(data) => {
-                        if (data?.activePayload?.[0]?.payload?.name) {
-                          setSelectedUser(data.activePayload[0].payload.name);
-                        }
-                      }}
-                    >
-                      <CartesianGrid strokeDasharray="3 3" className="stroke-muted" horizontal={false} />
-                      <XAxis
-                        type="number"
-                        tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }}
-                        axisLine={false}
-                        tickLine={false}
-                      />
-                       <YAxis
-                        type="category"
-                        dataKey="name"
-                        tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }}
-                        axisLine={false}
-                        tickLine={false}
-                        width={80}
-                       />
-                      <ChartTooltip
-                        content={<ChartTooltipContent labelFormatter={(v) => `User: ${v}`} />}
-                      />
-                      <ChartLegend content={<ChartLegendContent />} verticalAlign="top" />
-                      <Bar dataKey="total" name="Total" fill="hsl(var(--primary))" radius={[0, 3, 3, 0]} cursor="pointer" maxBarSize={16} />
-                      <Bar dataKey="resolved" name="Resolved" fill="hsl(var(--success))" radius={[0, 3, 3, 0]} cursor="pointer" maxBarSize={16} />
-                      <Bar dataKey="pending" name="Pending" fill="hsl(var(--warning))" radius={[0, 3, 3, 0]} cursor="pointer" maxBarSize={16} />
-                      <Bar dataKey="critical" name="Critical" fill="hsl(var(--destructive))" radius={[0, 3, 3, 0]} cursor="pointer" maxBarSize={16} />
-                    </BarChart>
-                  </ChartContainer>
-                  <p className="text-[10px] sm:text-xs text-muted-foreground text-center mt-2">
-                    Klik pada bar untuk melihat detail incident user
-                  </p>
-                </CardContent>
-              </Card>
-
-              {/* Detail Panel per User */}
-              <Card className="shadow-card">
-                <CardHeader className="p-3 sm:p-6">
-                  <CardTitle className="flex items-center gap-2 text-sm sm:text-base">
-                    <Eye className="h-4 w-4 sm:h-5 sm:w-5" />
-                    <span className="truncate">{selectedUser ? `Detail: ${selectedUser}` : "Detail User"}</span>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="p-3 sm:p-6 pt-0">
+                <CardContent className="p-3 sm:p-4">
                   {(() => {
-                    const userData = userStats.find(u => u.name === selectedUser);
-                    if (!userData) {
-                      return (
-                        <div className="text-center text-muted-foreground py-6 sm:py-8">
-                          <Monitor className="h-10 w-10 sm:h-12 sm:w-12 mx-auto mb-3 sm:mb-4 opacity-50" />
-                          <p className="text-xs sm:text-sm">Klik pada grafik untuk melihat detail user</p>
-                        </div>
-                      );
-                    }
+                    const nRate = nocTotals.total > 0 ? Math.round((nocTotals.resolved / nocTotals.total) * 100) : 0;
                     return (
-                      <div className="space-y-3 sm:space-y-4">
-                        <div className="space-y-2">
-                          <div className="flex justify-between text-xs sm:text-sm">
-                            <span className="text-muted-foreground">Total Incidents:</span>
-                            <span className="font-bold">{userData.total}</span>
+                      <div className="space-y-3">
+                        {/* Status summary row */}
+                        <div className="flex items-center gap-2">
+                          <div
+                            className="flex-1 flex items-center gap-1.5 p-2 rounded-lg bg-success/10 cursor-pointer hover:bg-success/20 active:bg-success/25 transition-colors"
+                            onClick={() => setNocStatusSheet({ status: "Resolved" })}
+                          >
+                            <div className="h-2 w-2 rounded-full bg-success shrink-0" />
+                            <span className="text-[9px] sm:text-[10px] text-muted-foreground">Resolved</span>
+                            <span className="text-sm sm:text-base font-bold text-success ml-auto">{nocTotals.resolved}</span>
                           </div>
-                          <div className="flex justify-between text-xs sm:text-sm">
-                            <span className="text-success">Resolved:</span>
-                            <span className="font-medium text-success">{userData.resolved}</span>
+                          <div
+                            className="flex-1 flex items-center gap-1.5 p-2 rounded-lg bg-warning/10 cursor-pointer hover:bg-warning/20 active:bg-warning/25 transition-colors"
+                            onClick={() => setNocStatusSheet({ status: "Pending" })}
+                          >
+                            <div className="h-2 w-2 rounded-full bg-warning shrink-0" />
+                            <span className="text-[9px] sm:text-[10px] text-muted-foreground">Pending</span>
+                            <span className="text-sm sm:text-base font-bold text-warning ml-auto">{nocTotals.pending}</span>
                           </div>
-                          <div className="flex justify-between text-xs sm:text-sm">
-                            <span className="text-warning">In Progress/Pending:</span>
-                            <span className="font-medium text-warning">{userData.pending}</span>
-                          </div>
-                          <div className="flex justify-between text-xs sm:text-sm">
-                            <span className="text-destructive">Critical:</span>
-                            <span className="font-medium text-destructive">{userData.critical}</span>
-                          </div>
-                          <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t">
-                            <div className="flex justify-between text-xs sm:text-sm font-medium">
-                              <span>Resolution Rate:</span>
-                              <span className="text-primary">
-                                {userData.total > 0
-                                  ? Math.round((userData.resolved / userData.total) * 100)
-                                  : 0}%
-                              </span>
-                            </div>
+                          <div
+                            className="flex-1 flex items-center gap-1.5 p-2 rounded-lg bg-destructive/10 cursor-pointer hover:bg-destructive/20 active:bg-destructive/25 transition-colors"
+                            onClick={() => setNocStatusSheet({ status: "Critical" })}
+                          >
+                            <div className="h-2 w-2 rounded-full bg-destructive shrink-0" />
+                            <span className="text-[9px] sm:text-[10px] text-muted-foreground">Critical</span>
+                            <span className="text-sm sm:text-base font-bold text-destructive ml-auto">{nocTotals.critical}</span>
                           </div>
                         </div>
-
-                        <Sheet>
-                          <SheetTrigger asChild>
-                            <Button variant="outline" size="sm" className="w-full mt-3 sm:mt-4 text-xs sm:text-sm">
-                              <Eye className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
-                              Lihat Detail Incidents
-                            </Button>
-                          </SheetTrigger>
-                          <SheetContent side="right" className="w-full sm:max-w-lg md:max-w-2xl p-3 sm:p-6">
-                            <SheetHeader>
-                              <SheetTitle className="text-base sm:text-lg">Detail Incidents - {selectedUser}</SheetTitle>
-                              <SheetDescription className="text-xs sm:text-sm">
-                                Daftar semua incident yang dibuat oleh {selectedUser}
-                              </SheetDescription>
-                            </SheetHeader>
-                            <ScrollArea className="h-[calc(100vh-150px)] sm:h-[calc(100vh-120px)] mt-4 sm:mt-6">
-                              <div className="space-y-3 sm:space-y-4 pr-2 sm:pr-4">
-                                {userData.tickets.map((ticket: any) => (
-                                  <Card key={ticket.id} className="shadow-sm">
-                                    <CardContent className="p-3 sm:pt-4">
-                                      <div className="space-y-2 sm:space-y-3">
-                                        <div className="flex items-start justify-between gap-2">
-                                          <div className="min-w-0 flex-1">
-                                            <p className="font-bold text-xs sm:text-sm truncate">{ticket.ticketId || ticket.id}</p>
-                                            <p className="text-[10px] sm:text-xs text-muted-foreground mt-1">
-                                              {ticket.createdAt} • {ticket.serpo}
-                                            </p>
-                                          </div>
-                                          <div className="flex flex-col gap-1 flex-shrink-0">
-                                            <StatusBadge status={ticket.status} />
-                                            <Badge
-                                              variant="outline"
-                                              className={`text-[10px] sm:text-xs ${
-                                                ticket.category === "FEEDER"
-                                                  ? "bg-warning/10 text-warning border-warning/20"
-                                                  : "bg-primary/10 text-primary border-primary/20"
-                                              }`}
-                                            >
-                                              {ticket.category}
-                                            </Badge>
-                                          </div>
-                                        </div>
-
-                                        <div className="grid grid-cols-2 gap-1.5 sm:gap-2 text-[10px] sm:text-xs">
-                                          <div className="min-w-0">
-                                            <span className="text-muted-foreground">Customer:</span>
-                                            <p className="font-medium truncate">{ticket.customerName}</p>
-                                          </div>
-                                          <div className="min-w-0">
-                                            <span className="text-muted-foreground">Service ID:</span>
-                                            <p className="font-medium font-mono truncate">{ticket.serviceId}</p>
-                                          </div>
-                                          <div className="min-w-0">
-                                            <span className="text-muted-foreground">Constraint:</span>
-                                            <p className="font-medium truncate">{ticket.constraint}</p>
-                                          </div>
-                                          <div className="min-w-0">
-                                            <span className="text-muted-foreground">Serpo:</span>
-                                            <p className="font-medium truncate">{ticket.serpo}</p>
-                                          </div>
-                                          <div className="min-w-0">
-                                            <span className="text-muted-foreground">Hostname:</span>
-                                            <p className="font-medium font-mono text-[9px] sm:text-[10px] truncate">{ticket.hostname}</p>
-                                          </div>
-                                          <div className="min-w-0">
-                                            <span className="text-muted-foreground">FAT ID:</span>
-                                            <p className="font-medium font-mono truncate">{ticket.fatId}</p>
-                                          </div>
-                                          <div className="min-w-0">
-                                            <span className="text-muted-foreground">SN ONT:</span>
-                                            <p className="font-medium font-mono truncate">{ticket.snOnt}</p>
-                                          </div>
-                                          <div className="min-w-0">
-                                            <span className="text-muted-foreground">Ticket ID:</span>
-                                            <p className="font-medium font-mono truncate">{ticket.ticketId}</p>
-                                          </div>
-                                        </div>
-
-                                        <div className="pt-2 border-t">
-                                          <span className="text-[10px] sm:text-xs text-muted-foreground">Ticket Result:</span>
-                                          <p className="text-[10px] sm:text-xs font-mono mt-1 p-1.5 sm:p-2 bg-muted/50 rounded break-all">
-                                            {ticket.ticketResult}
-                                          </p>
-                                        </div>
-                                      </div>
-                                    </CardContent>
-                                  </Card>
-                                ))}
+                        {/* Resolution rate bar */}
+                        <div className="space-y-1">
+                          <div className="flex justify-between items-center">
+                            <span className="text-[9px] sm:text-[10px] text-muted-foreground">Resolution Rate</span>
+                            <span className={cn("text-xs sm:text-sm font-bold", nRate >= 70 ? "text-success" : nRate >= 40 ? "text-warning" : "text-destructive")}>{nRate}%</span>
+                          </div>
+                          <div className="h-2.5 sm:h-3 w-full rounded-full bg-muted overflow-hidden flex">
+                            {nocTotals.resolved > 0 && <div className="h-full bg-success transition-all" style={{ width: `${(nocTotals.resolved / nocTotals.total) * 100}%` }} />}
+                            {nocTotals.pending > 0 && <div className="h-full bg-warning transition-all" style={{ width: `${(nocTotals.pending / nocTotals.total) * 100}%` }} />}
+                            {nocTotals.critical > 0 && <div className="h-full bg-destructive transition-all" style={{ width: `${(nocTotals.critical / nocTotals.total) * 100}%` }} />}
+                          </div>
+                        </div>
+                        {/* Top 5 NOC users */}
+                        <div className="space-y-0.5">
+                          <div className="flex items-center justify-between pb-1 border-b border-border/50">
+                            <p className="text-[9px] sm:text-xs font-semibold text-muted-foreground">Top 5 User NOC</p>
+                            <p className="text-[8px] sm:text-[9px] text-muted-foreground">{userStats.length} user aktif</p>
+                          </div>
+                          {userStats.slice(0, 5).map((u, i) => {
+                            const rate = u.total > 0 ? Math.round((u.resolved / u.total) * 100) : 0;
+                            return (
+                              <div
+                                key={u.name}
+                                className="flex items-center gap-1.5 sm:gap-2 cursor-pointer hover:bg-accent/5 active:bg-accent/10 rounded-md px-1.5 py-1 sm:py-1.5 transition-colors"
+                                onClick={() => setNocUserSheet(u.name)}
+                              >
+                                <span className="text-[9px] sm:text-[10px] font-bold text-muted-foreground w-4 text-center shrink-0">{i + 1}</span>
+                                <span className="text-[10px] sm:text-xs font-medium truncate flex-1 min-w-0 text-primary hover:underline underline-offset-2">{u.name}</span>
+                                <Badge variant="outline" className="text-[8px] sm:text-[9px] px-1 py-0 h-4 shrink-0">{u.total}</Badge>
+                                <div className="w-12 sm:w-20 shrink-0">
+                                  <Progress value={rate} className="h-1.5 sm:h-2" />
+                                </div>
+                                <span className={cn("text-[9px] sm:text-[10px] font-bold w-7 text-right shrink-0", rate >= 70 ? "text-success" : rate >= 40 ? "text-warning" : "text-destructive")}>{rate}%</span>
                               </div>
-                            </ScrollArea>
-                          </SheetContent>
-                        </Sheet>
+                            );
+                          })}
+                          {userStats.length > 5 && (
+                            <p className="text-[8px] sm:text-[9px] text-muted-foreground text-center pt-1">+ {userStats.length - 5} user lainnya di tabel bawah</p>
+                          )}
+                        </div>
                       </div>
                     );
                   })()}
                 </CardContent>
               </Card>
 
-              {/* Table Ranking */}
-              <div className="lg:col-span-3">
-                <Card className="shadow-card">
-                  <CardHeader className="p-3 sm:p-6">
-                    <CardTitle className="flex items-center gap-2 text-sm sm:text-base">
-                      🏆 Ranking User
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="p-3 sm:p-6 pt-0">
-                    <ScrollArea className="h-[320px] sm:h-[380px]">
-                      <Table>
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead className="text-xs w-8">#</TableHead>
-                            <TableHead className="text-xs">User</TableHead>
-                            <TableHead className="text-xs text-right">Total</TableHead>
-                            <TableHead className="text-xs text-right">Resolved</TableHead>
-                            <TableHead className="text-xs text-right">Rate</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {userStats.map((u, i) => (
-                            <TableRow
-                              key={u.name}
-                              className={cn("cursor-pointer", selectedUser === u.name && "bg-muted")}
-                              onClick={() => setSelectedUser(u.name)}
-                            >
-                              <TableCell className="text-xs font-medium">{i + 1}</TableCell>
-                              <TableCell className="text-xs font-medium truncate max-w-[100px]">{u.name}</TableCell>
-                              <TableCell className="text-xs text-right font-bold">{u.total}</TableCell>
-                              <TableCell className="text-xs text-right text-success">{u.resolved}</TableCell>
-                              <TableCell className="text-xs text-right text-primary font-medium">
-                                {u.total > 0 ? Math.round((u.resolved / u.total) * 100) : 0}%
-                              </TableCell>
+              {/* NOC Status Sheet */}
+              <Sheet open={!!nocStatusSheet} onOpenChange={(open) => !open && setNocStatusSheet(null)}>
+                <SheetContent side="right" className="w-full sm:max-w-lg md:max-w-2xl p-3 sm:p-6">
+                  {nocStatusSheet && (() => {
+                    const statusFilter = nocStatusSheet.status;
+                    const matchStatus = (ticket: any) => {
+                      if (statusFilter === "Resolved") return ticket.status === "Resolved";
+                      if (statusFilter === "Critical") return ticket.status === "Critical";
+                      return ticket.status === "Pending" || ticket.status === "On Progress";
+                    };
+                    const filteredList = userStats.flatMap(u => u.tickets.filter(matchStatus));
+                    const statusColor = statusFilter === "Resolved" ? "text-success" : statusFilter === "Critical" ? "text-destructive" : "text-warning";
+                    const statusBg = statusFilter === "Resolved" ? "bg-success" : statusFilter === "Critical" ? "bg-destructive" : "bg-warning";
+                    return (
+                      <>
+                        <SheetHeader>
+                          <SheetTitle className="text-base sm:text-lg flex items-center gap-2">
+                            <Badge className={cn("text-[10px]", statusBg, "text-white")}>{statusFilter}</Badge>
+                            Incident NOC
+                          </SheetTitle>
+                          <SheetDescription className="text-xs sm:text-sm">
+                            {filteredList.length} tiket berstatus {statusFilter}
+                          </SheetDescription>
+                        </SheetHeader>
+                        <ScrollArea className="h-[calc(100vh-150px)] mt-4">
+                          <div className="space-y-3 pr-2">
+                            {filteredList.length === 0 ? (
+                              <p className="text-xs text-muted-foreground text-center py-8">Tidak ada tiket {statusFilter}</p>
+                            ) : filteredList.map((ticket: any) => (
+                              <Card key={ticket.id} className="shadow-sm">
+                                <CardContent className="p-3">
+                                  <div className="space-y-2">
+                                    <div className="flex items-start justify-between gap-2">
+                                      <div className="min-w-0 flex-1">
+                                        <p className="font-bold text-xs sm:text-sm truncate">{ticket.ticketId || ticket.id}</p>
+                                        <p className="text-[10px] text-muted-foreground mt-0.5">{ticket.createdAt}{ticket.createdByName ? ` • ${ticket.createdByName}` : ""}</p>
+                                      </div>
+                                      <StatusBadge status={ticket.status} />
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-1.5 text-[10px] sm:text-xs">
+                                      <div><span className="text-muted-foreground">Customer:</span><p className="font-medium truncate">{ticket.customerName}</p></div>
+                                      <div><span className="text-muted-foreground">Serpo:</span><p className="font-medium truncate">{ticket.serpo}</p></div>
+                                      <div><span className="text-muted-foreground">Constraint:</span><p className="font-medium truncate">{ticket.constraint}</p></div>
+                                      <div><span className="text-muted-foreground">Hostname:</span><p className="font-medium font-mono text-[9px] truncate">{ticket.hostname}</p></div>
+                                    </div>
+                                    <div className="pt-1.5 border-t">
+                                      <p className="text-[10px] font-mono p-1.5 bg-muted/50 rounded break-all">{ticket.ticketResult}</p>
+                                    </div>
+                                  </div>
+                                </CardContent>
+                              </Card>
+                            ))}
+                          </div>
+                        </ScrollArea>
+                      </>
+                    );
+                  })()}
+                </SheetContent>
+              </Sheet>
+
+              {/* NOC User Detail Sheet */}
+              <Sheet open={!!nocUserSheet} onOpenChange={(open) => !open && setNocUserSheet(null)}>
+                <SheetContent side="right" className="w-full sm:max-w-lg md:max-w-2xl p-3 sm:p-6">
+                  {nocUserSheet && (() => {
+                    const userData = userStats.find(u => u.name === nocUserSheet);
+                    if (!userData) return null;
+                    const rate = userData.total > 0 ? Math.round((userData.resolved / userData.total) * 100) : 0;
+                    return (
+                      <>
+                        <SheetHeader>
+                          <SheetTitle className="text-base sm:text-lg flex items-center gap-2">
+                            <Badge className="bg-accent text-accent-foreground text-[10px]">NOC</Badge>
+                            {nocUserSheet}
+                          </SheetTitle>
+                          <SheetDescription className="text-xs sm:text-sm">
+                            {userData.total} total insident • {userData.resolved} resolved • Rate: {rate}%
+                          </SheetDescription>
+                        </SheetHeader>
+                        <div className="grid grid-cols-4 gap-2 mt-4">
+                          <div className="p-2 rounded-lg bg-muted/50 text-center">
+                            <p className="text-sm sm:text-lg font-bold">{userData.total}</p>
+                            <p className="text-[8px] sm:text-[10px] text-muted-foreground">Total</p>
+                          </div>
+                          <div className="p-2 rounded-lg bg-success/10 text-center">
+                            <p className="text-sm sm:text-lg font-bold text-success">{userData.resolved}</p>
+                            <p className="text-[8px] sm:text-[10px] text-muted-foreground">Resolved</p>
+                          </div>
+                          <div className="p-2 rounded-lg bg-warning/10 text-center">
+                            <p className="text-sm sm:text-lg font-bold text-warning">{userData.pending}</p>
+                            <p className="text-[8px] sm:text-[10px] text-muted-foreground">Pending</p>
+                          </div>
+                          <div className="p-2 rounded-lg bg-destructive/10 text-center">
+                            <p className="text-sm sm:text-lg font-bold text-destructive">{userData.critical}</p>
+                            <p className="text-[8px] sm:text-[10px] text-muted-foreground">Critical</p>
+                          </div>
+                        </div>
+                        <ScrollArea className="h-[calc(100vh-280px)] mt-4">
+                          <div className="space-y-3 pr-2">
+                            {userData.tickets.map((ticket: any) => (
+                              <Card key={ticket.id} className="shadow-sm">
+                                <CardContent className="p-3">
+                                  <div className="space-y-2">
+                                    <div className="flex items-start justify-between gap-2">
+                                      <div className="min-w-0 flex-1">
+                                        <p className="font-bold text-xs sm:text-sm truncate">{ticket.ticketId || ticket.id}</p>
+                                        <p className="text-[10px] text-muted-foreground mt-0.5">{ticket.createdAt} • {ticket.serpo}</p>
+                                      </div>
+                                      <div className="flex flex-col gap-1 shrink-0">
+                                        <StatusBadge status={ticket.status} />
+                                        <Badge variant="outline" className={cn("text-[10px]", ticket.category === "FEEDER" ? "bg-warning/10 text-warning border-warning/20" : "bg-primary/10 text-primary border-primary/20")}>{ticket.category}</Badge>
+                                      </div>
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-1.5 text-[10px] sm:text-xs">
+                                      <div><span className="text-muted-foreground">Customer:</span><p className="font-medium truncate">{ticket.customerName}</p></div>
+                                      <div><span className="text-muted-foreground">Service ID:</span><p className="font-medium font-mono truncate">{ticket.serviceId}</p></div>
+                                      <div><span className="text-muted-foreground">Constraint:</span><p className="font-medium truncate">{ticket.constraint}</p></div>
+                                      <div><span className="text-muted-foreground">Hostname:</span><p className="font-medium font-mono text-[9px] truncate">{ticket.hostname}</p></div>
+                                    </div>
+                                    <div className="pt-1.5 border-t">
+                                      <p className="text-[10px] font-mono p-1.5 bg-muted/50 rounded break-all">{ticket.ticketResult}</p>
+                                    </div>
+                                  </div>
+                                </CardContent>
+                              </Card>
+                            ))}
+                          </div>
+                        </ScrollArea>
+                      </>
+                    );
+                  })()}
+                </SheetContent>
+              </Sheet>
+
+              {/* Full Table - User NOC */}
+              <Card className="shadow-card overflow-hidden">
+                <CardHeader className="py-3 px-4 border-b bg-accent/5">
+                  <CardTitle className="flex items-center justify-between text-sm sm:text-base">
+                    <div className="flex items-center gap-2">
+                      <Badge className="bg-accent text-accent-foreground text-[10px] px-2">NOC</Badge>
+                      <span>Ranking User NOC</span>
+                      <Badge variant="secondary" className="text-[10px]">{userStats.length} user</Badge>
+                    </div>
+                    <span className="text-xs text-muted-foreground font-normal">
+                      {nocTotals.total} insident • {nocTotals.resolved} resolved
+                    </span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-0">
+                  <div className="overflow-x-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
+                    <div className="min-w-[560px]">
+                      <ScrollArea className={userStats.length > 8 ? "h-[420px]" : ""}>
+                        <Table>
+                          <TableHeader className="sticky top-0 z-10 bg-background">
+                            <TableRow className="bg-muted/30">
+                              <TableHead className="text-[10px] sm:text-xs w-8">#</TableHead>
+                              <TableHead className="text-[10px] sm:text-xs">Nama User</TableHead>
+                              <TableHead className="text-[10px] sm:text-xs text-center w-14">Total</TableHead>
+                              <TableHead className="text-[10px] sm:text-xs text-center text-success w-16">Resolved</TableHead>
+                              <TableHead className="text-[10px] sm:text-xs text-center text-warning w-16">Pending</TableHead>
+                              <TableHead className="text-[10px] sm:text-xs text-center text-destructive w-16">Critical</TableHead>
+                              <TableHead className="text-[10px] sm:text-xs w-[120px] sm:w-[160px]">Progress</TableHead>
                             </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
-                    </ScrollArea>
-                  </CardContent>
-                </Card>
-              </div>
+                          </TableHeader>
+                          <TableBody>
+                            {userStats.map((u, i) => {
+                              const rate = u.total > 0 ? Math.round((u.resolved / u.total) * 100) : 0;
+                              return (
+                                <TableRow
+                                  key={u.name}
+                                  className="cursor-pointer transition-colors hover:bg-accent/5"
+                                  onClick={() => setNocUserSheet(u.name)}
+                                >
+                                  <TableCell className="text-xs font-medium text-muted-foreground py-2">{i + 1}</TableCell>
+                                  <TableCell className="py-2">
+                                    <span className="text-xs sm:text-sm font-semibold truncate block max-w-[140px] sm:max-w-[200px]">{u.name}</span>
+                                  </TableCell>
+                                  <TableCell className="text-center text-xs sm:text-sm font-bold py-2">{u.total}</TableCell>
+                                  <TableCell className="text-center text-xs sm:text-sm font-medium text-success py-2">{u.resolved}</TableCell>
+                                  <TableCell className="text-center text-xs sm:text-sm font-medium text-warning py-2">{u.pending}</TableCell>
+                                  <TableCell className="text-center text-xs sm:text-sm font-medium text-destructive py-2">{u.critical}</TableCell>
+                                  <TableCell className="py-2">
+                                    <div className="flex items-center gap-2">
+                                      <Progress value={rate} className="h-2 flex-1" />
+                                      <span className={cn("text-[10px] sm:text-xs font-bold min-w-[32px] text-right", rate >= 70 ? "text-success" : rate >= 40 ? "text-warning" : "text-destructive")}>{rate}%</span>
+                                    </div>
+                                  </TableCell>
+                                </TableRow>
+                              );
+                            })}
+                          </TableBody>
+                        </Table>
+                      </ScrollArea>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
           )}
         </TabsContent>
