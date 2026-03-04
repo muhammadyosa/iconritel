@@ -342,75 +342,83 @@ export default function Teams() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
                 {/* Ritel Incident Stats */}
                 <Card className="shadow-card overflow-hidden">
-                  <CardHeader className="py-2 sm:py-3 px-3 sm:px-4 border-b bg-primary/5">
-                    <CardTitle className="flex items-center gap-2 text-xs sm:text-sm">
-                      <Badge className="bg-primary text-primary-foreground text-[9px] sm:text-[10px] px-1.5 sm:px-2">RITEL</Badge>
-                      Statistik Incident Ritel
+                  <CardHeader className="py-2.5 px-3 sm:px-4 border-b bg-primary/5">
+                    <CardTitle className="flex items-center justify-between text-xs sm:text-sm">
+                      <div className="flex items-center gap-2">
+                        <Badge className="bg-primary text-primary-foreground text-[9px] sm:text-[10px] px-1.5 sm:px-2">RITEL</Badge>
+                        <span>Statistik Incident</span>
+                      </div>
+                      <span className="text-[10px] sm:text-xs text-muted-foreground font-normal">{teamStatsByCategory.ritelTotal} total</span>
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="p-3 sm:p-4">
-                    {teamStatsByCategory.ritel.length > 0 ? (
-                      <div className="space-y-3 sm:space-y-4">
-                        <div className="grid grid-cols-3 gap-1.5 sm:gap-2 text-center">
-                          <div className="p-1.5 sm:p-2 rounded-lg bg-success/10">
-                            <p className="text-base sm:text-xl font-bold text-success">{teamStatsByCategory.ritelResolved}</p>
-                            <p className="text-[8px] sm:text-[10px] text-muted-foreground">Resolved</p>
+                    {teamStatsByCategory.ritel.length > 0 ? (() => {
+                      const rPending = teamStatsByCategory.ritelTotal - teamStatsByCategory.ritelResolved - teamStatsByCategory.ritel.reduce((s, t) => s + t.critical, 0);
+                      const rCritical = teamStatsByCategory.ritel.reduce((s, t) => s + t.critical, 0);
+                      const rRate = teamStatsByCategory.ritelTotal > 0 ? Math.round((teamStatsByCategory.ritelResolved / teamStatsByCategory.ritelTotal) * 100) : 0;
+                      return (
+                        <div className="space-y-3">
+                          {/* Status summary row */}
+                          <div className="flex items-center gap-2">
+                            <div className="flex-1 flex items-center gap-1.5 p-2 rounded-lg bg-success/10">
+                              <div className="h-2 w-2 rounded-full bg-success shrink-0" />
+                              <span className="text-[9px] sm:text-[10px] text-muted-foreground">Resolved</span>
+                              <span className="text-sm sm:text-base font-bold text-success ml-auto">{teamStatsByCategory.ritelResolved}</span>
+                            </div>
+                            <div className="flex-1 flex items-center gap-1.5 p-2 rounded-lg bg-warning/10">
+                              <div className="h-2 w-2 rounded-full bg-warning shrink-0" />
+                              <span className="text-[9px] sm:text-[10px] text-muted-foreground">Pending</span>
+                              <span className="text-sm sm:text-base font-bold text-warning ml-auto">{rPending}</span>
+                            </div>
+                            <div className="flex-1 flex items-center gap-1.5 p-2 rounded-lg bg-destructive/10">
+                              <div className="h-2 w-2 rounded-full bg-destructive shrink-0" />
+                              <span className="text-[9px] sm:text-[10px] text-muted-foreground">Critical</span>
+                              <span className="text-sm sm:text-base font-bold text-destructive ml-auto">{rCritical}</span>
+                            </div>
                           </div>
-                          <div className="p-1.5 sm:p-2 rounded-lg bg-warning/10">
-                            <p className="text-base sm:text-xl font-bold text-warning">{teamStatsByCategory.ritelTotal - teamStatsByCategory.ritelResolved - teamStatsByCategory.ritel.reduce((s, t) => s + t.critical, 0)}</p>
-                            <p className="text-[8px] sm:text-[10px] text-muted-foreground">Pending</p>
+                          {/* Resolution rate bar */}
+                          <div className="space-y-1">
+                            <div className="flex justify-between items-center">
+                              <span className="text-[9px] sm:text-[10px] text-muted-foreground">Resolution Rate</span>
+                              <span className={cn("text-xs sm:text-sm font-bold", rRate >= 70 ? "text-success" : rRate >= 40 ? "text-warning" : "text-destructive")}>{rRate}%</span>
+                            </div>
+                            <div className="h-2.5 sm:h-3 w-full rounded-full bg-muted overflow-hidden flex">
+                              {teamStatsByCategory.ritelResolved > 0 && <div className="h-full bg-success transition-all" style={{ width: `${(teamStatsByCategory.ritelResolved / teamStatsByCategory.ritelTotal) * 100}%` }} />}
+                              {rPending > 0 && <div className="h-full bg-warning transition-all" style={{ width: `${(rPending / teamStatsByCategory.ritelTotal) * 100}%` }} />}
+                              {rCritical > 0 && <div className="h-full bg-destructive transition-all" style={{ width: `${(rCritical / teamStatsByCategory.ritelTotal) * 100}%` }} />}
+                            </div>
                           </div>
-                          <div className="p-1.5 sm:p-2 rounded-lg bg-destructive/10">
-                            <p className="text-base sm:text-xl font-bold text-destructive">{teamStatsByCategory.ritel.reduce((s, t) => s + t.critical, 0)}</p>
-                            <p className="text-[8px] sm:text-[10px] text-muted-foreground">Critical</p>
+                          {/* Top 5 Ritel teams */}
+                          <div className="space-y-0.5">
+                            <div className="flex items-center justify-between pb-1 border-b border-border/50">
+                              <p className="text-[9px] sm:text-xs font-semibold text-muted-foreground">Top 5 Tim Ritel</p>
+                              <p className="text-[8px] sm:text-[9px] text-muted-foreground">{teamStatsByCategory.ritel.length} tim aktif</p>
+                            </div>
+                            {teamStatsByCategory.ritel.slice(0, 5).map((t, i) => {
+                              const rate = t.total > 0 ? Math.round((t.resolved / t.total) * 100) : 0;
+                              return (
+                                <div
+                                  key={t.team}
+                                  className="flex items-center gap-1.5 sm:gap-2 cursor-pointer hover:bg-primary/5 active:bg-primary/10 rounded-md px-1.5 py-1 sm:py-1.5 transition-colors"
+                                  onClick={() => setStatsSheetTeam({ team: t.team, category: "ritel" })}
+                                >
+                                  <span className="text-[9px] sm:text-[10px] font-bold text-muted-foreground w-4 text-center shrink-0">{i + 1}</span>
+                                  <span className="text-[10px] sm:text-xs font-medium truncate flex-1 min-w-0 text-primary hover:underline underline-offset-2">{t.team}</span>
+                                  <Badge variant="outline" className="text-[8px] sm:text-[9px] px-1 py-0 h-4 shrink-0">{t.total}</Badge>
+                                  <div className="w-12 sm:w-20 shrink-0">
+                                    <Progress value={rate} className="h-1.5 sm:h-2" />
+                                  </div>
+                                  <span className={cn("text-[9px] sm:text-[10px] font-bold w-7 text-right shrink-0", rate >= 70 ? "text-success" : rate >= 40 ? "text-warning" : "text-destructive")}>{rate}%</span>
+                                </div>
+                              );
+                            })}
+                            {teamStatsByCategory.ritel.length > 5 && (
+                              <p className="text-[8px] sm:text-[9px] text-muted-foreground text-center pt-1">+ {teamStatsByCategory.ritel.length - 5} tim lainnya di tabel bawah</p>
+                            )}
                           </div>
                         </div>
-                        <ChartContainer config={chartConfig} className="h-[140px] sm:h-[180px] w-full">
-                          <PieChart>
-                            <Pie
-                              data={[
-                                { name: "Resolved", value: teamStatsByCategory.ritelResolved, fill: "hsl(var(--success))" },
-                                { name: "Pending", value: teamStatsByCategory.ritelTotal - teamStatsByCategory.ritelResolved - teamStatsByCategory.ritel.reduce((s, t) => s + t.critical, 0), fill: "hsl(var(--warning))" },
-                                { name: "Critical", value: teamStatsByCategory.ritel.reduce((s, t) => s + t.critical, 0), fill: "hsl(var(--destructive))" },
-                              ].filter(d => d.value > 0)}
-                              cx="50%"
-                              cy="50%"
-                              innerRadius={30}
-                              outerRadius={55}
-                              paddingAngle={3}
-                              dataKey="value"
-                              label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                              fontSize={10}
-                            >
-                            </Pie>
-                            <ChartTooltip content={<ChartTooltipContent />} />
-                          </PieChart>
-                        </ChartContainer>
-                        {/* Top 5 Ritel teams mini ranking */}
-                        <div className="space-y-1 sm:space-y-1.5">
-                          <p className="text-[9px] sm:text-xs font-semibold text-muted-foreground">Top 5 Tim Ritel</p>
-                          {teamStatsByCategory.ritel.slice(0, 5).map((t, i) => {
-                            const rate = t.total > 0 ? Math.round((t.resolved / t.total) * 100) : 0;
-                            return (
-                              <div
-                                key={t.team}
-                                className="flex items-center gap-1.5 sm:gap-2 cursor-pointer hover:bg-primary/5 rounded-md px-1 py-0.5 transition-colors"
-                                onClick={() => setStatsSheetTeam({ team: t.team, category: "ritel" })}
-                              >
-                                <span className="text-[9px] sm:text-[10px] font-bold text-muted-foreground w-3 sm:w-4">{i + 1}</span>
-                                <span className="text-[9px] sm:text-xs font-medium truncate flex-1 min-w-0 text-primary underline-offset-2 hover:underline">{t.team}</span>
-                                <span className="text-[9px] sm:text-[10px] font-mono shrink-0">{t.total}</span>
-                                <Progress value={rate} className="h-1 sm:h-1.5 w-10 sm:w-16 shrink-0" />
-                                <span className={cn("text-[8px] sm:text-[9px] font-bold w-6 sm:w-7 text-right shrink-0", rate >= 70 ? "text-success" : rate >= 40 ? "text-warning" : "text-destructive")}>{rate}%</span>
-                              </div>
-                            );
-                          })}
-                          {teamStatsByCategory.ritel.length > 5 && (
-                            <p className="text-[8px] sm:text-[9px] text-muted-foreground text-center pt-1">+ {teamStatsByCategory.ritel.length - 5} tim lainnya di tabel bawah</p>
-                          )}
-                        </div>
-                      </div>
-                    ) : (
+                      );
+                    })() : (
                       <p className="text-xs text-muted-foreground text-center py-6">Belum ada data Ritel</p>
                     )}
                   </CardContent>
@@ -418,75 +426,83 @@ export default function Teams() {
 
                 {/* Serpo/Feeder Incident Stats */}
                 <Card className="shadow-card overflow-hidden">
-                  <CardHeader className="py-2 sm:py-3 px-3 sm:px-4 border-b bg-warning/5">
-                    <CardTitle className="flex items-center gap-2 text-xs sm:text-sm">
-                      <Badge className="bg-warning text-warning-foreground text-[9px] sm:text-[10px] px-1.5 sm:px-2">FEEDER</Badge>
-                      Statistik Incident Serpo
+                  <CardHeader className="py-2.5 px-3 sm:px-4 border-b bg-warning/5">
+                    <CardTitle className="flex items-center justify-between text-xs sm:text-sm">
+                      <div className="flex items-center gap-2">
+                        <Badge className="bg-warning text-warning-foreground text-[9px] sm:text-[10px] px-1.5 sm:px-2">FEEDER</Badge>
+                        <span>Statistik Incident</span>
+                      </div>
+                      <span className="text-[10px] sm:text-xs text-muted-foreground font-normal">{teamStatsByCategory.feederTotal} total</span>
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="p-3 sm:p-4">
-                    {teamStatsByCategory.feeder.length > 0 ? (
-                      <div className="space-y-3 sm:space-y-4">
-                        <div className="grid grid-cols-3 gap-1.5 sm:gap-2 text-center">
-                          <div className="p-1.5 sm:p-2 rounded-lg bg-success/10">
-                            <p className="text-base sm:text-xl font-bold text-success">{teamStatsByCategory.feederResolved}</p>
-                            <p className="text-[8px] sm:text-[10px] text-muted-foreground">Resolved</p>
+                    {teamStatsByCategory.feeder.length > 0 ? (() => {
+                      const fPending = teamStatsByCategory.feederTotal - teamStatsByCategory.feederResolved - teamStatsByCategory.feeder.reduce((s, t) => s + t.critical, 0);
+                      const fCritical = teamStatsByCategory.feeder.reduce((s, t) => s + t.critical, 0);
+                      const fRate = teamStatsByCategory.feederTotal > 0 ? Math.round((teamStatsByCategory.feederResolved / teamStatsByCategory.feederTotal) * 100) : 0;
+                      return (
+                        <div className="space-y-3">
+                          {/* Status summary row */}
+                          <div className="flex items-center gap-2">
+                            <div className="flex-1 flex items-center gap-1.5 p-2 rounded-lg bg-success/10">
+                              <div className="h-2 w-2 rounded-full bg-success shrink-0" />
+                              <span className="text-[9px] sm:text-[10px] text-muted-foreground">Resolved</span>
+                              <span className="text-sm sm:text-base font-bold text-success ml-auto">{teamStatsByCategory.feederResolved}</span>
+                            </div>
+                            <div className="flex-1 flex items-center gap-1.5 p-2 rounded-lg bg-warning/10">
+                              <div className="h-2 w-2 rounded-full bg-warning shrink-0" />
+                              <span className="text-[9px] sm:text-[10px] text-muted-foreground">Pending</span>
+                              <span className="text-sm sm:text-base font-bold text-warning ml-auto">{fPending}</span>
+                            </div>
+                            <div className="flex-1 flex items-center gap-1.5 p-2 rounded-lg bg-destructive/10">
+                              <div className="h-2 w-2 rounded-full bg-destructive shrink-0" />
+                              <span className="text-[9px] sm:text-[10px] text-muted-foreground">Critical</span>
+                              <span className="text-sm sm:text-base font-bold text-destructive ml-auto">{fCritical}</span>
+                            </div>
                           </div>
-                          <div className="p-1.5 sm:p-2 rounded-lg bg-warning/10">
-                            <p className="text-base sm:text-xl font-bold text-warning">{teamStatsByCategory.feederTotal - teamStatsByCategory.feederResolved - teamStatsByCategory.feeder.reduce((s, t) => s + t.critical, 0)}</p>
-                            <p className="text-[8px] sm:text-[10px] text-muted-foreground">Pending</p>
+                          {/* Resolution rate bar */}
+                          <div className="space-y-1">
+                            <div className="flex justify-between items-center">
+                              <span className="text-[9px] sm:text-[10px] text-muted-foreground">Resolution Rate</span>
+                              <span className={cn("text-xs sm:text-sm font-bold", fRate >= 70 ? "text-success" : fRate >= 40 ? "text-warning" : "text-destructive")}>{fRate}%</span>
+                            </div>
+                            <div className="h-2.5 sm:h-3 w-full rounded-full bg-muted overflow-hidden flex">
+                              {teamStatsByCategory.feederResolved > 0 && <div className="h-full bg-success transition-all" style={{ width: `${(teamStatsByCategory.feederResolved / teamStatsByCategory.feederTotal) * 100}%` }} />}
+                              {fPending > 0 && <div className="h-full bg-warning transition-all" style={{ width: `${(fPending / teamStatsByCategory.feederTotal) * 100}%` }} />}
+                              {fCritical > 0 && <div className="h-full bg-destructive transition-all" style={{ width: `${(fCritical / teamStatsByCategory.feederTotal) * 100}%` }} />}
+                            </div>
                           </div>
-                          <div className="p-1.5 sm:p-2 rounded-lg bg-destructive/10">
-                            <p className="text-base sm:text-xl font-bold text-destructive">{teamStatsByCategory.feeder.reduce((s, t) => s + t.critical, 0)}</p>
-                            <p className="text-[8px] sm:text-[10px] text-muted-foreground">Critical</p>
+                          {/* Top 5 Serpo teams */}
+                          <div className="space-y-0.5">
+                            <div className="flex items-center justify-between pb-1 border-b border-border/50">
+                              <p className="text-[9px] sm:text-xs font-semibold text-muted-foreground">Top 5 Tim Serpo</p>
+                              <p className="text-[8px] sm:text-[9px] text-muted-foreground">{teamStatsByCategory.feeder.length} tim aktif</p>
+                            </div>
+                            {teamStatsByCategory.feeder.slice(0, 5).map((t, i) => {
+                              const rate = t.total > 0 ? Math.round((t.resolved / t.total) * 100) : 0;
+                              return (
+                                <div
+                                  key={t.team}
+                                  className="flex items-center gap-1.5 sm:gap-2 cursor-pointer hover:bg-warning/5 active:bg-warning/10 rounded-md px-1.5 py-1 sm:py-1.5 transition-colors"
+                                  onClick={() => setStatsSheetTeam({ team: t.team, category: "feeder" })}
+                                >
+                                  <span className="text-[9px] sm:text-[10px] font-bold text-muted-foreground w-4 text-center shrink-0">{i + 1}</span>
+                                  <span className="text-[10px] sm:text-xs font-medium truncate flex-1 min-w-0 text-primary hover:underline underline-offset-2">{t.team}</span>
+                                  <Badge variant="outline" className="text-[8px] sm:text-[9px] px-1 py-0 h-4 shrink-0">{t.total}</Badge>
+                                  <div className="w-12 sm:w-20 shrink-0">
+                                    <Progress value={rate} className="h-1.5 sm:h-2" />
+                                  </div>
+                                  <span className={cn("text-[9px] sm:text-[10px] font-bold w-7 text-right shrink-0", rate >= 70 ? "text-success" : rate >= 40 ? "text-warning" : "text-destructive")}>{rate}%</span>
+                                </div>
+                              );
+                            })}
+                            {teamStatsByCategory.feeder.length > 5 && (
+                              <p className="text-[8px] sm:text-[9px] text-muted-foreground text-center pt-1">+ {teamStatsByCategory.feeder.length - 5} tim lainnya di tabel bawah</p>
+                            )}
                           </div>
                         </div>
-                        <ChartContainer config={chartConfig} className="h-[140px] sm:h-[180px] w-full">
-                          <PieChart>
-                            <Pie
-                              data={[
-                                { name: "Resolved", value: teamStatsByCategory.feederResolved, fill: "hsl(var(--success))" },
-                                { name: "Pending", value: teamStatsByCategory.feederTotal - teamStatsByCategory.feederResolved - teamStatsByCategory.feeder.reduce((s, t) => s + t.critical, 0), fill: "hsl(var(--warning))" },
-                                { name: "Critical", value: teamStatsByCategory.feeder.reduce((s, t) => s + t.critical, 0), fill: "hsl(var(--destructive))" },
-                              ].filter(d => d.value > 0)}
-                              cx="50%"
-                              cy="50%"
-                              innerRadius={30}
-                              outerRadius={55}
-                              paddingAngle={3}
-                              dataKey="value"
-                              label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                              fontSize={10}
-                            >
-                            </Pie>
-                            <ChartTooltip content={<ChartTooltipContent />} />
-                          </PieChart>
-                        </ChartContainer>
-                        {/* Top 5 Serpo teams mini ranking */}
-                        <div className="space-y-1 sm:space-y-1.5">
-                          <p className="text-[9px] sm:text-xs font-semibold text-muted-foreground">Top 5 Tim Serpo</p>
-                          {teamStatsByCategory.feeder.slice(0, 5).map((t, i) => {
-                            const rate = t.total > 0 ? Math.round((t.resolved / t.total) * 100) : 0;
-                            return (
-                              <div
-                                key={t.team}
-                                className="flex items-center gap-1.5 sm:gap-2 cursor-pointer hover:bg-warning/5 rounded-md px-1 py-0.5 transition-colors"
-                                onClick={() => setStatsSheetTeam({ team: t.team, category: "feeder" })}
-                              >
-                                <span className="text-[9px] sm:text-[10px] font-bold text-muted-foreground w-3 sm:w-4">{i + 1}</span>
-                                <span className="text-[9px] sm:text-xs font-medium truncate flex-1 min-w-0 text-primary underline-offset-2 hover:underline">{t.team}</span>
-                                <span className="text-[9px] sm:text-[10px] font-mono shrink-0">{t.total}</span>
-                                <Progress value={rate} className="h-1 sm:h-1.5 w-10 sm:w-16 shrink-0" />
-                                <span className={cn("text-[8px] sm:text-[9px] font-bold w-6 sm:w-7 text-right shrink-0", rate >= 70 ? "text-success" : rate >= 40 ? "text-warning" : "text-destructive")}>{rate}%</span>
-                              </div>
-                            );
-                          })}
-                          {teamStatsByCategory.feeder.length > 5 && (
-                            <p className="text-[8px] sm:text-[9px] text-muted-foreground text-center pt-1">+ {teamStatsByCategory.feeder.length - 5} tim lainnya di tabel bawah</p>
-                          )}
-                        </div>
-                      </div>
-                    ) : (
+                      );
+                    })() : (
                       <p className="text-xs text-muted-foreground text-center py-6">Belum ada data Serpo</p>
                     )}
                   </CardContent>
