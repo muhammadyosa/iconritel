@@ -256,7 +256,7 @@ export function MonthlyAnalytics({ tickets }: MonthlyAnalyticsProps) {
       doc.setTextColor(30, 64, 144);
       doc.setFontSize(11);
       doc.setFont("helvetica", "bold");
-      doc.text("Tiket per Kategori", margin, y);
+      doc.text("Incident Category", margin, y);
       y += 3;
 
       if (categoryData.length > 0) {
@@ -283,7 +283,7 @@ export function MonthlyAnalytics({ tickets }: MonthlyAnalyticsProps) {
       doc.setTextColor(30, 64, 144);
       doc.setFontSize(11);
       doc.setFont("helvetica", "bold");
-      doc.text("Tren Harian & SLA", margin, y);
+      doc.text("Daily Trends & SLA", margin, y);
       y += 3;
 
       const trendRows = dailyTrend.filter((d) => d.total > 0);
@@ -460,7 +460,7 @@ export function MonthlyAnalytics({ tickets }: MonthlyAnalyticsProps) {
              <div className="flex items-center justify-between gap-2">
               <CardTitle className="flex items-center gap-1.5 text-xs sm:text-sm">
                 <BarChart3 className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary" />
-                Tiket per Kategori
+                Incident Category
               </CardTitle>
               <input
                 type="date"
@@ -511,7 +511,7 @@ export function MonthlyAnalytics({ tickets }: MonthlyAnalyticsProps) {
             <div className="flex items-center justify-between gap-2">
               <CardTitle className="flex items-center gap-1.5 text-xs sm:text-sm">
                 <TrendingUp className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary" />
-                Tren Harian & SLA Compliance
+                Daily Trends & SLA Compliance
               </CardTitle>
               <Select value={trendDays.toString()} onValueChange={(v) => setTrendDays(Number(v))}>
                 <SelectTrigger className="w-[90px] h-7 text-[10px]">
