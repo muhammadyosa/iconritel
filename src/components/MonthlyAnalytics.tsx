@@ -49,6 +49,7 @@ export function MonthlyAnalytics({ tickets }: MonthlyAnalyticsProps) {
   });
 
   const [trendDays, setTrendDays] = useState<number>(7);
+  const [categoryDays, setCategoryDays] = useState<number>(7);
 
   // Drill-down state
   const [drillOpen, setDrillOpen] = useState(false);
@@ -105,14 +106,20 @@ export function MonthlyAnalytics({ tickets }: MonthlyAnalyticsProps) {
   const selectedMonthLabel = monthOptions.find((o) => o.value === selectedMonth)?.label || selectedMonth;
 
   const categoryData = useMemo(() => {
+    const now = new Date();
+    const cutoff = new Date(now);
+    cutoff.setDate(cutoff.getDate() - categoryDays);
+    cutoff.setHours(0, 0, 0, 0);
+
+    const filtered = tickets.filter((t) => new Date(t.createdISO) >= cutoff);
     const map = new Map<string, number>();
-    tickets.forEach((t) => {
+    filtered.forEach((t) => {
       map.set(t.constraint, (map.get(t.constraint) || 0) + 1);
     });
     return Array.from(map.entries())
       .map(([name, value]) => ({ name, value }))
       .sort((a, b) => b.value - a.value);
-  }, [tickets]);
+  }, [tickets, categoryDays]);
 
   const dailyTrend = useMemo(() => {
     const today = new Date();
@@ -151,10 +158,14 @@ export function MonthlyAnalytics({ tickets }: MonthlyAnalyticsProps) {
   const handleCategoryClick = (data: any) => {
     if (data?.activePayload?.[0]?.payload?.name) {
       const constraint = data.activePayload[0].payload.name;
-      const filtered = tickets.filter((t) => t.constraint === constraint);
+      const now = new Date();
+      const cutoff = new Date(now);
+      cutoff.setDate(cutoff.getDate() - categoryDays);
+      cutoff.setHours(0, 0, 0, 0);
+      const filtered = tickets.filter((t) => t.constraint === constraint && new Date(t.createdISO) >= cutoff);
       setDrillSelectedTicket(null);
       setDrillTickets(filtered);
-      setDrillTitle(`📊 ${constraint} — ${filtered.length} tiket`);
+      setDrillTitle(`📊 ${constraint} — ${filtered.length} tiket (${categoryDays} hari)`);
       setDrillOpen(true);
     }
   };
@@ -446,10 +457,22 @@ export function MonthlyAnalytics({ tickets }: MonthlyAnalyticsProps) {
         {/* Category Breakdown */}
         <Card className="overflow-hidden border">
           <CardHeader className="py-2 px-3 sm:px-4 border-b bg-muted/20">
-            <CardTitle className="flex items-center gap-1.5 text-xs sm:text-sm">
-              <BarChart3 className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary" />
-              Tiket per Kategori
-            </CardTitle>
+            <div className="flex items-center justify-between gap-2">
+              <CardTitle className="flex items-center gap-1.5 text-xs sm:text-sm">
+                <BarChart3 className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary" />
+                Tiket per Kategori
+              </CardTitle>
+              <Select value={categoryDays.toString()} onValueChange={(v) => setCategoryDays(Number(v))}>
+                <SelectTrigger className="w-[90px] h-7 text-[10px]">
+                  <SelectValue placeholder="Rentang" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="7">7 Hari</SelectItem>
+                  <SelectItem value="14">14 Hari</SelectItem>
+                  <SelectItem value="30">30 Hari</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </CardHeader>
           <CardContent className="p-2 sm:p-3">
             {categoryData.length === 0 ? (
