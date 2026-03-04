@@ -20,7 +20,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { toast } from "@/hooks/use-toast";
-import * as XLSX from "xlsx";
+import type * as XLSXType from "xlsx";
 import { FAT } from "@/types/fat";
 import { loadFATData } from "@/lib/indexedDB";
 import { sanitizeForCSV } from "@/lib/validation";
@@ -64,12 +64,13 @@ const FATList = () => {
     }));
   };
 
-  const handleExportExcel = () => {
+  const handleExportExcel = async () => {
     const exportData = buildExportData();
     if (exportData.length === 0) {
       toast({ title: "Tidak ada data", description: "Tidak ada data untuk diekspor.", variant: "destructive" });
       return;
     }
+    const XLSX = await import("xlsx");
     const ws = XLSX.utils.json_to_sheet(exportData);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "List FAT");
