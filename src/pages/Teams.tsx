@@ -687,50 +687,52 @@ export default function Teams() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="p-0">
-                    <ScrollArea className={teamStatsByCategory.ritel.length > 5 ? "h-[420px]" : ""}>
-                      <Table>
-                        <TableHeader>
-                          <TableRow className="bg-muted/30">
-                            <TableHead className="text-[10px] sm:text-xs w-8">#</TableHead>
-                            <TableHead className="text-[10px] sm:text-xs">Nama Tim</TableHead>
-                            <TableHead className="text-[10px] sm:text-xs text-center">Total</TableHead>
-                            <TableHead className="text-[10px] sm:text-xs text-center text-success">Resolved</TableHead>
-                            <TableHead className="text-[10px] sm:text-xs text-center text-warning">Pending</TableHead>
-                            <TableHead className="text-[10px] sm:text-xs text-center text-destructive">Critical</TableHead>
-                            <TableHead className="text-[10px] sm:text-xs w-[120px] sm:w-[160px]">Progress</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {teamStatsByCategory.ritel.map((t, i) => {
-                            const rate = t.total > 0 ? Math.round((t.resolved / t.total) * 100) : 0;
-                            return (
-                              <TableRow
-                                key={t.team}
-                                className={cn("cursor-pointer transition-colors hover:bg-primary/5", selectedTeam === t.team && "bg-primary/5")}
-                                onClick={() => setStatsSheetTeam({ team: t.team, category: "ritel" })}
-                              >
-                                <TableCell className="text-xs font-medium text-muted-foreground">{i + 1}</TableCell>
-                                <TableCell>
-                                  <div className="flex flex-col">
-                                    <span className="text-xs sm:text-sm font-semibold truncate max-w-[120px] sm:max-w-[200px]">{t.team}</span>
-                                  </div>
-                                </TableCell>
-                                <TableCell className="text-center text-xs sm:text-sm font-bold">{t.total}</TableCell>
-                                <TableCell className="text-center text-xs sm:text-sm font-medium text-success">{t.resolved}</TableCell>
-                                <TableCell className="text-center text-xs sm:text-sm font-medium text-warning">{t.pending}</TableCell>
-                                <TableCell className="text-center text-xs sm:text-sm font-medium text-destructive">{t.critical}</TableCell>
-                                <TableCell>
-                                  <div className="flex items-center gap-2">
-                                    <Progress value={rate} className="h-2 flex-1" />
-                                    <span className={cn("text-[10px] sm:text-xs font-bold min-w-[32px] text-right", rate >= 70 ? "text-success" : rate >= 40 ? "text-warning" : "text-destructive")}>{rate}%</span>
-                                  </div>
-                                </TableCell>
+                    <div className="overflow-x-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
+                      <div className="min-w-[560px]">
+                        <ScrollArea className={teamStatsByCategory.ritel.length > 5 ? "h-[420px]" : ""}>
+                          <Table>
+                            <TableHeader className="sticky top-0 z-10 bg-background">
+                              <TableRow className="bg-muted/30">
+                                <TableHead className="text-[10px] sm:text-xs w-8">#</TableHead>
+                                <TableHead className="text-[10px] sm:text-xs">Nama Tim</TableHead>
+                                <TableHead className="text-[10px] sm:text-xs text-center w-14">Total</TableHead>
+                                <TableHead className="text-[10px] sm:text-xs text-center text-success w-16">Resolved</TableHead>
+                                <TableHead className="text-[10px] sm:text-xs text-center text-warning w-16">Pending</TableHead>
+                                <TableHead className="text-[10px] sm:text-xs text-center text-destructive w-16">Critical</TableHead>
+                                <TableHead className="text-[10px] sm:text-xs w-[120px] sm:w-[160px]">Progress</TableHead>
                               </TableRow>
-                            );
-                          })}
-                        </TableBody>
-                      </Table>
-                    </ScrollArea>
+                            </TableHeader>
+                            <TableBody>
+                              {teamStatsByCategory.ritel.map((t, i) => {
+                                const rate = t.total > 0 ? Math.round((t.resolved / t.total) * 100) : 0;
+                                return (
+                                  <TableRow
+                                    key={t.team}
+                                    className={cn("cursor-pointer transition-colors hover:bg-primary/5", selectedTeam === t.team && "bg-primary/5")}
+                                    onClick={() => setStatsSheetTeam({ team: t.team, category: "ritel" })}
+                                  >
+                                    <TableCell className="text-xs font-medium text-muted-foreground py-2">{i + 1}</TableCell>
+                                    <TableCell className="py-2">
+                                      <span className="text-xs sm:text-sm font-semibold truncate block max-w-[140px] sm:max-w-[200px]">{t.team}</span>
+                                    </TableCell>
+                                    <TableCell className="text-center text-xs sm:text-sm font-bold py-2">{t.total}</TableCell>
+                                    <TableCell className="text-center text-xs sm:text-sm font-medium text-success py-2">{t.resolved}</TableCell>
+                                    <TableCell className="text-center text-xs sm:text-sm font-medium text-warning py-2">{t.pending}</TableCell>
+                                    <TableCell className="text-center text-xs sm:text-sm font-medium text-destructive py-2">{t.critical}</TableCell>
+                                    <TableCell className="py-2">
+                                      <div className="flex items-center gap-2">
+                                        <Progress value={rate} className="h-2 flex-1" />
+                                        <span className={cn("text-[10px] sm:text-xs font-bold min-w-[32px] text-right", rate >= 70 ? "text-success" : rate >= 40 ? "text-warning" : "text-destructive")}>{rate}%</span>
+                                      </div>
+                                    </TableCell>
+                                  </TableRow>
+                                );
+                              })}
+                            </TableBody>
+                          </Table>
+                        </ScrollArea>
+                      </div>
+                    </div>
                   </CardContent>
                 </Card>
               )}
@@ -751,50 +753,52 @@ export default function Teams() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="p-0">
-                    <ScrollArea className={teamStatsByCategory.feeder.length > 5 ? "h-[420px]" : ""}>
-                      <Table>
-                        <TableHeader>
-                          <TableRow className="bg-muted/30">
-                            <TableHead className="text-[10px] sm:text-xs w-8">#</TableHead>
-                            <TableHead className="text-[10px] sm:text-xs">Nama Tim</TableHead>
-                            <TableHead className="text-[10px] sm:text-xs text-center">Total</TableHead>
-                            <TableHead className="text-[10px] sm:text-xs text-center text-success">Resolved</TableHead>
-                            <TableHead className="text-[10px] sm:text-xs text-center text-warning">Pending</TableHead>
-                            <TableHead className="text-[10px] sm:text-xs text-center text-destructive">Critical</TableHead>
-                            <TableHead className="text-[10px] sm:text-xs w-[120px] sm:w-[160px]">Progress</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {teamStatsByCategory.feeder.map((t, i) => {
-                            const rate = t.total > 0 ? Math.round((t.resolved / t.total) * 100) : 0;
-                            return (
-                              <TableRow
-                                key={t.team}
-                                className={cn("cursor-pointer transition-colors hover:bg-warning/5", selectedTeam === t.team && "bg-warning/5")}
-                                onClick={() => setStatsSheetTeam({ team: t.team, category: "feeder" })}
-                              >
-                                <TableCell className="text-xs font-medium text-muted-foreground">{i + 1}</TableCell>
-                                <TableCell>
-                                  <div className="flex flex-col">
-                                    <span className="text-xs sm:text-sm font-semibold truncate max-w-[120px] sm:max-w-[200px]">{t.team}</span>
-                                  </div>
-                                </TableCell>
-                                <TableCell className="text-center text-xs sm:text-sm font-bold">{t.total}</TableCell>
-                                <TableCell className="text-center text-xs sm:text-sm font-medium text-success">{t.resolved}</TableCell>
-                                <TableCell className="text-center text-xs sm:text-sm font-medium text-warning">{t.pending}</TableCell>
-                                <TableCell className="text-center text-xs sm:text-sm font-medium text-destructive">{t.critical}</TableCell>
-                                <TableCell>
-                                  <div className="flex items-center gap-2">
-                                    <Progress value={rate} className="h-2 flex-1" />
-                                    <span className={cn("text-[10px] sm:text-xs font-bold min-w-[32px] text-right", rate >= 70 ? "text-success" : rate >= 40 ? "text-warning" : "text-destructive")}>{rate}%</span>
-                                  </div>
-                                </TableCell>
+                    <div className="overflow-x-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
+                      <div className="min-w-[560px]">
+                        <ScrollArea className={teamStatsByCategory.feeder.length > 5 ? "h-[420px]" : ""}>
+                          <Table>
+                            <TableHeader className="sticky top-0 z-10 bg-background">
+                              <TableRow className="bg-muted/30">
+                                <TableHead className="text-[10px] sm:text-xs w-8">#</TableHead>
+                                <TableHead className="text-[10px] sm:text-xs">Nama Tim</TableHead>
+                                <TableHead className="text-[10px] sm:text-xs text-center w-14">Total</TableHead>
+                                <TableHead className="text-[10px] sm:text-xs text-center text-success w-16">Resolved</TableHead>
+                                <TableHead className="text-[10px] sm:text-xs text-center text-warning w-16">Pending</TableHead>
+                                <TableHead className="text-[10px] sm:text-xs text-center text-destructive w-16">Critical</TableHead>
+                                <TableHead className="text-[10px] sm:text-xs w-[120px] sm:w-[160px]">Progress</TableHead>
                               </TableRow>
-                            );
-                          })}
-                        </TableBody>
-                      </Table>
-                    </ScrollArea>
+                            </TableHeader>
+                            <TableBody>
+                              {teamStatsByCategory.feeder.map((t, i) => {
+                                const rate = t.total > 0 ? Math.round((t.resolved / t.total) * 100) : 0;
+                                return (
+                                  <TableRow
+                                    key={t.team}
+                                    className={cn("cursor-pointer transition-colors hover:bg-warning/5", selectedTeam === t.team && "bg-warning/5")}
+                                    onClick={() => setStatsSheetTeam({ team: t.team, category: "feeder" })}
+                                  >
+                                    <TableCell className="text-xs font-medium text-muted-foreground py-2">{i + 1}</TableCell>
+                                    <TableCell className="py-2">
+                                      <span className="text-xs sm:text-sm font-semibold truncate block max-w-[140px] sm:max-w-[200px]">{t.team}</span>
+                                    </TableCell>
+                                    <TableCell className="text-center text-xs sm:text-sm font-bold py-2">{t.total}</TableCell>
+                                    <TableCell className="text-center text-xs sm:text-sm font-medium text-success py-2">{t.resolved}</TableCell>
+                                    <TableCell className="text-center text-xs sm:text-sm font-medium text-warning py-2">{t.pending}</TableCell>
+                                    <TableCell className="text-center text-xs sm:text-sm font-medium text-destructive py-2">{t.critical}</TableCell>
+                                    <TableCell className="py-2">
+                                      <div className="flex items-center gap-2">
+                                        <Progress value={rate} className="h-2 flex-1" />
+                                        <span className={cn("text-[10px] sm:text-xs font-bold min-w-[32px] text-right", rate >= 70 ? "text-success" : rate >= 40 ? "text-warning" : "text-destructive")}>{rate}%</span>
+                                      </div>
+                                    </TableCell>
+                                  </TableRow>
+                                );
+                              })}
+                            </TableBody>
+                          </Table>
+                        </ScrollArea>
+                      </div>
+                    </div>
                   </CardContent>
                 </Card>
               )}
