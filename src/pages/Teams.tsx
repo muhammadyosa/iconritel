@@ -87,6 +87,7 @@ export default function Teams() {
   const [activeTab, setActiveTab] = useState("team-stats");
   const [selectedUser, setSelectedUser] = useState<string | null>(null);
   const [statsSheetTeam, setStatsSheetTeam] = useState<{ team: string; category: "ritel" | "feeder" } | null>(null);
+  const [statusSheet, setStatusSheet] = useState<{ category: "ritel" | "feeder"; status: "Resolved" | "Pending" | "Critical" } | null>(null);
 
   // Handle period preset change
   const handlePeriodChange = (value: string) => {
@@ -360,17 +361,26 @@ export default function Teams() {
                         <div className="space-y-3">
                           {/* Status summary row */}
                           <div className="flex items-center gap-2">
-                            <div className="flex-1 flex items-center gap-1.5 p-2 rounded-lg bg-success/10">
+                            <div
+                              className="flex-1 flex items-center gap-1.5 p-2 rounded-lg bg-success/10 cursor-pointer hover:bg-success/20 active:bg-success/25 transition-colors"
+                              onClick={() => setStatusSheet({ category: "ritel", status: "Resolved" })}
+                            >
                               <div className="h-2 w-2 rounded-full bg-success shrink-0" />
                               <span className="text-[9px] sm:text-[10px] text-muted-foreground">Resolved</span>
                               <span className="text-sm sm:text-base font-bold text-success ml-auto">{teamStatsByCategory.ritelResolved}</span>
                             </div>
-                            <div className="flex-1 flex items-center gap-1.5 p-2 rounded-lg bg-warning/10">
+                            <div
+                              className="flex-1 flex items-center gap-1.5 p-2 rounded-lg bg-warning/10 cursor-pointer hover:bg-warning/20 active:bg-warning/25 transition-colors"
+                              onClick={() => setStatusSheet({ category: "ritel", status: "Pending" })}
+                            >
                               <div className="h-2 w-2 rounded-full bg-warning shrink-0" />
                               <span className="text-[9px] sm:text-[10px] text-muted-foreground">Pending</span>
                               <span className="text-sm sm:text-base font-bold text-warning ml-auto">{rPending}</span>
                             </div>
-                            <div className="flex-1 flex items-center gap-1.5 p-2 rounded-lg bg-destructive/10">
+                            <div
+                              className="flex-1 flex items-center gap-1.5 p-2 rounded-lg bg-destructive/10 cursor-pointer hover:bg-destructive/20 active:bg-destructive/25 transition-colors"
+                              onClick={() => setStatusSheet({ category: "ritel", status: "Critical" })}
+                            >
                               <div className="h-2 w-2 rounded-full bg-destructive shrink-0" />
                               <span className="text-[9px] sm:text-[10px] text-muted-foreground">Critical</span>
                               <span className="text-sm sm:text-base font-bold text-destructive ml-auto">{rCritical}</span>
@@ -444,17 +454,26 @@ export default function Teams() {
                         <div className="space-y-3">
                           {/* Status summary row */}
                           <div className="flex items-center gap-2">
-                            <div className="flex-1 flex items-center gap-1.5 p-2 rounded-lg bg-success/10">
+                            <div
+                              className="flex-1 flex items-center gap-1.5 p-2 rounded-lg bg-success/10 cursor-pointer hover:bg-success/20 active:bg-success/25 transition-colors"
+                              onClick={() => setStatusSheet({ category: "feeder", status: "Resolved" })}
+                            >
                               <div className="h-2 w-2 rounded-full bg-success shrink-0" />
                               <span className="text-[9px] sm:text-[10px] text-muted-foreground">Resolved</span>
                               <span className="text-sm sm:text-base font-bold text-success ml-auto">{teamStatsByCategory.feederResolved}</span>
                             </div>
-                            <div className="flex-1 flex items-center gap-1.5 p-2 rounded-lg bg-warning/10">
+                            <div
+                              className="flex-1 flex items-center gap-1.5 p-2 rounded-lg bg-warning/10 cursor-pointer hover:bg-warning/20 active:bg-warning/25 transition-colors"
+                              onClick={() => setStatusSheet({ category: "feeder", status: "Pending" })}
+                            >
                               <div className="h-2 w-2 rounded-full bg-warning shrink-0" />
                               <span className="text-[9px] sm:text-[10px] text-muted-foreground">Pending</span>
                               <span className="text-sm sm:text-base font-bold text-warning ml-auto">{fPending}</span>
                             </div>
-                            <div className="flex-1 flex items-center gap-1.5 p-2 rounded-lg bg-destructive/10">
+                            <div
+                              className="flex-1 flex items-center gap-1.5 p-2 rounded-lg bg-destructive/10 cursor-pointer hover:bg-destructive/20 active:bg-destructive/25 transition-colors"
+                              onClick={() => setStatusSheet({ category: "feeder", status: "Critical" })}
+                            >
                               <div className="h-2 w-2 rounded-full bg-destructive shrink-0" />
                               <span className="text-[9px] sm:text-[10px] text-muted-foreground">Critical</span>
                               <span className="text-sm sm:text-base font-bold text-destructive ml-auto">{fCritical}</span>
@@ -560,6 +579,74 @@ export default function Teams() {
                                       <div className="min-w-0 flex-1">
                                         <p className="font-bold text-xs sm:text-sm truncate">{ticket.ticketId || ticket.id}</p>
                                         <p className="text-[10px] text-muted-foreground mt-0.5">{ticket.createdAt}{ticket.createdByName ? ` • ${ticket.createdByName}` : ""}</p>
+                                      </div>
+                                      <StatusBadge status={ticket.status} />
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-1.5 text-[10px] sm:text-xs">
+                                      <div><span className="text-muted-foreground">Customer:</span><p className="font-medium truncate">{ticket.customerName}</p></div>
+                                      <div><span className="text-muted-foreground">Service ID:</span><p className="font-medium font-mono truncate">{ticket.serviceId}</p></div>
+                                      <div><span className="text-muted-foreground">Constraint:</span><p className="font-medium truncate">{ticket.constraint}</p></div>
+                                      <div><span className="text-muted-foreground">Hostname:</span><p className="font-medium font-mono text-[9px] truncate">{ticket.hostname}</p></div>
+                                    </div>
+                                    <div className="pt-1.5 border-t">
+                                      <p className="text-[10px] font-mono p-1.5 bg-muted/50 rounded break-all">{ticket.ticketResult}</p>
+                                    </div>
+                                  </div>
+                                </CardContent>
+                              </Card>
+                            ))}
+                          </div>
+                        </ScrollArea>
+                      </>
+                    );
+                  })()}
+                </SheetContent>
+              </Sheet>
+
+              {/* Status Filter Sheet */}
+              <Sheet open={!!statusSheet} onOpenChange={(open) => !open && setStatusSheet(null)}>
+                <SheetContent side="right" className="w-full sm:max-w-lg md:max-w-2xl p-3 sm:p-6">
+                  {statusSheet && (() => {
+                    const isRitel = statusSheet.category === "ritel";
+                    const source = isRitel ? teamStatsByCategory.ritel : teamStatsByCategory.feeder;
+                    const statusFilter = statusSheet.status;
+                    const matchStatus = (ticket: any) => {
+                      if (statusFilter === "Resolved") return ticket.status === "Resolved";
+                      if (statusFilter === "Critical") return ticket.status === "Critical";
+                      return ticket.status === "Pending" || ticket.status === "On Progress";
+                    };
+                    const filteredList = source.flatMap(t => t.tickets.filter(matchStatus));
+                    const statusColor = statusFilter === "Resolved" ? "text-success" : statusFilter === "Critical" ? "text-destructive" : "text-warning";
+                    const statusBg = statusFilter === "Resolved" ? "bg-success" : statusFilter === "Critical" ? "bg-destructive" : "bg-warning";
+                    return (
+                      <>
+                        <SheetHeader>
+                          <SheetTitle className="text-base sm:text-lg flex items-center gap-2">
+                            <Badge className={cn("text-[10px]", isRitel ? "bg-primary text-primary-foreground" : "bg-warning text-warning-foreground")}>
+                              {isRitel ? "RITEL" : "FEEDER"}
+                            </Badge>
+                            <div className={cn("h-2.5 w-2.5 rounded-full", statusBg)} />
+                            Tiket {statusFilter}
+                          </SheetTitle>
+                          <SheetDescription className="text-xs sm:text-sm">
+                            {filteredList.length} tiket dengan status {statusFilter}
+                          </SheetDescription>
+                        </SheetHeader>
+                        <ScrollArea className="h-[calc(100vh-150px)] mt-4">
+                          <div className="space-y-3 pr-2">
+                            {filteredList.length === 0 ? (
+                              <p className="text-sm text-muted-foreground text-center py-8">Tidak ada tiket {statusFilter}</p>
+                            ) : filteredList.map((ticket: any) => (
+                              <Card key={ticket.id} className="shadow-sm">
+                                <CardContent className="p-3">
+                                  <div className="space-y-2">
+                                    <div className="flex items-start justify-between gap-2">
+                                      <div className="min-w-0 flex-1">
+                                        <p className="font-bold text-xs sm:text-sm truncate">{ticket.ticketId || ticket.id}</p>
+                                        <p className="text-[10px] text-muted-foreground mt-0.5">
+                                          {ticket.createdAt}{ticket.createdByName ? ` • ${ticket.createdByName}` : ""}
+                                          {ticket.serpo ? ` • ${ticket.serpo}` : ""}
+                                        </p>
                                       </div>
                                       <StatusBadge status={ticket.status} />
                                     </div>
