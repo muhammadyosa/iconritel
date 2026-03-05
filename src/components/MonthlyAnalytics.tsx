@@ -49,7 +49,8 @@ export function MonthlyAnalytics({ tickets }: MonthlyAnalyticsProps) {
   });
 
   const [trendDays, setTrendDays] = useState<number>(7);
-  const [categoryDate, setCategoryDate] = useState<string>(() => {
+  const [categoryFilter, setCategoryFilter] = useState<string>("today");
+  const [categoryCustomDate, setCategoryCustomDate] = useState<string>(() => {
     return new Date().toISOString().split('T')[0];
   });
 
@@ -107,19 +108,33 @@ export function MonthlyAnalytics({ tickets }: MonthlyAnalyticsProps) {
 
   const selectedMonthLabel = monthOptions.find((o) => o.value === selectedMonth)?.label || selectedMonth;
 
+  const categoryFilteredTickets = useMemo(() => {
+    const today = new Date();
+    if (categoryFilter === "all") return tickets;
+    if (categoryFilter === "custom") {
+      return tickets.filter((t) => new Date(t.createdISO).toISOString().split('T')[0] === categoryCustomDate);
+    }
+    if (categoryFilter === "today") {
+      const todayStr = today.toISOString().split('T')[0];
+      return tickets.filter((t) => new Date(t.createdISO).toISOString().split('T')[0] === todayStr);
+    }
+    // 7, 14, 30 days
+    const days = Number(categoryFilter);
+    const start = new Date(today);
+    start.setDate(start.getDate() - days + 1);
+    start.setHours(0, 0, 0, 0);
+    return tickets.filter((t) => new Date(t.createdISO) >= start);
+  }, [tickets, categoryFilter, categoryCustomDate]);
+
   const categoryData = useMemo(() => {
-    const filtered = tickets.filter((t) => {
-      const tDate = new Date(t.createdISO).toISOString().split('T')[0];
-      return tDate === categoryDate;
-    });
     const map = new Map<string, number>();
-    filtered.forEach((t) => {
+    categoryFilteredTickets.forEach((t) => {
       map.set(t.constraint, (map.get(t.constraint) || 0) + 1);
     });
     return Array.from(map.entries())
       .map(([name, value]) => ({ name, value }))
       .sort((a, b) => b.value - a.value);
-  }, [tickets, categoryDate]);
+  }, [categoryFilteredTickets]);
 
   const dailyTrend = useMemo(() => {
     const today = new Date();
@@ -158,14 +173,11 @@ export function MonthlyAnalytics({ tickets }: MonthlyAnalyticsProps) {
   const handleCategoryClick = (data: any) => {
     if (data?.activePayload?.[0]?.payload?.name) {
       const constraint = data.activePayload[0].payload.name;
-      const filtered = tickets.filter((t) => {
-        const tDate = new Date(t.createdISO).toISOString().split('T')[0];
-        return t.constraint === constraint && tDate === categoryDate;
-      });
+      const filtered = categoryFilteredTickets.filter((t) => t.constraint === constraint);
       setDrillSelectedTicket(null);
       setDrillTickets(filtered);
-      const displayDate = new Date(categoryDate).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
-      setDrillTitle(`📊 ${constraint} — ${filtered.length} tiket (${displayDate})`);
+      const filterLabel = categoryFilter === "all" ? "Semua Data" : categoryFilter === "custom" ? categoryCustomDate : categoryFilter === "today" ? "Hari ini" : `${categoryFilter} Hari`;
+      setDrillTitle(`📊 ${constraint} — ${filtered.length} tiket (${filterLabel})`);
       setDrillOpen(true);
     }
   };
@@ -462,12 +474,29 @@ export function MonthlyAnalytics({ tickets }: MonthlyAnalyticsProps) {
                 <BarChart3 className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary" />
                 Incident Category
               </CardTitle>
-              <input
-                type="date"
-                value={categoryDate}
-                onChange={(e) => setCategoryDate(e.target.value)}
-                className="h-7 text-[10px] sm:text-xs px-2 rounded-md border border-input bg-background"
-              />
+              <div className="flex items-center gap-1.5">
+                <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                  <SelectTrigger className="w-[100px] sm:w-[120px] h-7 text-[10px] sm:text-xs">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="today">Hari ini</SelectItem>
+                    <SelectItem value="all">Semua Data</SelectItem>
+                    <SelectItem value="7">7 Hari</SelectItem>
+                    <SelectItem value="14">14 Hari</SelectItem>
+                    <SelectItem value="30">30 Hari</SelectItem>
+                    <SelectItem value="custom">Custom</SelectItem>
+                  </SelectContent>
+                </Select>
+                {categoryFilter === "custom" && (
+                  <input
+                    type="date"
+                    value={categoryCustomDate}
+                    onChange={(e) => setCategoryCustomDate(e.target.value)}
+                    className="h-7 text-[10px] sm:text-xs px-2 rounded-md border border-input bg-background"
+                  />
+                )}
+              </div>
             </div>
           </CardHeader>
           <CardContent className="p-2 sm:p-3">
