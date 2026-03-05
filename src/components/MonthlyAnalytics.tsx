@@ -48,7 +48,10 @@ export function MonthlyAnalytics({ tickets }: MonthlyAnalyticsProps) {
     return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
   });
 
-  const [trendDays, setTrendDays] = useState<number>(7);
+  const [trendFilter, setTrendFilter] = useState<string>("7");
+  const [trendCustomDate, setTrendCustomDate] = useState<string>(() => {
+    return new Date().toISOString().split('T')[0];
+  });
   const [categoryFilter, setCategoryFilter] = useState<string>("today");
   const [categoryCustomDate, setCategoryCustomDate] = useState<string>(() => {
     return new Date().toISOString().split('T')[0];
@@ -140,7 +143,34 @@ export function MonthlyAnalytics({ tickets }: MonthlyAnalyticsProps) {
     const today = new Date();
     const data: { day: string; isoDate: string; dayNum: number; total: number; resolved: number; slaOk: number }[] = [];
     
-    for (let i = trendDays - 1; i >= 0; i--) {
+    let days: number;
+    if (trendFilter === "all") {
+      // Find earliest ticket date
+      const earliest = tickets.reduce((min, t) => {
+        const d = new Date(t.createdISO);
+        return d < min ? d : min;
+      }, today);
+      days = Math.max(1, Math.ceil((today.getTime() - earliest.getTime()) / (1000 * 60 * 60 * 24)) + 1);
+    } else if (trendFilter === "custom") {
+      // Show just the custom date
+      const customD = new Date(trendCustomDate);
+      const isoDate = trendCustomDate;
+      const displayDay = customD.toLocaleDateString('id-ID', { day: '2-digit', month: 'short' });
+      const dayTickets = tickets.filter((t) => new Date(t.createdISO).toISOString().split('T')[0] === isoDate);
+      const resolvedDay = dayTickets.filter((t) => t.status === "Resolved");
+      const slaOk = resolvedDay.filter((t) => {
+        if (t.resolvedAt) {
+          const ms = new Date(t.resolvedAt).getTime() - new Date(t.createdISO).getTime();
+          return ms <= 24 * 60 * 60 * 1000;
+        }
+        return false;
+      }).length;
+      return [{ day: displayDay, isoDate, dayNum: customD.getDate(), total: dayTickets.length, resolved: resolvedDay.length, slaOk }];
+    } else {
+      days = Number(trendFilter);
+    }
+
+    for (let i = days - 1; i >= 0; i--) {
       const date = new Date(today);
       date.setDate(date.getDate() - i);
       const isoDate = date.toISOString().split('T')[0];
@@ -161,7 +191,7 @@ export function MonthlyAnalytics({ tickets }: MonthlyAnalyticsProps) {
       data.push({ day: displayDay, isoDate, dayNum: date.getDate(), total: dayTickets.length, resolved: resolvedDay.length, slaOk });
     }
     return data;
-  }, [tickets, trendDays]);
+  }, [tickets, trendFilter, trendCustomDate]);
 
   const trendConfig: ChartConfig = {
     total: { label: "Total", color: "hsl(var(--primary))" },
@@ -542,16 +572,28 @@ export function MonthlyAnalytics({ tickets }: MonthlyAnalyticsProps) {
                 <TrendingUp className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary" />
                 Daily Trends & SLA Compliance
               </CardTitle>
-              <Select value={trendDays.toString()} onValueChange={(v) => setTrendDays(Number(v))}>
-                <SelectTrigger className="w-[90px] h-7 text-[10px]">
-                  <SelectValue placeholder="Rentang" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="7">7 Hari</SelectItem>
-                  <SelectItem value="14">14 Hari</SelectItem>
-                  <SelectItem value="30">30 Hari</SelectItem>
-                </SelectContent>
-              </Select>
+              <div className="flex items-center gap-1.5">
+                <Select value={trendFilter} onValueChange={setTrendFilter}>
+                  <SelectTrigger className="w-[100px] sm:w-[120px] h-7 text-[10px] sm:text-xs">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Semua Data</SelectItem>
+                    <SelectItem value="7">7 Hari</SelectItem>
+                    <SelectItem value="14">14 Hari</SelectItem>
+                    <SelectItem value="30">30 Hari</SelectItem>
+                    <SelectItem value="custom">Custom</SelectItem>
+                  </SelectContent>
+                </Select>
+                {trendFilter === "custom" && (
+                  <input
+                    type="date"
+                    value={trendCustomDate}
+                    onChange={(e) => setTrendCustomDate(e.target.value)}
+                    className="h-7 text-[10px] sm:text-xs px-2 rounded-md border border-input bg-background"
+                  />
+                )}
+              </div>
             </div>
           </CardHeader>
           <CardContent className="p-2 sm:p-3">
@@ -566,7 +608,7 @@ export function MonthlyAnalytics({ tickets }: MonthlyAnalyticsProps) {
                     onClick={handleTrendDotClick}
                   >
                     <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                    <XAxis dataKey="day" tick={{ fontSize: 8, fill: "hsl(var(--muted-foreground))" }} tickLine={false} axisLine={false} interval={trendDays > 14 ? 3 : trendDays > 7 ? 1 : 0} />
+                    <XAxis dataKey="day" tick={{ fontSize: 8, fill: "hsl(var(--muted-foreground))" }} tickLine={false} axisLine={false} interval={dailyTrend.length > 14 ? 3 : dailyTrend.length > 7 ? 1 : 0} />
                     <YAxis tick={{ fontSize: 9, fill: "hsl(var(--muted-foreground))" }} width={25} tickLine={false} axisLine={false} />
                     <ChartTooltip content={<ChartTooltipContent />} />
                     <Line type="monotone" dataKey="total" stroke="var(--color-total)" strokeWidth={2} dot={{ r: 2, cursor: "pointer" }} activeDot={{ r: 5, cursor: "pointer" }} />
