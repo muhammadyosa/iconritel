@@ -241,6 +241,56 @@ export default function Teams() {
   }, [filteredTickets]);
 
 
+  // Category Trend for RITEL tickets
+  const ritelCategoryTrend = useMemo(() => {
+    const ritelTickets = filteredTickets.filter(t => t.category !== "FEEDER");
+    const dateMap: Record<string, Record<string, number>> = {};
+    const categories = new Set<string>();
+    ritelTickets.forEach((ticket) => {
+      const date = ticket.createdISO?.split("T")[0];
+      if (!date) return;
+      const cat = ticket.constraint || "Lainnya";
+      categories.add(cat);
+      if (!dateMap[date]) dateMap[date] = {};
+      dateMap[date][cat] = (dateMap[date][cat] || 0) + 1;
+    });
+    const sortedDates = Object.keys(dateMap).sort();
+    const catList = Array.from(categories).sort();
+    const data = sortedDates.map((date) => {
+      const entry: Record<string, any> = { date: format(new Date(date + "T00:00:00"), "dd MMM", { locale: localeId }) };
+      catList.forEach((cat) => { entry[cat] = dateMap[date][cat] || 0; });
+      return entry;
+    });
+    const config: ChartConfig = {};
+    catList.forEach((cat, i) => { config[cat] = { label: cat, color: NOC_CATEGORY_COLORS[i % NOC_CATEGORY_COLORS.length] }; });
+    return { data, categories: catList, config };
+  }, [filteredTickets]);
+
+  // Category Trend for FEEDER tickets
+  const feederCategoryTrend = useMemo(() => {
+    const feederTickets = filteredTickets.filter(t => t.category === "FEEDER");
+    const dateMap: Record<string, Record<string, number>> = {};
+    const categories = new Set<string>();
+    feederTickets.forEach((ticket) => {
+      const date = ticket.createdISO?.split("T")[0];
+      if (!date) return;
+      const cat = ticket.constraint || "Lainnya";
+      categories.add(cat);
+      if (!dateMap[date]) dateMap[date] = {};
+      dateMap[date][cat] = (dateMap[date][cat] || 0) + 1;
+    });
+    const sortedDates = Object.keys(dateMap).sort();
+    const catList = Array.from(categories).sort();
+    const data = sortedDates.map((date) => {
+      const entry: Record<string, any> = { date: format(new Date(date + "T00:00:00"), "dd MMM", { locale: localeId }) };
+      catList.forEach((cat) => { entry[cat] = dateMap[date][cat] || 0; });
+      return entry;
+    });
+    const config: ChartConfig = {};
+    catList.forEach((cat, i) => { config[cat] = { label: cat, color: NOC_CATEGORY_COLORS[i % NOC_CATEGORY_COLORS.length] }; });
+    return { data, categories: catList, config };
+  }, [filteredTickets]);
+
   const dateFilter = (
     <div className="flex flex-wrap items-center gap-2 sm:gap-3">
       <Select value={periodPreset} onValueChange={handlePeriodChange}>
