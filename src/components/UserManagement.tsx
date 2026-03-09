@@ -422,6 +422,31 @@ export function UserManagement() {
                       {user.email}
                     </TableCell>
                     <TableCell>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className={`h-7 px-2 text-xs gap-1 ${
+                          user.is_approved
+                            ? "text-green-600 hover:text-red-600"
+                            : "text-red-600 hover:text-green-600"
+                        }`}
+                        onClick={() => handleToggleApproval(user.user_id, user.is_approved)}
+                        title={user.is_approved ? "Cabut akses" : "Setujui user"}
+                      >
+                        {user.is_approved ? (
+                          <>
+                            <CheckCircle2 className="h-3.5 w-3.5" />
+                            Approved
+                          </>
+                        ) : (
+                          <>
+                            <XCircle className="h-3.5 w-3.5" />
+                            Pending
+                          </>
+                        )}
+                      </Button>
+                    </TableCell>
+                    <TableCell>
                       <Select
                         value={user.role}
                         onValueChange={(value: "admin" | "operator" | "reviewer") =>
