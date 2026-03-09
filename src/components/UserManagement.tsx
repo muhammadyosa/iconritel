@@ -29,7 +29,8 @@ interface UserWithRole {
   avatar_url: string | null;
   created_at: string;
   last_online: string | null;
-  role: "admin" | "operator" | "reviewer" | "reviewer" | "reviewer";
+  is_approved: boolean;
+  role: "admin" | "operator" | "reviewer";
   lastAction?: UserActivity;
 }
 
