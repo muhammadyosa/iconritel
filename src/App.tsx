@@ -31,6 +31,7 @@ const Settings = React.lazy(() => import("./pages/Settings"));
 const Install = React.lazy(() => import("./pages/Install"));
 const Login = React.lazy(() => import("./pages/Login"));
 const NotFound = React.lazy(() => import("./pages/NotFound"));
+const PendingApproval = React.lazy(() => import("./pages/PendingApproval"));
 
 const PageLoader = () => (
   <div className="flex items-center justify-center min-h-[50vh]">
