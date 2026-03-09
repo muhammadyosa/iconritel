@@ -51,6 +51,21 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import type { DateRange } from "react-day-picker";
 
+const NOC_CATEGORY_COLORS = [
+  "hsl(var(--primary))",
+  "hsl(var(--success))",
+  "hsl(var(--warning))",
+  "hsl(var(--destructive))",
+  "hsl(var(--accent-foreground))",
+  "hsl(210, 70%, 50%)",
+  "hsl(280, 60%, 55%)",
+  "hsl(340, 65%, 50%)",
+  "hsl(160, 55%, 45%)",
+  "hsl(30, 80%, 50%)",
+  "hsl(190, 60%, 45%)",
+  "hsl(60, 70%, 45%)",
+];
+
 const chartConfig = {
   total: {
     label: "Total",
