@@ -2,12 +2,12 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ShieldAlert, LogOut, RefreshCw } from "lucide-react";
-import { motion } from "framer-motion";
+import { motion, useMotionValue, useTransform, useSpring } from "framer-motion";
 import { ParticleBackground } from "@/components/ParticleBackground";
 import plnIconPlusLogo from "@/assets/pln-icon-plus-new.png";
 import iconnetLogo from "@/assets/iconnet-logo-new.png";
 import indonesiaMap from "@/assets/indonesia-map.png";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
