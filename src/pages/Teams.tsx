@@ -229,6 +229,20 @@ export default function Teams() {
     userStats.forEach(u => { t.total += u.total; t.resolved += u.resolved; t.pending += u.pending; t.critical += u.critical; });
     return t;
   }, [userStats]);
+
+  // NOC constraint breakdown
+  const nocConstraintStats = useMemo(() => {
+    const countMap: Record<string, number> = {};
+    const resolvedMap: Record<string, number> = {};
+    filteredTickets.forEach((ticket) => {
+      const cat = ticket.constraint || "Lainnya";
+      countMap[cat] = (countMap[cat] || 0) + 1;
+      if (ticket.status === "Resolved") resolvedMap[cat] = (resolvedMap[cat] || 0) + 1;
+    });
+    const topAll = Object.entries(countMap).sort((a, b) => b[1] - a[1]).slice(0, 4);
+    const topResolved = Object.entries(resolvedMap).sort((a, b) => b[1] - a[1]).slice(0, 4);
+    return { countMap, resolvedMap, topAll, topResolved };
+  }, [filteredTickets]);
   // NOC Category Trend data
   const nocCategoryTrend = useMemo(() => {
     const dateMap: Record<string, Record<string, number>> = {};
