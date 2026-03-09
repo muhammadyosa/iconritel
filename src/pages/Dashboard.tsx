@@ -542,7 +542,7 @@ export default function Dashboard() {
                         stroke="hsl(262, 83%, 58%)" 
                         strokeWidth={2}
                         strokeDasharray="5 5"
-                        dot={{ fill: "hsl(262, 83%, 58%)", strokeWidth: 1, r: trendDays > 14 ? 2 : 3, cursor: "pointer" }}
+                        dot={{ fill: "hsl(262, 83%, 58%)", strokeWidth: 1, r: numDays > 14 ? 2 : 3, cursor: "pointer" }}
                         activeDot={{ 
                           r: 6, 
                           strokeWidth: 2, 
