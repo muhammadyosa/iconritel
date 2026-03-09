@@ -547,17 +547,19 @@ export default function TicketManagement() {
                       {filteredData.slice(0, 200).map((record, idx) => (
                         <TableRow key={idx} className="h-6 sm:h-7">
                           <TableCell className="px-1 sm:px-1.5 py-0.5">
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              className="h-5 text-[8px] sm:text-[9px] px-1.5 sm:px-2"
-                              onClick={() => {
-                                setSelectedRecord(record);
-                                setIsFormOpen(true);
-                              }}
-                            >
-                              Pilih
-                            </Button>
+                            {!isReviewer && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="h-5 text-[8px] sm:text-[9px] px-1.5 sm:px-2"
+                                onClick={() => {
+                                  setSelectedRecord(record);
+                                  setIsFormOpen(true);
+                                }}
+                              >
+                                Pilih
+                              </Button>
+                            )}
                           </TableCell>
                           <TableCell className="px-1 sm:px-1.5 py-0.5 font-mono text-[9px] sm:text-[10px]">{String(record.service || "")}</TableCell>
                           <TableCell className="px-1 sm:px-1.5 py-0.5 text-[9px] sm:text-[10px] font-medium">{String(record.hostname || "")}</TableCell>
