@@ -29,7 +29,7 @@ import {
   ChartLegendContent,
   type ChartConfig,
 } from "@/components/ui/chart";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, PieChart, Pie, Cell as RechartsCell } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, PieChart, Pie, Cell as RechartsCell, LineChart, Line } from "recharts";
 import { useState, useMemo } from "react";
 import { format, isWithinInterval, startOfDay, endOfDay, subDays } from "date-fns";
 import { id as localeId } from "date-fns/locale";
@@ -50,6 +50,21 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import type { DateRange } from "react-day-picker";
+
+const NOC_CATEGORY_COLORS = [
+  "hsl(var(--primary))",
+  "hsl(var(--success))",
+  "hsl(var(--warning))",
+  "hsl(var(--destructive))",
+  "hsl(var(--accent-foreground))",
+  "hsl(210, 70%, 50%)",
+  "hsl(280, 60%, 55%)",
+  "hsl(340, 65%, 50%)",
+  "hsl(160, 55%, 45%)",
+  "hsl(30, 80%, 50%)",
+  "hsl(190, 60%, 45%)",
+  "hsl(60, 70%, 45%)",
+];
 
 const chartConfig = {
   total: {
@@ -195,8 +210,37 @@ export default function Teams() {
     userStats.forEach(u => { t.total += u.total; t.resolved += u.resolved; t.pending += u.pending; t.critical += u.critical; });
     return t;
   }, [userStats]);
+  // NOC Category Trend data
+  const nocCategoryTrend = useMemo(() => {
+    const dateMap: Record<string, Record<string, number>> = {};
+    const categories = new Set<string>();
 
-  // Date filter component (shared)
+    filteredTickets.forEach((ticket) => {
+      const date = ticket.createdISO?.split("T")[0];
+      if (!date) return;
+      const cat = ticket.constraint || "Lainnya";
+      categories.add(cat);
+      if (!dateMap[date]) dateMap[date] = {};
+      dateMap[date][cat] = (dateMap[date][cat] || 0) + 1;
+    });
+
+    const sortedDates = Object.keys(dateMap).sort();
+    const catList = Array.from(categories).sort();
+    const data = sortedDates.map((date) => {
+      const entry: Record<string, any> = { date: format(new Date(date + "T00:00:00"), "dd MMM", { locale: localeId }) };
+      catList.forEach((cat) => { entry[cat] = dateMap[date][cat] || 0; });
+      return entry;
+    });
+
+    const config: ChartConfig = {};
+    catList.forEach((cat, i) => {
+      config[cat] = { label: cat, color: NOC_CATEGORY_COLORS[i % NOC_CATEGORY_COLORS.length] };
+    });
+
+    return { data, categories: catList, config };
+  }, [filteredTickets]);
+
+
   const dateFilter = (
     <div className="flex flex-wrap items-center gap-2 sm:gap-3">
       <Select value={periodPreset} onValueChange={handlePeriodChange}>
@@ -908,6 +952,35 @@ export default function Teams() {
                             <span className="text-sm sm:text-base font-bold text-destructive ml-auto">{nocTotals.critical}</span>
                           </div>
                         </div>
+                        {/* Category Trend */}
+                        {nocCategoryTrend.data.length > 0 && (
+                          <div className="space-y-1.5">
+                            <p className="text-[9px] sm:text-xs font-semibold text-muted-foreground">Category Trend</p>
+                            <ChartContainer config={nocCategoryTrend.config} className="aspect-[2/1] w-full max-h-[180px] sm:max-h-[220px]">
+                              <LineChart data={nocCategoryTrend.data} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
+                                <CartesianGrid strokeDasharray="3 3" className="stroke-border/30" />
+                                <XAxis
+                                  dataKey="date"
+                                  tick={{ fontSize: 9 }}
+                                  interval={nocCategoryTrend.data.length > 14 ? 3 : nocCategoryTrend.data.length > 7 ? 1 : 0}
+                                />
+                                <YAxis tick={{ fontSize: 9 }} allowDecimals={false} />
+                                <ChartTooltip content={<ChartTooltipContent />} />
+                                {nocCategoryTrend.categories.map((cat, i) => (
+                                  <Line
+                                    key={cat}
+                                    type="monotone"
+                                    dataKey={cat}
+                                    stroke={NOC_CATEGORY_COLORS[i % NOC_CATEGORY_COLORS.length]}
+                                    strokeWidth={1.5}
+                                    dot={nocCategoryTrend.data.length <= 14}
+                                    activeDot={{ r: 3 }}
+                                  />
+                                ))}
+                              </LineChart>
+                            </ChartContainer>
+                          </div>
+                        )}
                         {/* Resolution rate bar */}
                         <div className="space-y-1">
                           <div className="flex justify-between items-center">
