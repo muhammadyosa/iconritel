@@ -135,28 +135,21 @@ export default function PendingApproval() {
               />
             </motion.div>
 
-            {/* Shield Icon */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.4, duration: 0.4 }}
-              className="mb-4"
-            >
-              <div className="mx-auto w-14 h-14 rounded-full bg-amber-500/15 border border-amber-500/20 flex items-center justify-center">
-                <ShieldAlert className="h-7 w-7 text-amber-400" />
-              </div>
-            </motion.div>
-
-            {/* Title & Description */}
+            {/* Title with badge */}
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5, duration: 0.4 }}
               className="space-y-3 mb-8"
             >
-              <h1 className="text-lg font-bold text-slate-100 tracking-tight">
-                Menunggu Persetujuan
-              </h1>
+              <div className="flex items-center justify-center gap-2">
+                <div className="w-8 h-8 rounded-full bg-amber-500/15 border border-amber-500/20 flex items-center justify-center shrink-0">
+                  <ShieldAlert className="h-4 w-4 text-amber-400" />
+                </div>
+                <h1 className="text-lg font-bold text-slate-100 tracking-tight">
+                  Menunggu Persetujuan
+                </h1>
+              </div>
               <p className="text-sm text-slate-400 leading-relaxed px-2">
                 Akun Anda telah berhasil dibuat, namun memerlukan persetujuan dari{" "}
                 <strong className="text-cyan-400 font-semibold">Admin</strong>{" "}
