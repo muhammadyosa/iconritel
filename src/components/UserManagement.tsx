@@ -29,7 +29,7 @@ interface UserWithRole {
   avatar_url: string | null;
   created_at: string;
   last_online: string | null;
-  role: "admin" | "operator";
+  role: "admin" | "operator" | "reviewer";
   lastAction?: UserActivity;
 }
 
