@@ -603,14 +603,15 @@ export default function TicketManagement() {
                 >
                   <RefreshCw className={`h-3 w-3 ${isLoadingTickets ? 'animate-spin' : ''}`} />
                 </Button>
-                <Dialog open={isManualFormOpen} onOpenChange={setIsManualFormOpen}>
-                  <DialogTrigger asChild>
-                    <Button variant="outline" size="sm" className="h-6 sm:h-7 text-[9px] sm:text-[10px] px-1.5 sm:px-2">
-                      <FileEdit className="h-3 w-3 mr-0.5 sm:mr-1" />
-                      <span className="hidden xs:inline">Manual</span>
-                      <span className="xs:hidden">+</span>
-                    </Button>
-                  </DialogTrigger>
+                {!isReviewer && (
+                  <Dialog open={isManualFormOpen} onOpenChange={setIsManualFormOpen}>
+                    <DialogTrigger asChild>
+                      <Button variant="outline" size="sm" className="h-6 sm:h-7 text-[9px] sm:text-[10px] px-1.5 sm:px-2">
+                        <FileEdit className="h-3 w-3 mr-0.5 sm:mr-1" />
+                        <span className="hidden xs:inline">Manual</span>
+                        <span className="xs:hidden">+</span>
+                      </Button>
+                    </DialogTrigger>
                   <DialogContent className="w-[95vw] max-w-2xl max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
                       <DialogTitle>Input Tiket Manual</DialogTitle>
