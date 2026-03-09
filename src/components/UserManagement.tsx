@@ -362,6 +362,7 @@ export function UserManagement() {
                   <TableHead className="w-[50px]"></TableHead>
                   <TableHead>User</TableHead>
                   <TableHead>Email</TableHead>
+                  <TableHead className="w-[90px]">Status</TableHead>
                   <TableHead className="w-[120px]">Role</TableHead>
                   <TableHead className="w-[150px]">
                     <Button
