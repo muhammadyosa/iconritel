@@ -86,8 +86,9 @@ function TicketNotificationProvider({ children }: { children: React.ReactNode })
 function AppLayout() {
   const location = useLocation();
   const isLoginPage = location.pathname === "/login";
+  const isPendingPage = location.pathname === "/pending-approval";
 
-  if (isLoginPage) {
+  if (isLoginPage || isPendingPage) {
     return <AnimatedRoutes />;
   }
 
