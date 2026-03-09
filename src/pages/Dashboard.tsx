@@ -488,7 +488,7 @@ export default function Dashboard() {
                         tick={{ fontSize: 8, fill: "hsl(var(--muted-foreground))" }}
                         tickLine={false}
                         axisLine={false}
-                        interval={trendDays > 14 ? 3 : trendDays > 7 ? 1 : 0}
+                        interval={numDays > 14 ? 3 : numDays > 7 ? 1 : 0}
                       />
                       <YAxis 
                         tick={{ fontSize: 9, fill: "hsl(var(--muted-foreground))" }}
