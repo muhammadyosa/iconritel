@@ -18,7 +18,7 @@ import { toast } from "sonner";
 export function UserMenu() {
   const navigate = useNavigate();
   const { user, profile, signOut } = useAuth();
-  const { role, , isReviewerisAdmin } = useUserRole();
+  const { role, isAdmin, isReviewer } = useUserRole();
 
   if (!user) return null;
 
