@@ -745,6 +745,7 @@ export default function TicketManagement() {
                     </div>
                   </DialogContent>
                 </Dialog>
+                )}
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="outline" size="sm" className="h-6 sm:h-7 text-[9px] sm:text-[10px] px-1.5 sm:px-2">
