@@ -488,6 +488,23 @@ export default function Teams() {
                               <span className="text-sm sm:text-base font-bold text-destructive ml-auto">{rCritical}</span>
                             </div>
                           </div>
+                          {/* Category Trend */}
+                          {ritelCategoryTrend.data.length > 0 && (
+                            <div className="space-y-1.5">
+                              <p className="text-[9px] sm:text-xs font-semibold text-muted-foreground">Category Trend</p>
+                              <ChartContainer config={ritelCategoryTrend.config} className="aspect-[2/1] w-full max-h-[160px] sm:max-h-[200px]">
+                                <LineChart data={ritelCategoryTrend.data} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
+                                  <CartesianGrid strokeDasharray="3 3" className="stroke-border/30" />
+                                  <XAxis dataKey="date" tick={{ fontSize: 9 }} interval={ritelCategoryTrend.data.length > 14 ? 3 : ritelCategoryTrend.data.length > 7 ? 1 : 0} />
+                                  <YAxis allowDecimals={false} tick={{ fontSize: 9 }} />
+                                  <ChartTooltip content={<ChartTooltipContent />} />
+                                  {ritelCategoryTrend.categories.map((cat, i) => (
+                                    <Line key={cat} type="monotone" dataKey={cat} stroke={NOC_CATEGORY_COLORS[i % NOC_CATEGORY_COLORS.length]} strokeWidth={1.5} dot={{ r: ritelCategoryTrend.data.length > 14 ? 0 : 2 }} />
+                                  ))}
+                                </LineChart>
+                              </ChartContainer>
+                            </div>
+                          )}
                           {/* Resolution rate bar */}
                           <div className="space-y-1">
                             <div className="flex justify-between items-center">
