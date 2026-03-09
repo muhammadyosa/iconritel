@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useUserRole } from "@/hooks/useUserRole";
 
 interface DbTicketPayload {
   ticket_id: string;
@@ -10,8 +11,15 @@ interface DbTicketPayload {
   hostname: string;
 }
 
+interface DbProfilePayload {
+  email: string;
+  display_name: string | null;
+  is_approved: boolean;
+}
+
 export function useTicketNotifications() {
   const initializedRef = useRef(false);
+  const { isAdmin } = useUserRole();
 
   useEffect(() => {
     // Skip first load to avoid notifications for existing data
@@ -56,4 +64,36 @@ export function useTicketNotifications() {
       supabase.removeChannel(channel);
     };
   }, []);
+
+  // Separate channel for admin-only new user notifications
+  useEffect(() => {
+    if (!isAdmin) return;
+
+    const profileChannel = supabase
+      .channel("new-user-notifications")
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "profiles" },
+        (payload) => {
+          const profile = payload.new as DbProfilePayload;
+          if (!profile.is_approved) {
+            toast.warning("👤 User Baru Mendaftar", {
+              description: `${profile.display_name || profile.email} menunggu persetujuan`,
+              duration: 10000,
+              action: {
+                label: "Buka Settings",
+                onClick: () => {
+                  window.location.href = "/settings";
+                },
+              },
+            });
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(profileChannel);
+    };
+  }, [isAdmin]);
 }
