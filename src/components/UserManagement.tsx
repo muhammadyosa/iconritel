@@ -29,7 +29,7 @@ interface UserWithRole {
   avatar_url: string | null;
   created_at: string;
   last_online: string | null;
-  role: "admin" | "operator" | "reviewer" | "reviewer";
+  role: "admin" | "operator" | "reviewer" | "reviewer" | "reviewer";
   lastAction?: UserActivity;
 }
 
@@ -79,7 +79,7 @@ export function UserManagement() {
           avatar_url: profile.avatar_url,
           created_at: profile.created_at,
           last_online: profile.last_online as string | null,
-          role: (userRole?.role as "admin" | "reviewer" | "operator") || "operator",
+          role: (userRole?.ro | "reviewer"le as "admin" | "reviewer" | "operator") || "operator",
           lastAction: latestActivityMap.get(profile.user_id),
         };
       });
@@ -101,7 +101,7 @@ export function UserManagement() {
     }
   }, [isAdmin]);
 
-  const handleRoleChange = async (userId: string, newRole: "admin" | "operator") => {
+  const handleRoleChange = async (userId: string, new | "reviewer"Role: "admin" | "operator") => {
     setUpdatingUserId(userId);
     try {
       // Get current role for logging
