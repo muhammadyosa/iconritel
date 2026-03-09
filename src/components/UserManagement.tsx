@@ -164,6 +164,36 @@ export function UserManagement() {
     }
   };
 
+  const handleToggleApproval = async (userId: string, currentStatus: boolean) => {
+    try {
+      const { error } = await supabase
+        .from("profiles")
+        .update({ is_approved: !currentStatus } as any)
+        .eq("user_id", userId);
+
+      if (error) throw error;
+
+      setUsers((prev) =>
+        prev.map((u) =>
+          u.user_id === userId ? { ...u, is_approved: !currentStatus } : u
+        )
+      );
+
+      const targetUser = users.find((u) => u.user_id === userId);
+      toast.success(
+        !currentStatus
+          ? `${targetUser?.display_name || targetUser?.email} telah disetujui`
+          : `Akses ${targetUser?.display_name || targetUser?.email} dicabut`
+      );
+      logActivity(
+        !currentStatus ? "approve_user" : "revoke_user",
+        targetUser?.email || userId
+      );
+    } catch (error) {
+      toast.error("Gagal mengubah status persetujuan");
+    }
+  };
+
   const handleEditUser = (user: UserWithRole) => {
     setEditingUser(user);
     setEditDisplayName(user.display_name || "");
