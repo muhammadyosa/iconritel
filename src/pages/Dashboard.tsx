@@ -66,7 +66,10 @@ export default function Dashboard() {
   const [showOltList, setShowOltList] = useState(false);
   const [selectedConstraint, setSelectedConstraint] = useState<string>("all");
   const [inlineSelectedTicket, setInlineSelectedTicket] = useState<Ticket | null>(null);
-  const [trendDays, setTrendDays] = useState<number>(7);
+  const [trendFilter, setTrendFilter] = useState<string>("7");
+  const [trendCustomDate, setTrendCustomDate] = useState<string>(() => {
+    return new Date().toISOString().split('T')[0];
+  });
   const [previousDialogState, setPreviousDialogState] = useState<{
     title: string;
     tickets: Ticket[];
@@ -363,22 +366,89 @@ export default function Dashboard() {
                   <TrendingUp className="h-4 w-4 text-accent" />
                   Category Trend
                 </CardTitle>
-                <Select value={trendDays.toString()} onValueChange={(v) => setTrendDays(Number(v))}>
-                  <SelectTrigger className="w-[90px] h-7 text-[10px]">
-                    <SelectValue placeholder="Rentang" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="7">7 Hari</SelectItem>
-                    <SelectItem value="14">14 Hari</SelectItem>
-                    <SelectItem value="30">30 Hari</SelectItem>
-                  </SelectContent>
-                </Select>
+                <div className="flex items-center gap-1.5">
+                  <Select value={trendFilter} onValueChange={setTrendFilter}>
+                    <SelectTrigger className="w-[100px] sm:w-[120px] h-7 text-[10px] sm:text-xs">
+                      <SelectValue placeholder="Rentang" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="today">Hari ini</SelectItem>
+                      <SelectItem value="all">Semua Data</SelectItem>
+                      <SelectItem value="7">7 Hari</SelectItem>
+                      <SelectItem value="14">14 Hari</SelectItem>
+                      <SelectItem value="30">30 Hari</SelectItem>
+                      <SelectItem value="custom">Custom</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  {trendFilter === "custom" && (
+                    <input
+                      type="date"
+                      value={trendCustomDate}
+                      onChange={(e) => setTrendCustomDate(e.target.value)}
+                      className="h-7 text-[10px] sm:text-xs px-2 rounded-md border border-input bg-background"
+                    />
+                  )}
+                </div>
               </div>
             </CardHeader>
             <CardContent className="p-2 sm:p-3">
               {(() => {
-                // Use history data for the chart
-                const chartData = getChartData(trendDays);
+                // Calculate chart data based on filter
+                const today = new Date();
+                let chartData: Array<{
+                  date: string; isoDate: string;
+                  ritel: number; feeder: number; total: number;
+                  created: number; inProgress: number; resolved: number;
+                }> = [];
+                
+                if (trendFilter === "today") {
+                  const todayStr = today.toISOString().split('T')[0];
+                  const displayDate = today.toLocaleDateString('id-ID', { day: '2-digit', month: 'short' });
+                  const dayTickets = tickets.filter((t) => new Date(t.createdISO).toISOString().split('T')[0] === todayStr);
+                  const ritelCount = dayTickets.filter((t) => !FEEDER_CONSTRAINTS_SET.has(t.constraint)).length;
+                  const feederCount = dayTickets.filter((t) => FEEDER_CONSTRAINTS_SET.has(t.constraint)).length;
+                  chartData = [{
+                    date: displayDate,
+                    isoDate: todayStr,
+                    ritel: ritelCount,
+                    feeder: feederCount,
+                    total: dayTickets.length,
+                    created: dayTickets.length,
+                    inProgress: dayTickets.filter((t) => t.status === "On Progress" || t.status === "Critical" || t.status === "Pending").length,
+                    resolved: dayTickets.filter((t) => t.status === "Resolved").length,
+                  }];
+                } else if (trendFilter === "custom") {
+                  const customD = new Date(trendCustomDate);
+                  const isoDate = trendCustomDate;
+                  const displayDate = customD.toLocaleDateString('id-ID', { day: '2-digit', month: 'short' });
+                  const dayTickets = tickets.filter((t) => new Date(t.createdISO).toISOString().split('T')[0] === isoDate);
+                  const ritelCount = dayTickets.filter((t) => !FEEDER_CONSTRAINTS_SET.has(t.constraint)).length;
+                  const feederCount = dayTickets.filter((t) => FEEDER_CONSTRAINTS_SET.has(t.constraint)).length;
+                  chartData = [{
+                    date: displayDate,
+                    isoDate,
+                    ritel: ritelCount,
+                    feeder: feederCount,
+                    total: dayTickets.length,
+                    created: dayTickets.length,
+                    inProgress: dayTickets.filter((t) => t.status === "On Progress" || t.status === "Critical" || t.status === "Pending").length,
+                    resolved: dayTickets.filter((t) => t.status === "Resolved").length,
+                  }];
+                } else if (trendFilter === "all") {
+                  // Find earliest ticket date
+                  const earliest = tickets.reduce((min, t) => {
+                    const d = new Date(t.createdISO);
+                    return d < min ? d : min;
+                  }, today);
+                  const days = Math.max(1, Math.ceil((today.getTime() - earliest.getTime()) / (1000 * 60 * 60 * 24)) + 1);
+                  chartData = getChartData(days);
+                } else {
+                  // 7, 14, 30 days
+                  const days = Number(trendFilter);
+                  chartData = getChartData(days);
+                }
+
+                const numDays = trendFilter === "today" || trendFilter === "custom" ? 1 : trendFilter === "all" ? chartData.length : Number(trendFilter);
 
                 const chartConfig: ChartConfig = {
                   ritel: { label: "🏠 RITEL", color: "hsl(217, 91%, 60%)" },
@@ -418,7 +488,7 @@ export default function Dashboard() {
                         tick={{ fontSize: 8, fill: "hsl(var(--muted-foreground))" }}
                         tickLine={false}
                         axisLine={false}
-                        interval={trendDays > 14 ? 3 : trendDays > 7 ? 1 : 0}
+                        interval={numDays > 14 ? 3 : numDays > 7 ? 1 : 0}
                       />
                       <YAxis 
                         tick={{ fontSize: 9, fill: "hsl(var(--muted-foreground))" }}
@@ -435,7 +505,7 @@ export default function Dashboard() {
                         dataKey="ritel" 
                         stroke="hsl(217, 91%, 60%)" 
                         strokeWidth={2}
-                        dot={{ fill: "hsl(217, 91%, 60%)", strokeWidth: 1, r: trendDays > 14 ? 2 : 3, cursor: "pointer" }}
+                        dot={{ fill: "hsl(217, 91%, 60%)", strokeWidth: 1, r: numDays > 14 ? 2 : 3, cursor: "pointer" }}
                         activeDot={{ 
                           r: 6, 
                           strokeWidth: 2, 
@@ -453,7 +523,7 @@ export default function Dashboard() {
                         dataKey="feeder" 
                         stroke="hsl(38, 92%, 50%)" 
                         strokeWidth={2}
-                        dot={{ fill: "hsl(38, 92%, 50%)", strokeWidth: 1, r: trendDays > 14 ? 2 : 3, cursor: "pointer" }}
+                        dot={{ fill: "hsl(38, 92%, 50%)", strokeWidth: 1, r: numDays > 14 ? 2 : 3, cursor: "pointer" }}
                         activeDot={{ 
                           r: 6, 
                           strokeWidth: 2, 
@@ -472,7 +542,7 @@ export default function Dashboard() {
                         stroke="hsl(262, 83%, 58%)" 
                         strokeWidth={2}
                         strokeDasharray="5 5"
-                        dot={{ fill: "hsl(262, 83%, 58%)", strokeWidth: 1, r: trendDays > 14 ? 2 : 3, cursor: "pointer" }}
+                        dot={{ fill: "hsl(262, 83%, 58%)", strokeWidth: 1, r: numDays > 14 ? 2 : 3, cursor: "pointer" }}
                         activeDot={{ 
                           r: 6, 
                           strokeWidth: 2, 
