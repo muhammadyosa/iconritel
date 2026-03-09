@@ -45,6 +45,7 @@ interface TicketDetailDialogProps {
 export function TicketDetailDialog({
   ticket,
   isAdmin,
+  isReviewer = false,
   updateTicket,
   deleteTicket,
   open: controlledOpen,
