@@ -193,7 +193,10 @@ export default function PendingApproval() {
               <Button
                 type="button"
                 variant="ghost"
-                onClick={() => signOut()}
+                onClick={async () => {
+                  await signOut();
+                  window.location.href = "/login";
+                }}
                 className="w-full h-10 rounded-xl text-slate-500 hover:text-slate-300 hover:bg-slate-800/40 active:scale-[0.97] transition-all touch-manipulation"
               >
                 <LogOut className="h-4 w-4 mr-2" />
