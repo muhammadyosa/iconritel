@@ -301,28 +301,29 @@ export function TicketDetailDialog({
                   </p>
                 </div>
               </div>
-              <div className="flex gap-2 pt-3">
-                <Select
-                  value={ticket.status}
-                  onValueChange={async (value: any) => {
-                    try {
-                      await updateTicket(ticket.id, { status: value });
-                      toast.success(`Status insident ${ticket.id} berhasil diubah menjadi ${value}`);
-                    } catch (error) {
-                      // Error already shown by hook
-                    }
-                  }}
-                >
-                  <SelectTrigger className="flex-1">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="On Progress">Progres</SelectItem>
-                    <SelectItem value="Critical">Critical</SelectItem>
-                    <SelectItem value="Resolved">Resolved</SelectItem>
-                    <SelectItem value="Pending">Pending</SelectItem>
-                  </SelectContent>
-                </Select>
+              {!isReviewer && (
+                <div className="flex gap-2 pt-3">
+                  <Select
+                    value={ticket.status}
+                    onValueChange={async (value: any) => {
+                      try {
+                        await updateTicket(ticket.id, { status: value });
+                        toast.success(`Status insident ${ticket.id} berhasil diubah menjadi ${value}`);
+                      } catch (error) {
+                        // Error already shown by hook
+                      }
+                    }}
+                  >
+                    <SelectTrigger className="flex-1">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="On Progress">Progres</SelectItem>
+                      <SelectItem value="Critical">Critical</SelectItem>
+                      <SelectItem value="Resolved">Resolved</SelectItem>
+                      <SelectItem value="Pending">Pending</SelectItem>
+                    </SelectContent>
+                  </Select>
                 {isAdmin && (
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
