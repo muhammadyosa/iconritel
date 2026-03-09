@@ -66,7 +66,10 @@ export default function Dashboard() {
   const [showOltList, setShowOltList] = useState(false);
   const [selectedConstraint, setSelectedConstraint] = useState<string>("all");
   const [inlineSelectedTicket, setInlineSelectedTicket] = useState<Ticket | null>(null);
-  const [trendDays, setTrendDays] = useState<number>(7);
+  const [trendFilter, setTrendFilter] = useState<string>("7");
+  const [trendCustomDate, setTrendCustomDate] = useState<string>(() => {
+    return new Date().toISOString().split('T')[0];
+  });
   const [previousDialogState, setPreviousDialogState] = useState<{
     title: string;
     tickets: Ticket[];
