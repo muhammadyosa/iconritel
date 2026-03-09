@@ -70,6 +70,11 @@ export function UserMenu() {
               <Shield className="h-4 w-4 text-primary" />
               <Badge variant="default" className="text-xs">Admin</Badge>
             </>
+          ) : isReviewer ? (
+            <>
+              <Users className="h-4 w-4 text-amber-500" />
+              <Badge variant="outline" className="text-xs border-amber-500/50 text-amber-600">Reviewer</Badge>
+            </>
           ) : (
             <>
               <User className="h-4 w-4 text-muted-foreground" />

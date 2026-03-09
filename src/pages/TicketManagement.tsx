@@ -62,7 +62,7 @@ export default function TicketManagement() {
   } = useCloudTickets();
 
   // User role for permission-based UI
-  const { isAdmin } = useUserRole();
+  const { isAdmin, isReviewer } = useUserRole();
   
   // Get current user for tracking who created tickets
   const { user, profile } = useAuth();
