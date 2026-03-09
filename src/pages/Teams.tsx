@@ -1027,12 +1027,22 @@ export default function Teams() {
                   <CardContent className="p-3 sm:p-4">
                     <p className="text-[10px] sm:text-xs text-muted-foreground">Total Incident</p>
                     <p className="text-lg sm:text-2xl font-bold mt-1">{nocTotals.total}</p>
+                    <div className="flex flex-wrap gap-1 mt-1.5">
+                      {nocConstraintStats.topAll.map(([name, count]) => (
+                        <Badge key={name} variant="outline" className="text-[8px] sm:text-[9px] px-1.5 py-0 bg-muted/50 border-border">{name} {count}</Badge>
+                      ))}
+                    </div>
                   </CardContent>
                 </Card>
                 <Card className="shadow-card border-l-4 border-l-success">
                   <CardContent className="p-3 sm:p-4">
                     <p className="text-[10px] sm:text-xs text-muted-foreground">Total Resolved</p>
                     <p className="text-lg sm:text-2xl font-bold text-success mt-1">{nocTotals.resolved}</p>
+                    <div className="flex flex-wrap gap-1 mt-1.5">
+                      {nocConstraintStats.topResolved.map(([name, count]) => (
+                        <Badge key={name} variant="outline" className="text-[8px] sm:text-[9px] px-1.5 py-0 bg-success/10 text-success border-success/20">{name} {count}</Badge>
+                      ))}
+                    </div>
                   </CardContent>
                 </Card>
                 <Card className="shadow-card border-l-4 border-l-destructive">
@@ -1041,6 +1051,15 @@ export default function Teams() {
                     <p className="text-lg sm:text-2xl font-bold text-primary mt-1">
                       {nocTotals.total > 0 ? Math.round((nocTotals.resolved / nocTotals.total) * 100) : 0}%
                     </p>
+                    <div className="flex flex-wrap gap-1 mt-1.5">
+                      {nocConstraintStats.topAll.slice(0, 3).map(([name, total]) => {
+                        const resolved = nocConstraintStats.resolvedMap[name] || 0;
+                        const rate = total > 0 ? Math.round((resolved / total) * 100) : 0;
+                        return (
+                          <Badge key={name} variant="outline" className={cn("text-[8px] sm:text-[9px] px-1.5 py-0 border-destructive/20", rate >= 70 ? "bg-success/10 text-success" : rate >= 40 ? "bg-warning/10 text-warning" : "bg-destructive/10 text-destructive")}>{name} {rate}%</Badge>
+                        );
+                      })}
+                    </div>
                   </CardContent>
                 </Card>
               </div>
