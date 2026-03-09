@@ -79,7 +79,7 @@ export function UserManagement() {
           avatar_url: profile.avatar_url,
           created_at: profile.created_at,
           last_online: profile.last_online as string | null,
-          role: (userRole?.ro | "reviewer"le as "admin" | "reviewer" | "operator") || "operator",
+          role: (userRole?.role as "admin" | "operator" | "reviewer") || "operator",
           lastAction: latestActivityMap.get(profile.user_id),
         };
       });
