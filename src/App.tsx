@@ -31,6 +31,7 @@ const Settings = React.lazy(() => import("./pages/Settings"));
 const Install = React.lazy(() => import("./pages/Install"));
 const Login = React.lazy(() => import("./pages/Login"));
 const NotFound = React.lazy(() => import("./pages/NotFound"));
+const PendingApproval = React.lazy(() => import("./pages/PendingApproval"));
 
 const PageLoader = () => (
   <div className="flex items-center justify-center min-h-[50vh]">
@@ -57,6 +58,7 @@ function AnimatedRoutes() {
       <Suspense fallback={<PageLoader />}>
         <Routes location={location} key={location.pathname}>
           <Route path="/login" element={<PageTransition><Login /></PageTransition>} />
+          <Route path="/pending-approval" element={<PageTransition><PendingApproval /></PageTransition>} />
           <Route path="/" element={<ProtectedRoute><PageTransition><Dashboard /></PageTransition></ProtectedRoute>} />
           <Route path="/tickets" element={<ProtectedRoute><PageTransition><TicketManagement /></PageTransition></ProtectedRoute>} />
           <Route path="/teams" element={<ProtectedRoute><PageTransition><Teams /></PageTransition></ProtectedRoute>} />
@@ -84,8 +86,9 @@ function TicketNotificationProvider({ children }: { children: React.ReactNode })
 function AppLayout() {
   const location = useLocation();
   const isLoginPage = location.pathname === "/login";
+  const isPendingPage = location.pathname === "/pending-approval";
 
-  if (isLoginPage) {
+  if (isLoginPage || isPendingPage) {
     return <AnimatedRoutes />;
   }
 

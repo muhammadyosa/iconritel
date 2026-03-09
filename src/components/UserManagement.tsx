@@ -10,7 +10,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Loader2, RefreshCw, Shield, User, Users, Clock, ArrowUpDown, ArrowUp, ArrowDown, Pencil, Activity } from "lucide-react";
+import { Loader2, RefreshCw, Shield, User, Users, Clock, ArrowUpDown, ArrowUp, ArrowDown, Pencil, Activity, CheckCircle2, XCircle } from "lucide-react";
 import { toast } from "sonner";
 import { getActionLabel, useActivityLog } from "@/hooks/useActivityLog";
 
@@ -29,7 +29,8 @@ interface UserWithRole {
   avatar_url: string | null;
   created_at: string;
   last_online: string | null;
-  role: "admin" | "operator" | "reviewer" | "reviewer" | "reviewer";
+  is_approved: boolean;
+  role: "admin" | "operator" | "reviewer";
   lastAction?: UserActivity;
 }
 
@@ -79,6 +80,7 @@ export function UserManagement() {
           avatar_url: profile.avatar_url,
           created_at: profile.created_at,
           last_online: profile.last_online as string | null,
+          is_approved: (profile as any).is_approved ?? false,
           role: (userRole?.role as "admin" | "operator" | "reviewer") || "operator",
           lastAction: latestActivityMap.get(profile.user_id),
         };
@@ -159,6 +161,36 @@ export function UserManagement() {
       toast.error("Gagal mengubah role user");
     } finally {
       setUpdatingUserId(null);
+    }
+  };
+
+  const handleToggleApproval = async (userId: string, currentStatus: boolean) => {
+    try {
+      const { error } = await supabase
+        .from("profiles")
+        .update({ is_approved: !currentStatus } as any)
+        .eq("user_id", userId);
+
+      if (error) throw error;
+
+      setUsers((prev) =>
+        prev.map((u) =>
+          u.user_id === userId ? { ...u, is_approved: !currentStatus } : u
+        )
+      );
+
+      const targetUser = users.find((u) => u.user_id === userId);
+      toast.success(
+        !currentStatus
+          ? `${targetUser?.display_name || targetUser?.email} telah disetujui`
+          : `Akses ${targetUser?.display_name || targetUser?.email} dicabut`
+      );
+      logActivity(
+        !currentStatus ? "approve_user" : "revoke_user",
+        targetUser?.email || userId
+      );
+    } catch (error) {
+      toast.error("Gagal mengubah status persetujuan");
     }
   };
 
@@ -330,6 +362,7 @@ export function UserManagement() {
                   <TableHead className="w-[50px]"></TableHead>
                   <TableHead>User</TableHead>
                   <TableHead>Email</TableHead>
+                  <TableHead className="w-[90px]">Status</TableHead>
                   <TableHead className="w-[120px]">Role</TableHead>
                   <TableHead className="w-[150px]">
                     <Button
@@ -387,6 +420,31 @@ export function UserManagement() {
                     </TableCell>
                     <TableCell className="text-sm text-muted-foreground">
                       {user.email}
+                    </TableCell>
+                    <TableCell>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className={`h-7 px-2 text-xs gap-1 ${
+                          user.is_approved
+                            ? "text-green-600 hover:text-red-600"
+                            : "text-red-600 hover:text-green-600"
+                        }`}
+                        onClick={() => handleToggleApproval(user.user_id, user.is_approved)}
+                        title={user.is_approved ? "Cabut akses" : "Setujui user"}
+                      >
+                        {user.is_approved ? (
+                          <>
+                            <CheckCircle2 className="h-3.5 w-3.5" />
+                            Approved
+                          </>
+                        ) : (
+                          <>
+                            <XCircle className="h-3.5 w-3.5" />
+                            Pending
+                          </>
+                        )}
+                      </Button>
                     </TableCell>
                     <TableCell>
                       <Select
