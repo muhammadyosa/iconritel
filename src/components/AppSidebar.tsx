@@ -13,6 +13,9 @@ import {
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "next-themes";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useUserRole } from "@/hooks/useUserRole";
 
 const menuItems = [
   { title: "Dashboard", icon: null, path: "/", emoji: "🖥️" },
@@ -28,10 +31,49 @@ const menuItems = [
   { title: "Settings", icon: null, path: "/settings", emoji: "🛠" },
 ];
 
+function usePendingUserCount() {
+  const { isAdmin } = useUserRole();
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    if (!isAdmin) return;
+
+    const fetchCount = async () => {
+      const { count: pendingCount, error } = await supabase
+        .from("profiles")
+        .select("*", { count: "exact", head: true })
+        .eq("is_approved", false);
+
+      if (!error && pendingCount !== null) {
+        setCount(pendingCount);
+      }
+    };
+
+    fetchCount();
+
+    // Listen for realtime changes on profiles
+    const channel = supabase
+      .channel("pending-users-count")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "profiles" },
+        () => fetchCount()
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [isAdmin]);
+
+  return { count, isAdmin };
+}
+
 export function AppSidebar() {
   const { state } = useSidebar();
   const { theme, setTheme } = useTheme();
   const collapsed = state === "collapsed";
+  const { count: pendingCount, isAdmin } = usePendingUserCount();
 
   return (
     <Sidebar className={collapsed ? "w-[52px]" : "w-56 sm:w-60"} collapsible="icon">
@@ -65,33 +107,48 @@ export function AppSidebar() {
           {!collapsed && <SidebarGroupLabel className="px-3 text-xs">Menu</SidebarGroupLabel>}
           <SidebarGroupContent>
             <SidebarMenu className={`gap-0.5 ${collapsed ? "items-center px-0" : "px-2"}`}>
-              {menuItems.map((item) => (
-                <SidebarMenuItem key={item.title} className={collapsed ? "w-full flex justify-center" : "w-full"}>
-                  <SidebarMenuButton asChild className={collapsed ? "h-8 w-8 min-w-8 p-0 !justify-center" : "h-9 justify-start"}>
-                    <NavLink
-                      to={item.path}
-                      className={({ isActive }) =>
-                        `flex items-center rounded-md transition-all duration-300 ease-out ${
-                          collapsed 
-                            ? "h-8 w-8 min-w-8 !justify-center hover:scale-110" 
-                            : "gap-3 px-3 py-2 w-full !justify-start hover:translate-x-1 hover:scale-[1.02]"
-                        } ${
-                          isActive
-                            ? "bg-sidebar-accent text-sidebar-accent-foreground shadow-sm"
-                            : "hover:bg-sidebar-accent/50 hover:shadow-sm"
-                        }`
-                      }
-                    >
-                      <span className={`text-sm leading-none flex-shrink-0 ${collapsed ? "text-center" : "w-5"}`}>
-                        {item.emoji}
-                      </span>
-                      {!collapsed && (
-                        <span className="text-sm truncate flex-1 text-left">{item.title}</span>
-                      )}
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+              {menuItems.map((item) => {
+                const showBadge = item.path === "/settings" && isAdmin && pendingCount > 0;
+                return (
+                  <SidebarMenuItem key={item.title} className={collapsed ? "w-full flex justify-center" : "w-full"}>
+                    <SidebarMenuButton asChild className={collapsed ? "h-8 w-8 min-w-8 p-0 !justify-center" : "h-9 justify-start"}>
+                      <NavLink
+                        to={item.path}
+                        className={({ isActive }) =>
+                          `flex items-center rounded-md transition-all duration-300 ease-out ${
+                            collapsed 
+                              ? "h-8 w-8 min-w-8 !justify-center hover:scale-110" 
+                              : "gap-3 px-3 py-2 w-full !justify-start hover:translate-x-1 hover:scale-[1.02]"
+                          } ${
+                            isActive
+                              ? "bg-sidebar-accent text-sidebar-accent-foreground shadow-sm"
+                              : "hover:bg-sidebar-accent/50 hover:shadow-sm"
+                          }`
+                        }
+                      >
+                        <span className={`relative text-sm leading-none flex-shrink-0 ${collapsed ? "text-center" : "w-5"}`}>
+                          {item.emoji}
+                          {showBadge && collapsed && (
+                            <span className="absolute -top-1.5 -right-1.5 h-3.5 w-3.5 rounded-full bg-destructive text-destructive-foreground text-[9px] font-bold flex items-center justify-center">
+                              {pendingCount}
+                            </span>
+                          )}
+                        </span>
+                        {!collapsed && (
+                          <span className="text-sm truncate flex-1 text-left flex items-center gap-2">
+                            {item.title}
+                            {showBadge && (
+                              <span className="h-5 min-w-5 px-1 rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold flex items-center justify-center">
+                                {pendingCount}
+                              </span>
+                            )}
+                          </span>
+                        )}
+                      </NavLink>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
