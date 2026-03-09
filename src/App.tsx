@@ -58,6 +58,7 @@ function AnimatedRoutes() {
       <Suspense fallback={<PageLoader />}>
         <Routes location={location} key={location.pathname}>
           <Route path="/login" element={<PageTransition><Login /></PageTransition>} />
+          <Route path="/pending-approval" element={<PageTransition><PendingApproval /></PageTransition>} />
           <Route path="/" element={<ProtectedRoute><PageTransition><Dashboard /></PageTransition></ProtectedRoute>} />
           <Route path="/tickets" element={<ProtectedRoute><PageTransition><TicketManagement /></PageTransition></ProtectedRoute>} />
           <Route path="/teams" element={<ProtectedRoute><PageTransition><Teams /></PageTransition></ProtectedRoute>} />
