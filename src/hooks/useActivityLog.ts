@@ -14,7 +14,9 @@ export type ActivityAction =
   | "import_tickets"
   | "export_data"
   | "login"
-  | "bulk_delete_tickets";
+  | "bulk_delete_tickets"
+  | "approve_user"
+  | "revoke_user";
 
 const ACTION_LABELS: Record<ActivityAction, string> = {
   create_ticket: "Membuat tiket",
