@@ -441,57 +441,102 @@ export default function Teams() {
             <div className="space-y-6">
               {/* Summary Cards */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                <Card className="shadow-card border-l-4 border-l-primary">
-                  <CardContent className="p-3 sm:p-4">
-                    <p className="text-[10px] sm:text-xs text-muted-foreground">Total Tim Aktif</p>
-                    <p className="text-lg sm:text-2xl font-bold mt-1">{teamStatsByCategory.ritel.length + teamStatsByCategory.feeder.length}</p>
-                    <div className="flex gap-2 mt-1">
-                      <Badge variant="outline" className="text-[9px] bg-primary/10 text-primary border-primary/20">{teamStatsByCategory.ritel.length} Ritel</Badge>
-                      <Badge variant="outline" className="text-[9px] bg-warning/10 text-warning border-warning/20">{teamStatsByCategory.feeder.length} Serpo</Badge>
+                {[
+                  {
+                    emoji: "👥",
+                    title: "Total Tim Aktif",
+                    value: teamStatsByCategory.ritel.length + teamStatsByCategory.feeder.length,
+                    borderClass: "border-primary/30 hover:border-primary/50",
+                    valueClass: "text-primary",
+                    glowClass: "hover:shadow-[0_0_20px_-4px_hsl(var(--primary)/0.4)]",
+                    bgClass: "bg-primary/5",
+                    badges: (
+                      <div className="flex flex-wrap gap-1 mt-1.5">
+                        <Badge variant="outline" className="text-[8px] sm:text-[9px] px-1.5 py-0 bg-primary/10 text-primary border-primary/20">{teamStatsByCategory.ritel.length} Ritel</Badge>
+                        <Badge variant="outline" className="text-[8px] sm:text-[9px] px-1.5 py-0 bg-warning/10 text-warning border-warning/20">{teamStatsByCategory.feeder.length} Serpo</Badge>
+                      </div>
+                    ),
+                  },
+                  {
+                    emoji: "🗃️",
+                    title: "Total Insident",
+                    value: teamStatsByCategory.ritelTotal + teamStatsByCategory.feederTotal,
+                    borderClass: "border-muted-foreground/30 hover:border-muted-foreground/50",
+                    valueClass: "text-foreground",
+                    glowClass: "hover:shadow-[0_0_20px_-4px_hsl(var(--muted-foreground)/0.3)]",
+                    bgClass: "bg-muted/5",
+                    badges: (
+                      <div className="flex flex-wrap gap-1 mt-1.5">
+                        {teamStatsByCategory.topConstraints.map(([name, count]) => (
+                          <Badge key={name} variant="outline" className="text-[8px] sm:text-[9px] px-1.5 py-0 bg-muted/50 border-border">{name} {count}</Badge>
+                        ))}
+                      </div>
+                    ),
+                  },
+                  {
+                    emoji: "✅",
+                    title: "Total Resolved",
+                    value: teamStatsByCategory.ritelResolved + teamStatsByCategory.feederResolved,
+                    borderClass: "border-success/30 hover:border-success/50",
+                    valueClass: "text-success",
+                    glowClass: "hover:shadow-[0_0_20px_-4px_hsl(var(--success)/0.4)]",
+                    bgClass: "bg-success/5",
+                    badges: (
+                      <div className="flex flex-wrap gap-1 mt-1.5">
+                        {teamStatsByCategory.topConstraintsResolved.map(([name, count]) => (
+                          <Badge key={name} variant="outline" className="text-[8px] sm:text-[9px] px-1.5 py-0 bg-success/10 text-success border-success/20">{name} {count}</Badge>
+                        ))}
+                      </div>
+                    ),
+                  },
+                  {
+                    emoji: "📊",
+                    title: "Resolution Rate",
+                    value: `${(teamStatsByCategory.ritelTotal + teamStatsByCategory.feederTotal) > 0
+                      ? Math.round(((teamStatsByCategory.ritelResolved + teamStatsByCategory.feederResolved) / (teamStatsByCategory.ritelTotal + teamStatsByCategory.feederTotal)) * 100)
+                      : 0}%`,
+                    borderClass: "border-destructive/30 hover:border-destructive/50",
+                    valueClass: "text-primary",
+                    glowClass: "hover:shadow-[0_0_20px_-4px_hsl(var(--destructive)/0.4)]",
+                    bgClass: "bg-destructive/5",
+                    badges: (
+                      <div className="flex flex-wrap gap-1 mt-1.5">
+                        {teamStatsByCategory.topConstraints.slice(0, 3).map(([name, total]) => {
+                          const resolved = teamStatsByCategory.constraintResolved[name] || 0;
+                          const rate = total > 0 ? Math.round((resolved / total) * 100) : 0;
+                          return (
+                            <Badge key={name} variant="outline" className={cn("text-[8px] sm:text-[9px] px-1.5 py-0 border-destructive/20", rate >= 70 ? "bg-success/10 text-success" : rate >= 40 ? "bg-warning/10 text-warning" : "bg-destructive/10 text-destructive")}>{name} {rate}%</Badge>
+                          );
+                        })}
+                      </div>
+                    ),
+                  },
+                ].map((card, index) => (
+                  <motion.div
+                    key={card.title}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3, delay: index * 0.05 }}
+                    className={`
+                      relative rounded-xl ${card.bgClass} ${card.borderClass} border
+                      transition-all duration-300
+                      ${card.glowClass} active:scale-[0.97]
+                    `}
+                  >
+                    <div className="p-3 sm:p-4">
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <span className="text-lg sm:text-xl">{card.emoji}</span>
+                          <p className="text-[10px] sm:text-xs text-muted-foreground font-medium truncate">{card.title}</p>
+                        </div>
+                        <p className={`text-xl sm:text-2xl font-bold shrink-0 tabular-nums ${card.valueClass}`}>
+                          {card.value}
+                        </p>
+                      </div>
+                      {card.badges}
                     </div>
-                  </CardContent>
-                </Card>
-                <Card className="shadow-card border-l-4 border-l-muted-foreground">
-                  <CardContent className="p-3 sm:p-4">
-                    <p className="text-[10px] sm:text-xs text-muted-foreground">Total Insident</p>
-                    <p className="text-lg sm:text-2xl font-bold mt-1">{teamStatsByCategory.ritelTotal + teamStatsByCategory.feederTotal}</p>
-                    <div className="flex flex-wrap gap-1 mt-1.5">
-                      {teamStatsByCategory.topConstraints.map(([name, count]) => (
-                        <Badge key={name} variant="outline" className="text-[8px] sm:text-[9px] px-1.5 py-0 bg-muted/50 border-border">{name} {count}</Badge>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-                <Card className="shadow-card border-l-4 border-l-success">
-                  <CardContent className="p-3 sm:p-4">
-                    <p className="text-[10px] sm:text-xs text-muted-foreground">Total Resolved</p>
-                    <p className="text-lg sm:text-2xl font-bold text-success mt-1">{teamStatsByCategory.ritelResolved + teamStatsByCategory.feederResolved}</p>
-                    <div className="flex flex-wrap gap-1 mt-1.5">
-                      {teamStatsByCategory.topConstraintsResolved.map(([name, count]) => (
-                        <Badge key={name} variant="outline" className="text-[8px] sm:text-[9px] px-1.5 py-0 bg-success/10 text-success border-success/20">{name} {count}</Badge>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-                <Card className="shadow-card border-l-4 border-l-destructive">
-                  <CardContent className="p-3 sm:p-4">
-                    <p className="text-[10px] sm:text-xs text-muted-foreground">Resolution Rate</p>
-                    <p className="text-lg sm:text-2xl font-bold text-primary mt-1">
-                      {(teamStatsByCategory.ritelTotal + teamStatsByCategory.feederTotal) > 0
-                        ? Math.round(((teamStatsByCategory.ritelResolved + teamStatsByCategory.feederResolved) / (teamStatsByCategory.ritelTotal + teamStatsByCategory.feederTotal)) * 100)
-                        : 0}%
-                    </p>
-                    <div className="flex flex-wrap gap-1 mt-1.5">
-                      {teamStatsByCategory.topConstraints.slice(0, 3).map(([name, total]) => {
-                        const resolved = teamStatsByCategory.constraintResolved[name] || 0;
-                        const rate = total > 0 ? Math.round((resolved / total) * 100) : 0;
-                        return (
-                          <Badge key={name} variant="outline" className={cn("text-[8px] sm:text-[9px] px-1.5 py-0 border-destructive/20", rate >= 70 ? "bg-success/10 text-success" : rate >= 40 ? "bg-warning/10 text-warning" : "bg-destructive/10 text-destructive")}>{name} {rate}%</Badge>
-                        );
-                      })}
-                    </div>
-                  </CardContent>
-                </Card>
+                  </motion.div>
+                ))}
               </div>
 
               {/* Statistik Incident per Bagian */}
