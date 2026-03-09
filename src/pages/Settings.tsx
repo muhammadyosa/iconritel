@@ -386,12 +386,9 @@ export default function Settings() {
         </div>
       </div>
 
-      <Tabs defaultValue="info" className="space-y-6">
+      <Tabs defaultValue="import" className="space-y-6">
         <div className="overflow-x-auto scrollbar-hide -mx-2 px-2 sm:mx-0 sm:px-0">
           <TabsList className={`inline-flex w-auto min-w-full sm:min-w-0 gap-1 h-auto flex-wrap sm:flex-nowrap p-1`}>
-            <TabsTrigger value="info" className="text-[11px] sm:text-sm px-2.5 sm:px-3 py-1.5 sm:py-2 whitespace-nowrap">
-              📌 Info
-            </TabsTrigger>
             <TabsTrigger value="import" className="text-[11px] sm:text-sm px-2.5 sm:px-3 py-1.5 sm:py-2 whitespace-nowrap">
               📥 Import
             </TabsTrigger>
@@ -413,6 +410,9 @@ export default function Settings() {
                 💻 Users
               </TabsTrigger>
             )}
+            <TabsTrigger value="info" className="text-[11px] sm:text-sm px-2.5 sm:px-3 py-1.5 sm:py-2 whitespace-nowrap">
+              📌 Info
+            </TabsTrigger>
           </TabsList>
         </div>
 
