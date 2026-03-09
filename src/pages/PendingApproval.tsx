@@ -4,6 +4,7 @@ import { ShieldAlert, LogOut, RefreshCw } from "lucide-react";
 import { motion, useMotionValue, useTransform, useSpring } from "framer-motion";
 import { ParticleBackground } from "@/components/ParticleBackground";
 import plnIconPlusLogo from "@/assets/pln-icon-plus-new.png";
+import iconnetMascot from "@/assets/iconnet-mascot.png";
 import iconnetLogo from "@/assets/iconnet-logo-new.png";
 import indonesiaMap from "@/assets/indonesia-map.png";
 import { useState, useRef } from "react";
