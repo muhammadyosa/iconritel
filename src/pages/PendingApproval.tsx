@@ -93,60 +93,60 @@ export default function PendingApproval() {
         <div className="w-[600px] h-[600px] bg-cyan-500/8 rounded-full blur-[120px]" />
       </div>
 
-      <motion.div
-        ref={cardRef}
-        initial={{ opacity: 0, y: 30, scale: 0.95 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-        style={{ rotateX, rotateY, transformStyle: "preserve-3d", perspective: 1000 }}
-        onMouseMove={handleMouseMove}
-        onMouseLeave={handleMouseLeave}
-        className="relative z-10 w-full max-w-md mx-4"
-      >
-        <Card className="border-cyan-500/20 bg-slate-900/80 backdrop-blur-xl shadow-[0_0_40px_rgba(6,182,212,0.1)]">
-          <CardContent className="pt-8 pb-8 px-6 text-center space-y-6">
-            <div className="space-y-2">
-              <div className="mx-auto w-16 h-16 rounded-full bg-amber-500/10 flex items-center justify-center">
-                <ShieldAlert className="h-8 w-8 text-amber-400" />
+      <div className="relative z-10 w-full max-w-md mx-4">
+        <motion.div
+          ref={cardRef}
+          initial={{ opacity: 0, y: 30, scale: 0.95 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+          style={{ rotateX, rotateY, transformStyle: "preserve-3d", perspective: 1000 }}
+          onMouseMove={handleMouseMove}
+          onMouseLeave={handleMouseLeave}
+        >
+          <Card className="border-cyan-500/20 bg-slate-900/80 backdrop-blur-xl shadow-[0_0_40px_rgba(6,182,212,0.1)]">
+            <CardContent className="pt-8 pb-8 px-6 text-center space-y-6">
+              <div className="space-y-2">
+                <div className="mx-auto w-16 h-16 rounded-full bg-amber-500/10 flex items-center justify-center">
+                  <ShieldAlert className="h-8 w-8 text-amber-400" />
+                </div>
+                <h1 className="text-xl font-bold text-cyan-50">Menunggu Persetujuan</h1>
+                <p className="text-sm text-slate-400 leading-relaxed">
+                  Akun Anda telah berhasil dibuat, namun memerlukan persetujuan dari <strong className="text-cyan-300">Admin</strong> sebelum dapat mengakses sistem NOC RITEL.
+                </p>
+                <p className="text-xs text-slate-500">
+                  Silakan hubungi admin untuk mempercepat proses persetujuan.
+                </p>
               </div>
-              <h1 className="text-xl font-bold text-cyan-50">Menunggu Persetujuan</h1>
-              <p className="text-sm text-slate-400 leading-relaxed">
-                Akun Anda telah berhasil dibuat, namun memerlukan persetujuan dari <strong className="text-cyan-300">Admin</strong> sebelum dapat mengakses sistem NOC RITEL.
-              </p>
-              <p className="text-xs text-slate-500">
-                Silakan hubungi admin untuk mempercepat proses persetujuan.
-              </p>
-            </div>
 
-            <div className="flex flex-col gap-3">
-              <Button
-                variant="outline"
-                onClick={handleCheckStatus}
-                disabled={isChecking}
-                className="w-full border-cyan-500/30 text-cyan-300 hover:bg-cyan-500/10 hover:text-cyan-200"
-              >
-                {isChecking ? (
-                  <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                ) : (
-                  <RefreshCw className="h-4 w-4 mr-2" />
-                )}
-                Cek Status Persetujuan
-              </Button>
-              <Button
-                variant="ghost"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  signOut();
-                }}
-                className="w-full text-slate-500 hover:text-slate-300 relative z-20"
-              >
-                <LogOut className="h-4 w-4 mr-2" />
-                Keluar
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </motion.div>
+              <div className="flex flex-col gap-3 relative z-30" style={{ transform: "translateZ(0)" }}>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleCheckStatus}
+                  disabled={isChecking}
+                  className="w-full border-cyan-500/30 text-cyan-300 hover:bg-cyan-500/10 hover:text-cyan-200 active:scale-95 transition-transform touch-manipulation"
+                >
+                  {isChecking ? (
+                    <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                  ) : (
+                    <RefreshCw className="h-4 w-4 mr-2" />
+                  )}
+                  Cek Status Persetujuan
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={() => signOut()}
+                  className="w-full text-slate-500 hover:text-slate-300 active:scale-95 transition-transform touch-manipulation"
+                >
+                  <LogOut className="h-4 w-4 mr-2" />
+                  Keluar
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+      </div>
     </div>
   );
 }
