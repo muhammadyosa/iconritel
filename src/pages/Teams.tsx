@@ -152,6 +152,21 @@ export default function Teams() {
         .map(([team, s]) => ({ team, ...s }))
         .sort((a, b) => b.total - a.total);
 
+    // Constraint breakdown
+    const constraintCount: Record<string, number> = {};
+    const constraintResolved: Record<string, number> = {};
+    filteredTickets.forEach((ticket) => {
+      const cat = ticket.constraint || "Lainnya";
+      constraintCount[cat] = (constraintCount[cat] || 0) + 1;
+      if (ticket.status === "Resolved") constraintResolved[cat] = (constraintResolved[cat] || 0) + 1;
+    });
+    const topConstraints = Object.entries(constraintCount)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 4);
+    const topConstraintsResolved = Object.entries(constraintResolved)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 4);
+
     return {
       ritel: toSorted(ritelStats),
       feeder: toSorted(feederStats),
@@ -159,6 +174,10 @@ export default function Teams() {
       feederTotal: Object.values(feederStats).reduce((s, v) => s + v.total, 0),
       ritelResolved: Object.values(ritelStats).reduce((s, v) => s + v.resolved, 0),
       feederResolved: Object.values(feederStats).reduce((s, v) => s + v.resolved, 0),
+      topConstraints,
+      topConstraintsResolved,
+      constraintCount,
+      constraintResolved,
     };
   }, [filteredTickets]);
 
@@ -421,12 +440,22 @@ export default function Teams() {
                   <CardContent className="p-3 sm:p-4">
                     <p className="text-[10px] sm:text-xs text-muted-foreground">Total Insident</p>
                     <p className="text-lg sm:text-2xl font-bold mt-1">{teamStatsByCategory.ritelTotal + teamStatsByCategory.feederTotal}</p>
+                    <div className="flex flex-wrap gap-1 mt-1.5">
+                      {teamStatsByCategory.topConstraints.map(([name, count]) => (
+                        <Badge key={name} variant="outline" className="text-[8px] sm:text-[9px] px-1.5 py-0 bg-muted/50 border-border">{name} {count}</Badge>
+                      ))}
+                    </div>
                   </CardContent>
                 </Card>
                 <Card className="shadow-card border-l-4 border-l-success">
                   <CardContent className="p-3 sm:p-4">
                     <p className="text-[10px] sm:text-xs text-muted-foreground">Total Resolved</p>
                     <p className="text-lg sm:text-2xl font-bold text-success mt-1">{teamStatsByCategory.ritelResolved + teamStatsByCategory.feederResolved}</p>
+                    <div className="flex flex-wrap gap-1 mt-1.5">
+                      {teamStatsByCategory.topConstraintsResolved.map(([name, count]) => (
+                        <Badge key={name} variant="outline" className="text-[8px] sm:text-[9px] px-1.5 py-0 bg-success/10 text-success border-success/20">{name} {count}</Badge>
+                      ))}
+                    </div>
                   </CardContent>
                 </Card>
                 <Card className="shadow-card border-l-4 border-l-destructive">
@@ -437,6 +466,15 @@ export default function Teams() {
                         ? Math.round(((teamStatsByCategory.ritelResolved + teamStatsByCategory.feederResolved) / (teamStatsByCategory.ritelTotal + teamStatsByCategory.feederTotal)) * 100)
                         : 0}%
                     </p>
+                    <div className="flex flex-wrap gap-1 mt-1.5">
+                      {teamStatsByCategory.topConstraints.slice(0, 3).map(([name, total]) => {
+                        const resolved = teamStatsByCategory.constraintResolved[name] || 0;
+                        const rate = total > 0 ? Math.round((resolved / total) * 100) : 0;
+                        return (
+                          <Badge key={name} variant="outline" className={cn("text-[8px] sm:text-[9px] px-1.5 py-0 border-destructive/20", rate >= 70 ? "bg-success/10 text-success" : rate >= 40 ? "bg-warning/10 text-warning" : "bg-destructive/10 text-destructive")}>{name} {rate}%</Badge>
+                        );
+                      })}
+                    </div>
                   </CardContent>
                 </Card>
               </div>
