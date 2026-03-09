@@ -12,13 +12,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { LogOut, Shield, User, Users } from "lucide-react";
+import { LogOut, Shield, User, Users, Users } from "lucide-react";
 import { toast } from "sonner";
 
 export function UserMenu() {
   const navigate = useNavigate();
   const { user, profile, signOut } = useAuth();
-  const { role, isAdmin } = useUserRole();
+  const { role, , isReviewerisAdmin } = useUserRole();
 
   if (!user) return null;
 
