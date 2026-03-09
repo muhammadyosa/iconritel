@@ -29,7 +29,7 @@ interface UserWithRole {
   avatar_url: string | null;
   created_at: string;
   last_online: string | null;
-  role: "admin" | "operator";
+  role: "admin" | "operator" | "reviewer" | "reviewer" | "reviewer";
   lastAction?: UserActivity;
 }
 
@@ -79,7 +79,7 @@ export function UserManagement() {
           avatar_url: profile.avatar_url,
           created_at: profile.created_at,
           last_online: profile.last_online as string | null,
-          role: (userRole?.role as "admin" | "operator") || "operator",
+          role: (userRole?.role as "admin" | "operator" | "reviewer") || "operator",
           lastAction: latestActivityMap.get(profile.user_id),
         };
       });
@@ -101,7 +101,7 @@ export function UserManagement() {
     }
   }, [isAdmin]);
 
-  const handleRoleChange = async (userId: string, newRole: "admin" | "operator") => {
+  const handleRoleChange = async (userId: string, newRole: "admin" | "operator" | "reviewer") => {
     setUpdatingUserId(userId);
     try {
       // Get current role for logging
@@ -391,7 +391,7 @@ export function UserManagement() {
                     <TableCell>
                       <Select
                         value={user.role}
-                        onValueChange={(value: "admin" | "operator") =>
+                        onValueChange={(value: "admin" | "operator" | "reviewer") =>
                           handleRoleChange(user.user_id, value)
                         }
                         disabled={updatingUserId === user.user_id}
@@ -414,6 +414,12 @@ export function UserManagement() {
                             <div className="flex items-center gap-2">
                               <User className="h-3 w-3 text-muted-foreground" />
                               Operator
+                            </div>
+                          </SelectItem>
+                          <SelectItem value="reviewer">
+                            <div className="flex items-center gap-2">
+                              <Users className="h-3 w-3 text-amber-500" />
+                              Reviewer
                             </div>
                           </SelectItem>
                         </SelectContent>
@@ -472,7 +478,7 @@ export function UserManagement() {
         {/* Role Legend */}
         <div className="mt-6 p-4 bg-muted/50 rounded-lg">
           <p className="text-xs font-medium text-muted-foreground mb-3">Keterangan Role:</p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div className="flex items-start gap-2">
               <Badge variant="default" className="mt-0.5">
                 <Shield className="h-3 w-3 mr-1" />
@@ -489,6 +495,15 @@ export function UserManagement() {
               </Badge>
               <span className="text-xs text-muted-foreground">
                 Akses standar: dapat membuat dan mengedit tiket & laporan
+              </span>
+            </div>
+            <div className="flex items-start gap-2">
+              <Badge variant="outline" className="mt-0.5 border-amber-500/50 text-amber-600">
+                <Users className="h-3 w-3 mr-1" />
+                Reviewer
+              </Badge>
+              <span className="text-xs text-muted-foreground">
+                Hanya lihat: tidak dapat membuat atau mengedit data (view only)
               </span>
             </div>
           </div>

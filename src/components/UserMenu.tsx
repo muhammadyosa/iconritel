@@ -12,13 +12,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { LogOut, Shield, User } from "lucide-react";
+import { LogOut, Shield, User, Users } from "lucide-react";
 import { toast } from "sonner";
 
 export function UserMenu() {
   const navigate = useNavigate();
   const { user, profile, signOut } = useAuth();
-  const { role, isAdmin } = useUserRole();
+  const { role, isAdmin, isReviewer } = useUserRole();
 
   if (!user) return null;
 
@@ -69,6 +69,11 @@ export function UserMenu() {
             <>
               <Shield className="h-4 w-4 text-primary" />
               <Badge variant="default" className="text-xs">Admin</Badge>
+            </>
+          ) : isReviewer ? (
+            <>
+              <Users className="h-4 w-4 text-amber-500" />
+              <Badge variant="outline" className="text-xs border-amber-500/50 text-amber-600">Reviewer</Badge>
             </>
           ) : (
             <>

@@ -62,7 +62,7 @@ export default function TicketManagement() {
   } = useCloudTickets();
 
   // User role for permission-based UI
-  const { isAdmin } = useUserRole();
+  const { isAdmin, isReviewer } = useUserRole();
   
   // Get current user for tracking who created tickets
   const { user, profile } = useAuth();
@@ -547,17 +547,19 @@ export default function TicketManagement() {
                       {filteredData.slice(0, 200).map((record, idx) => (
                         <TableRow key={idx} className="h-6 sm:h-7">
                           <TableCell className="px-1 sm:px-1.5 py-0.5">
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              className="h-5 text-[8px] sm:text-[9px] px-1.5 sm:px-2"
-                              onClick={() => {
-                                setSelectedRecord(record);
-                                setIsFormOpen(true);
-                              }}
-                            >
-                              Pilih
-                            </Button>
+                            {!isReviewer && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="h-5 text-[8px] sm:text-[9px] px-1.5 sm:px-2"
+                                onClick={() => {
+                                  setSelectedRecord(record);
+                                  setIsFormOpen(true);
+                                }}
+                              >
+                                Pilih
+                              </Button>
+                            )}
                           </TableCell>
                           <TableCell className="px-1 sm:px-1.5 py-0.5 font-mono text-[9px] sm:text-[10px]">{String(record.service || "")}</TableCell>
                           <TableCell className="px-1 sm:px-1.5 py-0.5 text-[9px] sm:text-[10px] font-medium">{String(record.hostname || "")}</TableCell>
@@ -601,14 +603,15 @@ export default function TicketManagement() {
                 >
                   <RefreshCw className={`h-3 w-3 ${isLoadingTickets ? 'animate-spin' : ''}`} />
                 </Button>
-                <Dialog open={isManualFormOpen} onOpenChange={setIsManualFormOpen}>
-                  <DialogTrigger asChild>
-                    <Button variant="outline" size="sm" className="h-6 sm:h-7 text-[9px] sm:text-[10px] px-1.5 sm:px-2">
-                      <FileEdit className="h-3 w-3 mr-0.5 sm:mr-1" />
-                      <span className="hidden xs:inline">Manual</span>
-                      <span className="xs:hidden">+</span>
-                    </Button>
-                  </DialogTrigger>
+                {!isReviewer && (
+                  <Dialog open={isManualFormOpen} onOpenChange={setIsManualFormOpen}>
+                    <DialogTrigger asChild>
+                      <Button variant="outline" size="sm" className="h-6 sm:h-7 text-[9px] sm:text-[10px] px-1.5 sm:px-2">
+                        <FileEdit className="h-3 w-3 mr-0.5 sm:mr-1" />
+                        <span className="hidden xs:inline">Manual</span>
+                        <span className="xs:hidden">+</span>
+                      </Button>
+                    </DialogTrigger>
                   <DialogContent className="w-[95vw] max-w-2xl max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
                       <DialogTitle>Input Tiket Manual</DialogTitle>
@@ -742,6 +745,7 @@ export default function TicketManagement() {
                     </div>
                   </DialogContent>
                 </Dialog>
+                )}
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="outline" size="sm" className="h-6 sm:h-7 text-[9px] sm:text-[10px] px-1.5 sm:px-2">
@@ -883,6 +887,7 @@ export default function TicketManagement() {
         <TicketDetailDialog
           ticket={selectedTicketForDetail}
           isAdmin={isAdmin}
+          isReviewer={isReviewer}
           updateTicket={updateTicket}
           deleteTicket={deleteTicket}
           open={!!selectedTicketForDetail}
