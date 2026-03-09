@@ -5,6 +5,8 @@ import { ShieldAlert, LogOut, RefreshCw } from "lucide-react";
 import { motion } from "framer-motion";
 import { ParticleBackground } from "@/components/ParticleBackground";
 import plnIconPlusLogo from "@/assets/pln-icon-plus-new.png";
+import iconnetLogo from "@/assets/iconnet-logo-new.png";
+import indonesiaMap from "@/assets/indonesia-map.png";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -27,7 +29,6 @@ export default function PendingApproval() {
 
       if (data?.is_approved) {
         toast.success("Akun telah disetujui! Mengalihkan...");
-        // Force reload to re-evaluate auth state
         window.location.href = "/";
       } else {
         toast.info("Akun belum disetujui. Hubungi admin.");
@@ -40,27 +41,61 @@ export default function PendingApproval() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-gradient-to-br from-background via-background to-muted/30">
+    <div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-gradient-to-br from-slate-950 via-[#0a1628] to-slate-950">
+      {/* Indonesia Map Background */}
+      <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 1 }}>
+        <img 
+          src={indonesiaMap} 
+          alt="" 
+          className="w-full h-full opacity-[0.30]"
+          style={{ filter: 'brightness(0.8) saturate(1)', objectFit: 'contain', objectPosition: 'center' }}
+        />
+      </div>
+
       <ParticleBackground />
+
+      {/* Top Left - PLN Icon Plus Logo */}
+      <motion.div 
+        className="absolute top-4 left-4 sm:top-6 sm:left-6 z-20"
+        initial={{ opacity: 0, x: -20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.6, delay: 0.2 }}
+      >
+        <img src={plnIconPlusLogo} alt="PLN Icon Plus" className="h-8 sm:h-10 w-auto object-contain drop-shadow-[0_0_10px_rgba(56,189,248,0.3)]" />
+      </motion.div>
+
+      {/* Top Right - ICONNET Logo */}
+      <motion.div 
+        className="absolute top-4 right-4 sm:top-6 sm:right-6 z-20"
+        initial={{ opacity: 0, x: 20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.6, delay: 0.2 }}
+      >
+        <img src={iconnetLogo} alt="ICONNET" className="h-8 sm:h-10 w-auto object-contain drop-shadow-[0_0_10px_rgba(56,189,248,0.3)]" />
+      </motion.div>
+
+      {/* Radial glow */}
+      <div className="absolute inset-0 flex items-center justify-center pointer-events-none" style={{ zIndex: 2 }}>
+        <div className="w-[600px] h-[600px] bg-cyan-500/8 rounded-full blur-[120px]" />
+      </div>
+
       <motion.div
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.5 }}
         className="relative z-10 w-full max-w-md mx-4"
       >
-        <Card className="border-amber-500/30 bg-background/95 backdrop-blur shadow-xl">
+        <Card className="border-cyan-500/20 bg-slate-900/80 backdrop-blur-xl shadow-[0_0_40px_rgba(6,182,212,0.1)]">
           <CardContent className="pt-8 pb-8 px-6 text-center space-y-6">
-            <img src={plnIconPlusLogo} alt="PLN Icon Plus" className="h-12 mx-auto" />
-            
             <div className="space-y-2">
               <div className="mx-auto w-16 h-16 rounded-full bg-amber-500/10 flex items-center justify-center">
-                <ShieldAlert className="h-8 w-8 text-amber-500" />
+                <ShieldAlert className="h-8 w-8 text-amber-400" />
               </div>
-              <h1 className="text-xl font-bold">Menunggu Persetujuan</h1>
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                Akun Anda telah berhasil dibuat, namun memerlukan persetujuan dari <strong>Admin</strong> sebelum dapat mengakses sistem NOC RITEL.
+              <h1 className="text-xl font-bold text-cyan-50">Menunggu Persetujuan</h1>
+              <p className="text-sm text-slate-400 leading-relaxed">
+                Akun Anda telah berhasil dibuat, namun memerlukan persetujuan dari <strong className="text-cyan-300">Admin</strong> sebelum dapat mengakses sistem NOC RITEL.
               </p>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-slate-500">
                 Silakan hubungi admin untuk mempercepat proses persetujuan.
               </p>
             </div>
@@ -70,7 +105,7 @@ export default function PendingApproval() {
                 variant="outline"
                 onClick={handleCheckStatus}
                 disabled={isChecking}
-                className="w-full"
+                className="w-full border-cyan-500/30 text-cyan-300 hover:bg-cyan-500/10 hover:text-cyan-200"
               >
                 {isChecking ? (
                   <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
@@ -82,7 +117,7 @@ export default function PendingApproval() {
               <Button
                 variant="ghost"
                 onClick={signOut}
-                className="w-full text-muted-foreground"
+                className="w-full text-slate-500 hover:text-slate-300"
               >
                 <LogOut className="h-4 w-4 mr-2" />
                 Keluar
