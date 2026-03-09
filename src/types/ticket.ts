@@ -36,6 +36,9 @@ export const RITEL_CONSTRAINTS = [
   "PENGECEKAN BERSAMA",
   "CABLE PROBLEM",
   "INTERMITTENT",
+  "RELOKASI ONT",
+  "NO INET",
+  "INET SLOW",
 ];
 
 // FEEDER Constraints - masuk bucket FEEDER (PROACTIVE NOC RETAIL)
