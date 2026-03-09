@@ -12,7 +12,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { LogOut, Shield, User, Users, Users } from "lucide-react";
+import { LogOut, Shield, User, Users } from "lucide-react";
 import { toast } from "sonner";
 
 export function UserMenu() {
