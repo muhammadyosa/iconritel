@@ -134,8 +134,11 @@ export default function PendingApproval() {
               </Button>
               <Button
                 variant="ghost"
-                onClick={signOut}
-                className="w-full text-slate-500 hover:text-slate-300"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  signOut();
+                }}
+                className="w-full text-slate-500 hover:text-slate-300 relative z-20"
               >
                 <LogOut className="h-4 w-4 mr-2" />
                 Keluar
