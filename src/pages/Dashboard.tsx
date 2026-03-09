@@ -505,7 +505,7 @@ export default function Dashboard() {
                         dataKey="ritel" 
                         stroke="hsl(217, 91%, 60%)" 
                         strokeWidth={2}
-                        dot={{ fill: "hsl(217, 91%, 60%)", strokeWidth: 1, r: trendDays > 14 ? 2 : 3, cursor: "pointer" }}
+                        dot={{ fill: "hsl(217, 91%, 60%)", strokeWidth: 1, r: numDays > 14 ? 2 : 3, cursor: "pointer" }}
                         activeDot={{ 
                           r: 6, 
                           strokeWidth: 2, 
