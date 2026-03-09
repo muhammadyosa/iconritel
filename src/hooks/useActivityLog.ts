@@ -30,6 +30,8 @@ const ACTION_LABELS: Record<ActivityAction, string> = {
   edit_username: "Mengedit username",
   import_tickets: "Mengimport tiket",
   export_data: "Mengexport data",
+  approve_user: "Menyetujui user",
+  revoke_user: "Mencabut akses user",
   login: "Login ke sistem",
   bulk_delete_tickets: "Menghapus tiket massal",
 };
