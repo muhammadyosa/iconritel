@@ -152,6 +152,21 @@ export default function Teams() {
         .map(([team, s]) => ({ team, ...s }))
         .sort((a, b) => b.total - a.total);
 
+    // Constraint breakdown
+    const constraintCount: Record<string, number> = {};
+    const constraintResolved: Record<string, number> = {};
+    filteredTickets.forEach((ticket) => {
+      const cat = ticket.constraint || "Lainnya";
+      constraintCount[cat] = (constraintCount[cat] || 0) + 1;
+      if (ticket.status === "Resolved") constraintResolved[cat] = (constraintResolved[cat] || 0) + 1;
+    });
+    const topConstraints = Object.entries(constraintCount)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 4);
+    const topConstraintsResolved = Object.entries(constraintResolved)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 4);
+
     return {
       ritel: toSorted(ritelStats),
       feeder: toSorted(feederStats),
@@ -159,6 +174,10 @@ export default function Teams() {
       feederTotal: Object.values(feederStats).reduce((s, v) => s + v.total, 0),
       ritelResolved: Object.values(ritelStats).reduce((s, v) => s + v.resolved, 0),
       feederResolved: Object.values(feederStats).reduce((s, v) => s + v.resolved, 0),
+      topConstraints,
+      topConstraintsResolved,
+      constraintCount,
+      constraintResolved,
     };
   }, [filteredTickets]);
 
