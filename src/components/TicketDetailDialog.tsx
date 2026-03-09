@@ -359,7 +359,8 @@ export function TicketDetailDialog({
                     </AlertDialogContent>
                   </AlertDialog>
                 )}
-              </div>
+                </div>
+              )}
             </>
           )}
         </div>
