@@ -523,7 +523,7 @@ export default function Dashboard() {
                         dataKey="feeder" 
                         stroke="hsl(38, 92%, 50%)" 
                         strokeWidth={2}
-                        dot={{ fill: "hsl(38, 92%, 50%)", strokeWidth: 1, r: trendDays > 14 ? 2 : 3, cursor: "pointer" }}
+                        dot={{ fill: "hsl(38, 92%, 50%)", strokeWidth: 1, r: numDays > 14 ? 2 : 3, cursor: "pointer" }}
                         activeDot={{ 
                           r: 6, 
                           strokeWidth: 2, 
