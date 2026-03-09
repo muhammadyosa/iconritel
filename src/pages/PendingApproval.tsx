@@ -4,6 +4,7 @@ import { ShieldAlert, LogOut, RefreshCw } from "lucide-react";
 import { motion, useMotionValue, useTransform, useSpring } from "framer-motion";
 import { ParticleBackground } from "@/components/ParticleBackground";
 import plnIconPlusLogo from "@/assets/pln-icon-plus-new.png";
+import iconnetMascot from "@/assets/iconnet-mascot.png";
 import iconnetLogo from "@/assets/iconnet-logo-new.png";
 import indonesiaMap from "@/assets/indonesia-map.png";
 import { useState, useRef } from "react";
@@ -114,6 +115,24 @@ export default function PendingApproval() {
               className="mb-6"
             >
               <img src={plnIconPlusLogo} alt="PLN Icon Plus" className="h-10 mx-auto" />
+            </motion.div>
+
+            {/* Mascot Coni with floating animation */}
+            <motion.div
+              initial={{ opacity: 0, y: -10, scale: 0.9 }}
+              animate={{ opacity: 1, y: [0, -8, 0], scale: 1 }}
+              transition={{
+                opacity: { duration: 0.5, delay: 0.35 },
+                scale: { duration: 0.5, delay: 0.35 },
+                y: { duration: 3, repeat: Infinity, ease: "easeInOut", delay: 0.8 },
+              }}
+              className="mb-4"
+            >
+              <img
+                src={iconnetMascot}
+                alt="ICONNET Mascot"
+                className="h-16 sm:h-20 mx-auto drop-shadow-[0_0_20px_rgba(56,189,248,0.4)]"
+              />
             </motion.div>
 
             {/* Shield Icon */}
