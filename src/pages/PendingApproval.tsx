@@ -2,19 +2,33 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ShieldAlert, LogOut, RefreshCw } from "lucide-react";
-import { motion } from "framer-motion";
+import { motion, useMotionValue, useTransform, useSpring } from "framer-motion";
 import { ParticleBackground } from "@/components/ParticleBackground";
 import plnIconPlusLogo from "@/assets/pln-icon-plus-new.png";
 import iconnetLogo from "@/assets/iconnet-logo-new.png";
 import indonesiaMap from "@/assets/indonesia-map.png";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 export default function PendingApproval() {
   const { signOut, user } = useAuth();
   const [isChecking, setIsChecking] = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
 
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+  const springConfig = { stiffness: 150, damping: 20 };
+  const rotateX = useSpring(useTransform(mouseY, [-0.5, 0.5], [8, -8]), springConfig);
+  const rotateY = useSpring(useTransform(mouseX, [-0.5, 0.5], [-8, 8]), springConfig);
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!cardRef.current) return;
+    const rect = cardRef.current.getBoundingClientRect();
+    mouseX.set((e.clientX - rect.left) / rect.width - 0.5);
+    mouseY.set((e.clientY - rect.top) / rect.height - 0.5);
+  };
+  const handleMouseLeave = () => { mouseX.set(0); mouseY.set(0); };
   const handleCheckStatus = async () => {
     if (!user) return;
     setIsChecking(true);
@@ -80,9 +94,13 @@ export default function PendingApproval() {
       </div>
 
       <motion.div
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.5 }}
+        ref={cardRef}
+        initial={{ opacity: 0, y: 30, scale: 0.95 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+        style={{ rotateX, rotateY, transformStyle: "preserve-3d", perspective: 1000 }}
+        onMouseMove={handleMouseMove}
+        onMouseLeave={handleMouseLeave}
         className="relative z-10 w-full max-w-md mx-4"
       >
         <Card className="border-cyan-500/20 bg-slate-900/80 backdrop-blur-xl shadow-[0_0_40px_rgba(6,182,212,0.1)]">
