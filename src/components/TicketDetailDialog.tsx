@@ -35,6 +35,7 @@ import { toast } from "sonner";
 interface TicketDetailDialogProps {
   ticket: Ticket;
   isAdmin: boolean;
+  isReviewer?: boolean;
   updateTicket: (id: string, updates: Partial<Ticket>) => Promise<void>;
   deleteTicket: (id: string) => Promise<void>;
   open?: boolean;
