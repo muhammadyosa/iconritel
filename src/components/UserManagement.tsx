@@ -29,7 +29,7 @@ interface UserWithRole {
   avatar_url: string | null;
   created_at: string;
   last_online: string | null;
-  role: "admin" | "operator" | "reviewer";
+  role: "admin" | "operator" | "reviewer" | "reviewer";
   lastAction?: UserActivity;
 }
 
@@ -79,7 +79,7 @@ export function UserManagement() {
           avatar_url: profile.avatar_url,
           created_at: profile.created_at,
           last_online: profile.last_online as string | null,
-          role: (userRole?.role as "admin" | "operator") || "operator",
+          role: (userRole?.role as "admin" | "reviewer" | "operator") || "operator",
           lastAction: latestActivityMap.get(profile.user_id),
         };
       });
