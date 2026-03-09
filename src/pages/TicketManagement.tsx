@@ -887,6 +887,7 @@ export default function TicketManagement() {
         <TicketDetailDialog
           ticket={selectedTicketForDetail}
           isAdmin={isAdmin}
+          isReviewer={isReviewer}
           updateTicket={updateTicket}
           deleteTicket={deleteTicket}
           open={!!selectedTicketForDetail}

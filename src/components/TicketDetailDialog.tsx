@@ -122,7 +122,7 @@ export function TicketDetailDialog({
         <DialogHeader>
           <DialogTitle className="flex items-center justify-between pr-8">
             <span>Detail Insident {ticket.id}</span>
-            {!isEditing && (
+            {!isEditing && !isReviewer && (
               <Button variant="outline" size="sm" onClick={handleStartEdit} className="h-7">
                 <Edit className="h-3 w-3 mr-1" />
                 Edit
