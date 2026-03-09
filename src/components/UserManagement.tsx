@@ -478,7 +478,7 @@ export function UserManagement() {
         {/* Role Legend */}
         <div className="mt-6 p-4 bg-muted/50 rounded-lg">
           <p className="text-xs font-medium text-muted-foreground mb-3">Keterangan Role:</p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div className="flex items-start gap-2">
               <Badge variant="default" className="mt-0.5">
                 <Shield className="h-3 w-3 mr-1" />
@@ -495,6 +495,15 @@ export function UserManagement() {
               </Badge>
               <span className="text-xs text-muted-foreground">
                 Akses standar: dapat membuat dan mengedit tiket & laporan
+              </span>
+            </div>
+            <div className="flex items-start gap-2">
+              <Badge variant="outline" className="mt-0.5 border-amber-500/50 text-amber-600">
+                <Users className="h-3 w-3 mr-1" />
+                Reviewer
+              </Badge>
+              <span className="text-xs text-muted-foreground">
+                Hanya lihat: tidak dapat membuat atau mengedit data (view only)
               </span>
             </div>
           </div>
