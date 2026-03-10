@@ -19,21 +19,21 @@ export type ActivityAction =
   | "revoke_user";
 
 const ACTION_LABELS: Record<ActivityAction, string> = {
-  create_ticket: "Membuat tiket",
-  update_ticket: "Mengupdate tiket",
-  delete_ticket: "Menghapus tiket",
-  resolve_ticket: "Menyelesaikan tiket",
+  create_ticket: "Membuat incident",
+  update_ticket: "Mengupdate incident",
+  delete_ticket: "Menghapus incident",
+  resolve_ticket: "Menyelesaikan incident",
   create_shift_report: "Membuat laporan shift",
   update_shift_report: "Mengupdate laporan shift",
   delete_shift_report: "Menghapus laporan shift",
   change_role: "Mengubah role user",
   edit_username: "Mengedit username",
-  import_tickets: "Mengimport tiket",
+  import_tickets: "Mengimport incident",
   export_data: "Mengexport data",
   approve_user: "Menyetujui user",
   revoke_user: "Mencabut akses user",
   login: "Login ke sistem",
-  bulk_delete_tickets: "Menghapus tiket massal",
+  bulk_delete_tickets: "Menghapus incident massal",
 };
 
 export function getActionLabel(action: string): string {
