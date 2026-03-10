@@ -850,7 +850,7 @@ function PendingTicketsList() {
     } catch (error) {
       toast({
         title: "Gagal hapus",
-        description: "Tidak dapat menghapus tiket.",
+        description: "Tidak dapat menghapus incident.",
         variant: "destructive",
       });
     }
