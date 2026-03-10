@@ -106,7 +106,7 @@ export function TicketHistoryExport() {
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
               <CardTitle className="flex items-center gap-2">
-                📊 Daily Ticket History
+                📊 Daily Incident History
               </CardTitle>
               <CardDescription>
                 Data historis tiket tersimpan permanen di cloud — tidak hilang saat browser di-clear
