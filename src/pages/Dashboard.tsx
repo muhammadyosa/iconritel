@@ -950,7 +950,7 @@ export default function Dashboard() {
           <DialogHeader className="pb-2">
             <DialogTitle className="flex items-center gap-2 text-base">
               <Activity className="h-4 w-4 text-primary" />
-              Detail Tiket
+               Detail Incident
             </DialogTitle>
           </DialogHeader>
           
