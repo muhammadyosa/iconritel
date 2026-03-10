@@ -328,8 +328,8 @@ export default function TicketManagement() {
   return (
     <div className="space-y-2 sm:space-y-3 md:space-y-4 max-w-full overflow-x-hidden">
       <div className="flex flex-col xs:flex-row xs:items-center gap-1 xs:gap-3">
-        <h1 className="text-lg xs:text-xl sm:text-2xl font-bold">🎫 Ticket Management</h1>
-        <span className="text-[10px] xs:text-xs text-muted-foreground">Kelola tiket incident NOC</span>
+        <h1 className="text-lg xs:text-xl sm:text-2xl font-bold">🎫 Incident Management</h1>
+        <span className="text-[10px] xs:text-xs text-muted-foreground">Kelola incident NOC</span>
       </div>
 
       {/* Dialog for creating ticket from Preview Data */}
