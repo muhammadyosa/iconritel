@@ -670,7 +670,7 @@ export function MonthlyAnalytics({ tickets }: MonthlyAnalyticsProps) {
                   </div>
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs">
                     {[
-                      { label: "ID Tiket", value: drillSelectedTicket.id },
+                      { label: "ID Incident", value: drillSelectedTicket.id },
                       { label: "Service ID", value: drillSelectedTicket.serviceId },
                       { label: "Customer", value: drillSelectedTicket.customerName },
                       { label: "Hostname", value: drillSelectedTicket.hostname },
