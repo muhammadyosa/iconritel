@@ -78,7 +78,7 @@ export function UserMenu() {
           ) : (
             <>
               <User className="h-4 w-4 text-muted-foreground" />
-              <Badge variant="secondary" className="text-xs">Operator</Badge>
+              <Badge variant="secondary" className="text-xs">NOC</Badge>
             </>
           )}
         </DropdownMenuItem>

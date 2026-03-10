@@ -2,17 +2,17 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 
-export type AppRole = "admin" | "operator" | "reviewer";
+export type AppRole = "admin" | "noc" | "reviewer";
 
 export function useUserRole() {
   const { user } = useAuth();
-  const [role, setRole] = useState<AppRole>("operator");
+  const [role, setRole] = useState<AppRole>("noc");
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     async function fetchRole() {
       if (!user) {
-        setRole("operator");
+        setRole("noc");
         setIsLoading(false);
         return;
       }
@@ -28,15 +28,15 @@ export function useUserRole() {
           if (import.meta.env.DEV) {
             console.error("Error fetching user role:", error);
           }
-          setRole("operator");
+          setRole("noc");
         } else {
-          setRole((data?.role as AppRole) || "operator");
+          setRole((data?.role as AppRole) || "noc");
         }
       } catch (error) {
         if (import.meta.env.DEV) {
           console.error("Error fetching user role:", error);
         }
-        setRole("operator");
+        setRole("noc");
       } finally {
         setIsLoading(false);
       }
@@ -46,13 +46,13 @@ export function useUserRole() {
   }, [user]);
 
   const isAdmin = role === "admin";
-  const isOperator = role === "operator";
+  const isNOC = role === "noc";
   const isReviewer = role === "reviewer";
 
   return {
     role,
     isAdmin,
-    isOperator,
+    isNOC,
     isReviewer,
     isLoading,
   };
