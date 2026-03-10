@@ -313,7 +313,7 @@ export default function Dashboard() {
                           setPreviousDialogState(null);
                           setShowOltList(false);
                           setFilterDialogTickets(filtered);
-                          setFilterDialogTitle(`⚙️ Tiket dengan Status: ${status}`);
+                          setFilterDialogTitle(`⚙️ Incident dengan Status: ${status}`);
                           setFilterDialogOpen(true);
                         }
                       }}
