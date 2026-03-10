@@ -30,7 +30,7 @@ interface UserWithRole {
   created_at: string;
   last_online: string | null;
   is_approved: boolean;
-  role: "admin" | "operator" | "reviewer";
+  role: "admin" | "noc" | "reviewer";
   lastAction?: UserActivity;
 }
 
@@ -81,7 +81,7 @@ export function UserManagement() {
           created_at: profile.created_at,
           last_online: profile.last_online as string | null,
           is_approved: (profile as any).is_approved ?? false,
-          role: (userRole?.role as "admin" | "operator" | "reviewer") || "operator",
+          role: (userRole?.role as "admin" | "noc" | "reviewer") || "noc",
           lastAction: latestActivityMap.get(profile.user_id),
         };
       });
@@ -103,12 +103,12 @@ export function UserManagement() {
     }
   }, [isAdmin]);
 
-  const handleRoleChange = async (userId: string, newRole: "admin" | "operator" | "reviewer") => {
+  const handleRoleChange = async (userId: string, newRole: "admin" | "noc" | "reviewer") => {
     setUpdatingUserId(userId);
     try {
       // Get current role for logging
       const currentUser = users.find((u) => u.user_id === userId);
-      const oldRole = currentUser?.role || "operator";
+      const oldRole = currentUser?.role || "noc";
 
       // Check if user already has a role entry
       const { data: existingRole } = await supabase
@@ -449,7 +449,7 @@ export function UserManagement() {
                     <TableCell>
                       <Select
                         value={user.role}
-                        onValueChange={(value: "admin" | "operator" | "reviewer") =>
+                        onValueChange={(value: "admin" | "noc" | "reviewer") =>
                           handleRoleChange(user.user_id, value)
                         }
                         disabled={updatingUserId === user.user_id}
@@ -468,10 +468,10 @@ export function UserManagement() {
                               Admin
                             </div>
                           </SelectItem>
-                          <SelectItem value="operator">
+                          <SelectItem value="noc">
                             <div className="flex items-center gap-2">
                               <User className="h-3 w-3 text-muted-foreground" />
-                              Operator
+                              NOC
                             </div>
                           </SelectItem>
                           <SelectItem value="reviewer">
@@ -549,7 +549,7 @@ export function UserManagement() {
             <div className="flex items-start gap-2">
               <Badge variant="secondary" className="mt-0.5">
                 <User className="h-3 w-3 mr-1" />
-                Operator
+                NOC
               </Badge>
               <span className="text-xs text-muted-foreground">
                 Akses standar: dapat membuat dan mengedit tiket & laporan
