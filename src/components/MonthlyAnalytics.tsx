@@ -267,7 +267,7 @@ export function MonthlyAnalytics({ tickets }: MonthlyAnalyticsProps) {
 
       const kpiBoxWidth = (pageWidth - margin * 2 - 9) / 4;
       const kpiItems = [
-        { label: "Total Tiket", value: String(kpis.total), sub: `R:${kpis.ritel} | F:${kpis.feeder}`, color: [30, 64, 144] as const },
+        { label: "Total Incident", value: String(kpis.total), sub: `R:${kpis.ritel} | F:${kpis.feeder}`, color: [30, 64, 144] as const },
         { label: "Resolved", value: String(kpis.resolved), sub: `${kpis.total > 0 ? Math.round((kpis.resolved / kpis.total) * 100) : 0}%`, color: [39, 174, 96] as const },
         { label: "Avg Resolusi", value: `${kpis.avgResolutionHours}h`, sub: "rata-rata", color: [243, 156, 18] as const },
         { label: "SLA Rate", value: `${kpis.slaRate}%`, sub: `${kpis.slaCompliant} OK`, color: (kpis.slaRate >= 80 ? [39, 174, 96] : [231, 76, 60]) as readonly [number, number, number] },
