@@ -317,7 +317,7 @@ export function useCloudTickets() {
       if (import.meta.env.DEV) {
         console.error("Error updating ticket:", error);
       }
-      toast.error("Gagal mengupdate tiket");
+      toast.error("Gagal mengupdate incident");
       throw error;
     }
   }, []);
