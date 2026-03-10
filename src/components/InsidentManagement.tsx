@@ -415,7 +415,7 @@ export function InsidentManagement() {
                     />
                   </TableHead>
                   <TableHead className="text-xs">No</TableHead>
-                  <TableHead className="text-xs">Ticket ID</TableHead>
+                  <TableHead className="text-xs">Incident ID</TableHead>
                   <TableHead className="text-xs">Customer</TableHead>
                   <TableHead className="text-xs">Kendala</TableHead>
                   <TableHead className="text-xs">Status</TableHead>
