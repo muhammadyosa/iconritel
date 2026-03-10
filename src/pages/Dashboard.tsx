@@ -1070,7 +1070,7 @@ export default function Dashboard() {
             )}
             <DialogTitle className="flex items-center gap-2 text-lg">
               <BarChart3 className="h-5 w-5 text-primary" />
-              {inlineSelectedTicket ? `🎫 Detail Tiket: ${inlineSelectedTicket.id}` : filterDialogTitle}
+              {inlineSelectedTicket ? `🎫 Detail Incident: ${inlineSelectedTicket.id}` : filterDialogTitle}
               {!inlineSelectedTicket && (
                 <span className="ml-2 text-sm font-normal text-muted-foreground">
                   ({showOltList 
