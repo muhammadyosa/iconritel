@@ -221,7 +221,7 @@ export function MonthlyAnalytics({ tickets }: MonthlyAnalyticsProps) {
       });
       setDrillSelectedTicket(null);
       setDrillTickets(filtered);
-      setDrillTitle(`📅 ${day} — ${filtered.length} tiket`);
+      setDrillTitle(`📅 ${day} — ${filtered.length} incident`);
       setDrillOpen(true);
     }
   };
