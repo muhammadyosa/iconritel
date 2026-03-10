@@ -230,7 +230,7 @@ export default function TicketManagement() {
   const handleExportExcel = () => {
     const data = tickets.map((t, idx) => ({
       "No": idx + 1,
-      "Ticket ID": t.id,
+      "Incident ID": t.id,
       "Category": t.category,
       "Service ID": t.serviceId,
       "Customer Name": t.customerName,
