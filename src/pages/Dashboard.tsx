@@ -860,7 +860,7 @@ export default function Dashboard() {
           <CardContent className="p-1.5 sm:p-2">
             {recentTickets.length === 0 ? (
               <p className="text-sm text-muted-foreground text-center py-8">
-                Belum ada tiket
+                Belum ada incident
               </p>
             ) : (
               <div className="rounded-md border overflow-x-auto overflow-y-auto max-h-[40vh] xs:max-h-[45vh] sm:max-h-[50vh] md:max-h-[55vh] lg:max-h-[60vh]">
