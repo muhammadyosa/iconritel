@@ -165,7 +165,7 @@ export default function TicketManagement() {
 
   const handleSubmitTicket = async () => {
     if (!formData.ticketId.trim()) {
-      toast.error("Ticket ID wajib diisi");
+      toast.error("Incident ID wajib diisi");
       return;
     }
     if (!formData.constraint) {
