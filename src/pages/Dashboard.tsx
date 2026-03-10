@@ -205,7 +205,7 @@ export default function Dashboard() {
                   const ageMs = new Date().getTime() - new Date(t.createdISO).getTime();
                   return ageMs > 24 * 60 * 60 * 1000 && t.status !== "Resolved";
                 });
-                title = "⚠️ Tiket Over SLA (>24h)";
+                title = "⚠️ Incident Over SLA (>24h)";
               } else if (card.metric === "feeder") {
                 filtered = tickets.filter((t) => FEEDER_CONSTRAINTS_SET.has(t.constraint));
                 title = "⛓️‍💥 Tiket Impact Feeder";
