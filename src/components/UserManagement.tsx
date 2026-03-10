@@ -549,7 +549,7 @@ export function UserManagement() {
             <div className="flex items-start gap-2">
               <Badge variant="secondary" className="mt-0.5">
                 <User className="h-3 w-3 mr-1" />
-                Operator
+                NOC
               </Badge>
               <span className="text-xs text-muted-foreground">
                 Akses standar: dapat membuat dan mengedit tiket & laporan
