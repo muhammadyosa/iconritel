@@ -46,7 +46,7 @@ export function TicketHistoryExport() {
       setRecords(data || []);
     } catch (err) {
       if (import.meta.env.DEV) console.error("Error fetching history:", err);
-      toast.error("Gagal memuat data historis");
+      toast.error("Gagal memuat data historis incident");
     } finally {
       setLoading(false);
     }
