@@ -204,7 +204,7 @@ export function InsidentManagement() {
       for (const row of rows) {
         try {
           await addTicket({
-            id: row["Ticket ID"] || `IMP-${Date.now()}-${successCount}`,
+            id: row["Incident ID"] || row["Ticket ID"] || `IMP-${Date.now()}-${successCount}`,
             serviceId: row["Service ID"] || "-",
             customerName: row["Customer"] || "-",
             serpo: row["SERPO"] || "-",
