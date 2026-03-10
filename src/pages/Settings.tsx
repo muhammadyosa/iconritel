@@ -532,7 +532,7 @@ export default function Settings() {
                                 <Badge className={typeInfo.color}>{typeInfo.label}</Badge>
                               </TableCell>
                               <TableCell className="text-muted-foreground">
-                                {sheet.type === "user" && "→ Ticket Management"}
+                                {sheet.type === "user" && "→ Incident Management"}
                                 {sheet.type === "olt" && "→ List OLT"}
                                 {sheet.type === "fat" && "→ List FAT"}
                                 {sheet.type === "upe" && "→ List UPE"}
