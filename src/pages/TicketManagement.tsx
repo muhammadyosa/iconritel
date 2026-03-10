@@ -119,7 +119,7 @@ export default function TicketManagement() {
     );
   });
 
-  // Filter untuk Daftar Tiket
+  // Filter untuk Daftar Incident
   const filteredTickets = tickets.filter((ticket) => {
     if (!ticketSearchQuery.trim()) return true;
     
