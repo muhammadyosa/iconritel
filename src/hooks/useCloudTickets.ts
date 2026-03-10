@@ -335,7 +335,7 @@ export function useCloudTickets() {
       if (import.meta.env.DEV) {
         console.error("Error deleting ticket:", error);
       }
-      toast.error("Gagal menghapus tiket");
+      toast.error("Gagal menghapus incident");
       throw error;
     }
   }, []);

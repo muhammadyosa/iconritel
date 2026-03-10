@@ -1153,7 +1153,7 @@ export default function Dashboard() {
 
                 {/* Ticket Result */}
                 <div className="p-3 rounded-lg bg-accent/10 border">
-                  <p className="text-xs font-semibold text-muted-foreground mb-2">Ticket Result:</p>
+                  <p className="text-xs font-semibold text-muted-foreground mb-2">Incident Result:</p>
                   <p className="text-sm font-mono whitespace-pre-wrap break-all">{inlineSelectedTicket.ticketResult}</p>
                 </div>
               </motion.div>

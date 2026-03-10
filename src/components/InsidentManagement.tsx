@@ -222,7 +222,7 @@ export function InsidentManagement() {
         } catch { /* skip failed rows */ }
       }
       toast.success(`${successCount} insident berhasil diimport`);
-      logActivity("import_tickets", `${successCount} tiket diimport`);
+      logActivity("import_tickets", `${successCount} incident diimport`);
       refetch();
     } catch (error) {
       toast.error("Gagal mengimport file");

@@ -108,7 +108,7 @@ export function useTickets() {
       }
       if (error instanceof DOMException && error.name === "QuotaExceededError") {
         toast.error(
-          "Storage penuh! Silakan export dan hapus tiket lama untuk membuat ruang."
+          "Storage penuh! Silakan export dan hapus incident lama untuk membuat ruang."
         );
       }
     }

@@ -701,7 +701,7 @@ export function MonthlyAnalytics({ tickets }: MonthlyAnalyticsProps) {
                   className="space-y-1.5"
                 >
                   {drillTickets.length === 0 ? (
-                    <p className="text-sm text-muted-foreground text-center py-8">Tidak ada tiket</p>
+                    <p className="text-sm text-muted-foreground text-center py-8">Tidak ada incident</p>
                   ) : (
                     drillTickets.map((ticket) => (
                       <div

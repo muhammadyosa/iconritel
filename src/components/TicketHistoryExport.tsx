@@ -166,7 +166,7 @@ export function TicketHistoryExport() {
             <div className="text-center py-8 text-muted-foreground text-sm">Memuat data...</div>
           ) : records.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground text-sm">
-              Belum ada data historis tiket
+              Belum ada data historis incident
             </div>
           ) : (
             <div className="overflow-auto rounded-lg border max-h-[50vh]">
