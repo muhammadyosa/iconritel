@@ -124,7 +124,7 @@ export function InsidentManagement() {
       }
 
       toast.success(`${idsToDelete.length} insident berhasil dihapus`);
-      logActivity("bulk_delete_tickets", `${idsToDelete.length} tiket dihapus`);
+      logActivity("bulk_delete_tickets", `${idsToDelete.length} incident dihapus`);
       setSelectedIds(new Set());
       setShowDeleteDialog(false);
       refetch();
