@@ -1218,7 +1218,7 @@ export default function Dashboard() {
                           {/* Row 2: Additional Info */}
                           <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs">
                             <div className="flex items-center gap-1">
-                              <span className="text-muted-foreground">Klik untuk lihat tiket</span>
+                              <span className="text-muted-foreground">Klik untuk lihat incident</span>
                             </div>
                             <span className="px-1.5 py-0.5 rounded text-xs font-medium bg-warning/20 text-warning">
                               OLT
