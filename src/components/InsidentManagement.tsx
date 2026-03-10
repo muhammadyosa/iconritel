@@ -185,7 +185,7 @@ export function InsidentManagement() {
     }));
     XLSX.writeFile(wb, `Insident_${new Date().toISOString().split("T")[0]}.xlsx`);
     toast.success(`${data.length} insident berhasil diexport ke Excel`);
-    logActivity("export_data", `Export ${data.length} insident ke Excel`);
+    logActivity("export_data", `Export ${data.length} incident ke Excel`);
   }, [filteredTickets, buildExportData]);
 
 
