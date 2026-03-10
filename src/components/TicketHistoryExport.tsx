@@ -89,7 +89,7 @@ export function TicketHistoryExport() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `histori-tiket-${days}hari-${new Date().toISOString().split("T")[0]}.csv`;
+    a.download = `histori-incident-${days}hari-${new Date().toISOString().split("T")[0]}.csv`;
     a.click();
     URL.revokeObjectURL(url);
     toast.success("File CSV berhasil diunduh");
