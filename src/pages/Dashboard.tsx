@@ -587,7 +587,7 @@ export default function Dashboard() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, delay: 0.3 }}
       >
-        <MonthlyAnalytics tickets={tickets} />
+        <MonthlyAnalytics tickets={tickets} getTrendChartData={getTrendChartData} getCategoryData={getCategoryData} />
       </motion.div>
 
       {/* Shift Reports Section - Enhanced Layout */}
