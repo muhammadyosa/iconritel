@@ -1240,7 +1240,7 @@ export default function Dashboard() {
                   exit={{ opacity: 0 }}
                   className="text-sm text-muted-foreground text-center py-8"
                 >
-                  Tidak ada tiket dalam kategori ini
+                  Tidak ada incident dalam kategori ini
                 </motion.p>
               ) : (
                 <motion.div
