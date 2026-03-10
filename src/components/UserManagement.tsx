@@ -103,12 +103,12 @@ export function UserManagement() {
     }
   }, [isAdmin]);
 
-  const handleRoleChange = async (userId: string, newRole: "admin" | "operator" | "reviewer") => {
+  const handleRoleChange = async (userId: string, newRole: "admin" | "noc" | "reviewer") => {
     setUpdatingUserId(userId);
     try {
       // Get current role for logging
       const currentUser = users.find((u) => u.user_id === userId);
-      const oldRole = currentUser?.role || "operator";
+      const oldRole = currentUser?.role || "noc";
 
       // Check if user already has a role entry
       const { data: existingRole } = await supabase
