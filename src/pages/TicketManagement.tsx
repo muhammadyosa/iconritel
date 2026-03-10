@@ -764,7 +764,7 @@ export default function TicketManagement() {
               </div>
             </CardHeader>
             <CardContent className="p-1.5 sm:p-2 space-y-1.5 sm:space-y-2">
-              {/* Search filter untuk Daftar Tiket */}
+              {/* Search filter untuk Daftar Incident */}
               <div className="flex flex-col xs:flex-row gap-1.5 sm:gap-2 xs:items-end">
                 <div className="w-full xs:w-28 sm:w-40">
                   <Label className="text-[9px] sm:text-[10px]">Search By</Label>

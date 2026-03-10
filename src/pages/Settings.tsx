@@ -620,7 +620,7 @@ export default function Settings() {
                     ✓ Data tersimpan permanen! Anda dapat langsung menggunakan:
                   </p>
                   <ul className="mt-2 text-sm text-green-700 dark:text-green-300 space-y-1">
-                    {importResult.summary.user > 0 && <li>• Ticket Management - {importResult.summary.user.toLocaleString()} data user siap digunakan</li>}
+                    {importResult.summary.user > 0 && <li>• Incident Management - {importResult.summary.user.toLocaleString()} data user siap digunakan</li>}
                     {importResult.summary.olt > 0 && <li>• List OLT - {importResult.summary.olt.toLocaleString()} data OLT siap digunakan</li>}
                     {importResult.summary.fat > 0 && <li>• List FAT - {importResult.summary.fat.toLocaleString()} data FAT siap digunakan</li>}
                     {importResult.summary.upe > 0 && <li>• List UPE - {importResult.summary.upe.toLocaleString()} data UPE siap digunakan</li>}
