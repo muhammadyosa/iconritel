@@ -207,7 +207,7 @@ export function MonthlyAnalytics({ tickets }: MonthlyAnalyticsProps) {
       setDrillSelectedTicket(null);
       setDrillTickets(filtered);
       const filterLabel = categoryFilter === "all" ? "Semua Data" : categoryFilter === "custom" ? categoryCustomDate : categoryFilter === "today" ? "Hari ini" : `${categoryFilter} Hari`;
-      setDrillTitle(`📊 ${constraint} — ${filtered.length} tiket (${filterLabel})`);
+      setDrillTitle(`📊 ${constraint} — ${filtered.length} incident (${filterLabel})`);
       setDrillOpen(true);
     }
   };
