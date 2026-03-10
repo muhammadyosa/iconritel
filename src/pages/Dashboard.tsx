@@ -840,7 +840,7 @@ export default function Dashboard() {
       >
         <Card className="overflow-hidden border">
           <CardHeader className="py-3 px-3 sm:px-6 border-b bg-muted/20 flex flex-col xs:flex-row xs:items-center justify-between space-y-2 xs:space-y-0">
-            <CardTitle className="text-xs sm:text-sm">Recent Tickets</CardTitle>
+            <CardTitle className="text-xs sm:text-sm">Recent Incidents</CardTitle>
             <div className="flex items-center gap-2">
               <Select value={selectedConstraint} onValueChange={setSelectedConstraint}>
                 <SelectTrigger className="w-[140px] sm:w-[170px] h-7 sm:h-8 text-[10px] sm:text-xs">
