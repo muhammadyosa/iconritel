@@ -1022,7 +1022,7 @@ export default function Dashboard() {
 
               {/* Ticket Result - Compact */}
               <div className="p-2 bg-success/5 rounded border border-success/20">
-                <p className="text-xs font-semibold text-success mb-1">Ticket Result</p>
+                <p className="text-xs font-semibold text-success mb-1">Incident Result</p>
                 <pre className="text-[10px] whitespace-pre-wrap font-mono bg-background p-2 rounded border max-h-24 overflow-auto">
                   {selectedTicket.ticketResult}
                 </pre>
