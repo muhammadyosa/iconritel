@@ -687,7 +687,7 @@ export function MonthlyAnalytics({ tickets }: MonthlyAnalyticsProps) {
                     ))}
                   </div>
                   <div className="bg-muted/40 rounded p-2">
-                    <p className="text-[10px] font-semibold text-muted-foreground mb-1">Ticket Result:</p>
+                    <p className="text-[10px] font-semibold text-muted-foreground mb-1">Incident Result:</p>
                     <p className="text-xs font-mono whitespace-pre-wrap break-all">{drillSelectedTicket.ticketResult}</p>
                   </div>
                 </motion.div>
