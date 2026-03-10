@@ -591,7 +591,7 @@ export default function Settings() {
                 <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
                   <div className="bg-blue-50 dark:bg-blue-950 p-4 rounded-lg text-center">
                     <div className="text-2xl font-bold text-blue-600">{importResult.summary.user.toLocaleString()}</div>
-                    <div className="text-sm text-muted-foreground">List User → Ticket</div>
+                    <div className="text-sm text-muted-foreground">List User → Incident</div>
                   </div>
                   <div className="bg-cyan-50 dark:bg-cyan-950 p-4 rounded-lg text-center">
                     <div className="text-2xl font-bold text-cyan-600">{importResult.summary.olt.toLocaleString()}</div>
