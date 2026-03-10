@@ -1200,7 +1200,7 @@ export default function Dashboard() {
                             setShowOltList(false);
                             setInlineSelectedTicket(null);
                             setFilterDialogTickets(oltTickets);
-                            setFilterDialogTitle(`Tiket OLT: ${hostname}`);
+                            setFilterDialogTitle(`Incident OLT: ${hostname}`);
                           }}
                         >
                           {/* Row 1: No, Hostname, Count */}
