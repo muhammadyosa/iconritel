@@ -19,6 +19,8 @@ import {
 
 interface MonthlyAnalyticsProps {
   tickets: Ticket[];
+  getTrendChartData?: (days: number) => Array<{ day: string; isoDate: string; dayNum: number; total: number; resolved: number; slaOk: number }>;
+  getCategoryData?: (filter: string, customDate?: string) => Array<{ name: string; value: number }>;
 }
 
 const CATEGORY_COLORS: Record<string, string> = {
