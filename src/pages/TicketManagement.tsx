@@ -76,7 +76,7 @@ export default function TicketManagement() {
     sn: "",
   });
 
-  // Filter untuk Daftar Tiket - single search with field selector
+  // Filter untuk Daftar Incident - single search with field selector
   const [ticketSearchField, setTicketSearchField] = useState<string>("all");
   const [ticketSearchQuery, setTicketSearchQuery] = useState("");
 
