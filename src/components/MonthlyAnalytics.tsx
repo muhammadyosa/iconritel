@@ -351,7 +351,7 @@ export function MonthlyAnalytics({ tickets }: MonthlyAnalyticsProps) {
       doc.setTextColor(30, 64, 144);
       doc.setFontSize(11);
       doc.setFont("helvetica", "bold");
-      doc.text(`Daftar Tiket (${monthTickets.length})`, margin, y);
+      doc.text(`Daftar Incident (${monthTickets.length})`, margin, y);
       y += 3;
 
       if (monthTickets.length > 0) {
