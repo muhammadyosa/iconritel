@@ -207,7 +207,7 @@ export function MonthlyAnalytics({ tickets }: MonthlyAnalyticsProps) {
       setDrillSelectedTicket(null);
       setDrillTickets(filtered);
       const filterLabel = categoryFilter === "all" ? "Semua Data" : categoryFilter === "custom" ? categoryCustomDate : categoryFilter === "today" ? "Hari ini" : `${categoryFilter} Hari`;
-      setDrillTitle(`📊 ${constraint} — ${filtered.length} tiket (${filterLabel})`);
+      setDrillTitle(`📊 ${constraint} — ${filtered.length} incident (${filterLabel})`);
       setDrillOpen(true);
     }
   };
@@ -221,7 +221,7 @@ export function MonthlyAnalytics({ tickets }: MonthlyAnalyticsProps) {
       });
       setDrillSelectedTicket(null);
       setDrillTickets(filtered);
-      setDrillTitle(`📅 ${day} — ${filtered.length} tiket`);
+      setDrillTitle(`📅 ${day} — ${filtered.length} incident`);
       setDrillOpen(true);
     }
   };
@@ -267,7 +267,7 @@ export function MonthlyAnalytics({ tickets }: MonthlyAnalyticsProps) {
 
       const kpiBoxWidth = (pageWidth - margin * 2 - 9) / 4;
       const kpiItems = [
-        { label: "Total Tiket", value: String(kpis.total), sub: `R:${kpis.ritel} | F:${kpis.feeder}`, color: [30, 64, 144] as const },
+        { label: "Total Incident", value: String(kpis.total), sub: `R:${kpis.ritel} | F:${kpis.feeder}`, color: [30, 64, 144] as const },
         { label: "Resolved", value: String(kpis.resolved), sub: `${kpis.total > 0 ? Math.round((kpis.resolved / kpis.total) * 100) : 0}%`, color: [39, 174, 96] as const },
         { label: "Avg Resolusi", value: `${kpis.avgResolutionHours}h`, sub: "rata-rata", color: [243, 156, 18] as const },
         { label: "SLA Rate", value: `${kpis.slaRate}%`, sub: `${kpis.slaCompliant} OK`, color: (kpis.slaRate >= 80 ? [39, 174, 96] : [231, 76, 60]) as readonly [number, number, number] },
@@ -351,7 +351,7 @@ export function MonthlyAnalytics({ tickets }: MonthlyAnalyticsProps) {
       doc.setTextColor(30, 64, 144);
       doc.setFontSize(11);
       doc.setFont("helvetica", "bold");
-      doc.text(`Daftar Tiket (${monthTickets.length})`, margin, y);
+      doc.text(`Daftar Incident (${monthTickets.length})`, margin, y);
       y += 3;
 
       if (monthTickets.length > 0) {
@@ -461,7 +461,7 @@ export function MonthlyAnalytics({ tickets }: MonthlyAnalyticsProps) {
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
         {[
           {
-            emoji: "🗃️", title: "Total Tiket", value: kpis.total,
+            emoji: "🗃️", title: "Total Incident", value: kpis.total,
             bgClass: "bg-primary/8 hover:bg-primary/15", borderClass: "border-primary/30 hover:border-primary/50",
             valueClass: "text-primary", glowClass: "hover:shadow-[0_0_15px_-4px_hsl(var(--primary)/0.3)]",
           },
@@ -645,7 +645,7 @@ export function MonthlyAnalytics({ tickets }: MonthlyAnalyticsProps) {
                 <Button variant="default" size="sm" className="rounded-full h-7 px-3 text-xs" onClick={() => setDrillSelectedTicket(null)}>
                   <ArrowLeft className="h-3 w-3 mr-1" /> Kembali
                 </Button>
-                <span className="truncate">Detail Tiket</span>
+                <span className="truncate">Detail Incident</span>
               </DialogTitle>
             ) : (
               <DialogTitle className="text-sm sm:text-base">{drillTitle}</DialogTitle>
@@ -670,7 +670,7 @@ export function MonthlyAnalytics({ tickets }: MonthlyAnalyticsProps) {
                   </div>
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs">
                     {[
-                      { label: "ID Tiket", value: drillSelectedTicket.id },
+                      { label: "ID Incident", value: drillSelectedTicket.id },
                       { label: "Service ID", value: drillSelectedTicket.serviceId },
                       { label: "Customer", value: drillSelectedTicket.customerName },
                       { label: "Hostname", value: drillSelectedTicket.hostname },
@@ -687,7 +687,7 @@ export function MonthlyAnalytics({ tickets }: MonthlyAnalyticsProps) {
                     ))}
                   </div>
                   <div className="bg-muted/40 rounded p-2">
-                    <p className="text-[10px] font-semibold text-muted-foreground mb-1">Ticket Result:</p>
+                    <p className="text-[10px] font-semibold text-muted-foreground mb-1">Incident Result:</p>
                     <p className="text-xs font-mono whitespace-pre-wrap break-all">{drillSelectedTicket.ticketResult}</p>
                   </div>
                 </motion.div>
@@ -701,7 +701,7 @@ export function MonthlyAnalytics({ tickets }: MonthlyAnalyticsProps) {
                   className="space-y-1.5"
                 >
                   {drillTickets.length === 0 ? (
-                    <p className="text-sm text-muted-foreground text-center py-8">Tidak ada tiket</p>
+                    <p className="text-sm text-muted-foreground text-center py-8">Tidak ada incident</p>
                   ) : (
                     drillTickets.map((ticket) => (
                       <div

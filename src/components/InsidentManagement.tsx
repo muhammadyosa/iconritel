@@ -124,7 +124,7 @@ export function InsidentManagement() {
       }
 
       toast.success(`${idsToDelete.length} insident berhasil dihapus`);
-      logActivity("bulk_delete_tickets", `${idsToDelete.length} tiket dihapus`);
+      logActivity("bulk_delete_tickets", `${idsToDelete.length} incident dihapus`);
       setSelectedIds(new Set());
       setShowDeleteDialog(false);
       refetch();
@@ -158,7 +158,7 @@ export function InsidentManagement() {
   const buildExportData = useCallback((data: typeof tickets) => {
     return data.map((t, idx) => ({
       "No": idx + 1,
-      "Ticket ID": t.id,
+      "Incident ID": t.id,
       "Customer": t.customerName,
       "Service ID": t.serviceId,
       "Hostname": t.hostname,
@@ -185,7 +185,7 @@ export function InsidentManagement() {
     }));
     XLSX.writeFile(wb, `Insident_${new Date().toISOString().split("T")[0]}.xlsx`);
     toast.success(`${data.length} insident berhasil diexport ke Excel`);
-    logActivity("export_data", `Export ${data.length} insident ke Excel`);
+    logActivity("export_data", `Export ${data.length} incident ke Excel`);
   }, [filteredTickets, buildExportData]);
 
 
@@ -204,7 +204,7 @@ export function InsidentManagement() {
       for (const row of rows) {
         try {
           await addTicket({
-            id: row["Ticket ID"] || `IMP-${Date.now()}-${successCount}`,
+            id: row["Incident ID"] || row["Ticket ID"] || `IMP-${Date.now()}-${successCount}`,
             serviceId: row["Service ID"] || "-",
             customerName: row["Customer"] || "-",
             serpo: row["SERPO"] || "-",
@@ -222,7 +222,7 @@ export function InsidentManagement() {
         } catch { /* skip failed rows */ }
       }
       toast.success(`${successCount} insident berhasil diimport`);
-      logActivity("import_tickets", `${successCount} tiket diimport`);
+      logActivity("import_tickets", `${successCount} incident diimport`);
       refetch();
     } catch (error) {
       toast.error("Gagal mengimport file");
@@ -415,7 +415,7 @@ export function InsidentManagement() {
                     />
                   </TableHead>
                   <TableHead className="text-xs">No</TableHead>
-                  <TableHead className="text-xs">Ticket ID</TableHead>
+                  <TableHead className="text-xs">Incident ID</TableHead>
                   <TableHead className="text-xs">Customer</TableHead>
                   <TableHead className="text-xs">Kendala</TableHead>
                   <TableHead className="text-xs">Status</TableHead>

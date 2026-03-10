@@ -165,7 +165,7 @@ export default function TicketManagement() {
 
   const handleSubmitTicket = async () => {
     if (!formData.ticketId.trim()) {
-      toast.error("Ticket ID wajib diisi");
+      toast.error("Incident ID wajib diisi");
       return;
     }
     if (!formData.constraint) {
@@ -217,8 +217,8 @@ export default function TicketManagement() {
 
     try {
       await addTicket(ticket);
-      logActivity("create_ticket", `Tiket ${ticket.id} - ${ticket.customerName}`);
-      toast.success(`Tiket ${category} berhasil dibuat & disimpan ke Cloud`);
+      logActivity("create_ticket", `Incident ${ticket.id} - ${ticket.customerName}`);
+      toast.success(`Incident ${category} berhasil dibuat & disimpan ke Cloud`);
       setIsFormOpen(false);
       setFormData({ ticketId: "", serpo: "", constraint: "", portText: "" });
       setSelectedRecord(null);
@@ -230,7 +230,7 @@ export default function TicketManagement() {
   const handleExportExcel = () => {
     const data = tickets.map((t, idx) => ({
       "No": idx + 1,
-      "Ticket ID": t.id,
+      "Incident ID": t.id,
       "Category": t.category,
       "Service ID": t.serviceId,
       "Customer Name": t.customerName,
@@ -241,7 +241,7 @@ export default function TicketManagement() {
       "Constraint": t.constraint,
       "Status": t.status,
       "Created": t.createdAt,
-      "Ticket Result": t.ticketResult,
+      "Incident Result": t.ticketResult,
     }));
 
     import("xlsx").then((XLSX) => {
@@ -261,7 +261,7 @@ export default function TicketManagement() {
 
   const handleSubmitManualTicket = async () => {
     if (!manualFormData.ticketId.trim()) {
-      toast.error("Ticket ID wajib diisi");
+      toast.error("Incident ID wajib diisi");
       return;
     }
     if (!manualFormData.constraint) {
@@ -306,8 +306,8 @@ export default function TicketManagement() {
 
     try {
       await addTicket(ticket);
-      logActivity("create_ticket", `Tiket manual ${ticket.id} - ${ticket.customerName}`);
-      toast.success(`Tiket ${category} berhasil dibuat & disimpan ke Cloud`);
+      logActivity("create_ticket", `Incident manual ${ticket.id} - ${ticket.customerName}`);
+      toast.success(`Incident ${category} berhasil dibuat & disimpan ke Cloud`);
       setIsManualFormOpen(false);
       setManualFormData({
         ticketId: "",
@@ -328,8 +328,8 @@ export default function TicketManagement() {
   return (
     <div className="space-y-2 sm:space-y-3 md:space-y-4 max-w-full overflow-x-hidden">
       <div className="flex flex-col xs:flex-row xs:items-center gap-1 xs:gap-3">
-        <h1 className="text-lg xs:text-xl sm:text-2xl font-bold">🎫 Ticket Management</h1>
-        <span className="text-[10px] xs:text-xs text-muted-foreground">Kelola tiket incident NOC</span>
+        <h1 className="text-lg xs:text-xl sm:text-2xl font-bold">🎫 Incident Management</h1>
+        <span className="text-[10px] xs:text-xs text-muted-foreground">Kelola incident NOC</span>
       </div>
 
       {/* Dialog for creating ticket from Preview Data */}
@@ -340,11 +340,11 @@ export default function TicketManagement() {
           </DialogHeader>
           <div className="space-y-4">
             <div>
-              <Label>Ticket ID</Label>
+              <Label>Incident ID</Label>
               <Input
                 value={formData.ticketId}
                 onChange={(e) => setFormData({ ...formData, ticketId: e.target.value })}
-                placeholder="Masukkan Ticket ID (contoh: INC12345678)"
+                placeholder="Masukkan Incident ID (contoh: INC12345678)"
               />
             </div>
             <div>
@@ -401,7 +401,7 @@ export default function TicketManagement() {
             {formData.constraint && selectedRecord && formData.serpo && (
               <div className="p-3 bg-accent/50 rounded-lg space-y-1">
                 <p className="text-xs font-semibold text-muted-foreground">
-                  Preview Format Tiket:
+                  Preview Format Incident:
                 </p>
                 <p className="text-sm font-mono">
                   {generateTicketFormat(
@@ -614,12 +614,12 @@ export default function TicketManagement() {
                     </DialogTrigger>
                   <DialogContent className="w-[95vw] max-w-2xl max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
-                      <DialogTitle>Input Tiket Manual</DialogTitle>
+                      <DialogTitle>Input Incident Manual</DialogTitle>
                     </DialogHeader>
                     <div className="space-y-4">
                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                         <div>
-                          <Label>Ticket ID *</Label>
+                          <Label>Incident ID *</Label>
                           <Input
                             value={manualFormData.ticketId}
                             onChange={(e) => setManualFormData({ ...manualFormData, ticketId: e.target.value })}
@@ -723,7 +723,7 @@ export default function TicketManagement() {
                       {manualFormData.constraint && manualFormData.serpo && (
                         <div className="p-3 bg-accent/50 rounded-lg space-y-1">
                           <p className="text-xs font-semibold text-muted-foreground">
-                            Preview Format Tiket:
+                            Preview Format Incident:
                           </p>
                           <p className="text-sm font-mono whitespace-pre-wrap break-all">
                             {generateTicketFormat(
@@ -774,7 +774,7 @@ export default function TicketManagement() {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">Semua</SelectItem>
-                      <SelectItem value="ticketId">Ticket ID</SelectItem>
+                      <SelectItem value="ticketId">Incident ID</SelectItem>
                       <SelectItem value="category">Category</SelectItem>
                       <SelectItem value="customerType">Customer/Type</SelectItem>
                       <SelectItem value="serviceId">Service ID</SelectItem>
@@ -816,7 +816,7 @@ export default function TicketManagement() {
                     {tickets.length === 0 ? (
                       <TableRow>
                         <TableCell colSpan={7} className="text-center text-muted-foreground text-[8px] sm:text-[9px] py-2">
-                          Belum ada tiket
+                          Belum ada incident
                         </TableCell>
                       </TableRow>
                     ) : (

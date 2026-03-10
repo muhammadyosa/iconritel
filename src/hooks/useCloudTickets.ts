@@ -188,7 +188,7 @@ export function useCloudTickets() {
       if (import.meta.env.DEV) {
         console.error("Error fetching tickets:", error);
       }
-      toast.error("Gagal memuat tiket dari database");
+      toast.error("Gagal memuat incident dari database");
     } finally {
       setIsLoading(false);
     }
@@ -278,7 +278,7 @@ export function useCloudTickets() {
         typeof error === "object" && error !== null && "message" in error
           ? String((error as { message?: unknown }).message)
           : "Unknown error";
-      toast.error(`Gagal menyimpan tiket ke database: ${message}`);
+      toast.error(`Gagal menyimpan incident ke database: ${message}`);
       throw error;
     }
   }, []);
@@ -317,7 +317,7 @@ export function useCloudTickets() {
       if (import.meta.env.DEV) {
         console.error("Error updating ticket:", error);
       }
-      toast.error("Gagal mengupdate tiket");
+      toast.error("Gagal mengupdate incident");
       throw error;
     }
   }, []);
@@ -335,7 +335,7 @@ export function useCloudTickets() {
       if (import.meta.env.DEV) {
         console.error("Error deleting ticket:", error);
       }
-      toast.error("Gagal menghapus tiket");
+      toast.error("Gagal menghapus incident");
       throw error;
     }
   }, []);

@@ -35,7 +35,7 @@ export function useTicketNotifications() {
         (payload) => {
           if (!initializedRef.current) return;
           const t = payload.new as DbTicketPayload;
-          toast.info("🆕 Tiket Baru Masuk", {
+          toast.info("🆕 Incident Baru Masuk", {
             description: `${t.constraint_type} — ${t.customer_name || t.hostname}`,
             duration: 6000,
           });

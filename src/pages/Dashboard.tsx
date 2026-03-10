@@ -199,16 +199,16 @@ export default function Dashboard() {
               
               if (card.metric === "total") {
                 filtered = tickets;
-                title = "🗃️ Semua Tiket";
+                title = "🗃️ Semua Incident";
               } else if (card.metric === "overSLA") {
                 filtered = tickets.filter((t) => {
                   const ageMs = new Date().getTime() - new Date(t.createdISO).getTime();
                   return ageMs > 24 * 60 * 60 * 1000 && t.status !== "Resolved";
                 });
-                title = "⚠️ Tiket Over SLA (>24h)";
+                title = "⚠️ Incident Over SLA (>24h)";
               } else if (card.metric === "feeder") {
                 filtered = tickets.filter((t) => FEEDER_CONSTRAINTS_SET.has(t.constraint));
-                title = "⛓️‍💥 Tiket Impact Feeder";
+                title = "⛓️‍💥 Incident Impact Feeder";
               } else if (card.metric === "olt") {
                 setShowOltList(true);
                 setFilterDialogTitle("📟 Daftar OLT Terdampak");
@@ -313,7 +313,7 @@ export default function Dashboard() {
                           setPreviousDialogState(null);
                           setShowOltList(false);
                           setFilterDialogTickets(filtered);
-                          setFilterDialogTitle(`⚙️ Tiket dengan Status: ${status}`);
+                          setFilterDialogTitle(`⚙️ Incident dengan Status: ${status}`);
                           setFilterDialogOpen(true);
                         }
                       }}
@@ -840,7 +840,7 @@ export default function Dashboard() {
       >
         <Card className="overflow-hidden border">
           <CardHeader className="py-3 px-3 sm:px-6 border-b bg-muted/20 flex flex-col xs:flex-row xs:items-center justify-between space-y-2 xs:space-y-0">
-            <CardTitle className="text-xs sm:text-sm">Recent Tickets</CardTitle>
+            <CardTitle className="text-xs sm:text-sm">Recent Incidents</CardTitle>
             <div className="flex items-center gap-2">
               <Select value={selectedConstraint} onValueChange={setSelectedConstraint}>
                 <SelectTrigger className="w-[140px] sm:w-[170px] h-7 sm:h-8 text-[10px] sm:text-xs">
@@ -860,7 +860,7 @@ export default function Dashboard() {
           <CardContent className="p-1.5 sm:p-2">
             {recentTickets.length === 0 ? (
               <p className="text-sm text-muted-foreground text-center py-8">
-                Belum ada tiket
+                Belum ada incident
               </p>
             ) : (
               <div className="rounded-md border overflow-x-auto overflow-y-auto max-h-[40vh] xs:max-h-[45vh] sm:max-h-[50vh] md:max-h-[55vh] lg:max-h-[60vh]">
@@ -950,7 +950,7 @@ export default function Dashboard() {
           <DialogHeader className="pb-2">
             <DialogTitle className="flex items-center gap-2 text-base">
               <Activity className="h-4 w-4 text-primary" />
-              Detail Tiket
+               Detail Incident
             </DialogTitle>
           </DialogHeader>
           
@@ -1022,7 +1022,7 @@ export default function Dashboard() {
 
               {/* Ticket Result - Compact */}
               <div className="p-2 bg-success/5 rounded border border-success/20">
-                <p className="text-xs font-semibold text-success mb-1">Ticket Result</p>
+                <p className="text-xs font-semibold text-success mb-1">Incident Result</p>
                 <pre className="text-[10px] whitespace-pre-wrap font-mono bg-background p-2 rounded border max-h-24 overflow-auto">
                   {selectedTicket.ticketResult}
                 </pre>
@@ -1070,7 +1070,7 @@ export default function Dashboard() {
             )}
             <DialogTitle className="flex items-center gap-2 text-lg">
               <BarChart3 className="h-5 w-5 text-primary" />
-              {inlineSelectedTicket ? `🎫 Detail Tiket: ${inlineSelectedTicket.id}` : filterDialogTitle}
+              {inlineSelectedTicket ? `🎫 Detail Incident: ${inlineSelectedTicket.id}` : filterDialogTitle}
               {!inlineSelectedTicket && (
                 <span className="ml-2 text-sm font-normal text-muted-foreground">
                   ({showOltList 
@@ -1153,7 +1153,7 @@ export default function Dashboard() {
 
                 {/* Ticket Result */}
                 <div className="p-3 rounded-lg bg-accent/10 border">
-                  <p className="text-xs font-semibold text-muted-foreground mb-2">Ticket Result:</p>
+                  <p className="text-xs font-semibold text-muted-foreground mb-2">Incident Result:</p>
                   <p className="text-sm font-mono whitespace-pre-wrap break-all">{inlineSelectedTicket.ticketResult}</p>
                 </div>
               </motion.div>
@@ -1200,7 +1200,7 @@ export default function Dashboard() {
                             setShowOltList(false);
                             setInlineSelectedTicket(null);
                             setFilterDialogTickets(oltTickets);
-                            setFilterDialogTitle(`Tiket OLT: ${hostname}`);
+                            setFilterDialogTitle(`Incident OLT: ${hostname}`);
                           }}
                         >
                           {/* Row 1: No, Hostname, Count */}
@@ -1211,14 +1211,14 @@ export default function Dashboard() {
                             </div>
                             <div className="flex items-center gap-1 flex-shrink-0">
                               <span className="text-lg font-bold text-primary">{count}</span>
-                              <span className="text-xs text-muted-foreground">tiket</span>
+                              <span className="text-xs text-muted-foreground">incident</span>
                             </div>
                           </div>
                           
                           {/* Row 2: Additional Info */}
                           <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs">
                             <div className="flex items-center gap-1">
-                              <span className="text-muted-foreground">Klik untuk lihat tiket</span>
+                              <span className="text-muted-foreground">Klik untuk lihat incident</span>
                             </div>
                             <span className="px-1.5 py-0.5 rounded text-xs font-medium bg-warning/20 text-warning">
                               OLT
@@ -1240,7 +1240,7 @@ export default function Dashboard() {
                   exit={{ opacity: 0 }}
                   className="text-sm text-muted-foreground text-center py-8"
                 >
-                  Tidak ada tiket dalam kategori ini
+                  Tidak ada incident dalam kategori ini
                 </motion.p>
               ) : (
                 <motion.div

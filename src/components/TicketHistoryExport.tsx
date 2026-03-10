@@ -46,7 +46,7 @@ export function TicketHistoryExport() {
       setRecords(data || []);
     } catch (err) {
       if (import.meta.env.DEV) console.error("Error fetching history:", err);
-      toast.error("Gagal memuat data historis");
+      toast.error("Gagal memuat data historis incident");
     } finally {
       setLoading(false);
     }
@@ -76,8 +76,8 @@ export function TicketHistoryExport() {
     if (records.length === 0) return toast.error("Tidak ada data untuk di-export");
     const ws = XLSX.utils.json_to_sheet(buildExportData());
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Histori Tiket");
-    XLSX.writeFile(wb, `histori-tiket-${days}hari-${new Date().toISOString().split("T")[0]}.xlsx`);
+    XLSX.utils.book_append_sheet(wb, ws, "Histori Incident");
+    XLSX.writeFile(wb, `histori-incident-${days}hari-${new Date().toISOString().split("T")[0]}.xlsx`);
     toast.success("File Excel berhasil diunduh");
   };
 
@@ -89,7 +89,7 @@ export function TicketHistoryExport() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `histori-tiket-${days}hari-${new Date().toISOString().split("T")[0]}.csv`;
+    a.download = `histori-incident-${days}hari-${new Date().toISOString().split("T")[0]}.csv`;
     a.click();
     URL.revokeObjectURL(url);
     toast.success("File CSV berhasil diunduh");
@@ -106,10 +106,10 @@ export function TicketHistoryExport() {
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
               <CardTitle className="flex items-center gap-2">
-                📊 Daily Ticket History
+                📊 Daily Incident History
               </CardTitle>
               <CardDescription>
-                Data historis tiket tersimpan permanen di cloud — tidak hilang saat browser di-clear
+                Data historis incident tersimpan permanen di cloud — tidak hilang saat browser di-clear
               </CardDescription>
             </div>
             <div className="flex items-center gap-2 flex-wrap">
@@ -166,7 +166,7 @@ export function TicketHistoryExport() {
             <div className="text-center py-8 text-muted-foreground text-sm">Memuat data...</div>
           ) : records.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground text-sm">
-              Belum ada data historis tiket
+              Belum ada data historis incident
             </div>
           ) : (
             <div className="overflow-auto rounded-lg border max-h-[50vh]">

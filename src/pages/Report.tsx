@@ -843,14 +843,14 @@ function PendingTicketsList() {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
         setTickets(updated.filter(t => t.status === "Pending"));
         toast({
-          title: "Tiket dihapus",
-          description: "Tiket berhasil dihapus dari sistem.",
+          title: "Incident dihapus",
+          description: "Incident berhasil dihapus dari sistem.",
         });
       }
     } catch (error) {
       toast({
         title: "Gagal hapus",
-        description: "Tidak dapat menghapus tiket.",
+        description: "Tidak dapat menghapus incident.",
         variant: "destructive",
       });
     }

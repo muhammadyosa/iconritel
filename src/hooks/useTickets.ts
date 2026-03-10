@@ -78,7 +78,7 @@ export function useTickets() {
         
         // Show toast only on subsequent checks, not initial mount
         if (deletedCount > 0 && hasRunInitialCheck.current) {
-          toast.info(`${deletedCount} tiket resolved (>24h) dihapus otomatis`);
+          toast.info(`${deletedCount} incident resolved (>24h) dihapus otomatis`);
         }
         
         hasRunInitialCheck.current = true;
@@ -108,7 +108,7 @@ export function useTickets() {
       }
       if (error instanceof DOMException && error.name === "QuotaExceededError") {
         toast.error(
-          "Storage penuh! Silakan export dan hapus tiket lama untuk membuat ruang."
+          "Storage penuh! Silakan export dan hapus incident lama untuk membuat ruang."
         );
       }
     }
