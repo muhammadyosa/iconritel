@@ -158,7 +158,7 @@ export function InsidentManagement() {
   const buildExportData = useCallback((data: typeof tickets) => {
     return data.map((t, idx) => ({
       "No": idx + 1,
-      "Ticket ID": t.id,
+      "Incident ID": t.id,
       "Customer": t.customerName,
       "Service ID": t.serviceId,
       "Hostname": t.hostname,
