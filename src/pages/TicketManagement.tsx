@@ -217,8 +217,8 @@ export default function TicketManagement() {
 
     try {
       await addTicket(ticket);
-      logActivity("create_ticket", `Tiket ${ticket.id} - ${ticket.customerName}`);
-      toast.success(`Tiket ${category} berhasil dibuat & disimpan ke Cloud`);
+      logActivity("create_ticket", `Incident ${ticket.id} - ${ticket.customerName}`);
+      toast.success(`Incident ${category} berhasil dibuat & disimpan ke Cloud`);
       setIsFormOpen(false);
       setFormData({ ticketId: "", serpo: "", constraint: "", portText: "" });
       setSelectedRecord(null);
