@@ -241,7 +241,7 @@ export default function TicketManagement() {
       "Constraint": t.constraint,
       "Status": t.status,
       "Created": t.createdAt,
-      "Ticket Result": t.ticketResult,
+      "Incident Result": t.ticketResult,
     }));
 
     import("xlsx").then((XLSX) => {
