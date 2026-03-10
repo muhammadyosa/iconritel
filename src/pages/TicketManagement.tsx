@@ -723,7 +723,7 @@ export default function TicketManagement() {
                       {manualFormData.constraint && manualFormData.serpo && (
                         <div className="p-3 bg-accent/50 rounded-lg space-y-1">
                           <p className="text-xs font-semibold text-muted-foreground">
-                            Preview Format Tiket:
+                            Preview Format Incident:
                           </p>
                           <p className="text-sm font-mono whitespace-pre-wrap break-all">
                             {generateTicketFormat(
