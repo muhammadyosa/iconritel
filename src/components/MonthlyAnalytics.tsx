@@ -645,7 +645,7 @@ export function MonthlyAnalytics({ tickets }: MonthlyAnalyticsProps) {
                 <Button variant="default" size="sm" className="rounded-full h-7 px-3 text-xs" onClick={() => setDrillSelectedTicket(null)}>
                   <ArrowLeft className="h-3 w-3 mr-1" /> Kembali
                 </Button>
-                <span className="truncate">Detail Tiket</span>
+                <span className="truncate">Detail Incident</span>
               </DialogTitle>
             ) : (
               <DialogTitle className="text-sm sm:text-base">{drillTitle}</DialogTitle>
