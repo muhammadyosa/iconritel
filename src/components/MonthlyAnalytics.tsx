@@ -123,7 +123,6 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
       const todayStr = today.toISOString().split('T')[0];
       return tickets.filter((t) => new Date(t.createdISO).toISOString().split('T')[0] === todayStr);
     }
-    // 7, 14, 30 days
     const days = Number(categoryFilter);
     const start = new Date(today);
     start.setDate(start.getDate() - days + 1);
@@ -132,6 +131,11 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
   }, [tickets, categoryFilter, categoryCustomDate]);
 
   const categoryData = useMemo(() => {
+    // Use cloud-persisted historical data if available
+    if (getCategoryDataFromHistory) {
+      return getCategoryDataFromHistory(categoryFilter, categoryCustomDate);
+    }
+    // Fallback to live tickets
     const map = new Map<string, number>();
     categoryFilteredTickets.forEach((t) => {
       map.set(t.constraint, (map.get(t.constraint) || 0) + 1);
@@ -139,7 +143,7 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
     return Array.from(map.entries())
       .map(([name, value]) => ({ name, value }))
       .sort((a, b) => b.value - a.value);
-  }, [categoryFilteredTickets]);
+  }, [categoryFilteredTickets, getCategoryDataFromHistory, categoryFilter, categoryCustomDate]);
 
   const dailyTrend = useMemo(() => {
     const today = new Date();
