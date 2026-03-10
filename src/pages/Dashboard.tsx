@@ -199,7 +199,7 @@ export default function Dashboard() {
               
               if (card.metric === "total") {
                 filtered = tickets;
-                title = "🗃️ Semua Tiket";
+                title = "🗃️ Semua Incident";
               } else if (card.metric === "overSLA") {
                 filtered = tickets.filter((t) => {
                   const ageMs = new Date().getTime() - new Date(t.createdISO).getTime();
