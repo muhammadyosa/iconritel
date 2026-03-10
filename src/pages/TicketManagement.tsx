@@ -340,11 +340,11 @@ export default function TicketManagement() {
           </DialogHeader>
           <div className="space-y-4">
             <div>
-              <Label>Ticket ID</Label>
+              <Label>Incident ID</Label>
               <Input
                 value={formData.ticketId}
                 onChange={(e) => setFormData({ ...formData, ticketId: e.target.value })}
-                placeholder="Masukkan Ticket ID (contoh: INC12345678)"
+                placeholder="Masukkan Incident ID (contoh: INC12345678)"
               />
             </div>
             <div>
