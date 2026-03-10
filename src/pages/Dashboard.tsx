@@ -1211,7 +1211,7 @@ export default function Dashboard() {
                             </div>
                             <div className="flex items-center gap-1 flex-shrink-0">
                               <span className="text-lg font-bold text-primary">{count}</span>
-                              <span className="text-xs text-muted-foreground">tiket</span>
+                              <span className="text-xs text-muted-foreground">incident</span>
                             </div>
                           </div>
                           
