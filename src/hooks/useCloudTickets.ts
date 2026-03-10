@@ -188,7 +188,7 @@ export function useCloudTickets() {
       if (import.meta.env.DEV) {
         console.error("Error fetching tickets:", error);
       }
-      toast.error("Gagal memuat tiket dari database");
+      toast.error("Gagal memuat incident dari database");
     } finally {
       setIsLoading(false);
     }
