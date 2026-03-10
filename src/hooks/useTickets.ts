@@ -78,7 +78,7 @@ export function useTickets() {
         
         // Show toast only on subsequent checks, not initial mount
         if (deletedCount > 0 && hasRunInitialCheck.current) {
-          toast.info(`${deletedCount} tiket resolved (>24h) dihapus otomatis`);
+          toast.info(`${deletedCount} incident resolved (>24h) dihapus otomatis`);
         }
         
         hasRunInitialCheck.current = true;
