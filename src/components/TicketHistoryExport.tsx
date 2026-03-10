@@ -76,8 +76,8 @@ export function TicketHistoryExport() {
     if (records.length === 0) return toast.error("Tidak ada data untuk di-export");
     const ws = XLSX.utils.json_to_sheet(buildExportData());
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Histori Tiket");
-    XLSX.writeFile(wb, `histori-tiket-${days}hari-${new Date().toISOString().split("T")[0]}.xlsx`);
+    XLSX.utils.book_append_sheet(wb, ws, "Histori Incident");
+    XLSX.writeFile(wb, `histori-incident-${days}hari-${new Date().toISOString().split("T")[0]}.xlsx`);
     toast.success("File Excel berhasil diunduh");
   };
 
