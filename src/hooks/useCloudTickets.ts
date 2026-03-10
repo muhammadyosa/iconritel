@@ -278,7 +278,7 @@ export function useCloudTickets() {
         typeof error === "object" && error !== null && "message" in error
           ? String((error as { message?: unknown }).message)
           : "Unknown error";
-      toast.error(`Gagal menyimpan tiket ke database: ${message}`);
+      toast.error(`Gagal menyimpan incident ke database: ${message}`);
       throw error;
     }
   }, []);
