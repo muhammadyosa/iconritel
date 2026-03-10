@@ -44,7 +44,7 @@ const FALLBACK_COLORS = [
   "hsl(340, 75%, 55%)", "hsl(30, 80%, 50%)",
 ];
 
-export function MonthlyAnalytics({ tickets }: MonthlyAnalyticsProps) {
+export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: getCategoryDataFromHistory }: MonthlyAnalyticsProps) {
   const [selectedMonth, setSelectedMonth] = useState(() => {
     const now = new Date();
     return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
