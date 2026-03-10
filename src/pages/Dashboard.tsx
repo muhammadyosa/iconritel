@@ -42,7 +42,7 @@ interface ShiftReport {
 
 export default function Dashboard() {
   const { tickets, isLoading: isLoadingTickets } = useCloudTickets();
-  const { getChartData, getTicketsForDate, getTicketsForDateByStatus } = useTicketHistory(tickets);
+  const { getChartData, getTrendChartData, getCategoryData, getTicketsForDate, getTicketsForDateByStatus } = useTicketHistory(tickets);
   
   // Cloud shift reports hook
   const { 
@@ -587,7 +587,7 @@ export default function Dashboard() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, delay: 0.3 }}
       >
-        <MonthlyAnalytics tickets={tickets} />
+        <MonthlyAnalytics tickets={tickets} getTrendChartData={getTrendChartData} getCategoryData={getCategoryData} />
       </motion.div>
 
       {/* Shift Reports Section - Enhanced Layout */}

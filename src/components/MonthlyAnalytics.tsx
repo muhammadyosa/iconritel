@@ -19,6 +19,8 @@ import {
 
 interface MonthlyAnalyticsProps {
   tickets: Ticket[];
+  getTrendChartData?: (days: number) => Array<{ day: string; isoDate: string; dayNum: number; total: number; resolved: number; slaOk: number }>;
+  getCategoryData?: (filter: string, customDate?: string) => Array<{ name: string; value: number }>;
 }
 
 const CATEGORY_COLORS: Record<string, string> = {
@@ -42,7 +44,7 @@ const FALLBACK_COLORS = [
   "hsl(340, 75%, 55%)", "hsl(30, 80%, 50%)",
 ];
 
-export function MonthlyAnalytics({ tickets }: MonthlyAnalyticsProps) {
+export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: getCategoryDataFromHistory }: MonthlyAnalyticsProps) {
   const [selectedMonth, setSelectedMonth] = useState(() => {
     const now = new Date();
     return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
@@ -121,7 +123,6 @@ export function MonthlyAnalytics({ tickets }: MonthlyAnalyticsProps) {
       const todayStr = today.toISOString().split('T')[0];
       return tickets.filter((t) => new Date(t.createdISO).toISOString().split('T')[0] === todayStr);
     }
-    // 7, 14, 30 days
     const days = Number(categoryFilter);
     const start = new Date(today);
     start.setDate(start.getDate() - days + 1);
@@ -130,6 +131,11 @@ export function MonthlyAnalytics({ tickets }: MonthlyAnalyticsProps) {
   }, [tickets, categoryFilter, categoryCustomDate]);
 
   const categoryData = useMemo(() => {
+    // Use cloud-persisted historical data if available
+    if (getCategoryDataFromHistory) {
+      return getCategoryDataFromHistory(categoryFilter, categoryCustomDate);
+    }
+    // Fallback to live tickets
     const map = new Map<string, number>();
     categoryFilteredTickets.forEach((t) => {
       map.set(t.constraint, (map.get(t.constraint) || 0) + 1);
@@ -137,22 +143,43 @@ export function MonthlyAnalytics({ tickets }: MonthlyAnalyticsProps) {
     return Array.from(map.entries())
       .map(([name, value]) => ({ name, value }))
       .sort((a, b) => b.value - a.value);
-  }, [categoryFilteredTickets]);
+  }, [categoryFilteredTickets, getCategoryDataFromHistory, categoryFilter, categoryCustomDate]);
 
   const dailyTrend = useMemo(() => {
     const today = new Date();
+    
+    // Use cloud-persisted historical data if available
+    if (getTrendChartData) {
+      if (trendFilter === "custom") {
+        const customD = new Date(trendCustomDate);
+        return getTrendChartData(1).length > 0
+          ? [getTrendChartData(Math.max(1, Math.ceil((today.getTime() - customD.getTime()) / (1000 * 60 * 60 * 24)) + 1))
+              .find(d => d.isoDate === trendCustomDate) || {
+                day: customD.toLocaleDateString('id-ID', { day: '2-digit', month: 'short' }),
+                isoDate: trendCustomDate, dayNum: customD.getDate(),
+                total: 0, resolved: 0, slaOk: 0,
+              }]
+          : [];
+      }
+      if (trendFilter === "all") {
+        // Use max available history (30 days)
+        return getTrendChartData(30).filter(d => d.total > 0 || true);
+      }
+      const days = Number(trendFilter);
+      return getTrendChartData(days);
+    }
+
+    // Fallback to live tickets
     const data: { day: string; isoDate: string; dayNum: number; total: number; resolved: number; slaOk: number }[] = [];
     
     let days: number;
     if (trendFilter === "all") {
-      // Find earliest ticket date
       const earliest = tickets.reduce((min, t) => {
         const d = new Date(t.createdISO);
         return d < min ? d : min;
       }, today);
       days = Math.max(1, Math.ceil((today.getTime() - earliest.getTime()) / (1000 * 60 * 60 * 24)) + 1);
     } else if (trendFilter === "custom") {
-      // Show just the custom date
       const customD = new Date(trendCustomDate);
       const isoDate = trendCustomDate;
       const displayDay = customD.toLocaleDateString('id-ID', { day: '2-digit', month: 'short' });
@@ -191,7 +218,7 @@ export function MonthlyAnalytics({ tickets }: MonthlyAnalyticsProps) {
       data.push({ day: displayDay, isoDate, dayNum: date.getDate(), total: dayTickets.length, resolved: resolvedDay.length, slaOk });
     }
     return data;
-  }, [tickets, trendFilter, trendCustomDate]);
+  }, [tickets, trendFilter, trendCustomDate, getTrendChartData]);
 
   const trendConfig: ChartConfig = {
     total: { label: "Total", color: "hsl(var(--primary))" },
