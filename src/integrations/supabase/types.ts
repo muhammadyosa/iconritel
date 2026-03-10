@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      daily_category_history: {
+        Row: {
+          constraint_type: string
+          count: number
+          created_at: string
+          date: string
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          constraint_type: string
+          count?: number
+          created_at?: string
+          date: string
+          id?: string
+          updated_at?: string
+        }
+        Update: {
+          constraint_type?: string
+          count?: number
+          created_at?: string
+          date?: string
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       daily_ticket_history: {
         Row: {
           created: number
@@ -24,6 +51,7 @@ export type Database = {
           in_progress: number
           resolved: number
           ritel: number
+          sla_ok: number
           total: number
           updated_at: string
         }
@@ -36,6 +64,7 @@ export type Database = {
           in_progress?: number
           resolved?: number
           ritel?: number
+          sla_ok?: number
           total?: number
           updated_at?: string
         }
@@ -48,6 +77,7 @@ export type Database = {
           in_progress?: number
           resolved?: number
           ritel?: number
+          sla_ok?: number
           total?: number
           updated_at?: string
         }
