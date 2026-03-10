@@ -461,7 +461,7 @@ export function MonthlyAnalytics({ tickets }: MonthlyAnalyticsProps) {
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
         {[
           {
-            emoji: "🗃️", title: "Total Tiket", value: kpis.total,
+            emoji: "🗃️", title: "Total Incident", value: kpis.total,
             bgClass: "bg-primary/8 hover:bg-primary/15", borderClass: "border-primary/30 hover:border-primary/50",
             valueClass: "text-primary", glowClass: "hover:shadow-[0_0_15px_-4px_hsl(var(--primary)/0.3)]",
           },
