@@ -774,7 +774,7 @@ export default function TicketManagement() {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">Semua</SelectItem>
-                      <SelectItem value="ticketId">Ticket ID</SelectItem>
+                      <SelectItem value="ticketId">Incident ID</SelectItem>
                       <SelectItem value="category">Category</SelectItem>
                       <SelectItem value="customerType">Customer/Type</SelectItem>
                       <SelectItem value="serviceId">Service ID</SelectItem>
