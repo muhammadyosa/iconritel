@@ -208,7 +208,7 @@ export default function Dashboard() {
                 title = "⚠️ Incident Over SLA (>24h)";
               } else if (card.metric === "feeder") {
                 filtered = tickets.filter((t) => FEEDER_CONSTRAINTS_SET.has(t.constraint));
-                title = "⛓️‍💥 Tiket Impact Feeder";
+                title = "⛓️‍💥 Incident Impact Feeder";
               } else if (card.metric === "olt") {
                 setShowOltList(true);
                 setFilterDialogTitle("📟 Daftar OLT Terdampak");
