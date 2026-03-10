@@ -261,7 +261,7 @@ export default function TicketManagement() {
 
   const handleSubmitManualTicket = async () => {
     if (!manualFormData.ticketId.trim()) {
-      toast.error("Ticket ID wajib diisi");
+      toast.error("Incident ID wajib diisi");
       return;
     }
     if (!manualFormData.constraint) {
