@@ -109,7 +109,7 @@ export function TicketHistoryExport() {
                 📊 Daily Incident History
               </CardTitle>
               <CardDescription>
-                Data historis tiket tersimpan permanen di cloud — tidak hilang saat browser di-clear
+                Data historis incident tersimpan permanen di cloud — tidak hilang saat browser di-clear
               </CardDescription>
             </div>
             <div className="flex items-center gap-2 flex-wrap">
