@@ -306,8 +306,8 @@ export default function TicketManagement() {
 
     try {
       await addTicket(ticket);
-      logActivity("create_ticket", `Tiket manual ${ticket.id} - ${ticket.customerName}`);
-      toast.success(`Tiket ${category} berhasil dibuat & disimpan ke Cloud`);
+      logActivity("create_ticket", `Incident manual ${ticket.id} - ${ticket.customerName}`);
+      toast.success(`Incident ${category} berhasil dibuat & disimpan ke Cloud`);
       setIsManualFormOpen(false);
       setManualFormData({
         ticketId: "",
