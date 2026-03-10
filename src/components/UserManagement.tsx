@@ -449,7 +449,7 @@ export function UserManagement() {
                     <TableCell>
                       <Select
                         value={user.role}
-                        onValueChange={(value: "admin" | "operator" | "reviewer") =>
+                        onValueChange={(value: "admin" | "noc" | "reviewer") =>
                           handleRoleChange(user.user_id, value)
                         }
                         disabled={updatingUserId === user.user_id}
@@ -468,10 +468,10 @@ export function UserManagement() {
                               Admin
                             </div>
                           </SelectItem>
-                          <SelectItem value="operator">
+                          <SelectItem value="noc">
                             <div className="flex items-center gap-2">
                               <User className="h-3 w-3 text-muted-foreground" />
-                              Operator
+                              NOC
                             </div>
                           </SelectItem>
                           <SelectItem value="reviewer">
