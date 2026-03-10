@@ -42,7 +42,7 @@ interface ShiftReport {
 
 export default function Dashboard() {
   const { tickets, isLoading: isLoadingTickets } = useCloudTickets();
-  const { getChartData, getTicketsForDate, getTicketsForDateByStatus } = useTicketHistory(tickets);
+  const { getChartData, getTrendChartData, getCategoryData, getTicketsForDate, getTicketsForDateByStatus } = useTicketHistory(tickets);
   
   // Cloud shift reports hook
   const { 
