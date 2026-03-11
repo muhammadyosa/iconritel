@@ -938,7 +938,7 @@ export default function Teams() {
                               {isRitel ? "RITEL" : "FEEDER"}
                             </Badge>
                             <div className={cn("h-2.5 w-2.5 rounded-full", statusBg)} />
-                            Tiket {statusFilter}
+                            Incident {statusFilter}
                           </SheetTitle>
                           <SheetDescription className="text-xs sm:text-sm">
                             {filteredList.length} tiket dengan status {statusFilter}
