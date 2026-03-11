@@ -4,10 +4,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
-import { Info, Search, Server, AlertTriangle, CheckCircle, Clock } from "lucide-react";
+import { Info, Search, Server, AlertTriangle, CheckCircle, Users } from "lucide-react";
 import { Link } from "react-router-dom";
-import { loadOLTData } from "@/lib/indexedDB";
-import { OLT } from "@/types/olt";
+import { loadRegionalTeamData } from "@/lib/indexedDB";
+import { RegionalTeamRecord } from "@/types/regionalTeam";
 import { Ticket } from "@/types/ticket";
 import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -25,79 +25,105 @@ interface RegionalOfficeTabProps {
 }
 
 interface RegionalData {
-  provinsi: string;
-  oltCount: number;
-  hostnames: string[];
+  region: string;
+  totalMitra: number;
+  totalHostnames: number;
+  ritelMitra: number;
+  feederMitra: number;
   totalIncidents: number;
   resolved: number;
   pending: number;
   critical: number;
   incidentTickets: Ticket[];
+  teams: RegionalTeamRecord[];
 }
 
 export default function RegionalOfficeTab({ tickets }: RegionalOfficeTabProps) {
-  const [oltData, setOltData] = useState<OLT[]>([]);
+  const [teamData, setTeamData] = useState<RegionalTeamRecord[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedRegion, setSelectedRegion] = useState<RegionalData | null>(null);
 
   useEffect(() => {
-    loadOLTData()
-      .then((data) => { setOltData(data); setIsLoading(false); })
+    loadRegionalTeamData()
+      .then((data) => { setTeamData(data); setIsLoading(false); })
       .catch(() => setIsLoading(false));
   }, []);
 
-  // Build hostname -> provinsi mapping and regional data (incident-driven)
+  // Build regional data from team records + match incidents
   const regionalData = useMemo(() => {
-    // Build hostname -> provinsi lookup from OLT data
-    const hostnameToProv: Record<string, string> = {};
-    const provOltCount: Record<string, number> = {};
-
-    oltData.forEach((olt) => {
-      const prov = (olt.provinsi || "").trim().toUpperCase();
-      if (!prov) return;
-      provOltCount[prov] = (provOltCount[prov] || 0) + 1;
-      if (olt.hostnameOlt) {
-        hostnameToProv[olt.hostnameOlt.trim().toUpperCase()] = prov;
-      }
+    // Group team records by region
+    const regionMap: Record<string, RegionalTeamRecord[]> = {};
+    teamData.forEach((rec) => {
+      const region = rec.region.trim().toUpperCase();
+      if (!region) return;
+      if (!regionMap[region]) regionMap[region] = [];
+      regionMap[region].push(rec);
     });
 
-    // Map tickets to provinsi via hostname — only create regions that have incidents
-    const regionStats: Record<string, RegionalData> = {};
+    // Build hostname -> region lookup (uppercase)
+    const hostnameToRegion: Record<string, string> = {};
+    Object.entries(regionMap).forEach(([region, records]) => {
+      records.forEach((rec) => {
+        rec.hostnames.forEach((h) => {
+          const normalized = h.trim().toUpperCase();
+          if (normalized) hostnameToRegion[normalized] = region;
+        });
+      });
+    });
 
+    // Build region stats
+    const stats: Record<string, RegionalData> = {};
+    
+    // Initialize from team data
+    Object.entries(regionMap).forEach(([region, records]) => {
+      const allHostnames = new Set<string>();
+      let ritelCount = 0;
+      let feederCount = 0;
+      records.forEach((rec) => {
+        rec.hostnames.forEach((h) => allHostnames.add(h.trim().toUpperCase()));
+        if (rec.serpoType === "RITEL") ritelCount++;
+        else if (rec.serpoType === "FEEDER") feederCount++;
+      });
+      
+      stats[region] = {
+        region,
+        totalMitra: records.length,
+        totalHostnames: allHostnames.size,
+        ritelMitra: ritelCount,
+        feederMitra: feederCount,
+        totalIncidents: 0,
+        resolved: 0,
+        pending: 0,
+        critical: 0,
+        incidentTickets: [],
+        teams: records,
+      };
+    });
+
+    // Map tickets to regions
     tickets.forEach((ticket) => {
       const ticketHostname = (ticket.hostname || "").trim().toUpperCase();
-      const prov = hostnameToProv[ticketHostname];
-      if (!prov) return;
+      const region = hostnameToRegion[ticketHostname];
+      if (!region || !stats[region]) return;
 
-      if (!regionStats[prov]) {
-        regionStats[prov] = {
-          provinsi: prov,
-          oltCount: provOltCount[prov] || 0,
-          hostnames: [],
-          totalIncidents: 0,
-          resolved: 0,
-          pending: 0,
-          critical: 0,
-          incidentTickets: [],
-        };
-      }
-      regionStats[prov].totalIncidents++;
-      regionStats[prov].incidentTickets.push(ticket);
-      if (ticket.status === "Resolved") regionStats[prov].resolved++;
-      else if (ticket.status === "Critical") regionStats[prov].critical++;
-      else regionStats[prov].pending++;
+      stats[region].totalIncidents++;
+      stats[region].incidentTickets.push(ticket);
+      if (ticket.status === "Resolved") stats[region].resolved++;
+      else if (ticket.status === "Critical") stats[region].critical++;
+      else stats[region].pending++;
     });
 
-    return Object.values(regionStats).sort((a, b) => b.totalIncidents - a.totalIncidents);
-  }, [oltData, tickets]);
+    return Object.values(stats).sort((a, b) => b.totalIncidents - a.totalIncidents);
+  }, [teamData, tickets]);
 
   const filteredData = regionalData.filter((r) => {
     if (!searchQuery) return true;
-    return r.provinsi.toLowerCase().includes(searchQuery.toLowerCase());
+    return r.region.toLowerCase().includes(searchQuery.toLowerCase());
   });
 
-  const totalOLT = regionalData.reduce((s, r) => s + r.oltCount, 0);
+  const totalHostnames = regionalData.reduce((s, r) => s + r.totalHostnames, 0);
+  const totalMitra = regionalData.reduce((s, r) => s + r.totalMitra, 0);
   const totalIncidents = regionalData.reduce((s, r) => s + r.totalIncidents, 0);
   const totalResolved = regionalData.reduce((s, r) => s + r.resolved, 0);
 
@@ -105,13 +131,13 @@ export default function RegionalOfficeTab({ tickets }: RegionalOfficeTabProps) {
     return (
       <Card>
         <CardContent className="py-8 text-center text-muted-foreground text-sm">
-          Memuat data OLT...
+          Memuat data Regional Team...
         </CardContent>
       </Card>
     );
   }
 
-  if (oltData.length === 0) {
+  if (teamData.length === 0) {
     return (
       <Card>
         <CardHeader>
@@ -121,9 +147,9 @@ export default function RegionalOfficeTab({ tickets }: RegionalOfficeTabProps) {
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <Info className="h-4 w-4 flex-shrink-0" />
             <span>
-              Belum ada data OLT. Import data melalui{" "}
+              Belum ada data Regional Team. Import data melalui{" "}
               <Link to="/settings" className="text-primary underline hover:no-underline">Settings</Link>
-              {" "}untuk menampilkan daftar Regional Office.
+              {" "}(sheet &quot;List Team Region&quot;) untuk menampilkan daftar Regional Office.
             </span>
           </div>
         </CardContent>
@@ -134,14 +160,18 @@ export default function RegionalOfficeTab({ tickets }: RegionalOfficeTabProps) {
   return (
     <div className="space-y-4">
       {/* Summary Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 sm:gap-3">
         <Card className="p-3">
-          <div className="text-[10px] sm:text-xs text-muted-foreground">Total Provinsi</div>
+          <div className="text-[10px] sm:text-xs text-muted-foreground">Total Region</div>
           <div className="text-lg sm:text-xl font-bold">{regionalData.length}</div>
         </Card>
         <Card className="p-3">
+          <div className="text-[10px] sm:text-xs text-muted-foreground flex items-center gap-1"><Users className="h-3 w-3" /> Total Mitra</div>
+          <div className="text-lg sm:text-xl font-bold">{totalMitra.toLocaleString()}</div>
+        </Card>
+        <Card className="p-3">
           <div className="text-[10px] sm:text-xs text-muted-foreground flex items-center gap-1"><Server className="h-3 w-3" /> Total OLT</div>
-          <div className="text-lg sm:text-xl font-bold">{totalOLT.toLocaleString()}</div>
+          <div className="text-lg sm:text-xl font-bold">{totalHostnames.toLocaleString()}</div>
         </Card>
         <Card className="p-3">
           <div className="text-[10px] sm:text-xs text-muted-foreground flex items-center gap-1"><AlertTriangle className="h-3 w-3" /> Total Incident</div>
@@ -162,12 +192,12 @@ export default function RegionalOfficeTab({ tickets }: RegionalOfficeTabProps) {
             🗺 List Regional Office
           </CardTitle>
           <CardDescription className="text-[10px] sm:text-xs">
-            Data regional berdasarkan Provinsi dari List OLT, disinkronkan dengan data Incident
+            Data regional berdasarkan List Team Region, disinkronkan dengan data Incident
           </CardDescription>
           <div className="mt-2 flex items-center gap-2 max-w-sm">
             <Search className="h-3.5 w-3.5 text-muted-foreground" />
             <Input
-              placeholder="Cari provinsi..."
+              placeholder="Cari region..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="h-7 sm:h-8 text-[10px] sm:text-xs"
@@ -176,12 +206,15 @@ export default function RegionalOfficeTab({ tickets }: RegionalOfficeTabProps) {
         </CardHeader>
         <CardContent className="p-2 sm:p-4 md:p-6 pt-0">
           <div className="rounded-md border overflow-x-auto overflow-y-auto max-h-[55vh] sm:max-h-[65vh]">
-            <Table className="text-[10px] sm:text-xs min-w-[600px]">
+            <Table className="text-[10px] sm:text-xs min-w-[700px]">
               <TableHeader className="sticky top-0 bg-background z-10">
                 <TableRow className="h-7 sm:h-9">
                   <TableHead className="px-2 py-1 w-8 text-center">#</TableHead>
-                  <TableHead className="px-2 py-1">PROVINSI</TableHead>
+                  <TableHead className="px-2 py-1">REGION</TableHead>
+                  <TableHead className="px-2 py-1 text-center">MITRA</TableHead>
                   <TableHead className="px-2 py-1 text-center">OLT</TableHead>
+                  <TableHead className="px-2 py-1 text-center">RITEL</TableHead>
+                  <TableHead className="px-2 py-1 text-center">FEEDER</TableHead>
                   <TableHead className="px-2 py-1 text-center">INCIDENT</TableHead>
                   <TableHead className="px-2 py-1 text-center text-success">RESOLVED</TableHead>
                   <TableHead className="px-2 py-1 text-center text-warning">PENDING</TableHead>
@@ -192,7 +225,7 @@ export default function RegionalOfficeTab({ tickets }: RegionalOfficeTabProps) {
               <TableBody>
                 {filteredData.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={8} className="text-center text-muted-foreground py-4">
+                    <TableCell colSpan={11} className="text-center text-muted-foreground py-4">
                       Tidak ada data yang sesuai.
                     </TableCell>
                   </TableRow>
@@ -201,15 +234,20 @@ export default function RegionalOfficeTab({ tickets }: RegionalOfficeTabProps) {
                     const rate = r.totalIncidents > 0 ? Math.round((r.resolved / r.totalIncidents) * 100) : 0;
                     return (
                       <TableRow
-                        key={r.provinsi}
+                        key={r.region}
                         className="cursor-pointer transition-colors hover:bg-accent/5 h-7 sm:h-9"
                         onClick={() => setSelectedRegion(r)}
                       >
                         <TableCell className="text-center text-muted-foreground px-2 py-1">{i + 1}</TableCell>
-                        <TableCell className="px-2 py-1 font-semibold">{r.provinsi}</TableCell>
+                        <TableCell className="px-2 py-1 font-semibold">{r.region}</TableCell>
                         <TableCell className="text-center px-2 py-1">
-                          <Badge variant="secondary" className="text-[9px] sm:text-[10px]">{r.oltCount}</Badge>
+                          <Badge variant="secondary" className="text-[9px] sm:text-[10px]">{r.totalMitra}</Badge>
                         </TableCell>
+                        <TableCell className="text-center px-2 py-1">
+                          <Badge variant="outline" className="text-[9px] sm:text-[10px]">{r.totalHostnames}</Badge>
+                        </TableCell>
+                        <TableCell className="text-center px-2 py-1 font-medium">{r.ritelMitra}</TableCell>
+                        <TableCell className="text-center px-2 py-1 font-medium">{r.feederMitra}</TableCell>
                         <TableCell className="text-center px-2 py-1 font-bold">{r.totalIncidents}</TableCell>
                         <TableCell className="text-center px-2 py-1 text-success font-medium">{r.resolved}</TableCell>
                         <TableCell className="text-center px-2 py-1 text-warning font-medium">{r.pending}</TableCell>
@@ -231,7 +269,7 @@ export default function RegionalOfficeTab({ tickets }: RegionalOfficeTabProps) {
             </Table>
           </div>
           <div className="mt-2 text-[10px] sm:text-xs text-muted-foreground">
-            Menampilkan {filteredData.length} dari {regionalData.length} provinsi
+            Menampilkan {filteredData.length} dari {regionalData.length} region
           </div>
         </CardContent>
       </Card>
@@ -242,12 +280,13 @@ export default function RegionalOfficeTab({ tickets }: RegionalOfficeTabProps) {
           {selectedRegion && (
             <>
               <SheetHeader>
-                <SheetTitle className="text-base">🗺 {selectedRegion.provinsi}</SheetTitle>
+                <SheetTitle className="text-base">🗺 {selectedRegion.region}</SheetTitle>
                 <SheetDescription className="text-xs">
-                  {selectedRegion.oltCount} OLT · {selectedRegion.totalIncidents} Incident
+                  {selectedRegion.totalMitra} Mitra · {selectedRegion.totalHostnames} OLT · {selectedRegion.totalIncidents} Incident
                 </SheetDescription>
               </SheetHeader>
-              <div className="mt-4 space-y-3">
+              <div className="mt-4 space-y-4">
+                {/* Stats */}
                 <div className="grid grid-cols-3 gap-2">
                   <Card className="p-2 text-center">
                     <div className="text-[10px] text-muted-foreground">Resolved</div>
@@ -263,29 +302,68 @@ export default function RegionalOfficeTab({ tickets }: RegionalOfficeTabProps) {
                   </Card>
                 </div>
 
-                {selectedRegion.incidentTickets.length > 0 ? (
-                  <ScrollArea className="max-h-[50vh]">
+                {/* Teams List */}
+                <div>
+                  <h4 className="text-xs font-semibold mb-2 flex items-center gap-1.5">
+                    <Users className="h-3.5 w-3.5" /> Daftar Tim ({selectedRegion.teams.length})
+                  </h4>
+                  <ScrollArea className="max-h-[30vh]">
                     <Table className="text-[10px] sm:text-xs">
                       <TableHeader>
                         <TableRow className="h-7">
-                          <TableHead className="px-1.5 py-1">Incident ID</TableHead>
-                          <TableHead className="px-1.5 py-1">Hostname</TableHead>
-                          <TableHead className="px-1.5 py-1">Pelanggan</TableHead>
-                          <TableHead className="px-1.5 py-1">Status</TableHead>
+                          <TableHead className="px-1.5 py-1">Tipe</TableHead>
+                          <TableHead className="px-1.5 py-1">Nama Mitra</TableHead>
+                          <TableHead className="px-1.5 py-1 text-center">OLT</TableHead>
+                          <TableHead className="px-1.5 py-1">Tim</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {selectedRegion.incidentTickets.map((t) => (
-                          <TableRow key={t.id} className="h-7">
-                            <TableCell className="px-1.5 py-0.5 font-mono">{t.serviceId}</TableCell>
-                            <TableCell className="px-1.5 py-0.5 font-mono">{t.hostname}</TableCell>
-                            <TableCell className="px-1.5 py-0.5 truncate max-w-[120px]">{t.customerName}</TableCell>
-                            <TableCell className="px-1.5 py-0.5"><StatusBadge status={t.status} /></TableCell>
+                        {selectedRegion.teams.map((t, idx) => (
+                          <TableRow key={`${t.mitraName}-${idx}`} className="h-7">
+                            <TableCell className="px-1.5 py-0.5">
+                              <Badge variant={t.serpoType === "RITEL" ? "default" : "secondary"} className="text-[8px]">
+                                {t.serpoType}
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="px-1.5 py-0.5 font-medium truncate max-w-[140px]">{t.mitraName}</TableCell>
+                            <TableCell className="px-1.5 py-0.5 text-center">{t.hostnames.length}</TableCell>
+                            <TableCell className="px-1.5 py-0.5 truncate max-w-[100px]">{t.teamMember || "-"}</TableCell>
                           </TableRow>
                         ))}
                       </TableBody>
                     </Table>
                   </ScrollArea>
+                </div>
+
+                {/* Incidents */}
+                {selectedRegion.incidentTickets.length > 0 ? (
+                  <div>
+                    <h4 className="text-xs font-semibold mb-2 flex items-center gap-1.5">
+                      <AlertTriangle className="h-3.5 w-3.5" /> Incidents ({selectedRegion.incidentTickets.length})
+                    </h4>
+                    <ScrollArea className="max-h-[30vh]">
+                      <Table className="text-[10px] sm:text-xs">
+                        <TableHeader>
+                          <TableRow className="h-7">
+                            <TableHead className="px-1.5 py-1">Incident ID</TableHead>
+                            <TableHead className="px-1.5 py-1">Hostname</TableHead>
+                            <TableHead className="px-1.5 py-1">Pelanggan</TableHead>
+                            <TableHead className="px-1.5 py-1">Status</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {selectedRegion.incidentTickets.map((t) => (
+                            <TableRow key={t.id} className="h-7">
+                              <TableCell className="px-1.5 py-0.5 font-mono">{t.serviceId}</TableCell>
+                              <TableCell className="px-1.5 py-0.5 font-mono">{t.hostname}</TableCell>
+                              <TableCell className="px-1.5 py-0.5 truncate max-w-[120px]">{t.customerName}</TableCell>
+                              <TableCell className="px-1.5 py-0.5"><StatusBadge status={t.status} /></TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </ScrollArea>
+                  </div>
                 ) : (
                   <p className="text-xs text-muted-foreground text-center py-4">Tidak ada incident di regional ini.</p>
                 )}
