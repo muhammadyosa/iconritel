@@ -150,7 +150,7 @@ export default function Settings() {
   // Load data counts and column status from IndexedDB on mount and after import/delete
   const loadDataCounts = async () => {
     try {
-      const [userData, oltData, fatData, upeData, bngData, fdtData, akvData] = await Promise.all([
+      const [userData, oltData, fatData, upeData, bngData, fdtData, akvData, regionalTeamData] = await Promise.all([
         loadExcelData(),
         loadOLTData(),
         loadFATData(),
@@ -158,6 +158,7 @@ export default function Settings() {
         loadBNGData(),
         loadFDTData(),
         loadAKVData(),
+        loadRegionalTeamData(),
       ]);
       setDataCounts({
         user: userData.length,
@@ -167,6 +168,7 @@ export default function Settings() {
         bng: bngData.length,
         fdt: fdtData.length,
         akv: akvData.length,
+        regionalTeam: regionalTeamData.length,
       });
 
       // Check column availability for each data type
