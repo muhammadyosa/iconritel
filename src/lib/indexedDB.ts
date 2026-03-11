@@ -58,6 +58,9 @@ export function openDB(): Promise<IDBDatabase> {
       if (!db.objectStoreNames.contains(AKV_STORE_NAME)) {
         db.createObjectStore(AKV_STORE_NAME);
       }
+      if (!db.objectStoreNames.contains(REGIONAL_TEAM_STORE_NAME)) {
+        db.createObjectStore(REGIONAL_TEAM_STORE_NAME);
+      }
     };
   });
 }
