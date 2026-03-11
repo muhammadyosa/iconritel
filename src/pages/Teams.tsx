@@ -1585,6 +1585,24 @@ export default function Teams() {
             </div>
           )}
         </TabsContent>
+
+        {/* ===== TAB 3: List Regional Office ===== */}
+        <TabsContent value="regional-office" className="space-y-4">
+          <div className="grid grid-cols-1 gap-4">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base sm:text-lg flex items-center gap-2">
+                  🗺 List Regional Office
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground">
+                  Halaman ini akan menampilkan daftar Regional Office. Fitur dalam pengembangan.
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
       </Tabs>
     </div>
   );
