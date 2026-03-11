@@ -473,7 +473,7 @@ export default function Teams() {
 
       {dateRange && (
         <Badge variant="secondary" className="text-xs">
-          {filteredTickets.length} tiket
+          {filteredTickets.length} incident
         </Badge>
       )}
     </div>
