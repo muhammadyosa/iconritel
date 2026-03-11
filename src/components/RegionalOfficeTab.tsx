@@ -19,6 +19,13 @@ import {
   SheetDescription,
 } from "@/components/ui/sheet";
 import { StatusBadge } from "@/components/StatusBadge";
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+  type ChartConfig,
+} from "@/components/ui/chart";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, PieChart, Pie, Cell as RechartsCell, ResponsiveContainer } from "recharts";
 
 interface RegionalOfficeTabProps {
   tickets: Ticket[];
@@ -184,6 +191,123 @@ export default function RegionalOfficeTab({ tickets }: RegionalOfficeTabProps) {
           </div>
         </Card>
       </div>
+
+      {/* Charts */}
+      {regionalData.some(r => r.totalIncidents > 0) && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+          {/* Horizontal Bar Chart - Incident per Region */}
+          <Card>
+            <CardHeader className="p-3 sm:p-4 pb-1">
+              <CardTitle className="text-sm sm:text-base flex items-center gap-2">
+                📊 Distribusi Incident per Region
+              </CardTitle>
+              <CardDescription className="text-[10px] sm:text-xs">
+                Jumlah incident berdasarkan status per wilayah regional
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="p-2 sm:p-4 pt-1">
+              <ChartContainer
+                config={{
+                  resolved: { label: "Resolved", color: "hsl(var(--success))" },
+                  pending: { label: "Pending", color: "hsl(var(--warning))" },
+                  critical: { label: "Critical", color: "hsl(var(--destructive))" },
+                } satisfies ChartConfig}
+                className="h-[280px] sm:h-[320px] w-full"
+              >
+                <BarChart
+                  data={regionalData.filter(r => r.totalIncidents > 0).slice(0, 10)}
+                  layout="vertical"
+                  margin={{ top: 5, right: 20, left: 5, bottom: 5 }}
+                  barCategoryGap="20%"
+                >
+                  <CartesianGrid strokeDasharray="3 3" horizontal={false} opacity={0.15} />
+                  <XAxis type="number" tick={{ fontSize: 10 }} />
+                  <YAxis
+                    type="category"
+                    dataKey="region"
+                    width={100}
+                    tick={{ fontSize: 9 }}
+                  />
+                  <ChartTooltip content={<ChartTooltipContent />} />
+                  <Bar dataKey="resolved" stackId="a" fill="hsl(var(--success))" radius={[0, 0, 0, 0]} name="Resolved" />
+                  <Bar dataKey="pending" stackId="a" fill="hsl(var(--warning))" radius={[0, 0, 0, 0]} name="Pending" />
+                  <Bar dataKey="critical" stackId="a" fill="hsl(var(--destructive))" radius={[0, 6, 6, 0]} name="Critical" />
+                </BarChart>
+              </ChartContainer>
+            </CardContent>
+          </Card>
+
+          {/* Pie Chart - Proportional Incident Share */}
+          <Card>
+            <CardHeader className="p-3 sm:p-4 pb-1">
+              <CardTitle className="text-sm sm:text-base flex items-center gap-2">
+                🥧 Proporsi Incident per Region
+              </CardTitle>
+              <CardDescription className="text-[10px] sm:text-xs">
+                Persentase kontribusi incident dari setiap wilayah
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="p-2 sm:p-4 pt-1">
+              {(() => {
+                const PIE_COLORS = [
+                  "hsl(var(--primary))",
+                  "hsl(var(--success))",
+                  "hsl(var(--warning))",
+                  "hsl(var(--destructive))",
+                  "hsl(210, 70%, 50%)",
+                  "hsl(280, 60%, 55%)",
+                  "hsl(340, 65%, 50%)",
+                  "hsl(160, 55%, 45%)",
+                  "hsl(30, 80%, 50%)",
+                  "hsl(60, 70%, 45%)",
+                ];
+                const pieData = regionalData
+                  .filter(r => r.totalIncidents > 0)
+                  .map(r => ({ name: r.region, value: r.totalIncidents }));
+                const pieConfig: ChartConfig = {};
+                pieData.forEach((d, i) => {
+                  pieConfig[d.name] = { label: d.name, color: PIE_COLORS[i % PIE_COLORS.length] };
+                });
+
+                return (
+                  <div className="flex flex-col items-center">
+                    <ChartContainer config={pieConfig} className="h-[220px] sm:h-[240px] w-full max-w-[300px]">
+                      <PieChart>
+                        <ChartTooltip content={<ChartTooltipContent nameKey="name" />} />
+                        <Pie
+                          data={pieData}
+                          cx="50%"
+                          cy="50%"
+                          innerRadius={50}
+                          outerRadius={90}
+                          paddingAngle={2}
+                          dataKey="value"
+                          nameKey="name"
+                          label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                          labelLine={false}
+                        >
+                          {pieData.map((_, index) => (
+                            <RechartsCell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
+                          ))}
+                        </Pie>
+                      </PieChart>
+                    </ChartContainer>
+                    {/* Legend */}
+                    <div className="flex flex-wrap justify-center gap-x-3 gap-y-1 mt-2">
+                      {pieData.map((d, i) => (
+                        <div key={d.name} className="flex items-center gap-1">
+                          <div className="w-2 h-2 rounded-full" style={{ backgroundColor: PIE_COLORS[i % PIE_COLORS.length] }} />
+                          <span className="text-[9px] sm:text-[10px] text-muted-foreground">{d.name} ({d.value})</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })()}
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
       {/* Table */}
       <Card>
