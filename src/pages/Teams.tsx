@@ -1308,7 +1308,10 @@ export default function Teams() {
                         {/* Category Trend */}
                         {nocCategoryTrend.data.length > 0 && (
                           <div className="space-y-1.5">
-                            <p className="text-[9px] sm:text-xs font-semibold text-muted-foreground">Category Trend</p>
+                            <div className="flex items-center justify-between gap-2">
+                              <p className="text-[9px] sm:text-xs font-semibold text-muted-foreground">Category Trend</p>
+                              {trendFilterUI}
+                            </div>
                             <ChartContainer config={nocCategoryTrend.config} className="aspect-[2/1] w-full max-h-[180px] sm:max-h-[220px]">
                               <LineChart data={nocCategoryTrend.data} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
                                 <CartesianGrid strokeDasharray="3 3" className="stroke-border/30" />
