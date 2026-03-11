@@ -52,6 +52,7 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
+import RegionalOfficeTab from "@/components/RegionalOfficeTab";
 import type { DateRange } from "react-day-picker";
 
 const NOC_CATEGORY_COLORS = [
