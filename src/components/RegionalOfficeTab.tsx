@@ -6,7 +6,7 @@ import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
 import { Info, Search, Server, AlertTriangle, CheckCircle, Users } from "lucide-react";
 import { Link } from "react-router-dom";
-import { loadRegionalTeamData } from "@/lib/indexedDB";
+import { loadDefaultRegionalTeamData } from "@/lib/defaultRegionalData";
 import { RegionalTeamRecord } from "@/types/regionalTeam";
 import { Ticket } from "@/types/ticket";
 import { cn } from "@/lib/utils";
