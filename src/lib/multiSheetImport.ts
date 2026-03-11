@@ -365,6 +365,7 @@ export async function importMultiSheetExcel(file: File): Promise<ImportResult> {
           bngRecords: [],
           fdtRecords: [],
           akvRecords: [],
+          regionalTeamRecords: [],
           summary: {
             user: 0,
             olt: 0,
@@ -373,6 +374,7 @@ export async function importMultiSheetExcel(file: File): Promise<ImportResult> {
             bng: 0,
             fdt: 0,
             akv: 0,
+            regionalTeam: 0,
             totalSheets: workbook.SheetNames.length,
             processedSheets: [],
             skippedSheets: [],
