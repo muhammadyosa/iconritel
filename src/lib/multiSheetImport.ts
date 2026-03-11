@@ -591,6 +591,12 @@ export async function importMultiSheetExcel(file: File): Promise<ImportResult> {
               result.summary.akv = result.akvRecords.length;
               result.summary.processedSheets.push(`${sheetName} → AKV (${result.akvRecords.length})`);
               break;
+              
+            case "regionalTeam":
+              result.regionalTeamRecords = processRegionalTeamSheet(sheet);
+              result.summary.regionalTeam = result.regionalTeamRecords.length;
+              result.summary.processedSheets.push(`${sheetName} → Regional Team (${result.regionalTeamRecords.length})`);
+              break;
           }
         }
         
