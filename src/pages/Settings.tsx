@@ -643,6 +643,7 @@ export default function Settings() {
                     {importResult.summary.upe > 0 && <li>• List UPE - {importResult.summary.upe.toLocaleString()} data UPE siap digunakan</li>}
                     {importResult.summary.bng > 0 && <li>• List BNG - {importResult.summary.bng.toLocaleString()} data BNG siap digunakan</li>}
                     {importResult.summary.fdt > 0 && <li>• List FDT - {importResult.summary.fdt.toLocaleString()} data FDT siap digunakan</li>}
+                    {importResult.summary.regionalTeam > 0 && <li>• List Team Region - {importResult.summary.regionalTeam.toLocaleString()} data regional team siap digunakan</li>}
                   </ul>
                 </div>
 
