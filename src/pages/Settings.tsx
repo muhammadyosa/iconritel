@@ -349,6 +349,8 @@ export default function Settings() {
         return { label: "📦 List FDT", color: "bg-amber-500" };
       case "akv":
         return { label: "🗂️ List AKV User", color: "bg-pink-500" };
+      case "regionalTeam":
+        return { label: "🗺 List Team Region", color: "bg-teal-500" };
       default:
         return { label: "Tidak Dikenali", color: "bg-muted" };
     }
