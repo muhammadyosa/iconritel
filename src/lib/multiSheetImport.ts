@@ -155,7 +155,7 @@ function detectSheetType(sheetName: string, sampleData: any[]): keyof typeof SHE
   const normalizedName = sheetName.toLowerCase().trim().replace(/\s+/g, ' ');
   
   // Priority order for matching (most specific first)
-  const priorityOrder: (keyof typeof SHEET_PATTERNS)[] = ['akv', 'fdt', 'olt', 'fat', 'upe', 'bng', 'user'];
+  const priorityOrder: (keyof typeof SHEET_PATTERNS)[] = ['regionalTeam', 'akv', 'fdt', 'olt', 'fat', 'upe', 'bng', 'user'];
   
   // Check by exact or close name patterns first
   for (const type of priorityOrder) {
