@@ -515,11 +515,11 @@ export default function Teams() {
           <TabsTrigger value="team-stats" className="text-xs sm:text-sm gap-1.5">
             👥 Team Ritel/Serpo
           </TabsTrigger>
-          <TabsTrigger value="regional-office" className="text-xs sm:text-sm gap-1.5">
-            🗺 List Regional Office
-          </TabsTrigger>
           <TabsTrigger value="team-noc" className="text-xs sm:text-sm gap-1.5">
             💻 Team NOC
+          </TabsTrigger>
+          <TabsTrigger value="regional-office" className="text-xs sm:text-sm gap-1.5">
+            🗺 List Regional Office
           </TabsTrigger>
         </TabsList>
 
