@@ -2,6 +2,23 @@ import * as XLSX from "xlsx";
 import { RegionalTeamRecord } from "@/types/regionalTeam";
 import { loadRegionalTeamData, saveRegionalTeamData } from "./indexedDB";
 
+// Region name normalization map
+const REGION_NAME_MAP: Record<string, string> = {
+  "SUMATERA SELATAN": "SUMSEL",
+  "SUMATERA BARAT": "SUMBAR",
+  "SUMATERA UTARA": "SUMUT",
+  "KALIMANTAN BARAT": "KALBAR",
+  "KALIMANTAN TIMUR": "KALTIM",
+  "KALIMANTAN SELATAN": "KALSEL",
+  "SULAWESI SELATAN": "SULSEL",
+  "SULAWESI UTARA": "SULUT",
+};
+
+const normalizeRegionName = (name: string): string => {
+  const upper = name.trim().toUpperCase();
+  return REGION_NAME_MAP[upper] || upper;
+};
+
 // OLT hostname detection helper
 const isOltHostname = (val: string) => {
   const v = val.trim().toUpperCase();
