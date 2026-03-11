@@ -47,11 +47,15 @@ function processRegionalTeamSheet(sheet: XLSX.WorkSheet): RegionalTeamRecord[] {
     const cell1 = String(row[1] || "").trim();
 
     if (cell0.toUpperCase() === "NAMA TIM") {
-      const startIdx = records.length - mitraNames.filter(n => n && n.trim() && n !== currentRegion).length;
+      // First flush remaining mitra
+      if (collectingHostnames) flushMitra();
+      
+      const batchSize = mitraNames.filter(n => n && n.trim() && n !== currentRegion).length;
+      const startIdx = records.length - batchSize;
       let mitraIdx = 0;
       for (let c = 1; c < row.length; c++) {
         const member = String(row[c] || "").trim();
-        if (startIdx + mitraIdx < records.length) {
+        if (member && startIdx + mitraIdx >= 0 && startIdx + mitraIdx < records.length) {
           records[startIdx + mitraIdx].teamMember = member;
         }
         mitraIdx++;
