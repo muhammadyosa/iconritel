@@ -138,14 +138,14 @@ function processRegionalTeamSheet(sheet: XLSX.WorkSheet): RegionalTeamRecord[] {
  * Returns the data (either from IndexedDB or freshly parsed).
  */
 export async function loadDefaultRegionalTeamData(): Promise<RegionalTeamRecord[]> {
-  // Check if data already exists in IndexedDB
-  const existing = await loadRegionalTeamData();
-  if (existing.length > 0) return existing;
-
-  // Always reload from Excel to pick up changes (clear old cached data)
+  // Always reload from bundled Excel to pick up region name fixes
   try {
     const response = await fetch("/data/List_Team_Region.xlsx", { cache: "no-cache" });
-    if (!response.ok) return existing;
+    if (!response.ok) {
+      // Fallback to IndexedDB
+      const existing = await loadRegionalTeamData();
+      return existing;
+    }
 
     const arrayBuffer = await response.arrayBuffer();
     const workbook = XLSX.read(arrayBuffer, { type: "array" });
