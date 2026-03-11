@@ -294,6 +294,47 @@ export async function clearAKVData(): Promise<void> {
   });
 }
 
+// Regional Team Data functions
+export async function saveRegionalTeamData(data: RegionalTeamRecord[]): Promise<void> {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction([REGIONAL_TEAM_STORE_NAME], "readwrite");
+    const store = transaction.objectStore(REGIONAL_TEAM_STORE_NAME);
+    const request = store.put(data, "regional_team_records");
+    request.onsuccess = () => resolve();
+    request.onerror = () => reject(request.error);
+  });
+}
+
+export async function loadRegionalTeamData(): Promise<RegionalTeamRecord[]> {
+  try {
+    const db = await openDB();
+    return new Promise((resolve, reject) => {
+      const transaction = db.transaction([REGIONAL_TEAM_STORE_NAME], "readonly");
+      const store = transaction.objectStore(REGIONAL_TEAM_STORE_NAME);
+      const request = store.get("regional_team_records");
+      request.onsuccess = () => resolve(request.result || []);
+      request.onerror = () => reject(request.error);
+    });
+  } catch (error) {
+    if (import.meta.env.DEV) {
+      console.error("Error loading Regional Team data from IndexedDB:", error);
+    }
+    return [];
+  }
+}
+
+export async function clearRegionalTeamData(): Promise<void> {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction([REGIONAL_TEAM_STORE_NAME], "readwrite");
+    const store = transaction.objectStore(REGIONAL_TEAM_STORE_NAME);
+    const request = store.delete("regional_team_records");
+    request.onsuccess = () => resolve();
+    request.onerror = () => reject(request.error);
+  });
+}
+
 // Clear only inventory/list data from IndexedDB (excludes tickets and reports)
 export async function clearListData(): Promise<void> {
   const db = await openDB();
@@ -317,6 +358,7 @@ export async function clearListData(): Promise<void> {
     clearStore(UPE_STORE_NAME, "upe_records"),
     clearStore(BNG_STORE_NAME, "bng_records"),
     clearStore(AKV_STORE_NAME, "akv_records"),
+    clearStore(REGIONAL_TEAM_STORE_NAME, "regional_team_records"),
   ]);
 }
 
