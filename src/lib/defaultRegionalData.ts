@@ -142,10 +142,10 @@ export async function loadDefaultRegionalTeamData(): Promise<RegionalTeamRecord[
   const existing = await loadRegionalTeamData();
   if (existing.length > 0) return existing;
 
+  // Always reload from Excel to pick up changes (clear old cached data)
   try {
-    // Fetch the bundled Excel file
-    const response = await fetch("/data/List_Team_Region.xlsx");
-    if (!response.ok) return [];
+    const response = await fetch("/data/List_Team_Region.xlsx", { cache: "no-cache" });
+    if (!response.ok) return existing;
 
     const arrayBuffer = await response.arrayBuffer();
     const workbook = XLSX.read(arrayBuffer, { type: "array" });
