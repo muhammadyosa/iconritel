@@ -307,6 +307,11 @@ export default function Settings() {
 
       if (result.akvRecords.length > 0) {
         await saveAKVData(result.akvRecords);
+        setImportProgress(95);
+      }
+
+      if (result.regionalTeamRecords.length > 0) {
+        await saveRegionalTeamData(result.regionalTeamRecords);
         setImportProgress(97);
       }
 
@@ -316,7 +321,7 @@ export default function Settings() {
       // Refresh data counts after import
       await loadDataCounts();
 
-      const totalRecords = result.summary.user + result.summary.olt + result.summary.fat + result.summary.upe + result.summary.bng + result.summary.fdt + result.summary.akv;
+      const totalRecords = result.summary.user + result.summary.olt + result.summary.fat + result.summary.upe + result.summary.bng + result.summary.fdt + result.summary.akv + result.summary.regionalTeam;
       toast.success(`Berhasil import ${totalRecords.toLocaleString()} data dari ${result.summary.processedSheets.length} sheet`);
     } catch (error) {
       toast.error("Gagal mengimport data");
