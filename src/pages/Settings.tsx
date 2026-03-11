@@ -135,6 +135,7 @@ export default function Settings() {
     bng: 0,
     fdt: 0,
     akv: 0,
+    regionalTeam: 0,
   });
   const [columnStatus, setColumnStatus] = useState<ColumnStatus>({
     user: { customer: false, service: false, hostname: false, fat: false, sn: false },
