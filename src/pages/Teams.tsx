@@ -941,7 +941,7 @@ export default function Teams() {
                             Incident {statusFilter}
                           </SheetTitle>
                           <SheetDescription className="text-xs sm:text-sm">
-                            {filteredList.length} tiket dengan status {statusFilter}
+                            {filteredList.length} incident dengan status {statusFilter}
                           </SheetDescription>
                         </SheetHeader>
                         <ScrollArea className="h-[calc(100vh-150px)] mt-4">
