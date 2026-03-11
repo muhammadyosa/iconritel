@@ -47,54 +47,46 @@ export default function RegionalOfficeTab({ tickets }: RegionalOfficeTabProps) {
       .catch(() => setIsLoading(false));
   }, []);
 
-  // Build hostname -> provinsi mapping and regional data
+  // Build hostname -> provinsi mapping and regional data (incident-driven)
   const regionalData = useMemo(() => {
-    // Group OLT by provinsi
-    const provinsiMap: Record<string, { hostnames: Set<string>; oltCount: number }> = {};
+    // Build hostname -> provinsi lookup from OLT data
+    const hostnameToProv: Record<string, string> = {};
+    const provOltCount: Record<string, number> = {};
 
     oltData.forEach((olt) => {
       const prov = (olt.provinsi || "").trim().toUpperCase();
       if (!prov) return;
-      if (!provinsiMap[prov]) {
-        provinsiMap[prov] = { hostnames: new Set(), oltCount: 0 };
-      }
-      provinsiMap[prov].oltCount++;
+      provOltCount[prov] = (provOltCount[prov] || 0) + 1;
       if (olt.hostnameOlt) {
-        provinsiMap[prov].hostnames.add(olt.hostnameOlt.trim().toUpperCase());
+        hostnameToProv[olt.hostnameOlt.trim().toUpperCase()] = prov;
       }
     });
 
-    // Build hostname -> provinsi lookup
-    const hostnameToProv: Record<string, string> = {};
-    Object.entries(provinsiMap).forEach(([prov, data]) => {
-      data.hostnames.forEach((h) => { hostnameToProv[h] = prov; });
-    });
-
-    // Map tickets to provinsi via hostname
+    // Map tickets to provinsi via hostname — only create regions that have incidents
     const regionStats: Record<string, RegionalData> = {};
-    Object.entries(provinsiMap).forEach(([prov, data]) => {
-      regionStats[prov] = {
-        provinsi: prov,
-        oltCount: data.oltCount,
-        hostnames: Array.from(data.hostnames),
-        totalIncidents: 0,
-        resolved: 0,
-        pending: 0,
-        critical: 0,
-        incidentTickets: [],
-      };
-    });
 
     tickets.forEach((ticket) => {
       const ticketHostname = (ticket.hostname || "").trim().toUpperCase();
       const prov = hostnameToProv[ticketHostname];
-      if (prov && regionStats[prov]) {
-        regionStats[prov].totalIncidents++;
-        regionStats[prov].incidentTickets.push(ticket);
-        if (ticket.status === "Resolved") regionStats[prov].resolved++;
-        else if (ticket.status === "Critical") regionStats[prov].critical++;
-        else regionStats[prov].pending++;
+      if (!prov) return;
+
+      if (!regionStats[prov]) {
+        regionStats[prov] = {
+          provinsi: prov,
+          oltCount: provOltCount[prov] || 0,
+          hostnames: [],
+          totalIncidents: 0,
+          resolved: 0,
+          pending: 0,
+          critical: 0,
+          incidentTickets: [],
+        };
       }
+      regionStats[prov].totalIncidents++;
+      regionStats[prov].incidentTickets.push(ticket);
+      if (ticket.status === "Resolved") regionStats[prov].resolved++;
+      else if (ticket.status === "Critical") regionStats[prov].critical++;
+      else regionStats[prov].pending++;
     });
 
     return Object.values(regionStats).sort((a, b) => b.totalIncidents - a.totalIncidents);
