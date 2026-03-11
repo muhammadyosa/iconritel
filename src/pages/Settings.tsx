@@ -71,6 +71,7 @@ interface DataCounts {
   bng: number;
   fdt: number;
   akv: number;
+  regionalTeam: number;
 }
 
 interface ColumnStatus {
