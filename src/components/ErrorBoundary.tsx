@@ -46,7 +46,7 @@ export class ErrorBoundary extends React.Component<
                 Aplikasi mengalami error yang tidak terduga. Silakan coba lagi.
               </p>
             </div>
-            {import.meta.env.DEV && this.state.error && (
+            {this.state.error && (
               <div className="bg-muted rounded-lg p-3 text-left">
                 <p className="text-xs font-mono text-destructive break-all">
                   {this.state.error.message}
