@@ -624,6 +624,12 @@ export default function Settings() {
                     <div className="text-2xl font-bold text-amber-600">{importResult.summary.fdt.toLocaleString()}</div>
                     <div className="text-sm text-muted-foreground">List FDT → Data FDT</div>
                   </div>
+                  {importResult.summary.regionalTeam > 0 && (
+                    <div className="bg-teal-50 dark:bg-teal-950 p-4 rounded-lg text-center">
+                      <div className="text-2xl font-bold text-teal-600">{importResult.summary.regionalTeam.toLocaleString()}</div>
+                      <div className="text-sm text-muted-foreground">Team Region → Regional</div>
+                    </div>
+                  )}
                 </div>
 
                 <div className="p-4 bg-green-50 dark:bg-green-950 rounded-lg border border-green-200 dark:border-green-800">
