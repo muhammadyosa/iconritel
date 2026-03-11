@@ -249,46 +249,84 @@ export default function Teams() {
     const topResolved = Object.entries(resolvedMap).sort((a, b) => b[1] - a[1]).slice(0, 4);
     return { countMap, resolvedMap, topAll, topResolved };
   }, [filteredTickets]);
+  // Helper: compute trend date range from trendFilter
+  const trendDateRange = useMemo(() => {
+    const today = new Date();
+    if (trendFilter === "today") {
+      return { from: startOfDay(today), to: endOfDay(today) };
+    } else if (trendFilter === "7d") {
+      return { from: startOfDay(subDays(today, 6)), to: endOfDay(today) };
+    } else if (trendFilter === "14d") {
+      return { from: startOfDay(subDays(today, 13)), to: endOfDay(today) };
+    } else if (trendFilter === "30d") {
+      return { from: startOfDay(subDays(today, 29)), to: endOfDay(today) };
+    } else if (trendFilter === "custom" && trendCustomDate?.from) {
+      return { from: startOfDay(trendCustomDate.from), to: trendCustomDate.to ? endOfDay(trendCustomDate.to) : endOfDay(trendCustomDate.from) };
+    }
+    return null; // "all" = no filter
+  }, [trendFilter, trendCustomDate]);
+
+  const filterRecordByTrendDate = useCallback((recDate: string) => {
+    if (!trendDateRange) return true;
+    const d = new Date(recDate + "T00:00:00");
+    return isWithinInterval(d, { start: trendDateRange.from, end: trendDateRange.to });
+  }, [trendDateRange]);
+
+  // Inline trend filter UI component
+  const trendFilterUI = (
+    <div className="flex flex-wrap items-center gap-1.5">
+      <Select value={trendFilter} onValueChange={(v) => { setTrendFilter(v); if (v !== "custom") setTrendCustomDate(undefined); }}>
+        <SelectTrigger className="h-6 w-[100px] sm:w-[120px] text-[9px] sm:text-[10px] px-2 border-border/50">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="all">Semua Data</SelectItem>
+          <SelectItem value="today">Hari ini</SelectItem>
+          <SelectItem value="7d">7 Hari</SelectItem>
+          <SelectItem value="14d">14 Hari</SelectItem>
+          <SelectItem value="30d">30 Hari</SelectItem>
+          <SelectItem value="custom">Custom</SelectItem>
+        </SelectContent>
+      </Select>
+      {trendFilter === "custom" && (
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button variant="outline" className="h-6 px-2 text-[9px] sm:text-[10px] font-normal">
+              <CalendarIcon className="mr-1 h-3 w-3" />
+              {trendCustomDate?.from ? (
+                trendCustomDate.to ? (
+                  <>{format(trendCustomDate.from, "dd MMM", { locale: localeId })} - {format(trendCustomDate.to, "dd MMM", { locale: localeId })}</>
+                ) : format(trendCustomDate.from, "dd MMM yyyy", { locale: localeId })
+              ) : "Pilih tanggal"}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="start">
+            <Calendar mode="range" selected={trendCustomDate} onSelect={setTrendCustomDate} numberOfMonths={1} className={cn("p-3 pointer-events-auto")} />
+          </PopoverContent>
+        </Popover>
+      )}
+    </div>
+  );
+
   // NOC Category Trend data - uses cloud history for persistence
   const nocCategoryTrend = useMemo(() => {
     const dateMap: Record<string, Record<string, number>> = {};
     const categories = new Set<string>();
 
-    // First, load cloud history (persisted data from previous days)
     history.categoryRecords.forEach((rec) => {
-      // Apply date filter
-      if (dateRange?.from) {
-        const recDate = new Date(rec.date + "T00:00:00");
-        const from = startOfDay(dateRange.from);
-        const to = dateRange.to ? endOfDay(dateRange.to) : endOfDay(dateRange.from);
-        if (!isWithinInterval(recDate, { start: from, end: to })) return;
-      }
+      if (!filterRecordByTrendDate(rec.date)) return;
       categories.add(rec.constraint_type);
       if (!dateMap[rec.date]) dateMap[rec.date] = {};
       dateMap[rec.date][rec.constraint_type] = Math.max(dateMap[rec.date][rec.constraint_type] || 0, rec.count);
     });
 
-    // Then merge live ticket data (for today's real-time accuracy)
     const today = new Date().toISOString().split('T')[0];
-    filteredTickets.forEach((ticket) => {
-      const date = ticket.createdISO?.split("T")[0];
-      if (!date) return;
-      const cat = ticket.constraint || "Lainnya";
-      categories.add(cat);
-      if (!dateMap[date]) dateMap[date] = {};
-      // For today, use live data; for past, use max of cloud vs live
-      if (date === today) {
-        dateMap[date][cat] = (dateMap[date][cat] || 0);
-        // Count from live tickets for today
-      }
-    });
-
-    // Recount today from live tickets
     const todayLive: Record<string, number> = {};
     filteredTickets.forEach((ticket) => {
       const date = ticket.createdISO?.split("T")[0];
-      if (date === today) {
+      if (date === today && filterRecordByTrendDate(today)) {
         const cat = ticket.constraint || "Lainnya";
+        categories.add(cat);
         todayLive[cat] = (todayLive[cat] || 0) + 1;
       }
     });
@@ -310,8 +348,7 @@ export default function Teams() {
     });
 
     return { data, categories: catList, config };
-  }, [filteredTickets, history.categoryRecords, dateRange]);
-
+  }, [filteredTickets, history.categoryRecords, filterRecordByTrendDate]);
 
   // Category Trend for RITEL tickets - uses cloud history
   const ritelCategoryTrend = useMemo(() => {
@@ -319,25 +356,18 @@ export default function Teams() {
     const categories = new Set<string>();
     const today = new Date().toISOString().split('T')[0];
 
-    // Cloud history filtered to RITEL constraints only
     history.categoryRecords.forEach((rec) => {
-      if (FEEDER_CONSTRAINTS_SET.has(rec.constraint_type)) return; // Skip feeder
-      if (dateRange?.from) {
-        const recDate = new Date(rec.date + "T00:00:00");
-        const from = startOfDay(dateRange.from);
-        const to = dateRange.to ? endOfDay(dateRange.to) : endOfDay(dateRange.from);
-        if (!isWithinInterval(recDate, { start: from, end: to })) return;
-      }
+      if (FEEDER_CONSTRAINTS_SET.has(rec.constraint_type)) return;
+      if (!filterRecordByTrendDate(rec.date)) return;
       categories.add(rec.constraint_type);
       if (!dateMap[rec.date]) dateMap[rec.date] = {};
       dateMap[rec.date][rec.constraint_type] = Math.max(dateMap[rec.date][rec.constraint_type] || 0, rec.count);
     });
 
-    // Live data for today
     const todayLive: Record<string, number> = {};
     filteredTickets.filter(t => t.category !== "FEEDER").forEach((ticket) => {
       const date = ticket.createdISO?.split("T")[0];
-      if (date === today) {
+      if (date === today && filterRecordByTrendDate(today)) {
         const cat = ticket.constraint || "Lainnya";
         categories.add(cat);
         todayLive[cat] = (todayLive[cat] || 0) + 1;
@@ -357,7 +387,7 @@ export default function Teams() {
     const config: ChartConfig = {};
     catList.forEach((cat, i) => { config[cat] = { label: cat, color: NOC_CATEGORY_COLORS[i % NOC_CATEGORY_COLORS.length] }; });
     return { data, categories: catList, config };
-  }, [filteredTickets, history.categoryRecords, dateRange]);
+  }, [filteredTickets, history.categoryRecords, filterRecordByTrendDate]);
 
   // Category Trend for FEEDER tickets - uses cloud history
   const feederCategoryTrend = useMemo(() => {
@@ -365,25 +395,18 @@ export default function Teams() {
     const categories = new Set<string>();
     const today = new Date().toISOString().split('T')[0];
 
-    // Cloud history filtered to FEEDER constraints only
     history.categoryRecords.forEach((rec) => {
-      if (!FEEDER_CONSTRAINTS_SET.has(rec.constraint_type)) return; // Only feeder
-      if (dateRange?.from) {
-        const recDate = new Date(rec.date + "T00:00:00");
-        const from = startOfDay(dateRange.from);
-        const to = dateRange.to ? endOfDay(dateRange.to) : endOfDay(dateRange.from);
-        if (!isWithinInterval(recDate, { start: from, end: to })) return;
-      }
+      if (!FEEDER_CONSTRAINTS_SET.has(rec.constraint_type)) return;
+      if (!filterRecordByTrendDate(rec.date)) return;
       categories.add(rec.constraint_type);
       if (!dateMap[rec.date]) dateMap[rec.date] = {};
       dateMap[rec.date][rec.constraint_type] = Math.max(dateMap[rec.date][rec.constraint_type] || 0, rec.count);
     });
 
-    // Live data for today
     const todayLive: Record<string, number> = {};
     filteredTickets.filter(t => t.category === "FEEDER").forEach((ticket) => {
       const date = ticket.createdISO?.split("T")[0];
-      if (date === today) {
+      if (date === today && filterRecordByTrendDate(today)) {
         const cat = ticket.constraint || "Lainnya";
         categories.add(cat);
         todayLive[cat] = (todayLive[cat] || 0) + 1;
@@ -403,8 +426,7 @@ export default function Teams() {
     const config: ChartConfig = {};
     catList.forEach((cat, i) => { config[cat] = { label: cat, color: NOC_CATEGORY_COLORS[i % NOC_CATEGORY_COLORS.length] }; });
     return { data, categories: catList, config };
-  }, [filteredTickets, history.categoryRecords, dateRange]);
-
+  }, [filteredTickets, history.categoryRecords, filterRecordByTrendDate]);
   const dateFilter = (
     <div className="flex flex-wrap items-center gap-2 sm:gap-3">
       <Select value={periodPreset} onValueChange={handlePeriodChange}>
