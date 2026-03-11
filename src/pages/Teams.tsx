@@ -804,7 +804,10 @@ export default function Teams() {
                           {/* Category Trend */}
                           {feederCategoryTrend.data.length > 0 && (
                             <div className="space-y-1.5">
-                              <p className="text-[9px] sm:text-xs font-semibold text-muted-foreground">Category Trend</p>
+                              <div className="flex items-center justify-between gap-2">
+                                <p className="text-[9px] sm:text-xs font-semibold text-muted-foreground">Category Trend</p>
+                                {trendFilterUI}
+                              </div>
                               <ChartContainer config={feederCategoryTrend.config} className="aspect-[2/1] w-full max-h-[160px] sm:max-h-[200px]">
                                 <LineChart data={feederCategoryTrend.data} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
                                   <CartesianGrid strokeDasharray="3 3" className="stroke-border/30" />
