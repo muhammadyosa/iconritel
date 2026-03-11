@@ -1371,7 +1371,7 @@ export default function Teams() {
                             Incident NOC
                           </SheetTitle>
                           <SheetDescription className="text-xs sm:text-sm">
-                            {filteredList.length} tiket berstatus {statusFilter}
+                            {filteredList.length} incident berstatus {statusFilter}
                           </SheetDescription>
                         </SheetHeader>
                         <ScrollArea className="h-[calc(100vh-150px)] mt-4">
