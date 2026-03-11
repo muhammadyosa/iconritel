@@ -3,6 +3,7 @@ import { ExcelRecord } from "@/types/ticket";
 import { OLT } from "@/types/olt";
 import { FAT } from "@/types/fat";
 import { FDT } from "@/types/fdt";
+import { RegionalTeamRecord } from "@/types/regionalTeam";
 import { saveExcelData, saveOLTData, saveFATData, saveAKVData } from "./indexedDB";
 import { AKV } from "@/types/akv";
 
@@ -37,6 +38,7 @@ export interface ImportResult {
   bngRecords: BNGRecord[];
   fdtRecords: FDT[];
   akvRecords: AKV[];
+  regionalTeamRecords: RegionalTeamRecord[];
   summary: {
     user: number;
     olt: number;
@@ -45,6 +47,7 @@ export interface ImportResult {
     bng: number;
     fdt: number;
     akv: number;
+    regionalTeam: number;
     totalSheets: number;
     processedSheets: string[];
     skippedSheets: string[];
@@ -53,6 +56,7 @@ export interface ImportResult {
 
 // Sheet detection patterns - prioritized by specificity (most specific first)
 const SHEET_PATTERNS = {
+  regionalTeam: ["list team region", "list_team_region", "listteamregion", "team region", "teamregion", "list team regional", "regional team"],
   akv: ["list akv user", "list_akv_user", "listakv user", "listakvuser", "akv user", "akvuser", "data akv user", "data akv", "list akv"],
   olt: ["list olt", "listolt", "list_olt", "data olt", "sheet list olt", "daftar olt", "master olt", "inventory olt"],
   fat: ["list fat", "listfat", "list_fat", "data fat", "sheet list fat", "daftar fat", "master fat"],
@@ -151,7 +155,7 @@ function detectSheetType(sheetName: string, sampleData: any[]): keyof typeof SHE
   const normalizedName = sheetName.toLowerCase().trim().replace(/\s+/g, ' ');
   
   // Priority order for matching (most specific first)
-  const priorityOrder: (keyof typeof SHEET_PATTERNS)[] = ['akv', 'fdt', 'olt', 'fat', 'upe', 'bng', 'user'];
+  const priorityOrder: (keyof typeof SHEET_PATTERNS)[] = ['regionalTeam', 'akv', 'fdt', 'olt', 'fat', 'upe', 'bng', 'user'];
   
   // Check by exact or close name patterns first
   for (const type of priorityOrder) {
@@ -343,6 +347,141 @@ function processAKVSheet(data: any[]): AKV[] {
     .filter((r) => r.provinsi || r.customer || r.serviceId || r.tikor || r.contact || r.address);
 }
 
+// Process Regional Team sheet (hierarchical format: Region → SERPO → Mitra → Hostnames)
+function processRegionalTeamSheet(sheet: XLSX.WorkSheet): RegionalTeamRecord[] {
+  const rawRows: any[][] = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: "" });
+  const records: RegionalTeamRecord[] = [];
+  
+  // Known region names to detect region header rows
+  const isOltHostname = (val: string) => {
+    const v = val.trim().toUpperCase();
+    return v.startsWith("SBS-") || v.startsWith("ALL OLT");
+  };
+  
+  let currentRegion = "";
+  let currentSerpoType = "";
+  let currentSerpoName = "";
+  let mitraNames: string[] = [];
+  let mitraHostnames: Record<number, string[]> = {};
+  let collectingHostnames = false;
+  
+  const flushMitra = () => {
+    if (!currentRegion || mitraNames.length === 0) return;
+    mitraNames.forEach((name, colIdx) => {
+      if (!name || name === currentRegion) return;
+      const hostnames = (mitraHostnames[colIdx] || []).filter(h => h.trim() !== "");
+      if (hostnames.length === 0 && !name.trim()) return;
+      records.push({
+        id: `rt-${Date.now()}-${records.length}`,
+        region: currentRegion,
+        serpoType: currentSerpoType,
+        serpoName: currentSerpoName,
+        mitraName: name.trim(),
+        hostnames,
+        teamMember: "",
+        createdAt: new Date().toISOString(),
+      });
+    });
+  };
+  
+  for (let i = 0; i < rawRows.length; i++) {
+    const row = rawRows[i];
+    if (!row || row.length === 0) continue;
+    
+    const cell0 = String(row[0] || "").trim();
+    const cell1 = String(row[1] || "").trim();
+    
+    // Detect "Nama Tim" row - assign team members and flush
+    if (cell0.toUpperCase() === "NAMA TIM") {
+      // Assign team members to the last batch of mitra
+      const startIdx = records.length - mitraNames.filter(n => n && n.trim() && n !== currentRegion).length;
+      let mitraIdx = 0;
+      for (let c = 1; c < row.length; c++) {
+        const member = String(row[c] || "").trim();
+        if (startIdx + mitraIdx < records.length) {
+          records[startIdx + mitraIdx].teamMember = member;
+        }
+        mitraIdx++;
+      }
+      collectingHostnames = false;
+      mitraNames = [];
+      mitraHostnames = {};
+      continue;
+    }
+    
+    // Detect SERPO row
+    if (cell0.toUpperCase() === "SERPO") {
+      // Flush previous mitra batch
+      if (collectingHostnames) flushMitra();
+      collectingHostnames = false;
+      mitraNames = [];
+      mitraHostnames = {};
+      
+      currentSerpoName = cell1;
+      if (cell1.toUpperCase().includes("RITEL")) {
+        currentSerpoType = "RITEL";
+      } else if (cell1.toUpperCase().includes("FEEDER")) {
+        currentSerpoType = "FEEDER";
+      } else {
+        currentSerpoType = cell1;
+      }
+      continue;
+    }
+    
+    // Detect "Nama Mitra" row
+    if (cell0.toUpperCase() === "NAMA MITRA") {
+      // Flush previous if any
+      if (collectingHostnames) flushMitra();
+      
+      mitraNames = [];
+      mitraHostnames = {};
+      for (let c = 1; c < row.length; c++) {
+        mitraNames.push(String(row[c] || "").trim());
+        mitraHostnames[c - 1] = [];
+      }
+      collectingHostnames = true;
+      continue;
+    }
+    
+    // If collecting hostnames, add to columns
+    if (collectingHostnames) {
+      let hasAnyHostname = false;
+      for (let c = 1; c < row.length && c - 1 < mitraNames.length; c++) {
+        const val = String(row[c] || "").trim();
+        if (val && isOltHostname(val)) {
+          mitraHostnames[c - 1].push(val);
+          hasAnyHostname = true;
+        } else if (val && val.length > 3) {
+          // Some entries are short area names (also valid hostnames that don't start with SBS-)
+          mitraHostnames[c - 1].push(val);
+          hasAnyHostname = true;
+        }
+      }
+      if (!hasAnyHostname && cell0 === "" && cell1 === "") {
+        // Empty row while collecting - might be end of section
+        // Don't flush yet, wait for SERPO/Nama Tim/Region
+      }
+      continue;
+    }
+    
+    // Detect region header: non-empty cell0, rest mostly empty, all uppercase
+    const nonEmptyCells = row.filter((c: any) => String(c || "").trim() !== "").length;
+    if (nonEmptyCells <= 1 && cell0 && cell0 === cell0.toUpperCase() && cell0.length >= 3 && !cell0.includes("SERPO") && !cell0.includes("NAMA")) {
+      if (collectingHostnames) flushMitra();
+      currentRegion = cell0;
+      collectingHostnames = false;
+      mitraNames = [];
+      mitraHostnames = {};
+      continue;
+    }
+  }
+  
+  // Final flush
+  if (collectingHostnames) flushMitra();
+  
+  return records;
+}
+
 // Main function to import multi-sheet Excel file
 export async function importMultiSheetExcel(file: File): Promise<ImportResult> {
   return new Promise((resolve, reject) => {
@@ -361,6 +500,7 @@ export async function importMultiSheetExcel(file: File): Promise<ImportResult> {
           bngRecords: [],
           fdtRecords: [],
           akvRecords: [],
+          regionalTeamRecords: [],
           summary: {
             user: 0,
             olt: 0,
@@ -369,6 +509,7 @@ export async function importMultiSheetExcel(file: File): Promise<ImportResult> {
             bng: 0,
             fdt: 0,
             akv: 0,
+            regionalTeam: 0,
             totalSheets: workbook.SheetNames.length,
             processedSheets: [],
             skippedSheets: [],
@@ -381,6 +522,22 @@ export async function importMultiSheetExcel(file: File): Promise<ImportResult> {
           const jsonData = XLSX.utils.sheet_to_json(sheet, { defval: "", raw: false });
           
           if (jsonData.length === 0) {
+            // For regionalTeam, jsonData might be empty because it's a hierarchical format
+            // Check raw rows instead
+            const rawRows: any[][] = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: "" });
+            if (rawRows.length === 0) {
+              result.summary.skippedSheets.push(`${sheetName} (empty)`);
+              continue;
+            }
+            // Try detecting as regionalTeam by name
+            const normalizedName = sheetName.toLowerCase().trim().replace(/\s+/g, ' ');
+            const isRegionalTeam = SHEET_PATTERNS.regionalTeam.some(p => normalizedName.includes(p));
+            if (isRegionalTeam) {
+              result.regionalTeamRecords = processRegionalTeamSheet(sheet);
+              result.summary.regionalTeam = result.regionalTeamRecords.length;
+              result.summary.processedSheets.push(`${sheetName} → Regional Team (${result.regionalTeamRecords.length})`);
+              continue;
+            }
             result.summary.skippedSheets.push(`${sheetName} (empty)`);
             continue;
           }
@@ -433,6 +590,12 @@ export async function importMultiSheetExcel(file: File): Promise<ImportResult> {
               result.akvRecords = processAKVSheet(jsonData);
               result.summary.akv = result.akvRecords.length;
               result.summary.processedSheets.push(`${sheetName} → AKV (${result.akvRecords.length})`);
+              break;
+              
+            case "regionalTeam":
+              result.regionalTeamRecords = processRegionalTeamSheet(sheet);
+              result.summary.regionalTeam = result.regionalTeamRecords.length;
+              result.summary.processedSheets.push(`${sheetName} → Regional Team (${result.regionalTeamRecords.length})`);
               break;
           }
         }

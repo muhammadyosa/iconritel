@@ -23,7 +23,7 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { importMultiSheetExcel, getExcelSheets, ImportResult } from "@/lib/multiSheetImport";
-import { saveExcelData, saveOLTData, saveFATData, openDB, clearListData, saveFDTData, saveAKVData, loadExcelData, loadOLTData, loadFATData, loadFDTData, loadAKVData } from "@/lib/indexedDB";
+import { saveExcelData, saveOLTData, saveFATData, openDB, clearListData, saveFDTData, saveAKVData, loadExcelData, loadOLTData, loadFATData, loadFDTData, loadAKVData, saveRegionalTeamData, loadRegionalTeamData } from "@/lib/indexedDB";
 import { useUserRole } from "@/hooks/useUserRole";
 import { UserManagement } from "@/components/UserManagement";
 import { InsidentManagement } from "@/components/InsidentManagement";
@@ -71,6 +71,7 @@ interface DataCounts {
   bng: number;
   fdt: number;
   akv: number;
+  regionalTeam: number;
 }
 
 interface ColumnStatus {
@@ -134,6 +135,7 @@ export default function Settings() {
     bng: 0,
     fdt: 0,
     akv: 0,
+    regionalTeam: 0,
   });
   const [columnStatus, setColumnStatus] = useState<ColumnStatus>({
     user: { customer: false, service: false, hostname: false, fat: false, sn: false },
@@ -148,7 +150,7 @@ export default function Settings() {
   // Load data counts and column status from IndexedDB on mount and after import/delete
   const loadDataCounts = async () => {
     try {
-      const [userData, oltData, fatData, upeData, bngData, fdtData, akvData] = await Promise.all([
+      const [userData, oltData, fatData, upeData, bngData, fdtData, akvData, regionalTeamData] = await Promise.all([
         loadExcelData(),
         loadOLTData(),
         loadFATData(),
@@ -156,6 +158,7 @@ export default function Settings() {
         loadBNGData(),
         loadFDTData(),
         loadAKVData(),
+        loadRegionalTeamData(),
       ]);
       setDataCounts({
         user: userData.length,
@@ -165,6 +168,7 @@ export default function Settings() {
         bng: bngData.length,
         fdt: fdtData.length,
         akv: akvData.length,
+        regionalTeam: regionalTeamData.length,
       });
 
       // Check column availability for each data type
@@ -303,6 +307,11 @@ export default function Settings() {
 
       if (result.akvRecords.length > 0) {
         await saveAKVData(result.akvRecords);
+        setImportProgress(95);
+      }
+
+      if (result.regionalTeamRecords.length > 0) {
+        await saveRegionalTeamData(result.regionalTeamRecords);
         setImportProgress(97);
       }
 
@@ -312,7 +321,7 @@ export default function Settings() {
       // Refresh data counts after import
       await loadDataCounts();
 
-      const totalRecords = result.summary.user + result.summary.olt + result.summary.fat + result.summary.upe + result.summary.bng + result.summary.fdt + result.summary.akv;
+      const totalRecords = result.summary.user + result.summary.olt + result.summary.fat + result.summary.upe + result.summary.bng + result.summary.fdt + result.summary.akv + result.summary.regionalTeam;
       toast.success(`Berhasil import ${totalRecords.toLocaleString()} data dari ${result.summary.processedSheets.length} sheet`);
     } catch (error) {
       toast.error("Gagal mengimport data");
@@ -340,6 +349,8 @@ export default function Settings() {
         return { label: "📦 List FDT", color: "bg-amber-500" };
       case "akv":
         return { label: "🗂️ List AKV User", color: "bg-pink-500" };
+      case "regionalTeam":
+        return { label: "🗺 List Team Region", color: "bg-teal-500" };
       default:
         return { label: "Tidak Dikenali", color: "bg-muted" };
     }
@@ -613,6 +624,12 @@ export default function Settings() {
                     <div className="text-2xl font-bold text-amber-600">{importResult.summary.fdt.toLocaleString()}</div>
                     <div className="text-sm text-muted-foreground">List FDT → Data FDT</div>
                   </div>
+                  {importResult.summary.regionalTeam > 0 && (
+                    <div className="bg-teal-50 dark:bg-teal-950 p-4 rounded-lg text-center">
+                      <div className="text-2xl font-bold text-teal-600">{importResult.summary.regionalTeam.toLocaleString()}</div>
+                      <div className="text-sm text-muted-foreground">Team Region → Regional</div>
+                    </div>
+                  )}
                 </div>
 
                 <div className="p-4 bg-green-50 dark:bg-green-950 rounded-lg border border-green-200 dark:border-green-800">
@@ -626,6 +643,7 @@ export default function Settings() {
                     {importResult.summary.upe > 0 && <li>• List UPE - {importResult.summary.upe.toLocaleString()} data UPE siap digunakan</li>}
                     {importResult.summary.bng > 0 && <li>• List BNG - {importResult.summary.bng.toLocaleString()} data BNG siap digunakan</li>}
                     {importResult.summary.fdt > 0 && <li>• List FDT - {importResult.summary.fdt.toLocaleString()} data FDT siap digunakan</li>}
+                    {importResult.summary.regionalTeam > 0 && <li>• List Team Region - {importResult.summary.regionalTeam.toLocaleString()} data regional team siap digunakan</li>}
                   </ul>
                 </div>
 
@@ -797,6 +815,23 @@ export default function Settings() {
                     <li>{columnStatus.akv.tikor ? "✅" : "⛔"} Tikor</li>
                     <li>{columnStatus.akv.contact ? "✅" : "⛔"} Contact</li>
                     <li>{columnStatus.akv.address ? "✅" : "⛔"} Address</li>
+                  </ul>
+                </div>
+                <div className="p-4 rounded-lg border bg-card">
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="font-medium flex items-center gap-2">
+                      {dataCounts.regionalTeam > 0 ? "♻️" : "⚠️"} 🗺 List Team Region
+                    </h4>
+                    <Badge variant={dataCounts.regionalTeam > 0 ? "default" : "secondary"} className={dataCounts.regionalTeam > 0 ? "bg-teal-500" : ""}>
+                      {dataCounts.regionalTeam.toLocaleString()} data
+                    </Badge>
+                  </div>
+                  <p className="text-xs text-muted-foreground mb-2">Format hierarki (Region → SERPO → Mitra → OLT):</p>
+                  <ul className="text-xs text-muted-foreground list-none space-y-0.5">
+                    <li>✅ Region (JAMBI, LAMPUNG, dll)</li>
+                    <li>✅ SERPO (RITEL / FEEDER)</li>
+                    <li>✅ Nama Mitra + Hostname OLT</li>
+                    <li>✅ Nama Tim</li>
                   </ul>
                 </div>
               </div>
