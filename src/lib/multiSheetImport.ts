@@ -3,6 +3,7 @@ import { ExcelRecord } from "@/types/ticket";
 import { OLT } from "@/types/olt";
 import { FAT } from "@/types/fat";
 import { FDT } from "@/types/fdt";
+import { RegionalTeamRecord } from "@/types/regionalTeam";
 import { saveExcelData, saveOLTData, saveFATData, saveAKVData } from "./indexedDB";
 import { AKV } from "@/types/akv";
 
