@@ -1377,7 +1377,7 @@ export default function Teams() {
                         <ScrollArea className="h-[calc(100vh-150px)] mt-4">
                           <div className="space-y-3 pr-2">
                             {filteredList.length === 0 ? (
-                              <p className="text-xs text-muted-foreground text-center py-8">Tidak ada tiket {statusFilter}</p>
+                              <p className="text-xs text-muted-foreground text-center py-8">Tidak ada incident {statusFilter}</p>
                             ) : filteredList.map((ticket: any) => (
                               <Card key={ticket.id} className="shadow-sm">
                                 <CardContent className="p-3">
