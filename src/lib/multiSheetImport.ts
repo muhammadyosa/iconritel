@@ -522,6 +522,22 @@ export async function importMultiSheetExcel(file: File): Promise<ImportResult> {
           const jsonData = XLSX.utils.sheet_to_json(sheet, { defval: "", raw: false });
           
           if (jsonData.length === 0) {
+            // For regionalTeam, jsonData might be empty because it's a hierarchical format
+            // Check raw rows instead
+            const rawRows: any[][] = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: "" });
+            if (rawRows.length === 0) {
+              result.summary.skippedSheets.push(`${sheetName} (empty)`);
+              continue;
+            }
+            // Try detecting as regionalTeam by name
+            const normalizedName = sheetName.toLowerCase().trim().replace(/\s+/g, ' ');
+            const isRegionalTeam = SHEET_PATTERNS.regionalTeam.some(p => normalizedName.includes(p));
+            if (isRegionalTeam) {
+              result.regionalTeamRecords = processRegionalTeamSheet(sheet);
+              result.summary.regionalTeam = result.regionalTeamRecords.length;
+              result.summary.processedSheets.push(`${sheetName} → Regional Team (${result.regionalTeamRecords.length})`);
+              continue;
+            }
             result.summary.skippedSheets.push(`${sheetName} (empty)`);
             continue;
           }
