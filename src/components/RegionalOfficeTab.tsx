@@ -167,7 +167,7 @@ export default function RegionalOfficeTab({ tickets }: RegionalOfficeTabProps) {
   return (
     <div className="space-y-4">
       {/* Summary Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 sm:gap-3">
+      <div className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-5 gap-2 sm:gap-3">
         <Card className="p-3">
           <div className="text-[10px] sm:text-xs text-muted-foreground">Total Region</div>
           <div className="text-lg sm:text-xl font-bold">{regionalData.length}</div>
