@@ -99,6 +99,7 @@ const PIE_COLORS = [
 
 export default function Teams() {
   const { tickets, isLoading } = useCloudTickets();
+  const { history } = useTicketHistory(tickets);
   const [selectedTeam, setSelectedTeam] = useState<string | null>(null);
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
   const [periodPreset, setPeriodPreset] = useState<string>("all");
