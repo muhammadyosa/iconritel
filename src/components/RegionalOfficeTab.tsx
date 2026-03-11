@@ -52,7 +52,7 @@ export default function RegionalOfficeTab({ tickets }: RegionalOfficeTabProps) {
   const [selectedRegion, setSelectedRegion] = useState<RegionalData | null>(null);
 
   useEffect(() => {
-    loadRegionalTeamData()
+    loadDefaultRegionalTeamData()
       .then((data) => { setTeamData(data); setIsLoading(false); })
       .catch(() => setIsLoading(false));
   }, []);
