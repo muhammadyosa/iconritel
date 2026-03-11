@@ -817,6 +817,23 @@ export default function Settings() {
                     <li>{columnStatus.akv.address ? "✅" : "⛔"} Address</li>
                   </ul>
                 </div>
+                <div className="p-4 rounded-lg border bg-card">
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="font-medium flex items-center gap-2">
+                      {dataCounts.regionalTeam > 0 ? "♻️" : "⚠️"} 🗺 List Team Region
+                    </h4>
+                    <Badge variant={dataCounts.regionalTeam > 0 ? "default" : "secondary"} className={dataCounts.regionalTeam > 0 ? "bg-teal-500" : ""}>
+                      {dataCounts.regionalTeam.toLocaleString()} data
+                    </Badge>
+                  </div>
+                  <p className="text-xs text-muted-foreground mb-2">Format hierarki (Region → SERPO → Mitra → OLT):</p>
+                  <ul className="text-xs text-muted-foreground list-none space-y-0.5">
+                    <li>✅ Region (JAMBI, LAMPUNG, dll)</li>
+                    <li>✅ SERPO (RITEL / FEEDER)</li>
+                    <li>✅ Nama Mitra + Hostname OLT</li>
+                    <li>✅ Nama Tim</li>
+                  </ul>
+                </div>
               </div>
             </CardContent>
           </Card>
