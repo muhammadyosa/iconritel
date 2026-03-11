@@ -247,19 +247,52 @@ export default function Teams() {
     const topResolved = Object.entries(resolvedMap).sort((a, b) => b[1] - a[1]).slice(0, 4);
     return { countMap, resolvedMap, topAll, topResolved };
   }, [filteredTickets]);
-  // NOC Category Trend data
+  // NOC Category Trend data - uses cloud history for persistence
   const nocCategoryTrend = useMemo(() => {
     const dateMap: Record<string, Record<string, number>> = {};
     const categories = new Set<string>();
 
+    // First, load cloud history (persisted data from previous days)
+    history.categoryRecords.forEach((rec) => {
+      // Apply date filter
+      if (dateRange?.from) {
+        const recDate = new Date(rec.date + "T00:00:00");
+        const from = startOfDay(dateRange.from);
+        const to = dateRange.to ? endOfDay(dateRange.to) : endOfDay(dateRange.from);
+        if (!isWithinInterval(recDate, { start: from, end: to })) return;
+      }
+      categories.add(rec.constraint_type);
+      if (!dateMap[rec.date]) dateMap[rec.date] = {};
+      dateMap[rec.date][rec.constraint_type] = Math.max(dateMap[rec.date][rec.constraint_type] || 0, rec.count);
+    });
+
+    // Then merge live ticket data (for today's real-time accuracy)
+    const today = new Date().toISOString().split('T')[0];
     filteredTickets.forEach((ticket) => {
       const date = ticket.createdISO?.split("T")[0];
       if (!date) return;
       const cat = ticket.constraint || "Lainnya";
       categories.add(cat);
       if (!dateMap[date]) dateMap[date] = {};
-      dateMap[date][cat] = (dateMap[date][cat] || 0) + 1;
+      // For today, use live data; for past, use max of cloud vs live
+      if (date === today) {
+        dateMap[date][cat] = (dateMap[date][cat] || 0);
+        // Count from live tickets for today
+      }
     });
+
+    // Recount today from live tickets
+    const todayLive: Record<string, number> = {};
+    filteredTickets.forEach((ticket) => {
+      const date = ticket.createdISO?.split("T")[0];
+      if (date === today) {
+        const cat = ticket.constraint || "Lainnya";
+        todayLive[cat] = (todayLive[cat] || 0) + 1;
+      }
+    });
+    if (Object.keys(todayLive).length > 0) {
+      dateMap[today] = { ...(dateMap[today] || {}), ...todayLive };
+    }
 
     const sortedDates = Object.keys(dateMap).sort();
     const catList = Array.from(categories).sort();
@@ -275,7 +308,7 @@ export default function Teams() {
     });
 
     return { data, categories: catList, config };
-  }, [filteredTickets]);
+  }, [filteredTickets, history.categoryRecords, dateRange]);
 
 
   // Category Trend for RITEL tickets
