@@ -56,6 +56,7 @@ export interface ImportResult {
 
 // Sheet detection patterns - prioritized by specificity (most specific first)
 const SHEET_PATTERNS = {
+  regionalTeam: ["list team region", "list_team_region", "listteamregion", "team region", "teamregion", "list team regional", "regional team"],
   akv: ["list akv user", "list_akv_user", "listakv user", "listakvuser", "akv user", "akvuser", "data akv user", "data akv", "list akv"],
   olt: ["list olt", "listolt", "list_olt", "data olt", "sheet list olt", "daftar olt", "master olt", "inventory olt"],
   fat: ["list fat", "listfat", "list_fat", "data fat", "sheet list fat", "daftar fat", "master fat"],
