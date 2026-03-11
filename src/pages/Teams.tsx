@@ -518,6 +518,9 @@ export default function Teams() {
           <TabsTrigger value="team-noc" className="text-xs sm:text-sm gap-1.5">
             💻 Team NOC
           </TabsTrigger>
+          <TabsTrigger value="regional-office" className="text-xs sm:text-sm gap-1.5">
+            🗺 List Regional Office
+          </TabsTrigger>
         </TabsList>
 
         {/* ===== TAB 1: Team Stats (existing) ===== */}
