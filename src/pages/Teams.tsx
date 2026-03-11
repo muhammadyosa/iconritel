@@ -483,7 +483,7 @@ export default function Teams() {
     <div className="space-y-4 sm:space-y-6 max-w-full overflow-x-hidden">
       <div>
         <h1 className="text-xl sm:text-2xl md:text-3xl font-bold">👥 List Team</h1>
-        <p className="text-muted-foreground text-xs sm:text-sm">Statistik ticket per tim dan aktivitas user NOC</p>
+        <p className="text-muted-foreground text-xs sm:text-sm">Statistik incident per tim dan aktivitas user NOC</p>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
