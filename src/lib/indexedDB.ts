@@ -3,6 +3,7 @@ import { OLT } from "@/types/olt";
 import { FAT } from "@/types/fat";
 import { FDT } from "@/types/fdt";
 import { AKV } from "@/types/akv";
+import { RegionalTeamRecord } from "@/types/regionalTeam";
 
 const DB_NAME = "NOC_Database";
 const STORE_NAME = "excel_data";
@@ -12,7 +13,8 @@ const FDT_STORE_NAME = "fdt_data";
 const UPE_STORE_NAME = "upe_data";
 const BNG_STORE_NAME = "bng_data";
 const AKV_STORE_NAME = "akv_data";
-const DB_VERSION = 7;
+const REGIONAL_TEAM_STORE_NAME = "regional_team_data";
+const DB_VERSION = 8;
 
 let dbInstance: IDBDatabase | null = null;
 
