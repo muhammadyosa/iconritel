@@ -21,6 +21,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { StatusBadge } from "@/components/StatusBadge";
 import { useCloudTickets } from "@/hooks/useCloudTickets";
+import { useTicketHistory } from "@/hooks/useTicketHistory";
+import { FEEDER_CONSTRAINTS_SET } from "@/types/ticket";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   ChartContainer,
@@ -97,6 +99,7 @@ const PIE_COLORS = [
 
 export default function Teams() {
   const { tickets, isLoading } = useCloudTickets();
+  const { history } = useTicketHistory(tickets);
   const [selectedTeam, setSelectedTeam] = useState<string | null>(null);
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
   const [periodPreset, setPeriodPreset] = useState<string>("all");
@@ -244,19 +247,52 @@ export default function Teams() {
     const topResolved = Object.entries(resolvedMap).sort((a, b) => b[1] - a[1]).slice(0, 4);
     return { countMap, resolvedMap, topAll, topResolved };
   }, [filteredTickets]);
-  // NOC Category Trend data
+  // NOC Category Trend data - uses cloud history for persistence
   const nocCategoryTrend = useMemo(() => {
     const dateMap: Record<string, Record<string, number>> = {};
     const categories = new Set<string>();
 
+    // First, load cloud history (persisted data from previous days)
+    history.categoryRecords.forEach((rec) => {
+      // Apply date filter
+      if (dateRange?.from) {
+        const recDate = new Date(rec.date + "T00:00:00");
+        const from = startOfDay(dateRange.from);
+        const to = dateRange.to ? endOfDay(dateRange.to) : endOfDay(dateRange.from);
+        if (!isWithinInterval(recDate, { start: from, end: to })) return;
+      }
+      categories.add(rec.constraint_type);
+      if (!dateMap[rec.date]) dateMap[rec.date] = {};
+      dateMap[rec.date][rec.constraint_type] = Math.max(dateMap[rec.date][rec.constraint_type] || 0, rec.count);
+    });
+
+    // Then merge live ticket data (for today's real-time accuracy)
+    const today = new Date().toISOString().split('T')[0];
     filteredTickets.forEach((ticket) => {
       const date = ticket.createdISO?.split("T")[0];
       if (!date) return;
       const cat = ticket.constraint || "Lainnya";
       categories.add(cat);
       if (!dateMap[date]) dateMap[date] = {};
-      dateMap[date][cat] = (dateMap[date][cat] || 0) + 1;
+      // For today, use live data; for past, use max of cloud vs live
+      if (date === today) {
+        dateMap[date][cat] = (dateMap[date][cat] || 0);
+        // Count from live tickets for today
+      }
     });
+
+    // Recount today from live tickets
+    const todayLive: Record<string, number> = {};
+    filteredTickets.forEach((ticket) => {
+      const date = ticket.createdISO?.split("T")[0];
+      if (date === today) {
+        const cat = ticket.constraint || "Lainnya";
+        todayLive[cat] = (todayLive[cat] || 0) + 1;
+      }
+    });
+    if (Object.keys(todayLive).length > 0) {
+      dateMap[today] = { ...(dateMap[today] || {}), ...todayLive };
+    }
 
     const sortedDates = Object.keys(dateMap).sort();
     const catList = Array.from(categories).sort();
@@ -272,47 +308,43 @@ export default function Teams() {
     });
 
     return { data, categories: catList, config };
-  }, [filteredTickets]);
+  }, [filteredTickets, history.categoryRecords, dateRange]);
 
 
-  // Category Trend for RITEL tickets
+  // Category Trend for RITEL tickets - uses cloud history
   const ritelCategoryTrend = useMemo(() => {
-    const ritelTickets = filteredTickets.filter(t => t.category !== "FEEDER");
     const dateMap: Record<string, Record<string, number>> = {};
     const categories = new Set<string>();
-    ritelTickets.forEach((ticket) => {
-      const date = ticket.createdISO?.split("T")[0];
-      if (!date) return;
-      const cat = ticket.constraint || "Lainnya";
-      categories.add(cat);
-      if (!dateMap[date]) dateMap[date] = {};
-      dateMap[date][cat] = (dateMap[date][cat] || 0) + 1;
-    });
-    const sortedDates = Object.keys(dateMap).sort();
-    const catList = Array.from(categories).sort();
-    const data = sortedDates.map((date) => {
-      const entry: Record<string, any> = { date: format(new Date(date + "T00:00:00"), "dd MMM", { locale: localeId }) };
-      catList.forEach((cat) => { entry[cat] = dateMap[date][cat] || 0; });
-      return entry;
-    });
-    const config: ChartConfig = {};
-    catList.forEach((cat, i) => { config[cat] = { label: cat, color: NOC_CATEGORY_COLORS[i % NOC_CATEGORY_COLORS.length] }; });
-    return { data, categories: catList, config };
-  }, [filteredTickets]);
+    const today = new Date().toISOString().split('T')[0];
 
-  // Category Trend for FEEDER tickets
-  const feederCategoryTrend = useMemo(() => {
-    const feederTickets = filteredTickets.filter(t => t.category === "FEEDER");
-    const dateMap: Record<string, Record<string, number>> = {};
-    const categories = new Set<string>();
-    feederTickets.forEach((ticket) => {
-      const date = ticket.createdISO?.split("T")[0];
-      if (!date) return;
-      const cat = ticket.constraint || "Lainnya";
-      categories.add(cat);
-      if (!dateMap[date]) dateMap[date] = {};
-      dateMap[date][cat] = (dateMap[date][cat] || 0) + 1;
+    // Cloud history filtered to RITEL constraints only
+    history.categoryRecords.forEach((rec) => {
+      if (FEEDER_CONSTRAINTS_SET.has(rec.constraint_type)) return; // Skip feeder
+      if (dateRange?.from) {
+        const recDate = new Date(rec.date + "T00:00:00");
+        const from = startOfDay(dateRange.from);
+        const to = dateRange.to ? endOfDay(dateRange.to) : endOfDay(dateRange.from);
+        if (!isWithinInterval(recDate, { start: from, end: to })) return;
+      }
+      categories.add(rec.constraint_type);
+      if (!dateMap[rec.date]) dateMap[rec.date] = {};
+      dateMap[rec.date][rec.constraint_type] = Math.max(dateMap[rec.date][rec.constraint_type] || 0, rec.count);
     });
+
+    // Live data for today
+    const todayLive: Record<string, number> = {};
+    filteredTickets.filter(t => t.category !== "FEEDER").forEach((ticket) => {
+      const date = ticket.createdISO?.split("T")[0];
+      if (date === today) {
+        const cat = ticket.constraint || "Lainnya";
+        categories.add(cat);
+        todayLive[cat] = (todayLive[cat] || 0) + 1;
+      }
+    });
+    if (Object.keys(todayLive).length > 0) {
+      dateMap[today] = { ...(dateMap[today] || {}), ...todayLive };
+    }
+
     const sortedDates = Object.keys(dateMap).sort();
     const catList = Array.from(categories).sort();
     const data = sortedDates.map((date) => {
@@ -323,7 +355,53 @@ export default function Teams() {
     const config: ChartConfig = {};
     catList.forEach((cat, i) => { config[cat] = { label: cat, color: NOC_CATEGORY_COLORS[i % NOC_CATEGORY_COLORS.length] }; });
     return { data, categories: catList, config };
-  }, [filteredTickets]);
+  }, [filteredTickets, history.categoryRecords, dateRange]);
+
+  // Category Trend for FEEDER tickets - uses cloud history
+  const feederCategoryTrend = useMemo(() => {
+    const dateMap: Record<string, Record<string, number>> = {};
+    const categories = new Set<string>();
+    const today = new Date().toISOString().split('T')[0];
+
+    // Cloud history filtered to FEEDER constraints only
+    history.categoryRecords.forEach((rec) => {
+      if (!FEEDER_CONSTRAINTS_SET.has(rec.constraint_type)) return; // Only feeder
+      if (dateRange?.from) {
+        const recDate = new Date(rec.date + "T00:00:00");
+        const from = startOfDay(dateRange.from);
+        const to = dateRange.to ? endOfDay(dateRange.to) : endOfDay(dateRange.from);
+        if (!isWithinInterval(recDate, { start: from, end: to })) return;
+      }
+      categories.add(rec.constraint_type);
+      if (!dateMap[rec.date]) dateMap[rec.date] = {};
+      dateMap[rec.date][rec.constraint_type] = Math.max(dateMap[rec.date][rec.constraint_type] || 0, rec.count);
+    });
+
+    // Live data for today
+    const todayLive: Record<string, number> = {};
+    filteredTickets.filter(t => t.category === "FEEDER").forEach((ticket) => {
+      const date = ticket.createdISO?.split("T")[0];
+      if (date === today) {
+        const cat = ticket.constraint || "Lainnya";
+        categories.add(cat);
+        todayLive[cat] = (todayLive[cat] || 0) + 1;
+      }
+    });
+    if (Object.keys(todayLive).length > 0) {
+      dateMap[today] = { ...(dateMap[today] || {}), ...todayLive };
+    }
+
+    const sortedDates = Object.keys(dateMap).sort();
+    const catList = Array.from(categories).sort();
+    const data = sortedDates.map((date) => {
+      const entry: Record<string, any> = { date: format(new Date(date + "T00:00:00"), "dd MMM", { locale: localeId }) };
+      catList.forEach((cat) => { entry[cat] = dateMap[date][cat] || 0; });
+      return entry;
+    });
+    const config: ChartConfig = {};
+    catList.forEach((cat, i) => { config[cat] = { label: cat, color: NOC_CATEGORY_COLORS[i % NOC_CATEGORY_COLORS.length] }; });
+    return { data, categories: catList, config };
+  }, [filteredTickets, history.categoryRecords, dateRange]);
 
   const dateFilter = (
     <div className="flex flex-wrap items-center gap-2 sm:gap-3">
@@ -395,7 +473,7 @@ export default function Teams() {
 
       {dateRange && (
         <Badge variant="secondary" className="text-xs">
-          {filteredTickets.length} tiket
+          {filteredTickets.length} incident
         </Badge>
       )}
     </div>
@@ -405,7 +483,7 @@ export default function Teams() {
     <div className="space-y-4 sm:space-y-6 max-w-full overflow-x-hidden">
       <div>
         <h1 className="text-xl sm:text-2xl md:text-3xl font-bold">👥 List Team</h1>
-        <p className="text-muted-foreground text-xs sm:text-sm">Statistik ticket per tim dan aktivitas user NOC</p>
+        <p className="text-muted-foreground text-xs sm:text-sm">Statistik incident per tim dan aktivitas user NOC</p>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
@@ -431,7 +509,7 @@ export default function Teams() {
                   ) : (
                     <>
                       <Users className="h-10 sm:h-12 w-10 sm:w-12 mx-auto mb-4 opacity-50" />
-                      <p className="text-sm">Belum ada data tim. Buat tiket untuk melihat statistik tim.</p>
+                      <p className="text-sm">Belum ada data tim. Buat incident untuk melihat statistik tim.</p>
                     </>
                   )}
                 </div>
@@ -860,16 +938,16 @@ export default function Teams() {
                               {isRitel ? "RITEL" : "FEEDER"}
                             </Badge>
                             <div className={cn("h-2.5 w-2.5 rounded-full", statusBg)} />
-                            Tiket {statusFilter}
+                            Incident {statusFilter}
                           </SheetTitle>
                           <SheetDescription className="text-xs sm:text-sm">
-                            {filteredList.length} tiket dengan status {statusFilter}
+                            {filteredList.length} incident dengan status {statusFilter}
                           </SheetDescription>
                         </SheetHeader>
                         <ScrollArea className="h-[calc(100vh-150px)] mt-4">
                           <div className="space-y-3 pr-2">
                             {filteredList.length === 0 ? (
-                              <p className="text-sm text-muted-foreground text-center py-8">Tidak ada tiket {statusFilter}</p>
+                              <p className="text-sm text-muted-foreground text-center py-8">Tidak ada incident {statusFilter}</p>
                             ) : filteredList.map((ticket: any) => (
                               <Card key={ticket.id} className="shadow-sm">
                                 <CardContent className="p-3">
@@ -1293,13 +1371,13 @@ export default function Teams() {
                             Incident NOC
                           </SheetTitle>
                           <SheetDescription className="text-xs sm:text-sm">
-                            {filteredList.length} tiket berstatus {statusFilter}
+                            {filteredList.length} incident berstatus {statusFilter}
                           </SheetDescription>
                         </SheetHeader>
                         <ScrollArea className="h-[calc(100vh-150px)] mt-4">
                           <div className="space-y-3 pr-2">
                             {filteredList.length === 0 ? (
-                              <p className="text-xs text-muted-foreground text-center py-8">Tidak ada tiket {statusFilter}</p>
+                              <p className="text-xs text-muted-foreground text-center py-8">Tidak ada incident {statusFilter}</p>
                             ) : filteredList.map((ticket: any) => (
                               <Card key={ticket.id} className="shadow-sm">
                                 <CardContent className="p-3">
