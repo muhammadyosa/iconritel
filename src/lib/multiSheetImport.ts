@@ -38,6 +38,7 @@ export interface ImportResult {
   bngRecords: BNGRecord[];
   fdtRecords: FDT[];
   akvRecords: AKV[];
+  regionalTeamRecords: RegionalTeamRecord[];
   summary: {
     user: number;
     olt: number;
@@ -46,6 +47,7 @@ export interface ImportResult {
     bng: number;
     fdt: number;
     akv: number;
+    regionalTeam: number;
     totalSheets: number;
     processedSheets: string[];
     skippedSheets: string[];
