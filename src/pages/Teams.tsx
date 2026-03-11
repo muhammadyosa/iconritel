@@ -357,19 +357,40 @@ export default function Teams() {
     return { data, categories: catList, config };
   }, [filteredTickets, history.categoryRecords, dateRange]);
 
-  // Category Trend for FEEDER tickets
+  // Category Trend for FEEDER tickets - uses cloud history
   const feederCategoryTrend = useMemo(() => {
-    const feederTickets = filteredTickets.filter(t => t.category === "FEEDER");
     const dateMap: Record<string, Record<string, number>> = {};
     const categories = new Set<string>();
-    feederTickets.forEach((ticket) => {
-      const date = ticket.createdISO?.split("T")[0];
-      if (!date) return;
-      const cat = ticket.constraint || "Lainnya";
-      categories.add(cat);
-      if (!dateMap[date]) dateMap[date] = {};
-      dateMap[date][cat] = (dateMap[date][cat] || 0) + 1;
+    const today = new Date().toISOString().split('T')[0];
+
+    // Cloud history filtered to FEEDER constraints only
+    history.categoryRecords.forEach((rec) => {
+      if (!FEEDER_CONSTRAINTS_SET.has(rec.constraint_type)) return; // Only feeder
+      if (dateRange?.from) {
+        const recDate = new Date(rec.date + "T00:00:00");
+        const from = startOfDay(dateRange.from);
+        const to = dateRange.to ? endOfDay(dateRange.to) : endOfDay(dateRange.from);
+        if (!isWithinInterval(recDate, { start: from, end: to })) return;
+      }
+      categories.add(rec.constraint_type);
+      if (!dateMap[rec.date]) dateMap[rec.date] = {};
+      dateMap[rec.date][rec.constraint_type] = Math.max(dateMap[rec.date][rec.constraint_type] || 0, rec.count);
     });
+
+    // Live data for today
+    const todayLive: Record<string, number> = {};
+    filteredTickets.filter(t => t.category === "FEEDER").forEach((ticket) => {
+      const date = ticket.createdISO?.split("T")[0];
+      if (date === today) {
+        const cat = ticket.constraint || "Lainnya";
+        categories.add(cat);
+        todayLive[cat] = (todayLive[cat] || 0) + 1;
+      }
+    });
+    if (Object.keys(todayLive).length > 0) {
+      dateMap[today] = { ...(dateMap[today] || {}), ...todayLive };
+    }
+
     const sortedDates = Object.keys(dateMap).sort();
     const catList = Array.from(categories).sort();
     const data = sortedDates.map((date) => {
@@ -380,7 +401,7 @@ export default function Teams() {
     const config: ChartConfig = {};
     catList.forEach((cat, i) => { config[cat] = { label: cat, color: NOC_CATEGORY_COLORS[i % NOC_CATEGORY_COLORS.length] }; });
     return { data, categories: catList, config };
-  }, [filteredTickets]);
+  }, [filteredTickets, history.categoryRecords, dateRange]);
 
   const dateFilter = (
     <div className="flex flex-wrap items-center gap-2 sm:gap-3">
