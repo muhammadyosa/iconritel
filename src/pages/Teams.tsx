@@ -509,7 +509,7 @@ export default function Teams() {
                   ) : (
                     <>
                       <Users className="h-10 sm:h-12 w-10 sm:w-12 mx-auto mb-4 opacity-50" />
-                      <p className="text-sm">Belum ada data tim. Buat tiket untuk melihat statistik tim.</p>
+                      <p className="text-sm">Belum ada data tim. Buat incident untuk melihat statistik tim.</p>
                     </>
                   )}
                 </div>
