@@ -1592,50 +1592,13 @@ export default function Teams() {
             <Card>
               <CardHeader>
                 <CardTitle className="text-base sm:text-lg flex items-center gap-2">
-                  🗺 List Regional Office PLN Icon Plus
+                  🗺 List Regional Office
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="overflow-x-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead className="w-[50px] text-center">No</TableHead>
-                        <TableHead>Regional Office</TableHead>
-                        <TableHead>Kode</TableHead>
-                        <TableHead>Wilayah Cakupan</TableHead>
-                        <TableHead>Kantor Pusat</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {[
-                        { no: 1, name: "Regional Sumatera Bagian Utara", code: "SUMBAGUT", area: "Aceh, Sumatera Utara", hq: "Medan" },
-                        { no: 2, name: "Regional Sumatera Bagian Tengah", code: "SUMBAGTENG", area: "Riau, Kepulauan Riau, Sumatera Barat", hq: "Pekanbaru" },
-                        { no: 3, name: "Regional Sumatera Bagian Selatan", code: "SUMBAGSEL", area: "Sumatera Selatan, Jambi, Bengkulu, Lampung, Bangka Belitung", hq: "Palembang" },
-                        { no: 4, name: "Regional Jakarta & Banten", code: "JAKBAN", area: "DKI Jakarta, Banten", hq: "Jakarta" },
-                        { no: 5, name: "Regional Jawa Barat", code: "JABAR", area: "Jawa Barat", hq: "Bandung" },
-                        { no: 6, name: "Regional Jawa Tengah & DIY", code: "JATENG-DIY", area: "Jawa Tengah, DI Yogyakarta", hq: "Semarang" },
-                        { no: 7, name: "Regional Jawa Timur", code: "JATIM", area: "Jawa Timur", hq: "Surabaya" },
-                        { no: 8, name: "Regional Kalimantan", code: "KALIMANTAN", area: "Kalimantan Barat, Kalimantan Tengah, Kalimantan Selatan, Kalimantan Timur, Kalimantan Utara", hq: "Balikpapan" },
-                        { no: 9, name: "Regional Sulawesi", code: "SULAWESI", area: "Sulawesi Utara, Sulawesi Tengah, Sulawesi Selatan, Sulawesi Tenggara, Gorontalo, Sulawesi Barat", hq: "Makassar" },
-                        { no: 10, name: "Regional Bali & Nusa Tenggara", code: "BALNUSRA", area: "Bali, Nusa Tenggara Barat, Nusa Tenggara Timur", hq: "Denpasar" },
-                        { no: 11, name: "Regional Maluku & Papua", code: "MALPAP", area: "Maluku, Maluku Utara, Papua, Papua Barat, Papua Tengah, Papua Pegunungan, Papua Selatan, Papua Barat Daya", hq: "Jayapura" },
-                      ].map((ro) => (
-                        <TableRow key={ro.no}>
-                          <TableCell className="text-center font-medium">{ro.no}</TableCell>
-                          <TableCell className="font-medium">{ro.name}</TableCell>
-                          <TableCell>
-                            <Badge variant="outline" className="text-xs">{ro.code}</Badge>
-                          </TableCell>
-                          <TableCell className="text-sm text-muted-foreground max-w-[300px]">{ro.area}</TableCell>
-                          <TableCell>
-                            <Badge className="bg-primary/10 text-primary border-primary/20 text-xs">{ro.hq}</Badge>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
+                <p className="text-sm text-muted-foreground">
+                  Halaman ini akan menampilkan daftar Regional Office. Fitur dalam pengembangan.
+                </p>
               </CardContent>
             </Card>
           </div>
