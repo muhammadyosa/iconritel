@@ -52,6 +52,7 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
+import RegionalOfficeTab from "@/components/RegionalOfficeTab";
 import type { DateRange } from "react-day-picker";
 
 const NOC_CATEGORY_COLORS = [
@@ -1588,20 +1589,7 @@ export default function Teams() {
 
         {/* ===== TAB 3: List Regional Office ===== */}
         <TabsContent value="regional-office" className="space-y-4">
-          <div className="grid grid-cols-1 gap-4">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base sm:text-lg flex items-center gap-2">
-                  🗺 List Regional Office
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground">
-                  Halaman ini akan menampilkan daftar Regional Office. Fitur dalam pengembangan.
-                </p>
-              </CardContent>
-            </Card>
-          </div>
+          <RegionalOfficeTab tickets={filteredTickets} />
         </TabsContent>
       </Tabs>
     </div>
