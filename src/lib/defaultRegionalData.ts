@@ -120,7 +120,7 @@ function processRegionalTeamSheet(sheet: XLSX.WorkSheet): RegionalTeamRecord[] {
     const nonEmptyCells = row.filter((c: any) => String(c || "").trim() !== "").length;
     if (nonEmptyCells <= 1 && cell0 && cell0 === cell0.toUpperCase() && cell0.length >= 3 && !cell0.includes("SERPO") && !cell0.includes("NAMA")) {
       if (collectingHostnames) flushMitra();
-      currentRegion = cell0;
+      currentRegion = normalizeRegionName(cell0);
       collectingHostnames = false;
       mitraNames = [];
       mitraHostnames = {};
