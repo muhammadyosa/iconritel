@@ -2,6 +2,23 @@ import * as XLSX from "xlsx";
 import { RegionalTeamRecord } from "@/types/regionalTeam";
 import { loadRegionalTeamData, saveRegionalTeamData } from "./indexedDB";
 
+// Region name normalization map
+const REGION_NAME_MAP: Record<string, string> = {
+  "SUMATERA SELATAN": "SUMSEL",
+  "SUMATERA BARAT": "SUMBAR",
+  "SUMATERA UTARA": "SUMUT",
+  "KALIMANTAN BARAT": "KALBAR",
+  "KALIMANTAN TIMUR": "KALTIM",
+  "KALIMANTAN SELATAN": "KALSEL",
+  "SULAWESI SELATAN": "SULSEL",
+  "SULAWESI UTARA": "SULUT",
+};
+
+const normalizeRegionName = (name: string): string => {
+  const upper = name.trim().toUpperCase();
+  return REGION_NAME_MAP[upper] || upper;
+};
+
 // OLT hostname detection helper
 const isOltHostname = (val: string) => {
   const v = val.trim().toUpperCase();
@@ -103,7 +120,7 @@ function processRegionalTeamSheet(sheet: XLSX.WorkSheet): RegionalTeamRecord[] {
     const nonEmptyCells = row.filter((c: any) => String(c || "").trim() !== "").length;
     if (nonEmptyCells <= 1 && cell0 && cell0 === cell0.toUpperCase() && cell0.length >= 3 && !cell0.includes("SERPO") && !cell0.includes("NAMA")) {
       if (collectingHostnames) flushMitra();
-      currentRegion = cell0;
+      currentRegion = normalizeRegionName(cell0);
       collectingHostnames = false;
       mitraNames = [];
       mitraHostnames = {};
@@ -121,14 +138,14 @@ function processRegionalTeamSheet(sheet: XLSX.WorkSheet): RegionalTeamRecord[] {
  * Returns the data (either from IndexedDB or freshly parsed).
  */
 export async function loadDefaultRegionalTeamData(): Promise<RegionalTeamRecord[]> {
-  // Check if data already exists in IndexedDB
-  const existing = await loadRegionalTeamData();
-  if (existing.length > 0) return existing;
-
+  // Always reload from bundled Excel to pick up region name fixes
   try {
-    // Fetch the bundled Excel file
-    const response = await fetch("/data/List_Team_Region.xlsx");
-    if (!response.ok) return [];
+    const response = await fetch("/data/List_Team_Region.xlsx", { cache: "no-cache" });
+    if (!response.ok) {
+      // Fallback to IndexedDB
+      const existing = await loadRegionalTeamData();
+      return existing;
+    }
 
     const arrayBuffer = await response.arrayBuffer();
     const workbook = XLSX.read(arrayBuffer, { type: "array" });

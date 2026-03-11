@@ -512,17 +512,19 @@ export default function Teams() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="mb-4">
-          <TabsTrigger value="team-stats" className="text-xs sm:text-sm gap-1.5">
-            👥 Team Ritel/Serpo
-          </TabsTrigger>
-          <TabsTrigger value="team-noc" className="text-xs sm:text-sm gap-1.5">
-            💻 Team NOC
-          </TabsTrigger>
-          <TabsTrigger value="regional-office" className="text-xs sm:text-sm gap-1.5">
-            🗺 List Regional Office
-          </TabsTrigger>
-        </TabsList>
+        <div className="overflow-x-auto -mx-2 px-2 sm:mx-0 sm:px-0">
+          <TabsList className="mb-4 w-max min-w-full sm:w-auto">
+            <TabsTrigger value="team-stats" className="text-[10px] sm:text-sm gap-1 sm:gap-1.5 px-2 sm:px-3">
+              👥 Team Ritel/Serpo
+            </TabsTrigger>
+            <TabsTrigger value="team-noc" className="text-[10px] sm:text-sm gap-1 sm:gap-1.5 px-2 sm:px-3">
+              💻 Team NOC
+            </TabsTrigger>
+            <TabsTrigger value="regional-office" className="text-[10px] sm:text-sm gap-1 sm:gap-1.5 px-2 sm:px-3">
+              🗺 Regional Office
+            </TabsTrigger>
+          </TabsList>
+        </div>
 
         {/* ===== TAB 1: Team Stats (existing) ===== */}
         <TabsContent value="team-stats" className="space-y-4">
