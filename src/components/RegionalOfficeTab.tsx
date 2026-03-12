@@ -823,8 +823,8 @@ export default function RegionalOfficeTab({ tickets }: RegionalOfficeTabProps) {
                   <div className="space-y-2">
                     {[
                       { label: "Service ID", value: selectedIncident.serviceId, icon: "🆔" },
-                      { label: "Ticket ID", value: selectedIncident.ticketId, icon: "🎫" },
                       { label: "Hostname", value: selectedIncident.hostname, icon: "📡" },
+                      { label: "FAT ID", value: selectedIncident.fatId, icon: "📍" },
                       { label: "FAT ID", value: selectedIncident.fatId, icon: "📍" },
                       { label: "SN ONT", value: selectedIncident.snOnt, icon: "🔌" },
                       { label: "SERPO", value: selectedIncident.serpo, icon: "🏢" },
