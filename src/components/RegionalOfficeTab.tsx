@@ -590,42 +590,44 @@ export default function RegionalOfficeTab({ tickets }: RegionalOfficeTabProps) {
         </DialogContent>
       </Dialog>
 
-      {/* Region Detail Sheet */}
-      <Sheet open={!!selectedRegion} onOpenChange={(open) => { if (!open) setSelectedRegion(null); }}>
-        <SheetContent className="w-full sm:max-w-lg overflow-y-auto">
-          {selectedRegion && (
+      {/* Region Detail Dialog */}
+      <Dialog open={!!selectedRegion} onOpenChange={(open) => { if (!open) { setSelectedRegion(null); setSelectedTeam(null); setSelectedIncident(null); } }}>
+        <DialogContent className="max-w-[95vw] sm:max-w-lg p-0 gap-0 max-h-[90vh] flex flex-col">
+          {selectedRegion && !selectedTeam && !selectedIncident && (
             <>
-              <SheetHeader>
-                <SheetTitle className="text-base flex items-center gap-2">
-                  <MapPin className="h-4 w-4 text-primary" /> {selectedRegion.region}
-                </SheetTitle>
-                <SheetDescription className="text-xs">
-                  {selectedRegion.totalMitra} Mitra · {selectedRegion.totalHostnames} OLT · {selectedRegion.totalIncidents} Incident
-                </SheetDescription>
-              </SheetHeader>
-              <div className="mt-4 space-y-4">
-                {/* Stats */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                  <Card className="p-2 text-center bg-gradient-to-br from-primary/5 to-transparent">
-                    <div className="text-[10px] text-muted-foreground">Ritel</div>
-                    <div className="text-sm font-bold">{selectedRegion.ritelMitra}</div>
+              {/* Fixed Header */}
+              <div className="p-4 pb-3 border-b border-border/50 flex-shrink-0">
+                <DialogHeader>
+                  <DialogTitle className="text-sm sm:text-base flex items-center gap-2 pr-8">
+                    <MapPin className="h-4 w-4 text-primary flex-shrink-0" /> {selectedRegion.region}
+                  </DialogTitle>
+                  <DialogDescription className="text-[10px] sm:text-xs">
+                    {selectedRegion.totalMitra} Mitra · {selectedRegion.totalHostnames} OLT · {selectedRegion.totalIncidents} Incident
+                  </DialogDescription>
+                </DialogHeader>
+
+                {/* Stats Cards */}
+                <div className="grid grid-cols-4 gap-1.5 sm:gap-2 mt-3">
+                  <Card className="p-1.5 sm:p-2 text-center bg-gradient-to-br from-primary/10 to-transparent border-primary/20">
+                    <div className="text-[8px] sm:text-[10px] text-muted-foreground">Ritel</div>
+                    <div className="text-sm sm:text-lg font-bold">{selectedRegion.ritelMitra}</div>
                   </Card>
-                  <Card className="p-2 text-center bg-gradient-to-br from-accent/5 to-transparent">
-                    <div className="text-[10px] text-muted-foreground">Feeder</div>
-                    <div className="text-sm font-bold">{selectedRegion.feederMitra}</div>
+                  <Card className="p-1.5 sm:p-2 text-center bg-gradient-to-br from-accent/10 to-transparent border-accent/20">
+                    <div className="text-[8px] sm:text-[10px] text-muted-foreground">Feeder</div>
+                    <div className="text-sm sm:text-lg font-bold">{selectedRegion.feederMitra}</div>
                   </Card>
-                  <Card className="p-2 text-center bg-gradient-to-br from-success/5 to-transparent">
-                    <div className="text-[10px] text-muted-foreground">Resolved</div>
-                    <div className="text-sm font-bold text-success">{selectedRegion.resolved}</div>
+                  <Card className="p-1.5 sm:p-2 text-center bg-gradient-to-br from-success/10 to-transparent border-success/20">
+                    <div className="text-[8px] sm:text-[10px] text-muted-foreground">Resolved</div>
+                    <div className="text-sm sm:text-lg font-bold text-success">{selectedRegion.resolved}</div>
                   </Card>
-                  <Card className="p-2 text-center bg-gradient-to-br from-destructive/5 to-transparent">
-                    <div className="text-[10px] text-muted-foreground">Critical</div>
-                    <div className="text-sm font-bold text-destructive">{selectedRegion.critical}</div>
+                  <Card className="p-1.5 sm:p-2 text-center bg-gradient-to-br from-destructive/10 to-transparent border-destructive/20">
+                    <div className="text-[8px] sm:text-[10px] text-muted-foreground">Critical</div>
+                    <div className="text-sm sm:text-lg font-bold text-destructive">{selectedRegion.critical}</div>
                   </Card>
                 </div>
 
                 {selectedRegion.totalIncidents > 0 && (
-                  <div className="space-y-1">
+                  <div className="space-y-1 mt-3">
                     <div className="flex justify-between text-[10px]">
                       <span className="text-muted-foreground">Resolution Rate</span>
                       <span className="font-bold">{Math.round((selectedRegion.resolved / selectedRegion.totalIncidents) * 100)}%</span>
@@ -633,77 +635,217 @@ export default function RegionalOfficeTab({ tickets }: RegionalOfficeTabProps) {
                     <Progress value={Math.round((selectedRegion.resolved / selectedRegion.totalIncidents) * 100)} className="h-2" />
                   </div>
                 )}
+              </div>
 
-                {/* Teams List */}
-                <div>
-                  <h4 className="text-xs font-semibold mb-2 flex items-center gap-1.5">
-                    <Users className="h-3.5 w-3.5" /> Daftar Tim ({selectedRegion.teams.length})
-                  </h4>
-                  <ScrollArea className="max-h-[30vh]">
-                    <Table className="text-[10px] sm:text-xs">
-                      <TableHeader>
-                        <TableRow className="h-7">
-                          <TableHead className="px-1.5 py-1">Tipe</TableHead>
-                          <TableHead className="px-1.5 py-1">Nama Mitra</TableHead>
-                          <TableHead className="px-1.5 py-1 text-center">OLT</TableHead>
-                          <TableHead className="px-1.5 py-1">Tim</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {selectedRegion.teams.map((t, idx) => (
-                          <TableRow key={`${t.mitraName}-${idx}`} className="h-7">
-                            <TableCell className="px-1.5 py-0.5">
-                              <Badge variant={t.serpoType === "RITEL" ? "default" : "secondary"} className="text-[8px]">
-                                {t.serpoType}
-                              </Badge>
-                            </TableCell>
-                            <TableCell className="px-1.5 py-0.5 font-medium truncate max-w-[140px]">{t.mitraName}</TableCell>
-                            <TableCell className="px-1.5 py-0.5 text-center">{t.hostnames.length}</TableCell>
-                            <TableCell className="px-1.5 py-0.5 truncate max-w-[100px]">{t.teamMember || "-"}</TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </ScrollArea>
-                </div>
-
-                {/* Incidents */}
-                {selectedRegion.incidentTickets.length > 0 ? (
+              {/* Scrollable Content */}
+              <ScrollArea className="flex-1 min-h-0">
+                <div className="p-4 space-y-4">
+                  {/* Teams List */}
                   <div>
                     <h4 className="text-xs font-semibold mb-2 flex items-center gap-1.5">
-                      <AlertTriangle className="h-3.5 w-3.5" /> Incidents ({selectedRegion.incidentTickets.length})
+                      <Users className="h-3.5 w-3.5" /> Daftar Tim ({selectedRegion.teams.length})
                     </h4>
-                    <ScrollArea className="max-h-[30vh]">
-                      <Table className="text-[10px] sm:text-xs">
+                    <div className="overflow-x-auto">
+                      <Table className="text-[10px] sm:text-xs min-w-[420px]">
                         <TableHeader>
-                          <TableRow className="h-7">
-                            <TableHead className="px-1.5 py-1">Incident ID</TableHead>
-                            <TableHead className="px-1.5 py-1">Hostname</TableHead>
-                            <TableHead className="px-1.5 py-1">Pelanggan</TableHead>
-                            <TableHead className="px-1.5 py-1">Status</TableHead>
+                          <TableRow className="h-7 bg-muted/30 sticky top-0">
+                            <TableHead className="px-1.5 py-1 w-14">Tipe</TableHead>
+                            <TableHead className="px-1.5 py-1">Nama Mitra</TableHead>
+                            <TableHead className="px-1.5 py-1 text-center w-10">OLT</TableHead>
+                            <TableHead className="px-1.5 py-1">Tim</TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
-                          {selectedRegion.incidentTickets.map((t) => (
-                            <TableRow key={t.id} className="h-7">
-                              <TableCell className="px-1.5 py-0.5 font-mono">{t.serviceId}</TableCell>
-                              <TableCell className="px-1.5 py-0.5 font-mono">{t.hostname}</TableCell>
-                              <TableCell className="px-1.5 py-0.5 truncate max-w-[120px]">{t.customerName}</TableCell>
-                              <TableCell className="px-1.5 py-0.5"><StatusBadge status={t.status} /></TableCell>
+                          {selectedRegion.teams.map((t, idx) => (
+                            <TableRow
+                              key={`${t.mitraName}-${idx}`}
+                              className="h-8 cursor-pointer hover:bg-primary/5 transition-colors"
+                              onClick={() => setSelectedTeam(t)}
+                            >
+                              <TableCell className="px-1.5 py-0.5">
+                                <Badge variant={t.serpoType === "RITEL" ? "default" : "secondary"} className="text-[7px] sm:text-[8px] px-1.5">
+                                  {t.serpoType}
+                                </Badge>
+                              </TableCell>
+                              <TableCell className="px-1.5 py-0.5 font-medium">{t.mitraName}</TableCell>
+                              <TableCell className="px-1.5 py-0.5 text-center font-bold">{t.hostnames.length}</TableCell>
+                              <TableCell className="px-1.5 py-0.5">{t.teamMember || "-"}</TableCell>
                             </TableRow>
                           ))}
                         </TableBody>
                       </Table>
-                    </ScrollArea>
+                    </div>
                   </div>
-                ) : (
-                  <p className="text-xs text-muted-foreground text-center py-4">Tidak ada incident di regional ini.</p>
-                )}
-              </div>
+
+                  {/* Incidents */}
+                  {selectedRegion.incidentTickets.length > 0 ? (
+                    <div>
+                      <h4 className="text-xs font-semibold mb-2 flex items-center gap-1.5">
+                        <AlertTriangle className="h-3.5 w-3.5 text-warning" /> Incidents ({selectedRegion.incidentTickets.length})
+                      </h4>
+                      <div className="overflow-x-auto">
+                        <Table className="text-[10px] sm:text-xs min-w-[460px]">
+                          <TableHeader>
+                            <TableRow className="h-7 bg-muted/30 sticky top-0">
+                              <TableHead className="px-1.5 py-1">Incident ID</TableHead>
+                              <TableHead className="px-1.5 py-1">Hostname</TableHead>
+                              <TableHead className="px-1.5 py-1">Pelanggan</TableHead>
+                              <TableHead className="px-1.5 py-1 text-right">Status</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {selectedRegion.incidentTickets.map((t) => (
+                              <TableRow
+                                key={t.id}
+                                className="h-8 cursor-pointer hover:bg-primary/5 transition-colors"
+                                onClick={() => setSelectedIncident(t)}
+                              >
+                                <TableCell className="px-1.5 py-0.5 font-mono text-[9px]">{t.serviceId}</TableCell>
+                                <TableCell className="px-1.5 py-0.5 font-mono text-[9px] max-w-[160px] truncate">{t.hostname}</TableCell>
+                                <TableCell className="px-1.5 py-0.5 truncate max-w-[100px]">{t.customerName}</TableCell>
+                                <TableCell className="px-1.5 py-0.5 text-right"><StatusBadge status={t.status} /></TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-1.5 text-[10px] text-success bg-success/5 rounded-lg px-3 py-3 justify-center">
+                      <Shield className="h-3.5 w-3.5" />
+                      <span className="font-medium">Tidak ada incident di regional ini</span>
+                    </div>
+                  )}
+                </div>
+              </ScrollArea>
             </>
           )}
-        </SheetContent>
-      </Sheet>
+
+          {/* Team Detail Sub-view */}
+          {selectedRegion && selectedTeam && !selectedIncident && (
+            <>
+              <div className="p-4 pb-3 border-b border-border/50 flex-shrink-0">
+                <button
+                  onClick={() => setSelectedTeam(null)}
+                  className="flex items-center gap-1 text-[10px] sm:text-xs text-primary hover:underline mb-2"
+                >
+                  ← Kembali ke {selectedRegion.region}
+                </button>
+                <DialogHeader>
+                  <DialogTitle className="text-sm sm:text-base flex items-center gap-2 pr-8">
+                    <Users className="h-4 w-4 text-primary flex-shrink-0" /> {selectedTeam.mitraName}
+                  </DialogTitle>
+                  <DialogDescription className="text-[10px] sm:text-xs">
+                    {selectedTeam.serpoType} · {selectedTeam.serpoName} · {selectedTeam.hostnames.length} OLT
+                  </DialogDescription>
+                </DialogHeader>
+              </div>
+              <ScrollArea className="flex-1 min-h-0">
+                <div className="p-4 space-y-4">
+                  {/* Team Info Cards */}
+                  <div className="grid grid-cols-2 gap-2">
+                    <Card className="p-3 bg-gradient-to-br from-primary/5 to-transparent border-primary/20">
+                      <div className="text-[9px] text-muted-foreground mb-0.5">Tipe Serpo</div>
+                      <div className="text-xs font-bold">{selectedTeam.serpoType}</div>
+                    </Card>
+                    <Card className="p-3 bg-gradient-to-br from-accent/5 to-transparent border-accent/20">
+                      <div className="text-[9px] text-muted-foreground mb-0.5">Nama Serpo</div>
+                      <div className="text-xs font-bold truncate">{selectedTeam.serpoName}</div>
+                    </Card>
+                    <Card className="p-3 bg-gradient-to-br from-secondary to-transparent">
+                      <div className="text-[9px] text-muted-foreground mb-0.5">Tim Member</div>
+                      <div className="text-xs font-bold">{selectedTeam.teamMember || "-"}</div>
+                    </Card>
+                    <Card className="p-3 bg-gradient-to-br from-warning/5 to-transparent border-warning/20">
+                      <div className="text-[9px] text-muted-foreground mb-0.5">Total OLT</div>
+                      <div className="text-xs font-bold">{selectedTeam.hostnames.length}</div>
+                    </Card>
+                  </div>
+
+                  {/* Hostname List */}
+                  <div>
+                    <h4 className="text-xs font-semibold mb-2 flex items-center gap-1.5">
+                      <Server className="h-3.5 w-3.5" /> Daftar OLT Hostname ({selectedTeam.hostnames.length})
+                    </h4>
+                    <div className="space-y-1">
+                      {selectedTeam.hostnames.map((h, i) => {
+                        const relatedIncidents = selectedRegion.incidentTickets.filter(
+                          t => t.hostname.trim().toUpperCase() === h.trim().toUpperCase()
+                        );
+                        return (
+                          <div key={i} className="flex items-center justify-between p-2 rounded-lg bg-muted/30 hover:bg-muted/60 transition-colors text-[10px] sm:text-xs">
+                            <div className="flex items-center gap-2 min-w-0">
+                              <Server className="h-3 w-3 text-muted-foreground flex-shrink-0" />
+                              <span className="font-mono truncate">{h}</span>
+                            </div>
+                            {relatedIncidents.length > 0 && (
+                              <Badge variant="destructive" className="text-[7px] sm:text-[8px] px-1.5 flex-shrink-0">
+                                {relatedIncidents.length} incident
+                              </Badge>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+              </ScrollArea>
+            </>
+          )}
+
+          {/* Incident Detail Sub-view */}
+          {selectedRegion && selectedIncident && (
+            <>
+              <div className="p-4 pb-3 border-b border-border/50 flex-shrink-0">
+                <button
+                  onClick={() => setSelectedIncident(null)}
+                  className="flex items-center gap-1 text-[10px] sm:text-xs text-primary hover:underline mb-2"
+                >
+                  ← Kembali ke {selectedRegion.region}
+                </button>
+                <DialogHeader>
+                  <DialogTitle className="text-sm sm:text-base flex items-center gap-2 pr-8">
+                    <AlertTriangle className="h-4 w-4 text-warning flex-shrink-0" /> Detail Incident
+                  </DialogTitle>
+                  <DialogDescription className="text-[10px] sm:text-xs">
+                    {selectedIncident.serviceId}
+                  </DialogDescription>
+                </DialogHeader>
+              </div>
+              <ScrollArea className="flex-1 min-h-0">
+                <div className="p-4 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-semibold">{selectedIncident.customerName}</span>
+                    <StatusBadge status={selectedIncident.status} />
+                  </div>
+                  <div className="space-y-2">
+                    {[
+                      { label: "Service ID", value: selectedIncident.serviceId, icon: "🆔" },
+                      { label: "Ticket ID", value: selectedIncident.ticketId, icon: "🎫" },
+                      { label: "Hostname", value: selectedIncident.hostname, icon: "📡" },
+                      { label: "FAT ID", value: selectedIncident.fatId, icon: "📍" },
+                      { label: "SN ONT", value: selectedIncident.snOnt, icon: "🔌" },
+                      { label: "SERPO", value: selectedIncident.serpo, icon: "🏢" },
+                      { label: "Kategori", value: selectedIncident.category, icon: "📂" },
+                      { label: "Kendala", value: selectedIncident.constraint, icon: "⚠️" },
+                      { label: "Hasil", value: selectedIncident.ticketResult, icon: "📋" },
+                      { label: "Dibuat", value: selectedIncident.createdAt ? new Date(selectedIncident.createdAt).toLocaleString("id-ID") : "-", icon: "📅" },
+                    ].map((field) => (
+                      <div key={field.label} className="flex items-start gap-2 p-2 rounded-lg bg-muted/30">
+                        <span className="text-xs flex-shrink-0">{field.icon}</span>
+                        <div className="min-w-0 flex-1">
+                          <div className="text-[9px] text-muted-foreground">{field.label}</div>
+                          <div className="text-[10px] sm:text-xs font-medium break-all">{field.value || "-"}</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </ScrollArea>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
