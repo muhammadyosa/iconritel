@@ -810,6 +810,8 @@ function PendingTicketsList({ pendingTickets, isLoading, updateTicket, deleteTic
   const [parsedPendingTickets, setParsedPendingTickets] = useState<ParsedPendingTicket[]>([]);
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
   const [detailOpen, setDetailOpen] = useState(false);
+  const [pendingSearchField, setPendingSearchField] = useState("all");
+  const [pendingSearchQuery, setPendingSearchQuery] = useState("");
   
   // User role for permission-based UI
   const { isAdmin, isReviewer } = useUserRole();
