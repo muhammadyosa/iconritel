@@ -789,9 +789,17 @@ function PendingTicketsList({ pendingTickets, isLoading, updateTicket, deleteTic
   const [detailOpen, setDetailOpen] = useState(false);
   const [pendingSearchField, setPendingSearchField] = useState("all");
   const [pendingSearchQuery, setPendingSearchQuery] = useState("");
+  const [regionalData, setRegionalData] = useState<RegionalTeamRecord[]>([]);
   
   // User role for permission-based UI
   const { isAdmin, isReviewer } = useUserRole();
+
+  // Load regional team data (same source as Regional Office)
+  useEffect(() => {
+    loadDefaultRegionalTeamData().then(setRegionalData).catch(() => {});
+  }, []);
+
+  const teamRegions = useMemo(() => buildTeamRegions(regionalData), [regionalData]);
 
   const handleUpdateStatus = async (id: string, newStatus: Ticket["status"]) => {
     try {
