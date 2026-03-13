@@ -352,10 +352,10 @@ export default function RegionalOfficeTab({ tickets }: RegionalOfficeTabProps) {
 
                   <CardContent className="p-2 xs:p-3 sm:p-4 space-y-2 xs:space-y-3">
                     {/* Key metrics row */}
-                    <div className="grid grid-cols-3 gap-2">
+                    <div className="grid grid-cols-3 gap-1 xs:gap-2">
                       <div className="text-center">
-                        <div className="text-[10px] text-muted-foreground">Mitra</div>
-                        <div className="text-sm sm:text-base font-bold">{r.totalMitra}</div>
+                        <div className="text-[9px] xs:text-[10px] text-muted-foreground">Mitra</div>
+                        <div className="text-xs xs:text-sm sm:text-base font-bold">{r.totalMitra}</div>
                         <div className="flex justify-center gap-1 mt-0.5">
                           <Badge variant="outline" className="text-[7px] sm:text-[8px] px-1 py-0 h-auto">R:{r.ritelMitra}</Badge>
                           <Badge variant="secondary" className="text-[7px] sm:text-[8px] px-1 py-0 h-auto">F:{r.feederMitra}</Badge>
