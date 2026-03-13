@@ -940,7 +940,7 @@ export default function RegionalOfficeTab({ tickets }: RegionalOfficeTabProps) {
                     );
                   })()}
                 </div>
-              </ScrollArea>
+              </div>
             </>
           )}
 
