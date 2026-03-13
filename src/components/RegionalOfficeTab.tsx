@@ -188,7 +188,7 @@ export default function RegionalOfficeTab({ tickets }: RegionalOfficeTabProps) {
   return (
     <div className="space-y-4">
       {/* Interactive Summary Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-3">
+      <div className="grid grid-cols-2 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-1.5 xs:gap-2 sm:gap-3">
         {summaryCards.map((card, idx) => (
           <motion.div
             key={card.type}
@@ -204,19 +204,19 @@ export default function RegionalOfficeTab({ tickets }: RegionalOfficeTabProps) {
               )}
               onClick={() => setActiveSummaryCard(card.type)}
             >
-              <CardContent className="p-3 sm:p-4">
+              <CardContent className="p-2 xs:p-2.5 sm:p-4">
                 <div className="flex items-start justify-between">
-                  <div className="space-y-1 min-w-0 flex-1">
-                    <p className="text-[10px] sm:text-xs text-muted-foreground font-medium flex items-center gap-1">
-                      <card.icon className="h-3 w-3 flex-shrink-0" />
+                  <div className="space-y-0.5 xs:space-y-1 min-w-0 flex-1">
+                    <p className="text-[9px] xs:text-[10px] sm:text-xs text-muted-foreground font-medium flex items-center gap-1">
+                      <card.icon className="h-2.5 xs:h-3 w-2.5 xs:w-3 flex-shrink-0" />
                       <span className="truncate">{card.label}</span>
                     </p>
-                    <p className="text-lg sm:text-2xl font-bold leading-none">{card.value}</p>
-                    <p className="text-[9px] sm:text-[10px] text-muted-foreground truncate">{card.sub}</p>
+                    <p className="text-base xs:text-lg sm:text-2xl font-bold leading-none">{card.value}</p>
+                    <p className="text-[8px] xs:text-[9px] sm:text-[10px] text-muted-foreground truncate">{card.sub}</p>
                   </div>
-                  <span className="text-lg sm:text-xl flex-shrink-0">{card.emoji}</span>
+                  <span className="text-base xs:text-lg sm:text-xl flex-shrink-0">{card.emoji}</span>
                 </div>
-                <ChevronRight className="absolute right-1.5 bottom-1.5 h-3 w-3 text-muted-foreground/40" />
+                <ChevronRight className="absolute right-1 bottom-1 h-2.5 w-2.5 xs:h-3 xs:w-3 text-muted-foreground/40" />
               </CardContent>
             </Card>
           </motion.div>
@@ -225,7 +225,7 @@ export default function RegionalOfficeTab({ tickets }: RegionalOfficeTabProps) {
 
       {/* Charts */}
       {regionalData.some(r => r.totalIncidents > 0) && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 sm:gap-3">
           {/* Bar Chart */}
           <Card>
             <CardHeader className="p-3 sm:p-4 pb-1">
@@ -239,17 +239,17 @@ export default function RegionalOfficeTab({ tickets }: RegionalOfficeTabProps) {
                   pending: { label: "Pending", color: "hsl(var(--warning))" },
                   critical: { label: "Critical", color: "hsl(var(--destructive))" },
                 } satisfies ChartConfig}
-                className="h-[280px] sm:h-[320px] w-full"
+                className="h-[220px] xs:h-[260px] sm:h-[320px] w-full"
               >
                 <BarChart
                   data={regionalData.filter(r => r.totalIncidents > 0).slice(0, 10)}
                   layout="vertical"
-                  margin={{ top: 5, right: 20, left: 5, bottom: 5 }}
+                  margin={{ top: 5, right: 10, left: 0, bottom: 5 }}
                   barCategoryGap="20%"
                 >
                   <CartesianGrid strokeDasharray="3 3" horizontal={false} opacity={0.15} />
-                  <XAxis type="number" tick={{ fontSize: 10 }} />
-                  <YAxis type="category" dataKey="region" width={100} tick={{ fontSize: 9 }} />
+                  <XAxis type="number" tick={{ fontSize: 9 }} />
+                  <YAxis type="category" dataKey="region" width={70} tick={{ fontSize: 8 }} />
                   <ChartTooltip content={<ChartTooltipContent />} />
                   <Bar dataKey="resolved" stackId="a" fill="hsl(var(--success))" name="Resolved" />
                   <Bar dataKey="pending" stackId="a" fill="hsl(var(--warning))" name="Pending" />
@@ -285,7 +285,7 @@ export default function RegionalOfficeTab({ tickets }: RegionalOfficeTabProps) {
                 };
                 return (
                   <div className="flex flex-col items-center">
-                    <ChartContainer config={pieConfig} className="h-[240px] sm:h-[260px] w-full max-w-[340px]">
+                    <ChartContainer config={pieConfig} className="h-[200px] xs:h-[230px] sm:h-[260px] w-full max-w-[340px]">
                       <PieChart>
                         <ChartTooltip content={<ChartTooltipContent nameKey="name" />} />
                         <Pie data={pieData} cx="50%" cy="50%" innerRadius={45} outerRadius={80} paddingAngle={3}
@@ -316,18 +316,18 @@ export default function RegionalOfficeTab({ tickets }: RegionalOfficeTabProps) {
 
       {/* Region Cards Grid */}
       <div>
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="text-sm sm:text-base font-semibold flex items-center gap-2">
+          <div className="flex flex-col xs:flex-row items-start xs:items-center justify-between gap-2 mb-3">
+          <h3 className="text-xs xs:text-sm sm:text-base font-semibold flex items-center gap-2">
             🗺 Regional Office ({regionalData.length})
           </h3>
-          <div className="flex items-center gap-2 max-w-[200px] sm:max-w-xs">
+          <div className="flex items-center gap-2 w-full xs:w-auto xs:max-w-[200px] sm:max-w-xs">
             <Search className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
             <Input placeholder="Cari region..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
-              className="h-7 sm:h-8 text-[10px] sm:text-xs" />
+              className="h-7 sm:h-8 text-[10px] sm:text-xs flex-1" />
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-3 gap-2 sm:gap-3">
           {filteredData.map((r, idx) => {
             const rate = r.totalIncidents > 0 ? Math.round((r.resolved / r.totalIncidents) * 100) : 0;
             return (
@@ -342,36 +342,36 @@ export default function RegionalOfficeTab({ tickets }: RegionalOfficeTabProps) {
                   onClick={() => setSelectedRegion(r)}
                 >
                   {/* Region header */}
-                  <div className="bg-gradient-to-r from-primary/8 to-transparent px-3 py-2 sm:px-4 sm:py-2.5 border-b border-border/50 flex items-center justify-between">
-                    <div className="flex items-center gap-2 min-w-0">
-                      <MapPin className="h-3.5 w-3.5 text-primary flex-shrink-0" />
-                      <span className="font-bold text-xs sm:text-sm truncate">{r.region}</span>
+                  <div className="bg-gradient-to-r from-primary/8 to-transparent px-2 py-1.5 xs:px-3 xs:py-2 sm:px-4 sm:py-2.5 border-b border-border/50 flex items-center justify-between">
+                    <div className="flex items-center gap-1.5 xs:gap-2 min-w-0">
+                      <MapPin className="h-3 w-3 xs:h-3.5 xs:w-3.5 text-primary flex-shrink-0" />
+                      <span className="font-bold text-[11px] xs:text-xs sm:text-sm truncate">{r.region}</span>
                     </div>
-                    <ChevronRight className="h-3.5 w-3.5 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0" />
+                    <ChevronRight className="h-3 w-3 xs:h-3.5 xs:w-3.5 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0" />
                   </div>
 
-                  <CardContent className="p-3 sm:p-4 space-y-3">
+                  <CardContent className="p-2 xs:p-3 sm:p-4 space-y-2 xs:space-y-3">
                     {/* Key metrics row */}
-                    <div className="grid grid-cols-3 gap-2">
+                    <div className="grid grid-cols-3 gap-1 xs:gap-2">
                       <div className="text-center">
-                        <div className="text-[10px] text-muted-foreground">Mitra</div>
-                        <div className="text-sm sm:text-base font-bold">{r.totalMitra}</div>
+                        <div className="text-[9px] xs:text-[10px] text-muted-foreground">Mitra</div>
+                        <div className="text-xs xs:text-sm sm:text-base font-bold">{r.totalMitra}</div>
                         <div className="flex justify-center gap-1 mt-0.5">
                           <Badge variant="outline" className="text-[7px] sm:text-[8px] px-1 py-0 h-auto">R:{r.ritelMitra}</Badge>
                           <Badge variant="secondary" className="text-[7px] sm:text-[8px] px-1 py-0 h-auto">F:{r.feederMitra}</Badge>
                         </div>
                       </div>
                       <div className="text-center">
-                        <div className="text-[10px] text-muted-foreground">OLT</div>
-                        <div className="text-sm sm:text-base font-bold">{r.totalHostnames}</div>
-                        <div className="text-[8px] text-muted-foreground mt-0.5">hostname</div>
+                        <div className="text-[9px] xs:text-[10px] text-muted-foreground">OLT</div>
+                        <div className="text-xs xs:text-sm sm:text-base font-bold">{r.totalHostnames}</div>
+                        <div className="text-[7px] xs:text-[8px] text-muted-foreground mt-0.5">hostname</div>
                       </div>
                       <div className="text-center">
-                        <div className="text-[10px] text-muted-foreground">Incident</div>
-                        <div className={cn("text-sm sm:text-base font-bold", r.totalIncidents > 0 ? "text-warning" : "text-success")}>
+                        <div className="text-[9px] xs:text-[10px] text-muted-foreground">Incident</div>
+                        <div className={cn("text-xs xs:text-sm sm:text-base font-bold", r.totalIncidents > 0 ? "text-warning" : "text-success")}>
                           {r.totalIncidents}
                         </div>
-                        <div className="text-[8px] text-muted-foreground mt-0.5">
+                        <div className="text-[7px] xs:text-[8px] text-muted-foreground mt-0.5">
                           {r.totalIncidents > 0 ? `${r.critical} critical` : "clean"}
                         </div>
                       </div>
@@ -418,7 +418,7 @@ export default function RegionalOfficeTab({ tickets }: RegionalOfficeTabProps) {
                         </span>
                         <span className="text-[8px] text-muted-foreground italic">scroll ↓</span>
                       </div>
-                      <ScrollArea className="h-[120px] sm:h-[140px] rounded-md border border-border/30 bg-muted/20">
+                      <ScrollArea className="h-[100px] xs:h-[120px] sm:h-[140px] rounded-md border border-border/30 bg-muted/20">
                         <div className="p-1.5 space-y-0.5">
                           {r.teams.map((t, tIdx) => {
                             const teamHostSet = new Set(t.hostnames.map(h => h.trim().toUpperCase()));
@@ -483,7 +483,7 @@ export default function RegionalOfficeTab({ tickets }: RegionalOfficeTabProps) {
 
       {/* Summary Card Drill-down Dialog */}
       <Dialog open={!!activeSummaryCard} onOpenChange={(open) => { if (!open) setActiveSummaryCard(null); }}>
-        <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
+        <DialogContent className="max-w-[95vw] sm:max-w-lg max-h-[85vh] overflow-y-auto p-3 sm:p-6">
           {activeSummaryCard === "region" && (
             <>
               <DialogHeader>
@@ -650,7 +650,7 @@ export default function RegionalOfficeTab({ tickets }: RegionalOfficeTabProps) {
 
       {/* Region Detail Dialog */}
       <Dialog open={!!selectedRegion} onOpenChange={(open) => { if (!open) { setSelectedRegion(null); setSelectedTeam(null); setSelectedIncident(null); } }}>
-        <DialogContent className="max-w-[95vw] sm:max-w-lg p-0 gap-0 max-h-[90vh] flex flex-col">
+        <DialogContent className="max-w-[98vw] xs:max-w-[95vw] sm:max-w-lg md:max-w-xl p-0 gap-0 max-h-[92vh] sm:max-h-[90vh] flex flex-col">
           {selectedRegion && !selectedTeam && !selectedIncident && (
             <>
               {/* Fixed Header */}
