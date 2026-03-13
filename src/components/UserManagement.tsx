@@ -449,7 +449,7 @@ export function UserManagement() {
                     <TableCell>
                       <Select
                         value={user.role}
-                        onValueChange={(value: "admin" | "noc" | "reviewer") =>
+                        onValueChange={(value: "admin" | "noc" | "reviewer" | "intern") =>
                           handleRoleChange(user.user_id, value)
                         }
                         disabled={updatingUserId === user.user_id}

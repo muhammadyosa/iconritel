@@ -115,7 +115,7 @@ export function AppSidebar() {
           {!collapsed && <SidebarGroupLabel className="px-3 text-xs">Menu</SidebarGroupLabel>}
           <SidebarGroupContent>
             <SidebarMenu className={`gap-0.5 ${collapsed ? "items-center px-0" : "px-2"}`}>
-              {menuItems.map((item) => {
+              {visibleMenuItems.map((item) => {
                 const showBadge = item.path === "/settings" && isAdmin && pendingCount > 0;
                 const badgeCount = pendingCount;
                 const badgeColor = "bg-destructive text-destructive-foreground";

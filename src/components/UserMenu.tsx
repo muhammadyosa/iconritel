@@ -75,6 +75,11 @@ export function UserMenu() {
               <Users className="h-4 w-4 text-amber-500" />
               <Badge variant="outline" className="text-xs border-amber-500/50 text-amber-600">Reviewer</Badge>
             </>
+          ) : isIntern ? (
+            <>
+              <User className="h-4 w-4 text-emerald-500" />
+              <Badge variant="outline" className="text-xs border-emerald-500/50 text-emerald-600">Intern</Badge>
+            </>
           ) : (
             <>
               <User className="h-4 w-4 text-muted-foreground" />
