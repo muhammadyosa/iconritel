@@ -797,7 +797,7 @@ export default function RegionalOfficeTab({ tickets }: RegionalOfficeTabProps) {
           )}
 
           {/* Team Detail Sub-view */}
-          {selectedRegion && selectedTeam && !selectedIncident && (
+          {selectedRegion && selectedTeam && !selectedIncident && !selectedHostname && (
             <>
               <div className="p-4 pb-3 border-b border-border/50 flex-shrink-0">
                 <button
