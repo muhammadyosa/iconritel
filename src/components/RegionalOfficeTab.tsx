@@ -757,10 +757,10 @@ export default function RegionalOfficeTab({ tickets }: RegionalOfficeTabProps) {
                       <h4 className="text-xs font-semibold mb-2 flex items-center gap-1.5">
                         <AlertTriangle className="h-3.5 w-3.5 text-warning" /> Incidents ({selectedRegion.incidentTickets.length})
                       </h4>
-                      <div className="overflow-x-auto">
+                      <div className="overflow-x-auto max-h-[40vh] overflow-y-auto rounded-md border border-border/30">
                         <Table className="text-[10px] sm:text-xs min-w-[460px]">
                           <TableHeader>
-                            <TableRow className="h-7 bg-muted/30 sticky top-0">
+                            <TableRow className="h-7 bg-muted/30 sticky top-0 z-10">
                               <TableHead className="px-1.5 py-1">Incident ID</TableHead>
                               <TableHead className="px-1.5 py-1">Hostname</TableHead>
                               <TableHead className="px-1.5 py-1">Pelanggan</TableHead>
