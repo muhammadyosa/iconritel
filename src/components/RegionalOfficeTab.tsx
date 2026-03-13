@@ -924,7 +924,6 @@ export default function RegionalOfficeTab({ tickets }: RegionalOfficeTabProps) {
                       { label: "Service ID", value: selectedIncident.serviceId, icon: "🆔" },
                       { label: "Hostname", value: selectedIncident.hostname, icon: "📡" },
                       { label: "FAT ID", value: selectedIncident.fatId, icon: "📍" },
-                      { label: "FAT ID", value: selectedIncident.fatId, icon: "📍" },
                       { label: "SN ONT", value: selectedIncident.snOnt, icon: "🔌" },
                       { label: "SERPO", value: selectedIncident.serpo, icon: "🏢" },
                       { label: "Kategori", value: selectedIncident.category, icon: "📂" },
