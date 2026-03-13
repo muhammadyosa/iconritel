@@ -894,7 +894,7 @@ function PendingTicketsList({ pendingTickets, isLoading, updateTicket, deleteTic
           description = parts.slice(2).join(" ");
         }
 
-        const { team, region } = extractTeam(description);
+        const { team, region } = extractTeam(description, teamRegions);
 
         parsedTickets.push({ 
           duration, 
