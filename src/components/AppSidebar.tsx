@@ -109,11 +109,9 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu className={`gap-0.5 ${collapsed ? "items-center px-0" : "px-2"}`}>
               {menuItems.map((item) => {
-                const showSettingsBadge = item.path === "/settings" && isAdmin && pendingCount > 0;
-                const showIncidentBadge = item.path === "/tickets" && activeIncidentCount > 0;
-                const badgeCount = showSettingsBadge ? pendingCount : showIncidentBadge ? activeIncidentCount : 0;
-                const showBadge = showSettingsBadge || showIncidentBadge;
-                const badgeColor = showIncidentBadge ? "bg-warning text-warning-foreground" : "bg-destructive text-destructive-foreground";
+                const showBadge = item.path === "/settings" && isAdmin && pendingCount > 0;
+                const badgeCount = pendingCount;
+                const badgeColor = "bg-destructive text-destructive-foreground";
                 return (
                   <SidebarMenuItem key={item.title} className={collapsed ? "w-full flex justify-center" : "w-full"}>
                     <SidebarMenuButton asChild className={collapsed ? "h-8 w-8 min-w-8 p-0 !justify-center" : "h-9 justify-start"}>
