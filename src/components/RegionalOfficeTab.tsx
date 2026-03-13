@@ -760,52 +760,129 @@ export default function RegionalOfficeTab({ tickets }: RegionalOfficeTabProps) {
               </div>
               <ScrollArea className="flex-1 min-h-0">
                 <div className="p-4 space-y-4">
-                  {/* Team Info Cards */}
-                  <div className="grid grid-cols-2 gap-2">
-                    <Card className="p-3 bg-gradient-to-br from-primary/5 to-transparent border-primary/20">
-                      <div className="text-[9px] text-muted-foreground mb-0.5">Tipe Serpo</div>
-                      <div className="text-xs font-bold">{selectedTeam.serpoType}</div>
-                    </Card>
-                    <Card className="p-3 bg-gradient-to-br from-accent/5 to-transparent border-accent/20">
-                      <div className="text-[9px] text-muted-foreground mb-0.5">Nama Serpo</div>
-                      <div className="text-xs font-bold truncate">{selectedTeam.serpoName}</div>
-                    </Card>
-                    <Card className="p-3 bg-gradient-to-br from-secondary to-transparent">
-                      <div className="text-[9px] text-muted-foreground mb-0.5">Tim Member</div>
-                      <div className="text-xs font-bold">{selectedTeam.teamMember || "-"}</div>
-                    </Card>
-                    <Card className="p-3 bg-gradient-to-br from-warning/5 to-transparent border-warning/20">
-                      <div className="text-[9px] text-muted-foreground mb-0.5">Total OLT</div>
-                      <div className="text-xs font-bold">{selectedTeam.hostnames.length}</div>
-                    </Card>
-                  </div>
+                  {(() => {
+                    const teamHostnamesSet = new Set(selectedTeam.hostnames.map(h => h.trim().toUpperCase()));
+                    const teamIncidents = selectedRegion.incidentTickets.filter(
+                      tk => teamHostnamesSet.has(tk.hostname.trim().toUpperCase())
+                    );
+                    const teamResolved = teamIncidents.filter(t => t.status === "Resolved").length;
+                    const teamCritical = teamIncidents.filter(t => t.status === "Critical").length;
+                    const teamPending = teamIncidents.length - teamResolved - teamCritical;
 
-                  {/* Hostname List */}
-                  <div>
-                    <h4 className="text-xs font-semibold mb-2 flex items-center gap-1.5">
-                      <Server className="h-3.5 w-3.5" /> Daftar OLT Hostname ({selectedTeam.hostnames.length})
-                    </h4>
-                    <div className="space-y-1">
-                      {selectedTeam.hostnames.map((h, i) => {
-                        const relatedIncidents = selectedRegion.incidentTickets.filter(
-                          t => t.hostname.trim().toUpperCase() === h.trim().toUpperCase()
-                        );
-                        return (
-                          <div key={i} className="flex items-center justify-between p-2 rounded-lg bg-muted/30 hover:bg-muted/60 transition-colors text-[10px] sm:text-xs">
-                            <div className="flex items-center gap-2 min-w-0">
-                              <Server className="h-3 w-3 text-muted-foreground flex-shrink-0" />
-                              <span className="font-mono truncate">{h}</span>
+                    return (
+                      <>
+                        {/* Team Info Cards */}
+                        <div className="grid grid-cols-2 gap-2">
+                          <Card className="p-3 bg-gradient-to-br from-primary/5 to-transparent border-primary/20">
+                            <div className="text-[9px] text-muted-foreground mb-0.5">Tipe Serpo</div>
+                            <div className="text-xs font-bold">{selectedTeam.serpoType}</div>
+                          </Card>
+                          <Card className="p-3 bg-gradient-to-br from-accent/5 to-transparent border-accent/20">
+                            <div className="text-[9px] text-muted-foreground mb-0.5">Nama Serpo</div>
+                            <div className="text-xs font-bold truncate">{selectedTeam.serpoName}</div>
+                          </Card>
+                          <Card className="p-3 bg-gradient-to-br from-secondary to-transparent">
+                            <div className="text-[9px] text-muted-foreground mb-0.5">Tim Member</div>
+                            <div className="text-xs font-bold">{selectedTeam.teamMember || "-"}</div>
+                          </Card>
+                          <Card className="p-3 bg-gradient-to-br from-warning/5 to-transparent border-warning/20">
+                            <div className="text-[9px] text-muted-foreground mb-0.5">Total OLT</div>
+                            <div className="text-xs font-bold">{selectedTeam.hostnames.length}</div>
+                          </Card>
+                        </div>
+
+                        {/* Incident Summary for this Mitra */}
+                        {teamIncidents.length > 0 && (
+                          <div className="rounded-lg border border-warning/20 bg-gradient-to-br from-warning/5 to-transparent p-3 space-y-2">
+                            <h4 className="text-xs font-semibold flex items-center gap-1.5">
+                              <AlertTriangle className="h-3.5 w-3.5 text-warning" />
+                              Incident Mitra ({teamIncidents.length})
+                            </h4>
+                            <div className="flex gap-1.5 flex-wrap">
+                              {teamResolved > 0 && <Badge variant="outline" className="text-[8px] px-1.5 py-0 h-auto border-success/30 text-success">✓ {teamResolved} Resolved</Badge>}
+                              {teamPending > 0 && <Badge variant="outline" className="text-[8px] px-1.5 py-0 h-auto border-warning/30 text-warning">◌ {teamPending} Pending</Badge>}
+                              {teamCritical > 0 && <Badge variant="outline" className="text-[8px] px-1.5 py-0 h-auto border-destructive/30 text-destructive">✕ {teamCritical} Critical</Badge>}
                             </div>
-                            {relatedIncidents.length > 0 && (
-                              <Badge variant="destructive" className="text-[7px] sm:text-[8px] px-1.5 flex-shrink-0">
-                                {relatedIncidents.length} incident
-                              </Badge>
-                            )}
                           </div>
-                        );
-                      })}
-                    </div>
-                  </div>
+                        )}
+
+                        {/* Hostname List */}
+                        <div>
+                          <h4 className="text-xs font-semibold mb-2 flex items-center gap-1.5">
+                            <Server className="h-3.5 w-3.5" /> Daftar OLT Hostname ({selectedTeam.hostnames.length})
+                          </h4>
+                          <div className="space-y-1">
+                            {selectedTeam.hostnames.map((h, i) => {
+                              const relatedIncidents = selectedRegion.incidentTickets.filter(
+                                t => t.hostname.trim().toUpperCase() === h.trim().toUpperCase()
+                              );
+                              return (
+                                <div
+                                  key={i}
+                                  className={cn(
+                                    "flex items-center justify-between p-2 rounded-lg bg-muted/30 transition-colors text-[10px] sm:text-xs",
+                                    relatedIncidents.length > 0 ? "hover:bg-destructive/10 cursor-pointer border border-transparent hover:border-destructive/20" : "hover:bg-muted/60"
+                                  )}
+                                  onClick={() => {
+                                    if (relatedIncidents.length === 1) {
+                                      setSelectedIncident(relatedIncidents[0]);
+                                    }
+                                  }}
+                                >
+                                  <div className="flex items-center gap-2 min-w-0">
+                                    <Server className={cn("h-3 w-3 flex-shrink-0", relatedIncidents.length > 0 ? "text-warning" : "text-muted-foreground")} />
+                                    <span className="font-mono truncate">{h}</span>
+                                  </div>
+                                  {relatedIncidents.length > 0 ? (
+                                    <Badge variant="destructive" className="text-[7px] sm:text-[8px] px-1.5 flex-shrink-0">
+                                      {relatedIncidents.length} incident
+                                    </Badge>
+                                  ) : (
+                                    <Badge variant="outline" className="text-[7px] sm:text-[8px] px-1.5 flex-shrink-0 text-success border-success/30">✓</Badge>
+                                  )}
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+
+                        {/* Related Incidents Table */}
+                        {teamIncidents.length > 0 && (
+                          <div>
+                            <h4 className="text-xs font-semibold mb-2 flex items-center gap-1.5">
+                              <Activity className="h-3.5 w-3.5 text-warning" /> Detail Incident ({teamIncidents.length})
+                            </h4>
+                            <div className="overflow-x-auto">
+                              <Table className="text-[10px] sm:text-xs min-w-[400px]">
+                                <TableHeader>
+                                  <TableRow className="h-7 bg-muted/30">
+                                    <TableHead className="px-1.5 py-1">Service ID</TableHead>
+                                    <TableHead className="px-1.5 py-1">Hostname</TableHead>
+                                    <TableHead className="px-1.5 py-1">Kendala</TableHead>
+                                    <TableHead className="px-1.5 py-1 text-right">Status</TableHead>
+                                  </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                  {teamIncidents.map((t) => (
+                                    <TableRow
+                                      key={t.id}
+                                      className="h-8 cursor-pointer hover:bg-primary/5 transition-colors"
+                                      onClick={() => setSelectedIncident(t)}
+                                    >
+                                      <TableCell className="px-1.5 py-0.5 font-mono text-[9px]">{t.serviceId}</TableCell>
+                                      <TableCell className="px-1.5 py-0.5 font-mono text-[9px] max-w-[120px] truncate">{t.hostname}</TableCell>
+                                      <TableCell className="px-1.5 py-0.5 truncate max-w-[100px]">{t.constraint || "-"}</TableCell>
+                                      <TableCell className="px-1.5 py-0.5 text-right"><StatusBadge status={t.status} /></TableCell>
+                                    </TableRow>
+                                  ))}
+                                </TableBody>
+                              </Table>
+                            </div>
+                          </div>
+                        )}
+                      </>
+                    );
+                  })()}
                 </div>
               </ScrollArea>
             </>
