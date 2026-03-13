@@ -696,7 +696,7 @@ export default function RegionalOfficeTab({ tickets }: RegionalOfficeTabProps) {
               </div>
 
               {/* Scrollable Content */}
-              <ScrollArea className="flex-1 min-h-0">
+              <div className="flex-1 min-h-0 overflow-y-auto">
                 <div className="p-4 space-y-4">
                   {/* Teams List */}
                   <div>
@@ -791,7 +791,7 @@ export default function RegionalOfficeTab({ tickets }: RegionalOfficeTabProps) {
                     </div>
                   )}
                 </div>
-              </ScrollArea>
+              </div>
             </>
           )}
 
@@ -814,7 +814,7 @@ export default function RegionalOfficeTab({ tickets }: RegionalOfficeTabProps) {
                   </DialogDescription>
                 </DialogHeader>
               </div>
-              <ScrollArea className="flex-1 min-h-0">
+              <div className="flex-1 min-h-0 overflow-y-auto">
                 <div className="p-4 space-y-4">
                   {(() => {
                     const teamHostnamesSet = new Set(selectedTeam.hostnames.map(h => h.trim().toUpperCase()));
@@ -940,7 +940,7 @@ export default function RegionalOfficeTab({ tickets }: RegionalOfficeTabProps) {
                     );
                   })()}
                 </div>
-              </ScrollArea>
+              </div>
             </>
           )}
 
@@ -969,7 +969,7 @@ export default function RegionalOfficeTab({ tickets }: RegionalOfficeTabProps) {
                   </DialogDescription>
                 </DialogHeader>
               </div>
-              <ScrollArea className="flex-1 min-h-0">
+              <div className="flex-1 min-h-0 overflow-y-auto">
                 <div className="p-4 space-y-3">
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-semibold">{selectedIncident.customerName}</span>
@@ -997,7 +997,7 @@ export default function RegionalOfficeTab({ tickets }: RegionalOfficeTabProps) {
                     ))}
                   </div>
                 </div>
-              </ScrollArea>
+              </div>
             </>
           )}
         </DialogContent>
