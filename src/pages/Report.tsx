@@ -744,11 +744,11 @@ interface ParsedPendingTicket {
   region: string;
 }
 
-// Function to extract team from description
-function extractTeam(description: string): { team: string; region: string } {
+// Function to extract team from description using dynamic team regions
+function extractTeam(description: string, teamRegions: Record<string, string[]>): { team: string; region: string } {
   const normalizedDesc = description.toUpperCase();
   
-  for (const [region, teams] of Object.entries(TEAM_REGIONS)) {
+  for (const [region, teams] of Object.entries(teamRegions)) {
     for (const team of teams) {
       if (normalizedDesc.includes(team.toUpperCase())) {
         return { team, region };
