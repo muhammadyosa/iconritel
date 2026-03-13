@@ -359,73 +359,81 @@ export function UserManagement() {
             <Table>
               <TableHeader className="sticky top-0 z-10 bg-background shadow-sm">
                 <TableRow>
-                  <TableHead className="w-[50px]"></TableHead>
-                  <TableHead>User</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead className="w-[90px]">Status</TableHead>
-                  <TableHead className="w-[120px]">Role</TableHead>
-                  <TableHead className="w-[150px]">
+                  <TableHead className="w-10 p-2"></TableHead>
+                  <TableHead className="p-2">User</TableHead>
+                  <TableHead className="p-2 w-[80px]">Status</TableHead>
+                  <TableHead className="p-2 w-[100px]">Role</TableHead>
+                  <TableHead className="p-2 w-[110px]">
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="h-auto p-0 font-medium hover:bg-transparent"
+                      className="h-auto p-0 font-medium hover:bg-transparent text-xs"
                       onClick={toggleSort}
                     >
-                      Last Online
+                      Online
                       {sortOrder === null && <ArrowUpDown className="ml-1 h-3 w-3" />}
                       {sortOrder === "desc" && <ArrowDown className="ml-1 h-3 w-3" />}
                       {sortOrder === "asc" && <ArrowUp className="ml-1 h-3 w-3" />}
                     </Button>
                   </TableHead>
-                  <TableHead className="w-[200px]">
-                    <div className="flex items-center gap-1">
+                  <TableHead className="p-2 hidden lg:table-cell">
+                    <div className="flex items-center gap-1 text-xs">
                       <Activity className="h-3 w-3" />
                       Last Action
                     </div>
                   </TableHead>
-                  <TableHead className="w-[100px]">Bergabung</TableHead>
+                  <TableHead className="p-2 hidden xl:table-cell w-[90px] text-xs">Bergabung</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {sortedUsers.map((user) => (
                   <TableRow key={user.id}>
-                    <TableCell>
+                    <TableCell className="p-2">
                       <div className="relative">
-                        <Avatar className="h-8 w-8">
+                        <Avatar className="h-7 w-7">
                           <AvatarImage src={user.avatar_url || undefined} />
-                          <AvatarFallback className="text-xs">
+                          <AvatarFallback className="text-[10px]">
                             {getInitials(user.display_name, user.email)}
                           </AvatarFallback>
                         </Avatar>
                         {isUserOnline(user.last_online) && (
-                          <span className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full bg-green-500 border-2 border-background" />
+                          <span className="absolute bottom-0 right-0 h-2 w-2 rounded-full bg-green-500 border-2 border-background" />
                         )}
                       </div>
                     </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <span className="font-medium text-sm">
-                          {user.display_name || "—"}
-                        </span>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-6 w-6"
-                          onClick={() => handleEditUser(user)}
-                          title="Edit username"
-                        >
-                          <Pencil className="h-3 w-3" />
-                        </Button>
+                    <TableCell className="p-2">
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-1">
+                          <span className="font-medium text-xs truncate">
+                            {user.display_name || "—"}
+                          </span>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-5 w-5 flex-shrink-0"
+                            onClick={() => handleEditUser(user)}
+                            title="Edit username"
+                          >
+                            <Pencil className="h-2.5 w-2.5" />
+                          </Button>
+                        </div>
+                        <p className="text-[11px] text-muted-foreground truncate">{user.email}</p>
+                        {/* Show last action inline on smaller screens */}
+                        <div className="lg:hidden mt-0.5">
+                          {user.lastAction ? (
+                            <p className="text-[10px] text-muted-foreground truncate">
+                              {getActionLabel(user.lastAction.action)}
+                              {user.lastAction.detail && ` · ${user.lastAction.detail}`}
+                            </p>
+                          ) : null}
+                        </div>
                       </div>
                     </TableCell>
-                    <TableCell className="text-sm text-muted-foreground">
-                      {user.email}
-                    </TableCell>
-                    <TableCell>
+                    <TableCell className="p-2">
                       <Button
                         variant="ghost"
                         size="sm"
-                        className={`h-7 px-2 text-xs gap-1 ${
+                        className={`h-6 px-1.5 text-[11px] gap-0.5 ${
                           user.is_approved
                             ? "text-green-600 hover:text-red-600"
                             : "text-red-600 hover:text-green-600"
@@ -434,19 +442,14 @@ export function UserManagement() {
                         title={user.is_approved ? "Cabut akses" : "Setujui user"}
                       >
                         {user.is_approved ? (
-                          <>
-                            <CheckCircle2 className="h-3.5 w-3.5" />
-                            Approved
-                          </>
+                          <CheckCircle2 className="h-3.5 w-3.5" />
                         ) : (
-                          <>
-                            <XCircle className="h-3.5 w-3.5" />
-                            Pending
-                          </>
+                          <XCircle className="h-3.5 w-3.5" />
                         )}
+                        <span className="hidden sm:inline">{user.is_approved ? "OK" : "No"}</span>
                       </Button>
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="p-2">
                       <Select
                         value={user.role}
                         onValueChange={(value: "admin" | "noc" | "reviewer" | "intern") =>
@@ -454,34 +457,34 @@ export function UserManagement() {
                         }
                         disabled={updatingUserId === user.user_id}
                       >
-                        <SelectTrigger className="w-[110px] h-8">
+                        <SelectTrigger className="w-[90px] h-7 text-xs">
                           {updatingUserId === user.user_id ? (
-                            <Loader2 className="h-4 w-4 animate-spin" />
+                            <Loader2 className="h-3 w-3 animate-spin" />
                           ) : (
                             <SelectValue />
                           )}
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="admin">
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-1.5 text-xs">
                               <Shield className="h-3 w-3 text-primary" />
                               Admin
                             </div>
                           </SelectItem>
                           <SelectItem value="noc">
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-1.5 text-xs">
                               <User className="h-3 w-3 text-muted-foreground" />
                               NOC
                             </div>
                           </SelectItem>
                           <SelectItem value="reviewer">
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-1.5 text-xs">
                               <Users className="h-3 w-3 text-amber-500" />
                               Reviewer
                             </div>
                           </SelectItem>
                           <SelectItem value="intern">
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-1.5 text-xs">
                               <User className="h-3 w-3 text-emerald-500" />
                               Intern
                             </div>
@@ -489,35 +492,34 @@ export function UserManagement() {
                         </SelectContent>
                       </Select>
                     </TableCell>
-                    <TableCell className="text-xs text-muted-foreground">
+                    <TableCell className="p-2 text-xs text-muted-foreground">
                       {user.last_online ? (
                         isUserOnline(user.last_online) ? (
-                          <Badge variant="outline" className="bg-green-500/10 text-green-600 border-green-500/30">
-                            <span className="h-1.5 w-1.5 rounded-full bg-green-500 mr-1.5 animate-pulse" />
+                          <Badge variant="outline" className="bg-green-500/10 text-green-600 border-green-500/30 text-[10px] px-1.5 py-0">
+                            <span className="h-1.5 w-1.5 rounded-full bg-green-500 mr-1 animate-pulse" />
                             Online
                           </Badge>
                         ) : (
-                          <div className="flex items-center gap-1">
-                            <Clock className="h-3 w-3" />
+                          <span className="text-[11px]">
                             {formatLastOnline(user.last_online)}
-                          </div>
+                          </span>
                         )
                       ) : (
                         <span className="text-muted-foreground/50">—</span>
                       )}
                     </TableCell>
-                    <TableCell className="text-xs">
+                    <TableCell className="p-2 text-xs hidden lg:table-cell">
                       {user.lastAction ? (
-                        <div className="space-y-0.5">
-                          <div className="font-medium text-foreground">
+                        <div className="space-y-0.5 min-w-0">
+                          <div className="font-medium text-foreground text-[11px]">
                             {getActionLabel(user.lastAction.action)}
                           </div>
                           {user.lastAction.detail && (
-                            <div className="text-muted-foreground truncate max-w-[180px]" title={user.lastAction.detail}>
+                            <div className="text-muted-foreground truncate max-w-[150px] text-[10px]" title={user.lastAction.detail}>
                               {user.lastAction.detail}
                             </div>
                           )}
-                          <div className="text-muted-foreground/70">
+                          <div className="text-muted-foreground/70 text-[10px]">
                             {formatLastOnline(user.lastAction.created_at)}
                           </div>
                         </div>
@@ -525,11 +527,11 @@ export function UserManagement() {
                         <span className="text-muted-foreground/50">—</span>
                       )}
                     </TableCell>
-                    <TableCell className="text-xs text-muted-foreground">
+                    <TableCell className="p-2 text-[11px] text-muted-foreground hidden xl:table-cell">
                       {new Date(user.created_at).toLocaleDateString("id-ID", {
                         day: "numeric",
                         month: "short",
-                        year: "numeric",
+                        year: "2-digit",
                       })}
                     </TableCell>
                   </TableRow>
