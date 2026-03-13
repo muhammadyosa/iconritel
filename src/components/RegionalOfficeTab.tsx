@@ -883,6 +883,8 @@ export default function RegionalOfficeTab({ tickets }: RegionalOfficeTabProps) {
                                   onClick={() => {
                                     if (relatedIncidents.length === 1) {
                                       setSelectedIncident(relatedIncidents[0]);
+                                    } else if (relatedIncidents.length > 1) {
+                                      setSelectedHostname({ name: h, incidents: relatedIncidents });
                                     }
                                   }}
                                 >
