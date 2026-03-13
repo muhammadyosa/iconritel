@@ -1,5 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useCloudTickets } from "@/hooks/useCloudTickets";
+import { loadDefaultRegionalTeamData } from "@/lib/defaultRegionalData";
+import { RegionalTeamRecord } from "@/types/regionalTeam";
 import { useRealtimeDate } from "@/hooks/useRealtimeDate";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -717,44 +719,19 @@ UPDATE : `}
   );
 };
 
-// Team definitions by region
-const TEAM_REGIONS: Record<string, string[]> = {
-  LAMPUNG: [
-    "SIB PESAWARAN", "SIB PRINGSEWU", "GSP TANGGAMUS", "INTERNAL LAMPUNG",
-    "TTM LAMPUNG TENGAH", "SIB BANDAR LAMPUNG", "SERPO TEGINENENG", "SERPO SUTAMI",
-    "SERPO RAJABASA", "SERPO PRINGSEWU", "SERPO MENGGALA", "SERPO RUMBIA",
-    "SERPO KOTA BUMI", "SERPO KALIANDA", "SERPO PAHAWANG"
-  ],
-  SUMSEL: [
-    "REG7 PALEMBANG 1", "REG7 PALEMBANG 2", "REG7 PALEMBANG 3", "INTERNAL SUMSEL",
-    "IKR OKU TIMUR", "TTM INDRALAYA", "INTERNAL LAHAT", "GSP LUBUK LINGGAU",
-    "GSP PRABU PANGKUL", "SIB BANYUASIN", "SIB MUARA ENIM - TJ ENIM", "SIB PAGARALAM",
-    "SIB LAHAT", "SIB EMPAT LAWANG", "SERPO PALEMBANG KOTA", "SERPO LAHAT",
-    "SERPO PAGAR ALAM", "SERPO BUKIT ASAM", "SERPO PRABUMULIH", "SERPO LINGGAU",
-    "SERPO MARTAPURA", "SERPO SEKAYU", "SERPO TUGUMULYO", "SERPO BATURAJA",
-    "SERPO SUNGAI LILIN", "SERPO BETUNG", "SERPO KAYU AGUNG", "SERPO INDRALAYA",
-    "SERPO TEBING", "SERPO BELITANG", "SERPO DEMANG", "SERPO MASKAREBET", "SERPO JAKABARING"
-  ],
-  JAMBI: [
-    "INTERNAL JAMBI", "TTM SAROLANGUN", "TTM MERANGIN", "GSP MUARA BULIAN",
-    "GSP JAMBI 2", "GSP SUNGAI PENUH", "GSP TEBO", "SERPO BUNGO",
-    "SERPO PAYOSELINCAH", "SERPO JAMBI KOTA", "SERPO SAROLANGUN",
-    "SERPO MUARA BULIAN", "SERPO BANGKO", "SERPO SUNGAI PENUH",
-    "SERPO TEBO", "SERPO KUALA TUNGKAL"
-  ],
-  BENGKULU: [
-    "GSP BENGKULU 1", "GSP BENGKULU 2", "SIB LEBONG", "TTM KAUR BINTUHAN",
-    "SIB CURUP", "GSP MANNA-KAUR", "GSP MUKO-MUKO", "GSP BENTENG-MUARABANGKAHULU",
-    "SERPO SUKAMERINDU", "SERPO ARGA MAKMUR", "SERPO MANNA", "SERPO PEKALONGAN",
-    "SERPO MUKO-MUKO", "SERPO KAUR"
-  ],
-  BANGKA: [
-    "BANGKA REG 7", "TTM SUNGAI LIAT", "SIB BELITUNG", "SIB BANGKA BARAT",
-    "BHMA MUNTOK", "BHMA TOBOALI", "TTM TOBOALI", "SERPO KOBA (Tarapti)",
-    "SERPO PANGKAL PINANG", "SERPO KOBA", "SERPO KELAPA", "SERPO MANGGAR",
-    "SERPO BELITUNG", "SERPO SUNGAI LIAT"
-  ],
-};
+// Dynamic team regions - built from RegionalTeamRecord data
+function buildTeamRegions(records: RegionalTeamRecord[]): Record<string, string[]> {
+  const map: Record<string, Set<string>> = {};
+  for (const r of records) {
+    if (!map[r.region]) map[r.region] = new Set();
+    map[r.region].add(r.mitraName);
+  }
+  const result: Record<string, string[]> = {};
+  for (const [region, set] of Object.entries(map)) {
+    result[region] = Array.from(set).sort();
+  }
+  return result;
+}
 
 // Interface for parsed pending ticket
 interface ParsedPendingTicket {
@@ -767,11 +744,11 @@ interface ParsedPendingTicket {
   region: string;
 }
 
-// Function to extract team from description
-function extractTeam(description: string): { team: string; region: string } {
+// Function to extract team from description using dynamic team regions
+function extractTeam(description: string, teamRegions: Record<string, string[]>): { team: string; region: string } {
   const normalizedDesc = description.toUpperCase();
   
-  for (const [region, teams] of Object.entries(TEAM_REGIONS)) {
+  for (const [region, teams] of Object.entries(teamRegions)) {
     for (const team of teams) {
       if (normalizedDesc.includes(team.toUpperCase())) {
         return { team, region };
@@ -812,9 +789,17 @@ function PendingTicketsList({ pendingTickets, isLoading, updateTicket, deleteTic
   const [detailOpen, setDetailOpen] = useState(false);
   const [pendingSearchField, setPendingSearchField] = useState("all");
   const [pendingSearchQuery, setPendingSearchQuery] = useState("");
+  const [regionalData, setRegionalData] = useState<RegionalTeamRecord[]>([]);
   
   // User role for permission-based UI
   const { isAdmin, isReviewer } = useUserRole();
+
+  // Load regional team data (same source as Regional Office)
+  useEffect(() => {
+    loadDefaultRegionalTeamData().then(setRegionalData).catch(() => {});
+  }, []);
+
+  const teamRegions = useMemo(() => buildTeamRegions(regionalData), [regionalData]);
 
   const handleUpdateStatus = async (id: string, newStatus: Ticket["status"]) => {
     try {
@@ -909,7 +894,7 @@ function PendingTicketsList({ pendingTickets, isLoading, updateTicket, deleteTic
           description = parts.slice(2).join(" ");
         }
 
-        const { team, region } = extractTeam(description);
+        const { team, region } = extractTeam(description, teamRegions);
 
         parsedTickets.push({ 
           duration, 
@@ -1109,31 +1094,21 @@ Contoh:
             </div>
           </div>
 
-          {/* Team Reference */}
+          {/* Team Reference - dynamic from Regional data */}
           <div className="border rounded-lg p-3 bg-muted/30">
-            <p className="text-xs font-medium mb-2">🗺️ Daftar Tim per Region:</p>
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-2 text-[10px]">
-              <div>
-                <span className="font-semibold text-primary">LAMPUNG:</span>
-                <span className="text-muted-foreground"> SIB PESAWARAN, TTM LAMPUNG TENGAH, dll</span>
+            <p className="text-xs font-medium mb-2">🗺️ Daftar Tim per Region ({Object.keys(teamRegions).length} wilayah):</p>
+            {Object.keys(teamRegions).length === 0 ? (
+              <p className="text-[10px] text-muted-foreground">Belum ada data regional. Import data dari Settings.</p>
+            ) : (
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2 text-[10px]">
+                {Object.entries(teamRegions).sort(([a], [b]) => a.localeCompare(b)).map(([region, teams]) => (
+                  <div key={region}>
+                    <span className="font-semibold text-primary">{region}:</span>
+                    <span className="text-muted-foreground"> {teams.slice(0, 3).join(", ")}{teams.length > 3 ? `, +${teams.length - 3} lainnya` : ""}</span>
+                  </div>
+                ))}
               </div>
-              <div>
-                <span className="font-semibold text-primary">SUMSEL:</span>
-                <span className="text-muted-foreground"> REG7 PALEMBANG, SIB BANYUASIN, dll</span>
-              </div>
-              <div>
-                <span className="font-semibold text-primary">JAMBI:</span>
-                <span className="text-muted-foreground"> INTERNAL JAMBI, GSP TEBO, dll</span>
-              </div>
-              <div>
-                <span className="font-semibold text-primary">BENGKULU:</span>
-                <span className="text-muted-foreground"> GSP BENGKULU, SIB CURUP, dll</span>
-              </div>
-              <div>
-                <span className="font-semibold text-primary">BANGKA:</span>
-                <span className="text-muted-foreground"> BANGKA REG 7, SIB BELITUNG, dll</span>
-              </div>
-            </div>
+            )}
           </div>
         </CardContent>
       </Card>
