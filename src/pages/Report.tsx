@@ -103,6 +103,11 @@ const Report = () => {
     getFormattedReports 
   } = useCloudShiftReports();
   
+  // Cloud tickets for pending count badge
+  const { tickets: allCloudTickets, isLoading: isLoadingTickets, updateTicket, deleteTicket } = useCloudTickets();
+  const pendingCloudTickets = allCloudTickets.filter(t => t.status === "Pending");
+  const pendingCount = pendingCloudTickets.length;
+
   // User role for permission-based UI
   const { isAdmin } = useUserRole();
   
