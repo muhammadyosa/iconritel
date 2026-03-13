@@ -658,22 +658,37 @@ export default function RegionalOfficeTab({ tickets }: RegionalOfficeTabProps) {
                           </TableRow>
                         </TableHeader>
                         <TableBody>
-                          {selectedRegion.teams.map((t, idx) => (
-                            <TableRow
-                              key={`${t.mitraName}-${idx}`}
-                              className="h-8 cursor-pointer hover:bg-primary/5 transition-colors"
-                              onClick={() => setSelectedTeam(t)}
-                            >
-                              <TableCell className="px-1.5 py-0.5">
-                                <Badge variant={t.serpoType === "RITEL" ? "default" : "secondary"} className="text-[7px] sm:text-[8px] px-1.5">
-                                  {t.serpoType}
-                                </Badge>
-                              </TableCell>
-                              <TableCell className="px-1.5 py-0.5 font-medium">{t.mitraName}</TableCell>
-                              <TableCell className="px-1.5 py-0.5 text-center font-bold">{t.hostnames.length}</TableCell>
-                              <TableCell className="px-1.5 py-0.5">{t.teamMember || "-"}</TableCell>
-                            </TableRow>
-                          ))}
+                          {selectedRegion.teams.map((t, idx) => {
+                            const teamHostnamesSet = new Set(t.hostnames.map(h => h.trim().toUpperCase()));
+                            const teamIncidents = selectedRegion.incidentTickets.filter(
+                              tk => teamHostnamesSet.has(tk.hostname.trim().toUpperCase())
+                            );
+                            return (
+                              <TableRow
+                                key={`${t.mitraName}-${idx}`}
+                                className="h-8 cursor-pointer hover:bg-primary/5 transition-colors"
+                                onClick={() => setSelectedTeam(t)}
+                              >
+                                <TableCell className="px-1.5 py-0.5">
+                                  <Badge variant={t.serpoType === "RITEL" ? "default" : "secondary"} className="text-[7px] sm:text-[8px] px-1.5">
+                                    {t.serpoType}
+                                  </Badge>
+                                </TableCell>
+                                <TableCell className="px-1.5 py-0.5 font-medium">{t.mitraName}</TableCell>
+                                <TableCell className="px-1.5 py-0.5 text-center font-bold">{t.hostnames.length}</TableCell>
+                                <TableCell className="px-1.5 py-0.5">{t.teamMember || "-"}</TableCell>
+                                <TableCell className="px-1.5 py-0.5 text-right">
+                                  {teamIncidents.length > 0 ? (
+                                    <Badge variant="destructive" className="text-[7px] sm:text-[8px] px-1.5">
+                                      {teamIncidents.length}
+                                    </Badge>
+                                  ) : (
+                                    <Badge variant="outline" className="text-[7px] sm:text-[8px] px-1.5 text-success border-success/30">✓</Badge>
+                                  )}
+                                </TableCell>
+                              </TableRow>
+                            );
+                          })}
                         </TableBody>
                       </Table>
                     </div>
