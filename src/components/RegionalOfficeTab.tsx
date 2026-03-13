@@ -285,7 +285,7 @@ export default function RegionalOfficeTab({ tickets }: RegionalOfficeTabProps) {
                 };
                 return (
                   <div className="flex flex-col items-center">
-                    <ChartContainer config={pieConfig} className="h-[240px] sm:h-[260px] w-full max-w-[340px]">
+                    <ChartContainer config={pieConfig} className="h-[200px] xs:h-[230px] sm:h-[260px] w-full max-w-[340px]">
                       <PieChart>
                         <ChartTooltip content={<ChartTooltipContent nameKey="name" />} />
                         <Pie data={pieData} cx="50%" cy="50%" innerRadius={45} outerRadius={80} paddingAngle={3}
