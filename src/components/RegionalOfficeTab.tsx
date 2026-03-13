@@ -483,7 +483,7 @@ export default function RegionalOfficeTab({ tickets }: RegionalOfficeTabProps) {
 
       {/* Summary Card Drill-down Dialog */}
       <Dialog open={!!activeSummaryCard} onOpenChange={(open) => { if (!open) setActiveSummaryCard(null); }}>
-        <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
+        <DialogContent className="max-w-[95vw] sm:max-w-lg max-h-[85vh] overflow-y-auto p-3 sm:p-6">
           {activeSummaryCard === "region" && (
             <>
               <DialogHeader>
