@@ -362,16 +362,16 @@ export default function RegionalOfficeTab({ tickets }: RegionalOfficeTabProps) {
                         </div>
                       </div>
                       <div className="text-center">
-                        <div className="text-[10px] text-muted-foreground">OLT</div>
-                        <div className="text-sm sm:text-base font-bold">{r.totalHostnames}</div>
-                        <div className="text-[8px] text-muted-foreground mt-0.5">hostname</div>
+                        <div className="text-[9px] xs:text-[10px] text-muted-foreground">OLT</div>
+                        <div className="text-xs xs:text-sm sm:text-base font-bold">{r.totalHostnames}</div>
+                        <div className="text-[7px] xs:text-[8px] text-muted-foreground mt-0.5">hostname</div>
                       </div>
                       <div className="text-center">
-                        <div className="text-[10px] text-muted-foreground">Incident</div>
-                        <div className={cn("text-sm sm:text-base font-bold", r.totalIncidents > 0 ? "text-warning" : "text-success")}>
+                        <div className="text-[9px] xs:text-[10px] text-muted-foreground">Incident</div>
+                        <div className={cn("text-xs xs:text-sm sm:text-base font-bold", r.totalIncidents > 0 ? "text-warning" : "text-success")}>
                           {r.totalIncidents}
                         </div>
-                        <div className="text-[8px] text-muted-foreground mt-0.5">
+                        <div className="text-[7px] xs:text-[8px] text-muted-foreground mt-0.5">
                           {r.totalIncidents > 0 ? `${r.critical} critical` : "clean"}
                         </div>
                       </div>
