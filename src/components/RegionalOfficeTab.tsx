@@ -650,7 +650,7 @@ export default function RegionalOfficeTab({ tickets }: RegionalOfficeTabProps) {
       </Dialog>
 
       {/* Region Detail Dialog */}
-      <Dialog open={!!selectedRegion} onOpenChange={(open) => { if (!open) { setSelectedRegion(null); setSelectedTeam(null); setSelectedIncident(null); } }}>
+      <Dialog open={!!selectedRegion} onOpenChange={(open) => { if (!open) { setSelectedRegion(null); setSelectedTeam(null); setSelectedIncident(null); setSelectedHostname(null); } }}>
         <DialogContent className="max-w-[98vw] xs:max-w-[95vw] sm:max-w-lg md:max-w-xl p-0 gap-0 max-h-[92vh] sm:max-h-[90vh] flex flex-col">
           {selectedRegion && !selectedTeam && !selectedIncident && (
             <>
