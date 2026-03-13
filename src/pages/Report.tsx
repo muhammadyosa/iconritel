@@ -1283,7 +1283,8 @@ Contoh:
                 </TableBody>
               </Table>
             </div>
-          )}
+          );
+          })()}
         </CardContent>
       </Card>
 
