@@ -188,7 +188,7 @@ export default function RegionalOfficeTab({ tickets }: RegionalOfficeTabProps) {
   return (
     <div className="space-y-4">
       {/* Interactive Summary Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-3">
+      <div className="grid grid-cols-2 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-1.5 xs:gap-2 sm:gap-3">
         {summaryCards.map((card, idx) => (
           <motion.div
             key={card.type}
