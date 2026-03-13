@@ -717,44 +717,19 @@ UPDATE : `}
   );
 };
 
-// Team definitions by region
-const TEAM_REGIONS: Record<string, string[]> = {
-  LAMPUNG: [
-    "SIB PESAWARAN", "SIB PRINGSEWU", "GSP TANGGAMUS", "INTERNAL LAMPUNG",
-    "TTM LAMPUNG TENGAH", "SIB BANDAR LAMPUNG", "SERPO TEGINENENG", "SERPO SUTAMI",
-    "SERPO RAJABASA", "SERPO PRINGSEWU", "SERPO MENGGALA", "SERPO RUMBIA",
-    "SERPO KOTA BUMI", "SERPO KALIANDA", "SERPO PAHAWANG"
-  ],
-  SUMSEL: [
-    "REG7 PALEMBANG 1", "REG7 PALEMBANG 2", "REG7 PALEMBANG 3", "INTERNAL SUMSEL",
-    "IKR OKU TIMUR", "TTM INDRALAYA", "INTERNAL LAHAT", "GSP LUBUK LINGGAU",
-    "GSP PRABU PANGKUL", "SIB BANYUASIN", "SIB MUARA ENIM - TJ ENIM", "SIB PAGARALAM",
-    "SIB LAHAT", "SIB EMPAT LAWANG", "SERPO PALEMBANG KOTA", "SERPO LAHAT",
-    "SERPO PAGAR ALAM", "SERPO BUKIT ASAM", "SERPO PRABUMULIH", "SERPO LINGGAU",
-    "SERPO MARTAPURA", "SERPO SEKAYU", "SERPO TUGUMULYO", "SERPO BATURAJA",
-    "SERPO SUNGAI LILIN", "SERPO BETUNG", "SERPO KAYU AGUNG", "SERPO INDRALAYA",
-    "SERPO TEBING", "SERPO BELITANG", "SERPO DEMANG", "SERPO MASKAREBET", "SERPO JAKABARING"
-  ],
-  JAMBI: [
-    "INTERNAL JAMBI", "TTM SAROLANGUN", "TTM MERANGIN", "GSP MUARA BULIAN",
-    "GSP JAMBI 2", "GSP SUNGAI PENUH", "GSP TEBO", "SERPO BUNGO",
-    "SERPO PAYOSELINCAH", "SERPO JAMBI KOTA", "SERPO SAROLANGUN",
-    "SERPO MUARA BULIAN", "SERPO BANGKO", "SERPO SUNGAI PENUH",
-    "SERPO TEBO", "SERPO KUALA TUNGKAL"
-  ],
-  BENGKULU: [
-    "GSP BENGKULU 1", "GSP BENGKULU 2", "SIB LEBONG", "TTM KAUR BINTUHAN",
-    "SIB CURUP", "GSP MANNA-KAUR", "GSP MUKO-MUKO", "GSP BENTENG-MUARABANGKAHULU",
-    "SERPO SUKAMERINDU", "SERPO ARGA MAKMUR", "SERPO MANNA", "SERPO PEKALONGAN",
-    "SERPO MUKO-MUKO", "SERPO KAUR"
-  ],
-  BANGKA: [
-    "BANGKA REG 7", "TTM SUNGAI LIAT", "SIB BELITUNG", "SIB BANGKA BARAT",
-    "BHMA MUNTOK", "BHMA TOBOALI", "TTM TOBOALI", "SERPO KOBA (Tarapti)",
-    "SERPO PANGKAL PINANG", "SERPO KOBA", "SERPO KELAPA", "SERPO MANGGAR",
-    "SERPO BELITUNG", "SERPO SUNGAI LIAT"
-  ],
-};
+// Dynamic team regions - built from RegionalTeamRecord data
+function buildTeamRegions(records: RegionalTeamRecord[]): Record<string, string[]> {
+  const map: Record<string, Set<string>> = {};
+  for (const r of records) {
+    if (!map[r.region]) map[r.region] = new Set();
+    map[r.region].add(r.mitraName);
+  }
+  const result: Record<string, string[]> = {};
+  for (const [region, set] of Object.entries(map)) {
+    result[region] = Array.from(set).sort();
+  }
+  return result;
+}
 
 // Interface for parsed pending ticket
 interface ParsedPendingTicket {
