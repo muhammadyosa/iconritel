@@ -30,7 +30,7 @@ interface UserWithRole {
   created_at: string;
   last_online: string | null;
   is_approved: boolean;
-  role: "admin" | "noc" | "reviewer";
+  role: "admin" | "noc" | "reviewer" | "intern";
   lastAction?: UserActivity;
 }
 
@@ -81,7 +81,7 @@ export function UserManagement() {
           created_at: profile.created_at,
           last_online: profile.last_online as string | null,
           is_approved: (profile as any).is_approved ?? false,
-          role: (userRole?.role as "admin" | "noc" | "reviewer") || "noc",
+          role: (userRole?.role as "admin" | "noc" | "reviewer" | "intern") || "noc",
           lastAction: latestActivityMap.get(profile.user_id),
         };
       });
@@ -103,7 +103,7 @@ export function UserManagement() {
     }
   }, [isAdmin]);
 
-  const handleRoleChange = async (userId: string, newRole: "admin" | "noc" | "reviewer") => {
+  const handleRoleChange = async (userId: string, newRole: "admin" | "noc" | "reviewer" | "intern") => {
     setUpdatingUserId(userId);
     try {
       // Get current role for logging
@@ -449,7 +449,7 @@ export function UserManagement() {
                     <TableCell>
                       <Select
                         value={user.role}
-                        onValueChange={(value: "admin" | "noc" | "reviewer") =>
+                        onValueChange={(value: "admin" | "noc" | "reviewer" | "intern") =>
                           handleRoleChange(user.user_id, value)
                         }
                         disabled={updatingUserId === user.user_id}
@@ -478,6 +478,12 @@ export function UserManagement() {
                             <div className="flex items-center gap-2">
                               <Users className="h-3 w-3 text-amber-500" />
                               Reviewer
+                            </div>
+                          </SelectItem>
+                          <SelectItem value="intern">
+                            <div className="flex items-center gap-2">
+                              <User className="h-3 w-3 text-emerald-500" />
+                              Intern
                             </div>
                           </SelectItem>
                         </SelectContent>
