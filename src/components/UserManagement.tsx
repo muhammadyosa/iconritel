@@ -103,7 +103,7 @@ export function UserManagement() {
     }
   }, [isAdmin]);
 
-  const handleRoleChange = async (userId: string, newRole: "admin" | "noc" | "reviewer") => {
+  const handleRoleChange = async (userId: string, newRole: "admin" | "noc" | "reviewer" | "intern") => {
     setUpdatingUserId(userId);
     try {
       // Get current role for logging
