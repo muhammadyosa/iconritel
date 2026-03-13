@@ -51,7 +51,6 @@ function usePendingUserCount() {
 
     fetchCount();
 
-    // Listen for realtime changes on profiles
     const channel = supabase
       .channel("pending-users-count")
       .on(
@@ -67,6 +66,40 @@ function usePendingUserCount() {
   }, [isAdmin]);
 
   return { count, isAdmin };
+}
+
+function useActiveIncidentCount() {
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    const fetchCount = async () => {
+      const { count: activeCount, error } = await supabase
+        .from("tickets")
+        .select("*", { count: "exact", head: true })
+        .in("status", ["On Progress", "Critical"]);
+
+      if (!error && activeCount !== null) {
+        setCount(activeCount);
+      }
+    };
+
+    fetchCount();
+
+    const channel = supabase
+      .channel("active-incidents-count")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "tickets" },
+        () => fetchCount()
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
+  return count;
 }
 
 export function AppSidebar() {
