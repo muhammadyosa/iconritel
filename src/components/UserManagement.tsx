@@ -30,7 +30,7 @@ interface UserWithRole {
   created_at: string;
   last_online: string | null;
   is_approved: boolean;
-  role: "admin" | "noc" | "reviewer";
+  role: "admin" | "noc" | "reviewer" | "intern";
   lastAction?: UserActivity;
 }
 
