@@ -379,7 +379,14 @@ Dibuat: ${new Date(r.createdAt).toLocaleString("id-ID")}
           <TabsList className="inline-flex w-auto min-w-full sm:min-w-0 gap-1 h-auto flex-wrap sm:flex-nowrap p-1">
             <TabsTrigger value="shift" className="text-[11px] sm:text-sm px-2.5 sm:px-3 py-1.5 sm:py-2 whitespace-nowrap">🗣️ Report Shift</TabsTrigger>
             <TabsTrigger value="sla" className="text-[11px] sm:text-sm px-2.5 sm:px-3 py-1.5 sm:py-2 whitespace-nowrap">⏰ SLA 7 JAM</TabsTrigger>
-            <TabsTrigger value="pending" className="text-[11px] sm:text-sm px-2.5 sm:px-3 py-1.5 sm:py-2 whitespace-nowrap">📋 Pending</TabsTrigger>
+            <TabsTrigger value="pending" className="text-[11px] sm:text-sm px-2.5 sm:px-3 py-1.5 sm:py-2 whitespace-nowrap relative">
+              📋 Pending
+              {pendingCount > 0 && (
+                <span className="ml-1.5 inline-flex items-center justify-center rounded-full bg-destructive text-destructive-foreground text-[9px] font-bold min-w-[18px] h-[18px] px-1">
+                  {pendingCount}
+                </span>
+              )}
+            </TabsTrigger>
             <TabsTrigger value="dashboard-iconnet" className="text-[11px] sm:text-sm px-2.5 sm:px-3 py-1.5 sm:py-2 whitespace-nowrap">📊 Iconnet</TabsTrigger>
           </TabsList>
         </div>
