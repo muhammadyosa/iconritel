@@ -103,6 +103,11 @@ const Report = () => {
     getFormattedReports 
   } = useCloudShiftReports();
   
+  // Cloud tickets for pending count badge
+  const { tickets: allCloudTickets, isLoading: isLoadingTickets, updateTicket, deleteTicket } = useCloudTickets();
+  const pendingCloudTickets = allCloudTickets.filter(t => t.status === "Pending");
+  const pendingCount = pendingCloudTickets.length;
+
   // User role for permission-based UI
   const { isAdmin } = useUserRole();
   
@@ -374,7 +379,14 @@ Dibuat: ${new Date(r.createdAt).toLocaleString("id-ID")}
           <TabsList className="inline-flex w-auto min-w-full sm:min-w-0 gap-1 h-auto flex-wrap sm:flex-nowrap p-1">
             <TabsTrigger value="shift" className="text-[11px] sm:text-sm px-2.5 sm:px-3 py-1.5 sm:py-2 whitespace-nowrap">🗣️ Report Shift</TabsTrigger>
             <TabsTrigger value="sla" className="text-[11px] sm:text-sm px-2.5 sm:px-3 py-1.5 sm:py-2 whitespace-nowrap">⏰ SLA 7 JAM</TabsTrigger>
-            <TabsTrigger value="pending" className="text-[11px] sm:text-sm px-2.5 sm:px-3 py-1.5 sm:py-2 whitespace-nowrap">📋 Pending</TabsTrigger>
+            <TabsTrigger value="pending" className="text-[11px] sm:text-sm px-2.5 sm:px-3 py-1.5 sm:py-2 whitespace-nowrap relative">
+              📋 Pending
+              {pendingCount > 0 && (
+                <span className="ml-1.5 inline-flex items-center justify-center rounded-full bg-destructive text-destructive-foreground text-[9px] font-bold min-w-[18px] h-[18px] px-1">
+                  {pendingCount}
+                </span>
+              )}
+            </TabsTrigger>
             <TabsTrigger value="dashboard-iconnet" className="text-[11px] sm:text-sm px-2.5 sm:px-3 py-1.5 sm:py-2 whitespace-nowrap">📊 Iconnet</TabsTrigger>
           </TabsList>
         </div>
@@ -687,7 +699,12 @@ UPDATE : `}
         </TabsContent>
 
         <TabsContent value="pending" className="space-y-4">
-          <PendingTicketsList />
+          <PendingTicketsList 
+            pendingTickets={pendingCloudTickets}
+            isLoading={isLoadingTickets}
+            updateTicket={updateTicket}
+            deleteTicket={deleteTicket}
+          />
         </TabsContent>
 
         <TabsContent value="dashboard-iconnet" className="space-y-4">
@@ -778,9 +795,14 @@ function parseDurationToMinutes(duration: string): number {
 }
 
 // Component for Pending Tickets List
-function PendingTicketsList() {
-  const { tickets: allCloudTickets, isLoading, updateTicket, deleteTicket } = useCloudTickets();
-  const pendingTickets = allCloudTickets.filter(t => t.status === "Pending");
+interface PendingTicketsListProps {
+  pendingTickets: Ticket[];
+  isLoading: boolean;
+  updateTicket: (id: string, updates: Partial<Ticket>) => Promise<void>;
+  deleteTicket: (id: string) => Promise<void>;
+}
+
+function PendingTicketsList({ pendingTickets, isLoading, updateTicket, deleteTicket }: PendingTicketsListProps) {
   const [pendingInput, setPendingInput] = useState("");
   const [pendingResult, setPendingResult] = useState("");
   const [parsedPendingTickets, setParsedPendingTickets] = useState<ParsedPendingTicket[]>([]);
