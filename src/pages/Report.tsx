@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/hooks/use-toast";
-import { FileText, Download, ClipboardList, Trash2, RefreshCw, Loader2, CalendarIcon } from "lucide-react";
+import { FileText, Download, ClipboardList, Trash2, RefreshCw, Loader2, CalendarIcon, Search } from "lucide-react";
 import { format, parse } from "date-fns";
 import { id as idLocale } from "date-fns/locale";
 import { cn } from "@/lib/utils";
@@ -810,6 +810,8 @@ function PendingTicketsList({ pendingTickets, isLoading, updateTicket, deleteTic
   const [parsedPendingTickets, setParsedPendingTickets] = useState<ParsedPendingTicket[]>([]);
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
   const [detailOpen, setDetailOpen] = useState(false);
+  const [pendingSearchField, setPendingSearchField] = useState("all");
+  const [pendingSearchQuery, setPendingSearchQuery] = useState("");
   
   // User role for permission-based UI
   const { isAdmin, isReviewer } = useUserRole();
@@ -1153,11 +1155,58 @@ Contoh:
           </div>
         </CardHeader>
         <CardContent className="p-1.5 sm:p-2">
-          {pendingTickets.length === 0 ? (
+          {/* Search filter */}
+          <div className="flex flex-col xs:flex-row gap-1.5 sm:gap-2 xs:items-end mb-1.5">
+            <div className="w-full xs:w-28 sm:w-40">
+              <Label className="text-[9px] sm:text-[10px]">Search By</Label>
+              <Select value={pendingSearchField} onValueChange={setPendingSearchField}>
+                <SelectTrigger className="h-6 sm:h-7 text-[9px] sm:text-[10px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Semua</SelectItem>
+                  <SelectItem value="ticketId">Incident ID</SelectItem>
+                  <SelectItem value="category">Category</SelectItem>
+                  <SelectItem value="customerType">Customer/Type</SelectItem>
+                  <SelectItem value="serviceId">Service ID</SelectItem>
+                  <SelectItem value="constraint">Constraint</SelectItem>
+                  <SelectItem value="serpo">Serpo</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex-1">
+              <Label className="text-[9px] sm:text-[10px]">Pencarian</Label>
+              <div className="relative">
+                <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3 w-3 text-muted-foreground" />
+                <Input
+                  placeholder="Cari..."
+                  value={pendingSearchQuery}
+                  onChange={(e) => setPendingSearchQuery(e.target.value)}
+                  className="h-6 sm:h-7 text-[10px] sm:text-xs pl-7"
+                />
+              </div>
+            </div>
+          </div>
+
+          {(() => {
+            const q = pendingSearchQuery.toLowerCase();
+            const filtered = q ? pendingTickets.filter((t) => {
+              switch (pendingSearchField) {
+                case "ticketId": return t.id.toLowerCase().includes(q);
+                case "category": return t.category.toLowerCase().includes(q);
+                case "customerType": return (t.customerName + " " + t.constraint).toLowerCase().includes(q);
+                case "serviceId": return t.serviceId.toLowerCase().includes(q);
+                case "constraint": return t.constraint.toLowerCase().includes(q);
+                case "serpo": return t.serpo.toLowerCase().includes(q);
+                default: return (t.id + t.customerName + t.serviceId + t.constraint + t.serpo + t.category + t.hostname).toLowerCase().includes(q);
+              }
+            }) : pendingTickets;
+
+            return filtered.length === 0 ? (
             <div className="text-center py-6 text-muted-foreground">
               <ClipboardList className="h-10 w-10 mx-auto mb-2 opacity-50" />
-              <p className="text-xs">Tidak ada incident pending</p>
-              <p className="text-[10px]">Semua incident sudah dalam proses atau selesai</p>
+              <p className="text-xs">{pendingTickets.length === 0 ? "Tidak ada incident pending" : "Tidak ditemukan"}</p>
+              <p className="text-[10px]">{pendingTickets.length === 0 ? "Semua incident sudah dalam proses atau selesai" : "Coba ubah kata kunci pencarian"}</p>
             </div>
           ) : (
             <div className="rounded-md border overflow-x-auto overflow-y-auto max-h-[40vh] sm:max-h-[50vh] md:max-h-[55vh]">
@@ -1174,7 +1223,7 @@ Contoh:
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {pendingTickets.map((ticket) => (
+                  {filtered.map((ticket) => (
                     <TableRow 
                       key={ticket.id} 
                       className="h-6 sm:h-7 cursor-pointer hover:bg-muted/70"
@@ -1234,7 +1283,8 @@ Contoh:
                 </TableBody>
               </Table>
             </div>
-          )}
+          );
+          })()}
         </CardContent>
       </Card>
 
