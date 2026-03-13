@@ -1009,15 +1009,11 @@ export default function RegionalOfficeTab({ tickets }: RegionalOfficeTabProps) {
               <div className="p-4 pb-3 border-b border-border/50 flex-shrink-0">
                 <button
                   onClick={() => {
-                    if (selectedTeam) {
-                      setSelectedIncident(null);
-                    } else {
-                      setSelectedIncident(null);
-                    }
+                    setSelectedIncident(null);
                   }}
                   className="flex items-center gap-1 text-[10px] sm:text-xs text-primary hover:underline mb-2"
                 >
-                  ← Kembali ke {selectedTeam ? selectedTeam.mitraName : selectedRegion.region}
+                  ← Kembali ke {selectedHostname ? selectedHostname.name : selectedTeam ? selectedTeam.mitraName : selectedRegion.region}
                 </button>
                 <DialogHeader>
                   <DialogTitle className="text-sm sm:text-base flex items-center gap-2 pr-8">
