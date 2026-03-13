@@ -77,7 +77,7 @@ export function AppSidebar() {
   const { isIntern } = useUserRole();
 
   // Intern can only see Dashboard and Incident Management
-  const INTERN_PATHS = new Set(["/", "/tickets"]);
+  const INTERN_PATHS = new Set(["/", "/tickets", "/teams"]);
   const visibleMenuItems = isIntern
     ? menuItems.filter((item) => INTERN_PATHS.has(item.path))
     : menuItems;

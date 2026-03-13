@@ -7,7 +7,7 @@ interface ProtectedRouteProps {
   children: React.ReactNode;
 }
 
-const INTERN_ALLOWED_PATHS = new Set(["/", "/tickets"]);
+const INTERN_ALLOWED_PATHS = new Set(["/", "/tickets", "/teams"]);
 
 export function ProtectedRoute({ children }: ProtectedRouteProps) {
   const { user, profile, isLoading } = useAuth();
