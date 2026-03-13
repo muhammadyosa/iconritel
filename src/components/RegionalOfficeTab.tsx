@@ -418,7 +418,7 @@ export default function RegionalOfficeTab({ tickets }: RegionalOfficeTabProps) {
                         </span>
                         <span className="text-[8px] text-muted-foreground italic">scroll ↓</span>
                       </div>
-                      <ScrollArea className="h-[120px] sm:h-[140px] rounded-md border border-border/30 bg-muted/20">
+                      <ScrollArea className="h-[100px] xs:h-[120px] sm:h-[140px] rounded-md border border-border/30 bg-muted/20">
                         <div className="p-1.5 space-y-0.5">
                           {r.teams.map((t, tIdx) => {
                             const teamHostSet = new Set(t.hostnames.map(h => h.trim().toUpperCase()));
