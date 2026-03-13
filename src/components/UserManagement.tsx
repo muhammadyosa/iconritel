@@ -480,6 +480,12 @@ export function UserManagement() {
                               Reviewer
                             </div>
                           </SelectItem>
+                          <SelectItem value="intern">
+                            <div className="flex items-center gap-2">
+                              <User className="h-3 w-3 text-emerald-500" />
+                              Intern
+                            </div>
+                          </SelectItem>
                         </SelectContent>
                       </Select>
                     </TableCell>
