@@ -225,7 +225,7 @@ export default function RegionalOfficeTab({ tickets }: RegionalOfficeTabProps) {
 
       {/* Charts */}
       {regionalData.some(r => r.totalIncidents > 0) && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 sm:gap-3">
           {/* Bar Chart */}
           <Card>
             <CardHeader className="p-3 sm:p-4 pb-1">
