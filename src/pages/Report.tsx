@@ -795,9 +795,14 @@ function parseDurationToMinutes(duration: string): number {
 }
 
 // Component for Pending Tickets List
-function PendingTicketsList() {
-  const { tickets: allCloudTickets, isLoading, updateTicket, deleteTicket } = useCloudTickets();
-  const pendingTickets = allCloudTickets.filter(t => t.status === "Pending");
+interface PendingTicketsListProps {
+  pendingTickets: Ticket[];
+  isLoading: boolean;
+  updateTicket: (id: string, updates: Partial<Ticket>) => Promise<void>;
+  deleteTicket: (id: string) => Promise<void>;
+}
+
+function PendingTicketsList({ pendingTickets, isLoading, updateTicket, deleteTicket }: PendingTicketsListProps) {
   const [pendingInput, setPendingInput] = useState("");
   const [pendingResult, setPendingResult] = useState("");
   const [parsedPendingTickets, setParsedPendingTickets] = useState<ParsedPendingTicket[]>([]);
