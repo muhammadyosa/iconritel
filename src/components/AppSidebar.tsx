@@ -74,6 +74,13 @@ export function AppSidebar() {
   const { theme, setTheme } = useTheme();
   const collapsed = state === "collapsed";
   const { count: pendingCount, isAdmin } = usePendingUserCount();
+  const { isIntern } = useUserRole();
+
+  // Intern can only see Dashboard and Incident Management
+  const INTERN_PATHS = new Set(["/", "/tickets"]);
+  const visibleMenuItems = isIntern
+    ? menuItems.filter((item) => INTERN_PATHS.has(item.path))
+    : menuItems;
   
 
   return (
