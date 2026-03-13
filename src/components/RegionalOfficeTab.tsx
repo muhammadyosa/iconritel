@@ -204,19 +204,19 @@ export default function RegionalOfficeTab({ tickets }: RegionalOfficeTabProps) {
               )}
               onClick={() => setActiveSummaryCard(card.type)}
             >
-              <CardContent className="p-3 sm:p-4">
+              <CardContent className="p-2 xs:p-2.5 sm:p-4">
                 <div className="flex items-start justify-between">
-                  <div className="space-y-1 min-w-0 flex-1">
-                    <p className="text-[10px] sm:text-xs text-muted-foreground font-medium flex items-center gap-1">
-                      <card.icon className="h-3 w-3 flex-shrink-0" />
+                  <div className="space-y-0.5 xs:space-y-1 min-w-0 flex-1">
+                    <p className="text-[9px] xs:text-[10px] sm:text-xs text-muted-foreground font-medium flex items-center gap-1">
+                      <card.icon className="h-2.5 xs:h-3 w-2.5 xs:w-3 flex-shrink-0" />
                       <span className="truncate">{card.label}</span>
                     </p>
-                    <p className="text-lg sm:text-2xl font-bold leading-none">{card.value}</p>
-                    <p className="text-[9px] sm:text-[10px] text-muted-foreground truncate">{card.sub}</p>
+                    <p className="text-base xs:text-lg sm:text-2xl font-bold leading-none">{card.value}</p>
+                    <p className="text-[8px] xs:text-[9px] sm:text-[10px] text-muted-foreground truncate">{card.sub}</p>
                   </div>
-                  <span className="text-lg sm:text-xl flex-shrink-0">{card.emoji}</span>
+                  <span className="text-base xs:text-lg sm:text-xl flex-shrink-0">{card.emoji}</span>
                 </div>
-                <ChevronRight className="absolute right-1.5 bottom-1.5 h-3 w-3 text-muted-foreground/40" />
+                <ChevronRight className="absolute right-1 bottom-1 h-2.5 w-2.5 xs:h-3 xs:w-3 text-muted-foreground/40" />
               </CardContent>
             </Card>
           </motion.div>
