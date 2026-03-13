@@ -1157,14 +1157,15 @@ Contoh:
             <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
-                  <TableRow>
-                    <TableHead className="text-xs w-[80px]">📅 Waktu</TableHead>
-                    <TableHead className="text-xs">👨‍💼 Service ID</TableHead>
-                    <TableHead className="text-xs">👤 Customer</TableHead>
-                    <TableHead className="text-xs w-[80px]">📊 Type</TableHead>
-                    <TableHead className="text-xs w-[80px]">Status</TableHead>
-                    <TableHead className="text-xs w-[120px]">Aksi</TableHead>
-                  </TableRow>
+                   <TableRow>
+                     <TableHead className="text-xs w-[80px]">📅 Waktu</TableHead>
+                     <TableHead className="text-xs">👨‍💼 Service ID</TableHead>
+                     <TableHead className="text-xs">👤 Customer</TableHead>
+                     <TableHead className="text-xs">🔧 Constraint</TableHead>
+                     <TableHead className="text-xs w-[80px]">📊 Type</TableHead>
+                     <TableHead className="text-xs w-[80px]">Status</TableHead>
+                     <TableHead className="text-xs w-[160px]">Aksi</TableHead>
+                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {pendingTickets.map((ticket) => (
