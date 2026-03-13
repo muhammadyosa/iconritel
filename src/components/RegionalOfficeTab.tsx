@@ -350,7 +350,7 @@ export default function RegionalOfficeTab({ tickets }: RegionalOfficeTabProps) {
                     <ChevronRight className="h-3 w-3 xs:h-3.5 xs:w-3.5 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0" />
                   </div>
 
-                  <CardContent className="p-3 sm:p-4 space-y-3">
+                  <CardContent className="p-2 xs:p-3 sm:p-4 space-y-2 xs:space-y-3">
                     {/* Key metrics row */}
                     <div className="grid grid-cols-3 gap-2">
                       <div className="text-center">
