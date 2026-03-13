@@ -32,6 +32,7 @@ import { Ticket } from "@/types/ticket";
 import { DashboardIconnetTab } from "@/components/DashboardIconnetTab";
 import { useUserRole } from "@/hooks/useUserRole";
 import { StatusBadge } from "@/components/StatusBadge";
+import { TicketDetailDialog } from "@/components/TicketDetailDialog";
 import {
   Table,
   TableBody,
