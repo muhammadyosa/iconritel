@@ -68,46 +68,13 @@ function usePendingUserCount() {
   return { count, isAdmin };
 }
 
-function useActiveIncidentCount() {
-  const [count, setCount] = useState(0);
-
-  useEffect(() => {
-    const fetchCount = async () => {
-      const { count: activeCount, error } = await supabase
-        .from("tickets")
-        .select("*", { count: "exact", head: true })
-        .in("status", ["On Progress", "Critical"]);
-
-      if (!error && activeCount !== null) {
-        setCount(activeCount);
-      }
-    };
-
-    fetchCount();
-
-    const channel = supabase
-      .channel("active-incidents-count")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "tickets" },
-        () => fetchCount()
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, []);
-
-  return count;
-}
 
 export function AppSidebar() {
   const { state } = useSidebar();
   const { theme, setTheme } = useTheme();
   const collapsed = state === "collapsed";
   const { count: pendingCount, isAdmin } = usePendingUserCount();
-  const activeIncidentCount = useActiveIncidentCount();
+  
 
   return (
     <Sidebar className={collapsed ? "w-[52px]" : "w-56 sm:w-60"} collapsible="icon">
@@ -142,11 +109,9 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu className={`gap-0.5 ${collapsed ? "items-center px-0" : "px-2"}`}>
               {menuItems.map((item) => {
-                const showSettingsBadge = item.path === "/settings" && isAdmin && pendingCount > 0;
-                const showIncidentBadge = item.path === "/tickets" && activeIncidentCount > 0;
-                const badgeCount = showSettingsBadge ? pendingCount : showIncidentBadge ? activeIncidentCount : 0;
-                const showBadge = showSettingsBadge || showIncidentBadge;
-                const badgeColor = showIncidentBadge ? "bg-warning text-warning-foreground" : "bg-destructive text-destructive-foreground";
+                const showBadge = item.path === "/settings" && isAdmin && pendingCount > 0;
+                const badgeCount = pendingCount;
+                const badgeColor = "bg-destructive text-destructive-foreground";
                 return (
                   <SidebarMenuItem key={item.title} className={collapsed ? "w-full flex justify-center" : "w-full"}>
                     <SidebarMenuButton asChild className={collapsed ? "h-8 w-8 min-w-8 p-0 !justify-center" : "h-9 justify-start"}>
