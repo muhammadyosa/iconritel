@@ -316,18 +316,18 @@ export default function RegionalOfficeTab({ tickets }: RegionalOfficeTabProps) {
 
       {/* Region Cards Grid */}
       <div>
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="text-sm sm:text-base font-semibold flex items-center gap-2">
+          <div className="flex flex-col xs:flex-row items-start xs:items-center justify-between gap-2 mb-3">
+          <h3 className="text-xs xs:text-sm sm:text-base font-semibold flex items-center gap-2">
             🗺 Regional Office ({regionalData.length})
           </h3>
-          <div className="flex items-center gap-2 max-w-[200px] sm:max-w-xs">
+          <div className="flex items-center gap-2 w-full xs:w-auto xs:max-w-[200px] sm:max-w-xs">
             <Search className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
             <Input placeholder="Cari region..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
-              className="h-7 sm:h-8 text-[10px] sm:text-xs" />
+              className="h-7 sm:h-8 text-[10px] sm:text-xs flex-1" />
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-3 gap-2 sm:gap-3">
           {filteredData.map((r, idx) => {
             const rate = r.totalIncidents > 0 ? Math.round((r.resolved / r.totalIncidents) * 100) : 0;
             return (
