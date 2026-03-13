@@ -174,7 +174,7 @@ export function useCloudTickets() {
       const processedTickets = (data || []).map((db) => {
         const ticket = dbToTicket(db as DbTicket, currentProfilesMap);
         // Check SLA for non-resolved tickets
-        if (ticket.status !== "Resolved" && ticket.status !== "Critical") {
+        if (ticket.status !== "Resolved" && ticket.status !== "Critical" && ticket.status !== "Pending") {
           const ticketAge = now - new Date(ticket.createdISO).getTime();
           if (ticketAge >= SLA_THRESHOLD_MS) {
             return { ...ticket, status: "Critical" as const };
