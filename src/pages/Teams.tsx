@@ -512,15 +512,15 @@ export default function Teams() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <div className="overflow-x-auto -mx-2 px-2 sm:mx-0 sm:px-0">
-          <TabsList className="mb-4 w-max min-w-full sm:w-auto">
-            <TabsTrigger value="team-stats" className="text-[10px] sm:text-sm gap-1 sm:gap-1.5 px-2 sm:px-3">
+        <div className="overflow-x-auto scrollbar-hide -mx-2 px-2 sm:mx-0 sm:px-0">
+          <TabsList className="inline-flex w-auto min-w-full sm:min-w-0 gap-1 h-auto flex-wrap sm:flex-nowrap p-1 mb-4">
+            <TabsTrigger value="team-stats" className="text-[11px] sm:text-sm px-2.5 sm:px-3 py-1.5 sm:py-2 whitespace-nowrap">
               👥 Team Ritel/Serpo
             </TabsTrigger>
-            <TabsTrigger value="team-noc" className="text-[10px] sm:text-sm gap-1 sm:gap-1.5 px-2 sm:px-3">
+            <TabsTrigger value="team-noc" className="text-[11px] sm:text-sm px-2.5 sm:px-3 py-1.5 sm:py-2 whitespace-nowrap">
               💻 Team NOC
             </TabsTrigger>
-            <TabsTrigger value="regional-office" className="text-[10px] sm:text-sm gap-1 sm:gap-1.5 px-2 sm:px-3">
+            <TabsTrigger value="regional-office" className="text-[11px] sm:text-sm px-2.5 sm:px-3 py-1.5 sm:py-2 whitespace-nowrap">
               🗺 Regional Office
             </TabsTrigger>
           </TabsList>
