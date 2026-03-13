@@ -699,7 +699,12 @@ UPDATE : `}
         </TabsContent>
 
         <TabsContent value="pending" className="space-y-4">
-          <PendingTicketsList />
+          <PendingTicketsList 
+            pendingTickets={pendingCloudTickets}
+            isLoading={isLoadingTickets}
+            updateTicket={updateTicket}
+            deleteTicket={deleteTicket}
+          />
         </TabsContent>
 
         <TabsContent value="dashboard-iconnet" className="space-y-4">
