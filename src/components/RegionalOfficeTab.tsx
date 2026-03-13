@@ -70,6 +70,7 @@ export default function RegionalOfficeTab({ tickets }: RegionalOfficeTabProps) {
   const [selectedTeam, setSelectedTeam] = useState<RegionalTeamRecord | null>(null);
   const [selectedIncident, setSelectedIncident] = useState<Ticket | null>(null);
   const [activeSummaryCard, setActiveSummaryCard] = useState<SummaryCardType | null>(null);
+  const [selectedHostname, setSelectedHostname] = useState<{ name: string; incidents: Ticket[] } | null>(null);
 
   useEffect(() => {
     loadDefaultRegionalTeamData()
