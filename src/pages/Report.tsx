@@ -20,6 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
 import { toast } from "@/hooks/use-toast";
 import { FileText, Download, ClipboardList, Trash2, RefreshCw, Loader2, CalendarIcon } from "lucide-react";
 import { format, parse } from "date-fns";
@@ -1135,86 +1136,112 @@ Contoh:
         </CardContent>
       </Card>
 
-      {/* Existing Pending Tickets Table */}
+      {/* Existing Pending Tickets Table - matching List Incident style */}
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <ClipboardList className="h-5 w-5" />
-            Tiket Pending di Sistem
-          </CardTitle>
-          <CardDescription>
-            Daftar tiket dengan status Pending dari sistem ({pendingTickets.length} tiket)
-          </CardDescription>
+        <CardHeader className="pb-2 pt-3 px-2 sm:px-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="text-sm sm:text-base flex items-center gap-1.5">
+                <ClipboardList className="h-4 w-4" />
+                Incident Pending di Sistem
+              </CardTitle>
+              <CardDescription className="text-[10px] sm:text-xs mt-0.5">
+                {pendingTickets.length} incident pending — klik baris untuk detail
+              </CardDescription>
+            </div>
+            {isLoading && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
+          </div>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-1.5 sm:p-2">
           {pendingTickets.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              <ClipboardList className="h-12 w-12 mx-auto mb-3 opacity-50" />
-              <p className="text-sm">Tidak ada tiket pending</p>
-              <p className="text-xs">Semua tiket sudah dalam proses atau selesai</p>
+            <div className="text-center py-6 text-muted-foreground">
+              <ClipboardList className="h-10 w-10 mx-auto mb-2 opacity-50" />
+              <p className="text-xs">Tidak ada incident pending</p>
+              <p className="text-[10px]">Semua incident sudah dalam proses atau selesai</p>
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                   <TableRow>
-                     <TableHead className="text-xs w-[80px]">📅 Waktu</TableHead>
-                     <TableHead className="text-xs">👨‍💼 Service ID</TableHead>
-                     <TableHead className="text-xs">👤 Customer</TableHead>
-                     <TableHead className="text-xs">🔧 Constraint</TableHead>
-                     <TableHead className="text-xs w-[80px]">📊 Type</TableHead>
-                     <TableHead className="text-xs w-[80px]">Status</TableHead>
-                     <TableHead className="text-xs w-[160px]">Aksi</TableHead>
-                   </TableRow>
+            <div className="rounded-md border overflow-x-auto overflow-y-auto max-h-[40vh] sm:max-h-[50vh] md:max-h-[55vh]">
+              <Table className="min-w-[550px]">
+                <TableHeader className="sticky top-0 bg-background z-10">
+                  <TableRow className="h-5">
+                    <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap bg-muted/80">🎫 Incident ID</TableHead>
+                    <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap bg-muted/80">📦 Type</TableHead>
+                    <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap bg-muted/80">👤 Customer/Type</TableHead>
+                    <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap bg-muted/80">👨‍💼 Service ID</TableHead>
+                    <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap bg-muted/80">👥 Serpo</TableHead>
+                    <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap bg-muted/80">⚙️ Status</TableHead>
+                    <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap bg-muted/80">Aksi</TableHead>
+                  </TableRow>
                 </TableHeader>
                 <TableBody>
                   {pendingTickets.map((ticket) => (
                     <TableRow 
                       key={ticket.id} 
-                      className="cursor-pointer hover:bg-muted/50"
+                      className="h-6 sm:h-7 cursor-pointer hover:bg-muted/70"
                       onClick={() => {
                         setSelectedTicket(ticket);
                         setDetailOpen(true);
                       }}
                     >
-                      <TableCell className="text-xs font-mono">
-                        {formatDate(ticket.createdISO)}
+                      <TableCell className="px-1 sm:px-1.5 py-0.5 text-[9px] sm:text-[10px] font-medium">{ticket.id}</TableCell>
+                      <TableCell className="px-1 sm:px-1.5 py-0.5">
+                        <div>
+                          <Badge
+                            className={`text-[7px] sm:text-[8px] px-1 py-0 h-3 sm:h-3.5 ${
+                              ticket.category === "FEEDER"
+                                ? "bg-warning text-warning-foreground"
+                                : "bg-primary text-primary-foreground"
+                            }`}
+                          >
+                            {ticket.category}
+                          </Badge>
+                          <div className="text-[7px] sm:text-[8px] text-muted-foreground mt-0.5 truncate max-w-[80px] sm:max-w-none">
+                            {ticket.constraint}
+                          </div>
+                        </div>
                       </TableCell>
-                      <TableCell className="text-xs font-mono">
-                        {ticket.serviceId || "-"}
+                      <TableCell className="px-1 sm:px-1.5 py-0.5 text-[9px] sm:text-[10px]">
+                        {ticket.category === "FEEDER" ? (
+                          ticket.constraint === "OLT DOWN" ? (
+                            <span className="font-medium">{ticket.hostname}</span>
+                          ) :
+                          ticket.constraint === "PORT DOWN" ? (
+                            <div>
+                              <div className="font-medium text-[9px] sm:text-[10px]">{ticket.ticketResult.match(/PORT - (.*?) - DOWN/)?.[1] || "PORT"}</div>
+                              <div className="text-muted-foreground text-[7px] sm:text-[8px]">{ticket.hostname}</div>
+                            </div>
+                          ) :
+                          ticket.constraint === "FAT LOSS" || ticket.constraint === "FAT BAD RX" ? (
+                            <div>
+                              <div className="font-medium text-[9px] sm:text-[10px]">{ticket.fatId}</div>
+                              <div className="text-muted-foreground text-[7px] sm:text-[8px]">{ticket.hostname}</div>
+                            </div>
+                          ) : ticket.constraint
+                        ) : ticket.customerName}
                       </TableCell>
-                      <TableCell className="text-xs">
-                        {ticket.customerName || "-"}
+                      <TableCell className="px-1 sm:px-1.5 py-0.5 font-mono text-[9px] sm:text-[10px]">{ticket.serviceId}</TableCell>
+                      <TableCell className="px-1 sm:px-1.5 py-0.5 text-[9px] sm:text-[10px]">{ticket.serpo}</TableCell>
+                      <TableCell className="px-1 sm:px-1.5 py-0.5">
+                        <div>
+                          <StatusBadge status={ticket.status} />
+                          <div className="text-[7px] sm:text-[8px] text-muted-foreground mt-0.5">
+                            {ticket.createdAt}
+                          </div>
+                        </div>
                       </TableCell>
-                      <TableCell className="text-xs">
-                        {ticket.constraint || "-"}
-                      </TableCell>
-                      <TableCell>
-                        <span className={`text-[10px] px-1.5 py-0.5 rounded ${
-                          ticket.category === "RITEL" 
-                            ? "bg-primary/10 text-primary" 
-                            : "bg-accent/50 text-accent-foreground"
-                        }`}>
-                          {ticket.category}
-                        </span>
-                      </TableCell>
-                      <TableCell>
-                        <StatusBadge status={ticket.status} />
-                      </TableCell>
-                      <TableCell onClick={(e) => e.stopPropagation()}>
-                        <div className="flex gap-1">
+                      <TableCell className="px-1 sm:px-1.5 py-0.5" onClick={(e) => e.stopPropagation()}>
+                        <div className="flex gap-0.5">
                           <Button
                             size="sm"
                             variant="outline"
-                            className="h-6 text-[10px] px-2"
+                            className="h-5 sm:h-6 text-[8px] sm:text-[9px] px-1.5"
                             onClick={() => handleUpdateStatus(ticket.id, "On Progress")}
                           >
                             Proses
                           </Button>
                           <Button
                             size="sm"
-                            variant="default"
-                            className="h-6 text-[10px] px-2 bg-green-600 hover:bg-green-700 text-white"
+                            className="h-5 sm:h-6 text-[8px] sm:text-[9px] px-1.5 bg-green-600 hover:bg-green-700 text-white"
                             onClick={() => handleUpdateStatus(ticket.id, "Resolved")}
                           >
                             Resolve
@@ -1225,7 +1252,7 @@ Contoh:
                                 <Button
                                   size="sm"
                                   variant="ghost"
-                                  className="h-6 w-6 p-0 text-destructive hover:text-destructive"
+                                  className="h-5 sm:h-6 w-5 sm:w-6 p-0 text-destructive hover:text-destructive"
                                 >
                                   <Trash2 className="h-3 w-3" />
                                 </Button>
@@ -1234,7 +1261,7 @@ Contoh:
                                 <AlertDialogHeader>
                                   <AlertDialogTitle>Hapus Incident?</AlertDialogTitle>
                                   <AlertDialogDescription>
-                                    Incident {ticket.serviceId} akan dihapus permanen. Aksi ini tidak dapat dibatalkan.
+                                    Incident {ticket.id} akan dihapus permanen.
                                   </AlertDialogDescription>
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>
