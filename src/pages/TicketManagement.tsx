@@ -433,10 +433,12 @@ export default function TicketManagement() {
       </Dialog>
 
       <Tabs defaultValue="preview-data" className="w-full">
-        <TabsList className="grid w-full max-w-md grid-cols-2">
-          <TabsTrigger value="preview-data">📋 Preview Data</TabsTrigger>
-          <TabsTrigger value="daftar-ticket">📑 List Incident</TabsTrigger>
-        </TabsList>
+        <div className="overflow-x-auto scrollbar-hide -mx-2 px-2 sm:mx-0 sm:px-0">
+          <TabsList className="inline-flex w-auto min-w-full sm:min-w-0 gap-1 h-auto flex-wrap sm:flex-nowrap p-1">
+            <TabsTrigger value="preview-data" className="text-[11px] sm:text-sm px-2.5 sm:px-3 py-1.5 sm:py-2 whitespace-nowrap">📋 Preview Data</TabsTrigger>
+            <TabsTrigger value="daftar-ticket" className="text-[11px] sm:text-sm px-2.5 sm:px-3 py-1.5 sm:py-2 whitespace-nowrap">📑 List Incident</TabsTrigger>
+          </TabsList>
+        </div>
 
         <TabsContent value="preview-data" className="mt-2 sm:mt-3 space-y-2 sm:space-y-3">
           <Card className="shadow-sm border">
