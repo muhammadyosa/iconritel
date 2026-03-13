@@ -778,76 +778,39 @@ function parseDurationToMinutes(duration: string): number {
 
 // Component for Pending Tickets List
 function PendingTicketsList() {
-  const [tickets, setTickets] = useState<Ticket[]>([]);
+  const { tickets: allCloudTickets, isLoading, updateTicket, deleteTicket } = useCloudTickets();
+  const pendingTickets = allCloudTickets.filter(t => t.status === "Pending");
   const [pendingInput, setPendingInput] = useState("");
   const [pendingResult, setPendingResult] = useState("");
   const [parsedPendingTickets, setParsedPendingTickets] = useState<ParsedPendingTicket[]>([]);
-  const STORAGE_KEY = "noc_tickets";
   
   // User role for permission-based UI
   const { isAdmin } = useUserRole();
 
-  useEffect(() => {
-    const loadTickets = () => {
-      try {
-        const saved = localStorage.getItem(STORAGE_KEY);
-        if (saved) {
-          const allTickets: Ticket[] = JSON.parse(saved);
-          const pendingTickets = allTickets.filter(t => t.status === "Pending");
-          setTickets(pendingTickets);
-        }
-      } catch (error) {
-        console.error("Error loading tickets:", error);
-      }
-    };
-
-    loadTickets();
-    
-    // Listen to storage changes
-    const handleStorageChange = () => loadTickets();
-    window.addEventListener("storage", handleStorageChange);
-    
-    return () => window.removeEventListener("storage", handleStorageChange);
-  }, []);
-
-  const handleUpdateStatus = (id: string, newStatus: Ticket["status"]) => {
+  const handleUpdateStatus = async (id: string, newStatus: Ticket["status"]) => {
     try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) {
-        const allTickets: Ticket[] = JSON.parse(saved);
-        const updated = allTickets.map(t => 
-          t.id === id ? { ...t, status: newStatus } : t
-        );
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
-        setTickets(updated.filter(t => t.status === "Pending"));
-        toast({
-          title: "Status diperbarui",
-          description: `Tiket berhasil diubah ke ${newStatus}`,
-        });
-      }
-    } catch (error) {
+      await updateTicket(id, { status: newStatus });
+      toast({
+        title: "Status diperbarui",
+        description: `Incident berhasil diubah ke ${newStatus}`,
+      });
+    } catch {
       toast({
         title: "Gagal update",
-        description: "Tidak dapat memperbarui status tiket.",
+        description: "Tidak dapat memperbarui status incident.",
         variant: "destructive",
       });
     }
   };
 
-  const handleDeleteTicket = (id: string) => {
+  const handleDeleteTicket = async (id: string) => {
     try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) {
-        const allTickets: Ticket[] = JSON.parse(saved);
-        const updated = allTickets.filter(t => t.id !== id);
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
-        setTickets(updated.filter(t => t.status === "Pending"));
-        toast({
-          title: "Incident dihapus",
-          description: "Incident berhasil dihapus dari sistem.",
-        });
-      }
-    } catch (error) {
+      await deleteTicket(id);
+      toast({
+        title: "Incident dihapus",
+        description: "Incident berhasil dihapus dari sistem.",
+      });
+    } catch {
       toast({
         title: "Gagal hapus",
         description: "Tidak dapat menghapus incident.",
