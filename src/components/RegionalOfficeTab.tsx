@@ -239,17 +239,17 @@ export default function RegionalOfficeTab({ tickets }: RegionalOfficeTabProps) {
                   pending: { label: "Pending", color: "hsl(var(--warning))" },
                   critical: { label: "Critical", color: "hsl(var(--destructive))" },
                 } satisfies ChartConfig}
-                className="h-[280px] sm:h-[320px] w-full"
+                className="h-[220px] xs:h-[260px] sm:h-[320px] w-full"
               >
                 <BarChart
                   data={regionalData.filter(r => r.totalIncidents > 0).slice(0, 10)}
                   layout="vertical"
-                  margin={{ top: 5, right: 20, left: 5, bottom: 5 }}
+                  margin={{ top: 5, right: 10, left: 0, bottom: 5 }}
                   barCategoryGap="20%"
                 >
                   <CartesianGrid strokeDasharray="3 3" horizontal={false} opacity={0.15} />
-                  <XAxis type="number" tick={{ fontSize: 10 }} />
-                  <YAxis type="category" dataKey="region" width={100} tick={{ fontSize: 9 }} />
+                  <XAxis type="number" tick={{ fontSize: 9 }} />
+                  <YAxis type="category" dataKey="region" width={70} tick={{ fontSize: 8 }} />
                   <ChartTooltip content={<ChartTooltipContent />} />
                   <Bar dataKey="resolved" stackId="a" fill="hsl(var(--success))" name="Resolved" />
                   <Bar dataKey="pending" stackId="a" fill="hsl(var(--warning))" name="Pending" />
