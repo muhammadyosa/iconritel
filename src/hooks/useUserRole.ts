@@ -48,12 +48,14 @@ export function useUserRole() {
   const isAdmin = role === "admin";
   const isNOC = role === "noc";
   const isReviewer = role === "reviewer";
+  const isIntern = role === "intern";
 
   return {
     role,
     isAdmin,
     isNOC,
     isReviewer,
+    isIntern,
     isLoading,
   };
 }
