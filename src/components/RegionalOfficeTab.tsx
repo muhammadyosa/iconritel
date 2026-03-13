@@ -947,6 +947,62 @@ export default function RegionalOfficeTab({ tickets }: RegionalOfficeTabProps) {
             </>
           )}
 
+          {/* Hostname Incidents Sub-view */}
+          {selectedRegion && selectedTeam && selectedHostname && !selectedIncident && (
+            <>
+              <div className="p-4 pb-3 border-b border-border/50 flex-shrink-0">
+                <button
+                  onClick={() => setSelectedHostname(null)}
+                  className="flex items-center gap-1 text-[10px] sm:text-xs text-primary hover:underline mb-2"
+                >
+                  ← Kembali ke {selectedTeam.mitraName}
+                </button>
+                <DialogHeader>
+                  <DialogTitle className="text-sm sm:text-base flex items-center gap-2 pr-8">
+                    <Server className="h-4 w-4 text-warning flex-shrink-0" /> {selectedHostname.name}
+                  </DialogTitle>
+                  <DialogDescription className="text-[10px] sm:text-xs">
+                    {selectedHostname.incidents.length} incident pada hostname ini
+                  </DialogDescription>
+                </DialogHeader>
+              </div>
+              <div className="flex-1 min-h-0 overflow-y-auto">
+                <div className="p-4 space-y-2">
+                  {selectedHostname.incidents.map((t) => (
+                    <div
+                      key={t.id}
+                      className="p-3 rounded-lg bg-muted/30 hover:bg-primary/5 cursor-pointer transition-colors border border-transparent hover:border-primary/20"
+                      onClick={() => setSelectedIncident(t)}
+                    >
+                      <div className="flex items-center justify-between mb-1.5">
+                        <span className="text-[10px] sm:text-xs font-mono font-semibold">{t.serviceId}</span>
+                        <StatusBadge status={t.status} />
+                      </div>
+                      <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-[9px] sm:text-[10px]">
+                        <div>
+                          <span className="text-muted-foreground">Pelanggan: </span>
+                          <span className="font-medium">{t.customerName}</span>
+                        </div>
+                        <div>
+                          <span className="text-muted-foreground">Kategori: </span>
+                          <span className="font-medium">{t.category || "-"}</span>
+                        </div>
+                        <div>
+                          <span className="text-muted-foreground">Kendala: </span>
+                          <span className="font-medium">{t.constraint || "-"}</span>
+                        </div>
+                        <div>
+                          <span className="text-muted-foreground">FAT ID: </span>
+                          <span className="font-medium">{t.fatId || "-"}</span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </>
+          )}
+
           {/* Incident Detail Sub-view */}
           {selectedRegion && selectedIncident && (
             <>
