@@ -801,7 +801,7 @@ export default function TicketManagement() {
                   </div>
                 </div>
               </div>
-              <div className="rounded-md border overflow-x-auto overflow-y-auto max-h-[40vh] xs:max-h-[45vh] sm:max-h-[50vh] md:max-h-[55vh] lg:max-h-[60vh]">
+              <div className="rounded-md border overflow-x-auto overflow-y-auto max-h-[220px] xs:max-h-[250px] sm:max-h-[50vh] md:max-h-[55vh] lg:max-h-[60vh]">
                 <Table className="min-w-[600px]">
                   <TableHeader className="sticky top-0 bg-background z-10">
                     <TableRow className="h-5">
