@@ -51,7 +51,6 @@ function usePendingUserCount() {
 
     fetchCount();
 
-    // Listen for realtime changes on profiles
     const channel = supabase
       .channel("pending-users-count")
       .on(
@@ -69,11 +68,46 @@ function usePendingUserCount() {
   return { count, isAdmin };
 }
 
+function useActiveIncidentCount() {
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    const fetchCount = async () => {
+      const { count: activeCount, error } = await supabase
+        .from("tickets")
+        .select("*", { count: "exact", head: true })
+        .in("status", ["On Progress", "Critical"]);
+
+      if (!error && activeCount !== null) {
+        setCount(activeCount);
+      }
+    };
+
+    fetchCount();
+
+    const channel = supabase
+      .channel("active-incidents-count")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "tickets" },
+        () => fetchCount()
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
+  return count;
+}
+
 export function AppSidebar() {
   const { state } = useSidebar();
   const { theme, setTheme } = useTheme();
   const collapsed = state === "collapsed";
   const { count: pendingCount, isAdmin } = usePendingUserCount();
+  const activeIncidentCount = useActiveIncidentCount();
 
   return (
     <Sidebar className={collapsed ? "w-[52px]" : "w-56 sm:w-60"} collapsible="icon">
@@ -108,7 +142,11 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu className={`gap-0.5 ${collapsed ? "items-center px-0" : "px-2"}`}>
               {menuItems.map((item) => {
-                const showBadge = item.path === "/settings" && isAdmin && pendingCount > 0;
+                const showSettingsBadge = item.path === "/settings" && isAdmin && pendingCount > 0;
+                const showIncidentBadge = item.path === "/tickets" && activeIncidentCount > 0;
+                const badgeCount = showSettingsBadge ? pendingCount : showIncidentBadge ? activeIncidentCount : 0;
+                const showBadge = showSettingsBadge || showIncidentBadge;
+                const badgeColor = showIncidentBadge ? "bg-warning text-warning-foreground" : "bg-destructive text-destructive-foreground";
                 return (
                   <SidebarMenuItem key={item.title} className={collapsed ? "w-full flex justify-center" : "w-full"}>
                     <SidebarMenuButton asChild className={collapsed ? "h-8 w-8 min-w-8 p-0 !justify-center" : "h-9 justify-start"}>
@@ -129,8 +167,8 @@ export function AppSidebar() {
                         <span className={`relative text-sm leading-none flex-shrink-0 ${collapsed ? "text-center" : "w-5"}`}>
                           {item.emoji}
                           {showBadge && collapsed && (
-                            <span className="absolute -top-1.5 -right-1.5 h-3.5 w-3.5 rounded-full bg-destructive text-destructive-foreground text-[9px] font-bold flex items-center justify-center">
-                              {pendingCount}
+                            <span className={`absolute -top-1.5 -right-1.5 h-3.5 w-3.5 rounded-full ${badgeColor} text-[9px] font-bold flex items-center justify-center`}>
+                              {badgeCount}
                             </span>
                           )}
                         </span>
@@ -138,8 +176,8 @@ export function AppSidebar() {
                           <span className="text-sm truncate flex-1 text-left flex items-center gap-2">
                             {item.title}
                             {showBadge && (
-                              <span className="h-5 min-w-5 px-1 rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold flex items-center justify-center">
-                                {pendingCount}
+                              <span className={`h-5 min-w-5 px-1 rounded-full ${badgeColor} text-[10px] font-bold flex items-center justify-center`}>
+                                {badgeCount}
                               </span>
                             )}
                           </span>
