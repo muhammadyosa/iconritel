@@ -409,6 +409,62 @@ export default function RegionalOfficeTab({ tickets }: RegionalOfficeTabProps) {
                         <span className="font-medium">Tidak ada incident aktif</span>
                       </div>
                     )}
+
+                    {/* Scrollable Team List inside card */}
+                    <div className="border-t border-border/40 pt-2" onClick={(e) => e.stopPropagation()}>
+                      <div className="flex items-center justify-between mb-1.5">
+                        <span className="text-[9px] sm:text-[10px] font-semibold text-muted-foreground flex items-center gap-1">
+                          <Users className="h-3 w-3" /> Daftar Tim ({r.teams.length})
+                        </span>
+                        <span className="text-[8px] text-muted-foreground italic">scroll ↓</span>
+                      </div>
+                      <ScrollArea className="h-[120px] sm:h-[140px] rounded-md border border-border/30 bg-muted/20">
+                        <div className="p-1.5 space-y-0.5">
+                          {r.teams.map((t, tIdx) => {
+                            const teamHostSet = new Set(t.hostnames.map(h => h.trim().toUpperCase()));
+                            const teamInc = r.incidentTickets.filter(tk => teamHostSet.has(tk.hostname.trim().toUpperCase()));
+                            const hasIncident = teamInc.length > 0;
+                            return (
+                              <div
+                                key={`${t.mitraName}-${tIdx}`}
+                                className={cn(
+                                  "flex items-center justify-between px-2 py-1.5 rounded-md text-[9px] sm:text-[10px] transition-colors",
+                                  hasIncident
+                                    ? "bg-destructive/5 hover:bg-destructive/10 cursor-pointer border border-transparent hover:border-destructive/20"
+                                    : "bg-muted/30 hover:bg-muted/50"
+                                )}
+                                onClick={() => {
+                                  if (hasIncident) {
+                                    setSelectedRegion(r);
+                                    setSelectedTeam(t);
+                                  }
+                                }}
+                              >
+                                <div className="flex items-center gap-1.5 min-w-0 flex-1">
+                                  <Badge
+                                    variant={t.serpoType === "RITEL" ? "default" : "secondary"}
+                                    className="text-[6px] sm:text-[7px] px-1 py-0 h-auto flex-shrink-0"
+                                  >
+                                    {t.serpoType === "RITEL" ? "R" : "F"}
+                                  </Badge>
+                                  <span className="font-medium truncate">{t.mitraName}</span>
+                                </div>
+                                <div className="flex items-center gap-1 flex-shrink-0">
+                                  <span className="text-[8px] text-muted-foreground">{t.hostnames.length} OLT</span>
+                                  {hasIncident ? (
+                                    <Badge variant="destructive" className="text-[6px] sm:text-[7px] px-1 py-0 h-auto ml-1">
+                                      {teamInc.length} <ChevronRight className="h-2 w-2 ml-0.5 inline" />
+                                    </Badge>
+                                  ) : (
+                                    <Badge variant="outline" className="text-[6px] sm:text-[7px] px-1 py-0 h-auto text-success border-success/30 ml-1">✓</Badge>
+                                  )}
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </ScrollArea>
+                    </div>
                   </CardContent>
                 </Card>
               </motion.div>
