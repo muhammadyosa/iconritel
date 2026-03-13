@@ -342,12 +342,12 @@ export default function RegionalOfficeTab({ tickets }: RegionalOfficeTabProps) {
                   onClick={() => setSelectedRegion(r)}
                 >
                   {/* Region header */}
-                  <div className="bg-gradient-to-r from-primary/8 to-transparent px-3 py-2 sm:px-4 sm:py-2.5 border-b border-border/50 flex items-center justify-between">
-                    <div className="flex items-center gap-2 min-w-0">
-                      <MapPin className="h-3.5 w-3.5 text-primary flex-shrink-0" />
-                      <span className="font-bold text-xs sm:text-sm truncate">{r.region}</span>
+                  <div className="bg-gradient-to-r from-primary/8 to-transparent px-2 py-1.5 xs:px-3 xs:py-2 sm:px-4 sm:py-2.5 border-b border-border/50 flex items-center justify-between">
+                    <div className="flex items-center gap-1.5 xs:gap-2 min-w-0">
+                      <MapPin className="h-3 w-3 xs:h-3.5 xs:w-3.5 text-primary flex-shrink-0" />
+                      <span className="font-bold text-[11px] xs:text-xs sm:text-sm truncate">{r.region}</span>
                     </div>
-                    <ChevronRight className="h-3.5 w-3.5 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0" />
+                    <ChevronRight className="h-3 w-3 xs:h-3.5 xs:w-3.5 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0" />
                   </div>
 
                   <CardContent className="p-3 sm:p-4 space-y-3">
