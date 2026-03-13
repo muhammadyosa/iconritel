@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useCloudTickets } from "@/hooks/useCloudTickets";
 import { useRealtimeDate } from "@/hooks/useRealtimeDate";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -778,76 +779,39 @@ function parseDurationToMinutes(duration: string): number {
 
 // Component for Pending Tickets List
 function PendingTicketsList() {
-  const [tickets, setTickets] = useState<Ticket[]>([]);
+  const { tickets: allCloudTickets, isLoading, updateTicket, deleteTicket } = useCloudTickets();
+  const pendingTickets = allCloudTickets.filter(t => t.status === "Pending");
   const [pendingInput, setPendingInput] = useState("");
   const [pendingResult, setPendingResult] = useState("");
   const [parsedPendingTickets, setParsedPendingTickets] = useState<ParsedPendingTicket[]>([]);
-  const STORAGE_KEY = "noc_tickets";
   
   // User role for permission-based UI
   const { isAdmin } = useUserRole();
 
-  useEffect(() => {
-    const loadTickets = () => {
-      try {
-        const saved = localStorage.getItem(STORAGE_KEY);
-        if (saved) {
-          const allTickets: Ticket[] = JSON.parse(saved);
-          const pendingTickets = allTickets.filter(t => t.status === "Pending");
-          setTickets(pendingTickets);
-        }
-      } catch (error) {
-        console.error("Error loading tickets:", error);
-      }
-    };
-
-    loadTickets();
-    
-    // Listen to storage changes
-    const handleStorageChange = () => loadTickets();
-    window.addEventListener("storage", handleStorageChange);
-    
-    return () => window.removeEventListener("storage", handleStorageChange);
-  }, []);
-
-  const handleUpdateStatus = (id: string, newStatus: Ticket["status"]) => {
+  const handleUpdateStatus = async (id: string, newStatus: Ticket["status"]) => {
     try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) {
-        const allTickets: Ticket[] = JSON.parse(saved);
-        const updated = allTickets.map(t => 
-          t.id === id ? { ...t, status: newStatus } : t
-        );
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
-        setTickets(updated.filter(t => t.status === "Pending"));
-        toast({
-          title: "Status diperbarui",
-          description: `Tiket berhasil diubah ke ${newStatus}`,
-        });
-      }
-    } catch (error) {
+      await updateTicket(id, { status: newStatus });
+      toast({
+        title: "Status diperbarui",
+        description: `Incident berhasil diubah ke ${newStatus}`,
+      });
+    } catch {
       toast({
         title: "Gagal update",
-        description: "Tidak dapat memperbarui status tiket.",
+        description: "Tidak dapat memperbarui status incident.",
         variant: "destructive",
       });
     }
   };
 
-  const handleDeleteTicket = (id: string) => {
+  const handleDeleteTicket = async (id: string) => {
     try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) {
-        const allTickets: Ticket[] = JSON.parse(saved);
-        const updated = allTickets.filter(t => t.id !== id);
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
-        setTickets(updated.filter(t => t.status === "Pending"));
-        toast({
-          title: "Incident dihapus",
-          description: "Incident berhasil dihapus dari sistem.",
-        });
-      }
-    } catch (error) {
+      await deleteTicket(id);
+      toast({
+        title: "Incident dihapus",
+        description: "Incident berhasil dihapus dari sistem.",
+      });
+    } catch {
       toast({
         title: "Gagal hapus",
         description: "Tidak dapat menghapus incident.",
@@ -1154,11 +1118,11 @@ Contoh:
             Tiket Pending di Sistem
           </CardTitle>
           <CardDescription>
-            Daftar tiket dengan status Pending dari sistem ({tickets.length} tiket)
+            Daftar tiket dengan status Pending dari sistem ({pendingTickets.length} tiket)
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {tickets.length === 0 ? (
+          {pendingTickets.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
               <ClipboardList className="h-12 w-12 mx-auto mb-3 opacity-50" />
               <p className="text-sm">Tidak ada tiket pending</p>
@@ -1178,7 +1142,7 @@ Contoh:
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {tickets.map((ticket) => (
+                  {pendingTickets.map((ticket) => (
                     <TableRow key={ticket.id}>
                       <TableCell className="text-xs font-mono">
                         {formatDate(ticket.createdISO)}
