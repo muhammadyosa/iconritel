@@ -1094,31 +1094,21 @@ Contoh:
             </div>
           </div>
 
-          {/* Team Reference */}
+          {/* Team Reference - dynamic from Regional data */}
           <div className="border rounded-lg p-3 bg-muted/30">
-            <p className="text-xs font-medium mb-2">🗺️ Daftar Tim per Region:</p>
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-2 text-[10px]">
-              <div>
-                <span className="font-semibold text-primary">LAMPUNG:</span>
-                <span className="text-muted-foreground"> SIB PESAWARAN, TTM LAMPUNG TENGAH, dll</span>
+            <p className="text-xs font-medium mb-2">🗺️ Daftar Tim per Region ({Object.keys(teamRegions).length} wilayah):</p>
+            {Object.keys(teamRegions).length === 0 ? (
+              <p className="text-[10px] text-muted-foreground">Belum ada data regional. Import data dari Settings.</p>
+            ) : (
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2 text-[10px]">
+                {Object.entries(teamRegions).sort(([a], [b]) => a.localeCompare(b)).map(([region, teams]) => (
+                  <div key={region}>
+                    <span className="font-semibold text-primary">{region}:</span>
+                    <span className="text-muted-foreground"> {teams.slice(0, 3).join(", ")}{teams.length > 3 ? `, +${teams.length - 3} lainnya` : ""}</span>
+                  </div>
+                ))}
               </div>
-              <div>
-                <span className="font-semibold text-primary">SUMSEL:</span>
-                <span className="text-muted-foreground"> REG7 PALEMBANG, SIB BANYUASIN, dll</span>
-              </div>
-              <div>
-                <span className="font-semibold text-primary">JAMBI:</span>
-                <span className="text-muted-foreground"> INTERNAL JAMBI, GSP TEBO, dll</span>
-              </div>
-              <div>
-                <span className="font-semibold text-primary">BENGKULU:</span>
-                <span className="text-muted-foreground"> GSP BENGKULU, SIB CURUP, dll</span>
-              </div>
-              <div>
-                <span className="font-semibold text-primary">BANGKA:</span>
-                <span className="text-muted-foreground"> BANGKA REG 7, SIB BELITUNG, dll</span>
-              </div>
-            </div>
+            )}
           </div>
         </CardContent>
       </Card>
