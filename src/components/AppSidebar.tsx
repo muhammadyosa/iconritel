@@ -74,7 +74,7 @@ export function AppSidebar() {
   const { theme, setTheme } = useTheme();
   const collapsed = state === "collapsed";
   const { count: pendingCount, isAdmin } = usePendingUserCount();
-  const activeIncidentCount = useActiveIncidentCount();
+  
 
   return (
     <Sidebar className={collapsed ? "w-[52px]" : "w-56 sm:w-60"} collapsible="icon">
