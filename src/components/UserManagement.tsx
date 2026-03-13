@@ -81,7 +81,7 @@ export function UserManagement() {
           created_at: profile.created_at,
           last_online: profile.last_online as string | null,
           is_approved: (profile as any).is_approved ?? false,
-          role: (userRole?.role as "admin" | "noc" | "reviewer") || "noc",
+          role: (userRole?.role as "admin" | "noc" | "reviewer" | "intern") || "noc",
           lastAction: latestActivityMap.get(profile.user_id),
         };
       });
