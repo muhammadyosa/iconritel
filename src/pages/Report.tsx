@@ -32,6 +32,7 @@ import { Ticket } from "@/types/ticket";
 import { DashboardIconnetTab } from "@/components/DashboardIconnetTab";
 import { useUserRole } from "@/hooks/useUserRole";
 import { StatusBadge } from "@/components/StatusBadge";
+import { TicketDetailDialog } from "@/components/TicketDetailDialog";
 import {
   Table,
   TableBody,
@@ -806,9 +807,11 @@ function PendingTicketsList({ pendingTickets, isLoading, updateTicket, deleteTic
   const [pendingInput, setPendingInput] = useState("");
   const [pendingResult, setPendingResult] = useState("");
   const [parsedPendingTickets, setParsedPendingTickets] = useState<ParsedPendingTicket[]>([]);
+  const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
+  const [detailOpen, setDetailOpen] = useState(false);
   
   // User role for permission-based UI
-  const { isAdmin } = useUserRole();
+  const { isAdmin, isReviewer } = useUserRole();
 
   const handleUpdateStatus = async (id: string, newStatus: Ticket["status"]) => {
     try {
@@ -1154,18 +1157,26 @@ Contoh:
             <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
-                  <TableRow>
-                    <TableHead className="text-xs w-[80px]">📅 Waktu</TableHead>
-                    <TableHead className="text-xs">👨‍💼 Service ID</TableHead>
-                    <TableHead className="text-xs">👤 Customer</TableHead>
-                    <TableHead className="text-xs w-[80px]">📊 Type</TableHead>
-                    <TableHead className="text-xs w-[80px]">Status</TableHead>
-                    <TableHead className="text-xs w-[120px]">Aksi</TableHead>
-                  </TableRow>
+                   <TableRow>
+                     <TableHead className="text-xs w-[80px]">📅 Waktu</TableHead>
+                     <TableHead className="text-xs">👨‍💼 Service ID</TableHead>
+                     <TableHead className="text-xs">👤 Customer</TableHead>
+                     <TableHead className="text-xs">🔧 Constraint</TableHead>
+                     <TableHead className="text-xs w-[80px]">📊 Type</TableHead>
+                     <TableHead className="text-xs w-[80px]">Status</TableHead>
+                     <TableHead className="text-xs w-[160px]">Aksi</TableHead>
+                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {pendingTickets.map((ticket) => (
-                    <TableRow key={ticket.id}>
+                    <TableRow 
+                      key={ticket.id} 
+                      className="cursor-pointer hover:bg-muted/50"
+                      onClick={() => {
+                        setSelectedTicket(ticket);
+                        setDetailOpen(true);
+                      }}
+                    >
                       <TableCell className="text-xs font-mono">
                         {formatDate(ticket.createdISO)}
                       </TableCell>
@@ -1175,11 +1186,14 @@ Contoh:
                       <TableCell className="text-xs">
                         {ticket.customerName || "-"}
                       </TableCell>
+                      <TableCell className="text-xs">
+                        {ticket.constraint || "-"}
+                      </TableCell>
                       <TableCell>
                         <span className={`text-[10px] px-1.5 py-0.5 rounded ${
                           ticket.category === "RITEL" 
-                            ? "bg-blue-500/10 text-blue-600" 
-                            : "bg-orange-500/10 text-orange-600"
+                            ? "bg-primary/10 text-primary" 
+                            : "bg-accent/50 text-accent-foreground"
                         }`}>
                           {ticket.category}
                         </span>
@@ -1187,7 +1201,7 @@ Contoh:
                       <TableCell>
                         <StatusBadge status={ticket.status} />
                       </TableCell>
-                      <TableCell>
+                      <TableCell onClick={(e) => e.stopPropagation()}>
                         <div className="flex gap-1">
                           <Button
                             size="sm"
@@ -1196,6 +1210,14 @@ Contoh:
                             onClick={() => handleUpdateStatus(ticket.id, "On Progress")}
                           >
                             Proses
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="default"
+                            className="h-6 text-[10px] px-2 bg-green-600 hover:bg-green-700 text-white"
+                            onClick={() => handleUpdateStatus(ticket.id, "Resolved")}
+                          >
+                            Resolve
                           </Button>
                           {isAdmin && (
                             <AlertDialog>
@@ -1210,9 +1232,9 @@ Contoh:
                               </AlertDialogTrigger>
                               <AlertDialogContent>
                                 <AlertDialogHeader>
-                                  <AlertDialogTitle>Hapus Tiket?</AlertDialogTitle>
+                                  <AlertDialogTitle>Hapus Incident?</AlertDialogTitle>
                                   <AlertDialogDescription>
-                                    Tiket {ticket.serviceId} akan dihapus permanen. Aksi ini tidak dapat dibatalkan.
+                                    Incident {ticket.serviceId} akan dihapus permanen. Aksi ini tidak dapat dibatalkan.
                                   </AlertDialogDescription>
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>
@@ -1237,6 +1259,22 @@ Contoh:
           )}
         </CardContent>
       </Card>
+
+      {/* Detail Dialog */}
+      {selectedTicket && (
+        <TicketDetailDialog
+          ticket={selectedTicket}
+          isAdmin={isAdmin}
+          isReviewer={isReviewer}
+          updateTicket={updateTicket}
+          deleteTicket={deleteTicket}
+          open={detailOpen}
+          onOpenChange={(open) => {
+            setDetailOpen(open);
+            if (!open) setSelectedTicket(null);
+          }}
+        />
+      )}
     </div>
   );
 }
