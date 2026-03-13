@@ -1118,7 +1118,7 @@ Contoh:
             Tiket Pending di Sistem
           </CardTitle>
           <CardDescription>
-            Daftar tiket dengan status Pending dari sistem ({tickets.length} tiket)
+            Daftar tiket dengan status Pending dari sistem ({pendingTickets.length} tiket)
           </CardDescription>
         </CardHeader>
         <CardContent>
