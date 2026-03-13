@@ -1122,7 +1122,7 @@ Contoh:
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {tickets.length === 0 ? (
+          {pendingTickets.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
               <ClipboardList className="h-12 w-12 mx-auto mb-3 opacity-50" />
               <p className="text-sm">Tidak ada tiket pending</p>
