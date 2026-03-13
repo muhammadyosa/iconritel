@@ -1170,7 +1170,7 @@ Contoh:
                     <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap bg-muted/80">👨‍💼 Service ID</TableHead>
                     <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap bg-muted/80">👥 Serpo</TableHead>
                     <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap bg-muted/80">⚙️ Status</TableHead>
-                    <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap bg-muted/80">Aksi</TableHead>
+                    
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -1227,55 +1227,6 @@ Contoh:
                           <div className="text-[7px] sm:text-[8px] text-muted-foreground mt-0.5">
                             {ticket.createdAt}
                           </div>
-                        </div>
-                      </TableCell>
-                      <TableCell className="px-1 sm:px-1.5 py-0.5" onClick={(e) => e.stopPropagation()}>
-                        <div className="flex gap-0.5">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="h-5 sm:h-6 text-[8px] sm:text-[9px] px-1.5"
-                            onClick={() => handleUpdateStatus(ticket.id, "On Progress")}
-                          >
-                            Proses
-                          </Button>
-                          <Button
-                            size="sm"
-                            className="h-5 sm:h-6 text-[8px] sm:text-[9px] px-1.5 bg-green-600 hover:bg-green-700 text-white"
-                            onClick={() => handleUpdateStatus(ticket.id, "Resolved")}
-                          >
-                            Resolve
-                          </Button>
-                          {isAdmin && (
-                            <AlertDialog>
-                              <AlertDialogTrigger asChild>
-                                <Button
-                                  size="sm"
-                                  variant="ghost"
-                                  className="h-5 sm:h-6 w-5 sm:w-6 p-0 text-destructive hover:text-destructive"
-                                >
-                                  <Trash2 className="h-3 w-3" />
-                                </Button>
-                              </AlertDialogTrigger>
-                              <AlertDialogContent>
-                                <AlertDialogHeader>
-                                  <AlertDialogTitle>Hapus Incident?</AlertDialogTitle>
-                                  <AlertDialogDescription>
-                                    Incident {ticket.id} akan dihapus permanen.
-                                  </AlertDialogDescription>
-                                </AlertDialogHeader>
-                                <AlertDialogFooter>
-                                  <AlertDialogCancel>Batal</AlertDialogCancel>
-                                  <AlertDialogAction
-                                    onClick={() => handleDeleteTicket(ticket.id)}
-                                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                                  >
-                                    Hapus
-                                  </AlertDialogAction>
-                                </AlertDialogFooter>
-                              </AlertDialogContent>
-                            </AlertDialog>
-                          )}
                         </div>
                       </TableCell>
                     </TableRow>
