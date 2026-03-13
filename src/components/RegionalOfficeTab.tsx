@@ -997,7 +997,7 @@ export default function RegionalOfficeTab({ tickets }: RegionalOfficeTabProps) {
                     ))}
                   </div>
                 </div>
-              </ScrollArea>
+              </div>
             </>
           )}
         </DialogContent>
