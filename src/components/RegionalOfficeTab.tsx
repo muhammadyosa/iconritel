@@ -654,8 +654,9 @@ export default function RegionalOfficeTab({ tickets }: RegionalOfficeTabProps) {
                             <TableHead className="px-1.5 py-1 w-14">Tipe</TableHead>
                             <TableHead className="px-1.5 py-1">Nama Mitra</TableHead>
                             <TableHead className="px-1.5 py-1 text-center w-10">OLT</TableHead>
-                            <TableHead className="px-1.5 py-1">Tim</TableHead>
-                          </TableRow>
+                             <TableHead className="px-1.5 py-1">Tim</TableHead>
+                             <TableHead className="px-1.5 py-1 text-right w-14">Inc</TableHead>
+                           </TableRow>
                         </TableHeader>
                         <TableBody>
                           {selectedRegion.teams.map((t, idx) => {
