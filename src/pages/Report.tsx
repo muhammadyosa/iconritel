@@ -806,9 +806,11 @@ function PendingTicketsList({ pendingTickets, isLoading, updateTicket, deleteTic
   const [pendingInput, setPendingInput] = useState("");
   const [pendingResult, setPendingResult] = useState("");
   const [parsedPendingTickets, setParsedPendingTickets] = useState<ParsedPendingTicket[]>([]);
+  const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
+  const [detailOpen, setDetailOpen] = useState(false);
   
   // User role for permission-based UI
-  const { isAdmin } = useUserRole();
+  const { isAdmin, isReviewer } = useUserRole();
 
   const handleUpdateStatus = async (id: string, newStatus: Ticket["status"]) => {
     try {
