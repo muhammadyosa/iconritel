@@ -1142,7 +1142,7 @@ Contoh:
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {tickets.map((ticket) => (
+                  {pendingTickets.map((ticket) => (
                     <TableRow key={ticket.id}>
                       <TableCell className="text-xs font-mono">
                         {formatDate(ticket.createdISO)}
