@@ -401,8 +401,60 @@ export function InsidentManagement() {
         </Button>
       </div>
 
-      {/* Tickets Table */}
-      <Card>
+      {/* Tickets Table - Mobile Card Layout */}
+      <div className="sm:hidden">
+        <div className="flex items-center gap-2 mb-2">
+          <Checkbox
+            checked={filteredTickets.length > 0 && selectedIds.size === filteredTickets.length}
+            onCheckedChange={toggleSelectAll}
+          />
+          <span className="text-[10px] text-muted-foreground">Pilih Semua</span>
+        </div>
+        <div className="space-y-1.5 max-h-[65vh] overflow-y-auto">
+          {filteredTickets.length === 0 ? (
+            <p className="text-center text-muted-foreground text-xs py-6">Tidak ada insident ditemukan</p>
+          ) : (
+            filteredTickets.slice(0, 200).map((ticket, idx) => (
+              <div
+                key={ticket.id}
+                className={`border rounded-md p-2 bg-card space-y-1 ${selectedIds.has(ticket.id) ? "border-primary/50 bg-primary/5" : ""}`}
+              >
+                <div className="flex items-center justify-between gap-1.5">
+                  <div className="flex items-center gap-1.5 min-w-0">
+                    <Checkbox
+                      checked={selectedIds.has(ticket.id)}
+                      onCheckedChange={() => toggleSelect(ticket.id)}
+                      className="flex-shrink-0"
+                    />
+                    <span className="text-[10px] text-muted-foreground">{idx + 1}.</span>
+                    <span className="text-[10px] font-mono font-medium truncate">{ticket.id}</span>
+                  </div>
+                  {statusBadge(ticket.status)}
+                </div>
+                <div className="grid grid-cols-2 gap-x-3 gap-y-0.5 text-[10px] pl-6">
+                  <div className="truncate"><span className="text-muted-foreground">👤 </span>{ticket.customerName}</div>
+                  <div className="truncate"><span className="text-muted-foreground">⚠️ </span>{ticket.constraint}</div>
+                  <div className="truncate"><span className="text-muted-foreground">✍️ </span>{ticket.createdByName || "—"}</div>
+                  <div className="truncate text-muted-foreground">🕐 {ticket.createdAt}</div>
+                </div>
+                {ticket.status === "Resolved" && ticket.resolvedAt && (
+                  <div className="text-[10px] pl-6 text-orange-400 font-medium">
+                    🗑️ Auto-delete: {getTimeRemaining(ticket.resolvedAt)}
+                  </div>
+                )}
+              </div>
+            ))
+          )}
+        </div>
+        {filteredTickets.length > 200 && (
+          <p className="text-[10px] text-muted-foreground text-center py-1.5">
+            Menampilkan 200 dari {filteredTickets.length} insident
+          </p>
+        )}
+      </div>
+
+      {/* Tickets Table - Desktop */}
+      <Card className="hidden sm:block">
         <CardContent className="p-0">
           <div className="max-h-[55vh] overflow-auto">
             <Table>
