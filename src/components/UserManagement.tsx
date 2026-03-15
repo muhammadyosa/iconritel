@@ -538,19 +538,43 @@ export function UserManagement() {
                 <TableRow>
                   <TableHead className="w-10 p-2"></TableHead>
                   <TableHead className="p-2">User</TableHead>
-                  <TableHead className="p-2 w-[80px]">Status</TableHead>
-                  <TableHead className="p-2 w-[100px]">Role</TableHead>
+                  <TableHead className="p-2 w-[80px]">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-auto p-0 font-medium hover:bg-transparent text-xs"
+                      onClick={() => toggleSort("approval")}
+                    >
+                      Status
+                      {sortField === "approval" && sortOrder === "desc" && <ArrowDown className="ml-1 h-3 w-3" />}
+                      {sortField === "approval" && sortOrder === "asc" && <ArrowUp className="ml-1 h-3 w-3" />}
+                      {(sortField !== "approval" || sortOrder === null) && <ArrowUpDown className="ml-1 h-3 w-3" />}
+                    </Button>
+                  </TableHead>
+                  <TableHead className="p-2 w-[100px]">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-auto p-0 font-medium hover:bg-transparent text-xs"
+                      onClick={() => toggleSort("role")}
+                    >
+                      Role
+                      {sortField === "role" && sortOrder === "desc" && <ArrowDown className="ml-1 h-3 w-3" />}
+                      {sortField === "role" && sortOrder === "asc" && <ArrowUp className="ml-1 h-3 w-3" />}
+                      {(sortField !== "role" || sortOrder === null) && <ArrowUpDown className="ml-1 h-3 w-3" />}
+                    </Button>
+                  </TableHead>
                   <TableHead className="p-2 w-[110px]">
                     <Button
                       variant="ghost"
                       size="sm"
                       className="h-auto p-0 font-medium hover:bg-transparent text-xs"
-                      onClick={toggleSort}
+                      onClick={() => toggleSort("online")}
                     >
                       Online
-                      {sortOrder === null && <ArrowUpDown className="ml-1 h-3 w-3" />}
-                      {sortOrder === "desc" && <ArrowDown className="ml-1 h-3 w-3" />}
-                      {sortOrder === "asc" && <ArrowUp className="ml-1 h-3 w-3" />}
+                      {sortField === "online" && sortOrder === "desc" && <ArrowDown className="ml-1 h-3 w-3" />}
+                      {sortField === "online" && sortOrder === "asc" && <ArrowUp className="ml-1 h-3 w-3" />}
+                      {(sortField !== "online" || sortOrder === null) && <ArrowUpDown className="ml-1 h-3 w-3" />}
                     </Button>
                   </TableHead>
                   <TableHead className="p-2 hidden lg:table-cell">
