@@ -670,6 +670,7 @@ export function UserManagement() {
               </TableBody>
             </Table>
           </div>
+          </>
         )}
 
         {/* Role Legend */}
