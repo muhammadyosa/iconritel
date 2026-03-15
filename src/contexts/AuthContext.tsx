@@ -117,10 +117,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [fetchProfile, updateLastOnline, user?.id]);
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    // Clear state first to prevent flicker
     setUser(null);
     setSession(null);
     setProfile(null);
+    // Sign out with global scope to invalidate all sessions
+    await supabase.auth.signOut({ scope: 'global' });
+    // Mark that user explicitly logged out to prevent auto-login
+    sessionStorage.setItem('explicit_logout', 'true');
   };
 
   return (
