@@ -181,7 +181,34 @@ const OLTDeviceList = () => {
             </div>
           </div>
 
-          <div className="rounded-md border overflow-x-auto overflow-y-auto max-h-[50vh] sm:max-h-[60vh] md:max-h-[65vh] lg:max-h-[70vh] -mx-2 sm:mx-0">
+          {/* Mobile Card Layout */}
+          <div className="sm:hidden space-y-2 max-h-[60vh] overflow-y-auto">
+            {isLoading ? (
+              <p className="text-center text-muted-foreground text-[10px] py-4">Memuat data OLT...</p>
+            ) : filteredData.length === 0 ? (
+              <p className="text-center text-muted-foreground text-[10px] py-4">
+                {oltData.length === 0 ? "Belum ada data OLT." : "Tidak ada data yang sesuai."}
+              </p>
+            ) : (
+              filteredData.slice(0, 100).map((olt) => (
+                <div key={olt.id} className="border rounded-lg p-2.5 bg-card space-y-1.5">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="font-mono text-[10px] font-semibold text-primary truncate">{olt.hostnameOlt || "-"}</span>
+                    <span className="text-[9px] text-muted-foreground shrink-0">{olt.provinsi || "-"}</span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-x-3 gap-y-0.5 text-[9px]">
+                    <div><span className="text-muted-foreground">ID OLT:</span> <span className="font-mono">{olt.idOlt || "-"}</span></div>
+                    <div><span className="text-muted-foreground">IP NMS:</span> <span className="font-mono">{olt.ipNmsOlt || "-"}</span></div>
+                    <div><span className="text-muted-foreground">HOST UPE:</span> <span className="font-mono">{olt.hostnameUpe || "-"}</span></div>
+                    <div className="truncate"><span className="text-muted-foreground">TIKOR:</span> <span className="font-mono">{olt.tikorOlt || "-"}</span></div>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+
+          {/* Desktop Table Layout */}
+          <div className="hidden sm:block rounded-md border overflow-x-auto overflow-y-auto max-h-[60vh] md:max-h-[65vh] lg:max-h-[70vh]">
             <Table className="text-[10px] sm:text-xs min-w-[700px]">
               <TableHeader className="sticky top-0 bg-background z-10">
                 <TableRow className="h-6 sm:h-8">
