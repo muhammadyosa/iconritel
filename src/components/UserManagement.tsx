@@ -10,7 +10,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Loader2, RefreshCw, Shield, User, Users, Clock, ArrowUpDown, ArrowUp, ArrowDown, Pencil, Activity, CheckCircle2, XCircle } from "lucide-react";
+import { Loader2, RefreshCw, Shield, User, Users, Clock, ArrowUpDown, ArrowUp, ArrowDown, Pencil, Activity, CheckCircle2, XCircle, Search } from "lucide-react";
 import { toast } from "sonner";
 import { getActionLabel, useActivityLog } from "@/hooks/useActivityLog";
 
@@ -43,6 +43,8 @@ export function UserManagement() {
   const [editDisplayName, setEditDisplayName] = useState("");
   const [isSavingName, setIsSavingName] = useState(false);
   const [sortOrder, setSortOrder] = useState<"asc" | "desc" | null>(null);
+  const [sortField, setSortField] = useState<"online" | "role" | "approval">("online");
+  const [searchQuery, setSearchQuery] = useState("");
   const { logActivity } = useActivityLog();
 
   const fetchUsers = async () => {
@@ -284,27 +286,53 @@ export function UserManagement() {
     }
   };
 
-  const toggleSort = () => {
-    if (sortOrder === null) {
-      setSortOrder("desc"); // Most recent first
+  const toggleSort = (field: "online" | "role" | "approval") => {
+    if (sortField !== field) {
+      setSortField(field);
+      setSortOrder("desc");
+    } else if (sortOrder === null) {
+      setSortOrder("desc");
     } else if (sortOrder === "desc") {
-      setSortOrder("asc"); // Oldest first
+      setSortOrder("asc");
     } else {
-      setSortOrder(null); // Reset to default
+      setSortOrder(null);
     }
   };
 
-  const sortedUsers = [...users].sort((a, b) => {
+  const roleOrder = { admin: 0, noc: 1, reviewer: 2, intern: 3 };
+
+  // Filter users by search query
+  const filteredUsers = users.filter((u) => {
+    if (!searchQuery.trim()) return true;
+    const q = searchQuery.toLowerCase();
+    return (
+      (u.display_name?.toLowerCase().includes(q)) ||
+      u.email.toLowerCase().includes(q) ||
+      u.role.toLowerCase().includes(q)
+    );
+  });
+
+  const sortedUsers = [...filteredUsers].sort((a, b) => {
     if (sortOrder === null) return 0;
-    
-    const aTime = a.last_online ? new Date(a.last_online).getTime() : 0;
-    const bTime = b.last_online ? new Date(b.last_online).getTime() : 0;
-    
-    if (sortOrder === "desc") {
-      return bTime - aTime; // Most recent first
-    } else {
-      return aTime - bTime; // Oldest first
+
+    if (sortField === "online") {
+      const aTime = a.last_online ? new Date(a.last_online).getTime() : 0;
+      const bTime = b.last_online ? new Date(b.last_online).getTime() : 0;
+      return sortOrder === "desc" ? bTime - aTime : aTime - bTime;
     }
+
+    if (sortField === "role") {
+      const diff = roleOrder[a.role] - roleOrder[b.role];
+      return sortOrder === "desc" ? -diff : diff;
+    }
+
+    if (sortField === "approval") {
+      const aVal = a.is_approved ? 1 : 0;
+      const bVal = b.is_approved ? 1 : 0;
+      return sortOrder === "desc" ? bVal - aVal : aVal - bVal;
+    }
+
+    return 0;
   });
 
   if (!isAdmin) {
@@ -345,6 +373,19 @@ export function UserManagement() {
         </div>
       </CardHeader>
       <CardContent>
+        {/* Search Bar */}
+        {!isLoading && users.length > 0 && (
+          <div className="relative mb-4">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Cari nama, email, atau role..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-9 h-9 text-sm"
+            />
+          </div>
+        )}
+
         {isLoading ? (
           <div className="flex items-center justify-center py-12">
             <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
@@ -497,19 +538,43 @@ export function UserManagement() {
                 <TableRow>
                   <TableHead className="w-10 p-2"></TableHead>
                   <TableHead className="p-2">User</TableHead>
-                  <TableHead className="p-2 w-[80px]">Status</TableHead>
-                  <TableHead className="p-2 w-[100px]">Role</TableHead>
+                  <TableHead className="p-2 w-[80px]">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-auto p-0 font-medium hover:bg-transparent text-xs"
+                      onClick={() => toggleSort("approval")}
+                    >
+                      Status
+                      {sortField === "approval" && sortOrder === "desc" && <ArrowDown className="ml-1 h-3 w-3" />}
+                      {sortField === "approval" && sortOrder === "asc" && <ArrowUp className="ml-1 h-3 w-3" />}
+                      {(sortField !== "approval" || sortOrder === null) && <ArrowUpDown className="ml-1 h-3 w-3" />}
+                    </Button>
+                  </TableHead>
+                  <TableHead className="p-2 w-[100px]">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-auto p-0 font-medium hover:bg-transparent text-xs"
+                      onClick={() => toggleSort("role")}
+                    >
+                      Role
+                      {sortField === "role" && sortOrder === "desc" && <ArrowDown className="ml-1 h-3 w-3" />}
+                      {sortField === "role" && sortOrder === "asc" && <ArrowUp className="ml-1 h-3 w-3" />}
+                      {(sortField !== "role" || sortOrder === null) && <ArrowUpDown className="ml-1 h-3 w-3" />}
+                    </Button>
+                  </TableHead>
                   <TableHead className="p-2 w-[110px]">
                     <Button
                       variant="ghost"
                       size="sm"
                       className="h-auto p-0 font-medium hover:bg-transparent text-xs"
-                      onClick={toggleSort}
+                      onClick={() => toggleSort("online")}
                     >
                       Online
-                      {sortOrder === null && <ArrowUpDown className="ml-1 h-3 w-3" />}
-                      {sortOrder === "desc" && <ArrowDown className="ml-1 h-3 w-3" />}
-                      {sortOrder === "asc" && <ArrowUp className="ml-1 h-3 w-3" />}
+                      {sortField === "online" && sortOrder === "desc" && <ArrowDown className="ml-1 h-3 w-3" />}
+                      {sortField === "online" && sortOrder === "asc" && <ArrowUp className="ml-1 h-3 w-3" />}
+                      {(sortField !== "online" || sortOrder === null) && <ArrowUpDown className="ml-1 h-3 w-3" />}
                     </Button>
                   </TableHead>
                   <TableHead className="p-2 hidden lg:table-cell">
