@@ -42,6 +42,12 @@ export default function Login() {
 
   useEffect(() => {
     if (!isLoading && user) {
+      // If user explicitly logged out, don't auto-redirect
+      const explicitLogout = sessionStorage.getItem('explicit_logout');
+      if (explicitLogout) {
+        sessionStorage.removeItem('explicit_logout');
+        return;
+      }
       const timer = setTimeout(() => {
         navigate("/", { replace: true });
       }, 100);
