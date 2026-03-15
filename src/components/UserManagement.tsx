@@ -355,6 +355,7 @@ export function UserManagement() {
             <p>Tidak ada user terdaftar</p>
           </div>
         ) : (
+          <>
           {/* Mobile Card Layout */}
           <div className="sm:hidden space-y-3 max-h-[60vh] overflow-auto">
             {sortedUsers.map((user) => (
