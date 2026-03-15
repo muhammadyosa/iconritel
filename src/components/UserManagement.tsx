@@ -286,30 +286,54 @@ export function UserManagement() {
     }
   };
 
-  const toggleSort = () => {
-    if (sortOrder === null) {
-      setSortOrder("desc"); // Most recent first
+  const toggleSort = (field: "online" | "role" | "approval") => {
+    if (sortField !== field) {
+      setSortField(field);
+      setSortOrder("desc");
+    } else if (sortOrder === null) {
+      setSortOrder("desc");
     } else if (sortOrder === "desc") {
-      setSortOrder("asc"); // Oldest first
+      setSortOrder("asc");
     } else {
-      setSortOrder(null); // Reset to default
+      setSortOrder(null);
     }
   };
 
-  const sortedUsers = [...users].sort((a, b) => {
-    if (sortOrder === null) return 0;
-    
-    const aTime = a.last_online ? new Date(a.last_online).getTime() : 0;
-    const bTime = b.last_online ? new Date(b.last_online).getTime() : 0;
-    
-    if (sortOrder === "desc") {
-      return bTime - aTime; // Most recent first
-    } else {
-      return aTime - bTime; // Oldest first
-    }
+  const roleOrder = { admin: 0, noc: 1, reviewer: 2, intern: 3 };
+
+  // Filter users by search query
+  const filteredUsers = users.filter((u) => {
+    if (!searchQuery.trim()) return true;
+    const q = searchQuery.toLowerCase();
+    return (
+      (u.display_name?.toLowerCase().includes(q)) ||
+      u.email.toLowerCase().includes(q) ||
+      u.role.toLowerCase().includes(q)
+    );
   });
 
-  if (!isAdmin) {
+  const sortedUsers = [...filteredUsers].sort((a, b) => {
+    if (sortOrder === null) return 0;
+
+    if (sortField === "online") {
+      const aTime = a.last_online ? new Date(a.last_online).getTime() : 0;
+      const bTime = b.last_online ? new Date(b.last_online).getTime() : 0;
+      return sortOrder === "desc" ? bTime - aTime : aTime - bTime;
+    }
+
+    if (sortField === "role") {
+      const diff = roleOrder[a.role] - roleOrder[b.role];
+      return sortOrder === "desc" ? -diff : diff;
+    }
+
+    if (sortField === "approval") {
+      const aVal = a.is_approved ? 1 : 0;
+      const bVal = b.is_approved ? 1 : 0;
+      return sortOrder === "desc" ? bVal - aVal : aVal - bVal;
+    }
+
+    return 0;
+  });
     return (
       <Card>
         <CardContent className="py-12">
