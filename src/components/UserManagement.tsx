@@ -355,7 +355,143 @@ export function UserManagement() {
             <p>Tidak ada user terdaftar</p>
           </div>
         ) : (
-          <div className="overflow-auto max-h-[60vh]">
+          <>
+          {/* Mobile Card Layout */}
+          <div className="sm:hidden space-y-3 max-h-[60vh] overflow-auto">
+            {sortedUsers.map((user) => (
+              <div key={user.id} className="border rounded-lg p-3 space-y-2.5 bg-card">
+                {/* Header: Avatar + Name + Edit */}
+                <div className="flex items-start gap-2.5">
+                  <div className="relative flex-shrink-0">
+                    <Avatar className="h-9 w-9">
+                      <AvatarImage src={user.avatar_url || undefined} />
+                      <AvatarFallback className="text-xs">
+                        {getInitials(user.display_name, user.email)}
+                      </AvatarFallback>
+                    </Avatar>
+                    {isUserOnline(user.last_online) && (
+                      <span className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full bg-green-500 border-2 border-card" />
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-1">
+                      <span className="font-medium text-sm truncate">
+                        {user.display_name || "—"}
+                      </span>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-5 w-5 flex-shrink-0"
+                        onClick={() => handleEditUser(user)}
+                      >
+                        <Pencil className="h-2.5 w-2.5" />
+                      </Button>
+                    </div>
+                    <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+                  </div>
+                  {/* Online status */}
+                  <div className="flex-shrink-0">
+                    {user.last_online ? (
+                      isUserOnline(user.last_online) ? (
+                        <Badge variant="outline" className="bg-green-500/10 text-green-600 border-green-500/30 text-[10px] px-1.5 py-0">
+                          <span className="h-1.5 w-1.5 rounded-full bg-green-500 mr-1 animate-pulse" />
+                          Online
+                        </Badge>
+                      ) : (
+                        <span className="text-[11px] text-muted-foreground">
+                          {formatLastOnline(user.last_online)}
+                        </span>
+                      )
+                    ) : null}
+                  </div>
+                </div>
+
+                {/* Controls: Role + Status + Joined */}
+                <div className="flex items-center gap-2 flex-wrap">
+                  <Select
+                    value={user.role}
+                    onValueChange={(value: "admin" | "noc" | "reviewer" | "intern") =>
+                      handleRoleChange(user.user_id, value)
+                    }
+                    disabled={updatingUserId === user.user_id}
+                  >
+                    <SelectTrigger className="w-[100px] h-7 text-xs">
+                      {updatingUserId === user.user_id ? (
+                        <Loader2 className="h-3 w-3 animate-spin" />
+                      ) : (
+                        <SelectValue />
+                      )}
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="admin">
+                        <div className="flex items-center gap-1.5 text-xs">
+                          <Shield className="h-3 w-3 text-primary" /> Admin
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="noc">
+                        <div className="flex items-center gap-1.5 text-xs">
+                          <User className="h-3 w-3 text-muted-foreground" /> NOC
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="reviewer">
+                        <div className="flex items-center gap-1.5 text-xs">
+                          <Users className="h-3 w-3 text-amber-500" /> Reviewer
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="intern">
+                        <div className="flex items-center gap-1.5 text-xs">
+                          <User className="h-3 w-3 text-emerald-500" /> Intern
+                        </div>
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className={`h-7 px-2 text-xs gap-1 ${
+                      user.is_approved
+                        ? "text-green-600 hover:text-red-600"
+                        : "text-red-600 hover:text-green-600"
+                    }`}
+                    onClick={() => handleToggleApproval(user.user_id, user.is_approved)}
+                  >
+                    {user.is_approved ? (
+                      <CheckCircle2 className="h-3.5 w-3.5" />
+                    ) : (
+                      <XCircle className="h-3.5 w-3.5" />
+                    )}
+                    {user.is_approved ? "Approved" : "Not Approved"}
+                  </Button>
+
+                  <span className="text-[10px] text-muted-foreground ml-auto">
+                    {new Date(user.created_at).toLocaleDateString("id-ID", {
+                      day: "numeric",
+                      month: "short",
+                      year: "2-digit",
+                    })}
+                  </span>
+                </div>
+
+                {/* Last Action */}
+                {user.lastAction && (
+                  <div className="text-[11px] text-muted-foreground border-t pt-2 flex items-center gap-1.5">
+                    <Activity className="h-3 w-3 flex-shrink-0" />
+                    <span className="truncate">
+                      {getActionLabel(user.lastAction.action)}
+                      {user.lastAction.detail && ` · ${user.lastAction.detail}`}
+                    </span>
+                    <span className="text-[10px] text-muted-foreground/70 flex-shrink-0 ml-auto">
+                      {formatLastOnline(user.lastAction.created_at)}
+                    </span>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+
+          {/* Desktop Table Layout */}
+          <div className="hidden sm:block overflow-auto max-h-[60vh]">
             <Table>
               <TableHeader className="sticky top-0 z-10 bg-background shadow-sm">
                 <TableRow>
@@ -418,7 +554,6 @@ export function UserManagement() {
                           </Button>
                         </div>
                         <p className="text-[11px] text-muted-foreground truncate">{user.email}</p>
-                        {/* Show last action inline on smaller screens */}
                         <div className="lg:hidden mt-0.5">
                           {user.lastAction ? (
                             <p className="text-[10px] text-muted-foreground truncate">
@@ -446,7 +581,7 @@ export function UserManagement() {
                         ) : (
                           <XCircle className="h-3.5 w-3.5" />
                         )}
-                        <span className="hidden sm:inline">{user.is_approved ? "OK" : "No"}</span>
+                        <span>{user.is_approved ? "OK" : "No"}</span>
                       </Button>
                     </TableCell>
                     <TableCell className="p-2">
@@ -467,26 +602,22 @@ export function UserManagement() {
                         <SelectContent>
                           <SelectItem value="admin">
                             <div className="flex items-center gap-1.5 text-xs">
-                              <Shield className="h-3 w-3 text-primary" />
-                              Admin
+                              <Shield className="h-3 w-3 text-primary" /> Admin
                             </div>
                           </SelectItem>
                           <SelectItem value="noc">
                             <div className="flex items-center gap-1.5 text-xs">
-                              <User className="h-3 w-3 text-muted-foreground" />
-                              NOC
+                              <User className="h-3 w-3 text-muted-foreground" /> NOC
                             </div>
                           </SelectItem>
                           <SelectItem value="reviewer">
                             <div className="flex items-center gap-1.5 text-xs">
-                              <Users className="h-3 w-3 text-amber-500" />
-                              Reviewer
+                              <Users className="h-3 w-3 text-amber-500" /> Reviewer
                             </div>
                           </SelectItem>
                           <SelectItem value="intern">
                             <div className="flex items-center gap-1.5 text-xs">
-                              <User className="h-3 w-3 text-emerald-500" />
-                              Intern
+                              <User className="h-3 w-3 text-emerald-500" /> Intern
                             </div>
                           </SelectItem>
                         </SelectContent>
@@ -539,6 +670,7 @@ export function UserManagement() {
               </TableBody>
             </Table>
           </div>
+          </>
         )}
 
         {/* Role Legend */}
