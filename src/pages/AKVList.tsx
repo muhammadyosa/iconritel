@@ -177,7 +177,34 @@ const AKVList = () => {
             </div>
           </div>
 
-          <div className="rounded-md border overflow-x-auto overflow-y-auto max-h-[50vh] sm:max-h-[60vh] md:max-h-[65vh] lg:max-h-[70vh] -mx-2 sm:mx-0">
+          {/* Mobile Card Layout */}
+          <div className="sm:hidden space-y-2 max-h-[60vh] overflow-y-auto">
+            {isLoading ? (
+              <p className="text-center text-muted-foreground text-[10px] py-4">Memuat data AKV...</p>
+            ) : filteredData.length === 0 ? (
+              <p className="text-center text-muted-foreground text-[10px] py-4">
+                {akvData.length === 0 ? "Belum ada data AKV User." : "Tidak ada data yang sesuai."}
+              </p>
+            ) : (
+              filteredData.slice(0, 100).map((akv) => (
+                <div key={akv.id} className="border rounded-lg p-2.5 bg-card space-y-1.5">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-[10px] font-semibold text-foreground truncate">{akv.customer || "-"}</span>
+                    <span className="text-[9px] text-muted-foreground shrink-0">{akv.provinsi || "-"}</span>
+                  </div>
+                  <div className="space-y-0.5 text-[9px]">
+                    <div><span className="text-muted-foreground">Service ID:</span> <span className="font-mono">{akv.serviceId || "-"}</span></div>
+                    <div><span className="text-muted-foreground">Contact:</span> {akv.contact || "-"}</div>
+                    <div className="truncate"><span className="text-muted-foreground">Tikor:</span> <span className="font-mono">{akv.tikor || "-"}</span></div>
+                    <div className="truncate"><span className="text-muted-foreground">Address:</span> {akv.address || "-"}</div>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+
+          {/* Desktop Table Layout */}
+          <div className="hidden sm:block rounded-md border overflow-x-auto overflow-y-auto max-h-[60vh] md:max-h-[65vh] lg:max-h-[70vh]">
             <Table className="text-[10px] sm:text-xs min-w-[800px]">
               <TableHeader className="sticky top-0 bg-background z-10">
                 <TableRow className="h-6 sm:h-8">

@@ -223,20 +223,51 @@ const BNGList = () => {
             </div>
           </div>
 
-          <div className="rounded-md border overflow-x-auto overflow-y-auto max-h-[50vh] sm:max-h-[60vh] md:max-h-[65vh] lg:max-h-[70vh] -mx-2 sm:mx-0">
-            <Table className="text-[10px] min-w-[900px]">
+          {/* Mobile Card Layout */}
+          <div className="sm:hidden space-y-2 max-h-[60vh] overflow-y-auto">
+            {isLoading ? (
+              <p className="text-center text-muted-foreground text-[10px] py-4">Memuat data BNG...</p>
+            ) : filteredData.length === 0 ? (
+              <p className="text-center text-muted-foreground text-[10px] py-4">
+                {bngData.length === 0 ? "Belum ada data BNG." : "Tidak ada data yang sesuai."}
+              </p>
+            ) : (
+              filteredData.slice(0, 100).map((bng) => (
+                <div key={bng.id} className="border rounded-lg p-2.5 bg-card space-y-1.5">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="font-mono text-[10px] font-semibold text-primary truncate">{bng.hostnameBng || "-"}</span>
+                    <span className="text-[9px] text-muted-foreground shrink-0">{bng.kotaKabupaten || "-"}</span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-[9px]">
+                    <div><span className="text-muted-foreground">IP BNG:</span> <span className="font-mono">{bng.ipBng || "-"}</span></div>
+                    <div><span className="text-muted-foreground">IP RADIUS:</span> <span className="font-mono">{bng.ipRadius || "-"}</span></div>
+                    <div><span className="text-muted-foreground">HOST RADIUS:</span> <span className="font-mono">{bng.hostnameRadius || "-"}</span></div>
+                    <div><span className="text-muted-foreground">NPE:</span> <span className="font-mono">{bng.npe || "-"}</span></div>
+                    <div><span className="text-muted-foreground">VLAN:</span> <span className="font-mono">{bng.vlan || "-"}</span></div>
+                    <div><span className="text-muted-foreground">HOST OLT:</span> <span className="font-mono">{bng.hostnameOlt || "-"}</span></div>
+                    <div><span className="text-muted-foreground">UPE:</span> <span className="font-mono">{bng.upe || "-"}</span></div>
+                    <div><span className="text-muted-foreground">PORT UPE:</span> <span className="font-mono">{bng.portUpe || "-"}</span></div>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+
+          {/* Desktop Table Layout */}
+          <div className="hidden sm:block rounded-md border overflow-x-auto overflow-y-auto max-h-[60vh] md:max-h-[65vh] lg:max-h-[70vh]">
+            <Table className="text-[10px] sm:text-xs min-w-[900px]">
               <TableHeader className="sticky top-0 bg-background z-10">
-                <TableRow>
-                  <TableHead className="px-1 py-1 whitespace-nowrap">IP RADIUS</TableHead>
-                  <TableHead className="px-1 py-1 whitespace-nowrap">HOST RADIUS</TableHead>
-                  <TableHead className="px-1 py-1 whitespace-nowrap">IP BNG</TableHead>
-                  <TableHead className="px-1 py-1 whitespace-nowrap">HOST BNG</TableHead>
-                  <TableHead className="px-1 py-1 whitespace-nowrap">NPE</TableHead>
-                  <TableHead className="px-1 py-1 whitespace-nowrap">VLAN</TableHead>
-                  <TableHead className="px-1 py-1 whitespace-nowrap">HOST OLT</TableHead>
-                  <TableHead className="px-1 py-1 whitespace-nowrap">UPE</TableHead>
-                  <TableHead className="px-1 py-1 whitespace-nowrap">PORT UPE</TableHead>
-                  <TableHead className="px-1 py-1 whitespace-nowrap">KOTA/KAB</TableHead>
+                <TableRow className="h-6 sm:h-8">
+                  <TableHead className="px-1 sm:px-2 py-1 whitespace-nowrap">IP RADIUS</TableHead>
+                  <TableHead className="px-1 sm:px-2 py-1 whitespace-nowrap">HOST RADIUS</TableHead>
+                  <TableHead className="px-1 sm:px-2 py-1 whitespace-nowrap">IP BNG</TableHead>
+                  <TableHead className="px-1 sm:px-2 py-1 whitespace-nowrap">HOST BNG</TableHead>
+                  <TableHead className="px-1 sm:px-2 py-1 whitespace-nowrap">NPE</TableHead>
+                  <TableHead className="px-1 sm:px-2 py-1 whitespace-nowrap">VLAN</TableHead>
+                  <TableHead className="px-1 sm:px-2 py-1 whitespace-nowrap">HOST OLT</TableHead>
+                  <TableHead className="px-1 sm:px-2 py-1 whitespace-nowrap">UPE</TableHead>
+                  <TableHead className="px-1 sm:px-2 py-1 whitespace-nowrap">PORT UPE</TableHead>
+                  <TableHead className="px-1 sm:px-2 py-1 whitespace-nowrap">KOTA/KAB</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -256,17 +287,17 @@ const BNGList = () => {
                   </TableRow>
                 ) : (
                   filteredData.slice(0, 100).map((bng) => (
-                    <TableRow key={bng.id}>
-                      <TableCell className="font-mono px-1 py-0.5">{bng.ipRadius}</TableCell>
-                      <TableCell className="font-mono px-1 py-0.5">{bng.hostnameRadius}</TableCell>
-                      <TableCell className="font-mono px-1 py-0.5">{bng.ipBng}</TableCell>
-                      <TableCell className="font-mono px-1 py-0.5">{bng.hostnameBng}</TableCell>
-                      <TableCell className="font-mono px-1 py-0.5">{bng.npe}</TableCell>
-                      <TableCell className="font-mono px-1 py-0.5">{bng.vlan}</TableCell>
-                      <TableCell className="font-mono px-1 py-0.5">{bng.hostnameOlt}</TableCell>
-                      <TableCell className="font-mono px-1 py-0.5">{bng.upe}</TableCell>
-                      <TableCell className="font-mono px-1 py-0.5">{bng.portUpe}</TableCell>
-                      <TableCell className="px-1 py-0.5">{bng.kotaKabupaten}</TableCell>
+                    <TableRow key={bng.id} className="h-6 sm:h-8">
+                      <TableCell className="font-mono px-1 sm:px-2 py-0.5">{bng.ipRadius}</TableCell>
+                      <TableCell className="font-mono px-1 sm:px-2 py-0.5">{bng.hostnameRadius}</TableCell>
+                      <TableCell className="font-mono px-1 sm:px-2 py-0.5">{bng.ipBng}</TableCell>
+                      <TableCell className="font-mono px-1 sm:px-2 py-0.5">{bng.hostnameBng}</TableCell>
+                      <TableCell className="font-mono px-1 sm:px-2 py-0.5">{bng.npe}</TableCell>
+                      <TableCell className="font-mono px-1 sm:px-2 py-0.5">{bng.vlan}</TableCell>
+                      <TableCell className="font-mono px-1 sm:px-2 py-0.5">{bng.hostnameOlt}</TableCell>
+                      <TableCell className="font-mono px-1 sm:px-2 py-0.5">{bng.upe}</TableCell>
+                      <TableCell className="font-mono px-1 sm:px-2 py-0.5">{bng.portUpe}</TableCell>
+                      <TableCell className="px-1 sm:px-2 py-0.5">{bng.kotaKabupaten}</TableCell>
                     </TableRow>
                   ))
                 )}
