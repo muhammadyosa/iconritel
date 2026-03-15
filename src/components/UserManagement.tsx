@@ -43,6 +43,8 @@ export function UserManagement() {
   const [editDisplayName, setEditDisplayName] = useState("");
   const [isSavingName, setIsSavingName] = useState(false);
   const [sortOrder, setSortOrder] = useState<"asc" | "desc" | null>(null);
+  const [sortField, setSortField] = useState<"online" | "role" | "approval">("online");
+  const [searchQuery, setSearchQuery] = useState("");
   const { logActivity } = useActivityLog();
 
   const fetchUsers = async () => {
