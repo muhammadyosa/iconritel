@@ -334,6 +334,8 @@ export function UserManagement() {
 
     return 0;
   });
+
+  if (!isAdmin) {
     return (
       <Card>
         <CardContent className="py-12">
