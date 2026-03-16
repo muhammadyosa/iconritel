@@ -70,6 +70,7 @@ function AnimatedRoutes() {
           <Route path="/upe" element={<ProtectedRoute><PageTransition><UPEList /></PageTransition></ProtectedRoute>} />
           <Route path="/bng" element={<ProtectedRoute><PageTransition><BNGList /></PageTransition></ProtectedRoute>} />
           <Route path="/report" element={<ProtectedRoute><PageTransition><Report /></PageTransition></ProtectedRoute>} />
+          <Route path="/notes" element={<ProtectedRoute><PageTransition><ListNote /></PageTransition></ProtectedRoute>} />
           <Route path="/settings" element={<ProtectedRoute><PageTransition><Settings /></PageTransition></ProtectedRoute>} />
           <Route path="/install" element={<ProtectedRoute><PageTransition><Install /></PageTransition></ProtectedRoute>} />
           <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
