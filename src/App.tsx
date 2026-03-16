@@ -26,6 +26,7 @@ const OLTDeviceList = React.lazy(() => import("./pages/OLTDeviceList"));
 const UPEList = React.lazy(() => import("./pages/UPEList"));
 const BNGList = React.lazy(() => import("./pages/BNGList"));
 const AKVList = React.lazy(() => import("./pages/AKVList"));
+const ListNote = React.lazy(() => import("./pages/ListNote"));
 const Report = React.lazy(() => import("./pages/Report"));
 const Settings = React.lazy(() => import("./pages/Settings"));
 const Install = React.lazy(() => import("./pages/Install"));

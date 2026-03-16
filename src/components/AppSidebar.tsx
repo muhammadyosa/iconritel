@@ -27,6 +27,7 @@ const menuItems = [
   { title: "List OLT", icon: null, path: "/olt", emoji: "📟" },
   { title: "List UPE", icon: null, path: "/upe", emoji: "🔗" },
   { title: "List BNG", icon: null, path: "/bng", emoji: "🛰" },
+  { title: "List Note", icon: null, path: "/notes", emoji: "📖" },
   { title: "Report", icon: null, path: "/report", emoji: "📝" },
   { title: "Settings", icon: null, path: "/settings", emoji: "🛠" },
 ];
