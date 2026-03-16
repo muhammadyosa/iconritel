@@ -75,9 +75,7 @@ export function AppSidebar() {
   const { theme, setTheme } = useTheme();
   const collapsed = state === "collapsed";
   const { count: pendingCount, isAdmin } = usePendingUserCount();
-  const { isIntern } = useUserRole();
-
-  const { isAdmin, isNOC } = useUserRole();
+  const { isIntern, isNOC } = useUserRole();
 
   // Filter menu based on role
   const INTERN_PATHS = new Set(["/", "/tickets", "/teams"]);
