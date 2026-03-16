@@ -75,13 +75,16 @@ export function AppSidebar() {
   const { theme, setTheme } = useTheme();
   const collapsed = state === "collapsed";
   const { count: pendingCount, isAdmin } = usePendingUserCount();
-  const { isIntern } = useUserRole();
+  const { isIntern, isNOC } = useUserRole();
 
-  // Intern can only see Dashboard and Incident Management
+  // Filter menu based on role
   const INTERN_PATHS = new Set(["/", "/tickets", "/teams"]);
-  const visibleMenuItems = isIntern
-    ? menuItems.filter((item) => INTERN_PATHS.has(item.path))
-    : menuItems;
+  const ADMIN_NOC_ONLY_PATHS = new Set(["/notes"]);
+  const visibleMenuItems = menuItems.filter((item) => {
+    if (isIntern && !INTERN_PATHS.has(item.path)) return false;
+    if (ADMIN_NOC_ONLY_PATHS.has(item.path) && !isAdmin && !isNOC) return false;
+    return true;
+  });
   
 
   return (
