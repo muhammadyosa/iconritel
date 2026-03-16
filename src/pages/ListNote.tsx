@@ -1,18 +1,13 @@
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Search, Plus, Trash2, Edit2, Save, X } from "lucide-react";
+import { Search, Plus, Trash2, Edit2, Save, X, Loader2 } from "lucide-react";
+import { useCloudNotes } from "@/hooks/useCloudNotes";
+import { useUserRole } from "@/hooks/useUserRole";
 import { toast } from "sonner";
-
-interface NoteItem {
-  id: string;
-  title: string;
-  content: string;
-  createdAt: string;
-}
 
 const TABS = [
   { value: "bng-upe", label: "🛰 BNG & UPE" },
@@ -22,15 +17,8 @@ const TABS = [
 ];
 
 function NoteSection({ tabKey }: { tabKey: string }) {
-  const storageKey = `list-note-${tabKey}`;
-  const [notes, setNotes] = useState<NoteItem[]>(() => {
-    try {
-      const stored = localStorage.getItem(storageKey);
-      return stored ? JSON.parse(stored) : [];
-    } catch {
-      return [];
-    }
-  });
+  const { notes, isLoading, addNote, updateNote, deleteNote } = useCloudNotes(tabKey);
+  const { isAdmin } = useUserRole();
   const [search, setSearch] = useState("");
   const [newTitle, setNewTitle] = useState("");
   const [newContent, setNewContent] = useState("");
@@ -39,52 +27,36 @@ function NoteSection({ tabKey }: { tabKey: string }) {
   const [editContent, setEditContent] = useState("");
   const [showForm, setShowForm] = useState(false);
 
-  const saveNotes = (updated: NoteItem[]) => {
-    setNotes(updated);
-    localStorage.setItem(storageKey, JSON.stringify(updated));
-  };
-
-  const addNote = () => {
+  const handleAdd = async () => {
     if (!newTitle.trim()) {
       toast.error("Judul tidak boleh kosong");
       return;
     }
-    const note: NoteItem = {
-      id: crypto.randomUUID(),
-      title: newTitle.trim(),
-      content: newContent.trim(),
-      createdAt: new Date().toISOString(),
-    };
-    saveNotes([note, ...notes]);
-    setNewTitle("");
-    setNewContent("");
-    setShowForm(false);
-    toast.success("Note ditambahkan");
+    const ok = await addNote(newTitle, newContent);
+    if (ok) {
+      setNewTitle("");
+      setNewContent("");
+      setShowForm(false);
+    }
   };
 
-  const deleteNote = (id: string) => {
-    saveNotes(notes.filter((n) => n.id !== id));
-    toast.success("Note dihapus");
-  };
-
-  const startEdit = (note: NoteItem) => {
-    setEditingId(note.id);
-    setEditTitle(note.title);
-    setEditContent(note.content);
-  };
-
-  const saveEdit = () => {
+  const handleSaveEdit = async () => {
     if (!editTitle.trim()) {
       toast.error("Judul tidak boleh kosong");
       return;
     }
-    saveNotes(
-      notes.map((n) =>
-        n.id === editingId ? { ...n, title: editTitle.trim(), content: editContent.trim() } : n
-      )
-    );
-    setEditingId(null);
-    toast.success("Note diperbarui");
+    if (editingId) {
+      const ok = await updateNote(editingId, editTitle, editContent);
+      if (ok) setEditingId(null);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!isAdmin) {
+      toast.error("Hanya Admin yang dapat menghapus note");
+      return;
+    }
+    await deleteNote(id);
   };
 
   const filtered = notes.filter(
@@ -126,7 +98,7 @@ function NoteSection({ tabKey }: { tabKey: string }) {
               onChange={(e) => setNewContent(e.target.value)}
               className="text-sm min-h-[80px]"
             />
-            <Button size="sm" onClick={addNote} className="h-8 gap-1.5">
+            <Button size="sm" onClick={handleAdd} className="h-8 gap-1.5">
               <Save className="h-3.5 w-3.5" />
               Simpan
             </Button>
@@ -134,7 +106,11 @@ function NoteSection({ tabKey }: { tabKey: string }) {
         </Card>
       )}
 
-      {filtered.length === 0 ? (
+      {isLoading ? (
+        <div className="flex justify-center py-10">
+          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+        </div>
+      ) : filtered.length === 0 ? (
         <div className="text-center py-10 text-muted-foreground text-sm">
           {notes.length === 0 ? "Belum ada note. Tambahkan note pertama!" : "Tidak ada note yang cocok."}
         </div>
@@ -156,7 +132,7 @@ function NoteSection({ tabKey }: { tabKey: string }) {
                       className="text-sm min-h-[60px]"
                     />
                     <div className="flex gap-1.5">
-                      <Button size="sm" onClick={saveEdit} className="h-7 gap-1 text-xs">
+                      <Button size="sm" onClick={handleSaveEdit} className="h-7 gap-1 text-xs">
                         <Save className="h-3 w-3" /> Simpan
                       </Button>
                       <Button size="sm" variant="ghost" onClick={() => setEditingId(null)} className="h-7 text-xs">
@@ -170,7 +146,10 @@ function NoteSection({ tabKey }: { tabKey: string }) {
                       <div className="min-w-0 flex-1">
                         <h4 className="text-sm font-semibold truncate">{note.title}</h4>
                         <p className="text-xs text-muted-foreground mt-0.5">
-                          {new Date(note.createdAt).toLocaleDateString("id-ID", {
+                          {note.created_by_name && (
+                            <span className="font-medium">{note.created_by_name} · </span>
+                          )}
+                          {new Date(note.created_at).toLocaleDateString("id-ID", {
                             day: "numeric",
                             month: "short",
                             year: "numeric",
@@ -180,12 +159,28 @@ function NoteSection({ tabKey }: { tabKey: string }) {
                         </p>
                       </div>
                       <div className="flex gap-1 flex-shrink-0">
-                        <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => startEdit(note)}>
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="h-7 w-7"
+                          onClick={() => {
+                            setEditingId(note.id);
+                            setEditTitle(note.title);
+                            setEditContent(note.content);
+                          }}
+                        >
                           <Edit2 className="h-3.5 w-3.5" />
                         </Button>
-                        <Button size="icon" variant="ghost" className="h-7 w-7 text-destructive" onClick={() => deleteNote(note.id)}>
-                          <Trash2 className="h-3.5 w-3.5" />
-                        </Button>
+                        {isAdmin && (
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className="h-7 w-7 text-destructive"
+                            onClick={() => handleDelete(note.id)}
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </Button>
+                        )}
                       </div>
                     </div>
                     {note.content && (
