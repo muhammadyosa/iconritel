@@ -18,6 +18,7 @@ const TABS = [
   { value: "bng-upe", label: "BNG & UPE" },
   { value: "huawei", label: "Huawei" },
   { value: "raisecom", label: "Raisecom" },
+  { value: "handling-incident", label: "Handling Incident" },
 ];
 
 function NoteSection({ tabKey }: { tabKey: string }) {
@@ -212,7 +213,7 @@ export default function ListNote() {
       </div>
 
       <Tabs defaultValue="bng-upe" className="w-full">
-        <TabsList className="w-full grid grid-cols-3 h-9">
+        <TabsList className="w-full grid grid-cols-2 sm:grid-cols-4 h-auto sm:h-9 gap-0.5">
           {TABS.map((tab) => (
             <TabsTrigger key={tab.value} value={tab.value} className="text-xs sm:text-sm">
               {tab.label}
