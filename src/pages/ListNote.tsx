@@ -15,10 +15,10 @@ interface NoteItem {
 }
 
 const TABS = [
-  { value: "bng-upe", label: "BNG & UPE" },
-  { value: "huawei", label: "Huawei" },
-  { value: "raisecom", label: "Raisecom" },
-  { value: "handling-incident", label: "Handling Incident" },
+  { value: "bng-upe", label: "🛰 BNG & UPE" },
+  { value: "huawei", label: "📟 Huawei" },
+  { value: "raisecom", label: "📟 Raisecom" },
+  { value: "handling-incident", label: "📒 Handling Incident" },
 ];
 
 function NoteSection({ tabKey }: { tabKey: string }) {
