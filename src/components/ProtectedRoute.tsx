@@ -8,10 +8,11 @@ interface ProtectedRouteProps {
 }
 
 const INTERN_ALLOWED_PATHS = new Set(["/", "/tickets", "/teams"]);
+const ADMIN_NOC_ONLY_PATHS = new Set(["/notes"]);
 
 export function ProtectedRoute({ children }: ProtectedRouteProps) {
   const { user, profile, isLoading } = useAuth();
-  const { isIntern, isLoading: isRoleLoading } = useUserRole();
+  const { isIntern, isAdmin, isNOC, isLoading: isRoleLoading } = useUserRole();
   const location = useLocation();
 
   if (isLoading || isRoleLoading) {
@@ -26,14 +27,18 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
     return <Navigate to="/login" replace />;
   }
 
-  // Check if user is approved
   if (profile && !profile.is_approved) {
     return <Navigate to="/pending-approval" replace />;
   }
 
-  // Intern can only access Dashboard and Incident Management
+  // Intern restriction
   if (isIntern && !INTERN_ALLOWED_PATHS.has(location.pathname)) {
     return <Navigate to="/tickets" replace />;
+  }
+
+  // Admin/NOC only pages
+  if (ADMIN_NOC_ONLY_PATHS.has(location.pathname) && !isAdmin && !isNOC) {
+    return <Navigate to="/" replace />;
   }
 
   return <>{children}</>;

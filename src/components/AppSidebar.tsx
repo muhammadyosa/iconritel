@@ -77,11 +77,16 @@ export function AppSidebar() {
   const { count: pendingCount, isAdmin } = usePendingUserCount();
   const { isIntern } = useUserRole();
 
-  // Intern can only see Dashboard and Incident Management
+  const { isAdmin, isNOC } = useUserRole();
+
+  // Filter menu based on role
   const INTERN_PATHS = new Set(["/", "/tickets", "/teams"]);
-  const visibleMenuItems = isIntern
-    ? menuItems.filter((item) => INTERN_PATHS.has(item.path))
-    : menuItems;
+  const ADMIN_NOC_ONLY_PATHS = new Set(["/notes"]);
+  const visibleMenuItems = menuItems.filter((item) => {
+    if (isIntern && !INTERN_PATHS.has(item.path)) return false;
+    if (ADMIN_NOC_ONLY_PATHS.has(item.path) && !isAdmin && !isNOC) return false;
+    return true;
+  });
   
 
   return (
