@@ -65,6 +65,7 @@ export function TicketDetailDialog({
 
   const handleStartEdit = () => {
     setEditData({
+      ticketId: ticket.id,
       customerName: ticket.customerName,
       serviceId: ticket.serviceId,
       hostname: ticket.hostname,
