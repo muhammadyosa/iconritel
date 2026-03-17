@@ -136,7 +136,15 @@ export function TicketDetailDialog({
         <div className="space-y-3">
           {isEditing ? (
             // Edit Mode
-            <div className="space-y-3">
+             <div className="space-y-3">
+              <div>
+                <Label className="text-xs">Nomor Insident</Label>
+                <Input
+                  value={editData.ticketId}
+                  onChange={(e) => setEditData({ ...editData, ticketId: e.target.value })}
+                  className="h-8 text-sm font-mono"
+                />
+              </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <Label className="text-xs">Customer</Label>
