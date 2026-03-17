@@ -248,7 +248,7 @@ export default function RegionalOfficeTab({ tickets }: RegionalOfficeTabProps) {
                   barCategoryGap="20%"
                 >
                   <CartesianGrid strokeDasharray="3 3" vertical={false} opacity={0.15} />
-                  <XAxis type="category" dataKey="region" tick={{ fontSize: 8, angle: -35, textAnchor: "end" }} interval={0} height={50} />
+                  <XAxis type="category" dataKey="region" tick={{ fontSize: 8 }} interval={0} height={50} angle={-35} textAnchor="end" />
                   <YAxis type="number" tick={{ fontSize: 9 }} width={35} />
                   <ChartTooltip content={<ChartTooltipContent />} />
                   <Bar dataKey="resolved" stackId="a" fill="hsl(var(--success))" name="Resolved" />
