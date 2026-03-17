@@ -84,14 +84,14 @@ export default function RegionalMapChart({ data, onRegionClick }: RegionalMapCha
               style={{ filter: "drop-shadow(0 2px 8px hsl(var(--foreground) / 0.1))" }}
             >
               {/* Water background */}
-              <rect x="60" y="0" width="260" height="340" rx="12" fill="hsl(210, 60%, 95%)" className="dark:fill-[hsl(210,30%,15%)]" />
+              <rect x="0" y="0" width="370" height="370" rx="12" fill="hsl(210, 60%, 95%)" className="dark:fill-[hsl(210,30%,15%)]" />
               
               {/* Grid lines for visual reference */}
-              {[80, 140, 200, 260].map(x => (
-                <line key={`vl-${x}`} x1={x} y1="0" x2={x} y2="340" stroke="hsl(210, 40%, 88%)" strokeWidth="0.3" className="dark:stroke-[hsl(210,20%,25%)]" />
+              {[60, 120, 180, 240, 300].map(x => (
+                <line key={`vl-${x}`} x1={x} y1="0" x2={x} y2="370" stroke="hsl(210, 40%, 88%)" strokeWidth="0.3" className="dark:stroke-[hsl(210,20%,25%)]" />
               ))}
-              {[60, 120, 180, 240, 300].map(y => (
-                <line key={`hl-${y}`} x1="60" y1={y} x2="320" y2={y} stroke="hsl(210, 40%, 88%)" strokeWidth="0.3" className="dark:stroke-[hsl(210,20%,25%)]" />
+              {[60, 120, 180, 240, 300, 360].map(y => (
+                <line key={`hl-${y}`} x1="0" y1={y} x2="370" y2={y} stroke="hsl(210, 40%, 88%)" strokeWidth="0.3" className="dark:stroke-[hsl(210,20%,25%)]" />
               ))}
 
               {/* Region shapes */}
