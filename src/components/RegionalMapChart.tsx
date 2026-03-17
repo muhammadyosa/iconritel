@@ -79,7 +79,7 @@ export default function RegionalMapChart({ data, onRegionClick }: RegionalMapCha
           {/* Map SVG */}
           <div className="flex-1 flex justify-center items-center">
             <svg
-              viewBox="60 0 260 340"
+              viewBox="0 0 370 370"
               className="w-full max-w-[320px] sm:max-w-[380px] h-auto"
               style={{ filter: "drop-shadow(0 2px 8px hsl(var(--foreground) / 0.1))" }}
             >
