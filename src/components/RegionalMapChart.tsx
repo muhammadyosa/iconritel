@@ -154,10 +154,13 @@ export default function RegionalMapChart({ data, onRegionClick }: RegionalMapCha
               })}
 
               {/* Compass */}
-              <g transform="translate(290, 25)">
+              <g transform="translate(345, 25)">
                 <circle r="12" fill="hsl(var(--background))" stroke="hsl(var(--border))" strokeWidth="1" opacity="0.8" />
                 <text textAnchor="middle" y="4" fill="hsl(var(--foreground))" fontSize="10" fontWeight="700">N</text>
               </g>
+
+              {/* Title label */}
+              <text x="20" y="365" fill="hsl(var(--muted-foreground))" fontSize="8" opacity="0.6">SUMBAGSEL</text>
             </svg>
           </div>
 
