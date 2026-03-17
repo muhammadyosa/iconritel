@@ -28,6 +28,7 @@ import {
 } from "@/components/ui/chart";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, PieChart, Pie, Cell as RechartsCell } from "recharts";
 import { motion, AnimatePresence } from "framer-motion";
+import RegionalMapChart from "@/components/RegionalMapChart";
 
 interface RegionalOfficeTabProps {
   tickets: Ticket[];
