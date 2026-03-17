@@ -71,8 +71,8 @@ export default function RegionalMapChart({ data, onRegionClick }: RegionalMapCha
   return (
     <Card className="overflow-hidden">
       <CardHeader className="p-3 sm:p-4 pb-1">
-        <CardTitle className="text-sm sm:text-base flex items-center gap-2">🗺️ Peta Daerah Regional</CardTitle>
-        <CardDescription className="text-[10px] sm:text-xs">Heat map incident per wilayah Sumatera</CardDescription>
+        <CardTitle className="text-sm sm:text-base flex items-center gap-2">🗺️ Peta Daerah Sumbagsel</CardTitle>
+        <CardDescription className="text-[10px] sm:text-xs">Heat map incident wilayah Sumatera Bagian Selatan</CardDescription>
       </CardHeader>
       <CardContent className="p-2 sm:p-4 pt-1">
         <div className="flex flex-col lg:flex-row gap-3">
