@@ -244,17 +244,16 @@ export default function RegionalOfficeTab({ tickets }: RegionalOfficeTabProps) {
               >
                 <BarChart
                   data={regionalData.filter(r => r.totalIncidents > 0).slice(0, 10)}
-                  layout="vertical"
-                  margin={{ top: 5, right: 10, left: 0, bottom: 5 }}
+                  margin={{ top: 5, right: 10, left: -10, bottom: 30 }}
                   barCategoryGap="20%"
                 >
-                  <CartesianGrid strokeDasharray="3 3" horizontal={false} opacity={0.15} />
-                  <XAxis type="number" tick={{ fontSize: 9 }} />
-                  <YAxis type="category" dataKey="region" width={70} tick={{ fontSize: 8 }} />
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} opacity={0.15} />
+                  <XAxis type="category" dataKey="region" tick={{ fontSize: 8 }} interval={0} height={50} angle={-35} textAnchor="end" />
+                  <YAxis type="number" tick={{ fontSize: 9 }} width={35} />
                   <ChartTooltip content={<ChartTooltipContent />} />
                   <Bar dataKey="resolved" stackId="a" fill="hsl(var(--success))" name="Resolved" />
                   <Bar dataKey="pending" stackId="a" fill="hsl(var(--warning))" name="Pending" />
-                  <Bar dataKey="critical" stackId="a" fill="hsl(var(--destructive))" radius={[0, 6, 6, 0]} name="Critical" />
+                  <Bar dataKey="critical" stackId="a" fill="hsl(var(--destructive))" radius={[6, 6, 0, 0]} name="Critical" />
                 </BarChart>
               </ChartContainer>
             </CardContent>
