@@ -1268,7 +1268,7 @@ Contoh:
         <TicketDetailDialog
           ticket={selectedTicket}
           isAdmin={isAdmin}
-          isReviewer={isReviewer}
+          isReviewer={false}
           updateTicket={updateTicket}
           deleteTicket={deleteTicket}
           open={detailOpen}
