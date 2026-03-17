@@ -53,6 +53,7 @@ export function TicketDetailDialog({
 }: TicketDetailDialogProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState({
+    ticketId: ticket.id,
     customerName: ticket.customerName,
     serviceId: ticket.serviceId,
     hostname: ticket.hostname,
