@@ -203,7 +203,7 @@ export default function ListNote() {
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="text-lg sm:text-xl font-bold">📖 List Note</h1>
+        <h1 className="text-lg sm:text-xl font-bold">📖 List Configure</h1>
         <p className="text-xs sm:text-sm text-muted-foreground">Catatan berdasarkan kategori perangkat</p>
       </div>
 
