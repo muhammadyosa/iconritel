@@ -28,7 +28,6 @@ import {
 } from "@/components/ui/chart";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, PieChart, Pie, Cell as RechartsCell } from "recharts";
 import { motion, AnimatePresence } from "framer-motion";
-import RegionalMapChart from "@/components/RegionalMapChart";
 
 interface RegionalOfficeTabProps {
   tickets: Ticket[];
@@ -224,15 +223,6 @@ export default function RegionalOfficeTab({ tickets }: RegionalOfficeTabProps) {
           </motion.div>
         ))}
       </div>
-
-      {/* Regional Map */}
-      <RegionalMapChart
-        data={regionalData}
-        onRegionClick={(regionName) => {
-          const found = regionalData.find(r => r.region === regionName);
-          if (found) setSelectedRegion(found);
-        }}
-      />
 
       {/* Charts */}
       {regionalData.some(r => r.totalIncidents > 0) && (
