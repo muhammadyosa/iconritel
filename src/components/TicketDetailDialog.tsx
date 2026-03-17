@@ -53,6 +53,7 @@ export function TicketDetailDialog({
 }: TicketDetailDialogProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState({
+    ticketId: ticket.id,
     customerName: ticket.customerName,
     serviceId: ticket.serviceId,
     hostname: ticket.hostname,
@@ -64,6 +65,7 @@ export function TicketDetailDialog({
 
   const handleStartEdit = () => {
     setEditData({
+      ticketId: ticket.id,
       customerName: ticket.customerName,
       serviceId: ticket.serviceId,
       hostname: ticket.hostname,
@@ -92,6 +94,7 @@ export function TicketDetailDialog({
       );
 
       await updateTicket(ticket.id, {
+        id: editData.ticketId,
         customerName: editData.customerName,
         serviceId: editData.serviceId,
         hostname: editData.hostname,
@@ -133,7 +136,15 @@ export function TicketDetailDialog({
         <div className="space-y-3">
           {isEditing ? (
             // Edit Mode
-            <div className="space-y-3">
+             <div className="space-y-3">
+              <div>
+                <Label className="text-xs">Nomor Insident</Label>
+                <Input
+                  value={editData.ticketId}
+                  onChange={(e) => setEditData({ ...editData, ticketId: e.target.value })}
+                  className="h-8 text-sm font-mono"
+                />
+              </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <Label className="text-xs">Customer</Label>
