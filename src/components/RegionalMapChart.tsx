@@ -18,28 +18,16 @@ interface RegionalMapChartProps {
   onRegionClick?: (region: string) => void;
 }
 
-// Simplified SVG paths for Sumatra provinces + nearby islands
-// These are approximate shapes positioned relative to each other
+// SVG paths for Sumbagsel provinces (Jambi, Bengkulu, Sumsel, Babel, Lampung)
 const REGION_PATHS: Record<string, { path: string; labelX: number; labelY: number }> = {
-  "ACEH":    { path: "M120,20 L160,15 L180,35 L175,65 L155,80 L130,70 L110,50 Z", labelX: 148, labelY: 45 },
-  "SUMUT":   { path: "M130,70 L155,80 L175,65 L185,90 L180,120 L160,135 L135,130 L120,110 L115,85 Z", labelX: 150, labelY: 100 },
-  "RIAU":    { path: "M160,135 L180,120 L210,115 L240,125 L245,155 L230,175 L200,180 L175,170 L160,150 Z", labelX: 200, labelY: 148 },
-  "KEPRI":   { path: "M260,130 L280,125 L295,135 L290,155 L270,160 L255,150 Z", labelX: 275, labelY: 142 },
-  "SUMBAR":  { path: "M120,110 L135,130 L160,150 L155,175 L140,190 L115,185 L105,160 L110,135 Z", labelX: 133, labelY: 158 },
-  "JAMBI":   { path: "M155,175 L175,170 L200,180 L210,200 L195,220 L170,215 L150,200 Z", labelX: 178, labelY: 195 },
-  "BENGKULU": { path: "M105,160 L115,185 L140,190 L150,200 L145,225 L130,245 L110,240 L95,215 L90,185 Z", labelX: 120, labelY: 210 },
-  "SUMSEL":  { path: "M150,200 L170,215 L195,220 L215,230 L225,255 L210,275 L180,280 L155,270 L140,250 L130,245 L145,225 Z", labelX: 178, labelY: 248 },
-  "BABEL":   { path: "M240,220 L260,215 L275,225 L275,250 L260,260 L240,250 Z", labelX: 258, labelY: 238 },
-  "LAMPUNG": { path: "M140,250 L155,270 L180,280 L185,305 L170,325 L145,320 L125,300 L120,275 Z", labelX: 152, labelY: 292 },
+  "JAMBI":    { path: "M60,30 L130,20 L180,40 L190,80 L170,120 L120,130 L70,110 L45,70 Z", labelX: 118, labelY: 70 },
+  "BENGKULU": { path: "M45,70 L70,110 L120,130 L110,170 L90,210 L55,230 L30,200 L20,150 L25,100 Z", labelX: 68, labelY: 155 },
+  "SUMSEL":  { path: "M120,130 L170,120 L220,130 L250,160 L245,210 L220,250 L170,260 L120,240 L100,210 L90,210 L110,170 Z", labelX: 170, labelY: 190 },
+  "BABEL":   { path: "M270,120 L310,110 L340,130 L345,175 L320,200 L285,195 L265,165 Z", labelX: 305, labelY: 155 },
+  "LAMPUNG": { path: "M100,210 L120,240 L170,260 L175,300 L155,340 L115,345 L75,320 L55,280 L55,230 Z", labelX: 115, labelY: 285 },
 };
 
-// Aliases for region name matching
 const REGION_ALIASES: Record<string, string[]> = {
-  "ACEH": ["ACEH", "NAD"],
-  "SUMUT": ["SUMUT", "SUMATERA UTARA", "MEDAN"],
-  "RIAU": ["RIAU", "PEKANBARU"],
-  "KEPRI": ["KEPRI", "KEPULAUAN RIAU", "BATAM"],
-  "SUMBAR": ["SUMBAR", "SUMATERA BARAT", "PADANG"],
   "JAMBI": ["JAMBI"],
   "BENGKULU": ["BENGKULU"],
   "SUMSEL": ["SUMSEL", "SUMATERA SELATAN", "PALEMBANG"],
