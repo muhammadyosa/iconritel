@@ -48,10 +48,11 @@ export default defineConfig(({ mode }) => ({
       },
       workbox: {
         // IMPORTANT: allow the platform's OAuth broker routes to be handled by the network/server.
-        // If the service worker serves the SPA fallback for these routes, OAuth will break and
-        // users can end up on the app's 404 page at `/~oauth/*`.
         navigateFallbackDenylist: [/^\/~oauth\//],
         globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
+        // Skip waiting so new SW activates immediately
+        skipWaiting: true,
+        clientsClaim: true,
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
@@ -60,7 +61,7 @@ export default defineConfig(({ mode }) => ({
               cacheName: "google-fonts-cache",
               expiration: {
                 maxEntries: 10,
-                maxAgeSeconds: 60 * 60 * 24 * 365, // 1 year
+                maxAgeSeconds: 60 * 60 * 24 * 365,
               },
             },
           },
