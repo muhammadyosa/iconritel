@@ -225,6 +225,15 @@ export default function RegionalOfficeTab({ tickets }: RegionalOfficeTabProps) {
         ))}
       </div>
 
+      {/* Regional Map */}
+      <RegionalMapChart
+        data={regionalData}
+        onRegionClick={(regionName) => {
+          const found = regionalData.find(r => r.region === regionName);
+          if (found) setSelectedRegion(found);
+        }}
+      />
+
       {/* Charts */}
       {regionalData.some(r => r.totalIncidents > 0) && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-2 sm:gap-3">
