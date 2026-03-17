@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Trash2, Edit, X, Check } from "lucide-react";
+import { Trash2, Edit, X, Check, Copy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -294,7 +294,21 @@ export function TicketDetailDialog({
                 </div>
               </div>
               <div className="pt-3 border-t">
-                <span className="text-muted-foreground text-sm">Format Insident:</span>
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground text-sm">Format Insident:</span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-6 text-xs gap-1"
+                    onClick={() => {
+                      navigator.clipboard.writeText(ticket.ticketResult || "");
+                      toast.success("Format insident disalin ke clipboard");
+                    }}
+                  >
+                    <Copy className="h-3 w-3" />
+                    Copy
+                  </Button>
+                </div>
                 <div className="mt-2 p-3 bg-muted/50 rounded-lg">
                   <p className="font-mono text-sm whitespace-pre-wrap break-all">
                     {ticket.ticketResult}
