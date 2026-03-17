@@ -94,6 +94,7 @@ export function TicketDetailDialog({
       );
 
       await updateTicket(ticket.id, {
+        id: editData.ticketId,
         customerName: editData.customerName,
         serviceId: editData.serviceId,
         hostname: editData.hostname,
