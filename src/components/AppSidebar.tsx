@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "next-themes";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useUserRole } from "@/hooks/useUserRole";
 
@@ -77,14 +77,16 @@ export function AppSidebar() {
   const { count: pendingCount, isAdmin } = usePendingUserCount();
   const { isIntern, isNOC } = useUserRole();
 
-  // Filter menu based on role
-  const INTERN_PATHS = new Set(["/", "/tickets", "/teams"]);
-  const ADMIN_NOC_ONLY_PATHS = new Set(["/notes"]);
-  const visibleMenuItems = menuItems.filter((item) => {
-    if (isIntern && !INTERN_PATHS.has(item.path)) return false;
-    if (ADMIN_NOC_ONLY_PATHS.has(item.path) && !isAdmin && !isNOC) return false;
-    return true;
-  });
+  // Memoize menu filtering to avoid recalculating on every render
+  const visibleMenuItems = useMemo(() => {
+    const INTERN_PATHS = new Set(["/", "/tickets", "/teams"]);
+    const ADMIN_NOC_ONLY_PATHS = new Set(["/notes"]);
+    return menuItems.filter((item) => {
+      if (isIntern && !INTERN_PATHS.has(item.path)) return false;
+      if (ADMIN_NOC_ONLY_PATHS.has(item.path) && !isAdmin && !isNOC) return false;
+      return true;
+    });
+  }, [isIntern, isAdmin, isNOC]);
   
 
   return (

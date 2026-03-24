@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { StatusBadge } from "@/components/StatusBadge";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { OLT } from "@/types/olt";
 import { loadOLTData } from "@/lib/indexedDB";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -52,8 +52,8 @@ export default function Dashboard() {
     updateReport: updateShiftReport,
   } = useCloudShiftReports();
   
-  // Get formatted reports for UI
-  const shiftReports = getFormattedReports();
+  // Memoize formatted reports to avoid re-creating on every render
+  const shiftReports = useMemo(() => getFormattedReports(), [getFormattedReports]);
   
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
@@ -92,23 +92,21 @@ export default function Dashboard() {
   }, []);
 
   const totalIncidents = tickets.length;
-  const overSLA = tickets.filter((t) => {
+  const overSLA = useMemo(() => tickets.filter((t) => {
     const ageMs = new Date().getTime() - new Date(t.createdISO).getTime();
     return ageMs > 24 * 60 * 60 * 1000 && t.status !== "Resolved";
-  }).length;
-  const feederImpact = tickets.filter((t) => FEEDER_CONSTRAINTS_SET.has(t.constraint)).length;
-  // Count unique OLT hostnames from tickets (impact)
-  const totalOLT = new Set(tickets.map((t) => t.hostname).filter(Boolean)).size || 0;
+  }).length, [tickets]);
+  const feederImpact = useMemo(() => tickets.filter((t) => FEEDER_CONSTRAINTS_SET.has(t.constraint)).length, [tickets]);
+  const totalOLT = useMemo(() => new Set(tickets.map((t) => t.hostname).filter(Boolean)).size || 0, [tickets]);
 
-  const recentTickets = tickets
+  const recentTickets = useMemo(() => tickets
     .filter((t) => selectedConstraint === "all" || t.constraint === selectedConstraint)
-    .slice(0, 10);
+    .slice(0, 10), [tickets, selectedConstraint]);
   
-  const filteredTickets = tickets.filter((ticket) => {
+  const filteredTickets = useMemo(() => tickets.filter((ticket) => {
     if (selectedStatus && ticket.status !== selectedStatus) return false;
     if (selectedCategory && ticket.category !== selectedCategory) return false;
     
-    // Metric-based filters
     if (selectedMetric === "overSLA") {
       const ageMs = new Date().getTime() - new Date(ticket.createdISO).getTime();
       return ageMs > 24 * 60 * 60 * 1000 && ticket.status !== "Resolved";
@@ -116,15 +114,11 @@ export default function Dashboard() {
     if (selectedMetric === "feeder") {
       return FEEDER_CONSTRAINTS_SET.has(ticket.constraint);
     }
-    if (selectedMetric === "total") {
-      return true; // Show all tickets
-    }
-    if (selectedMetric === "olt") {
-      return ticket.constraint === "OLT DOWN";
-    }
+    if (selectedMetric === "total") return true;
+    if (selectedMetric === "olt") return ticket.constraint === "OLT DOWN";
     
     return true;
-  });
+  }), [tickets, selectedStatus, selectedCategory, selectedMetric]);
 
   return (
     <div className="space-y-3 sm:space-y-4 md:space-y-6 w-full max-w-full overflow-x-hidden min-w-0">
