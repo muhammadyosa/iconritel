@@ -121,6 +121,10 @@ export default function Dashboard() {
     return true;
   }), [tickets, selectedStatus, selectedCategory, selectedMetric]);
 
+  if (isLoadingTickets && tickets.length === 0) {
+    return <DashboardSkeleton />;
+  }
+
   return (
     <div className="space-y-3 sm:space-y-4 md:space-y-6 w-full max-w-full overflow-x-hidden min-w-0">
       {/* Header Section */}
