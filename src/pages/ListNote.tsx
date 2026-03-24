@@ -108,9 +108,7 @@ function NoteSection({ tabKey }: { tabKey: string }) {
       )}
 
       {isLoading ? (
-        <div className="flex justify-center py-10">
-          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-        </div>
+        <NotesSkeleton />
       ) : filtered.length === 0 ? (
         <div className="text-center py-10 text-muted-foreground text-sm">
           {notes.length === 0 ? "Belum ada note. Tambahkan note pertama!" : "Tidak ada note yang cocok."}
