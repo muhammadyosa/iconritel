@@ -92,17 +92,16 @@ export default function Dashboard() {
   }, []);
 
   const totalIncidents = tickets.length;
-  const overSLA = tickets.filter((t) => {
+  const overSLA = useMemo(() => tickets.filter((t) => {
     const ageMs = new Date().getTime() - new Date(t.createdISO).getTime();
     return ageMs > 24 * 60 * 60 * 1000 && t.status !== "Resolved";
-  }).length;
-  const feederImpact = tickets.filter((t) => FEEDER_CONSTRAINTS_SET.has(t.constraint)).length;
-  // Count unique OLT hostnames from tickets (impact)
-  const totalOLT = new Set(tickets.map((t) => t.hostname).filter(Boolean)).size || 0;
+  }).length, [tickets]);
+  const feederImpact = useMemo(() => tickets.filter((t) => FEEDER_CONSTRAINTS_SET.has(t.constraint)).length, [tickets]);
+  const totalOLT = useMemo(() => new Set(tickets.map((t) => t.hostname).filter(Boolean)).size || 0, [tickets]);
 
-  const recentTickets = tickets
+  const recentTickets = useMemo(() => tickets
     .filter((t) => selectedConstraint === "all" || t.constraint === selectedConstraint)
-    .slice(0, 10);
+    .slice(0, 10), [tickets, selectedConstraint]);
   
   const filteredTickets = tickets.filter((ticket) => {
     if (selectedStatus && ticket.status !== selectedStatus) return false;
