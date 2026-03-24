@@ -61,6 +61,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
+  // Store user id in ref to avoid re-subscribing
+  const userIdRef = React.useRef<string | null>(null);
+
   useEffect(() => {
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -69,6 +72,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUser(session?.user ?? null);
 
         if (session?.user) {
+          userIdRef.current = session.user.id;
           // Use setTimeout to avoid potential deadlocks with Supabase client
           setTimeout(() => {
             fetchProfile(session.user.id);
@@ -83,6 +87,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             }
           }, 0);
         } else {
+          userIdRef.current = null;
           setProfile(null);
         }
 
@@ -96,6 +101,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(session?.user ?? null);
       
       if (session?.user) {
+        userIdRef.current = session.user.id;
         fetchProfile(session.user.id);
         updateLastOnline(session.user.id);
       }
@@ -105,8 +111,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     // Update last_online periodically (every 5 minutes)
     const intervalId = setInterval(() => {
-      if (user?.id) {
-        updateLastOnline(user.id);
+      if (userIdRef.current) {
+        updateLastOnline(userIdRef.current);
       }
     }, 5 * 60 * 1000);
 
@@ -114,7 +120,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       subscription.unsubscribe();
       clearInterval(intervalId);
     };
-  }, [fetchProfile, updateLastOnline, user?.id]);
+  }, [fetchProfile, updateLastOnline]);
 
   const signOut = async () => {
     // Clear state first to prevent flicker

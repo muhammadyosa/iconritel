@@ -103,11 +103,10 @@ export default function Dashboard() {
     .filter((t) => selectedConstraint === "all" || t.constraint === selectedConstraint)
     .slice(0, 10), [tickets, selectedConstraint]);
   
-  const filteredTickets = tickets.filter((ticket) => {
+  const filteredTickets = useMemo(() => tickets.filter((ticket) => {
     if (selectedStatus && ticket.status !== selectedStatus) return false;
     if (selectedCategory && ticket.category !== selectedCategory) return false;
     
-    // Metric-based filters
     if (selectedMetric === "overSLA") {
       const ageMs = new Date().getTime() - new Date(ticket.createdISO).getTime();
       return ageMs > 24 * 60 * 60 * 1000 && ticket.status !== "Resolved";
@@ -115,15 +114,11 @@ export default function Dashboard() {
     if (selectedMetric === "feeder") {
       return FEEDER_CONSTRAINTS_SET.has(ticket.constraint);
     }
-    if (selectedMetric === "total") {
-      return true; // Show all tickets
-    }
-    if (selectedMetric === "olt") {
-      return ticket.constraint === "OLT DOWN";
-    }
+    if (selectedMetric === "total") return true;
+    if (selectedMetric === "olt") return ticket.constraint === "OLT DOWN";
     
     return true;
-  });
+  }), [tickets, selectedStatus, selectedCategory, selectedMetric]);
 
   return (
     <div className="space-y-3 sm:space-y-4 md:space-y-6 w-full max-w-full overflow-x-hidden min-w-0">

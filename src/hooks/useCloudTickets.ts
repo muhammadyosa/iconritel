@@ -198,13 +198,10 @@ export function useCloudTickets() {
   useEffect(() => {
     fetchTickets();
 
-    // Periodic cleanup every minute for resolved tickets > 24h
+    // Periodic cleanup every 5 minutes (reduced from 1 min to avoid lag)
     const cleanupInterval = setInterval(() => {
-      cleanupResolvedTickets().then(() => {
-        // After cleanup, refetch to sync state
-        fetchTickets();
-      });
-    }, 60 * 1000);
+      cleanupResolvedTickets();
+    }, 5 * 60 * 1000);
 
     const ticketsChannel = supabase
       .channel("tickets-realtime")
@@ -232,7 +229,8 @@ export function useCloudTickets() {
       )
       .subscribe();
 
-    // Subscribe to profile changes to update creator names in real-time
+    // Debounced profile change handler - avoid refetching on every profile update
+    let profileDebounceTimer: ReturnType<typeof setTimeout> | null = null;
     const profilesChannel = supabase
       .channel("profiles-realtime-tickets")
       .on(
@@ -243,18 +241,37 @@ export function useCloudTickets() {
           table: "profiles",
         },
         () => {
-          // Refetch all data when a profile is updated
-          fetchTickets();
+          if (profileDebounceTimer) clearTimeout(profileDebounceTimer);
+          profileDebounceTimer = setTimeout(() => {
+            fetchProfiles().then((map) => {
+              // Update ticket names in-place without refetching from DB
+              setTickets((prev) =>
+                prev.map((t) => {
+                  if (t.createdByUserId) {
+                    const profile = map.get(t.createdByUserId);
+                    if (profile) {
+                      const newName = profile.display_name || profile.email.split("@")[0];
+                      if (newName !== t.createdByName) {
+                        return { ...t, createdByName: newName };
+                      }
+                    }
+                  }
+                  return t;
+                })
+              );
+            });
+          }, 2000);
         }
       )
       .subscribe();
 
     return () => {
       clearInterval(cleanupInterval);
+      if (profileDebounceTimer) clearTimeout(profileDebounceTimer);
       supabase.removeChannel(ticketsChannel);
       supabase.removeChannel(profilesChannel);
     };
-  }, [fetchTickets, cleanupResolvedTickets]);
+  }, [fetchTickets, cleanupResolvedTickets, fetchProfiles]);
 
   const addTicket = useCallback(async (ticket: Ticket) => {
     try {
