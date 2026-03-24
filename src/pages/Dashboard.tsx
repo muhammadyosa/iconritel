@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { StatusBadge } from "@/components/StatusBadge";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { OLT } from "@/types/olt";
 import { loadOLTData } from "@/lib/indexedDB";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
