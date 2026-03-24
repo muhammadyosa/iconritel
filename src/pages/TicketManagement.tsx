@@ -326,6 +326,10 @@ export default function TicketManagement() {
     }
   };
 
+  if (isLoadingTickets && tickets.length === 0) {
+    return <TablePageSkeleton />;
+  }
+
   return (
     <div className="space-y-2 sm:space-y-3 md:space-y-4 max-w-full overflow-x-hidden">
       <div className="flex flex-col xs:flex-row xs:items-center gap-1 xs:gap-3">

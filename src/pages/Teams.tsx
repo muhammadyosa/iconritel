@@ -505,6 +505,10 @@ export default function Teams() {
     </div>
   );
 
+  if (isLoading && tickets.length === 0) {
+    return <TeamsSkeleton />;
+  }
+
   return (
     <div className="space-y-4 sm:space-y-6 max-w-full overflow-x-hidden">
       <div>
