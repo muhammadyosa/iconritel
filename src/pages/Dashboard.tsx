@@ -52,8 +52,8 @@ export default function Dashboard() {
     updateReport: updateShiftReport,
   } = useCloudShiftReports();
   
-  // Get formatted reports for UI
-  const shiftReports = getFormattedReports();
+  // Memoize formatted reports to avoid re-creating on every render
+  const shiftReports = useMemo(() => getFormattedReports(), [getFormattedReports]);
   
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
