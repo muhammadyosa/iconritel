@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Search, Plus, Trash2, Edit2, Save, X, Loader2 } from "lucide-react";
+import { NotesSkeleton } from "@/components/PageSkeleton";
 import { useCloudNotes } from "@/hooks/useCloudNotes";
 import { useUserRole } from "@/hooks/useUserRole";
 import { toast } from "sonner";
