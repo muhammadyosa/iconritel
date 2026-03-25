@@ -262,41 +262,19 @@ export default function Teams() {
     return isWithinInterval(d, { start: trendDateRange.from, end: trendDateRange.to });
   }, [trendDateRange]);
 
-  // Inline trend filter UI component
-  const trendFilterUI = (
-    <div className="flex flex-wrap items-center gap-1.5">
-      <Select value={trendFilter} onValueChange={(v) => { setTrendFilter(v); if (v !== "custom") setTrendCustomDate(undefined); }}>
-        <SelectTrigger className="h-6 w-[100px] sm:w-[120px] text-[9px] sm:text-[10px] px-2 border-border/50">
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">Semua Data</SelectItem>
-          <SelectItem value="today">Hari ini</SelectItem>
-          <SelectItem value="7d">7 Hari</SelectItem>
-          <SelectItem value="14d">14 Hari</SelectItem>
-          <SelectItem value="30d">30 Hari</SelectItem>
-          <SelectItem value="custom">Custom</SelectItem>
-        </SelectContent>
-      </Select>
-      {trendFilter === "custom" && (
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button variant="outline" className="h-6 px-2 text-[9px] sm:text-[10px] font-normal">
-              <CalendarIcon className="mr-1 h-3 w-3" />
-              {trendCustomDate?.from ? (
-                trendCustomDate.to ? (
-                  <>{format(trendCustomDate.from, "dd MMM", { locale: localeId })} - {format(trendCustomDate.to, "dd MMM", { locale: localeId })}</>
-                ) : format(trendCustomDate.from, "dd MMM yyyy", { locale: localeId })
-              ) : "Pilih tanggal"}
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-auto p-0" align="start">
-            <Calendar mode="range" selected={trendCustomDate} onSelect={setTrendCustomDate} numberOfMonths={1} className={cn("p-3 pointer-events-auto")} />
-          </PopoverContent>
-        </Popover>
-      )}
-    </div>
-  );
+  // Trend filter label for display
+  const trendPeriodLabel = useMemo(() => {
+    if (periodPreset === "all") return "Semua Data";
+    if (periodPreset === "7d") return "7 Hari";
+    if (periodPreset === "14d") return "14 Hari";
+    if (periodPreset === "30d") return "30 Hari";
+    if (periodPreset === "custom" && dateRange?.from) {
+      return dateRange.to
+        ? `${format(dateRange.from, "dd MMM", { locale: localeId })} - ${format(dateRange.to, "dd MMM", { locale: localeId })}`
+        : format(dateRange.from, "dd MMM yyyy", { locale: localeId });
+    }
+    return "Semua Data";
+  }, [periodPreset, dateRange]);
 
   // NOC Category Trend data - uses cloud history for persistence
   const nocCategoryTrend = useMemo(() => {
