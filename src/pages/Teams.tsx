@@ -1287,7 +1287,7 @@ export default function Teams() {
                           <div className="space-y-1.5">
                             <div className="flex items-center justify-between gap-2">
                               <p className="text-[9px] sm:text-xs font-semibold text-muted-foreground">Category Trend</p>
-                              {trendFilterUI}
+                              <Badge variant="outline" className="text-[8px] sm:text-[9px] px-1.5 py-0">{trendPeriodLabel}</Badge>
                             </div>
                             <ChartContainer config={nocCategoryTrend.config} className="aspect-[2/1] w-full max-h-[180px] sm:max-h-[220px]">
                               <LineChart data={nocCategoryTrend.data} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
