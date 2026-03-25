@@ -532,7 +532,14 @@ export default function Teams() {
                     valueClass: "text-primary",
                     glowClass: "hover:shadow-[0_0_20px_-4px_hsl(var(--primary)/0.4)]",
                     bgClass: "bg-primary/5",
-                    onClick: () => setKpiSheet({ title: "👥 Semua Tim Aktif", emoji: "👥", tickets: filteredTickets }),
+                    onClick: () => {
+                      const teams = [
+                        ...teamStatsByCategory.ritel.map(t => ({ team: t.team, category: "RITEL", tickets: t.tickets })),
+                        ...teamStatsByCategory.feeder.map(t => ({ team: t.team, category: "FEEDER", tickets: t.tickets })),
+                      ];
+                      setExpandedDrillTeam(null);
+                      setTeamDrillSheet({ teams });
+                    },
                     badges: (
                       <div className="flex flex-wrap gap-1 mt-1.5">
                         <Badge variant="outline" className="text-[8px] sm:text-[9px] px-1.5 py-0 bg-primary/10 text-primary border-primary/20">{teamStatsByCategory.ritel.length} Ritel</Badge>
