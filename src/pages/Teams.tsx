@@ -111,6 +111,7 @@ export default function Teams() {
   const [statusSheet, setStatusSheet] = useState<{ category: "ritel" | "feeder"; status: "Resolved" | "Pending" | "Critical" } | null>(null);
   const [nocStatusSheet, setNocStatusSheet] = useState<{ status: "Resolved" | "Pending" | "Critical" } | null>(null);
   const [nocUserSheet, setNocUserSheet] = useState<string | null>(null);
+  const [kpiSheet, setKpiSheet] = useState<{ title: string; emoji: string; tickets: any[] } | null>(null);
   // trendFilter is now unified with periodPreset
 
   // Handle period preset change
