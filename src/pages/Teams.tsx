@@ -114,6 +114,8 @@ export default function Teams() {
   const [kpiSheet, setKpiSheet] = useState<{ title: string; emoji: string; tickets: any[] } | null>(null);
   const [teamDrillSheet, setTeamDrillSheet] = useState<{ teams: { team: string; category: string; tickets: any[] }[] } | null>(null);
   const [expandedDrillTeam, setExpandedDrillTeam] = useState<string | null>(null);
+  const [userDrillSheet, setUserDrillSheet] = useState<{ users: { name: string; tickets: any[] }[] } | null>(null);
+  const [expandedDrillUser, setExpandedDrillUser] = useState<string | null>(null);
   // trendFilter is now unified with periodPreset
 
   // Handle period preset change
@@ -1172,7 +1174,10 @@ export default function Teams() {
                     valueClass: "text-primary",
                     glowClass: "hover:shadow-[0_0_20px_-4px_hsl(var(--primary)/0.4)]",
                     bgClass: "bg-primary/5",
-                    onClick: () => setKpiSheet({ title: "👤 Semua User NOC", emoji: "👤", tickets: filteredTickets }),
+                    onClick: () => {
+                      setExpandedDrillUser(null);
+                      setUserDrillSheet({ users: userStats.map(u => ({ name: u.name, tickets: u.tickets })) });
+                    },
                     badges: null,
                   },
                   {
@@ -1723,6 +1728,92 @@ export default function Teams() {
                                         <div className="min-w-0 flex-1">
                                           <p className="font-bold text-[10px] sm:text-xs truncate">{ticket.ticketId || ticket.id}</p>
                                           <p className="text-[9px] text-muted-foreground">{ticket.createdAt}{ticket.createdByName ? ` • ${ticket.createdByName}` : ""}</p>
+                                        </div>
+                                        <StatusBadge status={ticket.status} />
+                                      </div>
+                                      <div className="grid grid-cols-2 gap-1 text-[9px] sm:text-[10px]">
+                                        <div><span className="text-muted-foreground">Customer:</span><p className="font-medium truncate">{ticket.customerName}</p></div>
+                                        <div><span className="text-muted-foreground">Constraint:</span><p className="font-medium truncate">{ticket.constraint}</p></div>
+                                      </div>
+                                    </div>
+                                  </CardContent>
+                                </Card>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </ScrollArea>
+              </>
+            );
+          })()}
+        </SheetContent>
+      </Sheet>
+
+      {/* User Drill-down Sheet */}
+      <Sheet open={!!userDrillSheet} onOpenChange={(open) => !open && setUserDrillSheet(null)}>
+        <SheetContent side="right" className="w-full sm:max-w-lg md:max-w-2xl p-3 sm:p-6">
+          {userDrillSheet && (() => {
+            const { users } = userDrillSheet;
+            const totalIncidents = users.reduce((s, u) => s + u.tickets.length, 0);
+            return (
+              <>
+                <SheetHeader>
+                  <SheetTitle className="text-base sm:text-lg">👤 User Aktif</SheetTitle>
+                  <SheetDescription className="text-xs sm:text-sm">
+                    {users.length} user aktif • {totalIncidents} incident {periodPreset !== "all" && `• ${trendPeriodLabel}`}
+                  </SheetDescription>
+                </SheetHeader>
+                <div className="grid grid-cols-3 gap-2 mt-4">
+                  <div className="p-2 rounded-lg bg-primary/10 text-center">
+                    <p className="text-sm sm:text-lg font-bold text-primary">{users.length}</p>
+                    <p className="text-[8px] sm:text-[10px] text-muted-foreground">User</p>
+                  </div>
+                  <div className="p-2 rounded-lg bg-success/10 text-center">
+                    <p className="text-sm sm:text-lg font-bold text-success">{users.reduce((s, u) => s + u.tickets.filter((t: any) => t.status === "Resolved").length, 0)}</p>
+                    <p className="text-[8px] sm:text-[10px] text-muted-foreground">Resolved</p>
+                  </div>
+                  <div className="p-2 rounded-lg bg-warning/10 text-center">
+                    <p className="text-sm sm:text-lg font-bold text-warning">{users.reduce((s, u) => s + u.tickets.filter((t: any) => t.status === "Pending" || t.status === "On Progress").length, 0)}</p>
+                    <p className="text-[8px] sm:text-[10px] text-muted-foreground">Pending</p>
+                  </div>
+                </div>
+                <ScrollArea className="h-[calc(100vh-280px)] mt-4">
+                  <div className="space-y-2 pr-2">
+                    {users.map((user) => {
+                      const isExpanded = expandedDrillUser === user.name;
+                      const resolved = user.tickets.filter((t: any) => t.status === "Resolved").length;
+                      const pending = user.tickets.filter((t: any) => t.status === "Pending" || t.status === "On Progress").length;
+                      const critical = user.tickets.filter((t: any) => t.status === "Critical").length;
+                      return (
+                        <div key={user.name} className="rounded-lg border overflow-hidden">
+                          <button
+                            className="w-full flex items-center justify-between gap-2 p-3 hover:bg-muted/50 transition-colors text-left"
+                            onClick={() => setExpandedDrillUser(isExpanded ? null : user.name)}
+                          >
+                            <div className="min-w-0 flex-1">
+                              <p className="text-xs sm:text-sm font-semibold truncate">👤 {user.name}</p>
+                              <div className="flex gap-1.5 mt-1">
+                                <span className="text-[9px] text-muted-foreground">{user.tickets.length} incident</span>
+                                {resolved > 0 && <Badge variant="outline" className="text-[8px] px-1 py-0 bg-success/10 text-success border-success/20">✅ {resolved}</Badge>}
+                                {pending > 0 && <Badge variant="outline" className="text-[8px] px-1 py-0 bg-warning/10 text-warning border-warning/20">⏳ {pending}</Badge>}
+                                {critical > 0 && <Badge variant="outline" className="text-[8px] px-1 py-0 bg-destructive/10 text-destructive border-destructive/20">🔴 {critical}</Badge>}
+                              </div>
+                            </div>
+                            {isExpanded ? <ChevronUp className="h-4 w-4 shrink-0 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground" />}
+                          </button>
+                          {isExpanded && (
+                            <div className="border-t bg-muted/20 p-2 space-y-2">
+                              {user.tickets.map((ticket: any) => (
+                                <Card key={ticket.id} className="shadow-sm">
+                                  <CardContent className="p-2.5">
+                                    <div className="space-y-1.5">
+                                      <div className="flex items-start justify-between gap-2">
+                                        <div className="min-w-0 flex-1">
+                                          <p className="font-bold text-[10px] sm:text-xs truncate">{ticket.ticketId || ticket.id}</p>
+                                          <p className="text-[9px] text-muted-foreground">{ticket.createdAt}{ticket.serpo ? ` • ${ticket.serpo}` : ""}</p>
                                         </div>
                                         <StatusBadge status={ticket.status} />
                                       </div>
