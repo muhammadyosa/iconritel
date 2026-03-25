@@ -111,8 +111,7 @@ export default function Teams() {
   const [statusSheet, setStatusSheet] = useState<{ category: "ritel" | "feeder"; status: "Resolved" | "Pending" | "Critical" } | null>(null);
   const [nocStatusSheet, setNocStatusSheet] = useState<{ status: "Resolved" | "Pending" | "Critical" } | null>(null);
   const [nocUserSheet, setNocUserSheet] = useState<string | null>(null);
-  const [trendFilter, setTrendFilter] = useState<string>("all");
-  const [trendCustomDate, setTrendCustomDate] = useState<DateRange | undefined>(undefined);
+  // trendFilter is now unified with periodPreset
 
   // Handle period preset change
   const handlePeriodChange = (value: string) => {
