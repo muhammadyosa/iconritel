@@ -1659,6 +1659,93 @@ export default function Teams() {
           })()}
         </SheetContent>
       </Sheet>
+
+      {/* Team Drill-down Sheet */}
+      <Sheet open={!!teamDrillSheet} onOpenChange={(open) => !open && setTeamDrillSheet(null)}>
+        <SheetContent side="right" className="w-full sm:max-w-lg md:max-w-2xl p-3 sm:p-6">
+          {teamDrillSheet && (() => {
+            const { teams } = teamDrillSheet;
+            const totalIncidents = teams.reduce((s, t) => s + t.tickets.length, 0);
+            return (
+              <>
+                <SheetHeader>
+                  <SheetTitle className="text-base sm:text-lg">👥 Tim Aktif</SheetTitle>
+                  <SheetDescription className="text-xs sm:text-sm">
+                    {teams.length} tim • {totalIncidents} incident {periodPreset !== "all" && `• ${trendPeriodLabel}`}
+                  </SheetDescription>
+                </SheetHeader>
+                <div className="grid grid-cols-2 gap-2 mt-4">
+                  <div className="p-2 rounded-lg bg-primary/10 text-center">
+                    <p className="text-sm sm:text-lg font-bold text-primary">{teams.filter(t => t.category === "RITEL").length}</p>
+                    <p className="text-[8px] sm:text-[10px] text-muted-foreground">Tim Ritel</p>
+                  </div>
+                  <div className="p-2 rounded-lg bg-warning/10 text-center">
+                    <p className="text-sm sm:text-lg font-bold text-warning">{teams.filter(t => t.category === "FEEDER").length}</p>
+                    <p className="text-[8px] sm:text-[10px] text-muted-foreground">Tim Serpo</p>
+                  </div>
+                </div>
+                <ScrollArea className="h-[calc(100vh-280px)] mt-4">
+                  <div className="space-y-2 pr-2">
+                    {teams.map((team) => {
+                      const isExpanded = expandedDrillTeam === team.team;
+                      const resolved = team.tickets.filter((t: any) => t.status === "Resolved").length;
+                      const pending = team.tickets.filter((t: any) => t.status === "Pending" || t.status === "On Progress").length;
+                      const critical = team.tickets.filter((t: any) => t.status === "Critical").length;
+                      return (
+                        <div key={team.team} className="rounded-lg border overflow-hidden">
+                          <button
+                            className="w-full flex items-center justify-between gap-2 p-3 hover:bg-muted/50 transition-colors text-left"
+                            onClick={() => setExpandedDrillTeam(isExpanded ? null : team.team)}
+                          >
+                            <div className="min-w-0 flex-1">
+                              <div className="flex items-center gap-2">
+                                <Badge variant="outline" className={cn("text-[8px] px-1.5 py-0 shrink-0", team.category === "RITEL" ? "bg-primary/10 text-primary border-primary/20" : "bg-warning/10 text-warning border-warning/20")}>
+                                  {team.category === "RITEL" ? "🏠 Ritel" : "🏬 Serpo"}
+                                </Badge>
+                                <p className="text-xs sm:text-sm font-semibold truncate">{team.team}</p>
+                              </div>
+                              <div className="flex gap-1.5 mt-1">
+                                <span className="text-[9px] text-muted-foreground">{team.tickets.length} incident</span>
+                                {resolved > 0 && <Badge variant="outline" className="text-[8px] px-1 py-0 bg-success/10 text-success border-success/20">✅ {resolved}</Badge>}
+                                {pending > 0 && <Badge variant="outline" className="text-[8px] px-1 py-0 bg-warning/10 text-warning border-warning/20">⏳ {pending}</Badge>}
+                                {critical > 0 && <Badge variant="outline" className="text-[8px] px-1 py-0 bg-destructive/10 text-destructive border-destructive/20">🔴 {critical}</Badge>}
+                              </div>
+                            </div>
+                            {isExpanded ? <ChevronUp className="h-4 w-4 shrink-0 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground" />}
+                          </button>
+                          {isExpanded && (
+                            <div className="border-t bg-muted/20 p-2 space-y-2">
+                              {team.tickets.map((ticket: any) => (
+                                <Card key={ticket.id} className="shadow-sm">
+                                  <CardContent className="p-2.5">
+                                    <div className="space-y-1.5">
+                                      <div className="flex items-start justify-between gap-2">
+                                        <div className="min-w-0 flex-1">
+                                          <p className="font-bold text-[10px] sm:text-xs truncate">{ticket.ticketId || ticket.id}</p>
+                                          <p className="text-[9px] text-muted-foreground">{ticket.createdAt}{ticket.createdByName ? ` • ${ticket.createdByName}` : ""}</p>
+                                        </div>
+                                        <StatusBadge status={ticket.status} />
+                                      </div>
+                                      <div className="grid grid-cols-2 gap-1 text-[9px] sm:text-[10px]">
+                                        <div><span className="text-muted-foreground">Customer:</span><p className="font-medium truncate">{ticket.customerName}</p></div>
+                                        <div><span className="text-muted-foreground">Constraint:</span><p className="font-medium truncate">{ticket.constraint}</p></div>
+                                      </div>
+                                    </div>
+                                  </CardContent>
+                                </Card>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </ScrollArea>
+              </>
+            );
+          })()}
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }
