@@ -111,8 +111,7 @@ export default function Teams() {
   const [statusSheet, setStatusSheet] = useState<{ category: "ritel" | "feeder"; status: "Resolved" | "Pending" | "Critical" } | null>(null);
   const [nocStatusSheet, setNocStatusSheet] = useState<{ status: "Resolved" | "Pending" | "Critical" } | null>(null);
   const [nocUserSheet, setNocUserSheet] = useState<string | null>(null);
-  const [trendFilter, setTrendFilter] = useState<string>("all");
-  const [trendCustomDate, setTrendCustomDate] = useState<DateRange | undefined>(undefined);
+  // trendFilter is now unified with periodPreset
 
   // Handle period preset change
   const handlePeriodChange = (value: string) => {
@@ -251,22 +250,11 @@ export default function Teams() {
     const topResolved = Object.entries(resolvedMap).sort((a, b) => b[1] - a[1]).slice(0, 4);
     return { countMap, resolvedMap, topAll, topResolved };
   }, [filteredTickets]);
-  // Helper: compute trend date range from trendFilter
+  // Trend date range is now unified with the main period filter
   const trendDateRange = useMemo(() => {
-    const today = new Date();
-    if (trendFilter === "today") {
-      return { from: startOfDay(today), to: endOfDay(today) };
-    } else if (trendFilter === "7d") {
-      return { from: startOfDay(subDays(today, 6)), to: endOfDay(today) };
-    } else if (trendFilter === "14d") {
-      return { from: startOfDay(subDays(today, 13)), to: endOfDay(today) };
-    } else if (trendFilter === "30d") {
-      return { from: startOfDay(subDays(today, 29)), to: endOfDay(today) };
-    } else if (trendFilter === "custom" && trendCustomDate?.from) {
-      return { from: startOfDay(trendCustomDate.from), to: trendCustomDate.to ? endOfDay(trendCustomDate.to) : endOfDay(trendCustomDate.from) };
-    }
-    return null; // "all" = no filter
-  }, [trendFilter, trendCustomDate]);
+    if (!dateRange?.from) return null; // "all" = no filter
+    return { from: startOfDay(dateRange.from), to: dateRange.to ? endOfDay(dateRange.to) : endOfDay(dateRange.from) };
+  }, [dateRange]);
 
   const filterRecordByTrendDate = useCallback((recDate: string) => {
     if (!trendDateRange) return true;
@@ -274,41 +262,19 @@ export default function Teams() {
     return isWithinInterval(d, { start: trendDateRange.from, end: trendDateRange.to });
   }, [trendDateRange]);
 
-  // Inline trend filter UI component
-  const trendFilterUI = (
-    <div className="flex flex-wrap items-center gap-1.5">
-      <Select value={trendFilter} onValueChange={(v) => { setTrendFilter(v); if (v !== "custom") setTrendCustomDate(undefined); }}>
-        <SelectTrigger className="h-6 w-[100px] sm:w-[120px] text-[9px] sm:text-[10px] px-2 border-border/50">
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">Semua Data</SelectItem>
-          <SelectItem value="today">Hari ini</SelectItem>
-          <SelectItem value="7d">7 Hari</SelectItem>
-          <SelectItem value="14d">14 Hari</SelectItem>
-          <SelectItem value="30d">30 Hari</SelectItem>
-          <SelectItem value="custom">Custom</SelectItem>
-        </SelectContent>
-      </Select>
-      {trendFilter === "custom" && (
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button variant="outline" className="h-6 px-2 text-[9px] sm:text-[10px] font-normal">
-              <CalendarIcon className="mr-1 h-3 w-3" />
-              {trendCustomDate?.from ? (
-                trendCustomDate.to ? (
-                  <>{format(trendCustomDate.from, "dd MMM", { locale: localeId })} - {format(trendCustomDate.to, "dd MMM", { locale: localeId })}</>
-                ) : format(trendCustomDate.from, "dd MMM yyyy", { locale: localeId })
-              ) : "Pilih tanggal"}
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-auto p-0" align="start">
-            <Calendar mode="range" selected={trendCustomDate} onSelect={setTrendCustomDate} numberOfMonths={1} className={cn("p-3 pointer-events-auto")} />
-          </PopoverContent>
-        </Popover>
-      )}
-    </div>
-  );
+  // Trend filter label for display
+  const trendPeriodLabel = useMemo(() => {
+    if (periodPreset === "all") return "Semua Data";
+    if (periodPreset === "7d") return "7 Hari";
+    if (periodPreset === "14d") return "14 Hari";
+    if (periodPreset === "30d") return "30 Hari";
+    if (periodPreset === "custom" && dateRange?.from) {
+      return dateRange.to
+        ? `${format(dateRange.from, "dd MMM", { locale: localeId })} - ${format(dateRange.to, "dd MMM", { locale: localeId })}`
+        : format(dateRange.from, "dd MMM yyyy", { locale: localeId });
+    }
+    return "Semua Data";
+  }, [periodPreset, dateRange]);
 
   // NOC Category Trend data - uses cloud history for persistence
   const nocCategoryTrend = useMemo(() => {
@@ -704,7 +670,7 @@ export default function Teams() {
                             <div className="space-y-1.5">
                               <div className="flex items-center justify-between gap-2">
                                 <p className="text-[9px] sm:text-xs font-semibold text-muted-foreground">Category Trend</p>
-                                {trendFilterUI}
+                                <Badge variant="outline" className="text-[8px] sm:text-[9px] px-1.5 py-0">{trendPeriodLabel}</Badge>
                               </div>
                               <ChartContainer config={ritelCategoryTrend.config} className="aspect-[2/1] w-full max-h-[160px] sm:max-h-[200px]">
                                 <LineChart data={ritelCategoryTrend.data} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
@@ -817,7 +783,7 @@ export default function Teams() {
                             <div className="space-y-1.5">
                               <div className="flex items-center justify-between gap-2">
                                 <p className="text-[9px] sm:text-xs font-semibold text-muted-foreground">Category Trend</p>
-                                {trendFilterUI}
+                                <Badge variant="outline" className="text-[8px] sm:text-[9px] px-1.5 py-0">{trendPeriodLabel}</Badge>
                               </div>
                               <ChartContainer config={feederCategoryTrend.config} className="aspect-[2/1] w-full max-h-[160px] sm:max-h-[200px]">
                                 <LineChart data={feederCategoryTrend.data} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
@@ -1321,7 +1287,7 @@ export default function Teams() {
                           <div className="space-y-1.5">
                             <div className="flex items-center justify-between gap-2">
                               <p className="text-[9px] sm:text-xs font-semibold text-muted-foreground">Category Trend</p>
-                              {trendFilterUI}
+                              <Badge variant="outline" className="text-[8px] sm:text-[9px] px-1.5 py-0">{trendPeriodLabel}</Badge>
                             </div>
                             <ChartContainer config={nocCategoryTrend.config} className="aspect-[2/1] w-full max-h-[180px] sm:max-h-[220px]">
                               <LineChart data={nocCategoryTrend.data} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
