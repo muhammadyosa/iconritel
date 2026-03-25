@@ -111,6 +111,7 @@ export default function Teams() {
   const [statusSheet, setStatusSheet] = useState<{ category: "ritel" | "feeder"; status: "Resolved" | "Pending" | "Critical" } | null>(null);
   const [nocStatusSheet, setNocStatusSheet] = useState<{ status: "Resolved" | "Pending" | "Critical" } | null>(null);
   const [nocUserSheet, setNocUserSheet] = useState<string | null>(null);
+  const [kpiSheet, setKpiSheet] = useState<{ title: string; emoji: string; tickets: any[] } | null>(null);
   // trendFilter is now unified with periodPreset
 
   // Handle period preset change
@@ -529,6 +530,7 @@ export default function Teams() {
                     valueClass: "text-primary",
                     glowClass: "hover:shadow-[0_0_20px_-4px_hsl(var(--primary)/0.4)]",
                     bgClass: "bg-primary/5",
+                    onClick: () => setKpiSheet({ title: "👥 Semua Tim Aktif", emoji: "👥", tickets: filteredTickets }),
                     badges: (
                       <div className="flex flex-wrap gap-1 mt-1.5">
                         <Badge variant="outline" className="text-[8px] sm:text-[9px] px-1.5 py-0 bg-primary/10 text-primary border-primary/20">{teamStatsByCategory.ritel.length} Ritel</Badge>
@@ -544,6 +546,7 @@ export default function Teams() {
                     valueClass: "text-foreground",
                     glowClass: "hover:shadow-[0_0_20px_-4px_hsl(var(--muted-foreground)/0.3)]",
                     bgClass: "bg-muted/5",
+                    onClick: () => setKpiSheet({ title: "🗃️ Semua Incident", emoji: "🗃️", tickets: filteredTickets }),
                     badges: (
                       <div className="flex flex-wrap gap-1 mt-1.5">
                         {teamStatsByCategory.topConstraints.map(([name, count]) => (
@@ -560,6 +563,7 @@ export default function Teams() {
                     valueClass: "text-success",
                     glowClass: "hover:shadow-[0_0_20px_-4px_hsl(var(--success)/0.4)]",
                     bgClass: "bg-success/5",
+                    onClick: () => setKpiSheet({ title: "✅ Incident Resolved", emoji: "✅", tickets: filteredTickets.filter(t => t.status === "Resolved") }),
                     badges: (
                       <div className="flex flex-wrap gap-1 mt-1.5">
                         {teamStatsByCategory.topConstraintsResolved.map(([name, count]) => (
@@ -578,6 +582,7 @@ export default function Teams() {
                     valueClass: "text-primary",
                     glowClass: "hover:shadow-[0_0_20px_-4px_hsl(var(--destructive)/0.4)]",
                     bgClass: "bg-destructive/5",
+                    onClick: () => setKpiSheet({ title: "📊 Detail Resolution Rate", emoji: "📊", tickets: filteredTickets }),
                     badges: (
                       <div className="flex flex-wrap gap-1 mt-1.5">
                         {teamStatsByCategory.topConstraints.slice(0, 3).map(([name, total]) => {
@@ -597,10 +602,11 @@ export default function Teams() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.3, delay: index * 0.05 }}
                     className={`
-                      relative rounded-xl ${card.bgClass} ${card.borderClass} border
+                      relative cursor-pointer rounded-xl ${card.bgClass} ${card.borderClass} border
                       transition-all duration-300
                       ${card.glowClass} active:scale-[0.97]
                     `}
+                    onClick={card.onClick}
                   >
                     <div className="p-3 sm:p-4">
                       <div className="flex items-center justify-between gap-2">
@@ -1157,6 +1163,7 @@ export default function Teams() {
                     valueClass: "text-primary",
                     glowClass: "hover:shadow-[0_0_20px_-4px_hsl(var(--primary)/0.4)]",
                     bgClass: "bg-primary/5",
+                    onClick: () => setKpiSheet({ title: "👤 Semua User NOC", emoji: "👤", tickets: filteredTickets }),
                     badges: null,
                   },
                   {
@@ -1167,6 +1174,7 @@ export default function Teams() {
                     valueClass: "text-foreground",
                     glowClass: "hover:shadow-[0_0_20px_-4px_hsl(var(--muted-foreground)/0.3)]",
                     bgClass: "bg-muted/5",
+                    onClick: () => setKpiSheet({ title: "🗃️ Semua Incident NOC", emoji: "🗃️", tickets: filteredTickets }),
                     badges: (
                       <div className="flex flex-wrap gap-1 mt-1.5">
                         {nocConstraintStats.topAll.map(([name, count]) => (
@@ -1183,6 +1191,7 @@ export default function Teams() {
                     valueClass: "text-success",
                     glowClass: "hover:shadow-[0_0_20px_-4px_hsl(var(--success)/0.4)]",
                     bgClass: "bg-success/5",
+                    onClick: () => setKpiSheet({ title: "✅ Incident Resolved NOC", emoji: "✅", tickets: filteredTickets.filter(t => t.status === "Resolved") }),
                     badges: (
                       <div className="flex flex-wrap gap-1 mt-1.5">
                         {nocConstraintStats.topResolved.map(([name, count]) => (
@@ -1199,6 +1208,7 @@ export default function Teams() {
                     valueClass: "text-primary",
                     glowClass: "hover:shadow-[0_0_20px_-4px_hsl(var(--destructive)/0.4)]",
                     bgClass: "bg-destructive/5",
+                    onClick: () => setKpiSheet({ title: "📊 Detail Resolution Rate NOC", emoji: "📊", tickets: filteredTickets }),
                     badges: (
                       <div className="flex flex-wrap gap-1 mt-1.5">
                         {nocConstraintStats.topAll.slice(0, 3).map(([name, total]) => {
@@ -1218,10 +1228,11 @@ export default function Teams() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.3, delay: index * 0.05 }}
                     className={`
-                      relative rounded-xl ${card.bgClass} ${card.borderClass} border
+                      relative cursor-pointer rounded-xl ${card.bgClass} ${card.borderClass} border
                       transition-all duration-300
                       ${card.glowClass} active:scale-[0.97]
                     `}
+                    onClick={card.onClick}
                   >
                     <div className="p-3 sm:p-4">
                       <div className="flex items-center justify-between gap-2">
@@ -1566,6 +1577,79 @@ export default function Teams() {
           <RegionalOfficeTab tickets={filteredTickets} />
         </TabsContent>
       </Tabs>
+
+      {/* KPI Drill-down Sheet */}
+      <Sheet open={!!kpiSheet} onOpenChange={(open) => !open && setKpiSheet(null)}>
+        <SheetContent side="right" className="w-full sm:max-w-lg md:max-w-2xl p-3 sm:p-6">
+          {kpiSheet && (() => {
+            const list = kpiSheet.tickets;
+            return (
+              <>
+                <SheetHeader>
+                  <SheetTitle className="text-base sm:text-lg">
+                    {kpiSheet.title}
+                  </SheetTitle>
+                  <SheetDescription className="text-xs sm:text-sm">
+                    {list.length} incident {periodPreset !== "all" && `• Filter: ${trendPeriodLabel}`}
+                  </SheetDescription>
+                </SheetHeader>
+                {/* Summary mini cards */}
+                <div className="grid grid-cols-4 gap-2 mt-4">
+                  <div className="p-2 rounded-lg bg-muted/50 text-center">
+                    <p className="text-sm sm:text-lg font-bold">{list.length}</p>
+                    <p className="text-[8px] sm:text-[10px] text-muted-foreground">Total</p>
+                  </div>
+                  <div className="p-2 rounded-lg bg-success/10 text-center">
+                    <p className="text-sm sm:text-lg font-bold text-success">{list.filter((t: any) => t.status === "Resolved").length}</p>
+                    <p className="text-[8px] sm:text-[10px] text-muted-foreground">Resolved</p>
+                  </div>
+                  <div className="p-2 rounded-lg bg-warning/10 text-center">
+                    <p className="text-sm sm:text-lg font-bold text-warning">{list.filter((t: any) => t.status === "Pending" || t.status === "On Progress").length}</p>
+                    <p className="text-[8px] sm:text-[10px] text-muted-foreground">Pending</p>
+                  </div>
+                  <div className="p-2 rounded-lg bg-destructive/10 text-center">
+                    <p className="text-sm sm:text-lg font-bold text-destructive">{list.filter((t: any) => t.status === "Critical").length}</p>
+                    <p className="text-[8px] sm:text-[10px] text-muted-foreground">Critical</p>
+                  </div>
+                </div>
+                <ScrollArea className="h-[calc(100vh-250px)] mt-4">
+                  <div className="space-y-3 pr-2">
+                    {list.length === 0 ? (
+                      <p className="text-sm text-muted-foreground text-center py-8">Tidak ada incident</p>
+                    ) : list.map((ticket: any) => (
+                      <Card key={ticket.id} className="shadow-sm">
+                        <CardContent className="p-3">
+                          <div className="space-y-2">
+                            <div className="flex items-start justify-between gap-2">
+                              <div className="min-w-0 flex-1">
+                                <p className="font-bold text-xs sm:text-sm truncate">{ticket.ticketId || ticket.id}</p>
+                                <p className="text-[10px] text-muted-foreground mt-0.5">
+                                  {ticket.createdAt}{ticket.createdByName ? ` • ${ticket.createdByName}` : ""}
+                                  {ticket.serpo ? ` • ${ticket.serpo}` : ""}
+                                </p>
+                              </div>
+                              <StatusBadge status={ticket.status} />
+                            </div>
+                            <div className="grid grid-cols-2 gap-1.5 text-[10px] sm:text-xs">
+                              <div><span className="text-muted-foreground">Customer:</span><p className="font-medium truncate">{ticket.customerName}</p></div>
+                              <div><span className="text-muted-foreground">Service ID:</span><p className="font-medium font-mono truncate">{ticket.serviceId}</p></div>
+                              <div><span className="text-muted-foreground">Constraint:</span><p className="font-medium truncate">{ticket.constraint}</p></div>
+                              <div><span className="text-muted-foreground">Hostname:</span><p className="font-medium font-mono text-[9px] truncate">{ticket.hostname}</p></div>
+                            </div>
+                            <div className="pt-1.5 border-t">
+                              <p className="text-[10px] font-mono p-1.5 bg-muted/50 rounded break-all">{ticket.ticketResult}</p>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                </ScrollArea>
+              </>
+            );
+          })()}
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }
