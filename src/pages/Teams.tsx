@@ -530,6 +530,7 @@ export default function Teams() {
                     valueClass: "text-primary",
                     glowClass: "hover:shadow-[0_0_20px_-4px_hsl(var(--primary)/0.4)]",
                     bgClass: "bg-primary/5",
+                    onClick: () => setKpiSheet({ title: "👥 Semua Tim Aktif", emoji: "👥", tickets: filteredTickets }),
                     badges: (
                       <div className="flex flex-wrap gap-1 mt-1.5">
                         <Badge variant="outline" className="text-[8px] sm:text-[9px] px-1.5 py-0 bg-primary/10 text-primary border-primary/20">{teamStatsByCategory.ritel.length} Ritel</Badge>
@@ -545,6 +546,7 @@ export default function Teams() {
                     valueClass: "text-foreground",
                     glowClass: "hover:shadow-[0_0_20px_-4px_hsl(var(--muted-foreground)/0.3)]",
                     bgClass: "bg-muted/5",
+                    onClick: () => setKpiSheet({ title: "🗃️ Semua Incident", emoji: "🗃️", tickets: filteredTickets }),
                     badges: (
                       <div className="flex flex-wrap gap-1 mt-1.5">
                         {teamStatsByCategory.topConstraints.map(([name, count]) => (
@@ -561,6 +563,7 @@ export default function Teams() {
                     valueClass: "text-success",
                     glowClass: "hover:shadow-[0_0_20px_-4px_hsl(var(--success)/0.4)]",
                     bgClass: "bg-success/5",
+                    onClick: () => setKpiSheet({ title: "✅ Incident Resolved", emoji: "✅", tickets: filteredTickets.filter(t => t.status === "Resolved") }),
                     badges: (
                       <div className="flex flex-wrap gap-1 mt-1.5">
                         {teamStatsByCategory.topConstraintsResolved.map(([name, count]) => (
@@ -579,6 +582,7 @@ export default function Teams() {
                     valueClass: "text-primary",
                     glowClass: "hover:shadow-[0_0_20px_-4px_hsl(var(--destructive)/0.4)]",
                     bgClass: "bg-destructive/5",
+                    onClick: () => setKpiSheet({ title: "📊 Detail Resolution Rate", emoji: "📊", tickets: filteredTickets }),
                     badges: (
                       <div className="flex flex-wrap gap-1 mt-1.5">
                         {teamStatsByCategory.topConstraints.slice(0, 3).map(([name, total]) => {
