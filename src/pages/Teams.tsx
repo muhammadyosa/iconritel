@@ -250,22 +250,11 @@ export default function Teams() {
     const topResolved = Object.entries(resolvedMap).sort((a, b) => b[1] - a[1]).slice(0, 4);
     return { countMap, resolvedMap, topAll, topResolved };
   }, [filteredTickets]);
-  // Helper: compute trend date range from trendFilter
+  // Trend date range is now unified with the main period filter
   const trendDateRange = useMemo(() => {
-    const today = new Date();
-    if (trendFilter === "today") {
-      return { from: startOfDay(today), to: endOfDay(today) };
-    } else if (trendFilter === "7d") {
-      return { from: startOfDay(subDays(today, 6)), to: endOfDay(today) };
-    } else if (trendFilter === "14d") {
-      return { from: startOfDay(subDays(today, 13)), to: endOfDay(today) };
-    } else if (trendFilter === "30d") {
-      return { from: startOfDay(subDays(today, 29)), to: endOfDay(today) };
-    } else if (trendFilter === "custom" && trendCustomDate?.from) {
-      return { from: startOfDay(trendCustomDate.from), to: trendCustomDate.to ? endOfDay(trendCustomDate.to) : endOfDay(trendCustomDate.from) };
-    }
-    return null; // "all" = no filter
-  }, [trendFilter, trendCustomDate]);
+    if (!dateRange?.from) return null; // "all" = no filter
+    return { from: startOfDay(dateRange.from), to: dateRange.to ? endOfDay(dateRange.to) : endOfDay(dateRange.from) };
+  }, [dateRange]);
 
   const filterRecordByTrendDate = useCallback((recDate: string) => {
     if (!trendDateRange) return true;
