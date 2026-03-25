@@ -114,6 +114,8 @@ export default function Teams() {
   const [kpiSheet, setKpiSheet] = useState<{ title: string; emoji: string; tickets: any[] } | null>(null);
   const [teamDrillSheet, setTeamDrillSheet] = useState<{ teams: { team: string; category: string; tickets: any[] }[] } | null>(null);
   const [expandedDrillTeam, setExpandedDrillTeam] = useState<string | null>(null);
+  const [userDrillSheet, setUserDrillSheet] = useState<{ users: { name: string; tickets: any[] }[] } | null>(null);
+  const [expandedDrillUser, setExpandedDrillUser] = useState<string | null>(null);
   // trendFilter is now unified with periodPreset
 
   // Handle period preset change
