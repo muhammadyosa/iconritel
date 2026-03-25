@@ -1596,7 +1596,8 @@ export default function Teams() {
 
         {/* ===== TAB 3: List Regional Office ===== */}
         <TabsContent value="regional-office" className="space-y-4">
-          <RegionalOfficeTab tickets={tickets} />
+          {dateFilter}
+          <RegionalOfficeTab tickets={filteredTickets} />
         </TabsContent>
       </Tabs>
     </div>
