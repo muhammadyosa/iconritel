@@ -1228,10 +1228,11 @@ export default function Teams() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.3, delay: index * 0.05 }}
                     className={`
-                      relative rounded-xl ${card.bgClass} ${card.borderClass} border
+                      relative cursor-pointer rounded-xl ${card.bgClass} ${card.borderClass} border
                       transition-all duration-300
                       ${card.glowClass} active:scale-[0.97]
                     `}
+                    onClick={card.onClick}
                   >
                     <div className="p-3 sm:p-4">
                       <div className="flex items-center justify-between gap-2">
