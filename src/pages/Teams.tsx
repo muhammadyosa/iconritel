@@ -1174,7 +1174,10 @@ export default function Teams() {
                     valueClass: "text-primary",
                     glowClass: "hover:shadow-[0_0_20px_-4px_hsl(var(--primary)/0.4)]",
                     bgClass: "bg-primary/5",
-                    onClick: () => setKpiSheet({ title: "👤 Semua User NOC", emoji: "👤", tickets: filteredTickets }),
+                    onClick: () => {
+                      setExpandedDrillUser(null);
+                      setUserDrillSheet({ users: userStats.map(u => ({ name: u.name, tickets: u.tickets })) });
+                    },
                     badges: null,
                   },
                   {
