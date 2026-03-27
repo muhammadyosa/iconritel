@@ -87,6 +87,7 @@ export default function Dashboard() {
   const { getHistoryRecords, getReportsForDate } = useShiftReportHistory(shiftReports as any);
   const [selectedHistoryDate, setSelectedHistoryDate] = useState<string | null>(null);
   const [shiftReportTab, setShiftReportTab] = useState<string>("latest");
+  const [teamData, setTeamData] = useState<RegionalTeamRecord[]>([]);
 
   // Load OLT data
   useEffect(() => {
