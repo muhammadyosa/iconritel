@@ -3,6 +3,7 @@ import { DashboardSkeleton } from "@/components/PageSkeleton";
 import { RecentActivity } from "@/components/RecentActivity";
 import { MonthlyAnalytics } from "@/components/MonthlyAnalytics";
 import { useCloudTickets } from "@/hooks/useCloudTickets";
+import { useUserRole } from "@/hooks/useUserRole";
 import { useTicketHistory } from "@/hooks/useTicketHistory";
 import { useShiftReportHistory } from "@/hooks/useShiftReportHistory";
 import { useCloudShiftReports } from "@/hooks/useCloudShiftReports";
@@ -44,6 +45,7 @@ interface ShiftReport {
 
 export default function Dashboard() {
   const { tickets, isLoading: isLoadingTickets } = useCloudTickets();
+  const { isAdmin } = useUserRole();
   const { getChartData, getTrendChartData, getCategoryData, getTicketsForDate, getTicketsForDateByStatus } = useTicketHistory(tickets);
   
   // Cloud shift reports hook
@@ -946,14 +948,16 @@ export default function Dashboard() {
         </Card>
       </motion.div>
 
-      {/* Recent Activity */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, delay: 0.8 }}
-      >
-        <RecentActivity />
-      </motion.div>
+      {/* Recent Activity - Admin Only */}
+      {isAdmin && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.8 }}
+        >
+          <RecentActivity />
+        </motion.div>
+      )}
       </div>
 
       {/* Ticket Detail Dialog */}
