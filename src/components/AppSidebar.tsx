@@ -90,7 +90,7 @@ export function AppSidebar() {
   
 
   return (
-    <Sidebar className={collapsed ? "w-[52px]" : "w-56 sm:w-60"} collapsible="icon">
+    <Sidebar className={`${collapsed ? "w-[52px]" : "w-56 sm:w-60"} transition-all duration-300 ease-out`} collapsible="icon">
       <SidebarContent className="flex flex-col overflow-x-hidden">
         {/* Header Logo Section */}
         <div className={`border-b border-sidebar-border flex-shrink-0 ${collapsed ? "py-3 px-1" : "p-3 sm:p-4"}`}>
