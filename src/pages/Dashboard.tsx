@@ -45,6 +45,7 @@ interface ShiftReport {
 
 export default function Dashboard() {
   const { tickets, isLoading: isLoadingTickets } = useCloudTickets();
+  const { isAdmin } = useUserRole();
   const { getChartData, getTrendChartData, getCategoryData, getTicketsForDate, getTicketsForDateByStatus } = useTicketHistory(tickets);
   
   // Cloud shift reports hook
