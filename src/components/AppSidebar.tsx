@@ -69,7 +69,7 @@ function usePendingUserCount() {
     };
   }, [isAdmin]);
 
-  return { count, isAdmin };
+  return { count, isAdmin, visible };
 }
 
 
