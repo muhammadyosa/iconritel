@@ -3,7 +3,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Activity, Plus, CheckCircle, Clock, Trash2, Edit, Upload, Download, RefreshCw, Loader2, ExternalLink } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Activity, Plus, CheckCircle, Clock, Trash2, Edit, Upload, Download, RefreshCw, Loader2, ExternalLink, Search, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { getActionLabel } from "@/hooks/useActivityLog";
@@ -92,6 +93,7 @@ export function RecentActivity() {
   const [loading, setLoading] = useState(true);
   const [profileMap, setProfileMap] = useState<Record<string, { display_name: string | null; email: string }>>({});
   const [filter, setFilter] = useState<FilterCategory>("all");
+  const [searchQuery, setSearchQuery] = useState("");
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
   const [ticketDialogOpen, setTicketDialogOpen] = useState(false);
   const [loadingTicket, setLoadingTicket] = useState(false);
@@ -151,13 +153,27 @@ export function RecentActivity() {
       profile: profileMap[log.user_id] || { display_name: null, email: "Unknown" },
     }));
 
-    if (filter === "all") return mapped;
-    return mapped.filter((log) => {
-      const cat = getActionCategory(log.action);
-      if (filter === "admin") return cat === "admin" || cat === "system";
-      return cat === filter;
-    });
-  }, [logs, profileMap, filter]);
+    let filtered = mapped;
+    if (filter !== "all") {
+      filtered = filtered.filter((log) => {
+        const cat = getActionCategory(log.action);
+        if (filter === "admin") return cat === "admin" || cat === "system";
+        return cat === filter;
+      });
+    }
+
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase().trim();
+      filtered = filtered.filter((log) => {
+        const name = (log.profile?.display_name || log.profile?.email || "").toLowerCase();
+        const detail = (log.detail || "").toLowerCase();
+        const actionLabel = getActionLabel(log.action).toLowerCase();
+        return name.includes(q) || detail.includes(q) || actionLabel.includes(q);
+      });
+    }
+
+    return filtered;
+  }, [logs, profileMap, filter, searchQuery]);
 
   const handleActivityClick = useCallback(async (log: ActivityLog) => {
     const isIncidentAction = getActionCategory(log.action) === "incident";
@@ -252,6 +268,24 @@ export function RecentActivity() {
                 {opt.label}
               </button>
             ))}
+          </div>
+          {/* Search input */}
+          <div className="relative">
+            <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3 w-3 text-muted-foreground" />
+            <Input
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Cari nama user atau detail..."
+              className="h-7 text-[10px] sm:text-[11px] pl-7 pr-7 bg-background"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery("")}
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              >
+                <X className="h-3 w-3" />
+              </button>
+            )}
           </div>
         </CardHeader>
         <CardContent className="p-0">
