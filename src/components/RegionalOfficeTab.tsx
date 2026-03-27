@@ -701,9 +701,9 @@ export default function RegionalOfficeTab({ tickets }: RegionalOfficeTabProps) {
                     <h4 className="text-xs font-semibold mb-2 flex items-center gap-1.5">
                       <Users className="h-3.5 w-3.5" /> Daftar Tim ({selectedRegion.teams.length})
                     </h4>
-                    <div className="overflow-x-auto">
+                    <div className="overflow-auto max-h-[50vh] relative">
                       <Table className="text-[10px] sm:text-xs min-w-[420px]">
-                        <TableHeader className="sticky top-0 z-10 bg-background">
+                        <TableHeader className="sticky top-0 z-10 bg-background shadow-sm">
                           <TableRow className="h-8 border-b border-border/50">
                             <TableHead className="px-2 py-1.5 w-14 text-[10px] sm:text-xs font-semibold text-muted-foreground">Tipe</TableHead>
                             <TableHead className="px-2 py-1.5 text-[10px] sm:text-xs font-semibold text-muted-foreground">Nama Mitra</TableHead>
