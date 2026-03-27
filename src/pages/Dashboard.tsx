@@ -582,14 +582,6 @@ export default function Dashboard() {
         </motion.div>
       </div>
 
-      {/* Monthly Analytics Section */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, delay: 0.3 }}
-      >
-        <MonthlyAnalytics tickets={tickets} getTrendChartData={getTrendChartData} getCategoryData={getCategoryData} />
-      </motion.div>
 
       {/* Activity Feed & Monthly Analytics row */}
       <div className="grid gap-2 sm:gap-3 grid-cols-1 lg:grid-cols-3 w-full">
