@@ -1,4 +1,6 @@
 import { Activity, AlertTriangle, Zap, Server, Calendar, Clock, User, ExternalLink, TrendingUp, BarChart3, FileText, History, RefreshCw, Loader2 } from "lucide-react";
+import { ActivityFeed } from "@/components/ActivityFeed";
+import { InfoHint } from "@/components/InfoHint";
 import { DashboardSkeleton } from "@/components/PageSkeleton";
 import { MonthlyAnalytics } from "@/components/MonthlyAnalytics";
 import { useCloudTickets } from "@/hooks/useCloudTickets";
@@ -149,6 +151,7 @@ export default function Dashboard() {
             value: totalIncidents, 
             emoji: "🗃️", 
             metric: "total",
+            hint: "Jumlah seluruh incident yang tercatat di sistem",
             bgClass: "bg-primary/8 hover:bg-primary/15",
             borderClass: "border-primary/30 hover:border-primary/50",
             valueClass: "text-primary",
@@ -159,6 +162,7 @@ export default function Dashboard() {
             value: overSLA, 
             emoji: "⚠️", 
             metric: "overSLA",
+            hint: "Incident yang belum resolved lebih dari 24 jam sejak dibuat",
             bgClass: "bg-destructive/8 hover:bg-destructive/15",
             borderClass: "border-destructive/30 hover:border-destructive/50",
             valueClass: "text-destructive",
@@ -169,6 +173,7 @@ export default function Dashboard() {
             value: totalOLT, 
             emoji: "📟", 
             metric: "olt",
+            hint: "Jumlah OLT unik yang terdampak incident",
             bgClass: "bg-success/8 hover:bg-success/15",
             borderClass: "border-success/30 hover:border-success/50",
             valueClass: "text-success",
@@ -179,6 +184,7 @@ export default function Dashboard() {
             value: feederImpact, 
             emoji: "⛓️‍💥", 
             metric: "feeder",
+            hint: "Incident pada segmen Feeder (OLT DOWN, PORT DOWN, FAT LOSS, FAT BAD RX)",
             bgClass: "bg-warning/8 hover:bg-warning/15",
             borderClass: "border-warning/30 hover:border-warning/50",
             valueClass: "text-warning",
@@ -229,9 +235,10 @@ export default function Dashboard() {
           >
             <div className="p-3 sm:p-4">
               <div className="flex items-center justify-between gap-2">
-                <div className="flex items-center gap-2.5 min-w-0">
+                <div className="flex items-center gap-1.5 sm:gap-2.5 min-w-0">
                   <span className="text-xl sm:text-2xl">{card.emoji}</span>
                   <p className="text-[10px] sm:text-xs text-muted-foreground font-medium truncate">{card.title}</p>
+                  <InfoHint text={card.hint} side="bottom" />
                 </div>
                 <p className={`text-2xl sm:text-3xl font-bold shrink-0 tabular-nums ${card.valueClass}`}>
                   {card.value}
@@ -580,14 +587,22 @@ export default function Dashboard() {
         </motion.div>
       </div>
 
-      {/* Monthly Analytics Section */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, delay: 0.3 }}
-      >
-        <MonthlyAnalytics tickets={tickets} getTrendChartData={getTrendChartData} getCategoryData={getCategoryData} />
-      </motion.div>
+
+      {/* Activity Feed & Monthly Analytics row */}
+      <div className="grid gap-2 sm:gap-3 grid-cols-1 lg:grid-cols-3 w-full">
+        <div className="lg:col-span-2">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.3 }}
+          >
+            <MonthlyAnalytics tickets={tickets} getTrendChartData={getTrendChartData} getCategoryData={getCategoryData} />
+          </motion.div>
+        </div>
+        <div className="lg:col-span-1">
+          <ActivityFeed tickets={tickets} shiftReports={shiftReports as any} />
+        </div>
+      </div>
 
       {/* Shift Reports Section - Enhanced Layout */}
       {shiftReports.length > 0 && (
