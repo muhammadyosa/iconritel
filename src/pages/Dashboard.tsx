@@ -641,7 +641,7 @@ export default function Dashboard() {
       </motion.div>
 
       {/* Regional Incident Stats + Report Shift Grid */}
-      <div className="grid gap-3 grid-cols-1 lg:grid-cols-[1fr_380px] w-full">
+      <div className="grid gap-3 grid-cols-1 lg:grid-cols-[1fr_400px] w-full">
         {/* Regional Incident Overview */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
