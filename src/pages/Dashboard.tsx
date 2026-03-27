@@ -832,8 +832,14 @@ export default function Dashboard() {
         </motion.div>
       )}
 
+      {/* Recent Incidents + Recent Activity Grid */}
+      <div className="grid gap-3 grid-cols-1 lg:grid-cols-[1fr_380px] w-full">
       {/* Recent Tickets Section */}
       <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 0.7 }}
+      >
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, delay: 0.7 }}
