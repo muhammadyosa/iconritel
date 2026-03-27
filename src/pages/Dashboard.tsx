@@ -19,7 +19,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { motion, AnimatePresence } from "framer-motion";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip, Cell, LineChart, Line } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip, Cell, LineChart, Line, PieChart, Pie, Cell as RechartsCell } from "recharts";
+import { loadDefaultRegionalTeamData } from "@/lib/defaultRegionalData";
+import { RegionalTeamRecord } from "@/types/regionalTeam";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ShiftReportCard } from "@/components/ShiftReportCard";
 import {
@@ -85,6 +87,7 @@ export default function Dashboard() {
   const { getHistoryRecords, getReportsForDate } = useShiftReportHistory(shiftReports as any);
   const [selectedHistoryDate, setSelectedHistoryDate] = useState<string | null>(null);
   const [shiftReportTab, setShiftReportTab] = useState<string>("latest");
+  const [teamData, setTeamData] = useState<RegionalTeamRecord[]>([]);
 
   // Load OLT data
   useEffect(() => {
@@ -94,6 +97,51 @@ export default function Dashboard() {
       }
     });
   }, []);
+
+  // Load Regional Team data
+  useEffect(() => {
+    loadDefaultRegionalTeamData().then(setTeamData).catch(() => {});
+  }, []);
+
+  // Regional incident data for pie chart and stats
+  const regionalIncidentData = useMemo(() => {
+    const hostnameToRegion: Record<string, string> = {};
+    const regionMap: Record<string, RegionalTeamRecord[]> = {};
+    teamData.forEach((rec) => {
+      const region = rec.region.trim().toUpperCase();
+      if (!region) return;
+      if (!regionMap[region]) regionMap[region] = [];
+      regionMap[region].push(rec);
+      rec.hostnames.forEach((h) => {
+        const normalized = h.trim().toUpperCase();
+        if (normalized) hostnameToRegion[normalized] = region;
+      });
+    });
+
+    const regionStats: Record<string, { total: number; resolved: number; pending: number; critical: number; ritel: number; feeder: number }> = {};
+    Object.keys(regionMap).forEach((region) => {
+      regionStats[region] = { total: 0, resolved: 0, pending: 0, critical: 0, ritel: 0, feeder: 0 };
+    });
+
+    tickets.forEach((ticket) => {
+      const region = hostnameToRegion[(ticket.hostname || "").trim().toUpperCase()];
+      if (!region || !regionStats[region]) return;
+      regionStats[region].total++;
+      if (ticket.status === "Resolved") regionStats[region].resolved++;
+      else if (ticket.status === "Critical") regionStats[region].critical++;
+      else regionStats[region].pending++;
+      if (FEEDER_CONSTRAINTS_SET.has(ticket.constraint)) regionStats[region].feeder++;
+      else regionStats[region].ritel++;
+    });
+
+    return Object.entries(regionStats)
+      .filter(([, s]) => s.total > 0)
+      .sort((a, b) => b[1].total - a[1].total)
+      .map(([region, stats]) => ({ region, ...stats }));
+  }, [teamData, tickets]);
+
+  const ritelTickets = useMemo(() => tickets.filter(t => !FEEDER_CONSTRAINTS_SET.has(t.constraint)), [tickets]);
+  const feederTickets = useMemo(() => tickets.filter(t => FEEDER_CONSTRAINTS_SET.has(t.constraint)), [tickets]);
 
   const totalIncidents = tickets.length;
   const overSLA = useMemo(() => tickets.filter((t) => {
@@ -834,130 +882,197 @@ export default function Dashboard() {
         </motion.div>
       )}
 
-      {/* Recent Incidents + Recent Activity Grid */}
+      {/* Regional Incident Stats + Recent Activity Grid */}
       <div className="grid gap-3 grid-cols-1 lg:grid-cols-[1fr_380px] w-full">
-      {/* Recent Tickets Section */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, delay: 0.7 }}
-      >
-        <Card className="overflow-hidden border">
-          <CardHeader className="py-3 px-3 sm:px-6 border-b bg-muted/20 flex flex-col xs:flex-row xs:items-center justify-between space-y-2 xs:space-y-0">
-            <CardTitle className="text-xs sm:text-sm">Recent Incidents</CardTitle>
-            <div className="flex items-center gap-2">
-              <Select value={selectedConstraint} onValueChange={setSelectedConstraint}>
-                <SelectTrigger className="w-[140px] sm:w-[170px] h-7 sm:h-8 text-[10px] sm:text-xs">
-                  <SelectValue placeholder="Filter Constraint" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Semua Constraint</SelectItem>
-                  {ALL_CONSTRAINTS.map((constraint) => (
-                    <SelectItem key={constraint} value={constraint}>
-                      {constraint}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </CardHeader>
-          <CardContent className="p-1.5 sm:p-2">
-            {recentTickets.length === 0 ? (
-              <p className="text-sm text-muted-foreground text-center py-8">
-                Belum ada incident
-              </p>
-            ) : (
-              <div className="rounded-md border overflow-x-auto overflow-y-auto max-h-[40vh] xs:max-h-[45vh] sm:max-h-[50vh] md:max-h-[55vh] lg:max-h-[60vh]">
-                <Table className="min-w-[600px]">
-                  <TableHeader className="sticky top-0 bg-background z-10">
-                    <TableRow className="h-5">
-                      <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap bg-muted/80">🎫 Insident ID</TableHead>
-                      <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap bg-muted/80">📦 Type</TableHead>
-                      <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap bg-muted/80">👤 Customer/Type</TableHead>
-                      <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap bg-muted/80">👨‍💼 Service ID</TableHead>
-                      <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap bg-muted/80">👥 Serpo</TableHead>
-                      <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap bg-muted/80">✍️ Create by</TableHead>
-                      <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap bg-muted/80">⚙️ Status</TableHead>
-                      
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {recentTickets.map((ticket) => (
-                      <TableRow key={ticket.id} className="h-6 sm:h-7 cursor-pointer hover:bg-muted/70" onClick={() => setSelectedTicket(ticket)}>
-                        <TableCell className="px-1 sm:px-1.5 py-0.5 text-[9px] sm:text-[10px] font-medium">{ticket.id}</TableCell>
-                        <TableCell className="px-1 sm:px-1.5 py-0.5">
-                          <div>
-                            <Badge
-                              className={`text-[7px] sm:text-[8px] px-1 py-0 h-3 sm:h-3.5 ${
-                                ticket.category === "FEEDER"
-                                  ? "bg-warning text-warning-foreground"
-                                  : "bg-primary text-primary-foreground"
-                              }`}
-                            >
-                              {ticket.category}
-                            </Badge>
-                            <div className="text-[7px] sm:text-[8px] text-muted-foreground mt-0.5 truncate max-w-[80px] sm:max-w-none">
-                              {ticket.constraint}
-                            </div>
-                          </div>
-                        </TableCell>
-                        <TableCell className="px-1 sm:px-1.5 py-0.5 text-[9px] sm:text-[10px]">
-                          {ticket.category === "FEEDER" ? (
-                            ticket.constraint === "OLT DOWN" ? (
-                              <span className="font-medium">{ticket.hostname}</span>
-                            ) :
-                            ticket.constraint === "PORT DOWN" ? (
-                              <div>
-                                <div className="font-medium text-[9px] sm:text-[10px]">{ticket.ticketResult.match(/PORT - (.*?) - DOWN/)?.[1] || "PORT"}</div>
-                                <div className="text-muted-foreground text-[7px] sm:text-[8px]">{ticket.hostname}</div>
-                              </div>
-                            ) :
-                            ticket.constraint === "FAT LOSS" || ticket.constraint === "FAT BAD RX" ? (
-                              <div>
-                                <div className="font-medium text-[9px] sm:text-[10px]">{ticket.fatId}</div>
-                                <div className="text-muted-foreground text-[7px] sm:text-[8px]">{ticket.hostname}</div>
-                              </div>
-                            ) : ticket.constraint
-                          ) : ticket.customerName}
-                        </TableCell>
-                        <TableCell className="px-1 sm:px-1.5 py-0.5 font-mono text-[9px] sm:text-[10px]">{ticket.serviceId}</TableCell>
-                        <TableCell className="px-1 sm:px-1.5 py-0.5 text-[9px] sm:text-[10px]">{ticket.serpo}</TableCell>
-                        <TableCell className="px-1 sm:px-1.5 py-0.5 text-[9px] sm:text-[10px]">
-                          <span className="text-muted-foreground">{ticket.createdByName || "-"}</span>
-                        </TableCell>
-                        <TableCell className="px-1 sm:px-1.5 py-0.5">
-                          <div>
-                            <StatusBadge status={ticket.status} />
-                            <div className="text-[7px] sm:text-[8px] text-muted-foreground mt-0.5">
-                              {ticket.createdAt}
-                            </div>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-            )}
-            {recentTickets.length > 200 && (
-              <p className="text-xs text-muted-foreground text-center py-2">
-                Menampilkan 200 dari {recentTickets.length} insident
-              </p>
-            )}
-          </CardContent>
-        </Card>
-      </motion.div>
-
-      {/* Recent Activity - Admin Only */}
-      {isAdmin && (
+        {/* Regional Incident Overview */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.8 }}
+          transition={{ duration: 0.6, delay: 0.7 }}
+          className="space-y-3"
         >
-          <RecentActivity />
+          {/* Proporsi Incident Pie Chart */}
+          <Card className="overflow-hidden border">
+            <CardHeader className="py-3 px-3 sm:px-6 border-b bg-muted/20">
+              <CardTitle className="text-xs sm:text-sm flex items-center gap-2">🥧 Proporsi Incident per Region</CardTitle>
+              <p className="text-[10px] sm:text-xs text-muted-foreground">Persentase kontribusi incident per wilayah</p>
+            </CardHeader>
+            <CardContent className="p-2 sm:p-4">
+              {regionalIncidentData.length === 0 ? (
+                <p className="text-sm text-muted-foreground text-center py-8">Belum ada data incident per region</p>
+              ) : (
+                (() => {
+                  const PIE_COLORS = [
+                    "hsl(217, 91%, 45%)", "hsl(142, 76%, 36%)", "hsl(38, 92%, 50%)",
+                    "hsl(0, 84%, 55%)", "hsl(262, 80%, 55%)", "hsl(180, 70%, 40%)",
+                    "hsl(330, 75%, 50%)", "hsl(25, 95%, 53%)", "hsl(195, 85%, 45%)", "hsl(55, 80%, 45%)",
+                  ];
+                  const pieData = regionalIncidentData.map(r => ({ name: r.region, value: r.total }));
+                  const pieConfig: ChartConfig = {};
+                  pieData.forEach((d, i) => { pieConfig[d.name] = { label: d.name, color: PIE_COLORS[i % PIE_COLORS.length] }; });
+                  const renderCustomLabel = ({ name, percent, cx, cy, midAngle, outerRadius }: any) => {
+                    const RADIAN = Math.PI / 180;
+                    const radius = outerRadius + 18;
+                    const x = cx + radius * Math.cos(-midAngle * RADIAN);
+                    const y = cy + radius * Math.sin(-midAngle * RADIAN);
+                    if (percent < 0.04) return null;
+                    return (
+                      <text x={x} y={y} fill="hsl(var(--foreground))" textAnchor={x > cx ? "start" : "end"} dominantBaseline="central"
+                        className="text-[8px] sm:text-[10px] font-semibold" style={{ textShadow: "0 0 3px hsl(var(--background))" }}>
+                        {name} {(percent * 100).toFixed(0)}%
+                      </text>
+                    );
+                  };
+                  return (
+                    <div className="flex flex-col items-center">
+                      <ChartContainer config={pieConfig} className="h-[200px] xs:h-[230px] sm:h-[260px] w-full max-w-[340px]">
+                        <PieChart>
+                          <ChartTooltip content={<ChartTooltipContent nameKey="name" />} />
+                          <Pie data={pieData} cx="50%" cy="50%" innerRadius={45} outerRadius={80} paddingAngle={3}
+                            dataKey="value" nameKey="name" label={renderCustomLabel}
+                            labelLine={{ stroke: "hsl(var(--muted-foreground))", strokeWidth: 1 }}
+                            strokeWidth={2} stroke="hsl(var(--background))">
+                            {pieData.map((_, index) => (
+                              <RechartsCell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
+                            ))}
+                          </Pie>
+                        </PieChart>
+                      </ChartContainer>
+                      <div className="flex flex-wrap justify-center gap-x-3 gap-y-1.5 mt-2">
+                        {pieData.map((d, i) => (
+                          <div key={d.name} className="flex items-center gap-1.5">
+                            <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: PIE_COLORS[i % PIE_COLORS.length] }} />
+                            <span className="text-[9px] sm:text-[11px] font-medium text-foreground">{d.name} ({d.value})</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })()
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Statistik Incident Ritel & Feeder */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {/* Statistik Incident Ritel */}
+            <Card className="overflow-hidden border border-primary/20">
+              <CardHeader className="py-3 px-3 sm:px-6 border-b bg-primary/5">
+                <CardTitle className="text-xs sm:text-sm flex items-center gap-2">
+                  📦 Statistik Incident Ritel
+                </CardTitle>
+                <p className="text-[10px] sm:text-xs text-muted-foreground">
+                  {ritelTickets.length} total incident ritel
+                </p>
+              </CardHeader>
+              <CardContent className="p-3 sm:p-4 space-y-3">
+                <div className="grid grid-cols-3 gap-2">
+                  <div className="text-center p-2 rounded-lg bg-primary/5 border border-primary/10">
+                    <div className="text-lg sm:text-xl font-bold text-primary">{ritelTickets.length}</div>
+                    <div className="text-[9px] sm:text-[10px] text-muted-foreground">Total</div>
+                  </div>
+                  <div className="text-center p-2 rounded-lg bg-success/5 border border-success/10">
+                    <div className="text-lg sm:text-xl font-bold text-success">{ritelTickets.filter(t => t.status === "Resolved").length}</div>
+                    <div className="text-[9px] sm:text-[10px] text-muted-foreground">Resolved</div>
+                  </div>
+                  <div className="text-center p-2 rounded-lg bg-warning/5 border border-warning/10">
+                    <div className="text-lg sm:text-xl font-bold text-warning">{ritelTickets.filter(t => t.status !== "Resolved").length}</div>
+                    <div className="text-[9px] sm:text-[10px] text-muted-foreground">Pending</div>
+                  </div>
+                </div>
+                {/* Top constraints */}
+                <div className="space-y-1.5">
+                  <span className="text-[10px] font-semibold text-muted-foreground">Top Constraint</span>
+                  {(() => {
+                    const constraintCount: Record<string, number> = {};
+                    ritelTickets.forEach(t => { constraintCount[t.constraint] = (constraintCount[t.constraint] || 0) + 1; });
+                    return Object.entries(constraintCount)
+                      .sort((a, b) => b[1] - a[1])
+                      .slice(0, 4)
+                      .map(([name, count]) => (
+                        <div key={name} className="flex items-center justify-between text-[10px] sm:text-xs">
+                          <span className="text-muted-foreground truncate mr-2">{name}</span>
+                          <Badge variant="outline" className="text-[9px] px-1.5 py-0 h-auto">{count}</Badge>
+                        </div>
+                      ));
+                  })()}
+                </div>
+                {ritelTickets.length > 0 && (
+                  <div className="flex items-center justify-between text-[10px] pt-1 border-t">
+                    <span className="text-muted-foreground">Resolution Rate</span>
+                    <span className="font-bold text-primary">
+                      {Math.round((ritelTickets.filter(t => t.status === "Resolved").length / ritelTickets.length) * 100)}%
+                    </span>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Statistik Incident Feeder */}
+            <Card className="overflow-hidden border border-warning/20">
+              <CardHeader className="py-3 px-3 sm:px-6 border-b bg-warning/5">
+                <CardTitle className="text-xs sm:text-sm flex items-center gap-2">
+                  ⚡ Statistik Incident Feeder
+                </CardTitle>
+                <p className="text-[10px] sm:text-xs text-muted-foreground">
+                  {feederTickets.length} total incident feeder
+                </p>
+              </CardHeader>
+              <CardContent className="p-3 sm:p-4 space-y-3">
+                <div className="grid grid-cols-3 gap-2">
+                  <div className="text-center p-2 rounded-lg bg-warning/5 border border-warning/10">
+                    <div className="text-lg sm:text-xl font-bold text-warning">{feederTickets.length}</div>
+                    <div className="text-[9px] sm:text-[10px] text-muted-foreground">Total</div>
+                  </div>
+                  <div className="text-center p-2 rounded-lg bg-success/5 border border-success/10">
+                    <div className="text-lg sm:text-xl font-bold text-success">{feederTickets.filter(t => t.status === "Resolved").length}</div>
+                    <div className="text-[9px] sm:text-[10px] text-muted-foreground">Resolved</div>
+                  </div>
+                  <div className="text-center p-2 rounded-lg bg-destructive/5 border border-destructive/10">
+                    <div className="text-lg sm:text-xl font-bold text-destructive">{feederTickets.filter(t => t.status !== "Resolved").length}</div>
+                    <div className="text-[9px] sm:text-[10px] text-muted-foreground">Pending</div>
+                  </div>
+                </div>
+                {/* Top constraints */}
+                <div className="space-y-1.5">
+                  <span className="text-[10px] font-semibold text-muted-foreground">Top Constraint</span>
+                  {(() => {
+                    const constraintCount: Record<string, number> = {};
+                    feederTickets.forEach(t => { constraintCount[t.constraint] = (constraintCount[t.constraint] || 0) + 1; });
+                    return Object.entries(constraintCount)
+                      .sort((a, b) => b[1] - a[1])
+                      .slice(0, 4)
+                      .map(([name, count]) => (
+                        <div key={name} className="flex items-center justify-between text-[10px] sm:text-xs">
+                          <span className="text-muted-foreground truncate mr-2">{name}</span>
+                          <Badge variant="outline" className="text-[9px] px-1.5 py-0 h-auto">{count}</Badge>
+                        </div>
+                      ));
+                  })()}
+                </div>
+                {feederTickets.length > 0 && (
+                  <div className="flex items-center justify-between text-[10px] pt-1 border-t">
+                    <span className="text-muted-foreground">Resolution Rate</span>
+                    <span className="font-bold text-warning">
+                      {Math.round((feederTickets.filter(t => t.status === "Resolved").length / feederTickets.length) * 100)}%
+                    </span>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
         </motion.div>
-      )}
+
+        {/* Recent Activity - Admin Only */}
+        {isAdmin && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.8 }}
+          >
+            <RecentActivity />
+          </motion.div>
+        )}
       </div>
 
       {/* Ticket Detail Dialog */}
