@@ -946,14 +946,16 @@ export default function Dashboard() {
         </Card>
       </motion.div>
 
-      {/* Recent Activity */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, delay: 0.8 }}
-      >
-        <RecentActivity />
-      </motion.div>
+      {/* Recent Activity - Admin Only */}
+      {isAdmin && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.8 }}
+        >
+          <RecentActivity />
+        </motion.div>
+      )}
       </div>
 
       {/* Ticket Detail Dialog */}
