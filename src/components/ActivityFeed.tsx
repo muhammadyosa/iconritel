@@ -159,7 +159,7 @@ export function ActivityFeed({ tickets, shiftReports = [] }: ActivityFeedProps) 
                 <div className="flex-1 min-w-0 pb-1">
                   <div className="flex items-center gap-2">
                     <span className="text-[10px] sm:text-[11px] font-semibold truncate">{item.title}</span>
-                    {item.status && <StatusBadge status={item.status} />}
+                    {item.status && <StatusBadge status={item.status as "On Progress" | "Critical" | "Resolved" | "Pending"} />}
                   </div>
                   <p className="text-[9px] sm:text-[10px] text-muted-foreground truncate mt-0.5">
                     {item.description}
