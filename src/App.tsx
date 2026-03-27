@@ -16,6 +16,8 @@ import { useTicketNotifications } from "@/hooks/useTicketNotifications";
 import { ScrollToTop } from "@/components/ScrollToTop";
 import { RouteScrollReset } from "@/components/RouteScrollReset";
 import { NetworkStatus } from "@/components/NetworkStatus";
+import { LiveStatsWidget } from "@/components/LiveStatsWidget";
+import { QuickStatsBanner } from "@/components/QuickStatsBanner";
 import plnIconPlusLogo from "@/assets/pln-icon-plus.png";
 import React, { Suspense } from "react";
 import { Loader2 } from "lucide-react";
