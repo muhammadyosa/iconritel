@@ -119,7 +119,10 @@ function AppLayout() {
                   </span>
                 </div>
               </div>
-              <UserMenu />
+              <div className="flex items-center gap-2 sm:gap-3">
+                <LiveStatsWidget />
+                <UserMenu />
+              </div>
             </div>
           </header>
           <main className="flex-1 p-2 sm:p-4 md:p-6 overflow-x-hidden overflow-y-auto scroll-smooth">
