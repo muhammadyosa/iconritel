@@ -358,10 +358,6 @@ export default function RegionalOfficeTab({ tickets }: RegionalOfficeTabProps) {
                       <div className="text-center">
                         <div className="text-[9px] xs:text-[10px] text-muted-foreground">Mitra</div>
                         <div className="text-xs xs:text-sm sm:text-base font-bold">{r.totalMitra}</div>
-                        <div className="flex justify-center gap-1 mt-0.5">
-                          <Badge variant="outline" className="text-[7px] sm:text-[8px] px-1 py-0 h-auto">R:{r.ritelMitra}</Badge>
-                          <Badge variant="secondary" className="text-[7px] sm:text-[8px] px-1 py-0 h-auto">F:{r.feederMitra}</Badge>
-                        </div>
                       </div>
                       <div className="text-center">
                         <div className="text-[9px] xs:text-[10px] text-muted-foreground">OLT</div>
