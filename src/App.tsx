@@ -141,6 +141,7 @@ const App = () => {
               <Toaster />
               <Sonner position="top-right" />
               <BrowserRouter>
+                <NetworkStatus />
                 <TicketNotificationProvider>
                   <AppLayout />
                 </TicketNotificationProvider>
