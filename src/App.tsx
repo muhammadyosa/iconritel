@@ -13,6 +13,9 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { UserMenu } from "@/components/UserMenu";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { useTicketNotifications } from "@/hooks/useTicketNotifications";
+import { ScrollToTop } from "@/components/ScrollToTop";
+import { RouteScrollReset } from "@/components/RouteScrollReset";
+import { NetworkStatus } from "@/components/NetworkStatus";
 import plnIconPlusLogo from "@/assets/pln-icon-plus.png";
 import React, { Suspense } from "react";
 import { Loader2 } from "lucide-react";
@@ -99,17 +102,17 @@ function AppLayout() {
       <div className="flex min-h-screen w-full overflow-x-hidden">
         <AppSidebar />
         <div className="flex-1 flex flex-col min-w-0">
-          <header className="sticky top-0 z-10 h-12 sm:h-14 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+          <header className="sticky top-0 z-10 h-12 sm:h-14 border-b bg-background/95 backdrop-blur-md supports-[backdrop-filter]:bg-background/60 transition-shadow duration-200">
             <div className="flex h-12 sm:h-14 items-center px-2 sm:px-4 gap-2 sm:gap-3 justify-between">
               <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-                <SidebarTrigger />
+                <SidebarTrigger className="hover:bg-accent/50 active:scale-95 transition-all" />
                 <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
                   <img 
                     src={plnIconPlusLogo} 
                     alt="PLN Icon Plus" 
                     className="h-6 xs:h-7 sm:h-8 md:h-9 w-auto flex-shrink-0 object-contain" 
                   />
-                  <span className="font-semibold text-xs xs:text-sm sm:text-base md:text-lg truncate hidden xs:inline">
+                  <span className="font-semibold text-xs xs:text-sm sm:text-base md:text-lg truncate hidden xs:inline bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
                     NOC RITEL
                   </span>
                 </div>
@@ -117,9 +120,11 @@ function AppLayout() {
               <UserMenu />
             </div>
           </header>
-          <main className="flex-1 p-2 sm:p-4 md:p-6 overflow-x-hidden overflow-y-auto">
+          <main className="flex-1 p-2 sm:p-4 md:p-6 overflow-x-hidden overflow-y-auto scroll-smooth">
+            <RouteScrollReset />
             <AnimatedRoutes />
           </main>
+          <ScrollToTop />
         </div>
       </div>
     </SidebarProvider>
@@ -136,6 +141,7 @@ const App = () => {
               <Toaster />
               <Sonner position="top-right" />
               <BrowserRouter>
+                <NetworkStatus />
                 <TicketNotificationProvider>
                   <AppLayout />
                 </TicketNotificationProvider>
