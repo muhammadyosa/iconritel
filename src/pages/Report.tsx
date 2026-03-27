@@ -61,12 +61,12 @@ import {
 const shiftReportSchema = z.object({
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Format tanggal tidak valid"),
   shift: z.enum(["pagi", "siang", "malam"]),
-  officer: z.string().trim().min(1, "Nama petugas wajib diisi").max(100, "Nama petugas maksimal 100 karakter"),
-  oltDown: z.string().trim().max(2000, "Laporan OLT Down maksimal 2000 karakter"),
-  portDown: z.string().trim().max(2000, "Laporan Port Down maksimal 2000 karakter"),
-  fatLoss: z.string().trim().max(2000, "Laporan FAT Loss maksimal 2000 karakter"),
-  issues: z.string().trim().max(5000, "Kendala/Masalah maksimal 5000 karakter"),
-  notes: z.string().trim().max(5000, "Catatan maksimal 5000 karakter"),
+  officer: z.string().trim().min(1, "Nama petugas wajib diisi"),
+  oltDown: z.string().trim(),
+  portDown: z.string().trim(),
+  fatLoss: z.string().trim(),
+  issues: z.string().trim(),
+  notes: z.string().trim(),
 });
 
 // Interface for parsed SLA ticket
