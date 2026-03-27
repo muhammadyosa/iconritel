@@ -4,66 +4,31 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Input } from "@/components/ui/input";
-import { Activity, Plus, CheckCircle, Clock, Trash2, Edit, Upload, Download, RefreshCw, Loader2, ExternalLink, Search, X } from "lucide-react";
+import { Activity, Plus, CheckCircle, Clock, Trash2, Edit, RefreshCw, Loader2, ExternalLink, Search, X, FileText, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
-import { getActionLabel } from "@/hooks/useActivityLog";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { StatusBadge } from "@/components/StatusBadge";
-import { Ticket, FEEDER_CONSTRAINTS_SET, generateTicketFormat } from "@/types/ticket";
+import { Ticket } from "@/types/ticket";
 
-interface ActivityLog {
+interface RecentItem {
   id: string;
-  user_id: string;
-  action: string;
-  detail: string | null;
-  created_at: string;
-  profile?: {
-    display_name: string | null;
-    email: string;
-  };
+  type: "incident" | "shift";
+  title: string;
+  detail: string;
+  status?: string;
+  timestamp: string;
+  userName?: string;
+  raw?: any;
 }
 
-type FilterCategory = "all" | "incident" | "shift" | "admin";
+type FilterCategory = "all" | "incident" | "shift";
 
 const FILTER_OPTIONS: { value: FilterCategory; label: string }[] = [
   { value: "all", label: "Semua" },
   { value: "incident", label: "Incident" },
   { value: "shift", label: "Shift" },
-  { value: "admin", label: "Admin" },
 ];
-
-const ACTION_ICONS: Record<string, { icon: React.ReactNode; color: string; bg: string }> = {
-  create_ticket: { icon: <Plus className="h-3 w-3" />, color: "text-success", bg: "bg-success/15" },
-  update_ticket: { icon: <Edit className="h-3 w-3" />, color: "text-primary", bg: "bg-primary/15" },
-  delete_ticket: { icon: <Trash2 className="h-3 w-3" />, color: "text-destructive", bg: "bg-destructive/15" },
-  resolve_ticket: { icon: <CheckCircle className="h-3 w-3" />, color: "text-success", bg: "bg-success/15" },
-  import_tickets: { icon: <Upload className="h-3 w-3" />, color: "text-accent", bg: "bg-accent/15" },
-  export_data: { icon: <Download className="h-3 w-3" />, color: "text-muted-foreground", bg: "bg-muted" },
-  bulk_delete_tickets: { icon: <Trash2 className="h-3 w-3" />, color: "text-destructive", bg: "bg-destructive/15" },
-  login: { icon: <Activity className="h-3 w-3" />, color: "text-primary", bg: "bg-primary/15" },
-  create_shift_report: { icon: <Plus className="h-3 w-3" />, color: "text-warning", bg: "bg-warning/15" },
-  update_shift_report: { icon: <Edit className="h-3 w-3" />, color: "text-warning", bg: "bg-warning/15" },
-  delete_shift_report: { icon: <Trash2 className="h-3 w-3" />, color: "text-destructive", bg: "bg-destructive/15" },
-  change_role: { icon: <Activity className="h-3 w-3" />, color: "text-accent", bg: "bg-accent/15" },
-  edit_username: { icon: <Edit className="h-3 w-3" />, color: "text-primary", bg: "bg-primary/15" },
-  approve_user: { icon: <CheckCircle className="h-3 w-3" />, color: "text-success", bg: "bg-success/15" },
-  revoke_user: { icon: <Trash2 className="h-3 w-3" />, color: "text-destructive", bg: "bg-destructive/15" },
-};
-
-function getActionCategory(action: string): "incident" | "shift" | "admin" | "system" {
-  if (action.includes("ticket") || action.includes("incident")) return "incident";
-  if (action.includes("shift")) return "shift";
-  if (action.includes("role") || action.includes("user")) return "admin";
-  return "system";
-}
-
-function getCategoryLabel(cat: string): string {
-  if (cat === "incident") return "Incident";
-  if (cat === "shift") return "Shift";
-  if (cat === "admin") return "Admin";
-  return "System";
-}
 
 function getTimeAgo(dateStr: string): string {
   const now = new Date();
@@ -80,148 +45,157 @@ function getTimeAgo(dateStr: string): string {
   return date.toLocaleDateString("id-ID", { day: "numeric", month: "short" });
 }
 
-function extractTicketId(detail: string | null): string | null {
-  if (!detail) return null;
-  // Try to extract ticket_id patterns like "IN123456" or from detail text
-  const match = detail.match(/(?:IN\d+|ticket[_\s]?id[:\s]*([^\s,]+))/i);
-  if (match) return match[0];
-  return null;
+function getStatusIcon(status?: string) {
+  if (!status) return { icon: <FileText className="h-3 w-3" />, color: "text-muted-foreground", bg: "bg-muted" };
+  switch (status) {
+    case "Resolved":
+      return { icon: <CheckCircle className="h-3 w-3" />, color: "text-success", bg: "bg-success/15" };
+    case "On Progress":
+      return { icon: <Clock className="h-3 w-3" />, color: "text-primary", bg: "bg-primary/15" };
+    case "Pending":
+      return { icon: <AlertTriangle className="h-3 w-3" />, color: "text-warning", bg: "bg-warning/15" };
+    case "Critical":
+      return { icon: <AlertTriangle className="h-3 w-3" />, color: "text-destructive", bg: "bg-destructive/15" };
+    default:
+      return { icon: <Activity className="h-3 w-3" />, color: "text-muted-foreground", bg: "bg-muted" };
+  }
 }
 
 export function RecentActivity() {
-  const [logs, setLogs] = useState<ActivityLog[]>([]);
+  const [items, setItems] = useState<RecentItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [profileMap, setProfileMap] = useState<Record<string, { display_name: string | null; email: string }>>({});
   const [filter, setFilter] = useState<FilterCategory>("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
   const [ticketDialogOpen, setTicketDialogOpen] = useState(false);
   const [loadingTicket, setLoadingTicket] = useState(false);
 
-  const fetchLogs = async () => {
+  const fetchData = useCallback(async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase
-        .from("user_activity_logs")
-        .select("*")
-        .order("created_at", { ascending: false })
-        .limit(30);
+      const [ticketsRes, shiftsRes] = await Promise.all([
+        supabase
+          .from("tickets")
+          .select("*")
+          .order("created_at", { ascending: false })
+          .limit(30),
+        supabase
+          .from("shift_reports")
+          .select("*")
+          .order("created_at", { ascending: false })
+          .limit(30),
+      ]);
 
-      if (error) throw error;
-      
-      if (data && data.length > 0) {
-        setLogs(data);
-        
-        const userIds = [...new Set(data.map((l) => l.user_id))];
-        const { data: profiles } = await supabase
-          .from("profiles")
-          .select("user_id, display_name, email")
-          .in("user_id", userIds);
-        
-        if (profiles) {
-          const map: Record<string, { display_name: string | null; email: string }> = {};
-          profiles.forEach((p) => {
-            map[p.user_id] = { display_name: p.display_name, email: p.email };
-          });
-          setProfileMap(map);
-        }
-      }
+      const ticketItems: RecentItem[] = (ticketsRes.data || []).map((t) => ({
+        id: t.id,
+        type: "incident" as const,
+        title: t.customer_name || t.ticket_id,
+        detail: `${t.constraint_type} • ${t.serpo} • ${t.hostname}`,
+        status: t.status,
+        timestamp: t.created_at,
+        userName: t.created_by_name || undefined,
+        raw: t,
+      }));
+
+      const shiftItems: RecentItem[] = (shiftsRes.data || []).map((s) => ({
+        id: s.id,
+        type: "shift" as const,
+        title: `Shift ${s.shift.charAt(0).toUpperCase() + s.shift.slice(1)}`,
+        detail: [
+          s.olt_down && `OLT: ${s.olt_down}`,
+          s.port_down && `Port: ${s.port_down}`,
+          s.fat_loss && `FAT: ${s.fat_loss}`,
+          s.issues && `Issues: ${s.issues}`,
+        ].filter(Boolean).join(" • ") || "Tidak ada kendala",
+        status: undefined,
+        timestamp: s.created_at,
+        userName: s.officer,
+        raw: s,
+      }));
+
+      const combined = [...ticketItems, ...shiftItems].sort(
+        (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+      );
+
+      setItems(combined);
     } catch (err) {
-      if (import.meta.env.DEV) console.error("Error fetching activity logs:", err);
+      if (import.meta.env.DEV) console.error("Error fetching recent activity:", err);
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
-    fetchLogs();
-    const channel = supabase
-      .channel("recent-activity")
-      .on("postgres_changes", { event: "INSERT", schema: "public", table: "user_activity_logs" }, () => {
-        fetchLogs();
+    fetchData();
+
+    const ticketChannel = supabase
+      .channel("recent-activity-tickets")
+      .on("postgres_changes", { event: "*", schema: "public", table: "tickets" }, () => {
+        fetchData();
+      })
+      .subscribe();
+
+    const shiftChannel = supabase
+      .channel("recent-activity-shifts")
+      .on("postgres_changes", { event: "*", schema: "public", table: "shift_reports" }, () => {
+        fetchData();
       })
       .subscribe();
 
     return () => {
-      supabase.removeChannel(channel);
+      supabase.removeChannel(ticketChannel);
+      supabase.removeChannel(shiftChannel);
     };
-  }, []);
+  }, [fetchData]);
 
-  const enrichedLogs = useMemo(() => {
-    const mapped = logs.map((log) => ({
-      ...log,
-      profile: profileMap[log.user_id] || { display_name: null, email: "Unknown" },
-    }));
+  const filteredItems = useMemo(() => {
+    let result = items;
 
-    let filtered = mapped;
     if (filter !== "all") {
-      filtered = filtered.filter((log) => {
-        const cat = getActionCategory(log.action);
-        if (filter === "admin") return cat === "admin" || cat === "system";
-        return cat === filter;
-      });
+      result = result.filter((item) => item.type === filter);
     }
 
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase().trim();
-      filtered = filtered.filter((log) => {
-        const name = (log.profile?.display_name || log.profile?.email || "").toLowerCase();
-        const detail = (log.detail || "").toLowerCase();
-        const actionLabel = getActionLabel(log.action).toLowerCase();
-        return name.includes(q) || detail.includes(q) || actionLabel.includes(q);
+      result = result.filter((item) => {
+        return (
+          item.title.toLowerCase().includes(q) ||
+          item.detail.toLowerCase().includes(q) ||
+          (item.userName || "").toLowerCase().includes(q)
+        );
       });
     }
 
-    return filtered;
-  }, [logs, profileMap, filter, searchQuery]);
+    return result;
+  }, [items, filter, searchQuery]);
 
-  const handleActivityClick = useCallback(async (log: ActivityLog) => {
-    const isIncidentAction = getActionCategory(log.action) === "incident";
-    if (!isIncidentAction || log.action === "bulk_delete_tickets" || log.action === "import_tickets" || log.action === "export_data" || log.action === "delete_ticket") return;
+  const handleItemClick = useCallback(async (item: RecentItem) => {
+    if (item.type !== "incident" || !item.raw) return;
 
     setLoadingTicket(true);
     setTicketDialogOpen(true);
 
     try {
-      // Try to find ticket by detail info
-      let query = supabase.from("tickets").select("*");
-      
-      if (log.detail) {
-        // Try matching by ticket_id in detail
-        const ticketIdMatch = log.detail.match(/IN\d+/i);
-        if (ticketIdMatch) {
-          query = query.eq("ticket_id", ticketIdMatch[0]);
-        } else {
-          // Try matching by customer name or service id in detail
-          query = query.or(`customer_name.ilike.%${log.detail.substring(0, 30)}%,ticket_id.ilike.%${log.detail.substring(0, 20)}%`);
-        }
-      }
-
-      const { data } = await query.limit(1).maybeSingle();
-      
-      if (data) {
-        const ticket: Ticket = {
-          id: data.id,
-          serviceId: data.service_id,
-          customerName: data.customer_name,
-          serpo: data.serpo,
-          hostname: data.hostname,
-          fatId: data.fat_id,
-          snOnt: data.sn_ont,
-          constraint: data.constraint_type,
-          category: data.category,
-          ticketResult: data.ticket_result,
-          status: data.status as "On Progress" | "Resolved" | "Pending" | "Critical",
-          createdAt: data.created_at,
-          createdISO: data.created_iso,
-          createdByName: data.created_by_name || undefined,
-          createdByUserId: data.created_by_user_id || undefined,
-          resolvedAt: data.resolved_at || undefined,
-        };
-        setSelectedTicket(ticket);
-      } else {
-        setSelectedTicket(null);
-      }
+      const data = item.raw;
+      const ticket: Ticket = {
+        id: data.id,
+        serviceId: data.service_id,
+        customerName: data.customer_name,
+        serpo: data.serpo,
+        hostname: data.hostname,
+        fatId: data.fat_id,
+        snOnt: data.sn_ont,
+        constraint: data.constraint_type,
+        category: data.category,
+        ticketResult: data.ticket_result,
+        status: data.status as "On Progress" | "Resolved" | "Pending" | "Critical",
+        createdAt: data.created_at,
+        createdISO: data.created_iso,
+        createdByName: data.created_by_name || undefined,
+        createdByUserId: data.created_by_user_id || undefined,
+        resolvedAt: data.resolved_at || undefined,
+      };
+      setSelectedTicket(ticket);
     } catch {
       setSelectedTicket(null);
     } finally {
@@ -241,7 +215,7 @@ export function RecentActivity() {
             <Button
               variant="ghost"
               size="icon"
-              onClick={fetchLogs}
+              onClick={fetchData}
               disabled={loading}
               className="h-7 w-7"
               title="Refresh"
@@ -275,7 +249,7 @@ export function RecentActivity() {
             <Input
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Cari nama user atau detail..."
+              placeholder="Cari nama, detail, atau constraint..."
               className="h-7 text-[10px] sm:text-[11px] pl-7 pr-7 bg-background"
             />
             {searchQuery && (
@@ -289,12 +263,12 @@ export function RecentActivity() {
           </div>
         </CardHeader>
         <CardContent className="p-0">
-          {loading && logs.length === 0 ? (
+          {loading && items.length === 0 ? (
             <div className="flex items-center justify-center py-12 text-muted-foreground">
               <Loader2 className="h-5 w-5 animate-spin mr-2" />
               <span className="text-xs">Memuat aktivitas...</span>
             </div>
-          ) : enrichedLogs.length === 0 ? (
+          ) : filteredItems.length === 0 ? (
             <div className="text-center py-12 text-muted-foreground">
               <Activity className="h-8 w-8 mx-auto mb-2 opacity-40" />
               <p className="text-xs">Belum ada aktivitas</p>
@@ -302,57 +276,64 @@ export function RecentActivity() {
           ) : (
             <ScrollArea className="h-[40vh] xs:h-[45vh] sm:h-[50vh] md:h-[55vh] lg:h-[60vh]">
               <div className="divide-y divide-border/50">
-                {enrichedLogs.map((log, idx) => {
-                  const actionInfo = ACTION_ICONS[log.action] || { icon: <Activity className="h-3 w-3" />, color: "text-muted-foreground", bg: "bg-muted" };
-                  const userName = log.profile?.display_name || log.profile?.email?.split("@")[0] || "User";
-                  const cat = getActionCategory(log.action);
-                  const isClickable = cat === "incident" && !["bulk_delete_tickets", "import_tickets", "export_data", "delete_ticket"].includes(log.action);
+                {filteredItems.map((item, idx) => {
+                  const isIncident = item.type === "incident";
+                  const iconInfo = isIncident
+                    ? getStatusIcon(item.status)
+                    : { icon: <FileText className="h-3 w-3" />, color: "text-warning", bg: "bg-warning/15" };
 
                   return (
                     <motion.div
-                      key={log.id}
+                      key={`${item.type}-${item.id}`}
                       initial={{ opacity: 0, x: -10 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ duration: 0.2, delay: idx * 0.02 }}
                       className={`flex items-start gap-2.5 px-3 py-2.5 transition-colors ${
-                        isClickable ? "cursor-pointer hover:bg-primary/5" : "hover:bg-muted/30"
+                        isIncident ? "cursor-pointer hover:bg-primary/5" : "hover:bg-muted/30"
                       }`}
-                      onClick={() => isClickable && handleActivityClick(log)}
+                      onClick={() => handleItemClick(item)}
                     >
                       {/* Icon */}
-                      <div className={`mt-0.5 shrink-0 rounded-full p-1.5 ${actionInfo.bg}`}>
-                        <span className={actionInfo.color}>{actionInfo.icon}</span>
+                      <div className={`mt-0.5 shrink-0 rounded-full p-1.5 ${iconInfo.bg}`}>
+                        <span className={iconInfo.color}>{iconInfo.icon}</span>
                       </div>
 
                       {/* Content */}
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-1.5 flex-wrap">
-                          <span className="text-[10px] sm:text-[11px] font-semibold text-foreground truncate max-w-[100px] sm:max-w-[140px]">
-                            {userName}
+                          <span className="text-[10px] sm:text-[11px] font-semibold text-foreground truncate max-w-[140px] sm:max-w-[180px]">
+                            {item.title}
                           </span>
-                          <span className="text-[9px] sm:text-[10px] text-muted-foreground">
-                            {getActionLabel(log.action)}
-                          </span>
-                          {isClickable && (
+                          {isIncident && item.status && (
+                            <StatusBadge status={item.status as any} />
+                          )}
+                          {isIncident && (
                             <ExternalLink className="h-2.5 w-2.5 text-muted-foreground/50" />
                           )}
                         </div>
-                        {log.detail && (
-                          <p className="text-[9px] sm:text-[10px] text-muted-foreground/80 mt-0.5 line-clamp-2 leading-tight">
-                            {log.detail}
-                          </p>
-                        )}
-                        <span className="text-[8px] sm:text-[9px] text-muted-foreground/60 mt-0.5 block">
-                          {getTimeAgo(log.created_at)}
-                        </span>
+                        <p className="text-[9px] sm:text-[10px] text-muted-foreground/80 mt-0.5 line-clamp-2 leading-tight">
+                          {item.detail}
+                        </p>
+                        <div className="flex items-center gap-1.5 mt-0.5">
+                          {item.userName && (
+                            <span className="text-[8px] sm:text-[9px] text-muted-foreground/70">
+                              oleh {item.userName}
+                            </span>
+                          )}
+                          <span className="text-[8px] sm:text-[9px] text-muted-foreground/60">
+                            • {getTimeAgo(item.timestamp)}
+                          </span>
+                        </div>
                       </div>
 
-                      {/* Action Badge */}
+                      {/* Type Badge */}
                       <Badge
                         variant="outline"
-                        className={`shrink-0 text-[7px] sm:text-[8px] px-1.5 py-0 h-4 ${actionInfo.color} border-current/20`}
+                        className={`shrink-0 text-[7px] sm:text-[8px] px-1.5 py-0 h-4 ${
+                          isIncident ? "text-primary border-primary/30" : "text-warning border-warning/30"
+                        }`}
                       >
-                        {getCategoryLabel(cat)}
+                        {isIncident ? "Incident" : "Shift"}
                       </Badge>
                     </motion.div>
                   );
@@ -393,10 +374,10 @@ export function RecentActivity() {
                   { label: "Serpo", value: selectedTicket.serpo },
                   { label: "Kategori", value: selectedTicket.category },
                   { label: "Constraint", value: selectedTicket.constraint },
-                ].map((item) => (
-                  <div key={item.label}>
-                    <span className="text-muted-foreground block text-[10px]">{item.label}</span>
-                    <span className="font-medium text-foreground truncate block">{item.value || "-"}</span>
+                ].map((field) => (
+                  <div key={field.label}>
+                    <span className="text-muted-foreground block text-[10px]">{field.label}</span>
+                    <span className="font-medium text-foreground truncate block">{field.value || "-"}</span>
                   </div>
                 ))}
               </div>
@@ -406,7 +387,7 @@ export function RecentActivity() {
               </div>
               {selectedTicket.createdByName && (
                 <div className="text-[10px] text-muted-foreground pt-1 border-t border-border/50">
-                  Create by <span className="font-medium text-foreground">{selectedTicket.createdByName}</span>
+                  Created by <span className="font-medium text-foreground">{selectedTicket.createdByName}</span>
                   {" • "}
                   {new Date(selectedTicket.createdISO).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}
                 </div>
@@ -416,7 +397,6 @@ export function RecentActivity() {
             <div className="text-center py-8 text-muted-foreground">
               <Activity className="h-8 w-8 mx-auto mb-2 opacity-40" />
               <p className="text-xs">Data incident tidak ditemukan</p>
-              <p className="text-[10px] mt-1">Incident mungkin sudah dihapus</p>
             </div>
           )}
         </DialogContent>
