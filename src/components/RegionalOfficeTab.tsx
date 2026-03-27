@@ -703,14 +703,14 @@ export default function RegionalOfficeTab({ tickets }: RegionalOfficeTabProps) {
                     </h4>
                     <div className="overflow-x-auto">
                       <Table className="text-[10px] sm:text-xs min-w-[420px]">
-                        <TableHeader>
-                          <TableRow className="h-7 bg-muted/30 sticky top-0">
-                            <TableHead className="px-1.5 py-1 w-14">Tipe</TableHead>
-                            <TableHead className="px-1.5 py-1">Nama Mitra</TableHead>
-                            <TableHead className="px-1.5 py-1 text-center w-10">OLT</TableHead>
-                             <TableHead className="px-1.5 py-1">Tim</TableHead>
-                             <TableHead className="px-1.5 py-1 text-right w-14">Inc</TableHead>
-                           </TableRow>
+                        <TableHeader className="sticky top-0 z-10 bg-background">
+                          <TableRow className="h-8 border-b border-border/50">
+                            <TableHead className="px-2 py-1.5 w-14 text-[10px] sm:text-xs font-semibold text-muted-foreground">Tipe</TableHead>
+                            <TableHead className="px-2 py-1.5 text-[10px] sm:text-xs font-semibold text-muted-foreground">Nama Mitra</TableHead>
+                            <TableHead className="px-2 py-1.5 text-center w-10 text-[10px] sm:text-xs font-semibold text-muted-foreground">OLT</TableHead>
+                            <TableHead className="px-2 py-1.5 text-[10px] sm:text-xs font-semibold text-muted-foreground">Tim</TableHead>
+                            <TableHead className="px-2 py-1.5 text-right w-14 text-[10px] sm:text-xs font-semibold text-muted-foreground">Inc</TableHead>
+                          </TableRow>
                         </TableHeader>
                         <TableBody>
                           {selectedRegion.teams.map((t, idx) => {
