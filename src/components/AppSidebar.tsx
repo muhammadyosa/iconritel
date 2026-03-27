@@ -34,6 +34,7 @@ const menuItems = [
 
 function usePendingUserCount() {
   const { isAdmin } = useUserRole();
+  const [count, setCount] = useState(0);
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
