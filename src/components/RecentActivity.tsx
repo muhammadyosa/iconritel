@@ -269,6 +269,24 @@ export function RecentActivity() {
               </button>
             ))}
           </div>
+          {/* Search input */}
+          <div className="relative">
+            <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3 w-3 text-muted-foreground" />
+            <Input
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Cari nama user atau detail..."
+              className="h-7 text-[10px] sm:text-[11px] pl-7 pr-7 bg-background"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery("")}
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              >
+                <X className="h-3 w-3" />
+              </button>
+            )}
+          </div>
         </CardHeader>
         <CardContent className="p-0">
           {loading && logs.length === 0 ? (
