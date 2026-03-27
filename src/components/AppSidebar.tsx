@@ -34,10 +34,11 @@ const menuItems = [
 
 function usePendingUserCount() {
   const { isAdmin } = useUserRole();
-  const [count, setCount] = useState(0);
+  const [visible, setVisible] = useState(false);
 
   useEffect(() => {
     if (!isAdmin) return;
+    setVisible(false);
 
     const fetchCount = async () => {
       const { count: pendingCount, error } = await supabase
@@ -47,6 +48,7 @@ function usePendingUserCount() {
 
       if (!error && pendingCount !== null) {
         setCount(pendingCount);
+        setVisible(true);
       }
     };
 
