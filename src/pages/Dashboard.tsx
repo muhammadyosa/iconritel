@@ -641,7 +641,7 @@ export default function Dashboard() {
       </motion.div>
 
       {/* Regional Incident Stats + Report Shift Grid */}
-      <div className="grid gap-3 grid-cols-1 lg:grid-cols-[1fr_380px] w-full">
+      <div className="grid gap-3 grid-cols-1 lg:grid-cols-[1fr_400px] w-full">
         {/* Regional Incident Overview */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -862,16 +862,16 @@ export default function Dashboard() {
                 </div>
               </CardHeader>
               
-              <CardContent className="pt-4 pb-5">
+              <CardContent className="pt-3 pb-4 px-3 sm:px-4">
                 <Tabs value={shiftReportTab} onValueChange={(v) => { setShiftReportTab(v); setSelectedHistoryDate(null); }} className="w-full">
-                  <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center justify-between mb-3">
                     <TabsList className="inline-flex w-auto gap-1 h-auto p-1">
-                      <TabsTrigger value="latest" className="flex items-center gap-1.5 text-[11px] sm:text-xs px-2.5 sm:px-3 py-1.5 sm:py-2 whitespace-nowrap data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-                        <Zap className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+                      <TabsTrigger value="latest" className="flex items-center gap-1.5 text-[10px] sm:text-xs px-2 sm:px-3 py-1.5 whitespace-nowrap data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                        <Zap className="h-3 w-3" />
                         Terbaru
                       </TabsTrigger>
-                      <TabsTrigger value="history" className="flex items-center gap-1.5 text-[11px] sm:text-xs px-2.5 sm:px-3 py-1.5 sm:py-2 whitespace-nowrap data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-                        <History className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+                      <TabsTrigger value="history" className="flex items-center gap-1.5 text-[10px] sm:text-xs px-2 sm:px-3 py-1.5 whitespace-nowrap data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                        <History className="h-3 w-3" />
                         Riwayat
                       </TabsTrigger>
                     </TabsList>
@@ -936,7 +936,7 @@ export default function Dashboard() {
                   <TabsContent value="history" className="mt-0">
                     {!selectedHistoryDate ? (
                       <div className="space-y-4">
-                        <div className="grid gap-2 grid-cols-1 sm:grid-cols-2">
+                        <div className="grid gap-2 grid-cols-1">
                           {getHistoryRecords().map((record, idx) => {
                             const shiftSummary = record.shifts.reduce((acc, s) => {
                               acc[s.shift] = (acc[s.shift] || 0) + 1;
