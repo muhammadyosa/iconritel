@@ -153,13 +153,27 @@ export function RecentActivity() {
       profile: profileMap[log.user_id] || { display_name: null, email: "Unknown" },
     }));
 
-    if (filter === "all") return mapped;
-    return mapped.filter((log) => {
-      const cat = getActionCategory(log.action);
-      if (filter === "admin") return cat === "admin" || cat === "system";
-      return cat === filter;
-    });
-  }, [logs, profileMap, filter]);
+    let filtered = mapped;
+    if (filter !== "all") {
+      filtered = filtered.filter((log) => {
+        const cat = getActionCategory(log.action);
+        if (filter === "admin") return cat === "admin" || cat === "system";
+        return cat === filter;
+      });
+    }
+
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase().trim();
+      filtered = filtered.filter((log) => {
+        const name = (log.profile?.display_name || log.profile?.email || "").toLowerCase();
+        const detail = (log.detail || "").toLowerCase();
+        const actionLabel = getActionLabel(log.action).toLowerCase();
+        return name.includes(q) || detail.includes(q) || actionLabel.includes(q);
+      });
+    }
+
+    return filtered;
+  }, [logs, profileMap, filter, searchQuery]);
 
   const handleActivityClick = useCallback(async (log: ActivityLog) => {
     const isIncidentAction = getActionCategory(log.action) === "incident";
