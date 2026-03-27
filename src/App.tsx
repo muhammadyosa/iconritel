@@ -16,8 +16,6 @@ import { useTicketNotifications } from "@/hooks/useTicketNotifications";
 import { ScrollToTop } from "@/components/ScrollToTop";
 import { RouteScrollReset } from "@/components/RouteScrollReset";
 import { NetworkStatus } from "@/components/NetworkStatus";
-import { LiveStatsWidget } from "@/components/LiveStatsWidget";
-import { QuickStatsBanner } from "@/components/QuickStatsBanner";
 import plnIconPlusLogo from "@/assets/pln-icon-plus.png";
 import React, { Suspense } from "react";
 import { Loader2 } from "lucide-react";
@@ -119,15 +117,11 @@ function AppLayout() {
                   </span>
                 </div>
               </div>
-              <div className="flex items-center gap-2 sm:gap-3">
-                <LiveStatsWidget />
-                <UserMenu />
-              </div>
+              <UserMenu />
             </div>
           </header>
           <main className="flex-1 p-2 sm:p-4 md:p-6 overflow-x-hidden overflow-y-auto scroll-smooth">
             <RouteScrollReset />
-            <QuickStatsBanner />
             <AnimatedRoutes />
           </main>
           <ScrollToTop />
