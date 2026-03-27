@@ -640,249 +640,7 @@ export default function Dashboard() {
         <MonthlyAnalytics tickets={tickets} getTrendChartData={getTrendChartData} getCategoryData={getCategoryData} />
       </motion.div>
 
-      {/* Shift Reports Section - Enhanced Layout */}
-      {shiftReports.length > 0 && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.6 }}
-        >
-          <Card className="overflow-hidden border">
-            <CardHeader className="py-3 px-3 sm:px-6 border-b bg-muted/20">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div>
-                  <h3 className="text-sm sm:text-base font-bold">📋 Report Shift</h3>
-                  <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5">
-                    Rekap aktivitas shift harian tim NOC
-                  </p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-[10px] px-2 py-1 rounded-md bg-primary/10 border border-primary/20 font-medium text-primary">
-                    {shiftReports.length} Laporan
-                  </span>
-                  <span className="text-[10px] px-2 py-1 rounded-md bg-muted border font-medium text-muted-foreground">
-                    {getHistoryRecords().length} Hari
-                  </span>
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    onClick={fetchShiftReports} 
-                    disabled={isLoadingShiftReports} 
-                    title="Refresh data"
-                    className="h-8 w-8"
-                  >
-                    {isLoadingShiftReports ? (
-                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                    ) : (
-                      <RefreshCw className="h-3.5 w-3.5" />
-                    )}
-                  </Button>
-                </div>
-              </div>
-            </CardHeader>
-            
-            <CardContent className="pt-4 pb-5">
-              <Tabs value={shiftReportTab} onValueChange={(v) => { setShiftReportTab(v); setSelectedHistoryDate(null); }} className="w-full">
-                <div className="flex items-center justify-between mb-4">
-                  <TabsList className="inline-flex w-auto gap-1 h-auto p-1">
-                    <TabsTrigger value="latest" className="flex items-center gap-1.5 text-[11px] sm:text-xs px-2.5 sm:px-3 py-1.5 sm:py-2 whitespace-nowrap data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-                      <Zap className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
-                      Terbaru
-                    </TabsTrigger>
-                    <TabsTrigger value="history" className="flex items-center gap-1.5 text-[11px] sm:text-xs px-2.5 sm:px-3 py-1.5 sm:py-2 whitespace-nowrap data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-                      <History className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
-                      Riwayat
-                    </TabsTrigger>
-                  </TabsList>
-                  
-                  {shiftReportTab === "latest" && (() => {
-                    // Get latest date from shift reports
-                    const latestDate = shiftReports.length > 0 
-                      ? new Date(Math.max(...shiftReports.map(r => new Date(r.date).getTime()))).toISOString().split('T')[0]
-                      : null;
-                    const latestReports = latestDate 
-                      ? shiftReports.filter(r => new Date(r.date).toISOString().split('T')[0] === latestDate)
-                      : [];
-                    
-                    return (
-                      <p className="text-[10px] text-muted-foreground hidden sm:block">
-                        📅 {latestDate ? new Date(latestDate).toLocaleDateString("id-ID", { 
-                          weekday: 'short', 
-                          day: 'numeric', 
-                          month: 'short' 
-                        }) : '-'} ({latestReports.length} laporan)
-                      </p>
-                    );
-                  })()}
-                </div>
-                
-                <TabsContent value="latest" className="mt-0">
-                  {(() => {
-                    // Get latest date from shift reports
-                    const latestDate = shiftReports.length > 0 
-                      ? new Date(Math.max(...shiftReports.map(r => new Date(r.date).getTime()))).toISOString().split('T')[0]
-                      : null;
-                    const latestReports = latestDate 
-                      ? shiftReports.filter(r => new Date(r.date).toISOString().split('T')[0] === latestDate)
-                      : [];
-                    
-                    if (latestReports.length === 0) {
-                      return (
-                        <div className="text-center py-10 text-muted-foreground bg-muted/30 rounded-xl border border-dashed">
-                          <FileText className="h-12 w-12 mx-auto mb-3 opacity-40" />
-                          <p className="text-sm font-medium">Belum ada laporan hari ini</p>
-                          <p className="text-xs opacity-70 mt-1">Buat laporan shift baru di tab Report</p>
-                        </div>
-                      );
-                    }
-                    
-                    return (
-                      <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-                        {latestReports.reverse().map((report, index) => (
-                          <ShiftReportCard
-                            key={report.id}
-                            report={report}
-                            index={index}
-                            total={latestReports.length}
-                            onEdit={async (id, data) => {
-                              return await updateShiftReport(id, data);
-                            }}
-                          />
-                        ))}
-                      </div>
-                    );
-                  })()}
-                </TabsContent>
-
-                <TabsContent value="history" className="mt-0">
-                  {!selectedHistoryDate ? (
-                    <div className="space-y-4">
-                      {/* Timeline-style history */}
-                      <div className="grid gap-2 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                        {getHistoryRecords().map((record, idx) => {
-                          // Calculate shift summary
-                          const shiftSummary = record.shifts.reduce((acc, s) => {
-                            acc[s.shift] = (acc[s.shift] || 0) + 1;
-                            return acc;
-                          }, {} as Record<string, number>);
-                          
-                          return (
-                            <motion.div
-                              key={record.date}
-                              initial={{ opacity: 0, y: 10 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              transition={{ duration: 0.2, delay: idx * 0.03 }}
-                              className="group relative rounded-xl bg-card border border-border/60 shadow-sm hover:shadow-lg hover:border-primary/40 cursor-pointer transition-all duration-200 overflow-hidden"
-                              onClick={() => setSelectedHistoryDate(record.date)}
-                            >
-                              {/* Date Header */}
-                              <div className="bg-gradient-to-r from-primary/10 to-transparent px-3 py-2 border-b border-border/50">
-                                <div className="flex items-center justify-between">
-                                  <div className="flex items-center gap-2">
-                                    <Calendar className="h-4 w-4 text-primary" />
-                                    <span className="text-sm font-semibold text-foreground">
-                                      {new Date(record.date).toLocaleDateString("id-ID", { 
-                                        weekday: 'short', 
-                                        day: 'numeric',
-                                        month: 'short'
-                                      })}
-                                    </span>
-                                  </div>
-                                  <span className="text-xs font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full">
-                                    {record.reportCount}
-                                  </span>
-                                </div>
-                              </div>
-                              
-                              {/* Shift Badges */}
-                              <div className="p-3">
-                                <div className="flex flex-wrap gap-1.5">
-                                  {shiftSummary['pagi'] && (
-                                    <span className="text-[10px] px-2 py-1 bg-warning/15 text-warning border border-warning/30 rounded-md font-medium flex items-center gap-1">
-                                      🌅 Pagi
-                                      {shiftSummary['pagi'] > 1 && <span className="text-[9px] opacity-75">×{shiftSummary['pagi']}</span>}
-                                    </span>
-                                  )}
-                                  {shiftSummary['siang'] && (
-                                    <span className="text-[10px] px-2 py-1 bg-primary/15 text-primary border border-primary/30 rounded-md font-medium flex items-center gap-1">
-                                      ☀️ Siang
-                                      {shiftSummary['siang'] > 1 && <span className="text-[9px] opacity-75">×{shiftSummary['siang']}</span>}
-                                    </span>
-                                  )}
-                                  {shiftSummary['malam'] && (
-                                    <span className="text-[10px] px-2 py-1 bg-accent/15 text-accent-foreground border border-accent/30 rounded-md font-medium flex items-center gap-1">
-                                      🌙 Malam
-                                      {shiftSummary['malam'] > 1 && <span className="text-[9px] opacity-75">×{shiftSummary['malam']}</span>}
-                                    </span>
-                                  )}
-                                </div>
-                                <p className="text-[10px] text-muted-foreground mt-2 group-hover:text-primary transition-colors flex items-center gap-1">
-                                  <ExternalLink className="h-3 w-3" />
-                                  Klik untuk detail
-                                </p>
-                              </div>
-                            </motion.div>
-                          );
-                        })}
-                        {getHistoryRecords().length === 0 && (
-                          <div className="col-span-full text-center py-10 text-muted-foreground bg-muted/30 rounded-xl border border-dashed">
-                            <History className="h-12 w-12 mx-auto mb-3 opacity-40" />
-                            <p className="text-sm font-medium">Belum ada riwayat</p>
-                            <p className="text-xs opacity-70 mt-1">Laporan akan muncul setelah disimpan</p>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="space-y-4">
-                      {/* Back button with date info */}
-                      <div className="flex items-center justify-between">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setSelectedHistoryDate(null)}
-                          className="h-8 text-xs gap-2"
-                        >
-                          <span>←</span>
-                          Kembali ke Riwayat
-                        </Button>
-                        <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-primary/10">
-                          <Calendar className="h-3.5 w-3.5 text-primary" />
-                          <span className="text-xs font-semibold text-primary">
-                            {new Date(selectedHistoryDate).toLocaleDateString("id-ID", { 
-                              weekday: 'long', 
-                              day: 'numeric',
-                              month: 'long',
-                              year: 'numeric'
-                            })}
-                          </span>
-                        </div>
-                      </div>
-                      
-                      <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-                        {getReportsForDate(selectedHistoryDate).map((report, index) => (
-                          <ShiftReportCard
-                            key={report.id}
-                            report={report}
-                            index={index}
-                            total={getReportsForDate(selectedHistoryDate).length}
-                            compact
-                            onEdit={async (id, data) => {
-                              return await updateShiftReport(id, data);
-                            }}
-                          />
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </TabsContent>
-              </Tabs>
-            </CardContent>
-          </Card>
-        </motion.div>
-      )}
-
-      {/* Regional Incident Stats + Recent Activity Grid */}
+      {/* Regional Incident Stats + Report Shift Grid */}
       <div className="grid gap-3 grid-cols-1 lg:grid-cols-[1fr_380px] w-full">
         {/* Regional Incident Overview */}
         <motion.div
@@ -1063,17 +821,252 @@ export default function Dashboard() {
           </div>
         </motion.div>
 
-        {/* Recent Activity - Admin Only */}
-        {isAdmin && (
+        {/* Report Shift */}
+        {shiftReports.length > 0 && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.8 }}
           >
-            <RecentActivity />
+            <Card className="overflow-hidden border">
+              <CardHeader className="py-3 px-3 sm:px-6 border-b bg-muted/20">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div>
+                    <h3 className="text-sm sm:text-base font-bold">📋 Report Shift</h3>
+                    <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5">
+                      Rekap aktivitas shift harian tim NOC
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] px-2 py-1 rounded-md bg-primary/10 border border-primary/20 font-medium text-primary">
+                      {shiftReports.length} Laporan
+                    </span>
+                    <span className="text-[10px] px-2 py-1 rounded-md bg-muted border font-medium text-muted-foreground">
+                      {getHistoryRecords().length} Hari
+                    </span>
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      onClick={fetchShiftReports} 
+                      disabled={isLoadingShiftReports} 
+                      title="Refresh data"
+                      className="h-8 w-8"
+                    >
+                      {isLoadingShiftReports ? (
+                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      ) : (
+                        <RefreshCw className="h-3.5 w-3.5" />
+                      )}
+                    </Button>
+                  </div>
+                </div>
+              </CardHeader>
+              
+              <CardContent className="pt-4 pb-5">
+                <Tabs value={shiftReportTab} onValueChange={(v) => { setShiftReportTab(v); setSelectedHistoryDate(null); }} className="w-full">
+                  <div className="flex items-center justify-between mb-4">
+                    <TabsList className="inline-flex w-auto gap-1 h-auto p-1">
+                      <TabsTrigger value="latest" className="flex items-center gap-1.5 text-[11px] sm:text-xs px-2.5 sm:px-3 py-1.5 sm:py-2 whitespace-nowrap data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                        <Zap className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+                        Terbaru
+                      </TabsTrigger>
+                      <TabsTrigger value="history" className="flex items-center gap-1.5 text-[11px] sm:text-xs px-2.5 sm:px-3 py-1.5 sm:py-2 whitespace-nowrap data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                        <History className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+                        Riwayat
+                      </TabsTrigger>
+                    </TabsList>
+                    
+                    {shiftReportTab === "latest" && (() => {
+                      const latestDate = shiftReports.length > 0 
+                        ? new Date(Math.max(...shiftReports.map(r => new Date(r.date).getTime()))).toISOString().split('T')[0]
+                        : null;
+                      const latestReports = latestDate 
+                        ? shiftReports.filter(r => new Date(r.date).toISOString().split('T')[0] === latestDate)
+                        : [];
+                      
+                      return (
+                        <p className="text-[10px] text-muted-foreground hidden sm:block">
+                          📅 {latestDate ? new Date(latestDate).toLocaleDateString("id-ID", { 
+                            weekday: 'short', 
+                            day: 'numeric', 
+                            month: 'short' 
+                          }) : '-'} ({latestReports.length} laporan)
+                        </p>
+                      );
+                    })()}
+                  </div>
+                  
+                  <TabsContent value="latest" className="mt-0">
+                    {(() => {
+                      const latestDate = shiftReports.length > 0 
+                        ? new Date(Math.max(...shiftReports.map(r => new Date(r.date).getTime()))).toISOString().split('T')[0]
+                        : null;
+                      const latestReports = latestDate 
+                        ? shiftReports.filter(r => new Date(r.date).toISOString().split('T')[0] === latestDate)
+                        : [];
+                      
+                      if (latestReports.length === 0) {
+                        return (
+                          <div className="text-center py-10 text-muted-foreground bg-muted/30 rounded-xl border border-dashed">
+                            <FileText className="h-12 w-12 mx-auto mb-3 opacity-40" />
+                            <p className="text-sm font-medium">Belum ada laporan hari ini</p>
+                            <p className="text-xs opacity-70 mt-1">Buat laporan shift baru di tab Report</p>
+                          </div>
+                        );
+                      }
+                      
+                      return (
+                        <div className="grid gap-3 grid-cols-1">
+                          {latestReports.reverse().map((report, index) => (
+                            <ShiftReportCard
+                              key={report.id}
+                              report={report}
+                              index={index}
+                              total={latestReports.length}
+                              onEdit={async (id, data) => {
+                                return await updateShiftReport(id, data);
+                              }}
+                            />
+                          ))}
+                        </div>
+                      );
+                    })()}
+                  </TabsContent>
+
+                  <TabsContent value="history" className="mt-0">
+                    {!selectedHistoryDate ? (
+                      <div className="space-y-4">
+                        <div className="grid gap-2 grid-cols-1 sm:grid-cols-2">
+                          {getHistoryRecords().map((record, idx) => {
+                            const shiftSummary = record.shifts.reduce((acc, s) => {
+                              acc[s.shift] = (acc[s.shift] || 0) + 1;
+                              return acc;
+                            }, {} as Record<string, number>);
+                            
+                            return (
+                              <motion.div
+                                key={record.date}
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.2, delay: idx * 0.03 }}
+                                className="group relative rounded-xl bg-card border border-border/60 shadow-sm hover:shadow-lg hover:border-primary/40 cursor-pointer transition-all duration-200 overflow-hidden"
+                                onClick={() => setSelectedHistoryDate(record.date)}
+                              >
+                                <div className="bg-gradient-to-r from-primary/10 to-transparent px-3 py-2 border-b border-border/50">
+                                  <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-2">
+                                      <Calendar className="h-4 w-4 text-primary" />
+                                      <span className="text-sm font-semibold text-foreground">
+                                        {new Date(record.date).toLocaleDateString("id-ID", { 
+                                          weekday: 'short', 
+                                          day: 'numeric',
+                                          month: 'short'
+                                        })}
+                                      </span>
+                                    </div>
+                                    <span className="text-xs font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full">
+                                      {record.reportCount}
+                                    </span>
+                                  </div>
+                                </div>
+                                
+                                <div className="p-3">
+                                  <div className="flex flex-wrap gap-1.5">
+                                    {shiftSummary['pagi'] && (
+                                      <span className="text-[10px] px-2 py-1 bg-warning/15 text-warning border border-warning/30 rounded-md font-medium flex items-center gap-1">
+                                        🌅 Pagi
+                                        {shiftSummary['pagi'] > 1 && <span className="text-[9px] opacity-75">×{shiftSummary['pagi']}</span>}
+                                      </span>
+                                    )}
+                                    {shiftSummary['siang'] && (
+                                      <span className="text-[10px] px-2 py-1 bg-primary/15 text-primary border border-primary/30 rounded-md font-medium flex items-center gap-1">
+                                        ☀️ Siang
+                                        {shiftSummary['siang'] > 1 && <span className="text-[9px] opacity-75">×{shiftSummary['siang']}</span>}
+                                      </span>
+                                    )}
+                                    {shiftSummary['malam'] && (
+                                      <span className="text-[10px] px-2 py-1 bg-accent/15 text-accent-foreground border border-accent/30 rounded-md font-medium flex items-center gap-1">
+                                        🌙 Malam
+                                        {shiftSummary['malam'] > 1 && <span className="text-[9px] opacity-75">×{shiftSummary['malam']}</span>}
+                                      </span>
+                                    )}
+                                  </div>
+                                  <p className="text-[10px] text-muted-foreground mt-2 group-hover:text-primary transition-colors flex items-center gap-1">
+                                    <ExternalLink className="h-3 w-3" />
+                                    Klik untuk detail
+                                  </p>
+                                </div>
+                              </motion.div>
+                            );
+                          })}
+                          {getHistoryRecords().length === 0 && (
+                            <div className="col-span-full text-center py-10 text-muted-foreground bg-muted/30 rounded-xl border border-dashed">
+                              <History className="h-12 w-12 mx-auto mb-3 opacity-40" />
+                              <p className="text-sm font-medium">Belum ada riwayat</p>
+                              <p className="text-xs opacity-70 mt-1">Laporan akan muncul setelah disimpan</p>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setSelectedHistoryDate(null)}
+                            className="h-8 text-xs gap-2"
+                          >
+                            <span>←</span>
+                            Kembali ke Riwayat
+                          </Button>
+                          <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-primary/10">
+                            <Calendar className="h-3.5 w-3.5 text-primary" />
+                            <span className="text-xs font-semibold text-primary">
+                              {new Date(selectedHistoryDate).toLocaleDateString("id-ID", { 
+                                weekday: 'long', 
+                                day: 'numeric',
+                                month: 'long',
+                                year: 'numeric'
+                              })}
+                            </span>
+                          </div>
+                        </div>
+                        
+                        <div className="grid gap-3 grid-cols-1">
+                          {getReportsForDate(selectedHistoryDate).map((report, index) => (
+                            <ShiftReportCard
+                              key={report.id}
+                              report={report}
+                              index={index}
+                              total={getReportsForDate(selectedHistoryDate).length}
+                              compact
+                              onEdit={async (id, data) => {
+                                return await updateShiftReport(id, data);
+                              }}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </TabsContent>
+                </Tabs>
+              </CardContent>
+            </Card>
           </motion.div>
         )}
       </div>
+
+      {/* Recent Activity - Admin Only - Bottom */}
+      {isAdmin && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.9 }}
+        >
+          <RecentActivity />
+        </motion.div>
+      )}
 
       {/* Ticket Detail Dialog */}
       <Dialog open={!!selectedTicket} onOpenChange={() => setSelectedTicket(null)}>
