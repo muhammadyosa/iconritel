@@ -346,7 +346,7 @@ export function RecentActivity() {
           ) : selectedTicket ? (
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold text-foreground">{selectedTicket.ticketId}</span>
+                <span className="text-xs font-semibold text-foreground">{selectedTicket.serviceId}</span>
                 <StatusBadge status={selectedTicket.status} />
               </div>
               <div className="grid grid-cols-2 gap-2 text-[11px]">
