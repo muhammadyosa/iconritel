@@ -1,5 +1,6 @@
 import { Activity, AlertTriangle, Zap, Server, Calendar, Clock, User, ExternalLink, TrendingUp, BarChart3, FileText, History, RefreshCw, Loader2 } from "lucide-react";
 import { DashboardSkeleton } from "@/components/PageSkeleton";
+import { RecentActivity } from "@/components/RecentActivity";
 import { MonthlyAnalytics } from "@/components/MonthlyAnalytics";
 import { useCloudTickets } from "@/hooks/useCloudTickets";
 import { useTicketHistory } from "@/hooks/useTicketHistory";
@@ -831,6 +832,8 @@ export default function Dashboard() {
         </motion.div>
       )}
 
+      {/* Recent Incidents + Recent Activity Grid */}
+      <div className="grid gap-3 grid-cols-1 lg:grid-cols-[1fr_380px] w-full">
       {/* Recent Tickets Section */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -942,6 +945,16 @@ export default function Dashboard() {
           </CardContent>
         </Card>
       </motion.div>
+
+      {/* Recent Activity */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 0.8 }}
+      >
+        <RecentActivity />
+      </motion.div>
+      </div>
 
       {/* Ticket Detail Dialog */}
       <Dialog open={!!selectedTicket} onOpenChange={() => setSelectedTicket(null)}>
