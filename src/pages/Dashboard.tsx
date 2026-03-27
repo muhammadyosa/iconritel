@@ -840,10 +840,6 @@ export default function Dashboard() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, delay: 0.7 }}
       >
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, delay: 0.7 }}
-      >
         <Card className="overflow-hidden border">
           <CardHeader className="py-3 px-3 sm:px-6 border-b bg-muted/20 flex flex-col xs:flex-row xs:items-center justify-between space-y-2 xs:space-y-0">
             <CardTitle className="text-xs sm:text-sm">Recent Incidents</CardTitle>
