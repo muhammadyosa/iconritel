@@ -936,7 +936,7 @@ export default function Dashboard() {
                   <TabsContent value="history" className="mt-0">
                     {!selectedHistoryDate ? (
                       <div className="space-y-4">
-                        <div className="grid gap-2 grid-cols-1 sm:grid-cols-2">
+                        <div className="grid gap-2 grid-cols-1">
                           {getHistoryRecords().map((record, idx) => {
                             const shiftSummary = record.shifts.reduce((acc, s) => {
                               acc[s.shift] = (acc[s.shift] || 0) + 1;
