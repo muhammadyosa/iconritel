@@ -98,7 +98,51 @@ export default function Dashboard() {
     });
   }, []);
 
-  const totalIncidents = tickets.length;
+  // Load Regional Team data
+  useEffect(() => {
+    loadDefaultRegionalTeamData().then(setTeamData).catch(() => {});
+  }, []);
+
+  // Regional incident data for pie chart and stats
+  const regionalIncidentData = useMemo(() => {
+    const hostnameToRegion: Record<string, string> = {};
+    const regionMap: Record<string, RegionalTeamRecord[]> = {};
+    teamData.forEach((rec) => {
+      const region = rec.region.trim().toUpperCase();
+      if (!region) return;
+      if (!regionMap[region]) regionMap[region] = [];
+      regionMap[region].push(rec);
+      rec.hostnames.forEach((h) => {
+        const normalized = h.trim().toUpperCase();
+        if (normalized) hostnameToRegion[normalized] = region;
+      });
+    });
+
+    const regionStats: Record<string, { total: number; resolved: number; pending: number; critical: number; ritel: number; feeder: number }> = {};
+    Object.keys(regionMap).forEach((region) => {
+      regionStats[region] = { total: 0, resolved: 0, pending: 0, critical: 0, ritel: 0, feeder: 0 };
+    });
+
+    tickets.forEach((ticket) => {
+      const region = hostnameToRegion[(ticket.hostname || "").trim().toUpperCase()];
+      if (!region || !regionStats[region]) return;
+      regionStats[region].total++;
+      if (ticket.status === "Resolved") regionStats[region].resolved++;
+      else if (ticket.status === "Critical") regionStats[region].critical++;
+      else regionStats[region].pending++;
+      if (FEEDER_CONSTRAINTS_SET.has(ticket.constraint)) regionStats[region].feeder++;
+      else regionStats[region].ritel++;
+    });
+
+    return Object.entries(regionStats)
+      .filter(([, s]) => s.total > 0)
+      .sort((a, b) => b[1].total - a[1].total)
+      .map(([region, stats]) => ({ region, ...stats }));
+  }, [teamData, tickets]);
+
+  const ritelTickets = useMemo(() => tickets.filter(t => !FEEDER_CONSTRAINTS_SET.has(t.constraint)), [tickets]);
+  const feederTickets = useMemo(() => tickets.filter(t => FEEDER_CONSTRAINTS_SET.has(t.constraint)), [tickets]);
+
   const overSLA = useMemo(() => tickets.filter((t) => {
     const ageMs = new Date().getTime() - new Date(t.createdISO).getTime();
     return ageMs > 24 * 60 * 60 * 1000 && t.status !== "Resolved";
