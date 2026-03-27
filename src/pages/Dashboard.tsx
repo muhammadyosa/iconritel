@@ -143,6 +143,7 @@ export default function Dashboard() {
   const ritelTickets = useMemo(() => tickets.filter(t => !FEEDER_CONSTRAINTS_SET.has(t.constraint)), [tickets]);
   const feederTickets = useMemo(() => tickets.filter(t => FEEDER_CONSTRAINTS_SET.has(t.constraint)), [tickets]);
 
+  const totalIncidents = tickets.length;
   const overSLA = useMemo(() => tickets.filter((t) => {
     const ageMs = new Date().getTime() - new Date(t.createdISO).getTime();
     return ageMs > 24 * 60 * 60 * 1000 && t.status !== "Resolved";
