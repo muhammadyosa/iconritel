@@ -1,5 +1,6 @@
 import { Activity, AlertTriangle, Zap, Server, Calendar, Clock, User, ExternalLink, TrendingUp, BarChart3, FileText, History, RefreshCw, Loader2 } from "lucide-react";
 import { DashboardSkeleton } from "@/components/PageSkeleton";
+import { RecentActivity } from "@/components/RecentActivity";
 import { MonthlyAnalytics } from "@/components/MonthlyAnalytics";
 import { useCloudTickets } from "@/hooks/useCloudTickets";
 import { useTicketHistory } from "@/hooks/useTicketHistory";
