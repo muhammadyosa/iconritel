@@ -591,6 +591,22 @@ export default function Dashboard() {
         <MonthlyAnalytics tickets={tickets} getTrendChartData={getTrendChartData} getCategoryData={getCategoryData} />
       </motion.div>
 
+      {/* Activity Feed & Monthly Analytics row */}
+      <div className="grid gap-2 sm:gap-3 grid-cols-1 lg:grid-cols-3 w-full">
+        <div className="lg:col-span-2">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.3 }}
+          >
+            <MonthlyAnalytics tickets={tickets} getTrendChartData={getTrendChartData} getCategoryData={getCategoryData} />
+          </motion.div>
+        </div>
+        <div className="lg:col-span-1">
+          <ActivityFeed tickets={tickets} shiftReports={shiftReports as any} />
+        </div>
+      </div>
+
       {/* Shift Reports Section - Enhanced Layout */}
       {shiftReports.length > 0 && (
         <motion.div
