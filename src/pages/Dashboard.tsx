@@ -235,9 +235,10 @@ export default function Dashboard() {
           >
             <div className="p-3 sm:p-4">
               <div className="flex items-center justify-between gap-2">
-                <div className="flex items-center gap-2.5 min-w-0">
+                <div className="flex items-center gap-1.5 sm:gap-2.5 min-w-0">
                   <span className="text-xl sm:text-2xl">{card.emoji}</span>
                   <p className="text-[10px] sm:text-xs text-muted-foreground font-medium truncate">{card.title}</p>
+                  <InfoHint text={card.hint} side="bottom" />
                 </div>
                 <p className={`text-2xl sm:text-3xl font-bold shrink-0 tabular-nums ${card.valueClass}`}>
                   {card.value}
