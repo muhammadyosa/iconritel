@@ -93,6 +93,7 @@ export function RecentActivity() {
   const [loading, setLoading] = useState(true);
   const [profileMap, setProfileMap] = useState<Record<string, { display_name: string | null; email: string }>>({});
   const [filter, setFilter] = useState<FilterCategory>("all");
+  const [searchQuery, setSearchQuery] = useState("");
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
   const [ticketDialogOpen, setTicketDialogOpen] = useState(false);
   const [loadingTicket, setLoadingTicket] = useState(false);
