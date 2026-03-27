@@ -3,6 +3,7 @@ import { DashboardSkeleton } from "@/components/PageSkeleton";
 import { RecentActivity } from "@/components/RecentActivity";
 import { MonthlyAnalytics } from "@/components/MonthlyAnalytics";
 import { useCloudTickets } from "@/hooks/useCloudTickets";
+import { useUserRole } from "@/hooks/useUserRole";
 import { useTicketHistory } from "@/hooks/useTicketHistory";
 import { useShiftReportHistory } from "@/hooks/useShiftReportHistory";
 import { useCloudShiftReports } from "@/hooks/useCloudShiftReports";
