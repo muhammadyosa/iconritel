@@ -358,7 +358,7 @@ export function RecentActivity() {
                   { label: "SN ONT", value: selectedTicket.snOnt },
                   { label: "Serpo", value: selectedTicket.serpo },
                   { label: "Kategori", value: selectedTicket.category },
-                  { label: "Constraint", value: selectedTicket.constraintType },
+                  { label: "Constraint", value: selectedTicket.constraint },
                 ].map((item) => (
                   <div key={item.label}>
                     <span className="text-muted-foreground block text-[10px]">{item.label}</span>
