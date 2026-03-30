@@ -88,7 +88,7 @@ export function generateTicketFormat(
   
   // INTERMITTENT - lowercase in format
   if (constraint === "INTERMITTENT") {
-    return `${customerName} // intermittent - ${serpo} // ${fatId} // ${hostname} // ${snOnt} //`;
+    return `${customerName} // INTERMITTENT - ${serpo} // ${fatId} // ${hostname} // ${snOnt} //`;
   }
   
   // RITEL Format (default) - includes CABLE PROBLEM
