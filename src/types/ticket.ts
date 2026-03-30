@@ -46,7 +46,9 @@ export const FEEDER_CONSTRAINTS = [
   "FAT BAD RX",
   "FAT LOSS",
   "PORT DOWN",
+  "PORT BAD RX",
   "OLT DOWN",
+  "OLT BAD RX",
   "CABLE PROBLEM (FEEDER)",
 ];
 
