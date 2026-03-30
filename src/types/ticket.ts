@@ -46,7 +46,9 @@ export const FEEDER_CONSTRAINTS = [
   "FAT BAD RX",
   "FAT LOSS",
   "PORT DOWN",
+  "PORT BAD RX",
   "OLT DOWN",
+  "OLT BAD RX",
   "CABLE PROBLEM (FEEDER)",
 ];
 
@@ -80,6 +82,15 @@ export function generateTicketFormat(
   
   if (constraint === "OLT DOWN") {
     return `[PROACTIVE NOC RETAIL] OLT DOWN UNDER - ${hostname} - ${serpo}`;
+  }
+  
+  if (constraint === "OLT BAD RX") {
+    return `[PROACTIVE NOC RETAIL] OLT BAD RX UNDER - ${hostname} - ${serpo}`;
+  }
+  
+  if (constraint === "PORT BAD RX") {
+    const portInfo = portText || "[TEXT]";
+    return `[PROACTIVE NOC RETAIL] PORT - ${portInfo} - BAD RX UNDER - ${hostname} - ${serpo}`;
   }
   
   if (constraint === "CABLE PROBLEM (FEEDER)") {
