@@ -84,6 +84,15 @@ export function generateTicketFormat(
     return `[PROACTIVE NOC RETAIL] OLT DOWN UNDER - ${hostname} - ${serpo}`;
   }
   
+  if (constraint === "OLT BAD RX") {
+    return `[PROACTIVE NOC RETAIL] OLT BAD RX UNDER - ${hostname} - ${serpo}`;
+  }
+  
+  if (constraint === "PORT BAD RX") {
+    const portInfo = portText || "[TEXT]";
+    return `[PROACTIVE NOC RETAIL] PORT - ${portInfo} - BAD RX UNDER - ${hostname} - ${serpo}`;
+  }
+  
   if (constraint === "CABLE PROBLEM (FEEDER)") {
     return `[PROACTIVE NOC RETAIL] CABLE PROBLEM UNDER - ${serpo}`;
   }
