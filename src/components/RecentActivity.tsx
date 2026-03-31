@@ -43,6 +43,12 @@ const FILTER_OPTIONS: { value: FilterCategory; label: string; icon: React.ReactN
   { value: "shift", label: "Shift", icon: <FileText className="h-3 w-3" /> },
 ];
 
+function isUserOnline(lastOnline: string | null): boolean {
+  if (!lastOnline) return false;
+  const diff = Date.now() - new Date(lastOnline).getTime();
+  return diff < 6 * 60 * 1000; // 6 minutes (matches 5-min heartbeat + buffer)
+}
+
 function getTimeAgo(dateStr: string): string {
   const now = new Date();
   const date = new Date(dateStr);
