@@ -95,6 +95,7 @@ function getActionFromStatus(status: string): RecentItem["action"] {
 
 export function RecentActivity() {
   const [items, setItems] = useState<RecentItem[]>([]);
+  const [userProfiles, setUserProfiles] = useState<Map<string, UserOnlineInfo>>(new Map());
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<FilterCategory>("all");
   const [searchQuery, setSearchQuery] = useState("");
