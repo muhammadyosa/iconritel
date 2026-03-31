@@ -1607,9 +1607,25 @@ export default function Teams() {
                                   className="cursor-pointer transition-colors hover:bg-accent/5"
                                   onClick={() => setNocUserSheet(u.name)}
                                 >
-                                  <TableCell className="text-xs font-medium text-muted-foreground py-2">{i + 1}</TableCell>
+                                  <TableCell className="py-2 w-[40px]">
+                                    {i === 0 ? (
+                                      <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-yellow-100 dark:bg-yellow-900/30" title="🥇 Peringkat 1">
+                                        <Trophy className="h-3.5 w-3.5 text-yellow-500" />
+                                      </span>
+                                    ) : i === 1 ? (
+                                      <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-slate-100 dark:bg-slate-700/30" title="🥈 Peringkat 2">
+                                        <Medal className="h-3.5 w-3.5 text-slate-400" />
+                                      </span>
+                                    ) : i === 2 ? (
+                                      <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-orange-100 dark:bg-orange-900/30" title="🥉 Peringkat 3">
+                                        <Medal className="h-3.5 w-3.5 text-orange-500" />
+                                      </span>
+                                    ) : (
+                                      <span className="text-xs font-medium text-muted-foreground">{i + 1}</span>
+                                    )}
+                                  </TableCell>
                                   <TableCell className="py-2">
-                                    <span className="text-xs sm:text-sm font-semibold truncate block max-w-[140px] sm:max-w-[200px]">{u.name}</span>
+                                    <span className={cn("text-xs sm:text-sm font-semibold truncate block max-w-[140px] sm:max-w-[200px]", i === 0 ? "text-yellow-600 dark:text-yellow-400" : i === 1 ? "text-slate-500 dark:text-slate-300" : i === 2 ? "text-orange-600 dark:text-orange-400" : "")}>{u.name}</span>
                                   </TableCell>
                                   <TableCell className="text-center text-xs sm:text-sm font-bold py-2">{u.total}</TableCell>
                                   <TableCell className="text-center text-xs sm:text-sm font-medium text-success py-2">{u.resolved}</TableCell>
