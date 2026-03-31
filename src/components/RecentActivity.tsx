@@ -377,6 +377,7 @@ export function RecentActivity() {
                   {filteredItems.map((item, idx) => {
                     const isIncident = item.type === "incident";
                     const actionInfo = getActionInfo(item.action);
+                    const userProfile = item.userName ? userProfiles.get(item.userName.toLowerCase()) : undefined;
 
                     return (
                       <motion.div
