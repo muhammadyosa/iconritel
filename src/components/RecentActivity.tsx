@@ -117,7 +117,7 @@ export function RecentActivity() {
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
-      const [ticketsRes, shiftsRes] = await Promise.all([
+      const [ticketsRes, shiftsRes, profilesRes] = await Promise.all([
         supabase
           .from("tickets")
           .select("*")
@@ -128,7 +128,25 @@ export function RecentActivity() {
           .select("*")
           .order("created_at", { ascending: false })
           .limit(30),
+        supabase
+          .from("profiles")
+          .select("user_id, display_name, last_online"),
       ]);
+
+      // Build profiles map by display_name (lowercased) for matching
+      const profilesByName = new Map<string, UserOnlineInfo>();
+      const profilesById = new Map<string, UserOnlineInfo>();
+      (profilesRes.data || []).forEach((p) => {
+        const info: UserOnlineInfo = {
+          displayName: p.display_name || p.user_id,
+          lastOnline: p.last_online,
+          isOnline: isUserOnline(p.last_online),
+        };
+        if (p.display_name) {
+          profilesByName.set(p.display_name.toLowerCase(), info);
+        }
+        profilesById.set(p.user_id, info);
+      });
 
       const ticketItems: RecentItem[] = (ticketsRes.data || []).map((t) => {
         const action = getActionFromStatus(t.status);
@@ -141,6 +159,7 @@ export function RecentActivity() {
           status: t.status,
           timestamp: t.status === "Resolved" && t.resolved_at ? t.resolved_at : t.created_at,
           userName: t.created_by_name || undefined,
+          userId: t.created_by_user_id || undefined,
           raw: t,
         };
       });
@@ -166,6 +185,39 @@ export function RecentActivity() {
         (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
       );
 
+      // Compute last action per user from combined items
+      const lastActionMap = new Map<string, { action: string; time: string }>();
+      for (const item of combined) {
+        const key = item.userName?.toLowerCase();
+        if (key && !lastActionMap.has(key)) {
+          const actionInfo = getActionInfo(item.action);
+          lastActionMap.set(key, { action: actionInfo.label, time: item.timestamp });
+        }
+      }
+
+      // Merge online info with last action
+      const mergedProfiles = new Map<string, UserOnlineInfo>();
+      const mergeProfile = (name: string, userId?: string) => {
+        const nameLower = name.toLowerCase();
+        if (mergedProfiles.has(nameLower)) return;
+        const byId = userId ? profilesById.get(userId) : undefined;
+        const byName = profilesByName.get(nameLower);
+        const base = byId || byName;
+        const la = lastActionMap.get(nameLower);
+        mergedProfiles.set(nameLower, {
+          displayName: name,
+          lastOnline: base?.lastOnline || null,
+          isOnline: base?.isOnline || false,
+          lastAction: la?.action,
+          lastActionTime: la?.time,
+        });
+      };
+
+      for (const item of combined) {
+        if (item.userName) mergeProfile(item.userName, item.userId);
+      }
+
+      setUserProfiles(mergedProfiles);
       setItems(combined);
     } catch (err) {
       if (import.meta.env.DEV) console.error("Error fetching recent activity:", err);
