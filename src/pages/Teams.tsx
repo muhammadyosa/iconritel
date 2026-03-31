@@ -116,6 +116,7 @@ export default function Teams() {
   const [expandedDrillTeam, setExpandedDrillTeam] = useState<string | null>(null);
   const [userDrillSheet, setUserDrillSheet] = useState<{ users: { name: string; tickets: any[] }[] } | null>(null);
   const [expandedDrillUser, setExpandedDrillUser] = useState<string | null>(null);
+  const [rankingPeriod, setRankingPeriod] = useState<"7d" | "14d" | "30d">("7d");
   // trendFilter is now unified with periodPreset
 
   // Handle period preset change
@@ -235,6 +236,34 @@ export default function Teams() {
       .map(([name, s]) => ({ name, ...s }))
       .sort((a, b) => b.total - a.total);
   }, [filteredTickets]);
+
+  // === Ranking User NOC with local period filter ===
+  const rankingDays = rankingPeriod === "7d" ? 7 : rankingPeriod === "14d" ? 14 : 30;
+  const rankingUserStats = useMemo(() => {
+    const cutoff = startOfDay(subDays(new Date(), rankingDays));
+    const rankingTickets = tickets.filter((t) => new Date(t.createdISO) >= cutoff);
+    const stats: Record<string, { total: number; resolved: number; pending: number; critical: number; tickets: any[] }> = {};
+    rankingTickets.forEach((ticket) => {
+      const creator = ticket.createdByName || "Unknown";
+      if (!stats[creator]) {
+        stats[creator] = { total: 0, resolved: 0, pending: 0, critical: 0, tickets: [] };
+      }
+      stats[creator].total++;
+      stats[creator].tickets.push(ticket);
+      if (ticket.status === "Resolved") stats[creator].resolved++;
+      if (ticket.status === "Pending" || ticket.status === "On Progress") stats[creator].pending++;
+      if (ticket.status === "Critical") stats[creator].critical++;
+    });
+    return Object.entries(stats)
+      .map(([name, s]) => ({ name, ...s }))
+      .sort((a, b) => b.total - a.total);
+  }, [tickets, rankingDays]);
+
+  const rankingTotals = useMemo(() => {
+    const t = { total: 0, resolved: 0, pending: 0, critical: 0 };
+    rankingUserStats.forEach(u => { t.total += u.total; t.resolved += u.resolved; t.pending += u.pending; t.critical += u.critical; });
+    return t;
+  }, [rankingUserStats]);
 
   const nocTotals = useMemo(() => {
     const t = { total: 0, resolved: 0, pending: 0, critical: 0 };
@@ -1518,24 +1547,39 @@ export default function Teams() {
                 </SheetContent>
               </Sheet>
 
-              {/* Full Table - User NOC */}
+               {/* Full Table - User NOC */}
               <Card className="shadow-card overflow-hidden">
                 <CardHeader className="py-3 px-4 border-b bg-accent/5">
-                  <CardTitle className="flex items-center justify-between text-sm sm:text-base">
-                    <div className="flex items-center gap-2">
-                      <Badge className="bg-accent text-accent-foreground text-[10px] px-2">NOC</Badge>
-                      <span>Ranking User NOC</span>
-                      <Badge variant="secondary" className="text-[10px]">{userStats.length} user</Badge>
+                  <CardTitle className="flex flex-col gap-2 text-sm sm:text-base">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Badge className="bg-accent text-accent-foreground text-[10px] px-2">NOC</Badge>
+                        <span>Ranking User NOC</span>
+                        <Badge variant="secondary" className="text-[10px]">{rankingUserStats.length} user</Badge>
+                      </div>
+                      <span className="text-xs text-muted-foreground font-normal">
+                        {rankingTotals.total} incident • {rankingTotals.resolved} resolved
+                      </span>
                     </div>
-                    <span className="text-xs text-muted-foreground font-normal">
-                      {nocTotals.total} insident • {nocTotals.resolved} resolved
-                    </span>
+                    <div className="flex items-center gap-1.5">
+                      {(["7d", "14d", "30d"] as const).map((p) => (
+                        <Button
+                          key={p}
+                          size="sm"
+                          variant={rankingPeriod === p ? "default" : "outline"}
+                          className="h-6 text-[10px] px-2.5"
+                          onClick={() => setRankingPeriod(p)}
+                        >
+                          {p === "7d" ? "7 Hari" : p === "14d" ? "14 Hari" : "30 Hari"}
+                        </Button>
+                      ))}
+                    </div>
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="p-0">
                   <div className="overflow-x-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
                     <div className="min-w-[560px]">
-                      <ScrollArea className={userStats.length > 8 ? "h-[420px]" : ""}>
+                      <ScrollArea className={rankingUserStats.length > 8 ? "h-[420px]" : ""}>
                         <Table>
                           <TableHeader className="sticky top-0 z-10 bg-background">
                             <TableRow className="bg-muted/30">
@@ -1549,7 +1593,13 @@ export default function Teams() {
                             </TableRow>
                           </TableHeader>
                           <TableBody>
-                            {userStats.map((u, i) => {
+                            {rankingUserStats.length === 0 ? (
+                              <TableRow>
+                                <TableCell colSpan={7} className="text-center text-sm text-muted-foreground py-8">
+                                  Tidak ada data incident dalam {rankingPeriod === "7d" ? "7" : rankingPeriod === "14d" ? "14" : "30"} hari terakhir
+                                </TableCell>
+                              </TableRow>
+                            ) : rankingUserStats.map((u, i) => {
                               const rate = u.total > 0 ? Math.round((u.resolved / u.total) * 100) : 0;
                               return (
                                 <TableRow
