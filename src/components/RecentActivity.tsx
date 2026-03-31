@@ -412,12 +412,42 @@ export function RecentActivity() {
                             {item.detail}
                           </p>
 
-                          <div className="flex items-center gap-1.5 mt-0.5">
+                          <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
                             {item.userName && (
-                              <span className="text-[8px] sm:text-[9px] text-muted-foreground/70 flex items-center gap-0.5">
-                                <User className="h-2.5 w-2.5" />
-                                {item.userName}
-                              </span>
+                              <TooltipProvider delayDuration={300}>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <span className="text-[8px] sm:text-[9px] text-muted-foreground/70 flex items-center gap-0.5 cursor-default">
+                                      <span className="relative flex items-center">
+                                        <User className="h-2.5 w-2.5" />
+                                        <Circle
+                                          className={`h-1.5 w-1.5 absolute -bottom-0.5 -right-0.5 fill-current ${
+                                            userProfile?.isOnline ? "text-emerald-500" : "text-muted-foreground/40"
+                                          }`}
+                                        />
+                                      </span>
+                                      {item.userName}
+                                    </span>
+                                  </TooltipTrigger>
+                                  <TooltipContent side="top" className="text-[10px] max-w-[200px]">
+                                    <div className="space-y-0.5">
+                                      <div className="flex items-center gap-1">
+                                        <Circle className={`h-2 w-2 fill-current ${userProfile?.isOnline ? "text-emerald-500" : "text-muted-foreground/40"}`} />
+                                        <span className="font-medium">{userProfile?.isOnline ? "Online" : "Offline"}</span>
+                                      </div>
+                                      {userProfile?.lastOnline && !userProfile.isOnline && (
+                                        <p className="text-muted-foreground">Terakhir online: {getTimeAgo(userProfile.lastOnline)}</p>
+                                      )}
+                                      {userProfile?.lastAction && (
+                                        <p className="text-muted-foreground">
+                                          Aksi terakhir: {userProfile.lastAction}
+                                          {userProfile.lastActionTime && ` • ${getTimeAgo(userProfile.lastActionTime)}`}
+                                        </p>
+                                      )}
+                                    </div>
+                                  </TooltipContent>
+                                </Tooltip>
+                              </TooltipProvider>
                             )}
                             <span className="text-[8px] sm:text-[9px] text-muted-foreground/50">
                               • {getTimeAgo(item.timestamp)}
