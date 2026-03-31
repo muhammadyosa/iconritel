@@ -4,7 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Input } from "@/components/ui/input";
-import { Activity, CheckCircle, Clock, RefreshCw, Loader2, ExternalLink, Search, X, FileText, AlertTriangle, CalendarDays, User, Zap, Copy, CheckCheck } from "lucide-react";
+import { Activity, CheckCircle, Clock, RefreshCw, Loader2, ExternalLink, Search, X, FileText, AlertTriangle, CalendarDays, User, Zap, Copy, CheckCheck, Circle } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -12,6 +13,14 @@ import { StatusBadge } from "@/components/StatusBadge";
 import { Ticket } from "@/types/ticket";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
+
+interface UserOnlineInfo {
+  displayName: string;
+  lastOnline: string | null;
+  isOnline: boolean;
+  lastAction?: string;
+  lastActionTime?: string;
+}
 
 interface RecentItem {
   id: string;
@@ -22,6 +31,7 @@ interface RecentItem {
   status?: string;
   timestamp: string;
   userName?: string;
+  userId?: string;
   raw?: any;
 }
 
@@ -32,6 +42,12 @@ const FILTER_OPTIONS: { value: FilterCategory; label: string; icon: React.ReactN
   { value: "incident", label: "Incident", icon: <Zap className="h-3 w-3" /> },
   { value: "shift", label: "Shift", icon: <FileText className="h-3 w-3" /> },
 ];
+
+function isUserOnline(lastOnline: string | null): boolean {
+  if (!lastOnline) return false;
+  const diff = Date.now() - new Date(lastOnline).getTime();
+  return diff < 6 * 60 * 1000; // 6 minutes (matches 5-min heartbeat + buffer)
+}
 
 function getTimeAgo(dateStr: string): string {
   const now = new Date();
@@ -79,6 +95,7 @@ function getActionFromStatus(status: string): RecentItem["action"] {
 
 export function RecentActivity() {
   const [items, setItems] = useState<RecentItem[]>([]);
+  const [userProfiles, setUserProfiles] = useState<Map<string, UserOnlineInfo>>(new Map());
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<FilterCategory>("all");
   const [searchQuery, setSearchQuery] = useState("");
@@ -100,7 +117,7 @@ export function RecentActivity() {
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
-      const [ticketsRes, shiftsRes] = await Promise.all([
+      const [ticketsRes, shiftsRes, profilesRes] = await Promise.all([
         supabase
           .from("tickets")
           .select("*")
@@ -111,7 +128,25 @@ export function RecentActivity() {
           .select("*")
           .order("created_at", { ascending: false })
           .limit(30),
+        supabase
+          .from("profiles")
+          .select("user_id, display_name, last_online"),
       ]);
+
+      // Build profiles map by display_name (lowercased) for matching
+      const profilesByName = new Map<string, UserOnlineInfo>();
+      const profilesById = new Map<string, UserOnlineInfo>();
+      (profilesRes.data || []).forEach((p) => {
+        const info: UserOnlineInfo = {
+          displayName: p.display_name || p.user_id,
+          lastOnline: p.last_online,
+          isOnline: isUserOnline(p.last_online),
+        };
+        if (p.display_name) {
+          profilesByName.set(p.display_name.toLowerCase(), info);
+        }
+        profilesById.set(p.user_id, info);
+      });
 
       const ticketItems: RecentItem[] = (ticketsRes.data || []).map((t) => {
         const action = getActionFromStatus(t.status);
@@ -124,6 +159,7 @@ export function RecentActivity() {
           status: t.status,
           timestamp: t.status === "Resolved" && t.resolved_at ? t.resolved_at : t.created_at,
           userName: t.created_by_name || undefined,
+          userId: t.created_by_user_id || undefined,
           raw: t,
         };
       });
@@ -149,6 +185,39 @@ export function RecentActivity() {
         (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
       );
 
+      // Compute last action per user from combined items
+      const lastActionMap = new Map<string, { action: string; time: string }>();
+      for (const item of combined) {
+        const key = item.userName?.toLowerCase();
+        if (key && !lastActionMap.has(key)) {
+          const actionInfo = getActionInfo(item.action);
+          lastActionMap.set(key, { action: actionInfo.label, time: item.timestamp });
+        }
+      }
+
+      // Merge online info with last action
+      const mergedProfiles = new Map<string, UserOnlineInfo>();
+      const mergeProfile = (name: string, userId?: string) => {
+        const nameLower = name.toLowerCase();
+        if (mergedProfiles.has(nameLower)) return;
+        const byId = userId ? profilesById.get(userId) : undefined;
+        const byName = profilesByName.get(nameLower);
+        const base = byId || byName;
+        const la = lastActionMap.get(nameLower);
+        mergedProfiles.set(nameLower, {
+          displayName: name,
+          lastOnline: base?.lastOnline || null,
+          isOnline: base?.isOnline || false,
+          lastAction: la?.action,
+          lastActionTime: la?.time,
+        });
+      };
+
+      for (const item of combined) {
+        if (item.userName) mergeProfile(item.userName, item.userId);
+      }
+
+      setUserProfiles(mergedProfiles);
       setItems(combined);
     } catch (err) {
       if (import.meta.env.DEV) console.error("Error fetching recent activity:", err);
@@ -308,6 +377,7 @@ export function RecentActivity() {
                   {filteredItems.map((item, idx) => {
                     const isIncident = item.type === "incident";
                     const actionInfo = getActionInfo(item.action);
+                    const userProfile = item.userName ? userProfiles.get(item.userName.toLowerCase()) : undefined;
 
                     return (
                       <motion.div
@@ -342,12 +412,42 @@ export function RecentActivity() {
                             {item.detail}
                           </p>
 
-                          <div className="flex items-center gap-1.5 mt-0.5">
+                          <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
                             {item.userName && (
-                              <span className="text-[8px] sm:text-[9px] text-muted-foreground/70 flex items-center gap-0.5">
-                                <User className="h-2.5 w-2.5" />
-                                {item.userName}
-                              </span>
+                              <TooltipProvider delayDuration={300}>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <span className="text-[8px] sm:text-[9px] text-muted-foreground/70 flex items-center gap-0.5 cursor-default">
+                                      <span className="relative flex items-center">
+                                        <User className="h-2.5 w-2.5" />
+                                        <Circle
+                                          className={`h-1.5 w-1.5 absolute -bottom-0.5 -right-0.5 fill-current ${
+                                            userProfile?.isOnline ? "text-emerald-500" : "text-muted-foreground/40"
+                                          }`}
+                                        />
+                                      </span>
+                                      {item.userName}
+                                    </span>
+                                  </TooltipTrigger>
+                                  <TooltipContent side="top" className="text-[10px] max-w-[200px]">
+                                    <div className="space-y-0.5">
+                                      <div className="flex items-center gap-1">
+                                        <Circle className={`h-2 w-2 fill-current ${userProfile?.isOnline ? "text-emerald-500" : "text-muted-foreground/40"}`} />
+                                        <span className="font-medium">{userProfile?.isOnline ? "Online" : "Offline"}</span>
+                                      </div>
+                                      {userProfile?.lastOnline && !userProfile.isOnline && (
+                                        <p className="text-muted-foreground">Terakhir online: {getTimeAgo(userProfile.lastOnline)}</p>
+                                      )}
+                                      {userProfile?.lastAction && (
+                                        <p className="text-muted-foreground">
+                                          Aksi terakhir: {userProfile.lastAction}
+                                          {userProfile.lastActionTime && ` • ${getTimeAgo(userProfile.lastActionTime)}`}
+                                        </p>
+                                      )}
+                                    </div>
+                                  </TooltipContent>
+                                </Tooltip>
+                              </TooltipProvider>
                             )}
                             <span className="text-[8px] sm:text-[9px] text-muted-foreground/50">
                               • {getTimeAgo(item.timestamp)}
