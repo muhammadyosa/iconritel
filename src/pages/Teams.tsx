@@ -1547,24 +1547,39 @@ export default function Teams() {
                 </SheetContent>
               </Sheet>
 
-              {/* Full Table - User NOC */}
+               {/* Full Table - User NOC */}
               <Card className="shadow-card overflow-hidden">
                 <CardHeader className="py-3 px-4 border-b bg-accent/5">
-                  <CardTitle className="flex items-center justify-between text-sm sm:text-base">
-                    <div className="flex items-center gap-2">
-                      <Badge className="bg-accent text-accent-foreground text-[10px] px-2">NOC</Badge>
-                      <span>Ranking User NOC</span>
-                      <Badge variant="secondary" className="text-[10px]">{userStats.length} user</Badge>
+                  <CardTitle className="flex flex-col gap-2 text-sm sm:text-base">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Badge className="bg-accent text-accent-foreground text-[10px] px-2">NOC</Badge>
+                        <span>Ranking User NOC</span>
+                        <Badge variant="secondary" className="text-[10px]">{rankingUserStats.length} user</Badge>
+                      </div>
+                      <span className="text-xs text-muted-foreground font-normal">
+                        {rankingTotals.total} incident • {rankingTotals.resolved} resolved
+                      </span>
                     </div>
-                    <span className="text-xs text-muted-foreground font-normal">
-                      {nocTotals.total} insident • {nocTotals.resolved} resolved
-                    </span>
+                    <div className="flex items-center gap-1.5">
+                      {(["7d", "14d", "30d"] as const).map((p) => (
+                        <Button
+                          key={p}
+                          size="sm"
+                          variant={rankingPeriod === p ? "default" : "outline"}
+                          className="h-6 text-[10px] px-2.5"
+                          onClick={() => setRankingPeriod(p)}
+                        >
+                          {p === "7d" ? "7 Hari" : p === "14d" ? "14 Hari" : "30 Hari"}
+                        </Button>
+                      ))}
+                    </div>
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="p-0">
                   <div className="overflow-x-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
                     <div className="min-w-[560px]">
-                      <ScrollArea className={userStats.length > 8 ? "h-[420px]" : ""}>
+                      <ScrollArea className={rankingUserStats.length > 8 ? "h-[420px]" : ""}>
                         <Table>
                           <TableHeader className="sticky top-0 z-10 bg-background">
                             <TableRow className="bg-muted/30">
@@ -1578,7 +1593,13 @@ export default function Teams() {
                             </TableRow>
                           </TableHeader>
                           <TableBody>
-                            {userStats.map((u, i) => {
+                            {rankingUserStats.length === 0 ? (
+                              <TableRow>
+                                <TableCell colSpan={7} className="text-center text-sm text-muted-foreground py-8">
+                                  Tidak ada data incident dalam {rankingPeriod === "7d" ? "7" : rankingPeriod === "14d" ? "14" : "30"} hari terakhir
+                                </TableCell>
+                              </TableRow>
+                            ) : rankingUserStats.map((u, i) => {
                               const rate = u.total > 0 ? Math.round((u.resolved / u.total) * 100) : 0;
                               return (
                                 <TableRow
