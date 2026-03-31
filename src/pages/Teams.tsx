@@ -237,6 +237,34 @@ export default function Teams() {
       .sort((a, b) => b.total - a.total);
   }, [filteredTickets]);
 
+  // === Ranking User NOC with local period filter ===
+  const rankingDays = rankingPeriod === "7d" ? 7 : rankingPeriod === "14d" ? 14 : 30;
+  const rankingUserStats = useMemo(() => {
+    const cutoff = startOfDay(subDays(new Date(), rankingDays));
+    const rankingTickets = tickets.filter((t) => new Date(t.createdISO) >= cutoff);
+    const stats: Record<string, { total: number; resolved: number; pending: number; critical: number; tickets: any[] }> = {};
+    rankingTickets.forEach((ticket) => {
+      const creator = ticket.createdByName || "Unknown";
+      if (!stats[creator]) {
+        stats[creator] = { total: 0, resolved: 0, pending: 0, critical: 0, tickets: [] };
+      }
+      stats[creator].total++;
+      stats[creator].tickets.push(ticket);
+      if (ticket.status === "Resolved") stats[creator].resolved++;
+      if (ticket.status === "Pending" || ticket.status === "On Progress") stats[creator].pending++;
+      if (ticket.status === "Critical") stats[creator].critical++;
+    });
+    return Object.entries(stats)
+      .map(([name, s]) => ({ name, ...s }))
+      .sort((a, b) => b.total - a.total);
+  }, [tickets, rankingDays]);
+
+  const rankingTotals = useMemo(() => {
+    const t = { total: 0, resolved: 0, pending: 0, critical: 0 };
+    rankingUserStats.forEach(u => { t.total += u.total; t.resolved += u.resolved; t.pending += u.pending; t.critical += u.critical; });
+    return t;
+  }, [rankingUserStats]);
+
   const nocTotals = useMemo(() => {
     const t = { total: 0, resolved: 0, pending: 0, critical: 0 };
     userStats.forEach(u => { t.total += u.total; t.resolved += u.resolved; t.pending += u.pending; t.critical += u.critical; });
