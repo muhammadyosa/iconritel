@@ -14,6 +14,14 @@ import { Ticket } from "@/types/ticket";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 
+interface UserOnlineInfo {
+  displayName: string;
+  lastOnline: string | null;
+  isOnline: boolean;
+  lastAction?: string;
+  lastActionTime?: string;
+}
+
 interface RecentItem {
   id: string;
   type: "incident" | "shift";
@@ -23,6 +31,7 @@ interface RecentItem {
   status?: string;
   timestamp: string;
   userName?: string;
+  userId?: string;
   raw?: any;
 }
 
