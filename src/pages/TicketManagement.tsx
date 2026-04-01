@@ -71,6 +71,12 @@ export default function TicketManagement() {
   const { user, profile } = useAuth();
   const { logActivity } = useActivityLog();
 
+  // Regional team data for Serpo/Tim suggestions
+  const [regionalTeamData, setRegionalTeamData] = useState<RegionalTeamRecord[]>([]);
+  useEffect(() => {
+    loadDefaultRegionalTeamData().then(setRegionalTeamData);
+  }, []);
+
   const [searchFilters, setSearchFilters] = useState({
     customer: "",
     service: "",
@@ -88,7 +94,7 @@ export default function TicketManagement() {
     ticketId: "",
     serpo: "",
     constraint: "",
-    portText: "", // For PORT DOWN constraint
+    portText: "",
   });
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingTicket, setEditingTicket] = useState<Ticket | null>(null);
@@ -105,6 +111,49 @@ export default function TicketManagement() {
     portText: "",
   });
 
+  // Compute serpo options for auto form based on hostname + constraint
+  const autoSerpoOptions = useMemo(() => {
+    if (!selectedRecord || !formData.constraint) return [];
+    const hostname = String(selectedRecord.hostname || "").trim().toUpperCase();
+    const isFeeder = FEEDER_CONSTRAINTS_SET.has(formData.constraint);
+    const targetType = isFeeder ? "FEEDER" : "RITEL";
+    
+    // Find mitra matching hostname and serpoType
+    const matched = regionalTeamData.filter(r => 
+      r.serpoType.toUpperCase() === targetType &&
+      r.hostnames.some(h => h.trim().toUpperCase() === hostname)
+    );
+    
+    if (matched.length > 0) {
+      return [...new Set(matched.map(r => r.mitraName))];
+    }
+    
+    // Fallback: show all mitra for this serpoType
+    const fallback = regionalTeamData.filter(r => r.serpoType.toUpperCase() === targetType);
+    return [...new Set(fallback.map(r => r.mitraName))];
+  }, [selectedRecord, formData.constraint, regionalTeamData]);
+
+  // Compute serpo options for manual form
+  const manualSerpoOptions = useMemo(() => {
+    if (!manualFormData.constraint) return [];
+    const hostname = manualFormData.hostname.trim().toUpperCase();
+    const isFeeder = FEEDER_CONSTRAINTS_SET.has(manualFormData.constraint);
+    const targetType = isFeeder ? "FEEDER" : "RITEL";
+    
+    if (hostname) {
+      const matched = regionalTeamData.filter(r =>
+        r.serpoType.toUpperCase() === targetType &&
+        r.hostnames.some(h => h.trim().toUpperCase() === hostname)
+      );
+      if (matched.length > 0) {
+        return [...new Set(matched.map(r => r.mitraName))];
+      }
+    }
+    
+    // Fallback: all mitra for this type
+    const fallback = regionalTeamData.filter(r => r.serpoType.toUpperCase() === targetType);
+    return [...new Set(fallback.map(r => r.mitraName))];
+  }, [manualFormData.constraint, manualFormData.hostname, regionalTeamData]);
   const filteredData = excelData.filter((r) => {
     // Convert all fields to string to handle numeric values from Excel
     const customer = String(r.customer || "").toLowerCase();
