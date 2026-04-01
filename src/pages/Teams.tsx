@@ -246,29 +246,25 @@ export default function Teams() {
   useEffect(() => {
     const fetchRankingData = async () => {
       const cutoff = startOfDay(subDays(new Date(), rankingDays)).toISOString().split("T")[0];
-      
-      // Fetch from persistent history table
-      const { data: historyData } = await supabase
-        .from("daily_user_ticket_history")
-        .select("user_name, date, total_created, total_resolved")
-        .gte("date", cutoff);
-      
-      if (historyData) {
-        setRankingHistoryData(historyData);
-      }
-
-      // Also fetch live tickets for trend chart & pending/critical counts
       const cutoffISO = startOfDay(subDays(new Date(), rankingDays)).toISOString();
-      const { data: liveData } = await supabase
-        .from("tickets")
-        .select("created_by_name, status, created_iso")
-        .gte("created_iso", cutoffISO);
-      if (liveData) {
-        setRankingDbTickets(liveData);
-      }
+      
+      // Fetch history and live tickets in parallel
+      const [historyRes, liveRes] = await Promise.all([
+        supabase
+          .from("daily_user_ticket_history")
+          .select("user_name, date, total_created, total_resolved")
+          .gte("date", cutoff),
+        supabase
+          .from("tickets")
+          .select("created_by_name, status, created_iso")
+          .gte("created_iso", cutoffISO),
+      ]);
+      
+      if (historyRes.data) setRankingHistoryData(historyRes.data);
+      if (liveRes.data) setRankingDbTickets(liveRes.data);
     };
     fetchRankingData();
-  }, [rankingDays, tickets]);
+  }, [rankingDays]);
 
   const rankingUserStats = useMemo(() => {
     // Aggregate from persistent history

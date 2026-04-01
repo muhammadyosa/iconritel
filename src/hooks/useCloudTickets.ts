@@ -157,23 +157,23 @@ export function useCloudTickets() {
   // Fetch tickets from database
   const fetchTickets = useCallback(async () => {
     try {
-      // Clean up old resolved tickets first
-      await cleanupResolvedTickets();
+      // Run cleanup in background (don't await)
+      cleanupResolvedTickets();
 
-      // Fetch profiles first to get current display names
-      const currentProfilesMap = await fetchProfiles();
+      // Fetch profiles and tickets in parallel
+      const [currentProfilesMap, ticketRes] = await Promise.all([
+        fetchProfiles(),
+        supabase
+          .from("tickets")
+          .select("*")
+          .order("created_at", { ascending: false }),
+      ]);
 
-      const { data, error } = await supabase
-        .from("tickets")
-        .select("*")
-        .order("created_at", { ascending: false });
-
-      if (error) throw error;
+      if (ticketRes.error) throw ticketRes.error;
 
       const now = new Date().getTime();
-      const processedTickets = (data || []).map((db) => {
+      const processedTickets = (ticketRes.data || []).map((db) => {
         const ticket = dbToTicket(db as DbTicket, currentProfilesMap);
-        // Check SLA for non-resolved tickets
         if (ticket.status !== "Resolved" && ticket.status !== "Critical" && ticket.status !== "Pending") {
           const ticketAge = now - new Date(ticket.createdISO).getTime();
           if (ticketAge >= SLA_THRESHOLD_MS) {
