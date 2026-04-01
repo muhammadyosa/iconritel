@@ -2,10 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { RegionalTeamRecord } from "@/types/regionalTeam";
 import { loadDefaultRegionalTeamData } from "@/lib/defaultRegionalData";
 import { TablePageSkeleton } from "@/components/PageSkeleton";
-import { Download, Plus, Search, Trash2, Edit, Info, FileEdit, RefreshCw, Loader2, FileDown, Check, ChevronsUpDown } from "lucide-react";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
-import { cn } from "@/lib/utils";
+import { Download, Plus, Search, Trash2, Edit, Info, FileEdit, RefreshCw, Loader2, FileDown } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -409,30 +406,19 @@ export default function TicketManagement() {
             <div>
               <Label>Serpo / Tim</Label>
               {autoSerpoOptions.length > 0 ? (
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button variant="outline" role="combobox" className={cn("w-full justify-between font-normal", !formData.serpo && "text-muted-foreground")}>
-                      {formData.serpo || "Pilih Serpo / Tim"}
-                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
-                    <Command>
-                      <CommandInput placeholder="Cari tim..." />
-                      <CommandList>
-                        <CommandEmpty>Tidak ditemukan.</CommandEmpty>
-                        <CommandGroup>
-                          {autoSerpoOptions.map((opt) => (
-                            <CommandItem key={opt} value={opt} onSelect={() => setFormData({ ...formData, serpo: opt })}>
-                              <Check className={cn("mr-2 h-4 w-4", formData.serpo === opt ? "opacity-100" : "opacity-0")} />
-                              {opt}
-                            </CommandItem>
-                          ))}
-                        </CommandGroup>
-                      </CommandList>
-                    </Command>
-                  </PopoverContent>
-                </Popover>
+                <Select
+                  value={formData.serpo}
+                  onValueChange={(value) => setFormData({ ...formData, serpo: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Pilih Serpo / Tim" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {autoSerpoOptions.map((opt) => (
+                      <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               ) : (
                 <Input
                   value={formData.serpo}
@@ -735,30 +721,19 @@ export default function TicketManagement() {
                         <div>
                           <Label>Serpo / Tim *</Label>
                           {manualSerpoOptions.length > 0 ? (
-                            <Popover>
-                              <PopoverTrigger asChild>
-                                <Button variant="outline" role="combobox" className={cn("w-full justify-between font-normal", !manualFormData.serpo && "text-muted-foreground")}>
-                                  {manualFormData.serpo || "Pilih Serpo / Tim"}
-                                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                                </Button>
-                              </PopoverTrigger>
-                              <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
-                                <Command>
-                                  <CommandInput placeholder="Cari tim..." />
-                                  <CommandList>
-                                    <CommandEmpty>Tidak ditemukan.</CommandEmpty>
-                                    <CommandGroup>
-                                      {manualSerpoOptions.map((opt) => (
-                                        <CommandItem key={opt} value={opt} onSelect={() => setManualFormData({ ...manualFormData, serpo: opt })}>
-                                          <Check className={cn("mr-2 h-4 w-4", manualFormData.serpo === opt ? "opacity-100" : "opacity-0")} />
-                                          {opt}
-                                        </CommandItem>
-                                      ))}
-                                    </CommandGroup>
-                                  </CommandList>
-                                </Command>
-                              </PopoverContent>
-                            </Popover>
+                            <Select
+                              value={manualFormData.serpo}
+                              onValueChange={(value) => setManualFormData({ ...manualFormData, serpo: value })}
+                            >
+                              <SelectTrigger>
+                                <SelectValue placeholder="Pilih Serpo / Tim" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {manualSerpoOptions.map((opt) => (
+                                  <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
                           ) : (
                             <Input
                               value={manualFormData.serpo}
