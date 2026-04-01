@@ -1,4 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
+import { RegionalTeamRecord } from "@/types/regionalTeam";
+import { loadDefaultRegionalTeamData } from "@/lib/defaultRegionalData";
 import { TablePageSkeleton } from "@/components/PageSkeleton";
 import { Download, Plus, Search, Trash2, Edit, Info, FileEdit, RefreshCw, Loader2, FileDown } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -69,6 +71,12 @@ export default function TicketManagement() {
   const { user, profile } = useAuth();
   const { logActivity } = useActivityLog();
 
+  // Regional team data for Serpo/Tim suggestions
+  const [regionalTeamData, setRegionalTeamData] = useState<RegionalTeamRecord[]>([]);
+  useEffect(() => {
+    loadDefaultRegionalTeamData().then(setRegionalTeamData);
+  }, []);
+
   const [searchFilters, setSearchFilters] = useState({
     customer: "",
     service: "",
@@ -86,7 +94,7 @@ export default function TicketManagement() {
     ticketId: "",
     serpo: "",
     constraint: "",
-    portText: "", // For PORT DOWN constraint
+    portText: "",
   });
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingTicket, setEditingTicket] = useState<Ticket | null>(null);
@@ -103,6 +111,49 @@ export default function TicketManagement() {
     portText: "",
   });
 
+  // Compute serpo options for auto form based on hostname + constraint
+  const autoSerpoOptions = useMemo(() => {
+    if (!selectedRecord || !formData.constraint) return [];
+    const hostname = String(selectedRecord.hostname || "").trim().toUpperCase();
+    const isFeeder = FEEDER_CONSTRAINTS_SET.has(formData.constraint);
+    const targetType = isFeeder ? "FEEDER" : "RITEL";
+    
+    // Find mitra matching hostname and serpoType
+    const matched = regionalTeamData.filter(r => 
+      r.serpoType.toUpperCase() === targetType &&
+      r.hostnames.some(h => h.trim().toUpperCase() === hostname)
+    );
+    
+    if (matched.length > 0) {
+      return [...new Set(matched.map(r => r.mitraName))];
+    }
+    
+    // Fallback: show all mitra for this serpoType
+    const fallback = regionalTeamData.filter(r => r.serpoType.toUpperCase() === targetType);
+    return [...new Set(fallback.map(r => r.mitraName))];
+  }, [selectedRecord, formData.constraint, regionalTeamData]);
+
+  // Compute serpo options for manual form
+  const manualSerpoOptions = useMemo(() => {
+    if (!manualFormData.constraint) return [];
+    const hostname = manualFormData.hostname.trim().toUpperCase();
+    const isFeeder = FEEDER_CONSTRAINTS_SET.has(manualFormData.constraint);
+    const targetType = isFeeder ? "FEEDER" : "RITEL";
+    
+    if (hostname) {
+      const matched = regionalTeamData.filter(r =>
+        r.serpoType.toUpperCase() === targetType &&
+        r.hostnames.some(h => h.trim().toUpperCase() === hostname)
+      );
+      if (matched.length > 0) {
+        return [...new Set(matched.map(r => r.mitraName))];
+      }
+    }
+    
+    // Fallback: all mitra for this type
+    const fallback = regionalTeamData.filter(r => r.serpoType.toUpperCase() === targetType);
+    return [...new Set(fallback.map(r => r.mitraName))];
+  }, [manualFormData.constraint, manualFormData.hostname, regionalTeamData]);
   const filteredData = excelData.filter((r) => {
     // Convert all fields to string to handle numeric values from Excel
     const customer = String(r.customer || "").toLowerCase();
@@ -354,17 +405,33 @@ export default function TicketManagement() {
             </div>
             <div>
               <Label>Serpo / Tim</Label>
-              <Input
-                value={formData.serpo}
-                onChange={(e) => setFormData({ ...formData, serpo: e.target.value })}
-                placeholder="Masukkan nama tim"
-              />
+              {autoSerpoOptions.length > 0 ? (
+                <Select
+                  value={formData.serpo}
+                  onValueChange={(value) => setFormData({ ...formData, serpo: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Pilih Serpo / Tim" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {autoSerpoOptions.map((opt) => (
+                      <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : (
+                <Input
+                  value={formData.serpo}
+                  onChange={(e) => setFormData({ ...formData, serpo: e.target.value })}
+                  placeholder="Pilih constraint terlebih dahulu"
+                />
+              )}
             </div>
             <div>
               <Label>Constraint</Label>
               <Select
                 value={formData.constraint}
-                onValueChange={(value) => setFormData({ ...formData, constraint: value })}
+                onValueChange={(value) => setFormData({ ...formData, constraint: value, serpo: "" })}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Pilih constraint" />
@@ -653,11 +720,27 @@ export default function TicketManagement() {
                         </div>
                         <div>
                           <Label>Serpo / Tim *</Label>
-                          <Input
-                            value={manualFormData.serpo}
-                            onChange={(e) => setManualFormData({ ...manualFormData, serpo: e.target.value })}
-                            placeholder="Nama tim"
-                          />
+                          {manualSerpoOptions.length > 0 ? (
+                            <Select
+                              value={manualFormData.serpo}
+                              onValueChange={(value) => setManualFormData({ ...manualFormData, serpo: value })}
+                            >
+                              <SelectTrigger>
+                                <SelectValue placeholder="Pilih Serpo / Tim" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {manualSerpoOptions.map((opt) => (
+                                  <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          ) : (
+                            <Input
+                              value={manualFormData.serpo}
+                              onChange={(e) => setManualFormData({ ...manualFormData, serpo: e.target.value })}
+                              placeholder="Pilih constraint terlebih dahulu"
+                            />
+                          )}
                         </div>
                       </div>
                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
@@ -690,7 +773,7 @@ export default function TicketManagement() {
                         <Label>Constraint *</Label>
                         <Select
                           value={manualFormData.constraint}
-                          onValueChange={(value) => setManualFormData({ ...manualFormData, constraint: value })}
+                          onValueChange={(value) => setManualFormData({ ...manualFormData, constraint: value, serpo: "" })}
                         >
                           <SelectTrigger>
                             <SelectValue placeholder="Pilih constraint" />
