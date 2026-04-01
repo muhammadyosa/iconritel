@@ -861,6 +861,9 @@ export default function Dashboard() {
             })}
           </div>
 
+          {/* NOC Statistik Incident */}
+          <NOCStatistikIncident tickets={tickets} />
+
         </motion.div>
 
         {/* Right column: Report Shift + Recent Activity stacked */}
