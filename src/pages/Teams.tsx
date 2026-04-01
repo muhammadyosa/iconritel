@@ -243,32 +243,38 @@ export default function Teams() {
   const [rankingHistoryData, setRankingHistoryData] = useState<any[]>([]);
   const [rankingDbTickets, setRankingDbTickets] = useState<any[]>([]);
 
-  useEffect(() => {
-    const fetchRankingData = async () => {
-      const cutoff = startOfDay(subDays(new Date(), rankingDays)).toISOString().split("T")[0];
-      
-      // Fetch from persistent history table
-      const { data: historyData } = await supabase
+  const fetchRankingData = useCallback(async () => {
+    const cutoff = startOfDay(subDays(new Date(), rankingDays)).toISOString().split("T")[0];
+    const cutoffISO = startOfDay(subDays(new Date(), rankingDays)).toISOString();
+    
+    const [historyRes, liveRes] = await Promise.all([
+      supabase
         .from("daily_user_ticket_history")
         .select("user_name, date, total_created, total_resolved")
-        .gte("date", cutoff);
-      
-      if (historyData) {
-        setRankingHistoryData(historyData);
-      }
-
-      // Also fetch live tickets for trend chart & pending/critical counts
-      const cutoffISO = startOfDay(subDays(new Date(), rankingDays)).toISOString();
-      const { data: liveData } = await supabase
+        .gte("date", cutoff),
+      supabase
         .from("tickets")
         .select("created_by_name, status, created_iso")
-        .gte("created_iso", cutoffISO);
-      if (liveData) {
-        setRankingDbTickets(liveData);
-      }
-    };
+        .gte("created_iso", cutoffISO),
+    ]);
+    
+    if (historyRes.data) setRankingHistoryData(historyRes.data);
+    if (liveRes.data) setRankingDbTickets(liveRes.data);
+  }, [rankingDays]);
+
+  useEffect(() => {
     fetchRankingData();
-  }, [rankingDays, tickets]);
+
+    // Listen for changes to refresh ranking
+    const rankingChannel = supabase
+      .channel("ranking-refresh")
+      .on("postgres_changes", { event: "*", schema: "public", table: "daily_user_ticket_history" }, () => {
+        fetchRankingData();
+      })
+      .subscribe();
+
+    return () => { supabase.removeChannel(rankingChannel); };
+  }, [fetchRankingData]);
 
   const rankingUserStats = useMemo(() => {
     // Aggregate from persistent history
