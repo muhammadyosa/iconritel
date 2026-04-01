@@ -392,7 +392,7 @@ export default function TicketManagement() {
       <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
         <DialogContent className="w-[95vw] max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Buat Tiket Baru</DialogTitle>
+            <DialogTitle>Create Incident</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div>
