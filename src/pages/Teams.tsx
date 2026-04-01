@@ -1679,7 +1679,64 @@ export default function Teams() {
                     </div>
                   </div>
                 </CardContent>
-              </Card>
+               </Card>
+
+              {/* Grafik Trend Incident per User */}
+              {rankingUserStats.filter(u => u.total > 0).length > 0 && (
+                <Card className="shadow-card overflow-hidden">
+                  <CardHeader className="py-3 px-4 border-b bg-accent/5">
+                    <CardTitle className="flex items-center gap-2 text-sm sm:text-base">
+                      <TrendingUp className="h-4 w-4 text-primary" />
+                      <span>Trend Incident per User</span>
+                      <Badge variant="secondary" className="text-[10px]">{rankingPeriod === "7d" ? "7 Hari" : rankingPeriod === "14d" ? "14 Hari" : "30 Hari"}</Badge>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-2 sm:p-4">
+                    {(() => {
+                      // Build daily data per user
+                      const days = rankingDays;
+                      const today = startOfDay(new Date());
+                      const dateKeys: string[] = [];
+                      for (let d = days; d >= 0; d--) {
+                        dateKeys.push(format(subDays(today, d), "yyyy-MM-dd"));
+                      }
+                      const activeUsers = rankingUserStats.filter(u => u.total > 0).slice(0, 8);
+                      const dailyMap: Record<string, Record<string, number>> = {};
+                      dateKeys.forEach(dk => { dailyMap[dk] = {}; activeUsers.forEach(u => { dailyMap[dk][u.name] = 0; }); });
+                      rankingDbTickets.forEach(t => {
+                        const creator = t.created_by_name || "Unknown";
+                        if (!activeUsers.find(u => u.name === creator)) return;
+                        try {
+                          const dk = format(startOfDay(new Date(t.created_iso)), "yyyy-MM-dd");
+                          if (dailyMap[dk] && dailyMap[dk][creator] !== undefined) dailyMap[dk][creator]++;
+                        } catch {}
+                      });
+                      const chartData = dateKeys.map(dk => {
+                        const entry: any = { date: format(new Date(dk), "dd/MM") };
+                        activeUsers.forEach(u => { entry[u.name] = dailyMap[dk][u.name] || 0; });
+                        return entry;
+                      });
+                      const colors = ["hsl(var(--primary))", "hsl(var(--destructive))", "hsl(var(--warning))", "hsl(142 76% 36%)", "hsl(280 60% 55%)", "hsl(200 80% 50%)", "hsl(30 90% 55%)", "hsl(340 70% 50%)"];
+                      const chartConfig: ChartConfig = {};
+                      activeUsers.forEach((u, i) => { chartConfig[u.name] = { label: u.name, color: colors[i % colors.length] }; });
+                      return (
+                        <ChartContainer config={chartConfig} className="h-[250px] sm:h-[300px] w-full">
+                          <LineChart data={chartData} margin={{ top: 5, right: 10, left: -10, bottom: 5 }}>
+                            <CartesianGrid strokeDasharray="3 3" className="stroke-muted/30" />
+                            <XAxis dataKey="date" tick={{ fontSize: 10 }} className="text-muted-foreground" />
+                            <YAxis allowDecimals={false} tick={{ fontSize: 10 }} className="text-muted-foreground" />
+                            <ChartTooltip content={<ChartTooltipContent />} />
+                            <ChartLegend content={<ChartLegendContent />} />
+                            {activeUsers.map((u, i) => (
+                              <Line key={u.name} type="monotone" dataKey={u.name} stroke={colors[i % colors.length]} strokeWidth={2} dot={{ r: 2 }} activeDot={{ r: 4 }} />
+                            ))}
+                          </LineChart>
+                        </ChartContainer>
+                      );
+                    })()}
+                  </CardContent>
+                </Card>
+              )}
             </div>
           )}
         </TabsContent>
