@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Settings as SettingsIcon, Info, FileSpreadsheet, FileUp, Check, X, AlertCircle, RefreshCw, Database, Trash2, Users, ClipboardList } from "lucide-react";
+import { Settings as SettingsIcon, Info, FileSpreadsheet, FileUp, Check, X, AlertCircle, RefreshCw, Database, Trash2, Users, ClipboardList, Trophy } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -29,6 +29,7 @@ import { UserManagement } from "@/components/UserManagement";
 import { InsidentManagement } from "@/components/InsidentManagement";
 import { ReportManagement } from "@/components/ReportManagement";
 import { TicketHistoryExport } from "@/components/TicketHistoryExport";
+import { TeamNOCManagement } from "@/components/TeamNOCManagement";
 
 const UPE_STORE_NAME = "upe_data";
 const BNG_STORE_NAME = "bng_data";
@@ -416,6 +417,11 @@ export default function Settings() {
             <TabsTrigger value="history" className="text-[11px] sm:text-sm px-2.5 sm:px-3 py-1.5 sm:py-2 whitespace-nowrap">
               📊 History
             </TabsTrigger>
+            {isAdmin && (
+              <TabsTrigger value="team-noc" className="text-[11px] sm:text-sm px-2.5 sm:px-3 py-1.5 sm:py-2 whitespace-nowrap">
+                👥 Team NOC
+              </TabsTrigger>
+            )}
             {isAdmin && (
               <TabsTrigger value="users" className="text-[11px] sm:text-sm px-2.5 sm:px-3 py-1.5 sm:py-2 whitespace-nowrap">
                 💻 Users
@@ -899,6 +905,13 @@ export default function Settings() {
         <TabsContent value="history" className="space-y-6">
           <TicketHistoryExport />
         </TabsContent>
+
+        {/* Team NOC Management Tab - Admin Only */}
+        {isAdmin && (
+          <TabsContent value="team-noc" className="space-y-6">
+            <TeamNOCManagement />
+          </TabsContent>
+        )}
       </Tabs>
 
       {/* Confirm Import Dialog */}

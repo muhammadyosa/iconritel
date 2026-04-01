@@ -16,7 +16,8 @@ export type ActivityAction =
   | "login"
   | "bulk_delete_tickets"
   | "approve_user"
-  | "revoke_user";
+  | "revoke_user"
+  | "delete_user_history";
 
 const ACTION_LABELS: Record<ActivityAction, string> = {
   create_ticket: "Membuat incident",
@@ -34,6 +35,7 @@ const ACTION_LABELS: Record<ActivityAction, string> = {
   revoke_user: "Mencabut akses user",
   login: "Login ke sistem",
   bulk_delete_tickets: "Menghapus incident massal",
+  delete_user_history: "Menghapus data history user NOC",
 };
 
 export function getActionLabel(action: string): string {

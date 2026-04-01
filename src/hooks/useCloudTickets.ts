@@ -273,24 +273,57 @@ export function useCloudTickets() {
     };
   }, [fetchTickets, cleanupResolvedTickets, fetchProfiles]);
 
+  // Helper: upsert daily_user_ticket_history
+  const upsertUserHistory = useCallback(async (userName: string, userId: string | undefined, dateStr: string, field: "total_created" | "total_resolved", increment: number) => {
+    try {
+      const date = dateStr.split("T")[0];
+      // Try to get existing record
+      const { data: existing } = await supabase
+        .from("daily_user_ticket_history")
+        .select("id, total_created, total_resolved")
+        .eq("date", date)
+        .eq("user_name", userName)
+        .maybeSingle();
+
+      if (existing) {
+        const updates: Record<string, unknown> = {};
+        updates[field] = (existing[field] as number) + increment;
+        await supabase.from("daily_user_ticket_history").update(updates as never).eq("id", existing.id);
+      } else {
+        const row: Record<string, unknown> = {
+          date,
+          user_name: userName,
+          user_id: userId || null,
+          total_created: field === "total_created" ? increment : 0,
+          total_resolved: field === "total_resolved" ? increment : 0,
+        };
+        await supabase.from("daily_user_ticket_history").insert(row as never);
+      }
+    } catch (err) {
+      if (import.meta.env.DEV) console.error("Error upserting user history:", err);
+    }
+  }, []);
+
   const addTicket = useCallback(async (ticket: Ticket) => {
     try {
       const dbData: DbTicketInsert = ticketToDb(ticket);
 
       // Extra guard: ensure we never accidentally send a string ticket id into the UUID PK column.
-      // (Helps avoid "invalid input syntax for type uuid" errors if any future refactor spreads objects.)
       delete (dbData as unknown as { id?: unknown }).id;
 
       const { error } = await supabase.from("tickets").insert(dbData as never);
 
       if (error) throw error;
-      // Realtime will handle updating the list
+
+      // Record in daily user history
+      if (ticket.createdByName) {
+        await upsertUserHistory(ticket.createdByName, ticket.createdByUserId, ticket.createdISO, "total_created", 1);
+      }
     } catch (error) {
       if (import.meta.env.DEV) {
         console.error("Error adding ticket:", error);
       }
 
-      // Show a more actionable message (still generic enough for end users).
       const message =
         typeof error === "object" && error !== null && "message" in error
           ? String((error as { message?: unknown }).message)
@@ -298,7 +331,7 @@ export function useCloudTickets() {
       toast.error(`Gagal menyimpan incident ke database: ${message}`);
       throw error;
     }
-  }, []);
+  }, [upsertUserHistory]);
 
   const updateTicket = useCallback(async (id: string, updates: Partial<Ticket>) => {
     try {
@@ -315,9 +348,13 @@ export function useCloudTickets() {
       if (updates.ticketResult !== undefined) dbUpdates.ticket_result = updates.ticketResult;
       if (updates.status !== undefined) {
         dbUpdates.status = updates.status;
-        // Set resolved_at when status changes to Resolved, clear it otherwise
         if (updates.status === "Resolved") {
           dbUpdates.resolved_at = new Date().toISOString();
+          // Record resolved count in user history
+          const ticket = tickets.find(t => t.id === id);
+          if (ticket?.createdByName) {
+            upsertUserHistory(ticket.createdByName, ticket.createdByUserId, ticket.createdISO, "total_resolved", 1);
+          }
         } else {
           dbUpdates.resolved_at = null;
         }
@@ -337,7 +374,7 @@ export function useCloudTickets() {
       toast.error("Gagal mengupdate incident");
       throw error;
     }
-  }, []);
+  }, [tickets, upsertUserHistory]);
 
   const deleteTicket = useCallback(async (id: string) => {
     try {

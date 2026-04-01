@@ -238,59 +238,62 @@ export default function Teams() {
       .sort((a, b) => b.total - a.total);
   }, [filteredTickets]);
 
-  // === Ranking User NOC with local period filter (direct DB query to include resolved tickets) ===
+  // === Ranking User NOC with local period filter (uses persistent history table) ===
   const rankingDays = rankingPeriod === "7d" ? 7 : rankingPeriod === "14d" ? 14 : 30;
+  const [rankingHistoryData, setRankingHistoryData] = useState<any[]>([]);
   const [rankingDbTickets, setRankingDbTickets] = useState<any[]>([]);
-  const [allCreatorNames, setAllCreatorNames] = useState<string[]>([]);
 
   useEffect(() => {
-    const fetchRankingTickets = async () => {
-      const cutoff = startOfDay(subDays(new Date(), rankingDays)).toISOString();
-      // Fetch tickets in period
-      const { data, error } = await supabase
+    const fetchRankingData = async () => {
+      const cutoff = startOfDay(subDays(new Date(), rankingDays)).toISOString().split("T")[0];
+      
+      // Fetch from persistent history table
+      const { data: historyData } = await supabase
+        .from("daily_user_ticket_history")
+        .select("user_name, date, total_created, total_resolved")
+        .gte("date", cutoff);
+      
+      if (historyData) {
+        setRankingHistoryData(historyData);
+      }
+
+      // Also fetch live tickets for trend chart & pending/critical counts
+      const cutoffISO = startOfDay(subDays(new Date(), rankingDays)).toISOString();
+      const { data: liveData } = await supabase
         .from("tickets")
         .select("created_by_name, status, created_iso")
-        .gte("created_iso", cutoff);
-      if (!error && data) {
-        setRankingDbTickets(data);
-      }
-      // Fetch ALL distinct creator names (ever)
-      const { data: allData } = await supabase
-        .from("tickets")
-        .select("created_by_name");
-      if (allData) {
-        const names = new Set<string>();
-        allData.forEach((t: any) => {
-          if (t.created_by_name) names.add(t.created_by_name);
-        });
-        setAllCreatorNames(Array.from(names));
+        .gte("created_iso", cutoffISO);
+      if (liveData) {
+        setRankingDbTickets(liveData);
       }
     };
-    fetchRankingTickets();
+    fetchRankingData();
   }, [rankingDays, tickets]);
 
   const rankingUserStats = useMemo(() => {
-    const stats: Record<string, { total: number; resolved: number; pending: number; critical: number; tickets: any[] }> = {};
-    // Initialize all known creators with zero counts
-    allCreatorNames.forEach((name) => {
-      stats[name] = { total: 0, resolved: 0, pending: 0, critical: 0, tickets: [] };
+    // Aggregate from persistent history
+    const stats: Record<string, { total: number; resolved: number; pending: number; critical: number }> = {};
+    
+    rankingHistoryData.forEach((rec) => {
+      const name = rec.user_name;
+      if (!stats[name]) stats[name] = { total: 0, resolved: 0, pending: 0, critical: 0 };
+      stats[name].total += rec.total_created || 0;
+      stats[name].resolved += rec.total_resolved || 0;
     });
-    // Aggregate period tickets
+
+    // Add pending/critical counts from live tickets
     rankingDbTickets.forEach((ticket) => {
       const creator = ticket.created_by_name || "Unknown";
-      if (!stats[creator]) {
-        stats[creator] = { total: 0, resolved: 0, pending: 0, critical: 0, tickets: [] };
-      }
-      stats[creator].total++;
-      stats[creator].tickets.push(ticket);
-      if (ticket.status === "Resolved") stats[creator].resolved++;
+      if (!stats[creator]) stats[creator] = { total: 0, resolved: 0, pending: 0, critical: 0 };
       if (ticket.status === "Pending" || ticket.status === "On Progress") stats[creator].pending++;
       if (ticket.status === "Critical") stats[creator].critical++;
     });
+
     return Object.entries(stats)
       .map(([name, s]) => ({ name, ...s }))
+      .filter(u => u.total > 0 || u.resolved > 0 || u.pending > 0 || u.critical > 0)
       .sort((a, b) => b.total - a.total);
-  }, [rankingDbTickets, allCreatorNames]);
+  }, [rankingHistoryData, rankingDbTickets]);
 
   const rankingTotals = useMemo(() => {
     const t = { total: 0, resolved: 0, pending: 0, critical: 0 };
