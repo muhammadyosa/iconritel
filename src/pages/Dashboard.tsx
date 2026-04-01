@@ -144,12 +144,18 @@ export default function Dashboard() {
   const feederTickets = useMemo(() => tickets.filter(t => FEEDER_CONSTRAINTS_SET.has(t.constraint)), [tickets]);
 
   const totalIncidents = tickets.length;
+  const resolvedCount = useMemo(() => tickets.filter(t => t.status === "Resolved").length, [tickets]);
+  const resolutionRate = totalIncidents > 0 ? Math.round((resolvedCount / totalIncidents) * 100) : 0;
+  const todayStr = useMemo(() => new Date().toISOString().split('T')[0], []);
+  const todayCreated = useMemo(() => tickets.filter(t => new Date(t.createdISO).toISOString().split('T')[0] === todayStr).length, [tickets, todayStr]);
+  const todayResolved = useMemo(() => tickets.filter(t => t.status === "Resolved" && t.resolvedAt && new Date(t.resolvedAt).toISOString().split('T')[0] === todayStr).length, [tickets, todayStr]);
   const overSLA = useMemo(() => tickets.filter((t) => {
     const ageMs = new Date().getTime() - new Date(t.createdISO).getTime();
     return ageMs > 24 * 60 * 60 * 1000 && t.status !== "Resolved";
   }).length, [tickets]);
   const feederImpact = useMemo(() => tickets.filter((t) => FEEDER_CONSTRAINTS_SET.has(t.constraint)).length, [tickets]);
   const totalOLT = useMemo(() => new Set(tickets.map((t) => t.hostname).filter(Boolean)).size || 0, [tickets]);
+  const activeIncidents = useMemo(() => tickets.filter(t => t.status !== "Resolved").length, [tickets]);
 
   const recentTickets = useMemo(() => tickets
     .filter((t) => selectedConstraint === "all" || t.constraint === selectedConstraint)
@@ -203,7 +209,10 @@ export default function Dashboard() {
             bgClass: "bg-primary/8 hover:bg-primary/15",
             borderClass: "border-primary/30 hover:border-primary/50",
             valueClass: "text-primary",
-            glowClass: "hover:shadow-[0_0_20px_-4px_hsl(var(--primary)/0.4)]"
+            glowClass: "hover:shadow-[0_0_20px_-4px_hsl(var(--primary)/0.4)]",
+            sub: `✅ ${resolvedCount} resolved · 🔄 ${activeIncidents} aktif`,
+            progress: resolutionRate,
+            progressColor: "bg-primary",
           },
           { 
             title: "Over SLA (>24h)", 
@@ -213,7 +222,10 @@ export default function Dashboard() {
             bgClass: "bg-destructive/8 hover:bg-destructive/15",
             borderClass: "border-destructive/30 hover:border-destructive/50",
             valueClass: "text-destructive",
-            glowClass: "hover:shadow-[0_0_20px_-4px_hsl(var(--destructive)/0.4)]"
+            glowClass: "hover:shadow-[0_0_20px_-4px_hsl(var(--destructive)/0.4)]",
+            sub: totalIncidents > 0 ? `${Math.round((overSLA / totalIncidents) * 100)}% dari total` : "0%",
+            progress: totalIncidents > 0 ? Math.round((overSLA / totalIncidents) * 100) : 0,
+            progressColor: "bg-destructive",
           },
           { 
             title: "Impact OLT", 
@@ -223,7 +235,10 @@ export default function Dashboard() {
             bgClass: "bg-success/8 hover:bg-success/15",
             borderClass: "border-success/30 hover:border-success/50",
             valueClass: "text-success",
-            glowClass: "hover:shadow-[0_0_20px_-4px_hsl(var(--success)/0.4)]"
+            glowClass: "hover:shadow-[0_0_20px_-4px_hsl(var(--success)/0.4)]",
+            sub: `📡 ${totalOLT} OLT terdampak`,
+            progress: null as number | null,
+            progressColor: "bg-success",
           },
           { 
             title: "Impact Feeder", 
@@ -233,7 +248,10 @@ export default function Dashboard() {
             bgClass: "bg-warning/8 hover:bg-warning/15",
             borderClass: "border-warning/30 hover:border-warning/50",
             valueClass: "text-warning",
-            glowClass: "hover:shadow-[0_0_20px_-4px_hsl(var(--warning)/0.4)]"
+            glowClass: "hover:shadow-[0_0_20px_-4px_hsl(var(--warning)/0.4)]",
+            sub: totalIncidents > 0 ? `${Math.round((feederImpact / totalIncidents) * 100)}% dari total` : "0%",
+            progress: totalIncidents > 0 ? Math.round((feederImpact / totalIncidents) * 100) : 0,
+            progressColor: "bg-warning",
           }
         ].map((card, index) => (
           <motion.div
@@ -278,20 +296,55 @@ export default function Dashboard() {
               ${card.glowClass} active:scale-[0.97]
             `}
           >
-            <div className="p-3 sm:p-4">
+            <div className="p-3 sm:p-4 space-y-2">
               <div className="flex items-center justify-between gap-2">
-                <div className="flex items-center gap-2.5 min-w-0">
-                  <span className="text-xl sm:text-2xl">{card.emoji}</span>
+                <div className="flex items-center gap-2 min-w-0">
+                  <span className="text-lg sm:text-xl">{card.emoji}</span>
                   <p className="text-[10px] sm:text-xs text-muted-foreground font-medium truncate">{card.title}</p>
                 </div>
                 <p className={`text-2xl sm:text-3xl font-bold shrink-0 tabular-nums ${card.valueClass}`}>
                   {card.value}
                 </p>
               </div>
+              {/* Sub info */}
+              <p className="text-[8px] sm:text-[9px] text-muted-foreground/80 truncate">{card.sub}</p>
+              {/* Mini progress bar */}
+              {card.progress !== null && (
+                <div className="w-full h-1 rounded-full bg-muted/60 overflow-hidden">
+                  <motion.div 
+                    className={`h-full rounded-full ${card.progressColor}/60`}
+                    initial={{ width: 0 }}
+                    animate={{ width: `${Math.min(card.progress, 100)}%` }}
+                    transition={{ duration: 0.8, delay: 0.3 + index * 0.1 }}
+                  />
+                </div>
+              )}
             </div>
           </motion.div>
         ))}
       </div>
+
+      {/* Today's Quick Stats Banner */}
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3, delay: 0.2 }}
+        className="flex flex-wrap items-center gap-2 sm:gap-4 px-3 py-2 rounded-lg bg-muted/40 border border-border/50"
+      >
+        <span className="text-[10px] sm:text-xs font-semibold text-muted-foreground">📅 Hari ini:</span>
+        <div className="flex items-center gap-1.5">
+          <span className="text-[10px] sm:text-xs text-primary font-bold">+{todayCreated}</span>
+          <span className="text-[9px] sm:text-[10px] text-muted-foreground">dibuat</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <span className="text-[10px] sm:text-xs text-success font-bold">+{todayResolved}</span>
+          <span className="text-[9px] sm:text-[10px] text-muted-foreground">resolved</span>
+        </div>
+        <div className="flex items-center gap-1.5 ml-auto">
+          <span className="text-[10px] sm:text-xs font-bold text-foreground">{resolutionRate}%</span>
+          <span className="text-[9px] sm:text-[10px] text-muted-foreground">Resolution Rate</span>
+        </div>
+      </motion.div>
 
       {/* Charts Section */}
       <div className="grid gap-2 sm:gap-3 grid-cols-1 lg:grid-cols-2 w-full">
@@ -640,124 +693,90 @@ export default function Dashboard() {
         <MonthlyAnalytics tickets={tickets} getTrendChartData={getTrendChartData} getCategoryData={getCategoryData} />
       </motion.div>
 
-      {/* Ritel & Feeder Stats - Full Width Row */}
+      {/* Ritel & Feeder Stats - Compact with Progress Bars */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, delay: 0.65 }}
       >
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full">
-          {/* Statistik Incident Ritel */}
-          <Card className="overflow-hidden border border-primary/20">
-            <CardHeader className="py-2.5 px-3 sm:px-4 border-b bg-primary/5">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-xs sm:text-sm flex items-center gap-2">
-                  📦 Incident Ritel
-                </CardTitle>
-                <Badge variant="outline" className="text-[9px] bg-primary/10 border-primary/20">
-                  {ritelTickets.length} total
-                </Badge>
-              </div>
-            </CardHeader>
-            <CardContent className="p-3 space-y-2.5">
-              <div className="grid grid-cols-3 gap-2">
-                <div className="text-center p-1.5 rounded-lg bg-primary/5 border border-primary/10">
-                  <div className="text-base sm:text-lg font-bold text-primary">{ritelTickets.length}</div>
-                  <div className="text-[9px] text-muted-foreground">Total</div>
-                </div>
-                <div className="text-center p-1.5 rounded-lg bg-success/5 border border-success/10">
-                  <div className="text-base sm:text-lg font-bold text-success">{ritelTickets.filter(t => t.status === "Resolved").length}</div>
-                  <div className="text-[9px] text-muted-foreground">Resolved</div>
-                </div>
-                <div className="text-center p-1.5 rounded-lg bg-warning/5 border border-warning/10">
-                  <div className="text-base sm:text-lg font-bold text-warning">{ritelTickets.filter(t => t.status !== "Resolved").length}</div>
-                  <div className="text-[9px] text-muted-foreground">Pending</div>
-                </div>
-              </div>
-              <div className="flex items-center gap-3">
-                <div className="flex-1 space-y-1">
-                  <span className="text-[9px] font-semibold text-muted-foreground uppercase tracking-wider">Top Constraint</span>
-                  {(() => {
-                    const constraintCount: Record<string, number> = {};
-                    ritelTickets.forEach(t => { constraintCount[t.constraint] = (constraintCount[t.constraint] || 0) + 1; });
-                    return Object.entries(constraintCount)
-                      .sort((a, b) => b[1] - a[1])
-                      .slice(0, 3)
-                      .map(([name, count]) => (
-                        <div key={name} className="flex items-center justify-between text-[10px]">
-                          <span className="text-muted-foreground truncate mr-2">{name}</span>
-                          <span className="font-semibold text-foreground">{count}</span>
-                        </div>
-                      ));
-                  })()}
-                </div>
-                {ritelTickets.length > 0 && (
-                  <div className="text-center px-3 py-2 rounded-lg bg-primary/5 border border-primary/10 min-w-[60px]">
-                    <div className="text-lg font-bold text-primary">
-                      {Math.round((ritelTickets.filter(t => t.status === "Resolved").length / ritelTickets.length) * 100)}%
-                    </div>
-                    <div className="text-[8px] text-muted-foreground">Rate</div>
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
+          {[
+            { 
+              label: "📦 Incident Ritel", data: ritelTickets, 
+              color: "primary", borderColor: "border-primary/20", bgColor: "bg-primary/5",
+              progressBg: "bg-primary/20", progressFill: "bg-primary",
+            },
+            { 
+              label: "⚡ Incident Feeder", data: feederTickets, 
+              color: "warning", borderColor: "border-warning/20", bgColor: "bg-warning/5",
+              progressBg: "bg-warning/20", progressFill: "bg-warning",
+            },
+          ].map((section) => {
+            const resolved = section.data.filter(t => t.status === "Resolved").length;
+            const pending = section.data.filter(t => t.status !== "Resolved").length;
+            const rate = section.data.length > 0 ? Math.round((resolved / section.data.length) * 100) : 0;
+            const constraintCount: Record<string, number> = {};
+            section.data.forEach(t => { constraintCount[t.constraint] = (constraintCount[t.constraint] || 0) + 1; });
+            const topConstraints = Object.entries(constraintCount).sort((a, b) => b[1] - a[1]).slice(0, 3);
 
-          {/* Statistik Incident Feeder */}
-          <Card className="overflow-hidden border border-warning/20">
-            <CardHeader className="py-2.5 px-3 sm:px-4 border-b bg-warning/5">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-xs sm:text-sm flex items-center gap-2">
-                  ⚡ Incident Feeder
-                </CardTitle>
-                <Badge variant="outline" className="text-[9px] bg-warning/10 border-warning/20">
-                  {feederTickets.length} total
-                </Badge>
-              </div>
-            </CardHeader>
-            <CardContent className="p-3 space-y-2.5">
-              <div className="grid grid-cols-3 gap-2">
-                <div className="text-center p-1.5 rounded-lg bg-warning/5 border border-warning/10">
-                  <div className="text-base sm:text-lg font-bold text-warning">{feederTickets.length}</div>
-                  <div className="text-[9px] text-muted-foreground">Total</div>
-                </div>
-                <div className="text-center p-1.5 rounded-lg bg-success/5 border border-success/10">
-                  <div className="text-base sm:text-lg font-bold text-success">{feederTickets.filter(t => t.status === "Resolved").length}</div>
-                  <div className="text-[9px] text-muted-foreground">Resolved</div>
-                </div>
-                <div className="text-center p-1.5 rounded-lg bg-destructive/5 border border-destructive/10">
-                  <div className="text-base sm:text-lg font-bold text-destructive">{feederTickets.filter(t => t.status !== "Resolved").length}</div>
-                  <div className="text-[9px] text-muted-foreground">Pending</div>
-                </div>
-              </div>
-              <div className="flex items-center gap-3">
-                <div className="flex-1 space-y-1">
-                  <span className="text-[9px] font-semibold text-muted-foreground uppercase tracking-wider">Top Constraint</span>
-                  {(() => {
-                    const constraintCount: Record<string, number> = {};
-                    feederTickets.forEach(t => { constraintCount[t.constraint] = (constraintCount[t.constraint] || 0) + 1; });
-                    return Object.entries(constraintCount)
-                      .sort((a, b) => b[1] - a[1])
-                      .slice(0, 3)
-                      .map(([name, count]) => (
-                        <div key={name} className="flex items-center justify-between text-[10px]">
-                          <span className="text-muted-foreground truncate mr-2">{name}</span>
-                          <span className="font-semibold text-foreground">{count}</span>
-                        </div>
-                      ));
-                  })()}
-                </div>
-                {feederTickets.length > 0 && (
-                  <div className="text-center px-3 py-2 rounded-lg bg-warning/5 border border-warning/10 min-w-[60px]">
-                    <div className="text-lg font-bold text-warning">
-                      {Math.round((feederTickets.filter(t => t.status === "Resolved").length / feederTickets.length) * 100)}%
-                    </div>
-                    <div className="text-[8px] text-muted-foreground">Rate</div>
+            return (
+              <Card key={section.label} className={`overflow-hidden border ${section.borderColor}`}>
+                <CardHeader className={`py-2 px-3 sm:px-4 border-b ${section.bgColor}`}>
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-xs sm:text-sm flex items-center gap-2">{section.label}</CardTitle>
+                    <span className={`text-lg sm:text-xl font-bold text-${section.color}`}>{section.data.length}</span>
                   </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
+                </CardHeader>
+                <CardContent className="p-3 space-y-2.5">
+                  {/* Resolution progress bar */}
+                  <div className="space-y-1">
+                    <div className="flex items-center justify-between text-[9px] sm:text-[10px]">
+                      <span className="text-muted-foreground">Resolution Rate</span>
+                      <span className={`font-bold text-${section.color}`}>{rate}%</span>
+                    </div>
+                    <div className={`w-full h-2 rounded-full ${section.progressBg} overflow-hidden`}>
+                      <motion.div 
+                        className={`h-full rounded-full ${section.progressFill}`}
+                        initial={{ width: 0 }}
+                        animate={{ width: `${rate}%` }}
+                        transition={{ duration: 1, delay: 0.5 }}
+                      />
+                    </div>
+                  </div>
+                  {/* Stats row */}
+                  <div className="grid grid-cols-3 gap-1.5">
+                    <div className="text-center p-1.5 rounded-md bg-muted/40">
+                      <div className={`text-sm sm:text-base font-bold text-${section.color}`}>{section.data.length}</div>
+                      <div className="text-[8px] sm:text-[9px] text-muted-foreground">Total</div>
+                    </div>
+                    <div className="text-center p-1.5 rounded-md bg-success/5">
+                      <div className="text-sm sm:text-base font-bold text-success">{resolved}</div>
+                      <div className="text-[8px] sm:text-[9px] text-muted-foreground">Resolved</div>
+                    </div>
+                    <div className="text-center p-1.5 rounded-md bg-destructive/5">
+                      <div className="text-sm sm:text-base font-bold text-destructive">{pending}</div>
+                      <div className="text-[8px] sm:text-[9px] text-muted-foreground">Pending</div>
+                    </div>
+                  </div>
+                  {/* Top Constraints with mini bars */}
+                  {topConstraints.length > 0 && (
+                    <div className="space-y-1">
+                      <span className="text-[8px] sm:text-[9px] font-semibold text-muted-foreground uppercase tracking-wider">Top Constraint</span>
+                      {topConstraints.map(([name, count]) => (
+                        <div key={name} className="flex items-center gap-2 text-[9px] sm:text-[10px]">
+                          <span className="text-muted-foreground truncate flex-1">{name}</span>
+                          <div className="w-12 sm:w-16 h-1.5 rounded-full bg-muted/60 overflow-hidden">
+                            <div className={`h-full rounded-full ${section.progressFill}/70`} style={{ width: `${section.data.length > 0 ? (count / section.data.length) * 100 : 0}%` }} />
+                          </div>
+                          <span className="font-semibold text-foreground w-5 text-right">{count}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
       </motion.div>
 
@@ -802,9 +821,11 @@ export default function Dashboard() {
                       </text>
                     );
                   };
+                  const totalAll = pieData.reduce((s, d) => s + d.value, 0);
                   return (
-                    <div className="flex flex-col items-center">
-                      <ChartContainer config={pieConfig} className="h-[200px] xs:h-[230px] sm:h-[260px] w-full max-w-[340px]">
+                    <div className="flex flex-col md:flex-row items-center md:items-start gap-4">
+                      {/* Pie Chart */}
+                      <ChartContainer config={pieConfig} className="h-[200px] xs:h-[230px] sm:h-[260px] w-full max-w-[320px] flex-shrink-0">
                         <PieChart>
                           <ChartTooltip content={<ChartTooltipContent nameKey="name" />} />
                           <Pie data={pieData} cx="50%" cy="50%" innerRadius={45} outerRadius={80} paddingAngle={3}
@@ -817,13 +838,23 @@ export default function Dashboard() {
                           </Pie>
                         </PieChart>
                       </ChartContainer>
-                      <div className="flex flex-wrap justify-center gap-x-3 gap-y-1.5 mt-2">
-                        {pieData.map((d, i) => (
-                          <div key={d.name} className="flex items-center gap-1.5">
-                            <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: PIE_COLORS[i % PIE_COLORS.length] }} />
-                            <span className="text-[9px] sm:text-[11px] font-medium text-foreground">{d.name} ({d.value})</span>
-                          </div>
-                        ))}
+                      {/* Region Stats Table */}
+                      <div className="flex-1 w-full space-y-1.5">
+                        {regionalIncidentData.map((r, i) => {
+                          const pct = totalAll > 0 ? Math.round((r.total / totalAll) * 100) : 0;
+                          const resRate = r.total > 0 ? Math.round((r.resolved / r.total) * 100) : 0;
+                          return (
+                            <div key={r.region} className="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-muted/40 transition-colors">
+                              <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: PIE_COLORS[i % PIE_COLORS.length] }} />
+                              <span className="text-[9px] sm:text-[11px] font-medium flex-1 truncate">{r.region}</span>
+                              <span className="text-[9px] sm:text-[10px] text-muted-foreground">{pct}%</span>
+                              <div className="w-10 sm:w-14 h-1.5 rounded-full bg-muted/60 overflow-hidden hidden xs:block">
+                                <div className="h-full rounded-full" style={{ width: `${resRate}%`, backgroundColor: PIE_COLORS[i % PIE_COLORS.length] }} />
+                              </div>
+                              <span className="text-[10px] sm:text-xs font-bold tabular-nums w-6 text-right">{r.total}</span>
+                            </div>
+                          );
+                        })}
                       </div>
                     </div>
                   );
