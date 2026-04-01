@@ -1053,20 +1053,20 @@ export default function Dashboard() {
                 </Tabs>
               </CardContent>
             </Card>
+            
+            {/* Recent Activity - Admin Only - beside Report Shift */}
+            {isAdmin && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.9 }}
+              >
+                <RecentActivity />
+              </motion.div>
+            )}
           </motion.div>
         )}
       </div>
-
-      {/* Recent Activity - Admin Only - Bottom */}
-      {isAdmin && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.9 }}
-        >
-          <RecentActivity />
-        </motion.div>
-      )}
 
       {/* Ticket Detail Dialog */}
       <Dialog open={!!selectedTicket} onOpenChange={() => setSelectedTicket(null)}>
