@@ -640,8 +640,129 @@ export default function Dashboard() {
         <MonthlyAnalytics tickets={tickets} getTrendChartData={getTrendChartData} getCategoryData={getCategoryData} />
       </motion.div>
 
-      {/* Regional Incident Stats + Report Shift Grid */}
-      <div className="grid gap-3 grid-cols-1 lg:grid-cols-[1fr_400px] w-full">
+      {/* Ritel & Feeder Stats - Full Width Row */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 0.65 }}
+      >
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full">
+          {/* Statistik Incident Ritel */}
+          <Card className="overflow-hidden border border-primary/20">
+            <CardHeader className="py-2.5 px-3 sm:px-4 border-b bg-primary/5">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-xs sm:text-sm flex items-center gap-2">
+                  📦 Incident Ritel
+                </CardTitle>
+                <Badge variant="outline" className="text-[9px] bg-primary/10 border-primary/20">
+                  {ritelTickets.length} total
+                </Badge>
+              </div>
+            </CardHeader>
+            <CardContent className="p-3 space-y-2.5">
+              <div className="grid grid-cols-3 gap-2">
+                <div className="text-center p-1.5 rounded-lg bg-primary/5 border border-primary/10">
+                  <div className="text-base sm:text-lg font-bold text-primary">{ritelTickets.length}</div>
+                  <div className="text-[9px] text-muted-foreground">Total</div>
+                </div>
+                <div className="text-center p-1.5 rounded-lg bg-success/5 border border-success/10">
+                  <div className="text-base sm:text-lg font-bold text-success">{ritelTickets.filter(t => t.status === "Resolved").length}</div>
+                  <div className="text-[9px] text-muted-foreground">Resolved</div>
+                </div>
+                <div className="text-center p-1.5 rounded-lg bg-warning/5 border border-warning/10">
+                  <div className="text-base sm:text-lg font-bold text-warning">{ritelTickets.filter(t => t.status !== "Resolved").length}</div>
+                  <div className="text-[9px] text-muted-foreground">Pending</div>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="flex-1 space-y-1">
+                  <span className="text-[9px] font-semibold text-muted-foreground uppercase tracking-wider">Top Constraint</span>
+                  {(() => {
+                    const constraintCount: Record<string, number> = {};
+                    ritelTickets.forEach(t => { constraintCount[t.constraint] = (constraintCount[t.constraint] || 0) + 1; });
+                    return Object.entries(constraintCount)
+                      .sort((a, b) => b[1] - a[1])
+                      .slice(0, 3)
+                      .map(([name, count]) => (
+                        <div key={name} className="flex items-center justify-between text-[10px]">
+                          <span className="text-muted-foreground truncate mr-2">{name}</span>
+                          <span className="font-semibold text-foreground">{count}</span>
+                        </div>
+                      ));
+                  })()}
+                </div>
+                {ritelTickets.length > 0 && (
+                  <div className="text-center px-3 py-2 rounded-lg bg-primary/5 border border-primary/10 min-w-[60px]">
+                    <div className="text-lg font-bold text-primary">
+                      {Math.round((ritelTickets.filter(t => t.status === "Resolved").length / ritelTickets.length) * 100)}%
+                    </div>
+                    <div className="text-[8px] text-muted-foreground">Rate</div>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Statistik Incident Feeder */}
+          <Card className="overflow-hidden border border-warning/20">
+            <CardHeader className="py-2.5 px-3 sm:px-4 border-b bg-warning/5">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-xs sm:text-sm flex items-center gap-2">
+                  ⚡ Incident Feeder
+                </CardTitle>
+                <Badge variant="outline" className="text-[9px] bg-warning/10 border-warning/20">
+                  {feederTickets.length} total
+                </Badge>
+              </div>
+            </CardHeader>
+            <CardContent className="p-3 space-y-2.5">
+              <div className="grid grid-cols-3 gap-2">
+                <div className="text-center p-1.5 rounded-lg bg-warning/5 border border-warning/10">
+                  <div className="text-base sm:text-lg font-bold text-warning">{feederTickets.length}</div>
+                  <div className="text-[9px] text-muted-foreground">Total</div>
+                </div>
+                <div className="text-center p-1.5 rounded-lg bg-success/5 border border-success/10">
+                  <div className="text-base sm:text-lg font-bold text-success">{feederTickets.filter(t => t.status === "Resolved").length}</div>
+                  <div className="text-[9px] text-muted-foreground">Resolved</div>
+                </div>
+                <div className="text-center p-1.5 rounded-lg bg-destructive/5 border border-destructive/10">
+                  <div className="text-base sm:text-lg font-bold text-destructive">{feederTickets.filter(t => t.status !== "Resolved").length}</div>
+                  <div className="text-[9px] text-muted-foreground">Pending</div>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="flex-1 space-y-1">
+                  <span className="text-[9px] font-semibold text-muted-foreground uppercase tracking-wider">Top Constraint</span>
+                  {(() => {
+                    const constraintCount: Record<string, number> = {};
+                    feederTickets.forEach(t => { constraintCount[t.constraint] = (constraintCount[t.constraint] || 0) + 1; });
+                    return Object.entries(constraintCount)
+                      .sort((a, b) => b[1] - a[1])
+                      .slice(0, 3)
+                      .map(([name, count]) => (
+                        <div key={name} className="flex items-center justify-between text-[10px]">
+                          <span className="text-muted-foreground truncate mr-2">{name}</span>
+                          <span className="font-semibold text-foreground">{count}</span>
+                        </div>
+                      ));
+                  })()}
+                </div>
+                {feederTickets.length > 0 && (
+                  <div className="text-center px-3 py-2 rounded-lg bg-warning/5 border border-warning/10 min-w-[60px]">
+                    <div className="text-lg font-bold text-warning">
+                      {Math.round((feederTickets.filter(t => t.status === "Resolved").length / feederTickets.length) * 100)}%
+                    </div>
+                    <div className="text-[8px] text-muted-foreground">Rate</div>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </motion.div>
+
+      {/* Pie Chart + Report Shift + Recent Activity Grid */}
+      <div className="grid gap-3 grid-cols-1 lg:grid-cols-[1fr_420px] w-full">
         {/* Regional Incident Overview */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
