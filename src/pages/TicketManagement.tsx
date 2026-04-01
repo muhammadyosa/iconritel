@@ -409,19 +409,30 @@ export default function TicketManagement() {
             <div>
               <Label>Serpo / Tim</Label>
               {autoSerpoOptions.length > 0 ? (
-                <Select
-                  value={formData.serpo}
-                  onValueChange={(value) => setFormData({ ...formData, serpo: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Pilih Serpo / Tim" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {autoSerpoOptions.map((opt) => (
-                      <SelectItem key={opt} value={opt}>{opt}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" role="combobox" className={cn("w-full justify-between font-normal", !formData.serpo && "text-muted-foreground")}>
+                      {formData.serpo || "Pilih Serpo / Tim"}
+                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
+                    <Command>
+                      <CommandInput placeholder="Cari tim..." />
+                      <CommandList>
+                        <CommandEmpty>Tidak ditemukan.</CommandEmpty>
+                        <CommandGroup>
+                          {autoSerpoOptions.map((opt) => (
+                            <CommandItem key={opt} value={opt} onSelect={() => setFormData({ ...formData, serpo: opt })}>
+                              <Check className={cn("mr-2 h-4 w-4", formData.serpo === opt ? "opacity-100" : "opacity-0")} />
+                              {opt}
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </CommandList>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
               ) : (
                 <Input
                   value={formData.serpo}
