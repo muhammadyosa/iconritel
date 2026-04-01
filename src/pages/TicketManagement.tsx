@@ -498,7 +498,7 @@ export default function TicketManagement() {
               </div>
             )}
             <Button onClick={handleSubmitTicket} className="w-full">
-              Simpan Insident
+              Save Incident
             </Button>
           </div>
         </DialogContent>
@@ -830,7 +830,7 @@ export default function TicketManagement() {
                       )}
                       
                       <Button onClick={handleSubmitManualTicket} className="w-full">
-                        Simpan Insident Manual
+                        Save Manual Incident
                       </Button>
                     </div>
                   </DialogContent>
