@@ -238,14 +238,28 @@ export default function Teams() {
       .sort((a, b) => b.total - a.total);
   }, [filteredTickets]);
 
-  // === Ranking User NOC with local period filter ===
+  // === Ranking User NOC with local period filter (direct DB query to include resolved tickets) ===
   const rankingDays = rankingPeriod === "7d" ? 7 : rankingPeriod === "14d" ? 14 : 30;
+  const [rankingDbTickets, setRankingDbTickets] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchRankingTickets = async () => {
+      const cutoff = startOfDay(subDays(new Date(), rankingDays)).toISOString();
+      const { data, error } = await supabase
+        .from("tickets")
+        .select("created_by_name, status, created_iso")
+        .gte("created_iso", cutoff);
+      if (!error && data) {
+        setRankingDbTickets(data);
+      }
+    };
+    fetchRankingTickets();
+  }, [rankingDays, tickets]); // re-fetch when tickets change or period changes
+
   const rankingUserStats = useMemo(() => {
-    const cutoff = startOfDay(subDays(new Date(), rankingDays));
-    const rankingTickets = tickets.filter((t) => new Date(t.createdISO) >= cutoff);
     const stats: Record<string, { total: number; resolved: number; pending: number; critical: number; tickets: any[] }> = {};
-    rankingTickets.forEach((ticket) => {
-      const creator = ticket.createdByName || "Unknown";
+    rankingDbTickets.forEach((ticket) => {
+      const creator = ticket.created_by_name || "Unknown";
       if (!stats[creator]) {
         stats[creator] = { total: 0, resolved: 0, pending: 0, critical: 0, tickets: [] };
       }
@@ -258,7 +272,7 @@ export default function Teams() {
     return Object.entries(stats)
       .map(([name, s]) => ({ name, ...s }))
       .sort((a, b) => b.total - a.total);
-  }, [tickets, rankingDays]);
+  }, [rankingDbTickets]);
 
   const rankingTotals = useMemo(() => {
     const t = { total: 0, resolved: 0, pending: 0, critical: 0 };
