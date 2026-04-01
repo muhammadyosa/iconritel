@@ -74,7 +74,7 @@ export function TeamNOCManagement() {
       if (error) throw error;
       setData([]);
       toast.success("Data history user NOC berhasil dihapus");
-      logActivity("delete_all_user_history", "Menghapus semua data history ranking user NOC");
+      logActivity("delete_user_history", "Menghapus semua data history ranking user NOC");
     } catch (err) {
       toast.error("Gagal menghapus data");
     } finally {

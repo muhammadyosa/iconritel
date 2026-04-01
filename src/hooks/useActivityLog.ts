@@ -35,6 +35,7 @@ const ACTION_LABELS: Record<ActivityAction, string> = {
   revoke_user: "Mencabut akses user",
   login: "Login ke sistem",
   bulk_delete_tickets: "Menghapus incident massal",
+  delete_user_history: "Menghapus data history user NOC",
 };
 
 export function getActionLabel(action: string): string {
