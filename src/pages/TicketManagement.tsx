@@ -431,7 +431,7 @@ export default function TicketManagement() {
               <Label>Constraint</Label>
               <Select
                 value={formData.constraint}
-                onValueChange={(value) => setFormData({ ...formData, constraint: value })}
+                onValueChange={(value) => setFormData({ ...formData, constraint: value, serpo: "" })}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Pilih constraint" />
