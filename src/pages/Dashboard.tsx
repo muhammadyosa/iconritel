@@ -693,92 +693,6 @@ export default function Dashboard() {
         <MonthlyAnalytics tickets={tickets} getTrendChartData={getTrendChartData} getCategoryData={getCategoryData} />
       </motion.div>
 
-      {/* Ritel & Feeder Stats - Compact with Progress Bars */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, delay: 0.65 }}
-      >
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full">
-          {[
-            { 
-              label: "📦 Incident Ritel", data: ritelTickets, 
-              color: "primary", borderColor: "border-primary/20", bgColor: "bg-primary/5",
-              progressBg: "bg-primary/20", progressFill: "bg-primary",
-            },
-            { 
-              label: "⚡ Incident Feeder", data: feederTickets, 
-              color: "warning", borderColor: "border-warning/20", bgColor: "bg-warning/5",
-              progressBg: "bg-warning/20", progressFill: "bg-warning",
-            },
-          ].map((section) => {
-            const resolved = section.data.filter(t => t.status === "Resolved").length;
-            const pending = section.data.filter(t => t.status !== "Resolved").length;
-            const rate = section.data.length > 0 ? Math.round((resolved / section.data.length) * 100) : 0;
-            const constraintCount: Record<string, number> = {};
-            section.data.forEach(t => { constraintCount[t.constraint] = (constraintCount[t.constraint] || 0) + 1; });
-            const topConstraints = Object.entries(constraintCount).sort((a, b) => b[1] - a[1]).slice(0, 3);
-
-            return (
-              <Card key={section.label} className={`overflow-hidden border ${section.borderColor}`}>
-                <CardHeader className={`py-2 px-3 sm:px-4 border-b ${section.bgColor}`}>
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="text-xs sm:text-sm flex items-center gap-2">{section.label}</CardTitle>
-                    <span className={`text-lg sm:text-xl font-bold text-${section.color}`}>{section.data.length}</span>
-                  </div>
-                </CardHeader>
-                <CardContent className="p-3 space-y-2.5">
-                  {/* Resolution progress bar */}
-                  <div className="space-y-1">
-                    <div className="flex items-center justify-between text-[9px] sm:text-[10px]">
-                      <span className="text-muted-foreground">Resolution Rate</span>
-                      <span className={`font-bold text-${section.color}`}>{rate}%</span>
-                    </div>
-                    <div className={`w-full h-2 rounded-full ${section.progressBg} overflow-hidden`}>
-                      <motion.div 
-                        className={`h-full rounded-full ${section.progressFill}`}
-                        initial={{ width: 0 }}
-                        animate={{ width: `${rate}%` }}
-                        transition={{ duration: 1, delay: 0.5 }}
-                      />
-                    </div>
-                  </div>
-                  {/* Stats row */}
-                  <div className="grid grid-cols-3 gap-1.5">
-                    <div className="text-center p-1.5 rounded-md bg-muted/40">
-                      <div className={`text-sm sm:text-base font-bold text-${section.color}`}>{section.data.length}</div>
-                      <div className="text-[8px] sm:text-[9px] text-muted-foreground">Total</div>
-                    </div>
-                    <div className="text-center p-1.5 rounded-md bg-success/5">
-                      <div className="text-sm sm:text-base font-bold text-success">{resolved}</div>
-                      <div className="text-[8px] sm:text-[9px] text-muted-foreground">Resolved</div>
-                    </div>
-                    <div className="text-center p-1.5 rounded-md bg-destructive/5">
-                      <div className="text-sm sm:text-base font-bold text-destructive">{pending}</div>
-                      <div className="text-[8px] sm:text-[9px] text-muted-foreground">Pending</div>
-                    </div>
-                  </div>
-                  {/* Top Constraints with mini bars */}
-                  {topConstraints.length > 0 && (
-                    <div className="space-y-1">
-                      <span className="text-[8px] sm:text-[9px] font-semibold text-muted-foreground uppercase tracking-wider">Top Constraint</span>
-                      {topConstraints.map(([name, count]) => (
-                        <div key={name} className="flex items-center gap-2 text-[9px] sm:text-[10px]">
-                          <span className="text-muted-foreground truncate flex-1">{name}</span>
-                          <div className="w-12 sm:w-16 h-1.5 rounded-full bg-muted/60 overflow-hidden">
-                            <div className={`h-full rounded-full ${section.progressFill}/70`} style={{ width: `${section.data.length > 0 ? (count / section.data.length) * 100 : 0}%` }} />
-                          </div>
-                          <span className="font-semibold text-foreground w-5 text-right">{count}</span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
-      </motion.div>
 
       {/* Report Shift + Recent Activity - Side by Side */}
       <div className="grid gap-3 grid-cols-1 lg:grid-cols-2 w-full items-start">
@@ -862,6 +776,85 @@ export default function Dashboard() {
               )}
             </CardContent>
           </Card>
+
+
+          {/* Ritel & Feeder Stats */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full">
+            {[
+              { 
+                label: "📦 Incident Ritel", data: ritelTickets, 
+                color: "primary", borderColor: "border-primary/20", bgColor: "bg-primary/5",
+                progressBg: "bg-primary/20", progressFill: "bg-primary",
+              },
+              { 
+                label: "⚡ Incident Feeder", data: feederTickets, 
+                color: "warning", borderColor: "border-warning/20", bgColor: "bg-warning/5",
+                progressBg: "bg-warning/20", progressFill: "bg-warning",
+              },
+            ].map((section) => {
+              const resolved = section.data.filter(t => t.status === "Resolved").length;
+              const pending = section.data.filter(t => t.status !== "Resolved").length;
+              const rate = section.data.length > 0 ? Math.round((resolved / section.data.length) * 100) : 0;
+              const constraintCount: Record<string, number> = {};
+              section.data.forEach(t => { constraintCount[t.constraint] = (constraintCount[t.constraint] || 0) + 1; });
+              const topConstraints = Object.entries(constraintCount).sort((a, b) => b[1] - a[1]).slice(0, 3);
+
+              return (
+                <Card key={section.label} className={`overflow-hidden border ${section.borderColor}`}>
+                  <CardHeader className={`py-2 px-3 sm:px-4 border-b ${section.bgColor}`}>
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-xs sm:text-sm flex items-center gap-2">{section.label}</CardTitle>
+                      <span className={`text-lg sm:text-xl font-bold text-${section.color}`}>{section.data.length}</span>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="p-3 space-y-2.5">
+                    <div className="space-y-1">
+                      <div className="flex items-center justify-between text-[9px] sm:text-[10px]">
+                        <span className="text-muted-foreground">Resolution Rate</span>
+                        <span className={`font-bold text-${section.color}`}>{rate}%</span>
+                      </div>
+                      <div className={`w-full h-2 rounded-full ${section.progressBg} overflow-hidden`}>
+                        <motion.div 
+                          className={`h-full rounded-full ${section.progressFill}`}
+                          initial={{ width: 0 }}
+                          animate={{ width: `${rate}%` }}
+                          transition={{ duration: 1, delay: 0.5 }}
+                        />
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-3 gap-1.5">
+                      <div className="text-center p-1.5 rounded-md bg-muted/40">
+                        <div className={`text-sm sm:text-base font-bold text-${section.color}`}>{section.data.length}</div>
+                        <div className="text-[8px] sm:text-[9px] text-muted-foreground">Total</div>
+                      </div>
+                      <div className="text-center p-1.5 rounded-md bg-success/5">
+                        <div className="text-sm sm:text-base font-bold text-success">{resolved}</div>
+                        <div className="text-[8px] sm:text-[9px] text-muted-foreground">Resolved</div>
+                      </div>
+                      <div className="text-center p-1.5 rounded-md bg-destructive/5">
+                        <div className="text-sm sm:text-base font-bold text-destructive">{pending}</div>
+                        <div className="text-[8px] sm:text-[9px] text-muted-foreground">Pending</div>
+                      </div>
+                    </div>
+                    {topConstraints.length > 0 && (
+                      <div className="space-y-1">
+                        <span className="text-[8px] sm:text-[9px] font-semibold text-muted-foreground uppercase tracking-wider">Top Constraint</span>
+                        {topConstraints.map(([name, count]) => (
+                          <div key={name} className="flex items-center gap-2 text-[9px] sm:text-[10px]">
+                            <span className="text-muted-foreground truncate flex-1">{name}</span>
+                            <div className="w-12 sm:w-16 h-1.5 rounded-full bg-muted/60 overflow-hidden">
+                              <div className={`h-full rounded-full ${section.progressFill}/70`} style={{ width: `${section.data.length > 0 ? (count / section.data.length) * 100 : 0}%` }} />
+                            </div>
+                            <span className="font-semibold text-foreground w-5 text-right">{count}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
 
         </motion.div>
 
