@@ -405,11 +405,27 @@ export default function TicketManagement() {
             </div>
             <div>
               <Label>Serpo / Tim</Label>
-              <Input
-                value={formData.serpo}
-                onChange={(e) => setFormData({ ...formData, serpo: e.target.value })}
-                placeholder="Masukkan nama tim"
-              />
+              {autoSerpoOptions.length > 0 ? (
+                <Select
+                  value={formData.serpo}
+                  onValueChange={(value) => setFormData({ ...formData, serpo: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Pilih Serpo / Tim" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {autoSerpoOptions.map((opt) => (
+                      <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : (
+                <Input
+                  value={formData.serpo}
+                  onChange={(e) => setFormData({ ...formData, serpo: e.target.value })}
+                  placeholder="Pilih constraint terlebih dahulu"
+                />
+              )}
             </div>
             <div>
               <Label>Constraint</Label>
