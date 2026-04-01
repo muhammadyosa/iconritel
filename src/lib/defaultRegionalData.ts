@@ -4,7 +4,7 @@ import { loadRegionalTeamData, saveRegionalTeamData } from "./indexedDB";
 
 // Region name normalization map
 const REGION_NAME_MAP: Record<string, string> = {
-  "SUMATERA SELATAN": "SUMSEL",
+  "SUMATERA SELATAN": "SUMATERA SELATAN",
   "SUMATERA BARAT": "SUMBAR",
   "SUMATERA UTARA": "SUMUT",
   "KALIMANTAN BARAT": "KALBAR",
