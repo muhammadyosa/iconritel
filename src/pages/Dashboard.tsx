@@ -862,7 +862,10 @@ export default function Dashboard() {
           </div>
 
           {/* NOC Statistik Incident */}
-          <NOCStatistikIncident tickets={tickets} />
+          <NOCStatistikIncident tickets={tickets} variant="noc" />
+
+          {/* RITEL Statistik Incident */}
+          <NOCStatistikIncident tickets={ritelTickets} variant="ritel" />
 
         </motion.div>
 
