@@ -21,6 +21,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { motion, AnimatePresence } from "framer-motion";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip, Cell, LineChart, Line, PieChart, Pie, Cell as RechartsCell } from "recharts";
 import { loadDefaultRegionalTeamData } from "@/lib/defaultRegionalData";
+import { NOCStatistikIncident } from "@/components/NOCStatistikIncident";
 import { RegionalTeamRecord } from "@/types/regionalTeam";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ShiftReportCard } from "@/components/ShiftReportCard";
@@ -859,6 +860,9 @@ export default function Dashboard() {
               );
             })}
           </div>
+
+          {/* NOC Statistik Incident */}
+          <NOCStatistikIncident tickets={tickets} />
 
         </motion.div>
 
