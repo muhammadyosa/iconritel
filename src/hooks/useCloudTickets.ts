@@ -348,9 +348,13 @@ export function useCloudTickets() {
       if (updates.ticketResult !== undefined) dbUpdates.ticket_result = updates.ticketResult;
       if (updates.status !== undefined) {
         dbUpdates.status = updates.status;
-        // Set resolved_at when status changes to Resolved, clear it otherwise
         if (updates.status === "Resolved") {
           dbUpdates.resolved_at = new Date().toISOString();
+          // Record resolved count in user history
+          const ticket = tickets.find(t => t.id === id);
+          if (ticket?.createdByName) {
+            upsertUserHistory(ticket.createdByName, ticket.createdByUserId, ticket.createdISO, "total_resolved", 1);
+          }
         } else {
           dbUpdates.resolved_at = null;
         }
