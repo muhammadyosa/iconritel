@@ -243,28 +243,38 @@ export default function Teams() {
   const [rankingHistoryData, setRankingHistoryData] = useState<any[]>([]);
   const [rankingDbTickets, setRankingDbTickets] = useState<any[]>([]);
 
-  useEffect(() => {
-    const fetchRankingData = async () => {
-      const cutoff = startOfDay(subDays(new Date(), rankingDays)).toISOString().split("T")[0];
-      const cutoffISO = startOfDay(subDays(new Date(), rankingDays)).toISOString();
-      
-      // Fetch history and live tickets in parallel
-      const [historyRes, liveRes] = await Promise.all([
-        supabase
-          .from("daily_user_ticket_history")
-          .select("user_name, date, total_created, total_resolved")
-          .gte("date", cutoff),
-        supabase
-          .from("tickets")
-          .select("created_by_name, status, created_iso")
-          .gte("created_iso", cutoffISO),
-      ]);
-      
-      if (historyRes.data) setRankingHistoryData(historyRes.data);
-      if (liveRes.data) setRankingDbTickets(liveRes.data);
-    };
-    fetchRankingData();
+  const fetchRankingData = useCallback(async () => {
+    const cutoff = startOfDay(subDays(new Date(), rankingDays)).toISOString().split("T")[0];
+    const cutoffISO = startOfDay(subDays(new Date(), rankingDays)).toISOString();
+    
+    const [historyRes, liveRes] = await Promise.all([
+      supabase
+        .from("daily_user_ticket_history")
+        .select("user_name, date, total_created, total_resolved")
+        .gte("date", cutoff),
+      supabase
+        .from("tickets")
+        .select("created_by_name, status, created_iso")
+        .gte("created_iso", cutoffISO),
+    ]);
+    
+    if (historyRes.data) setRankingHistoryData(historyRes.data);
+    if (liveRes.data) setRankingDbTickets(liveRes.data);
   }, [rankingDays]);
+
+  useEffect(() => {
+    fetchRankingData();
+
+    // Listen for changes to refresh ranking
+    const rankingChannel = supabase
+      .channel("ranking-refresh")
+      .on("postgres_changes", { event: "*", schema: "public", table: "daily_user_ticket_history" }, () => {
+        fetchRankingData();
+      })
+      .subscribe();
+
+    return () => { supabase.removeChannel(rankingChannel); };
+  }, [fetchRankingData]);
 
   const rankingUserStats = useMemo(() => {
     // Aggregate from persistent history
