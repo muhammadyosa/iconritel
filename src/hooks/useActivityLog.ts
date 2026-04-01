@@ -16,7 +16,8 @@ export type ActivityAction =
   | "login"
   | "bulk_delete_tickets"
   | "approve_user"
-  | "revoke_user";
+  | "revoke_user"
+  | "delete_user_history";
 
 const ACTION_LABELS: Record<ActivityAction, string> = {
   create_ticket: "Membuat incident",
