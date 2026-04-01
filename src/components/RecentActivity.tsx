@@ -371,7 +371,7 @@ export function RecentActivity() {
               <p className="text-xs">{searchQuery ? "Tidak ditemukan" : "Belum ada aktivitas"}</p>
             </div>
           ) : (
-            <ScrollArea className="h-[35vh] sm:h-[40vh] md:h-[45vh] lg:h-[50vh]">
+            <ScrollArea className="h-[40vh] sm:h-[45vh] md:h-[50vh] lg:h-[55vh]">
               <AnimatePresence mode="popLayout">
                 <div className="divide-y divide-border/40">
                   {filteredItems.map((item, idx) => {
