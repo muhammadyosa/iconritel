@@ -83,6 +83,39 @@ export type Database = {
         }
         Relationships: []
       }
+      daily_user_ticket_history: {
+        Row: {
+          created_at: string
+          date: string
+          id: string
+          total_created: number
+          total_resolved: number
+          updated_at: string
+          user_id: string | null
+          user_name: string
+        }
+        Insert: {
+          created_at?: string
+          date: string
+          id?: string
+          total_created?: number
+          total_resolved?: number
+          updated_at?: string
+          user_id?: string | null
+          user_name: string
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          id?: string
+          total_created?: number
+          total_resolved?: number
+          updated_at?: string
+          user_id?: string | null
+          user_name?: string
+        }
+        Relationships: []
+      }
       notes: {
         Row: {
           content: string
