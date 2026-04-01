@@ -241,10 +241,12 @@ export default function Teams() {
   // === Ranking User NOC with local period filter (direct DB query to include resolved tickets) ===
   const rankingDays = rankingPeriod === "7d" ? 7 : rankingPeriod === "14d" ? 14 : 30;
   const [rankingDbTickets, setRankingDbTickets] = useState<any[]>([]);
+  const [allCreatorNames, setAllCreatorNames] = useState<string[]>([]);
 
   useEffect(() => {
     const fetchRankingTickets = async () => {
       const cutoff = startOfDay(subDays(new Date(), rankingDays)).toISOString();
+      // Fetch tickets in period
       const { data, error } = await supabase
         .from("tickets")
         .select("created_by_name, status, created_iso")
@@ -252,12 +254,28 @@ export default function Teams() {
       if (!error && data) {
         setRankingDbTickets(data);
       }
+      // Fetch ALL distinct creator names (ever)
+      const { data: allData } = await supabase
+        .from("tickets")
+        .select("created_by_name");
+      if (allData) {
+        const names = new Set<string>();
+        allData.forEach((t: any) => {
+          if (t.created_by_name) names.add(t.created_by_name);
+        });
+        setAllCreatorNames(Array.from(names));
+      }
     };
     fetchRankingTickets();
-  }, [rankingDays, tickets]); // re-fetch when tickets change or period changes
+  }, [rankingDays, tickets]);
 
   const rankingUserStats = useMemo(() => {
     const stats: Record<string, { total: number; resolved: number; pending: number; critical: number; tickets: any[] }> = {};
+    // Initialize all known creators with zero counts
+    allCreatorNames.forEach((name) => {
+      stats[name] = { total: 0, resolved: 0, pending: 0, critical: 0, tickets: [] };
+    });
+    // Aggregate period tickets
     rankingDbTickets.forEach((ticket) => {
       const creator = ticket.created_by_name || "Unknown";
       if (!stats[creator]) {
@@ -272,7 +290,7 @@ export default function Teams() {
     return Object.entries(stats)
       .map(([name, s]) => ({ name, ...s }))
       .sort((a, b) => b.total - a.total);
-  }, [rankingDbTickets]);
+  }, [rankingDbTickets, allCreatorNames]);
 
   const rankingTotals = useMemo(() => {
     const t = { total: 0, resolved: 0, pending: 0, critical: 0 };
