@@ -29,6 +29,7 @@ import { UserManagement } from "@/components/UserManagement";
 import { InsidentManagement } from "@/components/InsidentManagement";
 import { ReportManagement } from "@/components/ReportManagement";
 import { TicketHistoryExport } from "@/components/TicketHistoryExport";
+import { TeamNOCManagement } from "@/components/TeamNOCManagement";
 
 const UPE_STORE_NAME = "upe_data";
 const BNG_STORE_NAME = "bng_data";
