@@ -315,9 +315,9 @@ export function useCloudTickets() {
 
       if (error) throw error;
 
-      // Record in daily user history
+      // Record in daily user history (non-blocking)
       if (ticket.createdByName) {
-        await upsertUserHistory(ticket.createdByName, ticket.createdByUserId, ticket.createdISO, "total_created", 1);
+        upsertUserHistory(ticket.createdByName, ticket.createdByUserId, ticket.createdISO, "total_created", 1);
       }
     } catch (error) {
       if (import.meta.env.DEV) {
