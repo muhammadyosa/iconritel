@@ -374,7 +374,7 @@ export function useCloudTickets() {
       toast.error("Gagal mengupdate incident");
       throw error;
     }
-  }, []);
+  }, [tickets, upsertUserHistory]);
 
   const deleteTicket = useCallback(async (id: string) => {
     try {
