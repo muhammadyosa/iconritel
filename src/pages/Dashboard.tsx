@@ -780,9 +780,9 @@ export default function Dashboard() {
         </div>
       </motion.div>
 
-      {/* Pie Chart + Report Shift + Recent Activity Grid */}
-      <div className="grid gap-3 grid-cols-1 lg:grid-cols-[1fr_420px] w-full">
-        {/* Regional Incident Overview */}
+      {/* Report Shift + Recent Activity - Side by Side */}
+      <div className="grid gap-3 grid-cols-1 lg:grid-cols-2 w-full items-start">
+        {/* Regional Incident Overview + Ritel/Feeder in left column */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
