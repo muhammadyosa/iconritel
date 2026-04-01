@@ -821,9 +821,11 @@ export default function Dashboard() {
                       </text>
                     );
                   };
+                  const totalAll = pieData.reduce((s, d) => s + d.value, 0);
                   return (
-                    <div className="flex flex-col items-center">
-                      <ChartContainer config={pieConfig} className="h-[200px] xs:h-[230px] sm:h-[260px] w-full max-w-[340px]">
+                    <div className="flex flex-col md:flex-row items-center md:items-start gap-4">
+                      {/* Pie Chart */}
+                      <ChartContainer config={pieConfig} className="h-[200px] xs:h-[230px] sm:h-[260px] w-full max-w-[320px] flex-shrink-0">
                         <PieChart>
                           <ChartTooltip content={<ChartTooltipContent nameKey="name" />} />
                           <Pie data={pieData} cx="50%" cy="50%" innerRadius={45} outerRadius={80} paddingAngle={3}
@@ -836,13 +838,23 @@ export default function Dashboard() {
                           </Pie>
                         </PieChart>
                       </ChartContainer>
-                      <div className="flex flex-wrap justify-center gap-x-3 gap-y-1.5 mt-2">
-                        {pieData.map((d, i) => (
-                          <div key={d.name} className="flex items-center gap-1.5">
-                            <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: PIE_COLORS[i % PIE_COLORS.length] }} />
-                            <span className="text-[9px] sm:text-[11px] font-medium text-foreground">{d.name} ({d.value})</span>
-                          </div>
-                        ))}
+                      {/* Region Stats Table */}
+                      <div className="flex-1 w-full space-y-1.5">
+                        {regionalIncidentData.map((r, i) => {
+                          const pct = totalAll > 0 ? Math.round((r.total / totalAll) * 100) : 0;
+                          const resRate = r.total > 0 ? Math.round((r.resolved / r.total) * 100) : 0;
+                          return (
+                            <div key={r.region} className="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-muted/40 transition-colors">
+                              <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: PIE_COLORS[i % PIE_COLORS.length] }} />
+                              <span className="text-[9px] sm:text-[11px] font-medium flex-1 truncate">{r.region}</span>
+                              <span className="text-[9px] sm:text-[10px] text-muted-foreground">{pct}%</span>
+                              <div className="w-10 sm:w-14 h-1.5 rounded-full bg-muted/60 overflow-hidden hidden xs:block">
+                                <div className="h-full rounded-full" style={{ width: `${resRate}%`, backgroundColor: PIE_COLORS[i % PIE_COLORS.length] }} />
+                              </div>
+                              <span className="text-[10px] sm:text-xs font-bold tabular-nums w-6 text-right">{r.total}</span>
+                            </div>
+                          );
+                        })}
                       </div>
                     </div>
                   );
