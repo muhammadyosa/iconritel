@@ -209,7 +209,10 @@ export default function Dashboard() {
             bgClass: "bg-primary/8 hover:bg-primary/15",
             borderClass: "border-primary/30 hover:border-primary/50",
             valueClass: "text-primary",
-            glowClass: "hover:shadow-[0_0_20px_-4px_hsl(var(--primary)/0.4)]"
+            glowClass: "hover:shadow-[0_0_20px_-4px_hsl(var(--primary)/0.4)]",
+            sub: `✅ ${resolvedCount} resolved · 🔄 ${activeIncidents} aktif`,
+            progress: resolutionRate,
+            progressColor: "bg-primary",
           },
           { 
             title: "Over SLA (>24h)", 
@@ -219,7 +222,10 @@ export default function Dashboard() {
             bgClass: "bg-destructive/8 hover:bg-destructive/15",
             borderClass: "border-destructive/30 hover:border-destructive/50",
             valueClass: "text-destructive",
-            glowClass: "hover:shadow-[0_0_20px_-4px_hsl(var(--destructive)/0.4)]"
+            glowClass: "hover:shadow-[0_0_20px_-4px_hsl(var(--destructive)/0.4)]",
+            sub: totalIncidents > 0 ? `${Math.round((overSLA / totalIncidents) * 100)}% dari total` : "0%",
+            progress: totalIncidents > 0 ? Math.round((overSLA / totalIncidents) * 100) : 0,
+            progressColor: "bg-destructive",
           },
           { 
             title: "Impact OLT", 
@@ -229,7 +235,10 @@ export default function Dashboard() {
             bgClass: "bg-success/8 hover:bg-success/15",
             borderClass: "border-success/30 hover:border-success/50",
             valueClass: "text-success",
-            glowClass: "hover:shadow-[0_0_20px_-4px_hsl(var(--success)/0.4)]"
+            glowClass: "hover:shadow-[0_0_20px_-4px_hsl(var(--success)/0.4)]",
+            sub: `📡 ${totalOLT} OLT terdampak`,
+            progress: null as number | null,
+            progressColor: "bg-success",
           },
           { 
             title: "Impact Feeder", 
@@ -239,7 +248,10 @@ export default function Dashboard() {
             bgClass: "bg-warning/8 hover:bg-warning/15",
             borderClass: "border-warning/30 hover:border-warning/50",
             valueClass: "text-warning",
-            glowClass: "hover:shadow-[0_0_20px_-4px_hsl(var(--warning)/0.4)]"
+            glowClass: "hover:shadow-[0_0_20px_-4px_hsl(var(--warning)/0.4)]",
+            sub: totalIncidents > 0 ? `${Math.round((feederImpact / totalIncidents) * 100)}% dari total` : "0%",
+            progress: totalIncidents > 0 ? Math.round((feederImpact / totalIncidents) * 100) : 0,
+            progressColor: "bg-warning",
           }
         ].map((card, index) => (
           <motion.div
@@ -284,20 +296,55 @@ export default function Dashboard() {
               ${card.glowClass} active:scale-[0.97]
             `}
           >
-            <div className="p-3 sm:p-4">
+            <div className="p-3 sm:p-4 space-y-2">
               <div className="flex items-center justify-between gap-2">
-                <div className="flex items-center gap-2.5 min-w-0">
-                  <span className="text-xl sm:text-2xl">{card.emoji}</span>
+                <div className="flex items-center gap-2 min-w-0">
+                  <span className="text-lg sm:text-xl">{card.emoji}</span>
                   <p className="text-[10px] sm:text-xs text-muted-foreground font-medium truncate">{card.title}</p>
                 </div>
                 <p className={`text-2xl sm:text-3xl font-bold shrink-0 tabular-nums ${card.valueClass}`}>
                   {card.value}
                 </p>
               </div>
+              {/* Sub info */}
+              <p className="text-[8px] sm:text-[9px] text-muted-foreground/80 truncate">{card.sub}</p>
+              {/* Mini progress bar */}
+              {card.progress !== null && (
+                <div className="w-full h-1 rounded-full bg-muted/60 overflow-hidden">
+                  <motion.div 
+                    className={`h-full rounded-full ${card.progressColor}/60`}
+                    initial={{ width: 0 }}
+                    animate={{ width: `${Math.min(card.progress, 100)}%` }}
+                    transition={{ duration: 0.8, delay: 0.3 + index * 0.1 }}
+                  />
+                </div>
+              )}
             </div>
           </motion.div>
         ))}
       </div>
+
+      {/* Today's Quick Stats Banner */}
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3, delay: 0.2 }}
+        className="flex flex-wrap items-center gap-2 sm:gap-4 px-3 py-2 rounded-lg bg-muted/40 border border-border/50"
+      >
+        <span className="text-[10px] sm:text-xs font-semibold text-muted-foreground">📅 Hari ini:</span>
+        <div className="flex items-center gap-1.5">
+          <span className="text-[10px] sm:text-xs text-primary font-bold">+{todayCreated}</span>
+          <span className="text-[9px] sm:text-[10px] text-muted-foreground">dibuat</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <span className="text-[10px] sm:text-xs text-success font-bold">+{todayResolved}</span>
+          <span className="text-[9px] sm:text-[10px] text-muted-foreground">resolved</span>
+        </div>
+        <div className="flex items-center gap-1.5 ml-auto">
+          <span className="text-[10px] sm:text-xs font-bold text-foreground">{resolutionRate}%</span>
+          <span className="text-[9px] sm:text-[10px] text-muted-foreground">Resolution Rate</span>
+        </div>
+      </motion.div>
 
       {/* Charts Section */}
       <div className="grid gap-2 sm:gap-3 grid-cols-1 lg:grid-cols-2 w-full">
