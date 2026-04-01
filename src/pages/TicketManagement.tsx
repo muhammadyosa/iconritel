@@ -720,11 +720,27 @@ export default function TicketManagement() {
                         </div>
                         <div>
                           <Label>Serpo / Tim *</Label>
-                          <Input
-                            value={manualFormData.serpo}
-                            onChange={(e) => setManualFormData({ ...manualFormData, serpo: e.target.value })}
-                            placeholder="Nama tim"
-                          />
+                          {manualSerpoOptions.length > 0 ? (
+                            <Select
+                              value={manualFormData.serpo}
+                              onValueChange={(value) => setManualFormData({ ...manualFormData, serpo: value })}
+                            >
+                              <SelectTrigger>
+                                <SelectValue placeholder="Pilih Serpo / Tim" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {manualSerpoOptions.map((opt) => (
+                                  <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          ) : (
+                            <Input
+                              value={manualFormData.serpo}
+                              onChange={(e) => setManualFormData({ ...manualFormData, serpo: e.target.value })}
+                              placeholder="Pilih constraint terlebih dahulu"
+                            />
+                          )}
                         </div>
                       </div>
                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
