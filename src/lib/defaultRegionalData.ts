@@ -138,11 +138,10 @@ function processRegionalTeamSheet(sheet: XLSX.WorkSheet): RegionalTeamRecord[] {
  * Returns the data (either from IndexedDB or freshly parsed).
  */
 export async function loadDefaultRegionalTeamData(): Promise<RegionalTeamRecord[]> {
-  // Always reload from bundled Excel to pick up region name fixes
   try {
-    const response = await fetch("/data/List_Team_Region.xlsx", { cache: "no-cache" });
+    // Cache-bust to always pick up latest file
+    const response = await fetch(`/data/List_Team_Region.xlsx?v=${Date.now()}`, { cache: "no-cache" });
     if (!response.ok) {
-      // Fallback to IndexedDB
       const existing = await loadRegionalTeamData();
       return existing;
     }
@@ -150,19 +149,21 @@ export async function loadDefaultRegionalTeamData(): Promise<RegionalTeamRecord[
     const arrayBuffer = await response.arrayBuffer();
     const workbook = XLSX.read(arrayBuffer, { type: "array" });
 
-    // Find the first sheet and parse it
-    const sheetName = workbook.SheetNames[0];
-    if (!sheetName) return [];
-
-    const sheet = workbook.Sheets[sheetName];
-    const records = processRegionalTeamSheet(sheet);
-
-    // Save to IndexedDB for future use
-    if (records.length > 0) {
-      await saveRegionalTeamData(records);
+    // Parse ALL sheets, not just the first one
+    const allRecords: RegionalTeamRecord[] = [];
+    for (const sheetName of workbook.SheetNames) {
+      const sheet = workbook.Sheets[sheetName];
+      if (!sheet) continue;
+      const records = processRegionalTeamSheet(sheet);
+      allRecords.push(...records);
     }
 
-    return records;
+    // Clear old data and save fresh records
+    if (allRecords.length > 0) {
+      await saveRegionalTeamData(allRecords);
+    }
+
+    return allRecords;
   } catch (error) {
     if (import.meta.env.DEV) {
       console.error("Error loading default regional team data:", error);
