@@ -838,7 +838,7 @@ export default function TicketManagement() {
                         <Label>Constraint *</Label>
                         <Select
                           value={manualFormData.constraint}
-                          onValueChange={(value) => setManualFormData({ ...manualFormData, constraint: value, serpo: "" })}
+                          onValueChange={(value) => { setManualFormData({ ...manualFormData, constraint: value, serpo: "" }); setManualSerpoManualEdit(false); }}
                         >
                           <SelectTrigger>
                             <SelectValue placeholder="Pilih constraint" />
