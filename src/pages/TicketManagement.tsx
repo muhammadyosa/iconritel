@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { RegionalTeamRecord } from "@/types/regionalTeam";
 import { loadDefaultRegionalTeamData } from "@/lib/defaultRegionalData";
 import { TablePageSkeleton } from "@/components/PageSkeleton";
-import { Download, Plus, Search, Trash2, Edit, Info, FileEdit, RefreshCw, Loader2, FileDown } from "lucide-react";
+import { Download, Plus, Search, Trash2, Edit, Info, FileEdit, RefreshCw, Loader2, FileDown, Pencil } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -111,7 +111,12 @@ export default function TicketManagement() {
     portText: "",
   });
 
+  // Manual edit toggle for Serpo/Tim
+  const [autoSerpoManualEdit, setAutoSerpoManualEdit] = useState(false);
+  const [manualSerpoManualEdit, setManualSerpoManualEdit] = useState(false);
+
   // Compute serpo options for auto form based on hostname + constraint
+  // If RITEL constraint has no matching RITEL mitra, fallback to FEEDER mitra
   const autoSerpoOptions = useMemo(() => {
     if (!selectedRecord || !formData.constraint) return [];
     const hostname = String(selectedRecord.hostname || "").trim().toUpperCase();
@@ -126,6 +131,19 @@ export default function TicketManagement() {
     
     if (matched.length > 0) {
       return [...new Set(matched.map(r => r.mitraName))];
+    }
+    
+    // Fallback for RITEL: try FEEDER mitra with same hostname
+    if (!isFeeder) {
+      const feederMatched = regionalTeamData.filter(r =>
+        r.serpoType.toUpperCase() === "FEEDER" &&
+        r.hostnames.some(h => h.trim().toUpperCase() === hostname)
+      );
+      if (feederMatched.length > 0) {
+        return [...new Set(feederMatched.map(r => r.mitraName))];
+      }
+      // Fallback: all mitra (RITEL + FEEDER)
+      return [...new Set(regionalTeamData.map(r => r.mitraName))];
     }
     
     // Fallback: show all mitra for this serpoType
@@ -147,6 +165,17 @@ export default function TicketManagement() {
       );
       if (matched.length > 0) {
         return [...new Set(matched.map(r => r.mitraName))];
+      }
+      // Fallback for RITEL: try FEEDER mitra with same hostname
+      if (!isFeeder) {
+        const feederMatched = regionalTeamData.filter(r =>
+          r.serpoType.toUpperCase() === "FEEDER" &&
+          r.hostnames.some(h => h.trim().toUpperCase() === hostname)
+        );
+        if (feederMatched.length > 0) {
+          return [...new Set(feederMatched.map(r => r.mitraName))];
+        }
+        return [...new Set(regionalTeamData.map(r => r.mitraName))];
       }
     }
     
@@ -404,8 +433,26 @@ export default function TicketManagement() {
               />
             </div>
             <div>
-              <Label>Serpo / Tim</Label>
-              {autoSerpoOptions.length > 0 ? (
+              <div className="flex items-center justify-between mb-1">
+                <Label>Serpo / Tim</Label>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="h-6 px-2 text-xs gap-1"
+                  onClick={() => { setAutoSerpoManualEdit(!autoSerpoManualEdit); setFormData({ ...formData, serpo: "" }); }}
+                >
+                  <Pencil className="h-3 w-3" />
+                  {autoSerpoManualEdit ? "Pilih dari list" : "Edit manual"}
+                </Button>
+              </div>
+              {autoSerpoManualEdit ? (
+                <Input
+                  value={formData.serpo}
+                  onChange={(e) => setFormData({ ...formData, serpo: e.target.value })}
+                  placeholder="Ketik nama Serpo / Tim manual"
+                />
+              ) : autoSerpoOptions.length > 0 ? (
                 <Select
                   value={formData.serpo}
                   onValueChange={(value) => setFormData({ ...formData, serpo: value })}
@@ -431,7 +478,7 @@ export default function TicketManagement() {
               <Label>Constraint</Label>
               <Select
                 value={formData.constraint}
-                onValueChange={(value) => setFormData({ ...formData, constraint: value, serpo: "" })}
+                onValueChange={(value) => { setFormData({ ...formData, constraint: value, serpo: "" }); setAutoSerpoManualEdit(false); }}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Pilih constraint" />
@@ -719,8 +766,26 @@ export default function TicketManagement() {
                           />
                         </div>
                         <div>
-                          <Label>Serpo / Tim *</Label>
-                          {manualSerpoOptions.length > 0 ? (
+                          <div className="flex items-center justify-between mb-1">
+                            <Label>Serpo / Tim *</Label>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              className="h-6 px-2 text-xs gap-1"
+                              onClick={() => { setManualSerpoManualEdit(!manualSerpoManualEdit); setManualFormData({ ...manualFormData, serpo: "" }); }}
+                            >
+                              <Pencil className="h-3 w-3" />
+                              {manualSerpoManualEdit ? "Pilih dari list" : "Edit manual"}
+                            </Button>
+                          </div>
+                          {manualSerpoManualEdit ? (
+                            <Input
+                              value={manualFormData.serpo}
+                              onChange={(e) => setManualFormData({ ...manualFormData, serpo: e.target.value })}
+                              placeholder="Ketik nama Serpo / Tim manual"
+                            />
+                          ) : manualSerpoOptions.length > 0 ? (
                             <Select
                               value={manualFormData.serpo}
                               onValueChange={(value) => setManualFormData({ ...manualFormData, serpo: value })}
@@ -773,7 +838,7 @@ export default function TicketManagement() {
                         <Label>Constraint *</Label>
                         <Select
                           value={manualFormData.constraint}
-                          onValueChange={(value) => setManualFormData({ ...manualFormData, constraint: value, serpo: "" })}
+                          onValueChange={(value) => { setManualFormData({ ...manualFormData, constraint: value, serpo: "" }); setManualSerpoManualEdit(false); }}
                         >
                           <SelectTrigger>
                             <SelectValue placeholder="Pilih constraint" />
