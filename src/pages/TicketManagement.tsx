@@ -766,8 +766,26 @@ export default function TicketManagement() {
                           />
                         </div>
                         <div>
-                          <Label>Serpo / Tim *</Label>
-                          {manualSerpoOptions.length > 0 ? (
+                          <div className="flex items-center justify-between mb-1">
+                            <Label>Serpo / Tim *</Label>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              className="h-6 px-2 text-xs gap-1"
+                              onClick={() => { setManualSerpoManualEdit(!manualSerpoManualEdit); setManualFormData({ ...manualFormData, serpo: "" }); }}
+                            >
+                              <Pencil className="h-3 w-3" />
+                              {manualSerpoManualEdit ? "Pilih dari list" : "Edit manual"}
+                            </Button>
+                          </div>
+                          {manualSerpoManualEdit ? (
+                            <Input
+                              value={manualFormData.serpo}
+                              onChange={(e) => setManualFormData({ ...manualFormData, serpo: e.target.value })}
+                              placeholder="Ketik nama Serpo / Tim manual"
+                            />
+                          ) : manualSerpoOptions.length > 0 ? (
                             <Select
                               value={manualFormData.serpo}
                               onValueChange={(value) => setManualFormData({ ...manualFormData, serpo: value })}
