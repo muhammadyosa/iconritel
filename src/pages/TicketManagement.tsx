@@ -111,7 +111,12 @@ export default function TicketManagement() {
     portText: "",
   });
 
+  // Manual edit toggle for Serpo/Tim
+  const [autoSerpoManualEdit, setAutoSerpoManualEdit] = useState(false);
+  const [manualSerpoManualEdit, setManualSerpoManualEdit] = useState(false);
+
   // Compute serpo options for auto form based on hostname + constraint
+  // If RITEL constraint has no matching RITEL mitra, fallback to FEEDER mitra
   const autoSerpoOptions = useMemo(() => {
     if (!selectedRecord || !formData.constraint) return [];
     const hostname = String(selectedRecord.hostname || "").trim().toUpperCase();
@@ -126,6 +131,19 @@ export default function TicketManagement() {
     
     if (matched.length > 0) {
       return [...new Set(matched.map(r => r.mitraName))];
+    }
+    
+    // Fallback for RITEL: try FEEDER mitra with same hostname
+    if (!isFeeder) {
+      const feederMatched = regionalTeamData.filter(r =>
+        r.serpoType.toUpperCase() === "FEEDER" &&
+        r.hostnames.some(h => h.trim().toUpperCase() === hostname)
+      );
+      if (feederMatched.length > 0) {
+        return [...new Set(feederMatched.map(r => r.mitraName))];
+      }
+      // Fallback: all mitra (RITEL + FEEDER)
+      return [...new Set(regionalTeamData.map(r => r.mitraName))];
     }
     
     // Fallback: show all mitra for this serpoType
@@ -147,6 +165,17 @@ export default function TicketManagement() {
       );
       if (matched.length > 0) {
         return [...new Set(matched.map(r => r.mitraName))];
+      }
+      // Fallback for RITEL: try FEEDER mitra with same hostname
+      if (!isFeeder) {
+        const feederMatched = regionalTeamData.filter(r =>
+          r.serpoType.toUpperCase() === "FEEDER" &&
+          r.hostnames.some(h => h.trim().toUpperCase() === hostname)
+        );
+        if (feederMatched.length > 0) {
+          return [...new Set(feederMatched.map(r => r.mitraName))];
+        }
+        return [...new Set(regionalTeamData.map(r => r.mitraName))];
       }
     }
     
