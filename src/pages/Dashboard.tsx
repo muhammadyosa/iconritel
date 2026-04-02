@@ -864,8 +864,6 @@ export default function Dashboard() {
           {/* NOC Statistik Incident */}
           <NOCStatistikIncident tickets={tickets} variant="noc" />
 
-          {/* RITEL Statistik Incident */}
-          <NOCStatistikIncident tickets={ritelTickets} variant="ritel" />
 
         </motion.div>
 
