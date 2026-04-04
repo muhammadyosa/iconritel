@@ -87,13 +87,12 @@ export default function RegionalOfficeTab({ tickets }: RegionalOfficeTabProps) {
       regionMap[region].push(rec);
     });
 
-    const hostnameToRegion: Record<string, string> = {};
+    // Build mitraName → region map for serpo-based matching
+    const mitraToRegion: Record<string, string> = {};
     Object.entries(regionMap).forEach(([region, records]) => {
       records.forEach((rec) => {
-        rec.hostnames.forEach((h) => {
-          const normalized = h.trim().toUpperCase();
-          if (normalized) hostnameToRegion[normalized] = region;
-        });
+        const normalizedMitra = rec.mitraName.trim().toUpperCase();
+        if (normalizedMitra) mitraToRegion[normalizedMitra] = region;
       });
     });
 
@@ -115,9 +114,10 @@ export default function RegionalOfficeTab({ tickets }: RegionalOfficeTabProps) {
       };
     });
 
+    // Match tickets to regions via serpo field → mitraName
     tickets.forEach((ticket) => {
-      const ticketHostname = (ticket.hostname || "").trim().toUpperCase();
-      const region = hostnameToRegion[ticketHostname];
+      const ticketSerpo = (ticket.serpo || "").trim().toUpperCase();
+      const region = mitraToRegion[ticketSerpo];
       if (!region || !stats[region]) return;
       stats[region].totalIncidents++;
       stats[region].incidentTickets.push(ticket);
@@ -419,8 +419,8 @@ export default function RegionalOfficeTab({ tickets }: RegionalOfficeTabProps) {
                       <ScrollArea className="h-[100px] xs:h-[120px] sm:h-[140px] rounded-md border border-border/30 bg-muted/20">
                         <div className="p-1.5 space-y-0.5">
                           {r.teams.map((t, tIdx) => {
-                            const teamHostSet = new Set(t.hostnames.map(h => h.trim().toUpperCase()));
-                            const teamInc = r.incidentTickets.filter(tk => teamHostSet.has(tk.hostname.trim().toUpperCase()));
+                            const teamMitraUpper = t.mitraName.trim().toUpperCase();
+                            const teamInc = r.incidentTickets.filter(tk => (tk.serpo || "").trim().toUpperCase() === teamMitraUpper);
                             const hasIncident = teamInc.length > 0;
                             return (
                               <div
@@ -714,9 +714,9 @@ export default function RegionalOfficeTab({ tickets }: RegionalOfficeTabProps) {
                         </TableHeader>
                         <TableBody>
                           {selectedRegion.teams.map((t, idx) => {
-                            const teamHostnamesSet = new Set(t.hostnames.map(h => h.trim().toUpperCase()));
+                             const teamMitraUpper = t.mitraName.trim().toUpperCase();
                             const teamIncidents = selectedRegion.incidentTickets.filter(
-                              tk => teamHostnamesSet.has(tk.hostname.trim().toUpperCase())
+                              tk => (tk.serpo || "").trim().toUpperCase() === teamMitraUpper
                             );
                             return (
                               <TableRow
@@ -815,9 +815,9 @@ export default function RegionalOfficeTab({ tickets }: RegionalOfficeTabProps) {
               <div className="flex-1 min-h-0 overflow-y-auto">
                 <div className="p-4 space-y-4">
                   {(() => {
-                    const teamHostnamesSet = new Set(selectedTeam.hostnames.map(h => h.trim().toUpperCase()));
+                     const teamMitraUpper = selectedTeam.mitraName.trim().toUpperCase();
                     const teamIncidents = selectedRegion.incidentTickets.filter(
-                      tk => teamHostnamesSet.has(tk.hostname.trim().toUpperCase())
+                      tk => (tk.serpo || "").trim().toUpperCase() === teamMitraUpper
                     );
                     const teamResolved = teamIncidents.filter(t => t.status === "Resolved").length;
                     const teamCritical = teamIncidents.filter(t => t.status === "Critical").length;
