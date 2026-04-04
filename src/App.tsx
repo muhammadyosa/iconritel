@@ -14,8 +14,8 @@ import { UserMenu } from "@/components/UserMenu";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { useTicketNotifications } from "@/hooks/useTicketNotifications";
 import { ScrollToTop } from "@/components/ScrollToTop";
-import { RouteScrollReset } from "@/components/RouteScrollReset";
 import { TopNavTabs } from "@/components/TopNavTabs";
+import { TabProvider, useOpenTabs, pathMap } from "@/contexts/TabContext";
 import { NetworkStatus } from "@/components/NetworkStatus";
 import plnIconPlusLogo from "@/assets/pln-icon-plus.png";
 import React, { Suspense } from "react";
@@ -55,32 +55,73 @@ const queryClient = new QueryClient({
   },
 });
 
-function AnimatedRoutes() {
-  const location = useLocation();
+// Component map for tab-based rendering
+const pageComponents: Record<string, React.LazyExoticComponent<React.ComponentType<any>>> = {
+  "/": Dashboard,
+  "/tickets": TicketManagement,
+  "/teams": Teams,
+  "/akv": AKVList,
+  "/fat": FATList,
+  "/fdt": FDTList,
+  "/olt": OLTDeviceList,
+  "/upe": UPEList,
+  "/bng": BNGList,
+  "/notes": ListNote,
+  "/report": Report,
+  "/settings": Settings,
+};
 
+// Non-tab routes (login, pending, install, 404)
+function NonTabRoutes() {
+  const location = useLocation();
   return (
     <AnimatePresence mode="wait">
       <Suspense fallback={<PageLoader />}>
         <Routes location={location} key={location.pathname}>
           <Route path="/login" element={<PageTransition><Login /></PageTransition>} />
           <Route path="/pending-approval" element={<PageTransition><PendingApproval /></PageTransition>} />
-          <Route path="/" element={<ProtectedRoute><PageTransition><Dashboard /></PageTransition></ProtectedRoute>} />
-          <Route path="/tickets" element={<ProtectedRoute><PageTransition><TicketManagement /></PageTransition></ProtectedRoute>} />
-          <Route path="/teams" element={<ProtectedRoute><PageTransition><Teams /></PageTransition></ProtectedRoute>} />
-          <Route path="/akv" element={<ProtectedRoute><PageTransition><AKVList /></PageTransition></ProtectedRoute>} />
-          <Route path="/fat" element={<ProtectedRoute><PageTransition><FATList /></PageTransition></ProtectedRoute>} />
-          <Route path="/fdt" element={<ProtectedRoute><PageTransition><FDTList /></PageTransition></ProtectedRoute>} />
-          <Route path="/olt" element={<ProtectedRoute><PageTransition><OLTDeviceList /></PageTransition></ProtectedRoute>} />
-          <Route path="/upe" element={<ProtectedRoute><PageTransition><UPEList /></PageTransition></ProtectedRoute>} />
-          <Route path="/bng" element={<ProtectedRoute><PageTransition><BNGList /></PageTransition></ProtectedRoute>} />
-          <Route path="/report" element={<ProtectedRoute><PageTransition><Report /></PageTransition></ProtectedRoute>} />
-          <Route path="/notes" element={<ProtectedRoute><PageTransition><ListNote /></PageTransition></ProtectedRoute>} />
-          <Route path="/settings" element={<ProtectedRoute><PageTransition><Settings /></PageTransition></ProtectedRoute>} />
           <Route path="/install" element={<ProtectedRoute><PageTransition><Install /></PageTransition></ProtectedRoute>} />
           <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
         </Routes>
       </Suspense>
     </AnimatePresence>
+  );
+}
+
+// Renders all open tabs, keeping them mounted but hiding inactive ones
+function TabbedContent() {
+  const location = useLocation();
+  const { openTabs } = useOpenTabs();
+  const currentPath = location.pathname;
+  
+  // Check if current path is a known tab path
+  const isTabPath = currentPath in pathMap;
+
+  if (!isTabPath) {
+    return <NonTabRoutes />;
+  }
+
+  return (
+    <>
+      {openTabs.map((tab) => {
+        const PageComponent = pageComponents[tab.path];
+        if (!PageComponent) return null;
+        const isActive = currentPath === tab.path;
+        return (
+          <div
+            key={tab.path}
+            style={{ display: isActive ? "block" : "none" }}
+            className="h-full"
+          >
+            <Suspense fallback={<PageLoader />}>
+              <ProtectedRoute>
+                <PageComponent />
+              </ProtectedRoute>
+            </Suspense>
+          </div>
+        );
+      })}
+    </>
   );
 }
 
@@ -95,7 +136,16 @@ function AppLayout() {
   const isPendingPage = location.pathname === "/pending-approval";
 
   if (isLoginPage || isPendingPage) {
-    return <AnimatedRoutes />;
+    return (
+      <Suspense fallback={<PageLoader />}>
+        <AnimatePresence mode="wait">
+          <Routes location={location} key={location.pathname}>
+            <Route path="/login" element={<PageTransition><Login /></PageTransition>} />
+            <Route path="/pending-approval" element={<PageTransition><PendingApproval /></PageTransition>} />
+          </Routes>
+        </AnimatePresence>
+      </Suspense>
+    );
   }
 
   return (
@@ -123,8 +173,7 @@ function AppLayout() {
           </header>
           <TopNavTabs />
           <main className="flex-1 p-2 sm:p-4 md:p-6 overflow-x-hidden overflow-y-auto scroll-smooth">
-            <RouteScrollReset />
-            <AnimatedRoutes />
+            <TabbedContent />
           </main>
           <ScrollToTop />
         </div>
@@ -145,7 +194,9 @@ const App = () => {
               <BrowserRouter>
                 <NetworkStatus />
                 <TicketNotificationProvider>
-                  <AppLayout />
+                  <TabProvider>
+                    <AppLayout />
+                  </TabProvider>
                 </TicketNotificationProvider>
               </BrowserRouter>
             </AuthProvider>
