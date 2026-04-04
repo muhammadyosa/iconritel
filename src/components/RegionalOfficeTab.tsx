@@ -87,13 +87,12 @@ export default function RegionalOfficeTab({ tickets }: RegionalOfficeTabProps) {
       regionMap[region].push(rec);
     });
 
-    const hostnameToRegion: Record<string, string> = {};
+    // Build mitraName → region map for serpo-based matching
+    const mitraToRegion: Record<string, string> = {};
     Object.entries(regionMap).forEach(([region, records]) => {
       records.forEach((rec) => {
-        rec.hostnames.forEach((h) => {
-          const normalized = h.trim().toUpperCase();
-          if (normalized) hostnameToRegion[normalized] = region;
-        });
+        const normalizedMitra = rec.mitraName.trim().toUpperCase();
+        if (normalizedMitra) mitraToRegion[normalizedMitra] = region;
       });
     });
 
@@ -115,9 +114,10 @@ export default function RegionalOfficeTab({ tickets }: RegionalOfficeTabProps) {
       };
     });
 
+    // Match tickets to regions via serpo field → mitraName
     tickets.forEach((ticket) => {
-      const ticketHostname = (ticket.hostname || "").trim().toUpperCase();
-      const region = hostnameToRegion[ticketHostname];
+      const ticketSerpo = (ticket.serpo || "").trim().toUpperCase();
+      const region = mitraToRegion[ticketSerpo];
       if (!region || !stats[region]) return;
       stats[region].totalIncidents++;
       stats[region].incidentTickets.push(ticket);
