@@ -1078,137 +1078,140 @@ export default function Teams() {
                 </SheetContent>
               </Sheet>
 
-              {/* Team Ritel Section */}
-              {teamStatsByCategory.ritel.length > 0 && (
-                <Card className="shadow-card overflow-hidden">
-                  <CardHeader className="py-3 px-4 border-b bg-primary/5">
-                    <CardTitle className="flex items-center justify-between text-sm sm:text-base">
-                      <div className="flex items-center gap-2">
-                        <Badge className="bg-primary text-primary-foreground text-[10px] px-2">RITEL</Badge>
-                        <span>Team Ritel</span>
-                        <Badge variant="secondary" className="text-[10px]">{teamStatsByCategory.ritel.length} tim</Badge>
+              {/* Team Tables - Side by Side */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
+                {/* Team Ritel Section */}
+                {teamStatsByCategory.ritel.length > 0 && (
+                  <Card className="shadow-card overflow-hidden">
+                    <CardHeader className="py-2.5 px-3 sm:px-4 border-b bg-primary/5">
+                      <CardTitle className="flex items-center justify-between text-xs sm:text-sm">
+                        <div className="flex items-center gap-2">
+                          <Badge className="bg-primary text-primary-foreground text-[9px] sm:text-[10px] px-1.5 sm:px-2">RITEL</Badge>
+                          <span>Team Ritel</span>
+                          <Badge variant="secondary" className="text-[8px] sm:text-[9px]">{teamStatsByCategory.ritel.length} tim</Badge>
+                        </div>
+                        <span className="text-[9px] sm:text-[10px] text-muted-foreground font-normal">
+                          {teamStatsByCategory.ritelTotal} • {teamStatsByCategory.ritelResolved} ✅
+                        </span>
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="p-0">
+                      <div className="overflow-x-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
+                        <div className="min-w-[420px]">
+                          <ScrollArea className={teamStatsByCategory.ritel.length > 6 ? "h-[380px]" : ""}>
+                            <Table>
+                              <TableHeader className="sticky top-0 z-10 bg-background">
+                                <TableRow className="bg-muted/30">
+                                  <TableHead className="text-[9px] sm:text-[10px] w-7">#</TableHead>
+                                  <TableHead className="text-[9px] sm:text-[10px]">Nama Tim</TableHead>
+                                  <TableHead className="text-[9px] sm:text-[10px] text-center w-10">Total</TableHead>
+                                  <TableHead className="text-[9px] sm:text-[10px] text-center text-success w-10">✅</TableHead>
+                                  <TableHead className="text-[9px] sm:text-[10px] text-center text-warning w-10">⏳</TableHead>
+                                  <TableHead className="text-[9px] sm:text-[10px] text-center text-destructive w-10">🔴</TableHead>
+                                  <TableHead className="text-[9px] sm:text-[10px] w-[90px] sm:w-[120px]">Progress</TableHead>
+                                </TableRow>
+                              </TableHeader>
+                              <TableBody>
+                                {teamStatsByCategory.ritel.map((t, i) => {
+                                  const rate = t.total > 0 ? Math.round((t.resolved / t.total) * 100) : 0;
+                                  return (
+                                    <TableRow
+                                      key={t.team}
+                                      className={cn("cursor-pointer transition-colors hover:bg-primary/5", selectedTeam === t.team && "bg-primary/5")}
+                                      onClick={() => setStatsSheetTeam({ team: t.team, category: "ritel" })}
+                                    >
+                                      <TableCell className="text-[10px] font-medium text-muted-foreground py-1.5">{i + 1}</TableCell>
+                                      <TableCell className="py-1.5">
+                                        <span className="text-[10px] sm:text-xs font-semibold truncate block max-w-[100px] sm:max-w-[160px]">{t.team}</span>
+                                      </TableCell>
+                                      <TableCell className="text-center text-[10px] sm:text-xs font-bold py-1.5">{t.total}</TableCell>
+                                      <TableCell className="text-center text-[10px] sm:text-xs font-medium text-success py-1.5">{t.resolved}</TableCell>
+                                      <TableCell className="text-center text-[10px] sm:text-xs font-medium text-warning py-1.5">{t.pending}</TableCell>
+                                      <TableCell className="text-center text-[10px] sm:text-xs font-medium text-destructive py-1.5">{t.critical}</TableCell>
+                                      <TableCell className="py-1.5">
+                                        <div className="flex items-center gap-1.5">
+                                          <Progress value={rate} className="h-1.5 flex-1" />
+                                          <span className={cn("text-[9px] sm:text-[10px] font-bold min-w-[28px] text-right", rate >= 70 ? "text-success" : rate >= 40 ? "text-warning" : "text-destructive")}>{rate}%</span>
+                                        </div>
+                                      </TableCell>
+                                    </TableRow>
+                                  );
+                                })}
+                              </TableBody>
+                            </Table>
+                          </ScrollArea>
+                        </div>
                       </div>
-                      <span className="text-xs text-muted-foreground font-normal">
-                        {teamStatsByCategory.ritelTotal} insident • {teamStatsByCategory.ritelResolved} resolved
-                      </span>
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="p-0">
-                    <div className="overflow-x-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
-                      <div className="min-w-[560px]">
-                        <ScrollArea className={teamStatsByCategory.ritel.length > 5 ? "h-[420px]" : ""}>
-                          <Table>
-                            <TableHeader className="sticky top-0 z-10 bg-background">
-                              <TableRow className="bg-muted/30">
-                                <TableHead className="text-[10px] sm:text-xs w-8">#</TableHead>
-                                <TableHead className="text-[10px] sm:text-xs">Nama Tim</TableHead>
-                                <TableHead className="text-[10px] sm:text-xs text-center w-14">Total</TableHead>
-                                <TableHead className="text-[10px] sm:text-xs text-center text-success w-16">Resolved</TableHead>
-                                <TableHead className="text-[10px] sm:text-xs text-center text-warning w-16">Pending</TableHead>
-                                <TableHead className="text-[10px] sm:text-xs text-center text-destructive w-16">Critical</TableHead>
-                                <TableHead className="text-[10px] sm:text-xs w-[120px] sm:w-[160px]">Progress</TableHead>
-                              </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                              {teamStatsByCategory.ritel.map((t, i) => {
-                                const rate = t.total > 0 ? Math.round((t.resolved / t.total) * 100) : 0;
-                                return (
-                                  <TableRow
-                                    key={t.team}
-                                    className={cn("cursor-pointer transition-colors hover:bg-primary/5", selectedTeam === t.team && "bg-primary/5")}
-                                    onClick={() => setStatsSheetTeam({ team: t.team, category: "ritel" })}
-                                  >
-                                    <TableCell className="text-xs font-medium text-muted-foreground py-2">{i + 1}</TableCell>
-                                    <TableCell className="py-2">
-                                      <span className="text-xs sm:text-sm font-semibold truncate block max-w-[140px] sm:max-w-[200px]">{t.team}</span>
-                                    </TableCell>
-                                    <TableCell className="text-center text-xs sm:text-sm font-bold py-2">{t.total}</TableCell>
-                                    <TableCell className="text-center text-xs sm:text-sm font-medium text-success py-2">{t.resolved}</TableCell>
-                                    <TableCell className="text-center text-xs sm:text-sm font-medium text-warning py-2">{t.pending}</TableCell>
-                                    <TableCell className="text-center text-xs sm:text-sm font-medium text-destructive py-2">{t.critical}</TableCell>
-                                    <TableCell className="py-2">
-                                      <div className="flex items-center gap-2">
-                                        <Progress value={rate} className="h-2 flex-1" />
-                                        <span className={cn("text-[10px] sm:text-xs font-bold min-w-[32px] text-right", rate >= 70 ? "text-success" : rate >= 40 ? "text-warning" : "text-destructive")}>{rate}%</span>
-                                      </div>
-                                    </TableCell>
-                                  </TableRow>
-                                );
-                              })}
-                            </TableBody>
-                          </Table>
-                        </ScrollArea>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
+                    </CardContent>
+                  </Card>
+                )}
 
-              {/* Team Feeder/Serpo Section */}
-              {teamStatsByCategory.feeder.length > 0 && (
-                <Card className="shadow-card overflow-hidden">
-                  <CardHeader className="py-3 px-4 border-b bg-warning/5">
-                    <CardTitle className="flex items-center justify-between text-sm sm:text-base">
-                      <div className="flex items-center gap-2">
-                        <Badge className="bg-warning text-warning-foreground text-[10px] px-2">FEEDER</Badge>
-                        <span>Team Serpo/Feeder</span>
-                        <Badge variant="secondary" className="text-[10px]">{teamStatsByCategory.feeder.length} tim</Badge>
+                {/* Team Feeder/Serpo Section */}
+                {teamStatsByCategory.feeder.length > 0 && (
+                  <Card className="shadow-card overflow-hidden">
+                    <CardHeader className="py-2.5 px-3 sm:px-4 border-b bg-warning/5">
+                      <CardTitle className="flex items-center justify-between text-xs sm:text-sm">
+                        <div className="flex items-center gap-2">
+                          <Badge className="bg-warning text-warning-foreground text-[9px] sm:text-[10px] px-1.5 sm:px-2">FEEDER</Badge>
+                          <span>Team Serpo/Feeder</span>
+                          <Badge variant="secondary" className="text-[8px] sm:text-[9px]">{teamStatsByCategory.feeder.length} tim</Badge>
+                        </div>
+                        <span className="text-[9px] sm:text-[10px] text-muted-foreground font-normal">
+                          {teamStatsByCategory.feederTotal} • {teamStatsByCategory.feederResolved} ✅
+                        </span>
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="p-0">
+                      <div className="overflow-x-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
+                        <div className="min-w-[420px]">
+                          <ScrollArea className={teamStatsByCategory.feeder.length > 6 ? "h-[380px]" : ""}>
+                            <Table>
+                              <TableHeader className="sticky top-0 z-10 bg-background">
+                                <TableRow className="bg-muted/30">
+                                  <TableHead className="text-[9px] sm:text-[10px] w-7">#</TableHead>
+                                  <TableHead className="text-[9px] sm:text-[10px]">Nama Tim</TableHead>
+                                  <TableHead className="text-[9px] sm:text-[10px] text-center w-10">Total</TableHead>
+                                  <TableHead className="text-[9px] sm:text-[10px] text-center text-success w-10">✅</TableHead>
+                                  <TableHead className="text-[9px] sm:text-[10px] text-center text-warning w-10">⏳</TableHead>
+                                  <TableHead className="text-[9px] sm:text-[10px] text-center text-destructive w-10">🔴</TableHead>
+                                  <TableHead className="text-[9px] sm:text-[10px] w-[90px] sm:w-[120px]">Progress</TableHead>
+                                </TableRow>
+                              </TableHeader>
+                              <TableBody>
+                                {teamStatsByCategory.feeder.map((t, i) => {
+                                  const rate = t.total > 0 ? Math.round((t.resolved / t.total) * 100) : 0;
+                                  return (
+                                    <TableRow
+                                      key={t.team}
+                                      className={cn("cursor-pointer transition-colors hover:bg-warning/5", selectedTeam === t.team && "bg-warning/5")}
+                                      onClick={() => setStatsSheetTeam({ team: t.team, category: "feeder" })}
+                                    >
+                                      <TableCell className="text-[10px] font-medium text-muted-foreground py-1.5">{i + 1}</TableCell>
+                                      <TableCell className="py-1.5">
+                                        <span className="text-[10px] sm:text-xs font-semibold truncate block max-w-[100px] sm:max-w-[160px]">{t.team}</span>
+                                      </TableCell>
+                                      <TableCell className="text-center text-[10px] sm:text-xs font-bold py-1.5">{t.total}</TableCell>
+                                      <TableCell className="text-center text-[10px] sm:text-xs font-medium text-success py-1.5">{t.resolved}</TableCell>
+                                      <TableCell className="text-center text-[10px] sm:text-xs font-medium text-warning py-1.5">{t.pending}</TableCell>
+                                      <TableCell className="text-center text-[10px] sm:text-xs font-medium text-destructive py-1.5">{t.critical}</TableCell>
+                                      <TableCell className="py-1.5">
+                                        <div className="flex items-center gap-1.5">
+                                          <Progress value={rate} className="h-1.5 flex-1" />
+                                          <span className={cn("text-[9px] sm:text-[10px] font-bold min-w-[28px] text-right", rate >= 70 ? "text-success" : rate >= 40 ? "text-warning" : "text-destructive")}>{rate}%</span>
+                                        </div>
+                                      </TableCell>
+                                    </TableRow>
+                                  );
+                                })}
+                              </TableBody>
+                            </Table>
+                          </ScrollArea>
+                        </div>
                       </div>
-                      <span className="text-xs text-muted-foreground font-normal">
-                        {teamStatsByCategory.feederTotal} insident • {teamStatsByCategory.feederResolved} resolved
-                      </span>
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="p-0">
-                    <div className="overflow-x-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
-                      <div className="min-w-[560px]">
-                        <ScrollArea className={teamStatsByCategory.feeder.length > 5 ? "h-[420px]" : ""}>
-                          <Table>
-                            <TableHeader className="sticky top-0 z-10 bg-background">
-                              <TableRow className="bg-muted/30">
-                                <TableHead className="text-[10px] sm:text-xs w-8">#</TableHead>
-                                <TableHead className="text-[10px] sm:text-xs">Nama Tim</TableHead>
-                                <TableHead className="text-[10px] sm:text-xs text-center w-14">Total</TableHead>
-                                <TableHead className="text-[10px] sm:text-xs text-center text-success w-16">Resolved</TableHead>
-                                <TableHead className="text-[10px] sm:text-xs text-center text-warning w-16">Pending</TableHead>
-                                <TableHead className="text-[10px] sm:text-xs text-center text-destructive w-16">Critical</TableHead>
-                                <TableHead className="text-[10px] sm:text-xs w-[120px] sm:w-[160px]">Progress</TableHead>
-                              </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                              {teamStatsByCategory.feeder.map((t, i) => {
-                                const rate = t.total > 0 ? Math.round((t.resolved / t.total) * 100) : 0;
-                                return (
-                                  <TableRow
-                                    key={t.team}
-                                    className={cn("cursor-pointer transition-colors hover:bg-warning/5", selectedTeam === t.team && "bg-warning/5")}
-                                    onClick={() => setStatsSheetTeam({ team: t.team, category: "feeder" })}
-                                  >
-                                    <TableCell className="text-xs font-medium text-muted-foreground py-2">{i + 1}</TableCell>
-                                    <TableCell className="py-2">
-                                      <span className="text-xs sm:text-sm font-semibold truncate block max-w-[140px] sm:max-w-[200px]">{t.team}</span>
-                                    </TableCell>
-                                    <TableCell className="text-center text-xs sm:text-sm font-bold py-2">{t.total}</TableCell>
-                                    <TableCell className="text-center text-xs sm:text-sm font-medium text-success py-2">{t.resolved}</TableCell>
-                                    <TableCell className="text-center text-xs sm:text-sm font-medium text-warning py-2">{t.pending}</TableCell>
-                                    <TableCell className="text-center text-xs sm:text-sm font-medium text-destructive py-2">{t.critical}</TableCell>
-                                    <TableCell className="py-2">
-                                      <div className="flex items-center gap-2">
-                                        <Progress value={rate} className="h-2 flex-1" />
-                                        <span className={cn("text-[10px] sm:text-xs font-bold min-w-[32px] text-right", rate >= 70 ? "text-success" : rate >= 40 ? "text-warning" : "text-destructive")}>{rate}%</span>
-                                      </div>
-                                    </TableCell>
-                                  </TableRow>
-                                );
-                              })}
-                            </TableBody>
-                          </Table>
-                        </ScrollArea>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
             </div>
           )}
         </TabsContent>
