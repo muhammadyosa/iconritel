@@ -419,8 +419,8 @@ export default function RegionalOfficeTab({ tickets }: RegionalOfficeTabProps) {
                       <ScrollArea className="h-[100px] xs:h-[120px] sm:h-[140px] rounded-md border border-border/30 bg-muted/20">
                         <div className="p-1.5 space-y-0.5">
                           {r.teams.map((t, tIdx) => {
-                            const teamHostSet = new Set(t.hostnames.map(h => h.trim().toUpperCase()));
-                            const teamInc = r.incidentTickets.filter(tk => teamHostSet.has(tk.hostname.trim().toUpperCase()));
+                            const teamMitraUpper = t.mitraName.trim().toUpperCase();
+                            const teamInc = r.incidentTickets.filter(tk => (tk.serpo || "").trim().toUpperCase() === teamMitraUpper);
                             const hasIncident = teamInc.length > 0;
                             return (
                               <div
