@@ -714,9 +714,9 @@ export default function RegionalOfficeTab({ tickets }: RegionalOfficeTabProps) {
                         </TableHeader>
                         <TableBody>
                           {selectedRegion.teams.map((t, idx) => {
-                            const teamHostnamesSet = new Set(t.hostnames.map(h => h.trim().toUpperCase()));
+                             const teamMitraUpper = t.mitraName.trim().toUpperCase();
                             const teamIncidents = selectedRegion.incidentTickets.filter(
-                              tk => teamHostnamesSet.has(tk.hostname.trim().toUpperCase())
+                              tk => (tk.serpo || "").trim().toUpperCase() === teamMitraUpper
                             );
                             return (
                               <TableRow
