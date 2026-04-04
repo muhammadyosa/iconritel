@@ -15,6 +15,7 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { useTicketNotifications } from "@/hooks/useTicketNotifications";
 import { ScrollToTop } from "@/components/ScrollToTop";
 import { RouteScrollReset } from "@/components/RouteScrollReset";
+import { TopNavTabs } from "@/components/TopNavTabs";
 import { NetworkStatus } from "@/components/NetworkStatus";
 import plnIconPlusLogo from "@/assets/pln-icon-plus.png";
 import React, { Suspense } from "react";
@@ -120,6 +121,7 @@ function AppLayout() {
               <UserMenu />
             </div>
           </header>
+          <TopNavTabs />
           <main className="flex-1 p-2 sm:p-4 md:p-6 overflow-x-hidden overflow-y-auto scroll-smooth">
             <RouteScrollReset />
             <AnimatedRoutes />
