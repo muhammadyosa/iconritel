@@ -625,6 +625,64 @@ export function OverSLATab({ tickets, getTicketRegion, onTicketClick }: OverSLAT
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Region Drill-down Dialog */}
+      <Dialog open={selectedRegion !== null} onOpenChange={(open) => !open && setSelectedRegion(null)}>
+        <DialogContent className="max-w-2xl max-h-[85vh]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-sm">
+              🗺️ Incident Over SLA — {selectedRegion}
+              <Badge variant="secondary" className="text-xs">
+                {overSLATickets.filter((t) => getTicketRegion(t.serpo) === selectedRegion).length} Incident
+              </Badge>
+            </DialogTitle>
+            <DialogDescription className="text-xs text-muted-foreground">
+              Daftar incident over SLA & pending di region {selectedRegion}
+            </DialogDescription>
+          </DialogHeader>
+          <ScrollArea className="max-h-[60vh]">
+            <div className="rounded-md border">
+              <Table>
+                <TableHeader className="sticky top-0 bg-background z-10">
+                  <TableRow className="h-6">
+                    <TableHead className="px-1.5 py-0.5 text-[8px] sm:text-[9px] bg-muted/80">No</TableHead>
+                    <TableHead className="px-1.5 py-0.5 text-[8px] sm:text-[9px] bg-muted/80">ID</TableHead>
+                    <TableHead className="px-1.5 py-0.5 text-[8px] sm:text-[9px] bg-muted/80">Constraint</TableHead>
+                    <TableHead className="px-1.5 py-0.5 text-[8px] sm:text-[9px] bg-muted/80">Serpo</TableHead>
+                    <TableHead className="px-1.5 py-0.5 text-[8px] sm:text-[9px] bg-muted/80">Durasi</TableHead>
+                    <TableHead className="px-1.5 py-0.5 text-[8px] sm:text-[9px] bg-muted/80">Status</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {overSLATickets
+                    .filter((t) => getTicketRegion(t.serpo) === selectedRegion)
+                    .sort((a, b) => {
+                      const durA = now - new Date(a.createdISO).getTime();
+                      const durB = now - new Date(b.createdISO).getTime();
+                      return durB - durA;
+                    })
+                    .map((t, idx) => (
+                      <TableRow key={t.id} className="h-6 hover:bg-muted/40 cursor-pointer" onClick={() => { setSelectedRegion(null); onTicketClick?.(t); }}>
+                        <TableCell className="px-1.5 py-0.5 text-[8px] sm:text-[9px] text-muted-foreground">{idx + 1}</TableCell>
+                        <TableCell className="px-1.5 py-0.5 font-mono text-[9px] font-medium">{t.id}</TableCell>
+                        <TableCell className="px-1.5 py-0.5 text-[9px]">
+                          <Badge variant="outline" className="text-[8px] px-1 py-0">{t.constraint}</Badge>
+                        </TableCell>
+                        <TableCell className="px-1.5 py-0.5 text-[9px] text-muted-foreground">{t.serpo}</TableCell>
+                        <TableCell className="px-1.5 py-0.5">
+                          <DurationCell createdISO={t.createdISO} status={t.status} resolvedAt={t.resolvedAt} />
+                        </TableCell>
+                        <TableCell className="px-1.5 py-0.5">
+                          <StatusBadge status={t.status} />
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                </TableBody>
+              </Table>
+            </div>
+          </ScrollArea>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
