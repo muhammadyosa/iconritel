@@ -714,15 +714,13 @@ export default function Dashboard() {
       </motion.div>
 
 
-      {/* Report Shift + Recent Activity - Side by Side */}
-      <div className="grid gap-3 grid-cols-1 lg:grid-cols-2 w-full items-start">
-        {/* Regional Incident Overview + Ritel/Feeder in left column */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.7 }}
-          className="space-y-3"
-        >
+      {/* Proporsi + Tier + Ritel/Feeder + NOC Statistik */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 0.7 }}
+        className="space-y-3"
+      >
           {/* Proporsi Incident + Tier OVER SLA side by side */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {/* Proporsi Incident Pie Chart */}
