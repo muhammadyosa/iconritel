@@ -51,6 +51,8 @@ export function TicketDetailDialog({
   isReviewer = false,
   updateTicket,
   deleteTicket,
+  logActivity,
+  currentUserName,
   open: controlledOpen,
   onOpenChange,
 }: TicketDetailDialogProps) {
