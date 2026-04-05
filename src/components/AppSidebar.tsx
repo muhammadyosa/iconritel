@@ -77,14 +77,14 @@ const MenuItem = memo(function MenuItem({
     <NavLink
       to={item.path}
       className={({ isActive }) =>
-        `flex items-center rounded-md transition-all duration-150 ${
+        `flex items-center rounded-lg transition-all duration-150 ${
           collapsed
-            ? "h-9 w-9 justify-center hover:scale-110"
+            ? "h-9 w-9 justify-center hover:scale-105"
             : "gap-2.5 px-2.5 py-2 w-full hover:translate-x-0.5"
         } ${
           isActive
-            ? "bg-sidebar-foreground/15 text-sidebar-foreground shadow-sm"
-            : "text-sidebar-foreground/70 hover:bg-sidebar-foreground/10 hover:text-sidebar-foreground"
+            ? "bg-sidebar-accent text-sidebar-primary font-semibold shadow-sm"
+            : "text-sidebar-foreground/65 hover:bg-sidebar-accent/60 hover:text-sidebar-foreground"
         }`
       }
     >
@@ -149,9 +149,9 @@ export function AppSidebar() {
       className={`${collapsed ? "w-[52px]" : "w-56"} transition-[width] duration-200 ease-out will-change-[width]`}
       collapsible="icon"
     >
-      <SidebarContent className="flex flex-col overflow-x-hidden bg-sidebar-background">
+      <SidebarContent className="flex flex-col overflow-x-hidden bg-sidebar-background border-r border-sidebar-border">
         {/* Logo */}
-        <div className={`flex-shrink-0 border-b border-sidebar-foreground/10 ${collapsed ? "py-3 px-1.5" : "p-3"}`}>
+        <div className={`flex-shrink-0 border-b border-sidebar-border ${collapsed ? "py-3 px-1.5" : "p-3"}`}>
           {!collapsed ? (
             <div className="flex items-center gap-2.5">
               <img src={iconnetLogo} alt="Iconnet" className="h-8 w-8 object-contain flex-shrink-0" />
@@ -177,7 +177,7 @@ export function AppSidebar() {
         {/* Menu */}
         {!collapsed && (
           <div className="px-3 pt-2 pb-0.5">
-            <span className="text-[10px] font-semibold uppercase tracking-wider text-sidebar-foreground/35">Menu</span>
+            <span className="text-[10px] font-semibold uppercase tracking-wider text-sidebar-foreground/40">Menu</span>
           </div>
         )}
 
@@ -194,14 +194,14 @@ export function AppSidebar() {
         </nav>
 
         {/* Footer */}
-        <div className="mt-auto border-t border-sidebar-foreground/10 flex-shrink-0">
+        <div className="mt-auto border-t border-sidebar-border flex-shrink-0">
           <div className={collapsed ? "py-2 px-1.5" : "p-2"}>
             {collapsed ? (
               <Tooltip delayDuration={0}>
                 <TooltipTrigger asChild>
                   <button onClick={toggleTheme} className="w-full flex justify-center">
-                    <div className="h-9 w-9 rounded-md flex items-center justify-center text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-foreground/10 transition-colors duration-150">
-                      <span className="text-sm">{theme === "dark" ? "☀️" : "🌙"}</span>
+                    <div className="h-9 w-9 rounded-lg flex items-center justify-center text-sidebar-foreground/50 hover:text-sidebar-primary hover:bg-sidebar-accent transition-colors duration-150">
+                       <span className="text-sm">{theme === "dark" ? "☀️" : "🌙"}</span>
                     </div>
                   </button>
                 </TooltipTrigger>
@@ -212,7 +212,7 @@ export function AppSidebar() {
             ) : (
               <button
                 onClick={toggleTheme}
-                className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-md text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-foreground/10 transition-colors duration-150"
+                className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-sidebar-foreground/50 hover:text-sidebar-primary hover:bg-sidebar-accent transition-colors duration-150"
               >
                 <span className="text-sm flex-shrink-0">{theme === "dark" ? "☀️" : "🌙"}</span>
                 <span className="text-[13px] truncate">{theme === "dark" ? "Light Mode" : "Dark Mode"}</span>
@@ -221,7 +221,7 @@ export function AppSidebar() {
           </div>
           {!collapsed && (
             <div className="px-3 pb-2 text-center">
-              <p className="text-[9px] text-sidebar-foreground/25">© RZ Corp</p>
+              <p className="text-[9px] text-sidebar-foreground/30">© RZ Corp</p>
             </div>
           )}
         </div>
