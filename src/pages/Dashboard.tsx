@@ -879,13 +879,11 @@ export default function Dashboard() {
             })}
           </div>
 
-          {/* NOC Statistik Incident */}
-          <NOCStatistikIncident tickets={tickets} variant="noc" />
 
       </motion.div>
 
-      {/* Report Shift + Recent Activity - Side by Side at bottom */}
-      <div className="grid gap-3 grid-cols-1 lg:grid-cols-2 w-full items-start">
+      {/* Report Shift + NOC Statistik + Recent Activity - 3 columns at bottom */}
+      <div className="grid gap-3 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 w-full items-start">
         {/* Report Shift */}
         {shiftReports.length > 0 && (
           <motion.div
@@ -1120,6 +1118,15 @@ export default function Dashboard() {
             </Card>
           </motion.div>
         )}
+
+        {/* NOC Statistik Incident */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.85 }}
+        >
+          <NOCStatistikIncident tickets={tickets} variant="noc" />
+        </motion.div>
 
         {/* Recent Activity - Admin Only */}
         {isAdmin && (
