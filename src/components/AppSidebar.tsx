@@ -77,14 +77,14 @@ const MenuItem = memo(function MenuItem({
     <NavLink
       to={item.path}
       className={({ isActive }) =>
-        `flex items-center rounded-md transition-all duration-150 ${
+        `flex items-center rounded-lg transition-all duration-150 ${
           collapsed
-            ? "h-9 w-9 justify-center hover:scale-110"
+            ? "h-9 w-9 justify-center hover:scale-105"
             : "gap-2.5 px-2.5 py-2 w-full hover:translate-x-0.5"
         } ${
           isActive
-            ? "bg-sidebar-foreground/15 text-sidebar-foreground shadow-sm"
-            : "text-sidebar-foreground/70 hover:bg-sidebar-foreground/10 hover:text-sidebar-foreground"
+            ? "bg-sidebar-accent text-sidebar-primary font-semibold shadow-sm"
+            : "text-sidebar-foreground/65 hover:bg-sidebar-accent/60 hover:text-sidebar-foreground"
         }`
       }
     >
