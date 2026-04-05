@@ -9,6 +9,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarTrigger,
   useSidebar,
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
@@ -95,10 +96,11 @@ export function AppSidebar() {
   return (
     <Sidebar className={`${collapsed ? "w-[52px]" : "w-56 sm:w-60"} transition-all duration-300 ease-out`} collapsible="icon">
       <SidebarContent className="flex flex-col overflow-x-hidden">
-        {/* Header Logo Section */}
+        {/* Header Logo + Trigger Section */}
         <div className={`border-b border-sidebar-border flex-shrink-0 ${collapsed ? "py-3 px-1" : "p-3 sm:p-4"}`}>
           {!collapsed ? (
             <div className="flex items-center gap-2 sm:gap-3">
+              <SidebarTrigger className="h-8 w-8 rounded-full hover:bg-sidebar-accent/60 active:scale-95 transition-all duration-200 flex-shrink-0" />
               <img 
                 src={iconnetLogo} 
                 alt="Iconnet" 
@@ -110,7 +112,8 @@ export function AppSidebar() {
               </div>
             </div>
           ) : (
-            <div className="flex justify-center items-center w-full">
+            <div className="flex flex-col items-center gap-2 w-full">
+              <SidebarTrigger className="h-7 w-7 rounded-full hover:bg-sidebar-accent/60 active:scale-95 transition-all duration-200" />
               <img 
                 src={iconnetLogo} 
                 alt="Iconnet" 

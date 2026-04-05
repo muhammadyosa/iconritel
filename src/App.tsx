@@ -4,7 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { PageTransition } from "@/components/PageTransition";
 import { AnimatePresence } from "framer-motion";
@@ -156,7 +156,6 @@ function AppLayout() {
           <header className="sticky top-0 z-10 h-12 sm:h-14 border-b bg-background/95 backdrop-blur-md supports-[backdrop-filter]:bg-background/60 transition-shadow duration-200">
             <div className="flex h-12 sm:h-14 items-center px-2 sm:px-4 gap-2 sm:gap-3 justify-between">
               <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-                <SidebarTrigger className="hover:bg-accent/50 active:scale-95 transition-all" />
                 <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
                   <img 
                     src={plnIconPlusLogo} 
