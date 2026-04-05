@@ -1605,6 +1605,57 @@ export default function Dashboard() {
           </div>
         </DialogContent>
       </Dialog>
+      {/* Region Detail Dialog */}
+      <Dialog open={regionDialogOpen} onOpenChange={setRegionDialogOpen}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-hidden flex flex-col">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-sm sm:text-base">
+              🗺️ Incident Region: {selectedRegion}
+              <Badge variant="secondary" className="text-[10px]">{selectedRegionTickets.length} tiket</Badge>
+            </DialogTitle>
+          </DialogHeader>
+          {(() => {
+            const resolved = selectedRegionTickets.filter(t => t.status === "Resolved").length;
+            const critical = selectedRegionTickets.filter(t => t.status === "Critical").length;
+            const pending = selectedRegionTickets.length - resolved - critical;
+            return (
+              <div className="flex items-center gap-3 text-xs pb-2 border-b">
+                <span className="flex items-center gap-1 text-success font-medium">✅ {resolved} Resolved</span>
+                <span className="flex items-center gap-1 text-destructive font-medium">🔴 {critical} Critical</span>
+                <span className="flex items-center gap-1 text-warning font-medium">⏳ {pending} Pending</span>
+              </div>
+            );
+          })()}
+          <div className="overflow-auto flex-1 -mx-6 px-6">
+            <Table>
+              <TableHeader>
+                <TableRow className="text-[10px] sm:text-xs">
+                  <TableHead className="py-1.5">Ticket ID</TableHead>
+                  <TableHead className="py-1.5">Hostname</TableHead>
+                  <TableHead className="py-1.5">Kendala</TableHead>
+                  <TableHead className="py-1.5">Status</TableHead>
+                  <TableHead className="py-1.5">Tanggal</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {selectedRegionTickets.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={5} className="text-center text-muted-foreground py-8 text-xs">Tidak ada incident</TableCell>
+                  </TableRow>
+                ) : selectedRegionTickets.map((t) => (
+                  <TableRow key={t.id} className="text-[10px] sm:text-xs">
+                    <TableCell className="py-1.5 font-mono text-[9px]">{t.ticketId}</TableCell>
+                    <TableCell className="py-1.5 font-medium truncate max-w-[120px]">{t.hostname}</TableCell>
+                    <TableCell className="py-1.5">{t.constraint}</TableCell>
+                    <TableCell className="py-1.5"><StatusBadge status={t.status} /></TableCell>
+                    <TableCell className="py-1.5 tabular-nums text-muted-foreground">{new Date(t.createdISO).toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "2-digit" })}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
