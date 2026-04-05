@@ -466,22 +466,22 @@ export function UserManagement() {
                     <SelectContent>
                       <SelectItem value="admin">
                         <div className="flex items-center gap-1.5 text-xs">
-                          <Shield className="h-3 w-3 text-primary" /> Admin
+                          <span>🕵️</span> Admin
                         </div>
                       </SelectItem>
                       <SelectItem value="noc">
                         <div className="flex items-center gap-1.5 text-xs">
-                          <User className="h-3 w-3 text-muted-foreground" /> NOC
+                          <span>🧑‍💼</span> NOC
                         </div>
                       </SelectItem>
                       <SelectItem value="reviewer">
                         <div className="flex items-center gap-1.5 text-xs">
-                          <Users className="h-3 w-3 text-amber-500" /> Reviewer
+                          <span>👨‍💻</span> Reviewer
                         </div>
                       </SelectItem>
                       <SelectItem value="intern">
                         <div className="flex items-center gap-1.5 text-xs">
-                          <User className="h-3 w-3 text-emerald-500" /> Intern
+                          <span>🧑‍🏫</span> Intern
                         </div>
                       </SelectItem>
                     </SelectContent>
@@ -667,22 +667,22 @@ export function UserManagement() {
                         <SelectContent>
                           <SelectItem value="admin">
                             <div className="flex items-center gap-1.5 text-xs">
-                              <Shield className="h-3 w-3 text-primary" /> Admin
+                              <span>🕵️</span> Admin
                             </div>
                           </SelectItem>
                           <SelectItem value="noc">
                             <div className="flex items-center gap-1.5 text-xs">
-                              <User className="h-3 w-3 text-muted-foreground" /> NOC
+                              <span>🧑‍💼</span> NOC
                             </div>
                           </SelectItem>
                           <SelectItem value="reviewer">
                             <div className="flex items-center gap-1.5 text-xs">
-                              <Users className="h-3 w-3 text-amber-500" /> Reviewer
+                              <span>👨‍💻</span> Reviewer
                             </div>
                           </SelectItem>
                           <SelectItem value="intern">
                             <div className="flex items-center gap-1.5 text-xs">
-                              <User className="h-3 w-3 text-emerald-500" /> Intern
+                              <span>🧑‍🏫</span> Intern
                             </div>
                           </SelectItem>
                         </SelectContent>
@@ -739,44 +739,59 @@ export function UserManagement() {
         )}
 
         {/* Role Legend */}
-        <div className="mt-6 p-4 bg-muted/50 rounded-lg">
-          <p className="text-xs font-medium text-muted-foreground mb-3">Keterangan Role:</p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div className="flex items-start gap-2">
-              <Badge variant="default" className="mt-0.5">
-                <Shield className="h-3 w-3 mr-1" />
-                Admin
+        <div className="mt-6 p-4 bg-muted/50 rounded-lg space-y-4">
+          <p className="text-xs font-semibold text-muted-foreground">Keterangan Role & Akses:</p>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            {/* Admin */}
+            <div className="space-y-1.5 p-3 rounded-md border bg-card">
+              <Badge variant="default" className="mb-1">
+                <span className="mr-1">🕵️</span> Admin
               </Badge>
-              <span className="text-xs text-muted-foreground">
-                Akses penuh: dapat menghapus tiket, laporan shift, dan mengelola user
-              </span>
+              <div className="flex flex-wrap gap-1">
+                {["🖥️ Dashboard","🎫 Incident","👥 Team","🗂️ AKV","📍 FAT","📦 FDT","📟 OLT","🔗 UPE","🛰 BNG","📖 Configure","📝 Report","🛠 Settings"].map(m => (
+                  <span key={m} className="text-[10px] bg-primary/10 text-primary rounded px-1.5 py-0.5">{m}</span>
+                ))}
+              </div>
+              <p className="text-[10px] text-muted-foreground">🛠 Settings: Full Akses</p>
             </div>
-            <div className="flex items-start gap-2">
-              <Badge variant="secondary" className="mt-0.5">
-                <User className="h-3 w-3 mr-1" />
-                NOC
+
+            {/* NOC */}
+            <div className="space-y-1.5 p-3 rounded-md border bg-card">
+              <Badge variant="secondary" className="mb-1">
+                <span className="mr-1">🧑‍💼</span> NOC
               </Badge>
-              <span className="text-xs text-muted-foreground">
-                Akses standar: dapat membuat dan mengedit tiket & laporan
-              </span>
+              <div className="flex flex-wrap gap-1">
+                {["🖥️ Dashboard","🎫 Incident","👥 Team","🗂️ AKV","📍 FAT","📦 FDT","📟 OLT","🔗 UPE","🛰 BNG","📖 Configure","📝 Report","🛠 Settings"].map(m => (
+                  <span key={m} className="text-[10px] bg-secondary/50 text-secondary-foreground rounded px-1.5 py-0.5">{m}</span>
+                ))}
+              </div>
+              <p className="text-[10px] text-muted-foreground">🛠 Settings: 📥 Import · 📊 History · 📌 Info</p>
             </div>
-            <div className="flex items-start gap-2">
-              <Badge variant="outline" className="mt-0.5 border-amber-500/50 text-amber-600">
-                <Users className="h-3 w-3 mr-1" />
-                Reviewer
+
+            {/* Intern */}
+            <div className="space-y-1.5 p-3 rounded-md border bg-card">
+              <Badge variant="outline" className="mb-1 border-emerald-500/50 text-emerald-600">
+                <span className="mr-1">🧑‍🏫</span> Intern
               </Badge>
-              <span className="text-xs text-muted-foreground">
-                Hanya lihat: tidak dapat membuat atau mengedit data (view only)
-              </span>
+              <div className="flex flex-wrap gap-1">
+                {["🖥️ Dashboard","🎫 Incident","👥 Team","🗂️ AKV","🛠 Settings"].map(m => (
+                  <span key={m} className="text-[10px] bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 rounded px-1.5 py-0.5">{m}</span>
+                ))}
+              </div>
+              <p className="text-[10px] text-muted-foreground">🛠 Settings: 📥 Import · 📌 Info</p>
             </div>
-            <div className="flex items-start gap-2">
-              <Badge variant="outline" className="mt-0.5 border-emerald-500/50 text-emerald-600">
-                <User className="h-3 w-3 mr-1" />
-                Intern
+
+            {/* Reviewer */}
+            <div className="space-y-1.5 p-3 rounded-md border bg-card">
+              <Badge variant="outline" className="mb-1 border-amber-500/50 text-amber-600">
+                <span className="mr-1">👨‍💻</span> Reviewer
               </Badge>
-              <span className="text-xs text-muted-foreground">
-                Akses terbatas: hanya Dashboard, Incident Management, dan List Team (view only)
-              </span>
+              <div className="flex flex-wrap gap-1">
+                {["🖥️ Dashboard","🎫 Incident","👥 Team","🗂️ AKV","📍 FAT","📦 FDT","📟 OLT","🔗 UPE","🛰 BNG","📖 Configure","📝 Report","🛠 Settings"].map(m => (
+                  <span key={m} className="text-[10px] bg-amber-500/10 text-amber-700 dark:text-amber-400 rounded px-1.5 py-0.5">{m}</span>
+                ))}
+              </div>
+              <p className="text-[10px] text-muted-foreground">🛠 Settings: 📥 Import · 📊 History · 📌 Info — <span className="font-medium">View Only</span></p>
             </div>
           </div>
         </div>
