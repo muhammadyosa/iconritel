@@ -200,8 +200,8 @@ export function AppSidebar() {
               <Tooltip delayDuration={0}>
                 <TooltipTrigger asChild>
                   <button onClick={toggleTheme} className="w-full flex justify-center">
-                    <div className="h-9 w-9 rounded-md flex items-center justify-center text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-foreground/10 transition-colors duration-150">
-                      <span className="text-sm">{theme === "dark" ? "☀️" : "🌙"}</span>
+                    <div className="h-9 w-9 rounded-lg flex items-center justify-center text-sidebar-foreground/50 hover:text-sidebar-primary hover:bg-sidebar-accent transition-colors duration-150">
+                       <span className="text-sm">{theme === "dark" ? "☀️" : "🌙"}</span>
                     </div>
                   </button>
                 </TooltipTrigger>
