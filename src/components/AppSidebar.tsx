@@ -217,10 +217,7 @@ export function AppSidebar() {
 
         {/* Menu Items */}
         <nav className={`flex-1 overflow-y-auto overflow-x-hidden scrollbar-hide ${collapsed ? "px-1.5 space-y-1" : "px-2 space-y-0.5"}`}>
-          {filteredMenuItems.map(renderMenuItem)}
-          {filteredMenuItems.length === 0 && !collapsed && (
-            <p className="text-xs text-sidebar-foreground/40 text-center py-4">No menu found</p>
-          )}
+          {visibleMenuItems.map(renderMenuItem)}
         </nav>
 
         {/* Footer */}
