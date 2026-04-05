@@ -753,7 +753,7 @@ export default function Dashboard() {
                     const totalAll = regionalIncidentData.reduce((s, r) => s + r.total, 0);
                     return (
                       <div className="flex items-center gap-2">
-                        <div className="w-[52px] h-[52px] sm:w-[60px] sm:h-[60px]">
+                        <div className="w-[52px] h-[52px] sm:w-[60px] sm:h-[60px] cursor-pointer" onClick={() => setRegionProportionOpen(true)} title="Klik untuk detail proporsi">
                           <ResponsiveContainer width="100%" height="100%">
                             <PieChart>
                               <Pie
