@@ -77,21 +77,21 @@ const MenuItem = memo(function MenuItem({
     <NavLink
       to={item.path}
       className={({ isActive }) =>
-        `flex items-center rounded-md transition-colors duration-150 ${
+        `flex items-center rounded-md transition-all duration-150 ${
           collapsed
-            ? "h-9 w-9 justify-center"
-            : "gap-2.5 px-2.5 py-2 w-full"
+            ? "h-9 w-9 justify-center hover:scale-110"
+            : "gap-2.5 px-2.5 py-2 w-full hover:translate-x-0.5"
         } ${
           isActive
-            ? "bg-sidebar-foreground/15 text-sidebar-foreground"
+            ? "bg-sidebar-foreground/15 text-sidebar-foreground shadow-sm"
             : "text-sidebar-foreground/70 hover:bg-sidebar-foreground/10 hover:text-sidebar-foreground"
         }`
       }
     >
-      <span className={`relative text-sm leading-none flex-shrink-0 ${collapsed ? "" : "w-5 text-center"}`}>
+      <span className={`relative text-sm leading-none flex-shrink-0 transition-transform duration-150 ${collapsed ? "" : "w-5 text-center"}`}>
         {item.emoji}
         {showBadge && collapsed && (
-          <span className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-destructive text-destructive-foreground text-[8px] font-bold flex items-center justify-center">
+          <span className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-destructive text-destructive-foreground text-[8px] font-bold flex items-center justify-center animate-pulse">
             {badgeCount}
           </span>
         )}
@@ -100,7 +100,7 @@ const MenuItem = memo(function MenuItem({
         <span className="text-[13px] truncate flex-1 text-left flex items-center gap-1.5">
           {item.title}
           {showBadge && (
-            <span className="h-4 min-w-4 px-1 rounded-full bg-destructive text-destructive-foreground text-[9px] font-bold flex items-center justify-center">
+            <span className="h-4 min-w-4 px-1 rounded-full bg-destructive text-destructive-foreground text-[9px] font-bold flex items-center justify-center animate-pulse">
               {badgeCount}
             </span>
           )}
