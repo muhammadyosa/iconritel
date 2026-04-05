@@ -44,14 +44,14 @@ All colors MUST be HSL.
 
     --radius: 0.5rem;
 
-    --sidebar-background: 220 30% 18%;
-    --sidebar-foreground: 220 20% 92%;
-    --sidebar-primary: 217 80% 62%;
+    --sidebar-background: 217 91% 35%;
+    --sidebar-foreground: 210 40% 98%;
+    --sidebar-primary: 217 91% 60%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 220 28% 24%;
+    --sidebar-accent: 217 91% 40%;
     --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 220 25% 26%;
-    --sidebar-ring: 217 80% 62%;
+    --sidebar-border: 217 91% 30%;
+    --sidebar-ring: 217 91% 60%;
 
     --gradient-primary: linear-gradient(135deg, hsl(217 91% 35%), hsl(217 91% 50%));
     --gradient-card: linear-gradient(to bottom right, hsl(0 0% 100%), hsl(210 40% 98%));
