@@ -212,7 +212,7 @@ export function AppSidebar() {
             ) : (
               <button
                 onClick={toggleTheme}
-                className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-md text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-foreground/10 transition-colors duration-150"
+                className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-sidebar-foreground/50 hover:text-sidebar-primary hover:bg-sidebar-accent transition-colors duration-150"
               >
                 <span className="text-sm flex-shrink-0">{theme === "dark" ? "☀️" : "🌙"}</span>
                 <span className="text-[13px] truncate">{theme === "dark" ? "Light Mode" : "Dark Mode"}</span>
