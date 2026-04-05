@@ -884,9 +884,6 @@ export default function Dashboard() {
           {/* NOC Statistik Incident */}
           <NOCStatistikIncident tickets={tickets} variant="noc" />
 
-          {/* Tier Incident OVER SLA */}
-          <DashboardTierOverSLA tickets={tickets} getTicketRegion={getTicketRegion} />
-
         </motion.div>
 
         {/* Right column: Report Shift + Recent Activity stacked */}
