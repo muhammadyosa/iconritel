@@ -142,7 +142,7 @@ export function AppSidebar() {
           <TooltipContent
             side="right"
             sideOffset={12}
-            className="bg-sidebar-background text-sidebar-foreground border-sidebar-border font-medium text-xs px-3 py-1.5 rounded-md shadow-lg"
+            className="bg-popover text-popover-foreground border font-medium text-xs px-3 py-1.5 rounded-md shadow-lg"
           >
             {item.emoji} {item.title}
             {showBadge && (
