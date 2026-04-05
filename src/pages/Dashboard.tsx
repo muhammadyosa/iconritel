@@ -1119,6 +1119,15 @@ export default function Dashboard() {
           </motion.div>
         )}
 
+        {/* NOC Statistik Incident */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.85 }}
+        >
+          <NOCStatistikIncident tickets={tickets} variant="noc" />
+        </motion.div>
+
         {/* Recent Activity - Admin Only */}
         {isAdmin && (
           <motion.div
