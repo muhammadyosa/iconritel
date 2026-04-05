@@ -116,6 +116,10 @@ const Report = () => {
   // User role for permission-based UI
   const { isAdmin } = useUserRole();
   
+  const [activeTab, setActiveTab] = useState("shift");
+  const setTabCb = useCallback((v: string) => setActiveTab(v), []);
+  useSidebarTabSync("/report", setTabCb);
+
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // State for SLA Report
