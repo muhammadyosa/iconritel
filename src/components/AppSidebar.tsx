@@ -83,8 +83,8 @@ const MenuItem = memo(function MenuItem({
             : "gap-2.5 px-2.5 py-2 w-full hover:translate-x-0.5"
         } ${
           isActive
-            ? "bg-sidebar-foreground/15 text-sidebar-foreground shadow-sm"
-            : "text-sidebar-foreground/70 hover:bg-sidebar-foreground/10 hover:text-sidebar-foreground"
+            ? "bg-white/20 text-white shadow-sm font-semibold"
+            : "text-white/80 hover:bg-white/10 hover:text-white"
         }`
       }
     >
