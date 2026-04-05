@@ -23,7 +23,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { LogOut, Shield, User, Users } from "lucide-react";
+import { LogOut } from "lucide-react";
 import { toast } from "sonner";
 
 export function UserMenu() {
