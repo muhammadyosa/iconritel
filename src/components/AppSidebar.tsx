@@ -177,7 +177,7 @@ export function AppSidebar() {
         {/* Menu */}
         {!collapsed && (
           <div className="px-3 pt-2 pb-0.5">
-            <span className="text-[10px] font-semibold uppercase tracking-wider text-sidebar-foreground/35">Menu</span>
+            <span className="text-[10px] font-semibold uppercase tracking-wider text-sidebar-foreground/40">Menu</span>
           </div>
         )}
 
