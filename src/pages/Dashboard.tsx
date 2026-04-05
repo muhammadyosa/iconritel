@@ -737,19 +737,42 @@ export default function Dashboard() {
             {/* Regional Office Summary — Modern Minimalist */}
             <Card className="overflow-hidden border">
               <CardHeader className="py-2.5 px-3 sm:px-4 border-b bg-muted/10">
-                <div className="flex items-center justify-between">
-                  <div>
+                <div className="flex items-center gap-3">
+                  <div className="flex-1 min-w-0">
                     <CardTitle className="text-xs sm:text-sm flex items-center gap-1.5">🗺️ Regional Office</CardTitle>
-                    <p className="text-[8px] sm:text-[9px] text-muted-foreground mt-0.5">Performa incident per wilayah</p>
+                    <p className="text-[8px] sm:text-[9px] text-muted-foreground mt-0.5">Klik region untuk detail incident</p>
                   </div>
+                  {/* Mini Donut Chart in header */}
                   {regionalIncidentData.length > 0 && (() => {
-                    const t = regionalIncidentData.reduce((s, r) => s + r.total, 0);
-                    const rv = regionalIncidentData.reduce((s, r) => s + r.resolved, 0);
-                    const rate = t > 0 ? Math.round((rv / t) * 100) : 0;
+                    const PIE_COLORS = [
+                      "hsl(217, 91%, 60%)", "hsl(142, 71%, 45%)", "hsl(38, 92%, 50%)",
+                      "hsl(0, 84%, 60%)", "hsl(262, 83%, 58%)", "hsl(180, 70%, 40%)",
+                    ];
+                    const totalAll = regionalIncidentData.reduce((s, r) => s + r.total, 0);
                     return (
-                      <div className="text-right">
-                        <div className="text-base sm:text-lg font-bold text-foreground leading-none tabular-nums">{t}</div>
-                        <div className={`text-[8px] sm:text-[9px] font-semibold tabular-nums ${rate >= 50 ? 'text-success' : rate >= 20 ? 'text-warning' : 'text-destructive'}`}>{rate}% resolved</div>
+                      <div className="flex items-center gap-2">
+                        <div className="w-[52px] h-[52px] sm:w-[60px] sm:h-[60px]">
+                          <ResponsiveContainer width="100%" height="100%">
+                            <PieChart>
+                              <Pie
+                                data={regionalIncidentData.map((r, i) => ({ name: r.region, value: r.total, fill: PIE_COLORS[i % PIE_COLORS.length] }))}
+                                cx="50%" cy="50%"
+                                innerRadius="55%" outerRadius="90%"
+                                dataKey="value"
+                                strokeWidth={1}
+                                stroke="hsl(var(--background))"
+                              >
+                                {regionalIncidentData.map((_, i) => (
+                                  <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
+                                ))}
+                              </Pie>
+                            </PieChart>
+                          </ResponsiveContainer>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-base sm:text-lg font-bold text-foreground leading-none tabular-nums">{totalAll}</div>
+                          <div className="text-[8px] sm:text-[9px] text-muted-foreground">{regionalIncidentData.length} Region</div>
+                        </div>
                       </div>
                     );
                   })()}
@@ -763,16 +786,12 @@ export default function Dashboard() {
                   const totalResolved = regionalIncidentData.reduce((s, r) => s + r.resolved, 0);
                   const totalCritical = regionalIncidentData.reduce((s, r) => s + r.critical, 0);
                   const totalPendingAll = regionalIncidentData.reduce((s, r) => s + r.pending, 0);
-                  const resRate = totalAll > 0 ? Math.round((totalResolved / totalAll) * 100) : 0;
                   const PIE_COLORS = [
                     "hsl(217, 91%, 60%)", "hsl(142, 71%, 45%)", "hsl(38, 92%, 50%)",
                     "hsl(0, 84%, 60%)", "hsl(262, 83%, 58%)", "hsl(180, 70%, 40%)",
                   ];
                   const maxRegionTotal = Math.max(...regionalIncidentData.map(r => r.total), 1);
-
-                  const bestRegion = [...regionalIncidentData].sort((a, b) => {
-                    return (b.total > 0 ? b.resolved / b.total : 0) - (a.total > 0 ? a.resolved / a.total : 0);
-                  })[0];
+                  const bestRegion = [...regionalIncidentData].sort((a, b) => (b.total > 0 ? b.resolved / b.total : 0) - (a.total > 0 ? a.resolved / a.total : 0))[0];
                   const worstRegion = [...regionalIncidentData].sort((a, b) => b.critical - a.critical)[0];
 
                   return (
@@ -793,11 +812,10 @@ export default function Dashboard() {
                         </div>
                       </div>
 
-                      {/* Region cards — each region as a mini row card */}
+                      {/* Region cards — clickable */}
                       <div className="space-y-1.5">
                         {regionalIncidentData.map((r, i) => {
                           const rRate = r.total > 0 ? Math.round((r.resolved / r.total) * 100) : 0;
-                          const barW = maxRegionTotal > 0 ? (r.total / maxRegionTotal) * 100 : 0;
                           const color = PIE_COLORS[i % PIE_COLORS.length];
                           return (
                             <motion.div
@@ -805,9 +823,9 @@ export default function Dashboard() {
                               initial={{ opacity: 0, x: -8 }}
                               animate={{ opacity: 1, x: 0 }}
                               transition={{ duration: 0.3, delay: i * 0.06 }}
-                              className="group rounded-lg border border-border/30 bg-muted/5 hover:bg-muted/15 transition-all p-2 cursor-default"
+                              className="group rounded-lg border border-border/30 bg-muted/5 hover:bg-muted/20 hover:border-primary/30 transition-all p-2 cursor-pointer active:scale-[0.98]"
+                              onClick={() => { setSelectedRegion(r.region); setRegionDialogOpen(true); }}
                             >
-                              {/* Row 1: Name + total + rate */}
                               <div className="flex items-center justify-between mb-1">
                                 <div className="flex items-center gap-1.5">
                                   <div className="w-2 h-2 rounded-sm shrink-0" style={{ backgroundColor: color }} />
@@ -816,15 +834,14 @@ export default function Dashboard() {
                                 <div className="flex items-center gap-2">
                                   <span className={`text-[8px] sm:text-[9px] font-bold tabular-nums ${rRate >= 50 ? 'text-success' : rRate >= 20 ? 'text-warning' : 'text-destructive'}`}>{rRate}%</span>
                                   <span className="text-[10px] sm:text-xs font-bold tabular-nums text-foreground">{r.total}</span>
+                                  <ExternalLink className="w-2.5 h-2.5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
                                 </div>
                               </div>
-                              {/* Row 2: Segmented bar */}
                               <div className="w-full h-1.5 rounded-full bg-muted/30 overflow-hidden flex mb-1">
                                 <div className="h-full bg-success transition-all duration-500" style={{ width: `${r.total > 0 ? (r.resolved / r.total) * 100 : 0}%` }} />
                                 <div className="h-full bg-warning transition-all duration-500" style={{ width: `${r.total > 0 ? (r.pending / r.total) * 100 : 0}%` }} />
                                 <div className="h-full bg-destructive transition-all duration-500" style={{ width: `${r.total > 0 ? (r.critical / r.total) * 100 : 0}%` }} />
                               </div>
-                              {/* Row 3: Status breakdown */}
                               <div className="flex items-center gap-3 text-[7px] sm:text-[8px] text-muted-foreground">
                                 <span className="text-success tabular-nums">✅ {r.resolved}</span>
                                 <span className="text-destructive tabular-nums">🔴 {r.critical}</span>
