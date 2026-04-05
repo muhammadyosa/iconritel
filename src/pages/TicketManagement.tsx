@@ -1050,6 +1050,8 @@ export default function TicketManagement() {
           isReviewer={isReviewer}
           updateTicket={updateTicket}
           deleteTicket={deleteTicket}
+          logActivity={logActivity}
+          currentUserName={profile?.display_name || user?.email?.split("@")[0] || "Unknown"}
           open={!!selectedTicketForDetail}
           onOpenChange={(open) => { if (!open) setSelectedTicketForDetail(null); }}
         />
