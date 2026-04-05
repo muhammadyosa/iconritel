@@ -23,7 +23,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { LogOut, Shield, User, Users } from "lucide-react";
+import { LogOut } from "lucide-react";
 import { toast } from "sonner";
 
 export function UserMenu() {
@@ -80,22 +80,22 @@ export function UserMenu() {
           <DropdownMenuItem className="gap-2 cursor-default" disabled>
             {isAdmin ? (
               <>
-                <Shield className="h-4 w-4 text-primary" />
+                <span className="text-base">🕵️</span>
                 <Badge variant="default" className="text-xs">Admin</Badge>
               </>
             ) : isReviewer ? (
               <>
-                <Users className="h-4 w-4 text-amber-500" />
+                <span className="text-base">👨‍💻</span>
                 <Badge variant="outline" className="text-xs border-amber-500/50 text-amber-600">Reviewer</Badge>
               </>
             ) : isIntern ? (
               <>
-                <User className="h-4 w-4 text-emerald-500" />
+                <span className="text-base">🧑‍🏫</span>
                 <Badge variant="outline" className="text-xs border-emerald-500/50 text-emerald-600">Intern</Badge>
               </>
             ) : (
               <>
-                <User className="h-4 w-4 text-muted-foreground" />
+                <span className="text-base">🧑‍💼</span>
                 <Badge variant="secondary" className="text-xs">NOC</Badge>
               </>
             )}
