@@ -9,6 +9,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarTrigger,
   useSidebar,
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
@@ -174,13 +175,14 @@ export function AppSidebar() {
 
         {/* Footer Section */}
         <div className="mt-auto border-t border-sidebar-border flex-shrink-0">
-          <div className={`${collapsed ? "py-2 px-1 flex justify-center" : "p-3"}`}>
+          <div className={`${collapsed ? "py-2 px-1 flex flex-col items-center gap-1" : "p-3 flex items-center gap-2"}`}>
+            <SidebarTrigger className={`text-sidebar-foreground hover:bg-sidebar-accent active:scale-95 transition-all ${collapsed ? "h-8 w-8 min-w-8" : "h-9 w-9 min-w-9"}`} />
             <Button
               variant="ghost"
               size="icon"
               onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
               className={`text-sidebar-foreground hover:bg-sidebar-accent ${
-                collapsed ? "h-8 w-8 min-w-8" : "h-9 w-full justify-start gap-3 px-2"
+                collapsed ? "h-8 w-8 min-w-8" : "h-9 flex-1 justify-start gap-3 px-2"
               }`}
             >
               <span className="text-sm leading-none flex-shrink-0">
