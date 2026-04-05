@@ -987,7 +987,7 @@ export default function TicketManagement() {
                   <TableBody>
                     {tickets.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={8} className="text-center text-muted-foreground text-[8px] sm:text-[9px] py-2">
+                        <TableCell colSpan={9} className="text-center text-muted-foreground text-[8px] sm:text-[9px] py-2">
                           Belum ada incident
                         </TableCell>
                       </TableRow>
