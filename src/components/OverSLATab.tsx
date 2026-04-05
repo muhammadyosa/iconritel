@@ -18,9 +18,12 @@ import { DurationCell } from "@/components/DurationCell";
 import { RegionBadge } from "@/components/RegionBadge";
 import { AlertTriangle, Clock, Search, Timer, TrendingUp, ChevronRight } from "lucide-react";
 import {
-  PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend,
+  PieChart, Pie, Cell as RechartsCell, ResponsiveContainer, Tooltip, Legend,
   BarChart, Bar, XAxis, YAxis, CartesianGrid,
 } from "recharts";
+import {
+  ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig,
+} from "@/components/ui/chart";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
