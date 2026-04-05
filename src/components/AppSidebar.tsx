@@ -151,7 +151,7 @@ export function AppSidebar() {
     >
       <SidebarContent className="flex flex-col overflow-x-hidden bg-sidebar-background border-r border-sidebar-border">
         {/* Logo */}
-        <div className={`flex-shrink-0 border-b border-sidebar-foreground/10 ${collapsed ? "py-3 px-1.5" : "p-3"}`}>
+        <div className={`flex-shrink-0 border-b border-sidebar-border ${collapsed ? "py-3 px-1.5" : "p-3"}`}>
           {!collapsed ? (
             <div className="flex items-center gap-2.5">
               <img src={iconnetLogo} alt="Iconnet" className="h-8 w-8 object-contain flex-shrink-0" />
