@@ -172,7 +172,7 @@ export function AppSidebar() {
         <div className={`flex-shrink-0 border-b border-sidebar-foreground/10 ${collapsed ? "py-4 px-2" : "p-4"}`}>
           {!collapsed ? (
             <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-xl bg-sidebar-foreground/10 flex items-center justify-center flex-shrink-0 backdrop-blur-sm">
+              <div className="h-10 w-10 rounded-xl flex items-center justify-center flex-shrink-0">
                 <img
                   src={iconnetLogo}
                   alt="Iconnet"
@@ -188,7 +188,7 @@ export function AppSidebar() {
             <Tooltip delayDuration={0}>
               <TooltipTrigger asChild>
                 <div className="flex justify-center">
-                  <div className="h-9 w-9 rounded-xl bg-sidebar-foreground/10 flex items-center justify-center backdrop-blur-sm">
+                  <div className="h-9 w-9 rounded-xl flex items-center justify-center">
                     <img
                       src={iconnetLogo}
                       alt="Iconnet"
