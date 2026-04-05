@@ -723,188 +723,124 @@ export default function Dashboard() {
       >
           {/* Proporsi Incident + Tier OVER SLA side by side */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {/* Regional Office Summary */}
+            {/* Regional Office Summary — Modern Minimalist */}
             <Card className="overflow-hidden border">
-              <CardHeader className="py-2 px-3 sm:px-4 border-b bg-muted/20">
-                <CardTitle className="text-xs sm:text-sm flex items-center gap-2">🗺️ Regional Office</CardTitle>
-                <p className="text-[9px] sm:text-[10px] text-muted-foreground">Distribusi & performa incident per wilayah</p>
+              <CardHeader className="py-2.5 px-3 sm:px-4 border-b bg-muted/10">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle className="text-xs sm:text-sm flex items-center gap-1.5">🗺️ Regional Office</CardTitle>
+                    <p className="text-[8px] sm:text-[9px] text-muted-foreground mt-0.5">Performa incident per wilayah</p>
+                  </div>
+                  {regionalIncidentData.length > 0 && (() => {
+                    const t = regionalIncidentData.reduce((s, r) => s + r.total, 0);
+                    const rv = regionalIncidentData.reduce((s, r) => s + r.resolved, 0);
+                    const rate = t > 0 ? Math.round((rv / t) * 100) : 0;
+                    return (
+                      <div className="text-right">
+                        <div className="text-base sm:text-lg font-bold text-foreground leading-none tabular-nums">{t}</div>
+                        <div className={`text-[8px] sm:text-[9px] font-semibold tabular-nums ${rate >= 50 ? 'text-success' : rate >= 20 ? 'text-warning' : 'text-destructive'}`}>{rate}% resolved</div>
+                      </div>
+                    );
+                  })()}
+                </div>
               </CardHeader>
-              <CardContent className="p-2 sm:p-3">
+              <CardContent className="p-2.5 sm:p-3">
                 {regionalIncidentData.length === 0 ? (
-                  <p className="text-sm text-muted-foreground text-center py-8">Belum ada data region</p>
+                  <p className="text-xs text-muted-foreground text-center py-6">Belum ada data region</p>
                 ) : (() => {
                   const totalAll = regionalIncidentData.reduce((s, r) => s + r.total, 0);
                   const totalResolved = regionalIncidentData.reduce((s, r) => s + r.resolved, 0);
                   const totalCritical = regionalIncidentData.reduce((s, r) => s + r.critical, 0);
                   const totalPendingAll = regionalIncidentData.reduce((s, r) => s + r.pending, 0);
-                  const totalActive = totalCritical + totalPendingAll;
                   const resRate = totalAll > 0 ? Math.round((totalResolved / totalAll) * 100) : 0;
-                  const totalRitel = regionalIncidentData.reduce((s, r) => s + r.ritel, 0);
-                  const totalFeeder = regionalIncidentData.reduce((s, r) => s + r.feeder, 0);
-                  const avgPerRegion = regionalIncidentData.length > 0 ? Math.round(totalAll / regionalIncidentData.length) : 0;
                   const PIE_COLORS = [
-                    "hsl(217, 91%, 45%)", "hsl(142, 76%, 36%)", "hsl(38, 92%, 50%)",
-                    "hsl(0, 84%, 55%)", "hsl(262, 80%, 55%)", "hsl(180, 70%, 40%)",
-                    "hsl(330, 75%, 50%)", "hsl(25, 95%, 53%)", "hsl(195, 85%, 45%)", "hsl(55, 80%, 45%)",
+                    "hsl(217, 91%, 60%)", "hsl(142, 71%, 45%)", "hsl(38, 92%, 50%)",
+                    "hsl(0, 84%, 60%)", "hsl(262, 83%, 58%)", "hsl(180, 70%, 40%)",
                   ];
-
-                  const chartData = regionalIncidentData.map((r, i) => ({
-                    name: r.region.length > 5 ? r.region.slice(0, 4) + ".." : r.region,
-                    fullName: r.region,
-                    resolved: r.resolved,
-                    critical: r.critical,
-                    pending: r.pending,
-                    total: r.total,
-                    fill: PIE_COLORS[i % PIE_COLORS.length],
-                  }));
-
-                  const pieData = regionalIncidentData.map((r, i) => ({
-                    name: r.region,
-                    value: r.total,
-                    fill: PIE_COLORS[i % PIE_COLORS.length],
-                  }));
-
-                  const barChartConfig: ChartConfig = {
-                    resolved: { label: "Resolved", color: "hsl(142, 76%, 36%)" },
-                    critical: { label: "Critical", color: "hsl(0, 84%, 55%)" },
-                    pending: { label: "Pending", color: "hsl(38, 92%, 50%)" },
-                  };
+                  const maxRegionTotal = Math.max(...regionalIncidentData.map(r => r.total), 1);
 
                   const bestRegion = [...regionalIncidentData].sort((a, b) => {
-                    const rA = a.total > 0 ? a.resolved / a.total : 0;
-                    const rB = b.total > 0 ? b.resolved / b.total : 0;
-                    return rB - rA;
+                    return (b.total > 0 ? b.resolved / b.total : 0) - (a.total > 0 ? a.resolved / a.total : 0);
                   })[0];
                   const worstRegion = [...regionalIncidentData].sort((a, b) => b.critical - a.critical)[0];
-                  const topRegion = regionalIncidentData[0];
-
-                  const inProgressAll = regionalIncidentData.reduce((s, r) => s + (r.total - r.resolved - r.critical - r.pending), 0);
 
                   return (
-                    <div className="space-y-2.5">
-                      {/* Compact KPI strip */}
-                      <div className="flex items-center gap-1.5 flex-wrap">
-                        {[
-                          { val: totalAll, label: "Total", cls: "text-foreground bg-muted/40" },
-                          { val: totalResolved, label: "Resolved", cls: "text-success bg-success/10" },
-                          { val: totalCritical, label: "Critical", cls: "text-destructive bg-destructive/10" },
-                          { val: totalPendingAll, label: "Pending", cls: "text-warning bg-warning/10" },
-                        ].map(s => (
-                          <div key={s.label} className={`flex items-center gap-1 px-1.5 py-0.5 rounded-md ${s.cls}`}>
-                            <span className="text-[9px] sm:text-[10px] font-bold tabular-nums">{s.val}</span>
-                            <span className="text-[6px] sm:text-[7px] opacity-70">{s.label}</span>
-                          </div>
-                        ))}
-                        <div className="ml-auto flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-success/10">
-                          <span className="text-[9px] sm:text-[10px] font-bold text-success tabular-nums">{resRate}%</span>
-                          <span className="text-[6px] sm:text-[7px] text-success/70">Rate</span>
+                    <div className="space-y-3">
+                      {/* Global progress bar with legend */}
+                      <div className="space-y-1">
+                        <div className="w-full h-2 rounded-full bg-muted/30 overflow-hidden flex">
+                          <motion.div className="h-full bg-success rounded-l-full" initial={{ width: 0 }} animate={{ width: `${totalAll > 0 ? (totalResolved / totalAll) * 100 : 0}%` }} transition={{ duration: 0.8 }} />
+                          <motion.div className="h-full bg-warning" initial={{ width: 0 }} animate={{ width: `${totalAll > 0 ? (totalPendingAll / totalAll) * 100 : 0}%` }} transition={{ duration: 0.8, delay: 0.15 }} />
+                          <motion.div className="h-full bg-destructive rounded-r-full" initial={{ width: 0 }} animate={{ width: `${totalAll > 0 ? (totalCritical / totalAll) * 100 : 0}%` }} transition={{ duration: 0.8, delay: 0.3 }} />
                         </div>
-                      </div>
-
-                      {/* Overall resolution bar */}
-                      <div>
-                        <div className="w-full h-1.5 rounded-full bg-muted/40 overflow-hidden flex">
-                          <motion.div className="h-full bg-success" initial={{ width: 0 }} animate={{ width: `${totalAll > 0 ? (totalResolved / totalAll) * 100 : 0}%` }} transition={{ duration: 0.6 }} />
-                          <motion.div className="h-full bg-warning" initial={{ width: 0 }} animate={{ width: `${totalAll > 0 ? (totalPendingAll / totalAll) * 100 : 0}%` }} transition={{ duration: 0.6, delay: 0.2 }} />
-                          <motion.div className="h-full bg-destructive" initial={{ width: 0 }} animate={{ width: `${totalAll > 0 ? (totalCritical / totalAll) * 100 : 0}%` }} transition={{ duration: 0.6, delay: 0.4 }} />
-                        </div>
-                      </div>
-
-                      {/* Donut + Stacked Bar — compact */}
-                      <div className="grid grid-cols-5 gap-1.5">
-                        <div className="col-span-2 flex flex-col items-center justify-center">
-                          <div className="relative w-full h-[80px] sm:h-[95px]">
-                            <ResponsiveContainer width="100%" height="100%">
-                              <PieChart>
-                                <Pie data={pieData} cx="50%" cy="50%" innerRadius="48%" outerRadius="82%" dataKey="value" strokeWidth={1} stroke="hsl(var(--background))">
-                                  {pieData.map((entry, idx) => <Cell key={idx} fill={entry.fill} />)}
-                                </Pie>
-                                <Tooltip content={({ active, payload }) => {
-                                  if (!active || !payload?.length) return null;
-                                  const d = payload[0];
-                                  return <div className="rounded border bg-background px-1.5 py-0.5 text-[8px] shadow-md"><b>{d.name}</b>: {String(d.value)}</div>;
-                                }} />
-                              </PieChart>
-                            </ResponsiveContainer>
-                            <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                              <span className="text-xs sm:text-sm font-bold text-foreground leading-none">{totalAll}</span>
-                              <span className="text-[5px] sm:text-[6px] text-muted-foreground">incident</span>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="col-span-3">
-                          <ChartContainer config={barChartConfig} className="h-[80px] sm:h-[95px] w-full">
-                            <BarChart data={chartData} margin={{ top: 2, right: 2, left: -14, bottom: 0 }}>
-                              <CartesianGrid strokeDasharray="3 3" className="stroke-muted/20" vertical={false} />
-                              <XAxis dataKey="name" tick={{ fontSize: 6, fill: "hsl(var(--muted-foreground))" }} tickLine={false} axisLine={false} interval={0} />
-                              <YAxis tick={{ fontSize: 5 }} tickLine={false} axisLine={false} allowDecimals={false} width={14} hide />
-                              <ChartTooltip content={({ active, payload }) => {
-                                if (!active || !payload?.length) return null;
-                                const d = payload[0]?.payload;
-                                return (
-                                  <div className="rounded border bg-background px-2 py-1 text-[8px] shadow-md space-y-0.5">
-                                    <div className="font-semibold">{d?.fullName}</div>
-                                    <div className="text-success">✅ {d?.resolved}</div>
-                                    <div className="text-destructive">🔴 {d?.critical}</div>
-                                    <div className="text-warning">⏳ {d?.pending}</div>
-                                  </div>
-                                );
-                              }} />
-                              <Bar dataKey="resolved" stackId="a" fill="hsl(142, 76%, 36%)" />
-                              <Bar dataKey="pending" stackId="a" fill="hsl(38, 92%, 50%)" />
-                              <Bar dataKey="critical" stackId="a" fill="hsl(0, 84%, 55%)" radius={[2, 2, 0, 0]} />
-                            </BarChart>
-                          </ChartContainer>
-                          <div className="flex items-center justify-center gap-2 mt-0.5">
-                            {[
-                              { label: "Resolved", color: "hsl(142, 76%, 36%)" },
-                              { label: "Critical", color: "hsl(0, 84%, 55%)" },
-                              { label: "Pending", color: "hsl(38, 92%, 50%)" },
-                            ].map(l => (
-                              <div key={l.label} className="flex items-center gap-0.5 text-[5px] sm:text-[6px] text-muted-foreground">
-                                <div className="w-1 h-1 rounded-[1px]" style={{ backgroundColor: l.color }} />
-                                {l.label}
-                              </div>
-                            ))}
+                        <div className="flex items-center justify-between text-[7px] sm:text-[8px] text-muted-foreground">
+                          <div className="flex items-center gap-2.5">
+                            <span className="flex items-center gap-1"><span className="inline-block w-1.5 h-1.5 rounded-full bg-success" />{totalResolved} Resolved</span>
+                            <span className="flex items-center gap-1"><span className="inline-block w-1.5 h-1.5 rounded-full bg-warning" />{totalPendingAll} Pending</span>
+                            <span className="flex items-center gap-1"><span className="inline-block w-1.5 h-1.5 rounded-full bg-destructive" />{totalCritical} Critical</span>
                           </div>
                         </div>
                       </div>
 
-                      {/* Region list — clean rows */}
-                      <div className="space-y-px max-h-[130px] sm:max-h-[150px] overflow-y-auto">
+                      {/* Region cards — each region as a mini row card */}
+                      <div className="space-y-1.5">
                         {regionalIncidentData.map((r, i) => {
                           const rRate = r.total > 0 ? Math.round((r.resolved / r.total) * 100) : 0;
-                          const maxTotal = regionalIncidentData[0]?.total || 1;
+                          const barW = maxRegionTotal > 0 ? (r.total / maxRegionTotal) * 100 : 0;
+                          const color = PIE_COLORS[i % PIE_COLORS.length];
                           return (
-                            <div key={r.region} className="group flex items-center gap-1.5 px-1 py-[3px] rounded hover:bg-muted/20 transition-colors cursor-default">
-                              <div className="w-1 h-1 rounded-full shrink-0" style={{ backgroundColor: PIE_COLORS[i % PIE_COLORS.length] }} />
-                              <span className="text-[7px] sm:text-[8px] font-medium truncate w-[70px] sm:w-[90px] shrink-0">{r.region}</span>
-                              <div className="flex-1 h-1 rounded-full bg-muted/30 overflow-hidden flex">
-                                <div className="h-full bg-success transition-all" style={{ width: `${r.total > 0 ? (r.resolved / r.total) * 100 : 0}%` }} />
-                                <div className="h-full bg-warning transition-all" style={{ width: `${r.total > 0 ? (r.pending / r.total) * 100 : 0}%` }} />
-                                <div className="h-full bg-destructive transition-all" style={{ width: `${r.total > 0 ? (r.critical / r.total) * 100 : 0}%` }} />
+                            <motion.div
+                              key={r.region}
+                              initial={{ opacity: 0, x: -8 }}
+                              animate={{ opacity: 1, x: 0 }}
+                              transition={{ duration: 0.3, delay: i * 0.06 }}
+                              className="group rounded-lg border border-border/30 bg-muted/5 hover:bg-muted/15 transition-all p-2 cursor-default"
+                            >
+                              {/* Row 1: Name + total + rate */}
+                              <div className="flex items-center justify-between mb-1">
+                                <div className="flex items-center gap-1.5">
+                                  <div className="w-2 h-2 rounded-sm shrink-0" style={{ backgroundColor: color }} />
+                                  <span className="text-[9px] sm:text-[10px] font-semibold truncate">{r.region}</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <span className={`text-[8px] sm:text-[9px] font-bold tabular-nums ${rRate >= 50 ? 'text-success' : rRate >= 20 ? 'text-warning' : 'text-destructive'}`}>{rRate}%</span>
+                                  <span className="text-[10px] sm:text-xs font-bold tabular-nums text-foreground">{r.total}</span>
+                                </div>
                               </div>
-                              <span className="text-[6px] sm:text-[7px] text-success font-medium tabular-nums w-5 text-right">{rRate}%</span>
-                              <span className="text-[7px] sm:text-[8px] font-bold tabular-nums w-5 text-right">{r.total}</span>
-                              <div className="hidden sm:flex items-center gap-0.5 text-[6px] text-muted-foreground shrink-0">
-                                <span className="text-success">{r.resolved}</span>
-                                <span>/</span>
-                                <span className="text-destructive">{r.critical}</span>
-                                <span>/</span>
-                                <span className="text-warning">{r.pending}</span>
+                              {/* Row 2: Segmented bar */}
+                              <div className="w-full h-1.5 rounded-full bg-muted/30 overflow-hidden flex mb-1">
+                                <div className="h-full bg-success transition-all duration-500" style={{ width: `${r.total > 0 ? (r.resolved / r.total) * 100 : 0}%` }} />
+                                <div className="h-full bg-warning transition-all duration-500" style={{ width: `${r.total > 0 ? (r.pending / r.total) * 100 : 0}%` }} />
+                                <div className="h-full bg-destructive transition-all duration-500" style={{ width: `${r.total > 0 ? (r.critical / r.total) * 100 : 0}%` }} />
                               </div>
-                            </div>
+                              {/* Row 3: Status breakdown */}
+                              <div className="flex items-center gap-3 text-[7px] sm:text-[8px] text-muted-foreground">
+                                <span className="text-success tabular-nums">✅ {r.resolved}</span>
+                                <span className="text-destructive tabular-nums">🔴 {r.critical}</span>
+                                <span className="text-warning tabular-nums">⏳ {r.pending}</span>
+                                <span className="ml-auto text-[6px] sm:text-[7px] opacity-60 tabular-nums">{totalAll > 0 ? Math.round((r.total / totalAll) * 100) : 0}% total</span>
+                              </div>
+                            </motion.div>
                           );
                         })}
                       </div>
 
-                      {/* Minimal insights */}
-                      <div className="flex items-center gap-1.5 pt-1.5 border-t border-border/20 text-[6px] sm:text-[7px] text-muted-foreground flex-wrap">
-                        <span className="flex items-center gap-0.5">🏅 <b className="text-success">{bestRegion?.region}</b> {bestRegion?.total > 0 ? Math.round((bestRegion.resolved / bestRegion.total) * 100) : 0}%</span>
-                        <span className="text-border">•</span>
-                        <span className="flex items-center gap-0.5">⚠️ <b className="text-destructive">{worstRegion?.region}</b> ({worstRegion?.critical})</span>
-                        <span className="text-border">•</span>
-                        <span className="flex items-center gap-0.5">📊 <b className="text-primary">{topRegion?.region}</b> ({topRegion?.total})</span>
+                      {/* Compact insights */}
+                      <div className="grid grid-cols-2 gap-1.5">
+                        <div className="flex items-center gap-1.5 px-2 py-1.5 rounded-md bg-success/5 border border-success/15">
+                          <span className="text-[9px]">🏅</span>
+                          <div className="min-w-0">
+                            <div className="text-[6px] sm:text-[7px] text-muted-foreground uppercase tracking-wider">Best Performance</div>
+                            <div className="text-[8px] sm:text-[9px] font-bold text-success truncate">{bestRegion?.region} — {bestRegion?.total > 0 ? Math.round((bestRegion.resolved / bestRegion.total) * 100) : 0}%</div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-1.5 px-2 py-1.5 rounded-md bg-destructive/5 border border-destructive/15">
+                          <span className="text-[9px]">⚠️</span>
+                          <div className="min-w-0">
+                            <div className="text-[6px] sm:text-[7px] text-muted-foreground uppercase tracking-wider">Most Critical</div>
+                            <div className="text-[8px] sm:text-[9px] font-bold text-destructive truncate">{worstRegion?.region} — {worstRegion?.critical} tiket</div>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   );
