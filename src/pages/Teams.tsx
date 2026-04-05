@@ -1,4 +1,5 @@
 import { Users, Eye, CalendarIcon, X, Monitor, TrendingUp, TrendingDown, ArrowRight, ChevronDown, ChevronUp, Trophy, Medal } from "lucide-react";
+import { useSidebarTabSync } from "@/hooks/useSidebarTabSync";
 import { TeamsSkeleton } from "@/components/PageSkeleton";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -107,6 +108,8 @@ export default function Teams() {
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
   const [periodPreset, setPeriodPreset] = useState<string>("all");
   const [activeTab, setActiveTab] = useState("team-stats");
+  const setTabCb = useCallback((v: string) => setActiveTab(v), []);
+  useSidebarTabSync("/teams", setTabCb);
   const [selectedUser, setSelectedUser] = useState<string | null>(null);
   const [statsSheetTeam, setStatsSheetTeam] = useState<{ team: string; category: "ritel" | "feeder" } | null>(null);
   const [statusSheet, setStatusSheet] = useState<{ category: "ritel" | "feeder"; status: "Resolved" | "Pending" | "Critical" } | null>(null);

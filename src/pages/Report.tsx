@@ -1,4 +1,5 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
+import { useSidebarTabSync } from "@/hooks/useSidebarTabSync";
 import { useCloudTickets } from "@/hooks/useCloudTickets";
 import { loadDefaultRegionalTeamData } from "@/lib/defaultRegionalData";
 import { RegionalTeamRecord } from "@/types/regionalTeam";
@@ -115,6 +116,10 @@ const Report = () => {
   // User role for permission-based UI
   const { isAdmin } = useUserRole();
   
+  const [activeTab, setActiveTab] = useState("shift");
+  const setTabCb = useCallback((v: string) => setActiveTab(v), []);
+  useSidebarTabSync("/report", setTabCb);
+
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // State for SLA Report
@@ -378,7 +383,7 @@ Dibuat: ${new Date(r.createdAt).toLocaleString("id-ID")}
         </p>
       </div>
 
-      <Tabs defaultValue="shift" className="w-full">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <div className="overflow-x-auto scrollbar-hide -mx-2 px-2 sm:mx-0 sm:px-0">
           <TabsList className="inline-flex w-auto min-w-full sm:min-w-0 gap-1 h-auto flex-wrap sm:flex-nowrap p-1">
             <TabsTrigger value="shift" className="text-[11px] sm:text-sm px-2.5 sm:px-3 py-1.5 sm:py-2 whitespace-nowrap">🗣️ Report Shift</TabsTrigger>

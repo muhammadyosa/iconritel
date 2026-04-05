@@ -1,4 +1,5 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
+import { useSidebarTabSync } from "@/hooks/useSidebarTabSync";
 import { RegionalTeamRecord } from "@/types/regionalTeam";
 import { loadDefaultRegionalTeamData } from "@/lib/defaultRegionalData";
 import { TablePageSkeleton } from "@/components/PageSkeleton";
@@ -51,6 +52,10 @@ import { useActivityLog } from "@/hooks/useActivityLog";
 import { Link } from "react-router-dom";
 
 export default function TicketManagement() {
+  const [activeTab, setActiveTab] = useState("preview-data");
+  const setTabCb = useCallback((v: string) => setActiveTab(v), []);
+  useSidebarTabSync("/tickets", setTabCb);
+
   // Local Excel data from IndexedDB
   const { excelData, isLoadingExcel } = useTickets();
   
@@ -551,7 +556,7 @@ export default function TicketManagement() {
         </DialogContent>
       </Dialog>
 
-      <Tabs defaultValue="preview-data" className="w-full">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <div className="overflow-x-auto scrollbar-hide -mx-2 px-2 sm:mx-0 sm:px-0">
           <TabsList className="inline-flex w-auto min-w-full sm:min-w-0 gap-1 h-auto flex-wrap sm:flex-nowrap p-1">
             <TabsTrigger value="preview-data" className="text-[11px] sm:text-sm px-2.5 sm:px-3 py-1.5 sm:py-2 whitespace-nowrap">📋 Preview Data</TabsTrigger>
