@@ -356,7 +356,7 @@ export function OverSLATab({ tickets, getTicketRegion }: OverSLATabProps) {
               return (
                 <div className="space-y-0.5">
                   {/* Header */}
-                  <div className="grid grid-cols-[24px_1fr_90px_70px_80px] gap-1 px-1.5 py-1 text-[8px] sm:text-[9px] font-semibold text-muted-foreground border-b border-border/40">
+                  <div className="grid grid-cols-[20px_1fr_80px_60px_72px] sm:grid-cols-[24px_1fr_90px_70px_80px] gap-1 px-1.5 py-1 text-[8px] sm:text-[9px] font-semibold text-muted-foreground border-b border-border/40">
                     <span className="text-center">#</span>
                     <span>Incident</span>
                     <span>Constraint</span>
