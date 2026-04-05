@@ -149,7 +149,7 @@ export function AppSidebar() {
       className={`${collapsed ? "w-[52px]" : "w-56"} transition-[width] duration-200 ease-out will-change-[width]`}
       collapsible="icon"
     >
-      <SidebarContent className="flex flex-col overflow-x-hidden bg-sidebar-background">
+      <SidebarContent className="flex flex-col overflow-x-hidden bg-sidebar-background border-r border-sidebar-border">
         {/* Logo */}
         <div className={`flex-shrink-0 border-b border-sidebar-foreground/10 ${collapsed ? "py-3 px-1.5" : "p-3"}`}>
           {!collapsed ? (
