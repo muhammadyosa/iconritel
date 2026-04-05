@@ -119,6 +119,10 @@ async function loadBNGData(): Promise<any[]> {
 }
 
 export default function Settings() {
+  const [activeTab, setActiveTab] = useState("import");
+  const setTabCb = useCallback((v: string) => setActiveTab(v), []);
+  useSidebarTabSync("/settings", setTabCb);
+
   const { isAdmin } = useUserRole();
   const [file, setFile] = useState<File | null>(null);
   const [sheets, setSheets] = useState<SheetPreview[]>([]);
