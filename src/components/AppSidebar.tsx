@@ -78,7 +78,7 @@ export function AppSidebar() {
   const collapsed = state === "collapsed";
   const { count: pendingCount, isAdmin } = usePendingUserCount();
   const { isIntern, isNOC } = useUserRole();
-  const [searchQuery, setSearchQuery] = useState("");
+  
 
   const visibleMenuItems = useMemo(() => {
     const INTERN_PATHS = new Set(["/", "/tickets", "/teams"]);
