@@ -9,7 +9,6 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarTrigger,
   useSidebar,
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
@@ -17,6 +16,7 @@ import { useTheme } from "next-themes";
 import { useEffect, useState, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useUserRole } from "@/hooks/useUserRole";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 const menuItems = [
   { title: "Dashboard", icon: null, path: "/", emoji: "🖥️" },
