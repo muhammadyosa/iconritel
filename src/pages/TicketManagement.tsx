@@ -1021,6 +1021,9 @@ export default function TicketManagement() {
                             <span className="text-muted-foreground">{ticket.createdByName || "-"}</span>
                           </TableCell>
                           <TableCell className="px-1 sm:px-1.5 py-0.5">
+                            <DurationCell createdISO={ticket.createdISO} status={ticket.status} resolvedAt={ticket.resolvedAt} />
+                          </TableCell>
+                          <TableCell className="px-1 sm:px-1.5 py-0.5">
                             <div>
                               <StatusBadge status={ticket.status} />
                               <div className="text-[7px] sm:text-[8px] text-muted-foreground mt-0.5">
