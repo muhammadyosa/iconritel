@@ -503,7 +503,7 @@ export function OverSLATab({ tickets, getTicketRegion, onTicketClick }: OverSLAT
                   </TableRow>
                 ) : (
                   sortedTickets.map((ticket, idx) => (
-                    <TableRow key={ticket.id} className="h-6 sm:h-7 hover:bg-muted/40 cursor-pointer">
+                    <TableRow key={ticket.id} className="h-6 sm:h-7 hover:bg-muted/40 cursor-pointer" onClick={() => onTicketClick?.(ticket)}>
                       <TableCell className="px-1 py-0.5 text-[8px] sm:text-[9px] text-muted-foreground">{idx + 1}</TableCell>
                       <TableCell className="px-1 py-0.5 font-mono text-[9px] sm:text-[10px] font-medium">{ticket.id}</TableCell>
                       <TableCell className="px-1 py-0.5 text-[9px] sm:text-[10px]">
