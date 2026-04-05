@@ -344,9 +344,9 @@ export function OverSLATab({ tickets, getTicketRegion }: OverSLATabProps) {
                   const hours = Math.floor((totalMinutes % 1440) / 60);
                   const mins = totalMinutes % 60;
                   const parts: string[] = [];
-                  if (days > 0) parts.push(`${days} HARI`);
-                  if (hours > 0) parts.push(`${hours} JAM`);
-                  parts.push(`${mins} MNT`);
+                  if (days > 0) parts.push(`${days}H`);
+                  if (hours > 0) parts.push(`${hours}J`);
+                  parts.push(`${mins}M`);
                   return { ...t, durationMs, durationLabel: parts.join(" ") };
                 })
                 .sort((a, b) => b.durationMs - a.durationMs)
