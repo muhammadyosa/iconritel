@@ -1644,7 +1644,7 @@ export default function Dashboard() {
                   </TableRow>
                 ) : selectedRegionTickets.map((t) => (
                   <TableRow key={t.id} className="text-[10px] sm:text-xs">
-                    <TableCell className="py-1.5 font-mono text-[9px]">{t.ticketId}</TableCell>
+                    <TableCell className="py-1.5 font-mono text-[9px]">{t.id.slice(0, 8)}</TableCell>
                     <TableCell className="py-1.5 font-medium truncate max-w-[120px]">{t.hostname}</TableCell>
                     <TableCell className="py-1.5">{t.constraint}</TableCell>
                     <TableCell className="py-1.5"><StatusBadge status={t.status} /></TableCell>
