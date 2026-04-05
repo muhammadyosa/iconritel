@@ -16,7 +16,6 @@ import { useTheme } from "next-themes";
 import { useEffect, useState, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useUserRole } from "@/hooks/useUserRole";
-import { ChevronLeft, ChevronRight } from "lucide-react";
 
 const menuItems = [
   { title: "Dashboard", icon: null, path: "/", emoji: "🖥️" },
@@ -93,43 +92,31 @@ export function AppSidebar() {
   }, [isIntern, isAdmin, isNOC]);
   
 
-  const { toggleSidebar } = useSidebar();
-
   return (
-    <Sidebar className={`${collapsed ? "w-[52px]" : "w-56 sm:w-60"} transition-all duration-300 ease-out relative`} collapsible="icon">
-      {/* Floating toggle button on the right edge, vertically centered */}
-      <button
-        onClick={toggleSidebar}
-        className="absolute top-1/2 -translate-y-1/2 -right-3 z-50 h-6 w-6 rounded-full border border-sidebar-border bg-background shadow-md flex items-center justify-center hover:bg-accent hover:scale-110 active:scale-95 transition-all duration-200 cursor-pointer"
-      >
-        {collapsed ? (
-          <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
-        ) : (
-          <ChevronLeft className="h-3.5 w-3.5 text-muted-foreground" />
-        )}
-      </button>
-
+    <Sidebar className={`${collapsed ? "w-[52px]" : "w-56 sm:w-60"} transition-all duration-300 ease-out`} collapsible="icon">
       <SidebarContent className="flex flex-col overflow-x-hidden">
-        {/* Header Logo Section - aligned with main header h-12 sm:h-14 */}
-        <div className={`border-b border-sidebar-border flex-shrink-0 h-12 sm:h-14 flex items-center ${collapsed ? "px-1 justify-center" : "px-3 sm:px-4"}`}>
+        {/* Header Logo Section */}
+        <div className={`border-b border-sidebar-border flex-shrink-0 ${collapsed ? "py-3 px-1" : "p-3 sm:p-4"}`}>
           {!collapsed ? (
-            <div className="flex items-center gap-2 sm:gap-3 w-full">
+            <div className="flex items-center gap-2 sm:gap-3">
               <img 
                 src={iconnetLogo} 
                 alt="Iconnet" 
-                className="h-8 sm:h-10 w-auto flex-shrink-0 object-contain" 
+                className="h-10 sm:h-12 w-auto flex-shrink-0 object-contain" 
               />
-              <div className="space-y-0 min-w-0 flex-1">
-                <p className="text-sm font-semibold text-sidebar-foreground truncate leading-tight">NOC RITEL</p>
-                <p className="text-[11px] text-sidebar-foreground/70 leading-tight">Iconnet</p>
+              <div className="space-y-0.5 min-w-0 flex-1">
+                <p className="text-sm font-semibold text-sidebar-foreground truncate">NOC RITEL</p>
+                <p className="text-xs text-sidebar-foreground/70">Iconnet</p>
               </div>
             </div>
           ) : (
-            <img 
-              src={iconnetLogo} 
-              alt="Iconnet" 
-              className="h-7 w-7 object-contain flex-shrink-0" 
-            />
+            <div className="flex justify-center items-center w-full">
+              <img 
+                src={iconnetLogo} 
+                alt="Iconnet" 
+                className="h-7 w-7 object-contain flex-shrink-0" 
+              />
+            </div>
           )}
         </div>
 
