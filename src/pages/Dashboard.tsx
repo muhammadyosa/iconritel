@@ -778,94 +778,78 @@ export default function Dashboard() {
                   const worstRegion = [...regionalIncidentData].sort((a, b) => b.critical - a.critical)[0];
                   const topRegion = regionalIncidentData[0];
 
+                  const inProgressAll = regionalIncidentData.reduce((s, r) => s + (r.total - r.resolved - r.critical - r.pending), 0);
+
                   return (
-                    <div className="space-y-2">
-                      {/* Stats row */}
-                      <div className="grid grid-cols-5 gap-1">
+                    <div className="space-y-2.5">
+                      {/* Compact KPI strip */}
+                      <div className="flex items-center gap-1.5 flex-wrap">
                         {[
-                          { val: regionalIncidentData.length, label: "Region", cls: "text-primary", bg: "bg-primary/5 border-primary/10" },
-                          { val: totalAll, label: "Total", cls: "text-foreground", bg: "bg-muted/30 border-border/30" },
-                          { val: `${resRate}%`, label: "Resolved", cls: "text-success", bg: "bg-success/5 border-success/10" },
-                          { val: totalActive, label: "Aktif", cls: "text-destructive", bg: "bg-destructive/5 border-destructive/10" },
-                          { val: avgPerRegion, label: "Avg/Region", cls: "text-accent-foreground", bg: "bg-accent/10 border-accent/20" },
+                          { val: totalAll, label: "Total", cls: "text-foreground bg-muted/40" },
+                          { val: totalResolved, label: "Resolved", cls: "text-success bg-success/10" },
+                          { val: totalCritical, label: "Critical", cls: "text-destructive bg-destructive/10" },
+                          { val: totalPendingAll, label: "Pending", cls: "text-warning bg-warning/10" },
                         ].map(s => (
-                          <div key={s.label} className={`text-center p-1 rounded-md border ${s.bg}`}>
-                            <div className={`text-[10px] sm:text-xs font-bold ${s.cls} tabular-nums`}>{s.val}</div>
-                            <div className="text-[6px] sm:text-[7px] text-muted-foreground leading-tight">{s.label}</div>
+                          <div key={s.label} className={`flex items-center gap-1 px-1.5 py-0.5 rounded-md ${s.cls}`}>
+                            <span className="text-[9px] sm:text-[10px] font-bold tabular-nums">{s.val}</span>
+                            <span className="text-[6px] sm:text-[7px] opacity-70">{s.label}</span>
                           </div>
                         ))}
+                        <div className="ml-auto flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-success/10">
+                          <span className="text-[9px] sm:text-[10px] font-bold text-success tabular-nums">{resRate}%</span>
+                          <span className="text-[6px] sm:text-[7px] text-success/70">Rate</span>
+                        </div>
                       </div>
 
-                      {/* Pie + Bar side by side */}
+                      {/* Overall resolution bar */}
+                      <div>
+                        <div className="w-full h-1.5 rounded-full bg-muted/40 overflow-hidden flex">
+                          <motion.div className="h-full bg-success" initial={{ width: 0 }} animate={{ width: `${totalAll > 0 ? (totalResolved / totalAll) * 100 : 0}%` }} transition={{ duration: 0.6 }} />
+                          <motion.div className="h-full bg-warning" initial={{ width: 0 }} animate={{ width: `${totalAll > 0 ? (totalPendingAll / totalAll) * 100 : 0}%` }} transition={{ duration: 0.6, delay: 0.2 }} />
+                          <motion.div className="h-full bg-destructive" initial={{ width: 0 }} animate={{ width: `${totalAll > 0 ? (totalCritical / totalAll) * 100 : 0}%` }} transition={{ duration: 0.6, delay: 0.4 }} />
+                        </div>
+                      </div>
+
+                      {/* Donut + Stacked Bar — compact */}
                       <div className="grid grid-cols-5 gap-1.5">
-                        {/* Mini Donut */}
-                        <div className="col-span-2 flex flex-col items-center justify-center rounded-md border border-border/30 bg-muted/10 p-1">
-                          <div className="relative w-full h-[90px] sm:h-[110px]">
+                        <div className="col-span-2 flex flex-col items-center justify-center">
+                          <div className="relative w-full h-[80px] sm:h-[95px]">
                             <ResponsiveContainer width="100%" height="100%">
                               <PieChart>
-                                <Pie
-                                  data={pieData}
-                                  cx="50%"
-                                  cy="50%"
-                                  innerRadius="45%"
-                                  outerRadius="80%"
-                                  dataKey="value"
-                                  strokeWidth={1}
-                                  stroke="hsl(var(--background))"
-                                >
-                                  {pieData.map((entry, idx) => (
-                                    <Cell key={idx} fill={entry.fill} />
-                                  ))}
+                                <Pie data={pieData} cx="50%" cy="50%" innerRadius="48%" outerRadius="82%" dataKey="value" strokeWidth={1} stroke="hsl(var(--background))">
+                                  {pieData.map((entry, idx) => <Cell key={idx} fill={entry.fill} />)}
                                 </Pie>
-                                <Tooltip
-                                  content={({ active, payload }) => {
-                                    if (!active || !payload?.length) return null;
-                                    const d = payload[0];
-                                    const pct = totalAll > 0 ? Math.round(((d.value as number) / totalAll) * 100) : 0;
-                                    return (
-                                      <div className="rounded-md border bg-background px-2 py-1 text-[9px] shadow-lg">
-                                        <span className="font-semibold">{d.name}</span>: {String(d.value)} ({pct}%)
-                                      </div>
-                                    );
-                                  }}
-                                />
+                                <Tooltip content={({ active, payload }) => {
+                                  if (!active || !payload?.length) return null;
+                                  const d = payload[0];
+                                  return <div className="rounded border bg-background px-1.5 py-0.5 text-[8px] shadow-md"><b>{d.name}</b>: {String(d.value)}</div>;
+                                }} />
                               </PieChart>
                             </ResponsiveContainer>
-                            {/* Center label */}
                             <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                              <span className="text-sm sm:text-base font-bold text-foreground leading-none">{totalAll}</span>
-                              <span className="text-[6px] sm:text-[7px] text-muted-foreground">incident</span>
+                              <span className="text-xs sm:text-sm font-bold text-foreground leading-none">{totalAll}</span>
+                              <span className="text-[5px] sm:text-[6px] text-muted-foreground">incident</span>
                             </div>
                           </div>
-                          {/* Ritel vs Feeder mini stat */}
-                          <div className="flex items-center gap-2 mt-0.5">
-                            <span className="text-[7px] sm:text-[8px] text-primary font-semibold">📦R:{totalRitel}</span>
-                            <span className="text-[7px] sm:text-[8px] text-warning font-semibold">⚡F:{totalFeeder}</span>
-                          </div>
                         </div>
-
-                        {/* Bar Chart */}
-                        <div className="col-span-3 rounded-md border border-border/30 bg-muted/10 p-1">
-                          <ChartContainer config={barChartConfig} className="h-[90px] sm:h-[110px] w-full">
-                            <BarChart data={chartData} margin={{ top: 2, right: 2, left: -12, bottom: 0 }}>
-                              <CartesianGrid strokeDasharray="3 3" className="stroke-muted/30" vertical={false} />
+                        <div className="col-span-3">
+                          <ChartContainer config={barChartConfig} className="h-[80px] sm:h-[95px] w-full">
+                            <BarChart data={chartData} margin={{ top: 2, right: 2, left: -14, bottom: 0 }}>
+                              <CartesianGrid strokeDasharray="3 3" className="stroke-muted/20" vertical={false} />
                               <XAxis dataKey="name" tick={{ fontSize: 6, fill: "hsl(var(--muted-foreground))" }} tickLine={false} axisLine={false} interval={0} />
-                              <YAxis tick={{ fontSize: 6, fill: "hsl(var(--muted-foreground))" }} tickLine={false} axisLine={false} allowDecimals={false} width={16} />
-                              <ChartTooltip
-                                content={({ active, payload }) => {
-                                  if (!active || !payload?.length) return null;
-                                  const d = payload[0]?.payload;
-                                  return (
-                                    <div className="rounded-lg border bg-background px-2 py-1.5 text-[9px] shadow-lg space-y-0.5">
-                                      <div className="font-semibold">{d?.fullName}</div>
-                                      <div className="text-success">✅ Resolved: {d?.resolved}</div>
-                                      <div className="text-destructive">🔴 Critical: {d?.critical}</div>
-                                      <div className="text-warning">⏳ Pending: {d?.pending}</div>
-                                      <div className="text-muted-foreground border-t border-border/40 pt-0.5 mt-0.5">Total: {d?.total}</div>
-                                    </div>
-                                  );
-                                }}
-                              />
+                              <YAxis tick={{ fontSize: 5 }} tickLine={false} axisLine={false} allowDecimals={false} width={14} hide />
+                              <ChartTooltip content={({ active, payload }) => {
+                                if (!active || !payload?.length) return null;
+                                const d = payload[0]?.payload;
+                                return (
+                                  <div className="rounded border bg-background px-2 py-1 text-[8px] shadow-md space-y-0.5">
+                                    <div className="font-semibold">{d?.fullName}</div>
+                                    <div className="text-success">✅ {d?.resolved}</div>
+                                    <div className="text-destructive">🔴 {d?.critical}</div>
+                                    <div className="text-warning">⏳ {d?.pending}</div>
+                                  </div>
+                                );
+                              }} />
                               <Bar dataKey="resolved" stackId="a" fill="hsl(142, 76%, 36%)" />
                               <Bar dataKey="pending" stackId="a" fill="hsl(38, 92%, 50%)" />
                               <Bar dataKey="critical" stackId="a" fill="hsl(0, 84%, 55%)" radius={[2, 2, 0, 0]} />
@@ -877,8 +861,8 @@ export default function Dashboard() {
                               { label: "Critical", color: "hsl(0, 84%, 55%)" },
                               { label: "Pending", color: "hsl(38, 92%, 50%)" },
                             ].map(l => (
-                              <div key={l.label} className="flex items-center gap-0.5 text-[6px] sm:text-[7px] text-muted-foreground">
-                                <div className="w-1.5 h-1.5 rounded-[1px]" style={{ backgroundColor: l.color }} />
+                              <div key={l.label} className="flex items-center gap-0.5 text-[5px] sm:text-[6px] text-muted-foreground">
+                                <div className="w-1 h-1 rounded-[1px]" style={{ backgroundColor: l.color }} />
                                 {l.label}
                               </div>
                             ))}
@@ -886,102 +870,41 @@ export default function Dashboard() {
                         </div>
                       </div>
 
-                      {/* Resolution progress bar */}
-                      <div className="rounded-md border border-border/20 bg-muted/10 px-2 py-1.5">
-                        <div className="flex items-center justify-between mb-1">
-                          <span className="text-[7px] sm:text-[8px] text-muted-foreground font-medium">Overall Resolution</span>
-                          <span className="text-[8px] sm:text-[9px] font-bold text-success tabular-nums">{resRate}%</span>
-                        </div>
-                        <div className="w-full h-2 rounded-full bg-muted/50 overflow-hidden flex">
-                          <motion.div
-                            className="h-full bg-success"
-                            initial={{ width: 0 }}
-                            animate={{ width: `${totalAll > 0 ? (totalResolved / totalAll) * 100 : 0}%` }}
-                            transition={{ duration: 0.8, delay: 0.3 }}
-                          />
-                          <motion.div
-                            className="h-full bg-warning"
-                            initial={{ width: 0 }}
-                            animate={{ width: `${totalAll > 0 ? (totalPendingAll / totalAll) * 100 : 0}%` }}
-                            transition={{ duration: 0.8, delay: 0.5 }}
-                          />
-                          <motion.div
-                            className="h-full bg-destructive"
-                            initial={{ width: 0 }}
-                            animate={{ width: `${totalAll > 0 ? (totalCritical / totalAll) * 100 : 0}%` }}
-                            transition={{ duration: 0.8, delay: 0.7 }}
-                          />
-                        </div>
-                        <div className="flex items-center justify-between mt-0.5">
-                          <div className="flex items-center gap-2 text-[6px] sm:text-[7px]">
-                            <span className="text-success">✅ {totalResolved}</span>
-                            <span className="text-warning">⏳ {totalPendingAll}</span>
-                            <span className="text-destructive">🔴 {totalCritical}</span>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Region list */}
-                      <div className="space-y-0.5 max-h-[120px] sm:max-h-[140px] overflow-y-auto pr-0.5">
+                      {/* Region list — clean rows */}
+                      <div className="space-y-px max-h-[130px] sm:max-h-[150px] overflow-y-auto">
                         {regionalIncidentData.map((r, i) => {
-                          const pct = totalAll > 0 ? Math.round((r.total / totalAll) * 100) : 0;
                           const rRate = r.total > 0 ? Math.round((r.resolved / r.total) * 100) : 0;
-                          const barPct = totalAll > 0 ? (r.total / regionalIncidentData[0].total) * 100 : 0;
+                          const maxTotal = regionalIncidentData[0]?.total || 1;
                           return (
-                            <div key={r.region} className="px-1.5 py-1 rounded hover:bg-muted/30 transition-colors cursor-default">
-                              <div className="flex items-center gap-1.5">
-                                <div className="w-1.5 h-1.5 rounded-sm shrink-0" style={{ backgroundColor: PIE_COLORS[i % PIE_COLORS.length] }} />
-                                <span className="text-[8px] sm:text-[9px] font-medium truncate flex-1">{r.region}</span>
-                                <span className="text-[7px] sm:text-[8px] text-success tabular-nums">{rRate}%</span>
-                                <Badge variant="outline" className="text-[7px] sm:text-[8px] px-1 py-0 h-3.5 font-bold tabular-nums shrink-0">{r.total}</Badge>
-                                <span className="text-[6px] sm:text-[7px] text-muted-foreground tabular-nums">{pct}%</span>
+                            <div key={r.region} className="group flex items-center gap-1.5 px-1 py-[3px] rounded hover:bg-muted/20 transition-colors cursor-default">
+                              <div className="w-1 h-1 rounded-full shrink-0" style={{ backgroundColor: PIE_COLORS[i % PIE_COLORS.length] }} />
+                              <span className="text-[7px] sm:text-[8px] font-medium truncate w-[70px] sm:w-[90px] shrink-0">{r.region}</span>
+                              <div className="flex-1 h-1 rounded-full bg-muted/30 overflow-hidden flex">
+                                <div className="h-full bg-success transition-all" style={{ width: `${r.total > 0 ? (r.resolved / r.total) * 100 : 0}%` }} />
+                                <div className="h-full bg-warning transition-all" style={{ width: `${r.total > 0 ? (r.pending / r.total) * 100 : 0}%` }} />
+                                <div className="h-full bg-destructive transition-all" style={{ width: `${r.total > 0 ? (r.critical / r.total) * 100 : 0}%` }} />
                               </div>
-                              <div className="flex items-center gap-1 mt-0.5">
-                                <div className="flex-1 h-1 rounded-full bg-muted/40 overflow-hidden flex">
-                                  <div className="h-full bg-success" style={{ width: `${r.total > 0 ? (r.resolved / r.total) * 100 : 0}%` }} />
-                                  <div className="h-full bg-warning" style={{ width: `${r.total > 0 ? (r.pending / r.total) * 100 : 0}%` }} />
-                                  <div className="h-full bg-destructive" style={{ width: `${r.total > 0 ? (r.critical / r.total) * 100 : 0}%` }} />
-                                </div>
-                                <div className="flex items-center gap-1 text-[6px] sm:text-[7px] text-muted-foreground shrink-0">
-                                  <span className="text-success">✅{r.resolved}</span>
-                                  <span className="text-destructive">🔴{r.critical}</span>
-                                  <span className="text-warning">⏳{r.pending}</span>
-                                </div>
+                              <span className="text-[6px] sm:text-[7px] text-success font-medium tabular-nums w-5 text-right">{rRate}%</span>
+                              <span className="text-[7px] sm:text-[8px] font-bold tabular-nums w-5 text-right">{r.total}</span>
+                              <div className="hidden sm:flex items-center gap-0.5 text-[6px] text-muted-foreground shrink-0">
+                                <span className="text-success">{r.resolved}</span>
+                                <span>/</span>
+                                <span className="text-destructive">{r.critical}</span>
+                                <span>/</span>
+                                <span className="text-warning">{r.pending}</span>
                               </div>
                             </div>
                           );
                         })}
                       </div>
 
-                      {/* Insights footer */}
-                      <div className="grid grid-cols-3 gap-1 pt-1 border-t border-border/30">
-                        <div className="flex items-center gap-1 p-1 rounded bg-success/5 border border-success/10">
-                          <span className="text-[7px]">🏅</span>
-                          <div className="min-w-0">
-                            <div className="text-[5px] sm:text-[6px] text-muted-foreground">Best</div>
-                            <div className="text-[7px] sm:text-[8px] font-semibold text-success truncate">
-                              {bestRegion?.region} {bestRegion?.total > 0 ? Math.round((bestRegion.resolved / bestRegion.total) * 100) : 0}%
-                            </div>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-1 p-1 rounded bg-destructive/5 border border-destructive/10">
-                          <span className="text-[7px]">⚠️</span>
-                          <div className="min-w-0">
-                            <div className="text-[5px] sm:text-[6px] text-muted-foreground">Critical</div>
-                            <div className="text-[7px] sm:text-[8px] font-semibold text-destructive truncate">
-                              {worstRegion?.region} ({worstRegion?.critical})
-                            </div>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-1 p-1 rounded bg-primary/5 border border-primary/10">
-                          <span className="text-[7px]">📊</span>
-                          <div className="min-w-0">
-                            <div className="text-[5px] sm:text-[6px] text-muted-foreground">Top Volume</div>
-                            <div className="text-[7px] sm:text-[8px] font-semibold text-primary truncate">
-                              {topRegion?.region} ({topRegion?.total})
-                            </div>
-                          </div>
-                        </div>
+                      {/* Minimal insights */}
+                      <div className="flex items-center gap-1.5 pt-1.5 border-t border-border/20 text-[6px] sm:text-[7px] text-muted-foreground flex-wrap">
+                        <span className="flex items-center gap-0.5">🏅 <b className="text-success">{bestRegion?.region}</b> {bestRegion?.total > 0 ? Math.round((bestRegion.resolved / bestRegion.total) * 100) : 0}%</span>
+                        <span className="text-border">•</span>
+                        <span className="flex items-center gap-0.5">⚠️ <b className="text-destructive">{worstRegion?.region}</b> ({worstRegion?.critical})</span>
+                        <span className="text-border">•</span>
+                        <span className="flex items-center gap-0.5">📊 <b className="text-primary">{topRegion?.region}</b> ({topRegion?.total})</span>
                       </div>
                     </div>
                   );
