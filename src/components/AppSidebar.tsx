@@ -10,7 +10,7 @@ import { useTheme } from "next-themes";
 import { useEffect, useState, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useUserRole } from "@/hooks/useUserRole";
-import { Search } from "lucide-react";
+
 import {
   Tooltip,
   TooltipContent,
@@ -78,7 +78,7 @@ export function AppSidebar() {
   const collapsed = state === "collapsed";
   const { count: pendingCount, isAdmin } = usePendingUserCount();
   const { isIntern, isNOC } = useUserRole();
-  const [searchQuery, setSearchQuery] = useState("");
+  
 
   const visibleMenuItems = useMemo(() => {
     const INTERN_PATHS = new Set(["/", "/tickets", "/teams"]);
@@ -90,12 +90,7 @@ export function AppSidebar() {
     });
   }, [isIntern, isAdmin, isNOC]);
 
-  const filteredMenuItems = useMemo(() => {
-    if (!searchQuery.trim()) return visibleMenuItems;
-    return visibleMenuItems.filter((item) =>
-      item.title.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-  }, [visibleMenuItems, searchQuery]);
+
 
   const renderMenuItem = (item: typeof menuItems[0]) => {
     const showBadge = item.path === "/settings" && isAdmin && pendingCount > 0;
@@ -209,37 +204,7 @@ export function AppSidebar() {
           )}
         </div>
 
-        {/* Search Box */}
-        <div className={`flex-shrink-0 ${collapsed ? "py-2 px-2" : "px-3 py-3"}`}>
-          {!collapsed ? (
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-sidebar-foreground/40" />
-              <input
-                type="text"
-                placeholder="Search menu..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full h-9 pl-9 pr-3 rounded-lg bg-sidebar-foreground/10 border-none text-sm text-sidebar-foreground placeholder:text-sidebar-foreground/40 focus:outline-none focus:ring-2 focus:ring-sidebar-foreground/20 transition-all duration-200"
-              />
-            </div>
-          ) : (
-            <Tooltip delayDuration={0}>
-              <TooltipTrigger asChild>
-                <button
-                  onClick={() => {/* Could expand sidebar to search */}}
-                  className="w-full flex justify-center"
-                >
-                  <div className="h-9 w-9 rounded-lg bg-sidebar-foreground/10 flex items-center justify-center text-sidebar-foreground/50 hover:text-sidebar-foreground hover:bg-sidebar-foreground/15 transition-all duration-200">
-                    <Search className="h-4 w-4" />
-                  </div>
-                </button>
-              </TooltipTrigger>
-              <TooltipContent side="right" sideOffset={12} className="bg-sidebar-background text-sidebar-foreground border-sidebar-border text-xs">
-                Search menu
-              </TooltipContent>
-            </Tooltip>
-          )}
-        </div>
+
 
         {/* Menu Label */}
         {!collapsed && (
@@ -252,10 +217,7 @@ export function AppSidebar() {
 
         {/* Menu Items */}
         <nav className={`flex-1 overflow-y-auto overflow-x-hidden scrollbar-hide ${collapsed ? "px-1.5 space-y-1" : "px-2 space-y-0.5"}`}>
-          {filteredMenuItems.map(renderMenuItem)}
-          {filteredMenuItems.length === 0 && !collapsed && (
-            <p className="text-xs text-sidebar-foreground/40 text-center py-4">No menu found</p>
-          )}
+          {visibleMenuItems.map(renderMenuItem)}
         </nav>
 
         {/* Footer */}
