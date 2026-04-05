@@ -253,6 +253,7 @@ export default function TicketManagement() {
       case "serviceId": return ticket.serviceId.toLowerCase().includes(query);
       case "constraint": return ticket.constraint.toLowerCase().includes(query);
       case "serpo": return ticket.serpo.toLowerCase().includes(query);
+      case "region": return getTicketRegion(ticket.serpo).toLowerCase().includes(query);
       case "status": return ticket.status.toLowerCase().includes(query);
       case "created": return ticket.createdAt.toLowerCase().includes(query);
       case "createdBy": return (ticket.createdByName || "").toLowerCase().includes(query);
