@@ -47,9 +47,10 @@ type CardType = "total" | "critical" | "onProgress" | "pending";
 interface OverSLATabProps {
   tickets: Ticket[];
   getTicketRegion: (serpo: string) => string;
+  onTicketClick?: (ticket: Ticket) => void;
 }
 
-export function OverSLATab({ tickets, getTicketRegion }: OverSLATabProps) {
+export function OverSLATab({ tickets, getTicketRegion, onTicketClick }: OverSLATabProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchField, setSearchField] = useState("all");
   const [activeCard, setActiveCard] = useState<CardType | null>(null);
