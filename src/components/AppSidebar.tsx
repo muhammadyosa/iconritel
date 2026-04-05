@@ -83,12 +83,12 @@ const MenuItem = memo(function MenuItem({
             : "gap-2.5 px-2.5 py-2 w-full hover:translate-x-0.5"
         } ${
           isActive
-            ? "bg-sidebar-foreground/15 text-sidebar-foreground shadow-sm"
-            : "text-sidebar-foreground/70 hover:bg-sidebar-foreground/10 hover:text-sidebar-foreground"
+            ? "bg-white/20 text-white shadow-sm font-semibold"
+            : "text-white/80 hover:bg-white/10 hover:text-white"
         }`
       }
     >
-      <span className={`relative text-sm leading-none flex-shrink-0 transition-transform duration-150 ${collapsed ? "" : "w-5 text-center"} bg-primary/15 rounded-md p-0.5`}>
+      <span className={`relative text-sm leading-none flex-shrink-0 transition-transform duration-150 ${collapsed ? "" : "w-5 text-center"} bg-white/20 rounded-md p-0.5`}>
         {item.emoji}
         {showBadge && collapsed && (
           <span className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-destructive text-destructive-foreground text-[8px] font-bold flex items-center justify-center animate-pulse">
