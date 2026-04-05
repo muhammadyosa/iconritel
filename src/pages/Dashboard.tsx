@@ -90,6 +90,8 @@ export default function Dashboard() {
   const [selectedHistoryDate, setSelectedHistoryDate] = useState<string | null>(null);
   const [shiftReportTab, setShiftReportTab] = useState<string>("latest");
   const [teamData, setTeamData] = useState<RegionalTeamRecord[]>([]);
+  const [selectedRegion, setSelectedRegion] = useState<string | null>(null);
+  const [regionDialogOpen, setRegionDialogOpen] = useState(false);
 
   // Load OLT data
   useEffect(() => {
