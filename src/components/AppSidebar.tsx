@@ -93,14 +93,27 @@ export function AppSidebar() {
   }, [isIntern, isAdmin, isNOC]);
   
 
+  const { toggleSidebar } = useSidebar();
+
   return (
-    <Sidebar className={`${collapsed ? "w-[52px]" : "w-56 sm:w-60"} transition-all duration-300 ease-out`} collapsible="icon">
+    <Sidebar className={`${collapsed ? "w-[52px]" : "w-56 sm:w-60"} transition-all duration-300 ease-out relative`} collapsible="icon">
+      {/* Floating toggle button on the right edge, vertically centered */}
+      <button
+        onClick={toggleSidebar}
+        className="absolute top-1/2 -translate-y-1/2 -right-3 z-50 h-6 w-6 rounded-full border border-sidebar-border bg-background shadow-md flex items-center justify-center hover:bg-accent hover:scale-110 active:scale-95 transition-all duration-200 cursor-pointer"
+      >
+        {collapsed ? (
+          <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
+        ) : (
+          <ChevronLeft className="h-3.5 w-3.5 text-muted-foreground" />
+        )}
+      </button>
+
       <SidebarContent className="flex flex-col overflow-x-hidden">
-        {/* Header Logo + Trigger Section */}
+        {/* Header Logo Section */}
         <div className={`border-b border-sidebar-border flex-shrink-0 ${collapsed ? "py-3 px-1" : "p-3 sm:p-4"}`}>
           {!collapsed ? (
             <div className="flex items-center gap-2 sm:gap-3">
-              <SidebarTrigger className="h-8 w-8 rounded-full hover:bg-sidebar-accent/60 active:scale-95 transition-all duration-200 flex-shrink-0" />
               <img 
                 src={iconnetLogo} 
                 alt="Iconnet" 
@@ -112,8 +125,7 @@ export function AppSidebar() {
               </div>
             </div>
           ) : (
-            <div className="flex flex-col items-center gap-2 w-full">
-              <SidebarTrigger className="h-7 w-7 rounded-full hover:bg-sidebar-accent/60 active:scale-95 transition-all duration-200" />
+            <div className="flex justify-center items-center w-full">
               <img 
                 src={iconnetLogo} 
                 alt="Iconnet" 
