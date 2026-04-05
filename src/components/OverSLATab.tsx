@@ -603,7 +603,7 @@ export function OverSLATab({ tickets, getTicketRegion, onTicketClick }: OverSLAT
                       </TableRow>
                     ) : (
                       cardDrillDown.map((t) => (
-                        <TableRow key={t.id} className="h-6 hover:bg-muted/40">
+                        <TableRow key={t.id} className="h-6 hover:bg-muted/40 cursor-pointer" onClick={() => { setActiveCard(null); onTicketClick?.(t); }}>
                           <TableCell className="px-1.5 py-0.5 font-mono text-[9px] font-medium">{t.id}</TableCell>
                           <TableCell className="px-1.5 py-0.5 text-[9px]">{t.constraint}</TableCell>
                           <TableCell className="px-1.5 py-0.5">
