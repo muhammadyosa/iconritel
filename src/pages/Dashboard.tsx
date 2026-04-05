@@ -725,9 +725,9 @@ export default function Dashboard() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {/* Regional Office Summary */}
             <Card className="overflow-hidden border">
-              <CardHeader className="py-2.5 px-3 sm:px-4 border-b bg-muted/20">
+              <CardHeader className="py-2 px-3 sm:px-4 border-b bg-muted/20">
                 <CardTitle className="text-xs sm:text-sm flex items-center gap-2">🗺️ Regional Office</CardTitle>
-                <p className="text-[10px] sm:text-xs text-muted-foreground">Ringkasan data per wilayah</p>
+                <p className="text-[9px] sm:text-[10px] text-muted-foreground">Distribusi & performa incident per wilayah</p>
               </CardHeader>
               <CardContent className="p-2 sm:p-3">
                 {regionalIncidentData.length === 0 ? (
@@ -742,48 +742,129 @@ export default function Dashboard() {
                     "hsl(0, 84%, 55%)", "hsl(262, 80%, 55%)", "hsl(180, 70%, 40%)",
                     "hsl(330, 75%, 50%)", "hsl(25, 95%, 53%)", "hsl(195, 85%, 45%)", "hsl(55, 80%, 45%)",
                   ];
+
+                  // Chart data for mini bar chart
+                  const chartData = regionalIncidentData.map((r, i) => ({
+                    name: r.region.length > 5 ? r.region.slice(0, 4) + ".." : r.region,
+                    fullName: r.region,
+                    resolved: r.resolved,
+                    critical: r.critical,
+                    pending: r.pending,
+                    total: r.total,
+                    fill: PIE_COLORS[i % PIE_COLORS.length],
+                  }));
+
+                  const barChartConfig: ChartConfig = {
+                    resolved: { label: "Resolved", color: "hsl(142, 76%, 36%)" },
+                    critical: { label: "Critical", color: "hsl(0, 84%, 55%)" },
+                    pending: { label: "Pending", color: "hsl(38, 92%, 50%)" },
+                  };
+
+                  // Best & worst region
+                  const bestRegion = [...regionalIncidentData].sort((a, b) => {
+                    const rA = a.total > 0 ? a.resolved / a.total : 0;
+                    const rB = b.total > 0 ? b.resolved / b.total : 0;
+                    return rB - rA;
+                  })[0];
+                  const worstRegion = [...regionalIncidentData].sort((a, b) => b.critical - a.critical)[0];
+
                   return (
-                    <div className="space-y-2.5">
+                    <div className="space-y-2">
                       {/* Quick stats row */}
-                      <div className="grid grid-cols-3 gap-1.5">
-                        <div className="text-center p-1.5 rounded-md bg-primary/5 border border-primary/10">
-                          <div className="text-sm sm:text-base font-bold text-primary">{regionalIncidentData.length}</div>
-                          <div className="text-[8px] sm:text-[9px] text-muted-foreground">Region</div>
+                      <div className="grid grid-cols-4 gap-1">
+                        <div className="text-center p-1 rounded-md bg-primary/5 border border-primary/10">
+                          <div className="text-xs sm:text-sm font-bold text-primary">{regionalIncidentData.length}</div>
+                          <div className="text-[7px] sm:text-[8px] text-muted-foreground">Region</div>
                         </div>
-                        <div className="text-center p-1.5 rounded-md bg-success/5 border border-success/10">
-                          <div className="text-sm sm:text-base font-bold text-success">{totalResolved}</div>
-                          <div className="text-[8px] sm:text-[9px] text-muted-foreground">Resolved</div>
+                        <div className="text-center p-1 rounded-md bg-muted/30 border border-border/30">
+                          <div className="text-xs sm:text-sm font-bold text-foreground">{totalAll}</div>
+                          <div className="text-[7px] sm:text-[8px] text-muted-foreground">Total</div>
                         </div>
-                        <div className="text-center p-1.5 rounded-md bg-destructive/5 border border-destructive/10">
-                          <div className="text-sm sm:text-base font-bold text-destructive">{totalPending}</div>
-                          <div className="text-[8px] sm:text-[9px] text-muted-foreground">Aktif</div>
+                        <div className="text-center p-1 rounded-md bg-success/5 border border-success/10">
+                          <div className="text-xs sm:text-sm font-bold text-success">{resRate}%</div>
+                          <div className="text-[7px] sm:text-[8px] text-muted-foreground">Resolved</div>
+                        </div>
+                        <div className="text-center p-1 rounded-md bg-destructive/5 border border-destructive/10">
+                          <div className="text-xs sm:text-sm font-bold text-destructive">{totalPending}</div>
+                          <div className="text-[7px] sm:text-[8px] text-muted-foreground">Aktif</div>
                         </div>
                       </div>
 
-                      {/* Region list with progress */}
-                      <div className="space-y-1">
+                      {/* Mini stacked bar chart */}
+                      <div className="rounded-md border border-border/30 bg-muted/10 p-1">
+                        <ChartContainer config={barChartConfig} className="h-[100px] sm:h-[120px] w-full">
+                          <BarChart data={chartData} margin={{ top: 2, right: 4, left: -10, bottom: 0 }}>
+                            <CartesianGrid strokeDasharray="3 3" className="stroke-muted/30" vertical={false} />
+                            <XAxis
+                              dataKey="name"
+                              tick={{ fontSize: 7, fill: "hsl(var(--muted-foreground))" }}
+                              tickLine={false}
+                              axisLine={false}
+                              interval={0}
+                            />
+                            <YAxis
+                              tick={{ fontSize: 7, fill: "hsl(var(--muted-foreground))" }}
+                              tickLine={false}
+                              axisLine={false}
+                              allowDecimals={false}
+                              width={20}
+                            />
+                            <ChartTooltip
+                              content={({ active, payload }) => {
+                                if (!active || !payload?.length) return null;
+                                const d = payload[0]?.payload;
+                                return (
+                                  <div className="rounded-lg border bg-background px-2 py-1.5 text-[10px] shadow-lg space-y-0.5">
+                                    <div className="font-semibold">{d?.fullName}</div>
+                                    <div className="text-success">✅ Resolved: {d?.resolved}</div>
+                                    <div className="text-destructive">🔴 Critical: {d?.critical}</div>
+                                    <div className="text-warning">⏳ Pending: {d?.pending}</div>
+                                    <div className="text-muted-foreground border-t border-border/40 pt-0.5 mt-0.5">Total: {d?.total}</div>
+                                  </div>
+                                );
+                              }}
+                            />
+                            <Bar dataKey="resolved" stackId="a" fill="hsl(142, 76%, 36%)" radius={[0, 0, 0, 0]} />
+                            <Bar dataKey="pending" stackId="a" fill="hsl(38, 92%, 50%)" radius={[0, 0, 0, 0]} />
+                            <Bar dataKey="critical" stackId="a" fill="hsl(0, 84%, 55%)" radius={[2, 2, 0, 0]} />
+                          </BarChart>
+                        </ChartContainer>
+                        <div className="flex items-center justify-center gap-3 mt-0.5">
+                          {[
+                            { label: "Resolved", color: "hsl(142, 76%, 36%)" },
+                            { label: "Critical", color: "hsl(0, 84%, 55%)" },
+                            { label: "Pending", color: "hsl(38, 92%, 50%)" },
+                          ].map(l => (
+                            <div key={l.label} className="flex items-center gap-1 text-[7px] sm:text-[8px] text-muted-foreground">
+                              <div className="w-1.5 h-1.5 rounded-[1px]" style={{ backgroundColor: l.color }} />
+                              {l.label}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Region list */}
+                      <div className="space-y-0.5 max-h-[140px] sm:max-h-[160px] overflow-y-auto pr-0.5">
                         {regionalIncidentData.map((r, i) => {
                           const pct = totalAll > 0 ? Math.round((r.total / totalAll) * 100) : 0;
                           const rRate = r.total > 0 ? Math.round((r.resolved / r.total) * 100) : 0;
                           const barPct = totalAll > 0 ? (r.total / regionalIncidentData[0].total) * 100 : 0;
                           return (
-                            <div key={r.region} className="px-2 py-1.5 rounded-md hover:bg-muted/30 transition-colors">
-                              <div className="flex items-center gap-1.5 mb-1">
-                                <div className="w-2 h-2 rounded-sm shrink-0" style={{ backgroundColor: PIE_COLORS[i % PIE_COLORS.length] }} />
-                                <span className="text-[9px] sm:text-[10px] font-medium truncate flex-1">{r.region}</span>
-                                <Badge variant="outline" className="text-[8px] sm:text-[9px] px-1 py-0 h-4 font-bold tabular-nums shrink-0">
-                                  {r.total}
-                                </Badge>
-                                <span className="text-[8px] sm:text-[9px] text-muted-foreground tabular-nums w-7 text-right">{pct}%</span>
-                              </div>
+                            <div key={r.region} className="px-1.5 py-1 rounded hover:bg-muted/30 transition-colors cursor-default group">
                               <div className="flex items-center gap-1.5">
-                                <div className="flex-1 h-1.5 rounded-full bg-muted/40 overflow-hidden">
-                                  <div className="h-full rounded-full transition-all duration-500" style={{ width: `${barPct}%`, backgroundColor: PIE_COLORS[i % PIE_COLORS.length] }} />
+                                <div className="w-1.5 h-1.5 rounded-sm shrink-0" style={{ backgroundColor: PIE_COLORS[i % PIE_COLORS.length] }} />
+                                <span className="text-[8px] sm:text-[9px] font-medium truncate flex-1">{r.region}</span>
+                                <span className="text-[7px] sm:text-[8px] text-success tabular-nums">{rRate}%</span>
+                                <Badge variant="outline" className="text-[7px] sm:text-[8px] px-1 py-0 h-3.5 font-bold tabular-nums shrink-0">{r.total}</Badge>
+                              </div>
+                              <div className="flex items-center gap-1 mt-0.5">
+                                <div className="flex-1 h-1 rounded-full bg-muted/40 overflow-hidden">
+                                  <div className="h-full rounded-full" style={{ width: `${barPct}%`, backgroundColor: PIE_COLORS[i % PIE_COLORS.length], opacity: 0.7 }} />
                                 </div>
-                                <div className="flex items-center gap-1.5 text-[7px] sm:text-[8px] text-muted-foreground shrink-0">
-                                  <span className="text-success font-semibold">✅{r.resolved}</span>
-                                  <span className="text-destructive font-semibold">🔴{r.critical}</span>
-                                  <span className="text-warning font-semibold">⏳{r.pending}</span>
+                                <div className="flex items-center gap-1 text-[6px] sm:text-[7px] text-muted-foreground shrink-0">
+                                  <span className="text-success">✅{r.resolved}</span>
+                                  <span className="text-destructive">🔴{r.critical}</span>
+                                  <span className="text-warning">⏳{r.pending}</span>
                                 </div>
                               </div>
                             </div>
@@ -791,14 +872,26 @@ export default function Dashboard() {
                         })}
                       </div>
 
-                      {/* Footer */}
-                      <div className="flex items-center justify-between px-2 pt-1.5 border-t border-border/40">
-                        <span className="text-[9px] sm:text-[10px] text-muted-foreground">
-                          Total: <span className="font-bold text-foreground">{totalAll}</span> incident
-                        </span>
-                        <span className="text-[9px] sm:text-[10px] text-success font-medium">
-                          {resRate}% resolved
-                        </span>
+                      {/* Insights footer */}
+                      <div className="grid grid-cols-2 gap-1.5 pt-1 border-t border-border/30">
+                        <div className="flex items-center gap-1 p-1 rounded bg-success/5 border border-success/10">
+                          <span className="text-[7px] sm:text-[8px]">🏅</span>
+                          <div className="min-w-0">
+                            <div className="text-[6px] sm:text-[7px] text-muted-foreground">Best Region</div>
+                            <div className="text-[8px] sm:text-[9px] font-semibold text-success truncate">
+                              {bestRegion?.region} ({bestRegion?.total > 0 ? Math.round((bestRegion.resolved / bestRegion.total) * 100) : 0}%)
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-1 p-1 rounded bg-destructive/5 border border-destructive/10">
+                          <span className="text-[7px] sm:text-[8px]">⚠️</span>
+                          <div className="min-w-0">
+                            <div className="text-[6px] sm:text-[7px] text-muted-foreground">Most Critical</div>
+                            <div className="text-[8px] sm:text-[9px] font-semibold text-destructive truncate">
+                              {worstRegion?.region} ({worstRegion?.critical} kritis)
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   );
