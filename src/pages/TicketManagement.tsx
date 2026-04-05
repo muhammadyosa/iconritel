@@ -1064,6 +1064,9 @@ export default function TicketManagement() {
             </CardContent>
           </Card>
         </TabsContent>
+        <TabsContent value="over-sla" className="mt-2 sm:mt-3">
+          <OverSLATab tickets={tickets} getTicketRegion={getTicketRegion} />
+        </TabsContent>
 
       </Tabs>
 
