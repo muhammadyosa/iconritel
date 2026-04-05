@@ -259,51 +259,70 @@ export function OverSLATab({ tickets, getTicketRegion }: OverSLATabProps) {
       {/* Charts */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-2 sm:gap-3">
         {/* Pie Chart */}
-        <Card className="shadow-sm border">
-          <CardHeader className="py-1.5 sm:py-2 px-2 sm:px-3 border-b bg-muted/30">
-            <CardTitle className="text-xs sm:text-sm">🗺️ Proporsi Over SLA per Region</CardTitle>
+        <Card className="overflow-hidden border">
+          <CardHeader className="py-2.5 px-3 sm:px-4 border-b bg-muted/20">
+            <CardTitle className="text-xs sm:text-sm flex items-center gap-2">🗺️ Proporsi Over SLA per Region</CardTitle>
+            <p className="text-[10px] sm:text-xs text-muted-foreground">Persentase kontribusi incident over SLA per wilayah</p>
           </CardHeader>
           <CardContent className="p-2 sm:p-3">
-            {pieData.length > 0 ? (
-              <div className="h-[200px] sm:h-[250px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={pieData}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={40}
-                      outerRadius={70}
-                      paddingAngle={2}
-                      dataKey="value"
-                      label={({ name, percent }) =>
-                        percent > 0.05 ? `${name} ${(percent * 100).toFixed(0)}%` : ""
-                      }
-                      labelLine={false}
-                    >
-                      {pieData.map((_, i) => (
-                        <Cell key={i} fill={REGION_COLORS[i % REGION_COLORS.length]} />
-                      ))}
-                    </Pie>
-                    <Tooltip formatter={(value: number) => [`${value} incident`, "Jumlah"]} />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-            ) : (
+            {pieData.length > 0 ? (() => {
+              const pieConfig: ChartConfig = {};
+              pieData.forEach((d, i) => { pieConfig[d.name] = { label: d.name, color: REGION_COLORS[i % REGION_COLORS.length] }; });
+              const totalAll = pieData.reduce((s, d) => s + d.value, 0);
+              return (
+                <div className="space-y-3">
+                  <ChartContainer config={pieConfig} className="h-[180px] sm:h-[200px] w-full mx-auto aspect-square max-w-[280px] sm:max-w-[300px]">
+                    <PieChart>
+                      <ChartTooltip content={<ChartTooltipContent nameKey="name" />} />
+                      <Pie data={pieData} cx="50%" cy="50%" innerRadius="35%" outerRadius="65%" paddingAngle={2}
+                        dataKey="value" nameKey="name"
+                        label={({ name, percent, cx, cy, midAngle, outerRadius }: any) => {
+                          const RADIAN = Math.PI / 180;
+                          const radius = outerRadius + 14;
+                          const x = cx + radius * Math.cos(-midAngle * RADIAN);
+                          const y = cy + radius * Math.sin(-midAngle * RADIAN);
+                          if (percent < 0.05) return null;
+                          return (
+                            <text x={x} y={y} fill="hsl(var(--foreground))" textAnchor={x > cx ? "start" : "end"} dominantBaseline="central"
+                              className="text-[7px] xs:text-[8px] sm:text-[9px] font-semibold" style={{ textShadow: "0 0 4px hsl(var(--background))" }}>
+                              {(percent * 100).toFixed(0)}%
+                            </text>
+                          );
+                        }}
+                        labelLine={{ stroke: "hsl(var(--muted-foreground))", strokeWidth: 1 }}
+                        strokeWidth={2} stroke="hsl(var(--background))">
+                        {pieData.map((_, index) => (
+                          <RechartsCell key={`cell-${index}`} fill={REGION_COLORS[index % REGION_COLORS.length]} />
+                        ))}
+                      </Pie>
+                    </PieChart>
+                  </ChartContainer>
+                  {/* Legend + Stats Grid */}
+                  <div className="grid grid-cols-1 xs:grid-cols-2 gap-x-2 gap-y-1">
+                    {regionData.map((r, i) => {
+                      const pct = totalAll > 0 ? Math.round((r.total / totalAll) * 100) : 0;
+                      return (
+                        <div key={r.name} className="flex items-center gap-1.5 px-2 py-1 rounded-md hover:bg-muted/40 transition-colors group">
+                          <div className="w-2 h-2 rounded-sm flex-shrink-0" style={{ backgroundColor: REGION_COLORS[i % REGION_COLORS.length] }} />
+                          <span className="text-[9px] sm:text-[10px] font-medium truncate flex-1 min-w-0">{r.name}</span>
+                          <Badge variant="outline" className="text-[8px] sm:text-[9px] px-1 py-0 h-4 font-bold tabular-nums shrink-0">
+                            {r.total}
+                          </Badge>
+                          <span className="text-[8px] sm:text-[9px] text-muted-foreground tabular-nums shrink-0 w-7 text-right">{pct}%</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  {/* Summary footer */}
+                  <div className="flex items-center justify-between px-2 pt-1 border-t border-border/40">
+                    <span className="text-[9px] sm:text-[10px] text-muted-foreground">Total: <span className="font-bold text-foreground">{totalAll}</span> incident</span>
+                    <span className="text-[9px] sm:text-[10px] text-muted-foreground">{regionData.length} region aktif</span>
+                  </div>
+                </div>
+              );
+            })() : (
               <p className="text-center text-muted-foreground text-xs py-8">Tidak ada data</p>
             )}
-            <div className="grid grid-cols-2 gap-1 mt-2">
-              {regionData.map((r, i) => (
-                <div key={r.name} className="flex items-center gap-1.5 text-[9px] sm:text-[10px]">
-                  <div
-                    className="h-2.5 w-2.5 rounded-sm shrink-0"
-                    style={{ backgroundColor: REGION_COLORS[i % REGION_COLORS.length] }}
-                  />
-                  <span className="truncate">{r.name}</span>
-                  <Badge variant="outline" className="text-[8px] px-1 py-0 ml-auto">{r.total}</Badge>
-                </div>
-              ))}
-            </div>
           </CardContent>
         </Card>
 
