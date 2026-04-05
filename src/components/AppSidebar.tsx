@@ -194,7 +194,7 @@ export function AppSidebar() {
         </nav>
 
         {/* Footer */}
-        <div className="mt-auto border-t border-sidebar-foreground/10 flex-shrink-0">
+        <div className="mt-auto border-t border-sidebar-border flex-shrink-0">
           <div className={collapsed ? "py-2 px-1.5" : "p-2"}>
             {collapsed ? (
               <Tooltip delayDuration={0}>
