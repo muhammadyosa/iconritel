@@ -162,6 +162,15 @@ export default function Dashboard() {
       .map(([region, stats]) => ({ region, ...stats }));
   }, [teamData, tickets, hostnameToRegionMap]);
 
+  // Tickets for selected region
+  const selectedRegionTickets = useMemo(() => {
+    if (!selectedRegion) return [];
+    return tickets.filter(t => {
+      const region = hostnameToRegionMap[(t.hostname || "").trim().toUpperCase()];
+      return region === selectedRegion;
+    });
+  }, [selectedRegion, tickets, hostnameToRegionMap]);
+
   const ritelTickets = useMemo(() => tickets.filter(t => !FEEDER_CONSTRAINTS_SET.has(t.constraint)), [tickets]);
   const feederTickets = useMemo(() => tickets.filter(t => FEEDER_CONSTRAINTS_SET.has(t.constraint)), [tickets]);
 
