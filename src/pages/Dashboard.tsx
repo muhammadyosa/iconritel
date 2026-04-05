@@ -882,13 +882,7 @@ export default function Dashboard() {
           {/* NOC Statistik Incident */}
           <NOCStatistikIncident tickets={tickets} variant="noc" />
 
-        </motion.div>
-
-        {/* Right column: NOC Statistik etc */}
-        <div className="space-y-3">
-          {/* Recent Activity - Admin Only (placeholder to keep grid balanced) */}
-        </div>
-      </div>
+      </motion.div>
 
       {/* Report Shift + Recent Activity - Side by Side at bottom */}
       <div className="grid gap-3 grid-cols-1 lg:grid-cols-2 w-full items-start">
