@@ -92,6 +92,8 @@ export default function Dashboard() {
   const [teamData, setTeamData] = useState<RegionalTeamRecord[]>([]);
   const [selectedRegion, setSelectedRegion] = useState<string | null>(null);
   const [regionDialogOpen, setRegionDialogOpen] = useState(false);
+  const [regionStatusFilter, setRegionStatusFilter] = useState<string>("all");
+  const [regionProportionOpen, setRegionProportionOpen] = useState(false);
 
   // Load OLT data
   useEffect(() => {
