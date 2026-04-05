@@ -31,6 +31,7 @@ import {
 import { StatusBadge } from "@/components/StatusBadge";
 import { Ticket, ALL_CONSTRAINTS, FEEDER_CONSTRAINTS_SET, generateTicketFormat } from "@/types/ticket";
 import { toast } from "sonner";
+import { ActivityAction } from "@/hooks/useActivityLog";
 
 interface TicketDetailDialogProps {
   ticket: Ticket;
@@ -38,6 +39,8 @@ interface TicketDetailDialogProps {
   isReviewer?: boolean;
   updateTicket: (id: string, updates: Partial<Ticket>) => Promise<void>;
   deleteTicket: (id: string) => Promise<void>;
+  logActivity?: (action: ActivityAction, detail?: string) => Promise<void>;
+  currentUserName?: string;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
 }
