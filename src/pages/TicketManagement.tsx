@@ -184,6 +184,20 @@ export default function TicketManagement() {
     const fallback = regionalTeamData.filter(r => r.serpoType.toUpperCase() === targetType);
     return [...new Set(fallback.map(r => r.mitraName))];
   }, [manualFormData.constraint, manualFormData.hostname, regionalTeamData]);
+  // Build mitraName → region map for resolving ticket region
+  const mitraToRegion = useMemo(() => {
+    const map: Record<string, string> = {};
+    regionalTeamData.forEach((r) => {
+      const key = r.mitraName.trim().toUpperCase();
+      if (key && !map[key]) map[key] = r.region;
+    });
+    return map;
+  }, [regionalTeamData]);
+
+  const getTicketRegion = (serpo: string) => {
+    return mitraToRegion[serpo.trim().toUpperCase()] || "-";
+  };
+
   const filteredData = excelData.filter((r) => {
     // Convert all fields to string to handle numeric values from Excel
     const customer = String(r.customer || "").toLowerCase();
@@ -225,6 +239,7 @@ export default function TicketManagement() {
         ticket.serviceId.toLowerCase().includes(query) ||
         ticket.constraint.toLowerCase().includes(query) ||
         ticket.serpo.toLowerCase().includes(query) ||
+        getTicketRegion(ticket.serpo).toLowerCase().includes(query) ||
         ticket.status.toLowerCase().includes(query) ||
         ticket.createdAt.toLowerCase().includes(query) ||
         (ticket.createdByName || "").toLowerCase().includes(query)
@@ -238,6 +253,7 @@ export default function TicketManagement() {
       case "serviceId": return ticket.serviceId.toLowerCase().includes(query);
       case "constraint": return ticket.constraint.toLowerCase().includes(query);
       case "serpo": return ticket.serpo.toLowerCase().includes(query);
+      case "region": return getTicketRegion(ticket.serpo).toLowerCase().includes(query);
       case "status": return ticket.status.toLowerCase().includes(query);
       case "created": return ticket.createdAt.toLowerCase().includes(query);
       case "createdBy": return (ticket.createdByName || "").toLowerCase().includes(query);
@@ -936,6 +952,7 @@ export default function TicketManagement() {
                       <SelectItem value="serviceId">Service ID</SelectItem>
                       <SelectItem value="constraint">Constraint</SelectItem>
                       <SelectItem value="serpo">Serpo</SelectItem>
+                      <SelectItem value="region">Region</SelectItem>
                       <SelectItem value="createdBy">Created By</SelectItem>
                       <SelectItem value="status">Status</SelectItem>
                       <SelectItem value="created">Created</SelectItem>
@@ -964,6 +981,7 @@ export default function TicketManagement() {
                       <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap bg-muted/80">👤 Customer/Type</TableHead>
                       <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap bg-muted/80">👨‍💼 Service ID</TableHead>
                       <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap bg-muted/80">👥 Serpo</TableHead>
+                      <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap bg-muted/80">🌐 Region</TableHead>
                       <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap bg-muted/80">✍️ Create by</TableHead>
                       <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap bg-muted/80">⏱️ Durasi</TableHead>
                       <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap bg-muted/80">⚙️ Status</TableHead>
@@ -972,7 +990,7 @@ export default function TicketManagement() {
                   <TableBody>
                     {tickets.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={8} className="text-center text-muted-foreground text-[8px] sm:text-[9px] py-2">
+                        <TableCell colSpan={9} className="text-center text-muted-foreground text-[8px] sm:text-[9px] py-2">
                           Belum ada incident
                         </TableCell>
                       </TableRow>
@@ -1017,6 +1035,9 @@ export default function TicketManagement() {
                           </TableCell>
                           <TableCell className="px-1 sm:px-1.5 py-0.5 font-mono text-[9px] sm:text-[10px]">{ticket.serviceId}</TableCell>
                           <TableCell className="px-1 sm:px-1.5 py-0.5 text-[9px] sm:text-[10px]">{ticket.serpo}</TableCell>
+                          <TableCell className="px-1 sm:px-1.5 py-0.5 text-[8px] sm:text-[9px]">
+                            <span className="text-muted-foreground">{getTicketRegion(ticket.serpo)}</span>
+                          </TableCell>
                           <TableCell className="px-1 sm:px-1.5 py-0.5 text-[9px] sm:text-[10px]">
                             <span className="text-muted-foreground">{ticket.createdByName || "-"}</span>
                           </TableCell>
