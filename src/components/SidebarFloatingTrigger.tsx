@@ -11,29 +11,21 @@ export function SidebarFloatingTrigger() {
   const collapsed = state === "collapsed";
 
   return (
-    <Tooltip delayDuration={300}>
+    <Tooltip delayDuration={400}>
       <TooltipTrigger asChild>
         <button
           onClick={toggleSidebar}
-          className="fixed z-30 top-1/2 -translate-y-1/2 h-7 w-7 rounded-full border-2 border-sidebar-border bg-sidebar-background text-sidebar-foreground/70 shadow-lg flex items-center justify-center hover:scale-110 hover:text-sidebar-foreground hover:shadow-xl hover:border-sidebar-primary active:scale-90 transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]"
+          className="fixed z-30 top-1/2 -translate-y-1/2 h-6 w-6 rounded-full border border-border bg-background text-muted-foreground shadow-sm flex items-center justify-center hover:scale-110 hover:bg-accent hover:text-accent-foreground active:scale-90 transition-all duration-200"
           style={{
-            left: collapsed ? 46 : "calc(250px - 14px)",
-            transition: "left 0.3s cubic-bezier(0.4,0,0.2,1), transform 0.2s ease, box-shadow 0.2s ease",
+            left: collapsed ? 40 : "calc(14rem - 12px)",
+            transition: "left 0.2s ease-out",
           }}
           aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
-          {collapsed ? (
-            <ChevronRight className="h-3.5 w-3.5" />
-          ) : (
-            <ChevronLeft className="h-3.5 w-3.5" />
-          )}
+          {collapsed ? <ChevronRight className="h-3 w-3" /> : <ChevronLeft className="h-3 w-3" />}
         </button>
       </TooltipTrigger>
-      <TooltipContent
-        side="right"
-        sideOffset={8}
-        className="text-xs"
-      >
+      <TooltipContent side="right" sideOffset={6} className="text-xs">
         {collapsed ? "Expand" : "Collapse"}
       </TooltipContent>
     </Tooltip>
