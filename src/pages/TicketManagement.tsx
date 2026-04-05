@@ -184,6 +184,20 @@ export default function TicketManagement() {
     const fallback = regionalTeamData.filter(r => r.serpoType.toUpperCase() === targetType);
     return [...new Set(fallback.map(r => r.mitraName))];
   }, [manualFormData.constraint, manualFormData.hostname, regionalTeamData]);
+  // Build mitraName → region map for resolving ticket region
+  const mitraToRegion = useMemo(() => {
+    const map: Record<string, string> = {};
+    regionalTeamData.forEach((r) => {
+      const key = r.mitraName.trim().toUpperCase();
+      if (key && !map[key]) map[key] = r.region;
+    });
+    return map;
+  }, [regionalTeamData]);
+
+  const getTicketRegion = (serpo: string) => {
+    return mitraToRegion[serpo.trim().toUpperCase()] || "-";
+  };
+
   const filteredData = excelData.filter((r) => {
     // Convert all fields to string to handle numeric values from Excel
     const customer = String(r.customer || "").toLowerCase();
