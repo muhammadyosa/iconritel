@@ -237,7 +237,7 @@ export function AppSidebar() {
                     </div>
                   </button>
                 </TooltipTrigger>
-                <TooltipContent side="right" sideOffset={12} className="bg-sidebar-background text-sidebar-foreground border-sidebar-border text-xs">
+                <TooltipContent side="right" sideOffset={12} className="bg-popover text-popover-foreground border text-xs">
                   {theme === "dark" ? "Light Mode" : "Dark Mode"}
                 </TooltipContent>
               </Tooltip>
