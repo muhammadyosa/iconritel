@@ -466,22 +466,22 @@ export function UserManagement() {
                     <SelectContent>
                       <SelectItem value="admin">
                         <div className="flex items-center gap-1.5 text-xs">
-                          <Shield className="h-3 w-3 text-primary" /> Admin
+                          <span>🕵️</span> Admin
                         </div>
                       </SelectItem>
                       <SelectItem value="noc">
                         <div className="flex items-center gap-1.5 text-xs">
-                          <User className="h-3 w-3 text-muted-foreground" /> NOC
+                          <span>🧑‍💼</span> NOC
                         </div>
                       </SelectItem>
                       <SelectItem value="reviewer">
                         <div className="flex items-center gap-1.5 text-xs">
-                          <Users className="h-3 w-3 text-amber-500" /> Reviewer
+                          <span>👨‍💻</span> Reviewer
                         </div>
                       </SelectItem>
                       <SelectItem value="intern">
                         <div className="flex items-center gap-1.5 text-xs">
-                          <User className="h-3 w-3 text-emerald-500" /> Intern
+                          <span>🧑‍🏫</span> Intern
                         </div>
                       </SelectItem>
                     </SelectContent>
