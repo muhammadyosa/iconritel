@@ -344,9 +344,9 @@ export function OverSLATab({ tickets, getTicketRegion }: OverSLATabProps) {
                   const hours = Math.floor((totalMinutes % 1440) / 60);
                   const mins = totalMinutes % 60;
                   const parts: string[] = [];
-                  if (days > 0) parts.push(`${days} HARI`);
-                  if (hours > 0) parts.push(`${hours} JAM`);
-                  parts.push(`${mins} MNT`);
+                  if (days > 0) parts.push(`${days}H`);
+                  if (hours > 0) parts.push(`${hours}J`);
+                  parts.push(`${mins}M`);
                   return { ...t, durationMs, durationLabel: parts.join(" ") };
                 })
                 .sort((a, b) => b.durationMs - a.durationMs)
@@ -356,7 +356,7 @@ export function OverSLATab({ tickets, getTicketRegion }: OverSLATabProps) {
               return (
                 <div className="space-y-0.5">
                   {/* Header */}
-                  <div className="grid grid-cols-[24px_1fr_90px_70px_80px] gap-1 px-1.5 py-1 text-[8px] sm:text-[9px] font-semibold text-muted-foreground border-b border-border/40">
+                  <div className="grid grid-cols-[20px_1fr_80px_60px_72px] sm:grid-cols-[24px_1fr_90px_70px_80px] gap-1 px-1.5 py-1 text-[8px] sm:text-[9px] font-semibold text-muted-foreground border-b border-border/40">
                     <span className="text-center">#</span>
                     <span>Incident</span>
                     <span>Constraint</span>
@@ -377,7 +377,7 @@ export function OverSLATab({ tickets, getTicketRegion }: OverSLATabProps) {
                       <div
                         key={t.id}
                         className={cn(
-                          "grid grid-cols-[24px_1fr_90px_70px_80px] gap-1 items-center px-1.5 py-1 rounded transition-colors hover:bg-muted/40",
+                          "grid grid-cols-[20px_1fr_80px_60px_72px] sm:grid-cols-[24px_1fr_90px_70px_80px] gap-1 items-center px-1.5 py-1 rounded transition-colors hover:bg-muted/40",
                           isTop3 && "bg-muted/20"
                         )}
                       >
