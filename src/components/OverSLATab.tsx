@@ -326,36 +326,70 @@ export function OverSLATab({ tickets, getTicketRegion }: OverSLATabProps) {
           </CardContent>
         </Card>
 
-        {/* Bar Chart */}
-        <Card className="shadow-sm border">
-          <CardHeader className="py-1.5 sm:py-2 px-2 sm:px-3 border-b bg-muted/30">
-            <CardTitle className="text-xs sm:text-sm">📊 Over SLA & Pending per Region</CardTitle>
+        {/* Tier Incident OVER SLA - Top 15 by Duration */}
+        <Card className="overflow-hidden border">
+          <CardHeader className="py-2.5 px-3 sm:px-4 border-b bg-muted/20">
+            <CardTitle className="text-xs sm:text-sm flex items-center gap-2">🏆 Tier Incident OVER SLA</CardTitle>
+            <p className="text-[10px] sm:text-xs text-muted-foreground">Top 15 incident dengan durasi tertinggi</p>
           </CardHeader>
           <CardContent className="p-2 sm:p-3">
-            {regionData.length > 0 ? (
-              <div className="h-[200px] sm:h-[280px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={regionData} layout="vertical" margin={{ left: 0, right: 10, top: 5, bottom: 5 }}>
-                    <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
-                    <XAxis type="number" tick={{ fontSize: 9 }} />
-                    <YAxis dataKey="name" type="category" width={80} tick={{ fontSize: 9 }} />
-                    <Tooltip
-                      contentStyle={{ fontSize: 11 }}
-                      formatter={(value: number, name: string) => [
-                        value,
-                        name === "overSLA" ? "Over SLA" : "Pending",
-                      ]}
-                    />
-                    <Legend
-                      wrapperStyle={{ fontSize: 10 }}
-                      formatter={(value) => (value === "overSLA" ? "Over SLA" : "Pending")}
-                    />
-                    <Bar dataKey="overSLA" stackId="a" fill="hsl(0, 84%, 55%)" radius={[0, 0, 0, 0]} />
-                    <Bar dataKey="pending" stackId="a" fill="hsl(38, 92%, 50%)" radius={[0, 4, 4, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            ) : (
+            {overSLATickets.length > 0 ? (() => {
+              const top15 = [...overSLATickets]
+                .map((t) => {
+                  const endTime = (t.status === "Pending" || t.status === "Resolved") && t.resolvedAt
+                    ? new Date(t.resolvedAt).getTime() : now;
+                  const durationMs = endTime - new Date(t.createdISO).getTime();
+                  const totalMinutes = Math.floor(durationMs / 60000);
+                  const days = Math.floor(totalMinutes / 1440);
+                  const hours = Math.floor((totalMinutes % 1440) / 60);
+                  const mins = totalMinutes % 60;
+                  const parts: string[] = [];
+                  if (days > 0) parts.push(`${days}H`);
+                  if (hours > 0) parts.push(`${hours}J`);
+                  parts.push(`${mins}M`);
+                  return { ...t, durationMs, durationLabel: parts.join(" ") };
+                })
+                .sort((a, b) => b.durationMs - a.durationMs)
+                .slice(0, 15);
+              const maxDuration = top15[0]?.durationMs || 1;
+
+              return (
+                <div className="space-y-1">
+                  {top15.map((t, idx) => {
+                    const pct = Math.max((t.durationMs / maxDuration) * 100, 2);
+                    const region = getTicketRegion(t.serpo);
+                    const barColor = t.status === "Critical"
+                      ? "bg-destructive"
+                      : t.status === "Pending"
+                      ? "bg-warning"
+                      : "bg-primary";
+                    return (
+                      <div key={t.id} className="flex items-center gap-2 group hover:bg-muted/40 rounded px-1.5 py-1 transition-colors">
+                        <span className="text-[9px] sm:text-[10px] font-bold text-muted-foreground w-5 text-right shrink-0">
+                          {idx + 1}
+                        </span>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-1 mb-0.5">
+                            <span className="font-mono text-[9px] sm:text-[10px] font-medium truncate">{t.id}</span>
+                            <RegionBadge region={region} />
+                            <StatusBadge status={t.status} />
+                          </div>
+                          <div className="relative h-3 rounded-full bg-muted/60 overflow-hidden">
+                            <div
+                              className={cn("h-full rounded-full transition-all duration-500", barColor)}
+                              style={{ width: `${pct}%` }}
+                            />
+                          </div>
+                        </div>
+                        <span className="text-[9px] sm:text-[10px] font-bold tabular-nums shrink-0 w-20 text-right text-foreground">
+                          {t.durationLabel}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              );
+            })() : (
               <p className="text-center text-muted-foreground text-xs py-8">Tidak ada data</p>
             )}
           </CardContent>
