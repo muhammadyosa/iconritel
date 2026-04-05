@@ -46,6 +46,7 @@ import {
 import { StatusBadge } from "@/components/StatusBadge";
 import { TicketDetailDialog } from "@/components/TicketDetailDialog";
 import { DurationCell } from "@/components/DurationCell";
+import { RegionBadge } from "@/components/RegionBadge";
 import { toast } from "sonner";
 import { useActivityLog } from "@/hooks/useActivityLog";
 
@@ -1035,8 +1036,8 @@ export default function TicketManagement() {
                           </TableCell>
                           <TableCell className="px-1 sm:px-1.5 py-0.5 font-mono text-[9px] sm:text-[10px]">{ticket.serviceId}</TableCell>
                           <TableCell className="px-1 sm:px-1.5 py-0.5 text-[9px] sm:text-[10px]">{ticket.serpo}</TableCell>
-                          <TableCell className="px-1 sm:px-1.5 py-0.5 text-[8px] sm:text-[9px]">
-                            <span className="text-muted-foreground">{getTicketRegion(ticket.serpo)}</span>
+                          <TableCell className="px-1 sm:px-1.5 py-0.5">
+                            <RegionBadge region={getTicketRegion(ticket.serpo)} />
                           </TableCell>
                           <TableCell className="px-1 sm:px-1.5 py-0.5 text-[9px] sm:text-[10px]">
                             <span className="text-muted-foreground">{ticket.createdByName || "-"}</span>
