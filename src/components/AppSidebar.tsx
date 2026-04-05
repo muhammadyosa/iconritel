@@ -97,7 +97,7 @@ const MenuItem = memo(function MenuItem({
         )}
       </span>
       {!collapsed && (
-        <span className="text-[13px] truncate flex-1 text-left flex items-center gap-1.5">
+        <span className="text-[13px] truncate flex-1 text-left flex items-center gap-1.5 animate-[fadeSlideIn_0.2s_ease-out]">
           {item.title}
           {showBadge && (
             <span className="h-4 min-w-4 px-1 rounded-full bg-destructive text-destructive-foreground text-[9px] font-bold flex items-center justify-center animate-pulse">
