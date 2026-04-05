@@ -52,6 +52,10 @@ import { useActivityLog } from "@/hooks/useActivityLog";
 import { Link } from "react-router-dom";
 
 export default function TicketManagement() {
+  const [activeTab, setActiveTab] = useState("preview-data");
+  const setTabCb = useCallback((v: string) => setActiveTab(v), []);
+  useSidebarTabSync("/tickets", setTabCb);
+
   // Local Excel data from IndexedDB
   const { excelData, isLoadingExcel } = useTickets();
   
