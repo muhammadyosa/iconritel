@@ -8,40 +8,61 @@ import {
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
+} from "@/components/ui/dialog";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Ticket } from "@/types/ticket";
 import { StatusBadge } from "@/components/StatusBadge";
 import { DurationCell } from "@/components/DurationCell";
 import { RegionBadge } from "@/components/RegionBadge";
-import { AlertTriangle, Clock, Search, Timer } from "lucide-react";
+import { AlertTriangle, Clock, Search, Timer, TrendingUp, ChevronRight } from "lucide-react";
 import {
   PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend,
   BarChart, Bar, XAxis, YAxis, CartesianGrid,
 } from "recharts";
+import { motion } from "framer-motion";
+import { cn } from "@/lib/utils";
 
 const SLA_MS = 8 * 60 * 60 * 1000;
 
 const REGION_COLORS = [
-  "#ef4444", "#f97316", "#eab308", "#22c55e", "#06b6d4",
-  "#3b82f6", "#8b5cf6", "#ec4899", "#f43f5e", "#14b8a6",
+  "hsl(217, 91%, 45%)",
+  "hsl(142, 76%, 36%)",
+  "hsl(38, 92%, 50%)",
+  "hsl(0, 84%, 55%)",
+  "hsl(262, 80%, 55%)",
+  "hsl(180, 70%, 40%)",
+  "hsl(330, 75%, 50%)",
+  "hsl(25, 95%, 53%)",
+  "hsl(195, 85%, 45%)",
+  "hsl(55, 80%, 45%)",
 ];
+
+function formatDuration(ms: number): string {
+  if (ms < 0) ms = 0;
+  const totalMinutes = Math.floor(ms / 60000);
+  const days = Math.floor(totalMinutes / 1440);
+  const hours = Math.floor((totalMinutes % 1440) / 60);
+  const minutes = totalMinutes % 60;
+  const parts: string[] = [];
+  if (days > 0) parts.push(`${days} HARI`);
+  if (hours > 0) parts.push(`${hours} JAM`);
+  parts.push(`${minutes} MENIT`);
+  return parts.join(" ");
+}
+
+type CardType = "total" | "critical" | "onProgress" | "pending";
 
 interface OverSLATabProps {
   tickets: Ticket[];
   getTicketRegion: (serpo: string) => string;
 }
 
-function formatDuration(ms: number): string {
-  if (ms < 0) ms = 0;
-  const totalMinutes = Math.floor(ms / 60000);
-  const hours = Math.floor(totalMinutes / 60);
-  const minutes = totalMinutes % 60;
-  if (hours > 0) return `${hours}j ${minutes}m`;
-  return `${minutes}m`;
-}
-
 export function OverSLATab({ tickets, getTicketRegion }: OverSLATabProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchField, setSearchField] = useState("all");
+  const [activeCard, setActiveCard] = useState<CardType | null>(null);
 
   // Filter: over SLA (>= 8h) OR Pending
   const overSLATickets = useMemo(() => {
@@ -80,7 +101,7 @@ export function OverSLATab({ tickets, getTicketRegion }: OverSLATabProps) {
     });
   }, [overSLATickets, searchQuery, searchField, getTicketRegion]);
 
-  // Sort by duration descending (longest first)
+  // Sort by duration descending
   const sortedTickets = useMemo(() => {
     return [...filteredTickets].sort((a, b) => {
       const endA = a.status === "Pending" && a.resolvedAt ? new Date(a.resolvedAt).getTime() : Date.now();
@@ -121,54 +142,94 @@ export function OverSLATab({ tickets, getTicketRegion }: OverSLATabProps) {
     return { total: overSLATickets.length, critical, onProgress, pending };
   }, [overSLATickets]);
 
+  // Drill-down tickets for card
+  const cardDrillDown = useMemo(() => {
+    if (!activeCard) return [];
+    switch (activeCard) {
+      case "total": return overSLATickets;
+      case "critical": return overSLATickets.filter((t) => t.status === "Critical");
+      case "onProgress": return overSLATickets.filter((t) => t.status === "On Progress");
+      case "pending": return overSLATickets.filter((t) => t.status === "Pending");
+    }
+  }, [activeCard, overSLATickets]);
+
+  // Region breakdown for drill-down
+  const cardRegionBreakdown = useMemo(() => {
+    const map: Record<string, number> = {};
+    cardDrillDown.forEach((t) => {
+      const r = getTicketRegion(t.serpo);
+      map[r] = (map[r] || 0) + 1;
+    });
+    return Object.entries(map)
+      .map(([name, count]) => ({ name, count }))
+      .sort((a, b) => b.count - a.count);
+  }, [cardDrillDown, getTicketRegion]);
+
+  // Constraint breakdown for drill-down
+  const cardConstraintBreakdown = useMemo(() => {
+    const map: Record<string, number> = {};
+    cardDrillDown.forEach((t) => {
+      map[t.constraint] = (map[t.constraint] || 0) + 1;
+    });
+    return Object.entries(map)
+      .map(([name, count]) => ({ name, count }))
+      .sort((a, b) => b.count - a.count);
+  }, [cardDrillDown]);
+
+  const cardLabels: Record<CardType, { label: string; emoji: string; color: string; bgColor: string; borderColor: string }> = {
+    total: { label: "Total Over SLA", emoji: "⚠️", color: "text-orange-400", bgColor: "bg-orange-500/10 hover:bg-orange-500/15", borderColor: "border-orange-500/20 hover:border-orange-500/40" },
+    critical: { label: "Critical", emoji: "🔴", color: "text-red-400", bgColor: "bg-red-500/10 hover:bg-red-500/15", borderColor: "border-red-500/20 hover:border-red-500/40" },
+    onProgress: { label: "On Progress", emoji: "🔵", color: "text-blue-400", bgColor: "bg-blue-500/10 hover:bg-blue-500/15", borderColor: "border-blue-500/20 hover:border-blue-500/40" },
+    pending: { label: "Pending", emoji: "🟡", color: "text-amber-400", bgColor: "bg-amber-500/10 hover:bg-amber-500/15", borderColor: "border-amber-500/20 hover:border-amber-500/40" },
+  };
+
+  const cardIcons: Record<CardType, React.ReactNode> = {
+    total: <AlertTriangle className="h-4 w-4 text-orange-400" />,
+    critical: <Timer className="h-4 w-4 text-red-400" />,
+    onProgress: <Clock className="h-4 w-4 text-blue-400" />,
+    pending: <AlertTriangle className="h-4 w-4 text-amber-400" />,
+  };
+
+  const cardValues: Record<CardType, number> = {
+    total: stats.total,
+    critical: stats.critical,
+    onProgress: stats.onProgress,
+    pending: stats.pending,
+  };
+
   return (
     <div className="space-y-3">
-      {/* Stats Cards */}
+      {/* Stats Cards - Interactive */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-        <Card className="shadow-sm border">
-          <CardContent className="p-2 sm:p-3 flex items-center gap-2">
-            <div className="p-1.5 rounded-lg bg-destructive/10">
-              <AlertTriangle className="h-4 w-4 text-destructive" />
-            </div>
-            <div>
-              <p className="text-[9px] sm:text-[10px] text-muted-foreground">Total Over SLA</p>
-              <p className="text-base sm:text-lg font-bold text-destructive">{stats.total}</p>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="shadow-sm border">
-          <CardContent className="p-2 sm:p-3 flex items-center gap-2">
-            <div className="p-1.5 rounded-lg bg-red-500/10">
-              <Timer className="h-4 w-4 text-red-500" />
-            </div>
-            <div>
-              <p className="text-[9px] sm:text-[10px] text-muted-foreground">Critical</p>
-              <p className="text-base sm:text-lg font-bold text-red-500">{stats.critical}</p>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="shadow-sm border">
-          <CardContent className="p-2 sm:p-3 flex items-center gap-2">
-            <div className="p-1.5 rounded-lg bg-blue-500/10">
-              <Clock className="h-4 w-4 text-blue-500" />
-            </div>
-            <div>
-              <p className="text-[9px] sm:text-[10px] text-muted-foreground">On Progress</p>
-              <p className="text-base sm:text-lg font-bold text-blue-500">{stats.onProgress}</p>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="shadow-sm border">
-          <CardContent className="p-2 sm:p-3 flex items-center gap-2">
-            <div className="p-1.5 rounded-lg bg-amber-500/10">
-              <AlertTriangle className="h-4 w-4 text-amber-500" />
-            </div>
-            <div>
-              <p className="text-[9px] sm:text-[10px] text-muted-foreground">Pending</p>
-              <p className="text-base sm:text-lg font-bold text-amber-500">{stats.pending}</p>
-            </div>
-          </CardContent>
-        </Card>
+        {(["total", "critical", "onProgress", "pending"] as CardType[]).map((type) => {
+          const cfg = cardLabels[type];
+          return (
+            <motion.div
+              key={type}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <Card
+                className={cn(
+                  "shadow-sm border cursor-pointer transition-all duration-200",
+                  cfg.bgColor, cfg.borderColor
+                )}
+                onClick={() => setActiveCard(type)}
+              >
+                <CardContent className="p-2 sm:p-3 flex items-center gap-2">
+                  <div className={cn("p-1.5 rounded-lg", cfg.bgColor)}>
+                    {cardIcons[type]}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[9px] sm:text-[10px] text-muted-foreground">{cfg.label}</p>
+                    <p className={cn("text-base sm:text-lg font-bold", cfg.color)}>{cardValues[type]}</p>
+                  </div>
+                  <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/40" />
+                </CardContent>
+              </Card>
+            </motion.div>
+          );
+        })}
       </div>
 
       {/* Charts */}
@@ -252,8 +313,8 @@ export function OverSLATab({ tickets, getTicketRegion }: OverSLATabProps) {
                       wrapperStyle={{ fontSize: 10 }}
                       formatter={(value) => (value === "overSLA" ? "Over SLA" : "Pending")}
                     />
-                    <Bar dataKey="overSLA" stackId="a" fill="#ef4444" radius={[0, 0, 0, 0]} />
-                    <Bar dataKey="pending" stackId="a" fill="#f59e0b" radius={[0, 4, 4, 0]} />
+                    <Bar dataKey="overSLA" stackId="a" fill="hsl(0, 84%, 55%)" radius={[0, 0, 0, 0]} />
+                    <Bar dataKey="pending" stackId="a" fill="hsl(38, 92%, 50%)" radius={[0, 4, 4, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
@@ -352,6 +413,95 @@ export function OverSLATab({ tickets, getTicketRegion }: OverSLATabProps) {
           </div>
         </CardContent>
       </Card>
+
+      {/* Drill-down Dialog */}
+      <Dialog open={activeCard !== null} onOpenChange={(open) => !open && setActiveCard(null)}>
+        <DialogContent className="max-w-2xl max-h-[85vh]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-sm">
+              {activeCard && cardLabels[activeCard].emoji} {activeCard && cardLabels[activeCard].label}
+              <Badge variant="secondary" className="text-xs">{cardDrillDown.length} Incident</Badge>
+            </DialogTitle>
+            <DialogDescription className="text-xs text-muted-foreground">
+              Detail incident berdasarkan status yang dipilih
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-3">
+            {/* Region Breakdown */}
+            <div>
+              <h4 className="text-[10px] font-semibold text-muted-foreground mb-1.5 flex items-center gap-1">
+                <TrendingUp className="h-3 w-3" /> Distribusi per Region
+              </h4>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
+                {cardRegionBreakdown.map((r) => (
+                  <div key={r.name} className="flex items-center justify-between bg-muted/40 rounded-md px-2 py-1.5">
+                    <RegionBadge region={r.name} />
+                    <Badge variant="outline" className="text-[9px] font-bold">{r.count}</Badge>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Constraint Breakdown */}
+            <div>
+              <h4 className="text-[10px] font-semibold text-muted-foreground mb-1.5 flex items-center gap-1">
+                📋 Top Constraint
+              </h4>
+              <div className="flex flex-wrap gap-1">
+                {cardConstraintBreakdown.slice(0, 8).map((c) => (
+                  <Badge key={c.name} variant="outline" className="text-[8px] sm:text-[9px] px-1.5 py-0.5 gap-1">
+                    {c.name}
+                    <span className="font-bold text-primary">{c.count}</span>
+                  </Badge>
+                ))}
+              </div>
+            </div>
+
+            {/* Ticket list */}
+            <ScrollArea className="max-h-[40vh]">
+              <div className="rounded-md border">
+                <Table>
+                  <TableHeader className="sticky top-0 bg-background z-10">
+                    <TableRow className="h-6">
+                      <TableHead className="px-1.5 py-0.5 text-[8px] sm:text-[9px] bg-muted/80">ID</TableHead>
+                      <TableHead className="px-1.5 py-0.5 text-[8px] sm:text-[9px] bg-muted/80">Constraint</TableHead>
+                      <TableHead className="px-1.5 py-0.5 text-[8px] sm:text-[9px] bg-muted/80">Region</TableHead>
+                      <TableHead className="px-1.5 py-0.5 text-[8px] sm:text-[9px] bg-muted/80">Durasi</TableHead>
+                      <TableHead className="px-1.5 py-0.5 text-[8px] sm:text-[9px] bg-muted/80">Status</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {cardDrillDown.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={5} className="text-center py-4 text-muted-foreground text-xs">
+                          Tidak ada data
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      cardDrillDown.map((t) => (
+                        <TableRow key={t.id} className="h-6 hover:bg-muted/40">
+                          <TableCell className="px-1.5 py-0.5 font-mono text-[9px] font-medium">{t.id}</TableCell>
+                          <TableCell className="px-1.5 py-0.5 text-[9px]">{t.constraint}</TableCell>
+                          <TableCell className="px-1.5 py-0.5">
+                            <RegionBadge region={getTicketRegion(t.serpo)} />
+                          </TableCell>
+                          <TableCell className="px-1.5 py-0.5">
+                            <DurationCell createdISO={t.createdISO} status={t.status} resolvedAt={t.resolvedAt} />
+                          </TableCell>
+                          <TableCell className="px-1.5 py-0.5">
+                            <StatusBadge status={t.status} />
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
+            </ScrollArea>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
