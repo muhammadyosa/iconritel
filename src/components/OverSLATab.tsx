@@ -354,74 +354,68 @@ export function OverSLATab({ tickets, getTicketRegion }: OverSLATabProps) {
               const maxDuration = top15[0]?.durationMs || 1;
 
               return (
-                <div className="space-y-0.5">
-                  {/* Header */}
-                  <div className="grid grid-cols-[20px_1fr_80px_60px_72px] sm:grid-cols-[24px_1fr_90px_70px_80px] gap-1 px-1.5 py-1 text-[8px] sm:text-[9px] font-semibold text-muted-foreground border-b border-border/40">
-                    <span className="text-center">#</span>
-                    <span>Incident</span>
-                    <span>Constraint</span>
-                    <span className="text-center">Region</span>
-                    <span className="text-right">Durasi</span>
-                  </div>
-                  {top15.map((t, idx) => {
-                    const pct = Math.max((t.durationMs / maxDuration) * 100, 3);
-                    const region = getTicketRegion(t.serpo);
-                    const isTop3 = idx < 3;
-                    const barColor = t.status === "Critical"
-                      ? "bg-destructive/80"
-                      : t.status === "Pending"
-                      ? "bg-warning/80"
-                      : "bg-primary/80";
-                    const rankEmoji = idx === 0 ? "🥇" : idx === 1 ? "🥈" : idx === 2 ? "🥉" : null;
-                    return (
-                      <div
-                        key={t.id}
-                        className={cn(
-                          "grid grid-cols-[20px_1fr_80px_60px_72px] sm:grid-cols-[24px_1fr_90px_70px_80px] gap-1 items-center px-1.5 py-1 rounded transition-colors hover:bg-muted/40",
-                          isTop3 && "bg-muted/20"
-                        )}
-                      >
-                        <span className="text-[9px] sm:text-[10px] font-bold text-muted-foreground text-center">
-                          {rankEmoji || idx + 1}
-                        </span>
-                        <div className="min-w-0">
-                          <div className="flex items-center gap-1 mb-0.5">
-                            <span className="font-mono text-[9px] sm:text-[10px] font-semibold truncate">{t.id}</span>
-                            <StatusBadge status={t.status} />
-                          </div>
-                          <div className="relative h-2 rounded-full bg-muted/50 overflow-hidden">
-                            <div className={cn("h-full rounded-full transition-all duration-500", barColor)} style={{ width: `${pct}%` }} />
-                          </div>
-                        </div>
-                        <span className="text-[8px] sm:text-[9px] text-muted-foreground truncate">{t.constraint}</span>
-                        <div className="flex justify-center">
-                          <RegionBadge region={region} />
-                        </div>
-                        <span className={cn(
-                          "text-[8px] sm:text-[9px] font-bold tabular-nums text-right",
-                          isTop3 ? "text-destructive" : "text-foreground"
-                        )}>
-                          {t.durationLabel}
-                        </span>
-                      </div>
-                    );
-                  })}
+                <div className="overflow-x-auto">
+                  <table className="w-full text-[9px] sm:text-[10px]">
+                    <thead>
+                      <tr className="border-b border-border/40 text-[8px] sm:text-[9px] text-muted-foreground">
+                        <th className="text-center w-6 py-1 font-semibold">#</th>
+                        <th className="text-left py-1 font-semibold">ID</th>
+                        <th className="text-left py-1 font-semibold hidden sm:table-cell">Serpo</th>
+                        <th className="text-center py-1 font-semibold">Region</th>
+                        <th className="text-center py-1 font-semibold">Status</th>
+                        <th className="text-right py-1 pr-1.5 font-semibold whitespace-nowrap">Durasi</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {top15.map((t, idx) => {
+                        const region = getTicketRegion(t.serpo);
+                        const isTop3 = idx < 3;
+                        const rankIcon = idx === 0 ? "🥇" : idx === 1 ? "🥈" : idx === 2 ? "🥉" : String(idx + 1);
+                        const pct = Math.max((t.durationMs / maxDuration) * 100, 4);
+                        const barColor = t.status === "Critical"
+                          ? "bg-destructive/60"
+                          : t.status === "Pending"
+                          ? "bg-warning/60"
+                          : "bg-primary/60";
+                        return (
+                          <tr
+                            key={t.id}
+                            className={cn(
+                              "border-b border-border/10 hover:bg-muted/30 transition-colors relative",
+                              isTop3 && "bg-muted/10"
+                            )}
+                          >
+                            <td className="text-center py-1.5 font-bold text-muted-foreground">{rankIcon}</td>
+                            <td className="py-1.5 font-mono font-semibold">{t.id}</td>
+                            <td className="py-1.5 text-muted-foreground truncate max-w-[100px] hidden sm:table-cell">{t.serpo}</td>
+                            <td className="py-1.5 text-center"><RegionBadge region={region} /></td>
+                            <td className="py-1.5 text-center"><StatusBadge status={t.status} /></td>
+                            <td className="py-1.5 pr-1.5 text-right">
+                              <div className="flex items-center justify-end gap-1.5">
+                                <div className="hidden sm:block w-16 h-1.5 rounded-full bg-muted/40 overflow-hidden">
+                                  <div className={cn("h-full rounded-full", barColor)} style={{ width: `${pct}%` }} />
+                                </div>
+                                <span className={cn(
+                                  "font-bold tabular-nums whitespace-nowrap",
+                                  isTop3 ? "text-destructive" : "text-foreground"
+                                )}>
+                                  {t.durationLabel}
+                                </span>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
                   {/* Footer */}
-                  <div className="flex items-center justify-between px-2 pt-1.5 mt-1 border-t border-border/40">
-                    <div className="flex items-center gap-3">
-                      <span className="flex items-center gap-1 text-[8px] sm:text-[9px] text-muted-foreground">
-                        <span className="w-2 h-2 rounded-sm bg-destructive/80" /> Critical
-                      </span>
-                      <span className="flex items-center gap-1 text-[8px] sm:text-[9px] text-muted-foreground">
-                        <span className="w-2 h-2 rounded-sm bg-warning/80" /> Pending
-                      </span>
-                      <span className="flex items-center gap-1 text-[8px] sm:text-[9px] text-muted-foreground">
-                        <span className="w-2 h-2 rounded-sm bg-primary/80" /> On Progress
-                      </span>
+                  <div className="flex items-center justify-between px-1.5 pt-1.5 mt-0.5 text-[8px] sm:text-[9px] text-muted-foreground">
+                    <div className="flex items-center gap-2.5">
+                      <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-destructive" />Critical</span>
+                      <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-warning" />Pending</span>
+                      <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-primary" />On Progress</span>
                     </div>
-                    <span className="text-[8px] sm:text-[9px] text-muted-foreground">
-                      Top {top15.length} dari {overSLATickets.length} incident
-                    </span>
+                    <span>Top {top15.length} / {overSLATickets.length}</span>
                   </div>
                 </div>
               );
