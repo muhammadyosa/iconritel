@@ -307,7 +307,7 @@ export function OverSLATab({ tickets, getTicketRegion, onTicketClick }: OverSLAT
                       const pct = totalAll > 0 ? Math.round((r.total / totalAll) * 100) : 0;
                       const barPct = totalAll > 0 ? (r.total / regionData[0].total) * 100 : 0;
                       return (
-                        <div key={r.name} className="px-2 py-1.5 rounded-md hover:bg-muted/30 transition-colors">
+                        <div key={r.name} className="px-2 py-1.5 rounded-md hover:bg-muted/30 transition-colors cursor-pointer" onClick={() => setSelectedRegion(r.name)}>
                           <div className="flex items-center gap-1.5 mb-1">
                             <div className="w-2 h-2 rounded-sm shrink-0" style={{ backgroundColor: REGION_COLORS[i % REGION_COLORS.length] }} />
                             <span className="text-[9px] sm:text-[10px] font-medium truncate flex-1">{r.name}</span>
