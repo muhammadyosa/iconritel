@@ -723,77 +723,86 @@ export default function Dashboard() {
       >
           {/* Proporsi Incident + Tier OVER SLA side by side */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {/* Proporsi Incident Pie Chart */}
+            {/* Regional Office Summary */}
             <Card className="overflow-hidden border">
               <CardHeader className="py-2.5 px-3 sm:px-4 border-b bg-muted/20">
-                <CardTitle className="text-xs sm:text-sm flex items-center gap-2">🥧 Proporsi Incident per Region</CardTitle>
-                <p className="text-[10px] sm:text-xs text-muted-foreground">Persentase kontribusi incident per wilayah</p>
+                <CardTitle className="text-xs sm:text-sm flex items-center gap-2">🗺️ Regional Office</CardTitle>
+                <p className="text-[10px] sm:text-xs text-muted-foreground">Ringkasan data per wilayah</p>
               </CardHeader>
               <CardContent className="p-2 sm:p-3">
                 {regionalIncidentData.length === 0 ? (
-                  <p className="text-sm text-muted-foreground text-center py-8">Belum ada data incident per region</p>
-                ) : (
-                  (() => {
-                    const PIE_COLORS = [
-                      "hsl(217, 91%, 45%)", "hsl(142, 76%, 36%)", "hsl(38, 92%, 50%)",
-                      "hsl(0, 84%, 55%)", "hsl(262, 80%, 55%)", "hsl(180, 70%, 40%)",
-                      "hsl(330, 75%, 50%)", "hsl(25, 95%, 53%)", "hsl(195, 85%, 45%)", "hsl(55, 80%, 45%)",
-                    ];
-                    const pieData = regionalIncidentData.map(r => ({ name: r.region, value: r.total }));
-                    const pieConfig: ChartConfig = {};
-                    pieData.forEach((d, i) => { pieConfig[d.name] = { label: d.name, color: PIE_COLORS[i % PIE_COLORS.length] }; });
-                    const totalAll = pieData.reduce((s, d) => s + d.value, 0);
-                    return (
-                      <div className="space-y-3">
-                        <ChartContainer config={pieConfig} className="h-[180px] sm:h-[200px] w-full mx-auto aspect-square max-w-[280px] sm:max-w-[300px]">
-                          <PieChart>
-                            <ChartTooltip content={<ChartTooltipContent nameKey="name" />} />
-                            <Pie data={pieData} cx="50%" cy="50%" innerRadius="35%" outerRadius="65%" paddingAngle={2}
-                              dataKey="value" nameKey="name"
-                              label={({ name, percent, cx, cy, midAngle, outerRadius }: any) => {
-                                const RADIAN = Math.PI / 180;
-                                const radius = outerRadius + 14;
-                                const x = cx + radius * Math.cos(-midAngle * RADIAN);
-                                const y = cy + radius * Math.sin(-midAngle * RADIAN);
-                                if (percent < 0.05) return null;
-                                return (
-                                  <text x={x} y={y} fill="hsl(var(--foreground))" textAnchor={x > cx ? "start" : "end"} dominantBaseline="central"
-                                    className="text-[7px] xs:text-[8px] sm:text-[9px] font-semibold" style={{ textShadow: "0 0 4px hsl(var(--background))" }}>
-                                    {(percent * 100).toFixed(0)}%
-                                  </text>
-                                );
-                              }}
-                              labelLine={{ stroke: "hsl(var(--muted-foreground))", strokeWidth: 1 }}
-                              strokeWidth={2} stroke="hsl(var(--background))">
-                              {pieData.map((_, index) => (
-                                <RechartsCell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
-                              ))}
-                            </Pie>
-                          </PieChart>
-                        </ChartContainer>
-                        <div className="grid grid-cols-1 xs:grid-cols-2 gap-x-2 gap-y-1">
-                          {regionalIncidentData.map((r, i) => {
-                            const pct = totalAll > 0 ? Math.round((r.total / totalAll) * 100) : 0;
-                            return (
-                              <div key={r.region} className="flex items-center gap-1.5 px-2 py-1 rounded-md hover:bg-muted/40 transition-colors group">
-                                <div className="w-2 h-2 rounded-sm flex-shrink-0" style={{ backgroundColor: PIE_COLORS[i % PIE_COLORS.length] }} />
-                                <span className="text-[9px] sm:text-[10px] font-medium truncate flex-1 min-w-0">{r.region}</span>
+                  <p className="text-sm text-muted-foreground text-center py-8">Belum ada data region</p>
+                ) : (() => {
+                  const totalAll = regionalIncidentData.reduce((s, r) => s + r.total, 0);
+                  const totalResolved = regionalIncidentData.reduce((s, r) => s + r.resolved, 0);
+                  const totalPending = regionalIncidentData.reduce((s, r) => s + r.pending + r.critical, 0);
+                  const resRate = totalAll > 0 ? Math.round((totalResolved / totalAll) * 100) : 0;
+                  const PIE_COLORS = [
+                    "hsl(217, 91%, 45%)", "hsl(142, 76%, 36%)", "hsl(38, 92%, 50%)",
+                    "hsl(0, 84%, 55%)", "hsl(262, 80%, 55%)", "hsl(180, 70%, 40%)",
+                    "hsl(330, 75%, 50%)", "hsl(25, 95%, 53%)", "hsl(195, 85%, 45%)", "hsl(55, 80%, 45%)",
+                  ];
+                  return (
+                    <div className="space-y-2.5">
+                      {/* Quick stats row */}
+                      <div className="grid grid-cols-3 gap-1.5">
+                        <div className="text-center p-1.5 rounded-md bg-primary/5 border border-primary/10">
+                          <div className="text-sm sm:text-base font-bold text-primary">{regionalIncidentData.length}</div>
+                          <div className="text-[8px] sm:text-[9px] text-muted-foreground">Region</div>
+                        </div>
+                        <div className="text-center p-1.5 rounded-md bg-success/5 border border-success/10">
+                          <div className="text-sm sm:text-base font-bold text-success">{totalResolved}</div>
+                          <div className="text-[8px] sm:text-[9px] text-muted-foreground">Resolved</div>
+                        </div>
+                        <div className="text-center p-1.5 rounded-md bg-destructive/5 border border-destructive/10">
+                          <div className="text-sm sm:text-base font-bold text-destructive">{totalPending}</div>
+                          <div className="text-[8px] sm:text-[9px] text-muted-foreground">Aktif</div>
+                        </div>
+                      </div>
+
+                      {/* Region list with progress */}
+                      <div className="space-y-1">
+                        {regionalIncidentData.map((r, i) => {
+                          const pct = totalAll > 0 ? Math.round((r.total / totalAll) * 100) : 0;
+                          const rRate = r.total > 0 ? Math.round((r.resolved / r.total) * 100) : 0;
+                          const barPct = totalAll > 0 ? (r.total / regionalIncidentData[0].total) * 100 : 0;
+                          return (
+                            <div key={r.region} className="px-2 py-1.5 rounded-md hover:bg-muted/30 transition-colors">
+                              <div className="flex items-center gap-1.5 mb-1">
+                                <div className="w-2 h-2 rounded-sm shrink-0" style={{ backgroundColor: PIE_COLORS[i % PIE_COLORS.length] }} />
+                                <span className="text-[9px] sm:text-[10px] font-medium truncate flex-1">{r.region}</span>
                                 <Badge variant="outline" className="text-[8px] sm:text-[9px] px-1 py-0 h-4 font-bold tabular-nums shrink-0">
                                   {r.total}
                                 </Badge>
-                                <span className="text-[8px] sm:text-[9px] text-muted-foreground tabular-nums shrink-0 w-7 text-right">{pct}%</span>
+                                <span className="text-[8px] sm:text-[9px] text-muted-foreground tabular-nums w-7 text-right">{pct}%</span>
                               </div>
-                            );
-                          })}
-                        </div>
-                        <div className="flex items-center justify-between px-2 pt-1 border-t border-border/40">
-                          <span className="text-[9px] sm:text-[10px] text-muted-foreground">Total: <span className="font-bold text-foreground">{totalAll}</span> incident</span>
-                          <span className="text-[9px] sm:text-[10px] text-muted-foreground">{regionalIncidentData.length} region aktif</span>
-                        </div>
+                              <div className="flex items-center gap-1.5">
+                                <div className="flex-1 h-1.5 rounded-full bg-muted/40 overflow-hidden">
+                                  <div className="h-full rounded-full transition-all duration-500" style={{ width: `${barPct}%`, backgroundColor: PIE_COLORS[i % PIE_COLORS.length] }} />
+                                </div>
+                                <div className="flex items-center gap-1.5 text-[7px] sm:text-[8px] text-muted-foreground shrink-0">
+                                  <span className="text-success font-semibold">✅{r.resolved}</span>
+                                  <span className="text-destructive font-semibold">🔴{r.critical}</span>
+                                  <span className="text-warning font-semibold">⏳{r.pending}</span>
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
                       </div>
-                    );
-                  })()
-                )}
+
+                      {/* Footer */}
+                      <div className="flex items-center justify-between px-2 pt-1.5 border-t border-border/40">
+                        <span className="text-[9px] sm:text-[10px] text-muted-foreground">
+                          Total: <span className="font-bold text-foreground">{totalAll}</span> incident
+                        </span>
+                        <span className="text-[9px] sm:text-[10px] text-success font-medium">
+                          {resRate}% resolved
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })()}
               </CardContent>
             </Card>
 
