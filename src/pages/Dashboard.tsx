@@ -879,13 +879,11 @@ export default function Dashboard() {
             })}
           </div>
 
-          {/* NOC Statistik Incident */}
-          <NOCStatistikIncident tickets={tickets} variant="noc" />
 
       </motion.div>
 
-      {/* Report Shift + Recent Activity - Side by Side at bottom */}
-      <div className="grid gap-3 grid-cols-1 lg:grid-cols-2 w-full items-start">
+      {/* Report Shift + NOC Statistik + Recent Activity - 3 columns at bottom */}
+      <div className="grid gap-3 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 w-full items-start">
         {/* Report Shift */}
         {shiftReports.length > 0 && (
           <motion.div
