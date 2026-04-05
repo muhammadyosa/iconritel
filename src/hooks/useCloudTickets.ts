@@ -334,6 +334,21 @@ export function useCloudTickets() {
   }, [upsertUserHistory]);
 
   const updateTicket = useCallback(async (id: string, updates: Partial<Ticket>) => {
+    // Optimistic update: update local state instantly
+    const prevTickets = tickets;
+    setTickets((prev) =>
+      prev.map((t) => {
+        if (t.id !== id) return t;
+        const merged = { ...t, ...updates };
+        if (updates.status === "Resolved" && t.status !== "Resolved") {
+          merged.resolvedAt = new Date().toISOString();
+        } else if (updates.status && updates.status !== "Resolved") {
+          merged.resolvedAt = undefined;
+        }
+        return merged;
+      })
+    );
+
     try {
       const dbUpdates: Record<string, unknown> = {};
       if (updates.id !== undefined) dbUpdates.ticket_id = updates.id;
@@ -350,8 +365,7 @@ export function useCloudTickets() {
         dbUpdates.status = updates.status;
         if (updates.status === "Resolved") {
           dbUpdates.resolved_at = new Date().toISOString();
-          // Record resolved count in user history
-          const ticket = tickets.find(t => t.id === id);
+          const ticket = prevTickets.find(t => t.id === id);
           if (ticket?.createdByName) {
             upsertUserHistory(ticket.createdByName, ticket.createdByUserId, ticket.createdISO, "total_resolved", 1);
           }
@@ -366,8 +380,10 @@ export function useCloudTickets() {
         .eq("ticket_id" as never, id) as unknown as Promise<{ error: Error | null }>);
 
       if (error) throw error;
-      // Realtime will handle updating the list
+      // Realtime will reconcile if needed
     } catch (error) {
+      // Rollback on failure
+      setTickets(prevTickets);
       if (import.meta.env.DEV) {
         console.error("Error updating ticket:", error);
       }
