@@ -1,4 +1,5 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
+import { useSidebarTabSync } from "@/hooks/useSidebarTabSync";
 import { useCloudTickets } from "@/hooks/useCloudTickets";
 import { loadDefaultRegionalTeamData } from "@/lib/defaultRegionalData";
 import { RegionalTeamRecord } from "@/types/regionalTeam";
