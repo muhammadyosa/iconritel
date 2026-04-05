@@ -239,6 +239,7 @@ export default function TicketManagement() {
         ticket.serviceId.toLowerCase().includes(query) ||
         ticket.constraint.toLowerCase().includes(query) ||
         ticket.serpo.toLowerCase().includes(query) ||
+        getTicketRegion(ticket.serpo).toLowerCase().includes(query) ||
         ticket.status.toLowerCase().includes(query) ||
         ticket.createdAt.toLowerCase().includes(query) ||
         (ticket.createdByName || "").toLowerCase().includes(query)
