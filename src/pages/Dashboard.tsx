@@ -883,6 +883,8 @@ export default function Dashboard() {
           {/* NOC Statistik Incident */}
           <NOCStatistikIncident tickets={tickets} variant="noc" />
 
+          {/* Tier Incident OVER SLA */}
+          <DashboardTierOverSLA tickets={tickets} getTicketRegion={getTicketRegion} />
 
         </motion.div>
 
