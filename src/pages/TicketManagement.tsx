@@ -948,15 +948,15 @@ export default function TicketManagement() {
                     <SelectContent>
                       <SelectItem value="all">Semua</SelectItem>
                       <SelectItem value="ticketId">Incident ID</SelectItem>
-                      <SelectItem value="category">Category</SelectItem>
+                      <SelectItem value="category">Type (Ritel/Feeder)</SelectItem>
+                      <SelectItem value="constraint">Kendala</SelectItem>
                       <SelectItem value="customerType">Customer/Type</SelectItem>
                       <SelectItem value="serviceId">Service ID</SelectItem>
-                      <SelectItem value="constraint">Constraint</SelectItem>
                       <SelectItem value="serpo">Serpo</SelectItem>
                       <SelectItem value="region">Region</SelectItem>
-                      <SelectItem value="createdBy">Created By</SelectItem>
+                      <SelectItem value="createdBy">Create by</SelectItem>
                       <SelectItem value="status">Status</SelectItem>
-                      <SelectItem value="created">Created</SelectItem>
+                      <SelectItem value="created">Tanggal</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
