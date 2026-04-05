@@ -92,6 +92,8 @@ export default function Dashboard() {
   const [teamData, setTeamData] = useState<RegionalTeamRecord[]>([]);
   const [selectedRegion, setSelectedRegion] = useState<string | null>(null);
   const [regionDialogOpen, setRegionDialogOpen] = useState(false);
+  const [regionStatusFilter, setRegionStatusFilter] = useState<string>("all");
+  const [regionProportionOpen, setRegionProportionOpen] = useState(false);
 
   // Load OLT data
   useEffect(() => {
@@ -751,7 +753,7 @@ export default function Dashboard() {
                     const totalAll = regionalIncidentData.reduce((s, r) => s + r.total, 0);
                     return (
                       <div className="flex items-center gap-2">
-                        <div className="w-[52px] h-[52px] sm:w-[60px] sm:h-[60px]">
+                        <div className="w-[52px] h-[52px] sm:w-[60px] sm:h-[60px] cursor-pointer" onClick={() => setRegionProportionOpen(true)} title="Klik untuk detail proporsi">
                           <ResponsiveContainer width="100%" height="100%">
                             <PieChart>
                               <Pie
@@ -1606,7 +1608,7 @@ export default function Dashboard() {
         </DialogContent>
       </Dialog>
       {/* Region Detail Dialog */}
-      <Dialog open={regionDialogOpen} onOpenChange={setRegionDialogOpen}>
+      <Dialog open={regionDialogOpen} onOpenChange={(open) => { setRegionDialogOpen(open); if (!open) setRegionStatusFilter("all"); }}>
         <DialogContent className="max-w-2xl max-h-[80vh] overflow-hidden flex flex-col">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-sm sm:text-base">
@@ -1618,11 +1620,27 @@ export default function Dashboard() {
             const resolved = selectedRegionTickets.filter(t => t.status === "Resolved").length;
             const critical = selectedRegionTickets.filter(t => t.status === "Critical").length;
             const pending = selectedRegionTickets.length - resolved - critical;
+            const filters = [
+              { key: "all", label: "Semua", count: selectedRegionTickets.length, color: "text-foreground" },
+              { key: "Resolved", label: "✅ Resolved", count: resolved, color: "text-success" },
+              { key: "Critical", label: "🔴 Critical", count: critical, color: "text-destructive" },
+              { key: "pending", label: "⏳ Pending", count: pending, color: "text-warning" },
+            ];
             return (
-              <div className="flex items-center gap-3 text-xs pb-2 border-b">
-                <span className="flex items-center gap-1 text-success font-medium">✅ {resolved} Resolved</span>
-                <span className="flex items-center gap-1 text-destructive font-medium">🔴 {critical} Critical</span>
-                <span className="flex items-center gap-1 text-warning font-medium">⏳ {pending} Pending</span>
+              <div className="flex items-center gap-1.5 pb-2 border-b flex-wrap">
+                {filters.map(f => (
+                  <button
+                    key={f.key}
+                    onClick={() => setRegionStatusFilter(f.key)}
+                    className={`px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-medium transition-all ${
+                      regionStatusFilter === f.key
+                        ? "bg-primary text-primary-foreground shadow-sm"
+                        : "bg-muted/50 hover:bg-muted text-muted-foreground"
+                    }`}
+                  >
+                    {f.label} <span className="tabular-nums">({f.count})</span>
+                  </button>
+                ))}
               </div>
             );
           })()}
@@ -1638,21 +1656,79 @@ export default function Dashboard() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {selectedRegionTickets.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={5} className="text-center text-muted-foreground py-8 text-xs">Tidak ada incident</TableCell>
-                  </TableRow>
-                ) : selectedRegionTickets.map((t) => (
-                  <TableRow key={t.id} className="text-[10px] sm:text-xs">
-                    <TableCell className="py-1.5 font-mono text-[9px]">{t.id.slice(0, 8)}</TableCell>
-                    <TableCell className="py-1.5 font-medium truncate max-w-[120px]">{t.hostname}</TableCell>
-                    <TableCell className="py-1.5">{t.constraint}</TableCell>
-                    <TableCell className="py-1.5"><StatusBadge status={t.status} /></TableCell>
-                    <TableCell className="py-1.5 tabular-nums text-muted-foreground">{new Date(t.createdISO).toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "2-digit" })}</TableCell>
-                  </TableRow>
-                ))}
+                {(() => {
+                  const filtered = selectedRegionTickets.filter(t => {
+                    if (regionStatusFilter === "all") return true;
+                    if (regionStatusFilter === "pending") return t.status !== "Resolved" && t.status !== "Critical";
+                    return t.status === regionStatusFilter;
+                  });
+                  if (filtered.length === 0) return (
+                    <TableRow>
+                      <TableCell colSpan={5} className="text-center text-muted-foreground py-8 text-xs">Tidak ada incident</TableCell>
+                    </TableRow>
+                  );
+                  return filtered.map((t) => (
+                    <TableRow key={t.id} className="text-[10px] sm:text-xs">
+                      <TableCell className="py-1.5 font-mono text-[9px]">{t.id.slice(0, 8)}</TableCell>
+                      <TableCell className="py-1.5 font-medium truncate max-w-[120px]">{t.hostname}</TableCell>
+                      <TableCell className="py-1.5">{t.constraint}</TableCell>
+                      <TableCell className="py-1.5"><StatusBadge status={t.status} /></TableCell>
+                      <TableCell className="py-1.5 tabular-nums text-muted-foreground">{new Date(t.createdISO).toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "2-digit" })}</TableCell>
+                    </TableRow>
+                  ));
+                })()}
               </TableBody>
             </Table>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Region Proportion Dialog */}
+      <Dialog open={regionProportionOpen} onOpenChange={setRegionProportionOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-sm sm:text-base">🥧 Proporsi Incident per Region</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div className="w-full h-[200px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={regionalIncidentData.map((r, i) => ({ name: r.region, value: r.total, fill: ["hsl(217,91%,60%)", "hsl(142,71%,45%)", "hsl(38,92%,50%)", "hsl(0,84%,60%)", "hsl(262,83%,58%)", "hsl(180,70%,40%)"][i % 6] }))}
+                    cx="50%" cy="50%"
+                    innerRadius="40%" outerRadius="75%"
+                    dataKey="value"
+                    strokeWidth={2}
+                    stroke="hsl(var(--background))"
+                    label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                  >
+                    {regionalIncidentData.map((_, i) => (
+                      <Cell key={i} fill={["hsl(217,91%,60%)", "hsl(142,71%,45%)", "hsl(38,92%,50%)", "hsl(0,84%,60%)", "hsl(262,83%,58%)", "hsl(180,70%,40%)"][i % 6]} />
+                    ))}
+                  </Pie>
+                  <Tooltip formatter={(value: number) => [`${value} tiket`, "Total"]} />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+            <div className="space-y-1.5">
+              {regionalIncidentData.map((r, i) => {
+                const totalAll = regionalIncidentData.reduce((s, x) => s + x.total, 0);
+                const pct = totalAll > 0 ? Math.round((r.total / totalAll) * 100) : 0;
+                const color = ["hsl(217,91%,60%)", "hsl(142,71%,45%)", "hsl(38,92%,50%)", "hsl(0,84%,60%)", "hsl(262,83%,58%)", "hsl(180,70%,40%)"][i % 6];
+                return (
+                  <div
+                    key={r.region}
+                    className="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-muted/30 cursor-pointer transition-colors"
+                    onClick={() => { setRegionProportionOpen(false); setSelectedRegion(r.region); setRegionDialogOpen(true); }}
+                  >
+                    <div className="w-2.5 h-2.5 rounded-sm shrink-0" style={{ backgroundColor: color }} />
+                    <span className="text-xs font-medium flex-1">{r.region}</span>
+                    <span className="text-xs tabular-nums font-bold">{r.total}</span>
+                    <span className="text-[10px] text-muted-foreground tabular-nums w-8 text-right">{pct}%</span>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </DialogContent>
       </Dialog>
