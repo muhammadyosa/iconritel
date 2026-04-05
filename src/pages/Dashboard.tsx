@@ -90,6 +90,8 @@ export default function Dashboard() {
   const [selectedHistoryDate, setSelectedHistoryDate] = useState<string | null>(null);
   const [shiftReportTab, setShiftReportTab] = useState<string>("latest");
   const [teamData, setTeamData] = useState<RegionalTeamRecord[]>([]);
+  const [selectedRegion, setSelectedRegion] = useState<string | null>(null);
+  const [regionDialogOpen, setRegionDialogOpen] = useState(false);
 
   // Load OLT data
   useEffect(() => {
@@ -159,6 +161,15 @@ export default function Dashboard() {
       .sort((a, b) => b[1].total - a[1].total)
       .map(([region, stats]) => ({ region, ...stats }));
   }, [teamData, tickets, hostnameToRegionMap]);
+
+  // Tickets for selected region
+  const selectedRegionTickets = useMemo(() => {
+    if (!selectedRegion) return [];
+    return tickets.filter(t => {
+      const region = hostnameToRegionMap[(t.hostname || "").trim().toUpperCase()];
+      return region === selectedRegion;
+    });
+  }, [selectedRegion, tickets, hostnameToRegionMap]);
 
   const ritelTickets = useMemo(() => tickets.filter(t => !FEEDER_CONSTRAINTS_SET.has(t.constraint)), [tickets]);
   const feederTickets = useMemo(() => tickets.filter(t => FEEDER_CONSTRAINTS_SET.has(t.constraint)), [tickets]);
@@ -726,19 +737,42 @@ export default function Dashboard() {
             {/* Regional Office Summary — Modern Minimalist */}
             <Card className="overflow-hidden border">
               <CardHeader className="py-2.5 px-3 sm:px-4 border-b bg-muted/10">
-                <div className="flex items-center justify-between">
-                  <div>
+                <div className="flex items-center gap-3">
+                  <div className="flex-1 min-w-0">
                     <CardTitle className="text-xs sm:text-sm flex items-center gap-1.5">🗺️ Regional Office</CardTitle>
-                    <p className="text-[8px] sm:text-[9px] text-muted-foreground mt-0.5">Performa incident per wilayah</p>
+                    <p className="text-[8px] sm:text-[9px] text-muted-foreground mt-0.5">Klik region untuk detail incident</p>
                   </div>
+                  {/* Mini Donut Chart in header */}
                   {regionalIncidentData.length > 0 && (() => {
-                    const t = regionalIncidentData.reduce((s, r) => s + r.total, 0);
-                    const rv = regionalIncidentData.reduce((s, r) => s + r.resolved, 0);
-                    const rate = t > 0 ? Math.round((rv / t) * 100) : 0;
+                    const PIE_COLORS = [
+                      "hsl(217, 91%, 60%)", "hsl(142, 71%, 45%)", "hsl(38, 92%, 50%)",
+                      "hsl(0, 84%, 60%)", "hsl(262, 83%, 58%)", "hsl(180, 70%, 40%)",
+                    ];
+                    const totalAll = regionalIncidentData.reduce((s, r) => s + r.total, 0);
                     return (
-                      <div className="text-right">
-                        <div className="text-base sm:text-lg font-bold text-foreground leading-none tabular-nums">{t}</div>
-                        <div className={`text-[8px] sm:text-[9px] font-semibold tabular-nums ${rate >= 50 ? 'text-success' : rate >= 20 ? 'text-warning' : 'text-destructive'}`}>{rate}% resolved</div>
+                      <div className="flex items-center gap-2">
+                        <div className="w-[52px] h-[52px] sm:w-[60px] sm:h-[60px]">
+                          <ResponsiveContainer width="100%" height="100%">
+                            <PieChart>
+                              <Pie
+                                data={regionalIncidentData.map((r, i) => ({ name: r.region, value: r.total, fill: PIE_COLORS[i % PIE_COLORS.length] }))}
+                                cx="50%" cy="50%"
+                                innerRadius="55%" outerRadius="90%"
+                                dataKey="value"
+                                strokeWidth={1}
+                                stroke="hsl(var(--background))"
+                              >
+                                {regionalIncidentData.map((_, i) => (
+                                  <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
+                                ))}
+                              </Pie>
+                            </PieChart>
+                          </ResponsiveContainer>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-base sm:text-lg font-bold text-foreground leading-none tabular-nums">{totalAll}</div>
+                          <div className="text-[8px] sm:text-[9px] text-muted-foreground">{regionalIncidentData.length} Region</div>
+                        </div>
                       </div>
                     );
                   })()}
@@ -752,16 +786,12 @@ export default function Dashboard() {
                   const totalResolved = regionalIncidentData.reduce((s, r) => s + r.resolved, 0);
                   const totalCritical = regionalIncidentData.reduce((s, r) => s + r.critical, 0);
                   const totalPendingAll = regionalIncidentData.reduce((s, r) => s + r.pending, 0);
-                  const resRate = totalAll > 0 ? Math.round((totalResolved / totalAll) * 100) : 0;
                   const PIE_COLORS = [
                     "hsl(217, 91%, 60%)", "hsl(142, 71%, 45%)", "hsl(38, 92%, 50%)",
                     "hsl(0, 84%, 60%)", "hsl(262, 83%, 58%)", "hsl(180, 70%, 40%)",
                   ];
                   const maxRegionTotal = Math.max(...regionalIncidentData.map(r => r.total), 1);
-
-                  const bestRegion = [...regionalIncidentData].sort((a, b) => {
-                    return (b.total > 0 ? b.resolved / b.total : 0) - (a.total > 0 ? a.resolved / a.total : 0);
-                  })[0];
+                  const bestRegion = [...regionalIncidentData].sort((a, b) => (b.total > 0 ? b.resolved / b.total : 0) - (a.total > 0 ? a.resolved / a.total : 0))[0];
                   const worstRegion = [...regionalIncidentData].sort((a, b) => b.critical - a.critical)[0];
 
                   return (
@@ -782,11 +812,10 @@ export default function Dashboard() {
                         </div>
                       </div>
 
-                      {/* Region cards — each region as a mini row card */}
+                      {/* Region cards — clickable */}
                       <div className="space-y-1.5">
                         {regionalIncidentData.map((r, i) => {
                           const rRate = r.total > 0 ? Math.round((r.resolved / r.total) * 100) : 0;
-                          const barW = maxRegionTotal > 0 ? (r.total / maxRegionTotal) * 100 : 0;
                           const color = PIE_COLORS[i % PIE_COLORS.length];
                           return (
                             <motion.div
@@ -794,9 +823,9 @@ export default function Dashboard() {
                               initial={{ opacity: 0, x: -8 }}
                               animate={{ opacity: 1, x: 0 }}
                               transition={{ duration: 0.3, delay: i * 0.06 }}
-                              className="group rounded-lg border border-border/30 bg-muted/5 hover:bg-muted/15 transition-all p-2 cursor-default"
+                              className="group rounded-lg border border-border/30 bg-muted/5 hover:bg-muted/20 hover:border-primary/30 transition-all p-2 cursor-pointer active:scale-[0.98]"
+                              onClick={() => { setSelectedRegion(r.region); setRegionDialogOpen(true); }}
                             >
-                              {/* Row 1: Name + total + rate */}
                               <div className="flex items-center justify-between mb-1">
                                 <div className="flex items-center gap-1.5">
                                   <div className="w-2 h-2 rounded-sm shrink-0" style={{ backgroundColor: color }} />
@@ -805,15 +834,14 @@ export default function Dashboard() {
                                 <div className="flex items-center gap-2">
                                   <span className={`text-[8px] sm:text-[9px] font-bold tabular-nums ${rRate >= 50 ? 'text-success' : rRate >= 20 ? 'text-warning' : 'text-destructive'}`}>{rRate}%</span>
                                   <span className="text-[10px] sm:text-xs font-bold tabular-nums text-foreground">{r.total}</span>
+                                  <ExternalLink className="w-2.5 h-2.5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
                                 </div>
                               </div>
-                              {/* Row 2: Segmented bar */}
                               <div className="w-full h-1.5 rounded-full bg-muted/30 overflow-hidden flex mb-1">
                                 <div className="h-full bg-success transition-all duration-500" style={{ width: `${r.total > 0 ? (r.resolved / r.total) * 100 : 0}%` }} />
                                 <div className="h-full bg-warning transition-all duration-500" style={{ width: `${r.total > 0 ? (r.pending / r.total) * 100 : 0}%` }} />
                                 <div className="h-full bg-destructive transition-all duration-500" style={{ width: `${r.total > 0 ? (r.critical / r.total) * 100 : 0}%` }} />
                               </div>
-                              {/* Row 3: Status breakdown */}
                               <div className="flex items-center gap-3 text-[7px] sm:text-[8px] text-muted-foreground">
                                 <span className="text-success tabular-nums">✅ {r.resolved}</span>
                                 <span className="text-destructive tabular-nums">🔴 {r.critical}</span>
@@ -1574,6 +1602,57 @@ export default function Dashboard() {
             <Button variant="outline" size="sm" onClick={() => setFilterDialogOpen(false)}>
               Tutup
             </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+      {/* Region Detail Dialog */}
+      <Dialog open={regionDialogOpen} onOpenChange={setRegionDialogOpen}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-hidden flex flex-col">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-sm sm:text-base">
+              🗺️ Incident Region: {selectedRegion}
+              <Badge variant="secondary" className="text-[10px]">{selectedRegionTickets.length} tiket</Badge>
+            </DialogTitle>
+          </DialogHeader>
+          {(() => {
+            const resolved = selectedRegionTickets.filter(t => t.status === "Resolved").length;
+            const critical = selectedRegionTickets.filter(t => t.status === "Critical").length;
+            const pending = selectedRegionTickets.length - resolved - critical;
+            return (
+              <div className="flex items-center gap-3 text-xs pb-2 border-b">
+                <span className="flex items-center gap-1 text-success font-medium">✅ {resolved} Resolved</span>
+                <span className="flex items-center gap-1 text-destructive font-medium">🔴 {critical} Critical</span>
+                <span className="flex items-center gap-1 text-warning font-medium">⏳ {pending} Pending</span>
+              </div>
+            );
+          })()}
+          <div className="overflow-auto flex-1 -mx-6 px-6">
+            <Table>
+              <TableHeader>
+                <TableRow className="text-[10px] sm:text-xs">
+                  <TableHead className="py-1.5">Ticket ID</TableHead>
+                  <TableHead className="py-1.5">Hostname</TableHead>
+                  <TableHead className="py-1.5">Kendala</TableHead>
+                  <TableHead className="py-1.5">Status</TableHead>
+                  <TableHead className="py-1.5">Tanggal</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {selectedRegionTickets.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={5} className="text-center text-muted-foreground py-8 text-xs">Tidak ada incident</TableCell>
+                  </TableRow>
+                ) : selectedRegionTickets.map((t) => (
+                  <TableRow key={t.id} className="text-[10px] sm:text-xs">
+                    <TableCell className="py-1.5 font-mono text-[9px]">{t.id.slice(0, 8)}</TableCell>
+                    <TableCell className="py-1.5 font-medium truncate max-w-[120px]">{t.hostname}</TableCell>
+                    <TableCell className="py-1.5">{t.constraint}</TableCell>
+                    <TableCell className="py-1.5"><StatusBadge status={t.status} /></TableCell>
+                    <TableCell className="py-1.5 tabular-nums text-muted-foreground">{new Date(t.createdISO).toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "2-digit" })}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           </div>
         </DialogContent>
       </Dialog>
