@@ -90,12 +90,7 @@ export function AppSidebar() {
     });
   }, [isIntern, isAdmin, isNOC]);
 
-  const filteredMenuItems = useMemo(() => {
-    if (!searchQuery.trim()) return visibleMenuItems;
-    return visibleMenuItems.filter((item) =>
-      item.title.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-  }, [visibleMenuItems, searchQuery]);
+
 
   const renderMenuItem = (item: typeof menuItems[0]) => {
     const showBadge = item.path === "/settings" && isAdmin && pendingCount > 0;
