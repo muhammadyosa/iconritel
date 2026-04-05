@@ -45,6 +45,7 @@ import {
 } from "@/types/ticket";
 import { StatusBadge } from "@/components/StatusBadge";
 import { TicketDetailDialog } from "@/components/TicketDetailDialog";
+import { DurationCell } from "@/components/DurationCell";
 import { toast } from "sonner";
 import { useActivityLog } from "@/hooks/useActivityLog";
 
@@ -964,13 +965,14 @@ export default function TicketManagement() {
                       <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap bg-muted/80">👨‍💼 Service ID</TableHead>
                       <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap bg-muted/80">👥 Serpo</TableHead>
                       <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap bg-muted/80">✍️ Create by</TableHead>
+                      <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap bg-muted/80">⏱️ Durasi</TableHead>
                       <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap bg-muted/80">⚙️ Status</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {tickets.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={7} className="text-center text-muted-foreground text-[8px] sm:text-[9px] py-2">
+                        <TableCell colSpan={8} className="text-center text-muted-foreground text-[8px] sm:text-[9px] py-2">
                           Belum ada incident
                         </TableCell>
                       </TableRow>
@@ -1019,6 +1021,9 @@ export default function TicketManagement() {
                             <span className="text-muted-foreground">{ticket.createdByName || "-"}</span>
                           </TableCell>
                           <TableCell className="px-1 sm:px-1.5 py-0.5">
+                            <DurationCell createdISO={ticket.createdISO} status={ticket.status} resolvedAt={ticket.resolvedAt} />
+                          </TableCell>
+                          <TableCell className="px-1 sm:px-1.5 py-0.5">
                             <div>
                               <StatusBadge status={ticket.status} />
                               <div className="text-[7px] sm:text-[8px] text-muted-foreground mt-0.5">
@@ -1045,6 +1050,8 @@ export default function TicketManagement() {
           isReviewer={isReviewer}
           updateTicket={updateTicket}
           deleteTicket={deleteTicket}
+          logActivity={logActivity}
+          currentUserName={profile?.display_name || user?.email?.split("@")[0] || "Unknown"}
           open={!!selectedTicketForDetail}
           onOpenChange={(open) => { if (!open) setSelectedTicketForDetail(null); }}
         />
