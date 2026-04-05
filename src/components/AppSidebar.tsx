@@ -88,7 +88,7 @@ const MenuItem = memo(function MenuItem({
         }`
       }
     >
-      <span className={`relative text-sm leading-none flex-shrink-0 transition-transform duration-150 ${collapsed ? "" : "w-5 text-center"} drop-shadow-[0_0_3px_rgba(59,130,246,0.5)]`}>
+      <span className={`relative text-sm leading-none flex-shrink-0 transition-transform duration-150 ${collapsed ? "" : "w-5 text-center"} bg-primary/15 rounded-md p-0.5`}>
         {item.emoji}
         {showBadge && collapsed && (
           <span className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-destructive text-destructive-foreground text-[8px] font-bold flex items-center justify-center animate-pulse">
