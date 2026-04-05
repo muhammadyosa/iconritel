@@ -221,7 +221,7 @@ export function AppSidebar() {
           </div>
           {!collapsed && (
             <div className="px-3 pb-2 text-center">
-              <p className="text-[9px] text-sidebar-foreground/25">© RZ Corp</p>
+              <p className="text-[9px] text-sidebar-foreground/30">© RZ Corp</p>
             </div>
           )}
         </div>
