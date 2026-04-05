@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -39,19 +39,6 @@ const REGION_COLORS = [
   "hsl(55, 80%, 45%)",
 ];
 
-function formatDuration(ms: number): string {
-  if (ms < 0) ms = 0;
-  const totalMinutes = Math.floor(ms / 60000);
-  const days = Math.floor(totalMinutes / 1440);
-  const hours = Math.floor((totalMinutes % 1440) / 60);
-  const minutes = totalMinutes % 60;
-  const parts: string[] = [];
-  if (days > 0) parts.push(`${days} HARI`);
-  if (hours > 0) parts.push(`${hours} JAM`);
-  parts.push(`${minutes} MENIT`);
-  return parts.join(" ");
-}
-
 type CardType = "total" | "critical" | "onProgress" | "pending";
 
 interface OverSLATabProps {
@@ -63,16 +50,23 @@ export function OverSLATab({ tickets, getTicketRegion }: OverSLATabProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchField, setSearchField] = useState("all");
   const [activeCard, setActiveCard] = useState<CardType | null>(null);
+  const [now, setNow] = useState(Date.now());
 
-  // Filter: over SLA (>= 8h) OR Pending
+  // Real-time ticker for accurate calculations
+  useEffect(() => {
+    const timer = setInterval(() => setNow(Date.now()), 30000); // update every 30s
+    return () => clearInterval(timer);
+  }, []);
+
+  // Filter: over SLA (>= 8h) OR Pending — recalculated with live `now`
   const overSLATickets = useMemo(() => {
     return tickets.filter((t) => {
       if (t.status === "Pending") return true;
       if (t.status === "Resolved") return false;
-      const elapsed = Date.now() - new Date(t.createdISO).getTime();
+      const elapsed = now - new Date(t.createdISO).getTime();
       return elapsed >= SLA_MS;
     });
-  }, [tickets]);
+  }, [tickets, now]);
 
   // Search filter
   const filteredTickets = useMemo(() => {
@@ -104,13 +98,13 @@ export function OverSLATab({ tickets, getTicketRegion }: OverSLATabProps) {
   // Sort by duration descending
   const sortedTickets = useMemo(() => {
     return [...filteredTickets].sort((a, b) => {
-      const endA = a.status === "Pending" && a.resolvedAt ? new Date(a.resolvedAt).getTime() : Date.now();
-      const endB = b.status === "Pending" && b.resolvedAt ? new Date(b.resolvedAt).getTime() : Date.now();
+      const endA = a.status === "Pending" && a.resolvedAt ? new Date(a.resolvedAt).getTime() : now;
+      const endB = b.status === "Pending" && b.resolvedAt ? new Date(b.resolvedAt).getTime() : now;
       const durA = endA - new Date(a.createdISO).getTime();
       const durB = endB - new Date(b.createdISO).getTime();
       return durB - durA;
     });
-  }, [filteredTickets]);
+  }, [filteredTickets, now]);
 
   // Region chart data
   const regionData = useMemo(() => {
@@ -129,12 +123,11 @@ export function OverSLATab({ tickets, getTicketRegion }: OverSLATabProps) {
       .sort((a, b) => b.total - a.total);
   }, [overSLATickets, getTicketRegion]);
 
-  // Pie data
   const pieData = useMemo(() => {
     return regionData.map((r) => ({ name: r.name, value: r.total }));
   }, [regionData]);
 
-  // Stats
+  // Stats — derived from the already-filtered overSLATickets
   const stats = useMemo(() => {
     const critical = overSLATickets.filter((t) => t.status === "Critical").length;
     const onProgress = overSLATickets.filter((t) => t.status === "On Progress").length;
@@ -142,7 +135,7 @@ export function OverSLATab({ tickets, getTicketRegion }: OverSLATabProps) {
     return { total: overSLATickets.length, critical, onProgress, pending };
   }, [overSLATickets]);
 
-  // Drill-down tickets for card
+  // Drill-down
   const cardDrillDown = useMemo(() => {
     if (!activeCard) return [];
     switch (activeCard) {
@@ -153,7 +146,6 @@ export function OverSLATab({ tickets, getTicketRegion }: OverSLATabProps) {
     }
   }, [activeCard, overSLATickets]);
 
-  // Region breakdown for drill-down
   const cardRegionBreakdown = useMemo(() => {
     const map: Record<string, number> = {};
     cardDrillDown.forEach((t) => {
@@ -165,7 +157,6 @@ export function OverSLATab({ tickets, getTicketRegion }: OverSLATabProps) {
       .sort((a, b) => b.count - a.count);
   }, [cardDrillDown, getTicketRegion]);
 
-  // Constraint breakdown for drill-down
   const cardConstraintBreakdown = useMemo(() => {
     const map: Record<string, number> = {};
     cardDrillDown.forEach((t) => {
@@ -176,18 +167,48 @@ export function OverSLATab({ tickets, getTicketRegion }: OverSLATabProps) {
       .sort((a, b) => b.count - a.count);
   }, [cardDrillDown]);
 
-  const cardLabels: Record<CardType, { label: string; emoji: string; color: string; bgColor: string; borderColor: string }> = {
-    total: { label: "Total Over SLA", emoji: "⚠️", color: "text-orange-400", bgColor: "bg-orange-500/10 hover:bg-orange-500/15", borderColor: "border-orange-500/20 hover:border-orange-500/40" },
-    critical: { label: "Critical", emoji: "🔴", color: "text-red-400", bgColor: "bg-red-500/10 hover:bg-red-500/15", borderColor: "border-red-500/20 hover:border-red-500/40" },
-    onProgress: { label: "On Progress", emoji: "🔵", color: "text-blue-400", bgColor: "bg-blue-500/10 hover:bg-blue-500/15", borderColor: "border-blue-500/20 hover:border-blue-500/40" },
-    pending: { label: "Pending", emoji: "🟡", color: "text-amber-400", bgColor: "bg-amber-500/10 hover:bg-amber-500/15", borderColor: "border-amber-500/20 hover:border-amber-500/40" },
-  };
-
-  const cardIcons: Record<CardType, React.ReactNode> = {
-    total: <AlertTriangle className="h-4 w-4 text-orange-400" />,
-    critical: <Timer className="h-4 w-4 text-red-400" />,
-    onProgress: <Clock className="h-4 w-4 text-blue-400" />,
-    pending: <AlertTriangle className="h-4 w-4 text-amber-400" />,
+  // Card config using design system tokens (matching Dashboard)
+  const cardConfig: Record<CardType, {
+    label: string; emoji: string;
+    iconClass: string; bgClass: string; borderClass: string; valueClass: string; glowClass: string;
+    icon: React.ReactNode;
+  }> = {
+    total: {
+      label: "Total Over SLA", emoji: "⚠️",
+      iconClass: "bg-destructive/10 text-destructive",
+      bgClass: "bg-destructive/5",
+      borderClass: "border-destructive/20",
+      valueClass: "text-destructive",
+      glowClass: "hover:shadow-[0_0_20px_-4px_hsl(var(--destructive)/0.4)]",
+      icon: <AlertTriangle className="h-4 w-4" />,
+    },
+    critical: {
+      label: "Critical", emoji: "🔴",
+      iconClass: "bg-destructive/10 text-destructive",
+      bgClass: "bg-destructive/5",
+      borderClass: "border-destructive/20",
+      valueClass: "text-destructive",
+      glowClass: "hover:shadow-[0_0_20px_-4px_hsl(var(--destructive)/0.4)]",
+      icon: <Timer className="h-4 w-4" />,
+    },
+    onProgress: {
+      label: "On Progress", emoji: "🔵",
+      iconClass: "bg-primary/10 text-primary",
+      bgClass: "bg-primary/5",
+      borderClass: "border-primary/20",
+      valueClass: "text-primary",
+      glowClass: "hover:shadow-[0_0_20px_-4px_hsl(var(--primary)/0.4)]",
+      icon: <Clock className="h-4 w-4" />,
+    },
+    pending: {
+      label: "Pending", emoji: "🟡",
+      iconClass: "bg-warning/10 text-warning",
+      bgClass: "bg-warning/5",
+      borderClass: "border-warning/20",
+      valueClass: "text-warning",
+      glowClass: "hover:shadow-[0_0_20px_-4px_hsl(var(--warning)/0.4)]",
+      icon: <AlertTriangle className="h-4 w-4" />,
+    },
   };
 
   const cardValues: Record<CardType, number> = {
@@ -199,10 +220,10 @@ export function OverSLATab({ tickets, getTicketRegion }: OverSLATabProps) {
 
   return (
     <div className="space-y-3">
-      {/* Stats Cards - Interactive */}
+      {/* Stats Cards - Interactive, matching Dashboard style */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
         {(["total", "critical", "onProgress", "pending"] as CardType[]).map((type) => {
-          const cfg = cardLabels[type];
+          const cfg = cardConfig[type];
           return (
             <motion.div
               key={type}
@@ -211,18 +232,18 @@ export function OverSLATab({ tickets, getTicketRegion }: OverSLATabProps) {
             >
               <Card
                 className={cn(
-                  "shadow-sm border cursor-pointer transition-all duration-200",
-                  cfg.bgColor, cfg.borderColor
+                  "shadow-sm border cursor-pointer transition-all duration-300",
+                  cfg.bgClass, cfg.borderClass, cfg.glowClass
                 )}
                 onClick={() => setActiveCard(type)}
               >
-                <CardContent className="p-2 sm:p-3 flex items-center gap-2">
-                  <div className={cn("p-1.5 rounded-lg", cfg.bgColor)}>
-                    {cardIcons[type]}
+                <CardContent className="p-2.5 sm:p-3 flex items-center gap-2.5">
+                  <div className={cn("p-2 rounded-lg", cfg.iconClass)}>
+                    {cfg.icon}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-[9px] sm:text-[10px] text-muted-foreground">{cfg.label}</p>
-                    <p className={cn("text-base sm:text-lg font-bold", cfg.color)}>{cardValues[type]}</p>
+                    <p className="text-[9px] sm:text-[10px] text-muted-foreground font-medium">{cfg.label}</p>
+                    <p className={cn("text-lg sm:text-xl font-bold", cfg.valueClass)}>{cardValues[type]}</p>
                   </div>
                   <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/40" />
                 </CardContent>
@@ -268,7 +289,6 @@ export function OverSLATab({ tickets, getTicketRegion }: OverSLATabProps) {
             ) : (
               <p className="text-center text-muted-foreground text-xs py-8">Tidak ada data</p>
             )}
-            {/* Legend */}
             <div className="grid grid-cols-2 gap-1 mt-2">
               {regionData.map((r, i) => (
                 <div key={r.name} className="flex items-center gap-1.5 text-[9px] sm:text-[10px]">
@@ -296,12 +316,7 @@ export function OverSLATab({ tickets, getTicketRegion }: OverSLATabProps) {
                   <BarChart data={regionData} layout="vertical" margin={{ left: 0, right: 10, top: 5, bottom: 5 }}>
                     <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
                     <XAxis type="number" tick={{ fontSize: 9 }} />
-                    <YAxis
-                      dataKey="name"
-                      type="category"
-                      width={80}
-                      tick={{ fontSize: 9 }}
-                    />
+                    <YAxis dataKey="name" type="category" width={80} tick={{ fontSize: 9 }} />
                     <Tooltip
                       contentStyle={{ fontSize: 11 }}
                       formatter={(value: number, name: string) => [
@@ -419,7 +434,7 @@ export function OverSLATab({ tickets, getTicketRegion }: OverSLATabProps) {
         <DialogContent className="max-w-2xl max-h-[85vh]">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-sm">
-              {activeCard && cardLabels[activeCard].emoji} {activeCard && cardLabels[activeCard].label}
+              {activeCard && cardConfig[activeCard].emoji} {activeCard && cardConfig[activeCard].label}
               <Badge variant="secondary" className="text-xs">{cardDrillDown.length} Incident</Badge>
             </DialogTitle>
             <DialogDescription className="text-xs text-muted-foreground">
