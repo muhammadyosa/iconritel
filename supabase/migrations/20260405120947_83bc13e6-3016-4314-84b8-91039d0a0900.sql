@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX idx_tickets_ticket_id_unique ON public.tickets (ticket_id);
