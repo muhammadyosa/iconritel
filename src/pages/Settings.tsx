@@ -1,5 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
-import { useSidebarTabSync } from "@/hooks/useSidebarTabSync";
+import { useState, useEffect } from "react";
 import { Settings as SettingsIcon, Info, FileSpreadsheet, FileUp, Check, X, AlertCircle, RefreshCw, Database, Trash2, Users, ClipboardList, Trophy } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -119,10 +118,6 @@ async function loadBNGData(): Promise<any[]> {
 }
 
 export default function Settings() {
-  const [activeTab, setActiveTab] = useState("import");
-  const setTabCb = useCallback((v: string) => setActiveTab(v), []);
-  useSidebarTabSync("/settings", setTabCb);
-
   const { isAdmin } = useUserRole();
   const [file, setFile] = useState<File | null>(null);
   const [sheets, setSheets] = useState<SheetPreview[]>([]);
@@ -403,7 +398,7 @@ export default function Settings() {
         </div>
       </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+      <Tabs defaultValue="import" className="space-y-6">
         <div className="overflow-x-auto scrollbar-hide -mx-2 px-2 sm:mx-0 sm:px-0">
           <TabsList className={`inline-flex w-auto min-w-full sm:min-w-0 gap-1 h-auto flex-wrap sm:flex-nowrap p-1`}>
             <TabsTrigger value="import" className="text-[11px] sm:text-sm px-2.5 sm:px-3 py-1.5 sm:py-2 whitespace-nowrap">

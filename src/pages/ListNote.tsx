@@ -1,5 +1,4 @@
-import { useState, useCallback } from "react";
-import { useSidebarTabSync } from "@/hooks/useSidebarTabSync";
+import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -200,10 +199,6 @@ function NoteSection({ tabKey }: { tabKey: string }) {
 }
 
 export default function ListNote() {
-  const [activeTab, setActiveTab] = useState("bng-upe");
-  const setTabCb = useCallback((v: string) => setActiveTab(v), []);
-  useSidebarTabSync("/notes", setTabCb);
-
   return (
     <div className="space-y-4">
       <div>
@@ -211,7 +206,7 @@ export default function ListNote() {
         <p className="text-xs sm:text-sm text-muted-foreground">Catatan berdasarkan kategori perangkat</p>
       </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+      <Tabs defaultValue="bng-upe" className="w-full">
         <TabsList className="w-full grid grid-cols-2 sm:grid-cols-4 h-auto sm:h-9 gap-0.5">
           {TABS.map((tab) => (
             <TabsTrigger key={tab.value} value={tab.value} className="text-xs sm:text-sm">
