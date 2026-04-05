@@ -262,13 +262,14 @@ export function OverSLATab({ tickets, getTicketRegion }: OverSLATabProps) {
         <Card className="overflow-hidden border">
           <CardHeader className="py-2.5 px-3 sm:px-4 border-b bg-muted/20">
             <CardTitle className="text-xs sm:text-sm flex items-center gap-2">🗺️ Proporsi Over SLA per Region</CardTitle>
-            <p className="text-[10px] sm:text-xs text-muted-foreground">Persentase kontribusi incident over SLA per wilayah</p>
+            <p className="text-[10px] sm:text-xs text-muted-foreground">Analisa distribusi incident over SLA per wilayah</p>
           </CardHeader>
           <CardContent className="p-2 sm:p-3">
             {pieData.length > 0 ? (() => {
               const pieConfig: ChartConfig = {};
               pieData.forEach((d, i) => { pieConfig[d.name] = { label: d.name, color: REGION_COLORS[i % REGION_COLORS.length] }; });
               const totalAll = pieData.reduce((s, d) => s + d.value, 0);
+              const worstRegion = regionData[0];
               return (
                 <div className="space-y-3">
                   <ChartContainer config={pieConfig} className="h-[180px] sm:h-[200px] w-full mx-auto aspect-square max-w-[280px] sm:max-w-[300px]">
@@ -297,26 +298,44 @@ export function OverSLATab({ tickets, getTicketRegion }: OverSLATabProps) {
                       </Pie>
                     </PieChart>
                   </ChartContainer>
-                  {/* Legend + Stats Grid */}
-                  <div className="grid grid-cols-1 xs:grid-cols-2 gap-x-2 gap-y-1">
+
+                  {/* Detail per Region */}
+                  <div className="space-y-1">
                     {regionData.map((r, i) => {
                       const pct = totalAll > 0 ? Math.round((r.total / totalAll) * 100) : 0;
+                      const barPct = totalAll > 0 ? (r.total / regionData[0].total) * 100 : 0;
                       return (
-                        <div key={r.name} className="flex items-center gap-1.5 px-2 py-1 rounded-md hover:bg-muted/40 transition-colors group">
-                          <div className="w-2 h-2 rounded-sm flex-shrink-0" style={{ backgroundColor: REGION_COLORS[i % REGION_COLORS.length] }} />
-                          <span className="text-[9px] sm:text-[10px] font-medium truncate flex-1 min-w-0">{r.name}</span>
-                          <Badge variant="outline" className="text-[8px] sm:text-[9px] px-1 py-0 h-4 font-bold tabular-nums shrink-0">
-                            {r.total}
-                          </Badge>
-                          <span className="text-[8px] sm:text-[9px] text-muted-foreground tabular-nums shrink-0 w-7 text-right">{pct}%</span>
+                        <div key={r.name} className="px-2 py-1.5 rounded-md hover:bg-muted/30 transition-colors">
+                          <div className="flex items-center gap-1.5 mb-1">
+                            <div className="w-2 h-2 rounded-sm shrink-0" style={{ backgroundColor: REGION_COLORS[i % REGION_COLORS.length] }} />
+                            <span className="text-[9px] sm:text-[10px] font-medium truncate flex-1">{r.name}</span>
+                            <span className="text-[9px] sm:text-[10px] font-bold tabular-nums">{r.total}</span>
+                            <span className="text-[8px] sm:text-[9px] text-muted-foreground tabular-nums w-7 text-right">{pct}%</span>
+                          </div>
+                          <div className="flex items-center gap-1.5">
+                            <div className="flex-1 h-1.5 rounded-full bg-muted/40 overflow-hidden">
+                              <div className="h-full rounded-full transition-all duration-500" style={{ width: `${barPct}%`, backgroundColor: REGION_COLORS[i % REGION_COLORS.length] }} />
+                            </div>
+                            <div className="flex items-center gap-1.5 text-[7px] sm:text-[8px] text-muted-foreground shrink-0">
+                              <span className="text-destructive font-semibold">{r.overSLA}⚡</span>
+                              <span className="text-warning font-semibold">{r.pending}⏳</span>
+                            </div>
+                          </div>
                         </div>
                       );
                     })}
                   </div>
+
                   {/* Summary footer */}
-                  <div className="flex items-center justify-between px-2 pt-1 border-t border-border/40">
-                    <span className="text-[9px] sm:text-[10px] text-muted-foreground">Total: <span className="font-bold text-foreground">{totalAll}</span> incident</span>
-                    <span className="text-[9px] sm:text-[10px] text-muted-foreground">{regionData.length} region aktif</span>
+                  <div className="flex items-center justify-between px-2 pt-1.5 border-t border-border/40">
+                    <span className="text-[9px] sm:text-[10px] text-muted-foreground">
+                      Total: <span className="font-bold text-foreground">{totalAll}</span> incident · {regionData.length} region
+                    </span>
+                    {worstRegion && (
+                      <span className="text-[8px] sm:text-[9px] text-destructive font-medium">
+                        🔺 {worstRegion.name} ({Math.round((worstRegion.total / totalAll) * 100)}%)
+                      </span>
+                    )}
                   </div>
                 </div>
               );
