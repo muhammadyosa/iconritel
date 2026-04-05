@@ -110,28 +110,26 @@ export function AppSidebar() {
       </button>
 
       <SidebarContent className="flex flex-col overflow-x-hidden">
-        {/* Header Logo Section */}
-        <div className={`border-b border-sidebar-border flex-shrink-0 ${collapsed ? "py-3 px-1" : "p-3 sm:p-4"}`}>
+        {/* Header Logo Section - aligned with main header h-12 sm:h-14 */}
+        <div className={`border-b border-sidebar-border flex-shrink-0 h-12 sm:h-14 flex items-center ${collapsed ? "px-1 justify-center" : "px-3 sm:px-4"}`}>
           {!collapsed ? (
-            <div className="flex items-center gap-2 sm:gap-3">
+            <div className="flex items-center gap-2 sm:gap-3 w-full">
               <img 
                 src={iconnetLogo} 
                 alt="Iconnet" 
-                className="h-10 sm:h-12 w-auto flex-shrink-0 object-contain" 
+                className="h-8 sm:h-10 w-auto flex-shrink-0 object-contain" 
               />
-              <div className="space-y-0.5 min-w-0 flex-1">
-                <p className="text-sm font-semibold text-sidebar-foreground truncate">NOC RITEL</p>
-                <p className="text-xs text-sidebar-foreground/70">Iconnet</p>
+              <div className="space-y-0 min-w-0 flex-1">
+                <p className="text-sm font-semibold text-sidebar-foreground truncate leading-tight">NOC RITEL</p>
+                <p className="text-[11px] text-sidebar-foreground/70 leading-tight">Iconnet</p>
               </div>
             </div>
           ) : (
-            <div className="flex justify-center items-center w-full">
-              <img 
-                src={iconnetLogo} 
-                alt="Iconnet" 
-                className="h-7 w-7 object-contain flex-shrink-0" 
-              />
-            </div>
+            <img 
+              src={iconnetLogo} 
+              alt="Iconnet" 
+              className="h-7 w-7 object-contain flex-shrink-0" 
+            />
           )}
         </div>
 
