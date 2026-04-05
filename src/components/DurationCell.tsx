@@ -2,18 +2,17 @@ import { useState, useEffect } from "react";
 
 function formatDuration(ms: number): string {
   if (ms < 0) ms = 0;
-  const totalSeconds = Math.floor(ms / 1000);
-  const hours = Math.floor(totalSeconds / 3600);
-  const minutes = Math.floor((totalSeconds % 3600) / 60);
-  const seconds = totalSeconds % 60;
+  const totalMinutes = Math.floor(ms / 60000);
+  const days = Math.floor(totalMinutes / 1440);
+  const hours = Math.floor((totalMinutes % 1440) / 60);
+  const minutes = totalMinutes % 60;
 
-  if (hours > 0) {
-    return `${hours}j ${minutes}m`;
-  }
-  if (minutes > 0) {
-    return `${minutes}m ${seconds}s`;
-  }
-  return `${seconds}s`;
+  const parts: string[] = [];
+  if (days > 0) parts.push(`${days} HARI`);
+  if (hours > 0) parts.push(`${hours} JAM`);
+  parts.push(`${minutes} MENIT`);
+
+  return parts.join(" ");
 }
 
 interface DurationCellProps {
