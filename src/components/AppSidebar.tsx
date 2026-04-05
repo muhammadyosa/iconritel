@@ -105,7 +105,7 @@ export function AppSidebar() {
               : "gap-3 px-3 py-2.5 w-full hover:translate-x-0.5"
           } ${
             isActive
-              ? "bg-sidebar-foreground/15 text-sidebar-foreground shadow-sm backdrop-blur-sm"
+              ? "bg-sidebar-foreground/15 text-sidebar-foreground shadow-sm"
               : "text-sidebar-foreground/70 hover:bg-sidebar-foreground/10 hover:text-sidebar-foreground"
           }`
         }
