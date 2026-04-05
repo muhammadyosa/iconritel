@@ -10,7 +10,7 @@ import { useTheme } from "next-themes";
 import { useEffect, useState, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useUserRole } from "@/hooks/useUserRole";
-import { Search } from "lucide-react";
+
 import {
   Tooltip,
   TooltipContent,
