@@ -142,7 +142,7 @@ export function AppSidebar() {
           <TooltipContent
             side="right"
             sideOffset={12}
-            className="bg-sidebar-background text-sidebar-foreground border-sidebar-border font-medium text-xs px-3 py-1.5 rounded-md shadow-lg"
+            className="bg-popover text-popover-foreground border font-medium text-xs px-3 py-1.5 rounded-md shadow-lg"
           >
             {item.emoji} {item.title}
             {showBadge && (
@@ -197,7 +197,7 @@ export function AppSidebar() {
                   </div>
                 </div>
               </TooltipTrigger>
-              <TooltipContent side="right" sideOffset={12} className="bg-sidebar-background text-sidebar-foreground border-sidebar-border font-bold text-xs">
+              <TooltipContent side="right" sideOffset={12} className="bg-popover text-popover-foreground border font-bold text-xs">
                 NOC RITEL - Iconnet
               </TooltipContent>
             </Tooltip>
@@ -237,7 +237,7 @@ export function AppSidebar() {
                     </div>
                   </button>
                 </TooltipTrigger>
-                <TooltipContent side="right" sideOffset={12} className="bg-sidebar-background text-sidebar-foreground border-sidebar-border text-xs">
+                <TooltipContent side="right" sideOffset={12} className="bg-popover text-popover-foreground border text-xs">
                   {theme === "dark" ? "Light Mode" : "Dark Mode"}
                 </TooltipContent>
               </Tooltip>
