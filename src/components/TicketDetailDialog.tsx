@@ -333,17 +333,25 @@ export function TicketDetailDialog({
               </div>
               {!isReviewer && (
                 <div className="flex gap-2 pt-3">
-                  <Select
-                    value={ticket.status}
-                    onValueChange={async (value: any) => {
-                      try {
-                        await updateTicket(ticket.id, { status: value });
-                        toast.success(`Status insident ${ticket.id} berhasil diubah menjadi ${value}`);
-                      } catch (error) {
-                        // Error already shown by hook
-                      }
-                    }}
-                  >
+                    <Select
+                      value={ticket.status}
+                      onValueChange={async (value: any) => {
+                        try {
+                          const oldStatus = ticket.status;
+                          await updateTicket(ticket.id, { status: value });
+                          toast.success(`Status insident ${ticket.id} berhasil diubah menjadi ${value}`);
+                          
+                          // Log activity for status changes
+                          if (logActivity) {
+                            const actionType = value === "Resolved" ? "resolve_ticket" : "update_ticket";
+                            const detail = `${currentUserName || "User"} mengubah status ${ticket.id} dari ${oldStatus} → ${value}`;
+                            logActivity(actionType as ActivityAction, detail);
+                          }
+                        } catch (error) {
+                          // Error already shown by hook
+                        }
+                      }}
+                    >
                     <SelectTrigger className="flex-1">
                       <SelectValue />
                     </SelectTrigger>
