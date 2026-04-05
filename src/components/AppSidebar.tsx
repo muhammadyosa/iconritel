@@ -5,12 +5,10 @@ import {
   SidebarContent,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { Button } from "@/components/ui/button";
 import { useTheme } from "next-themes";
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useCallback, memo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useUserRole } from "@/hooks/useUserRole";
-
 import {
   Tooltip,
   TooltipContent,
@@ -30,47 +28,102 @@ const menuItems = [
   { title: "List Configure", path: "/notes", emoji: "📖" },
   { title: "Report", path: "/report", emoji: "📝" },
   { title: "Settings", path: "/settings", emoji: "🛠" },
-];
+] as const;
+
+const INTERN_PATHS = new Set(["/", "/tickets", "/teams"]);
+const ADMIN_NOC_ONLY_PATHS = new Set(["/notes"]);
 
 function usePendingUserCount() {
   const { isAdmin } = useUserRole();
   const [count, setCount] = useState(0);
-  const [visible, setVisible] = useState(false);
 
   useEffect(() => {
     if (!isAdmin) return;
-    setVisible(false);
 
     const fetchCount = async () => {
-      const { count: pendingCount, error } = await supabase
+      const { count: c, error } = await supabase
         .from("profiles")
         .select("*", { count: "exact", head: true })
         .eq("is_approved", false);
-
-      if (!error && pendingCount !== null) {
-        setCount(pendingCount);
-        setVisible(true);
-      }
+      if (!error && c !== null) setCount(c);
     };
 
     fetchCount();
 
     const channel = supabase
       .channel("pending-users-count")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "profiles" },
-        () => fetchCount()
-      )
+      .on("postgres_changes", { event: "*", schema: "public", table: "profiles" }, fetchCount)
       .subscribe();
 
-    return () => {
-      supabase.removeChannel(channel);
-    };
+    return () => { supabase.removeChannel(channel); };
   }, [isAdmin]);
 
-  return { count, isAdmin, visible };
+  return { count, isAdmin };
 }
+
+// Memoized menu item to prevent unnecessary re-renders
+const MenuItem = memo(function MenuItem({
+  item,
+  collapsed,
+  showBadge,
+  badgeCount,
+}: {
+  item: typeof menuItems[number];
+  collapsed: boolean;
+  showBadge: boolean;
+  badgeCount: number;
+}) {
+  const link = (
+    <NavLink
+      to={item.path}
+      className={({ isActive }) =>
+        `flex items-center rounded-md transition-colors duration-150 ${
+          collapsed
+            ? "h-9 w-9 justify-center"
+            : "gap-2.5 px-2.5 py-2 w-full"
+        } ${
+          isActive
+            ? "bg-sidebar-foreground/15 text-sidebar-foreground"
+            : "text-sidebar-foreground/70 hover:bg-sidebar-foreground/10 hover:text-sidebar-foreground"
+        }`
+      }
+    >
+      <span className={`relative text-sm leading-none flex-shrink-0 ${collapsed ? "" : "w-5 text-center"}`}>
+        {item.emoji}
+        {showBadge && collapsed && (
+          <span className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-destructive text-destructive-foreground text-[8px] font-bold flex items-center justify-center">
+            {badgeCount}
+          </span>
+        )}
+      </span>
+      {!collapsed && (
+        <span className="text-[13px] truncate flex-1 text-left flex items-center gap-1.5">
+          {item.title}
+          {showBadge && (
+            <span className="h-4 min-w-4 px-1 rounded-full bg-destructive text-destructive-foreground text-[9px] font-bold flex items-center justify-center">
+              {badgeCount}
+            </span>
+          )}
+        </span>
+      )}
+    </NavLink>
+  );
+
+  if (collapsed) {
+    return (
+      <Tooltip delayDuration={0}>
+        <TooltipTrigger asChild>
+          <div className="flex justify-center">{link}</div>
+        </TooltipTrigger>
+        <TooltipContent side="right" sideOffset={10} className="bg-popover text-popover-foreground border text-xs px-2.5 py-1 rounded shadow-md">
+          {item.emoji} {item.title}
+        </TooltipContent>
+      </Tooltip>
+    );
+  }
+
+  return link;
+});
 
 export function AppSidebar() {
   const { state } = useSidebar();
@@ -78,11 +131,12 @@ export function AppSidebar() {
   const collapsed = state === "collapsed";
   const { count: pendingCount, isAdmin } = usePendingUserCount();
   const { isIntern, isNOC } = useUserRole();
-  
+
+  const toggleTheme = useCallback(() => {
+    setTheme(theme === "dark" ? "light" : "dark");
+  }, [theme, setTheme]);
 
   const visibleMenuItems = useMemo(() => {
-    const INTERN_PATHS = new Set(["/", "/tickets", "/teams"]);
-    const ADMIN_NOC_ONLY_PATHS = new Set(["/notes"]);
     return menuItems.filter((item) => {
       if (isIntern && !INTERN_PATHS.has(item.path)) return false;
       if (ADMIN_NOC_ONLY_PATHS.has(item.path) && !isAdmin && !isNOC) return false;
@@ -90,175 +144,84 @@ export function AppSidebar() {
     });
   }, [isIntern, isAdmin, isNOC]);
 
-
-
-  const renderMenuItem = (item: typeof menuItems[0]) => {
-    const showBadge = item.path === "/settings" && isAdmin && pendingCount > 0;
-
-    const linkContent = (
-      <NavLink
-        to={item.path}
-        className={({ isActive }) =>
-          `flex items-center rounded-lg transition-all duration-300 ease-out group/link ${
-            collapsed
-              ? "h-10 w-10 justify-center"
-              : "gap-3 px-3 py-2.5 w-full hover:translate-x-0.5"
-          } ${
-            isActive
-              ? "bg-sidebar-foreground/15 text-sidebar-foreground shadow-sm"
-              : "text-sidebar-foreground/70 hover:bg-sidebar-foreground/10 hover:text-sidebar-foreground"
-          }`
-        }
-      >
-        <span className={`relative text-base leading-none flex-shrink-0 transition-transform duration-200 group-hover/link:scale-110 ${collapsed ? "" : "w-5 text-center"}`}>
-          {item.emoji}
-          {showBadge && collapsed && (
-            <span className="absolute -top-1.5 -right-1.5 h-3.5 w-3.5 rounded-full bg-destructive text-destructive-foreground text-[9px] font-bold flex items-center justify-center animate-pulse">
-              {pendingCount}
-            </span>
-          )}
-        </span>
-        {!collapsed && (
-          <span className="text-sm font-medium truncate flex-1 text-left flex items-center gap-2">
-            {item.title}
-            {showBadge && (
-              <span className="h-5 min-w-5 px-1 rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold flex items-center justify-center animate-pulse">
-                {pendingCount}
-              </span>
-            )}
-          </span>
-        )}
-      </NavLink>
-    );
-
-    if (collapsed) {
-      return (
-        <Tooltip key={item.title} delayDuration={0}>
-          <TooltipTrigger asChild>
-            <div className="w-full flex justify-center">
-              {linkContent}
-            </div>
-          </TooltipTrigger>
-          <TooltipContent
-            side="right"
-            sideOffset={12}
-            className="bg-popover text-popover-foreground border font-medium text-xs px-3 py-1.5 rounded-md shadow-lg"
-          >
-            {item.emoji} {item.title}
-            {showBadge && (
-              <span className="ml-1.5 text-destructive-foreground bg-destructive rounded-full px-1.5 py-0.5 text-[10px] font-bold">
-                {pendingCount}
-              </span>
-            )}
-          </TooltipContent>
-        </Tooltip>
-      );
-    }
-
-    return (
-      <div key={item.title} className="w-full">
-        {linkContent}
-      </div>
-    );
-  };
-
   return (
     <Sidebar
-      className={`${collapsed ? "w-[60px]" : "w-[250px]"} transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]`}
+      className={`${collapsed ? "w-[52px]" : "w-56"} transition-[width] duration-200 ease-out will-change-[width]`}
       collapsible="icon"
     >
       <SidebarContent className="flex flex-col overflow-x-hidden bg-sidebar-background">
-        {/* Header Logo */}
-        <div className={`flex-shrink-0 border-b border-sidebar-foreground/10 ${collapsed ? "py-4 px-2" : "p-4"}`}>
+        {/* Logo */}
+        <div className={`flex-shrink-0 border-b border-sidebar-foreground/10 ${collapsed ? "py-3 px-1.5" : "p-3"}`}>
           {!collapsed ? (
-            <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-xl flex items-center justify-center flex-shrink-0">
-                <img
-                  src={iconnetLogo}
-                  alt="Iconnet"
-                  className="h-7 w-7 object-contain"
-                />
-              </div>
+            <div className="flex items-center gap-2.5">
+              <img src={iconnetLogo} alt="Iconnet" className="h-8 w-8 object-contain flex-shrink-0" />
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-bold text-sidebar-foreground tracking-wide truncate">NOC RITEL</p>
-                <p className="text-[11px] text-sidebar-foreground/60 font-medium">Iconnet Platform</p>
+                <p className="text-sm font-bold text-sidebar-foreground truncate">NOC RITEL</p>
+                <p className="text-[10px] text-sidebar-foreground/50">Iconnet</p>
               </div>
             </div>
           ) : (
             <Tooltip delayDuration={0}>
               <TooltipTrigger asChild>
                 <div className="flex justify-center">
-                  <div className="h-9 w-9 rounded-xl flex items-center justify-center">
-                    <img
-                      src={iconnetLogo}
-                      alt="Iconnet"
-                      className="h-6 w-6 object-contain"
-                    />
-                  </div>
+                  <img src={iconnetLogo} alt="Iconnet" className="h-7 w-7 object-contain" />
                 </div>
               </TooltipTrigger>
-              <TooltipContent side="right" sideOffset={12} className="bg-popover text-popover-foreground border font-bold text-xs">
-                NOC RITEL - Iconnet
+              <TooltipContent side="right" sideOffset={10} className="bg-popover text-popover-foreground border text-xs font-bold">
+                NOC RITEL
               </TooltipContent>
             </Tooltip>
           )}
         </div>
 
-
-
-        {/* Menu Label */}
+        {/* Menu */}
         {!collapsed && (
-          <div className="px-4 pb-1">
-            <span className="text-[10px] font-semibold uppercase tracking-widest text-sidebar-foreground/40">
-              Menu
-            </span>
+          <div className="px-3 pt-2 pb-0.5">
+            <span className="text-[10px] font-semibold uppercase tracking-wider text-sidebar-foreground/35">Menu</span>
           </div>
         )}
 
-        {/* Menu Items */}
-        <nav className={`flex-1 overflow-y-auto overflow-x-hidden scrollbar-hide ${collapsed ? "px-1.5 space-y-1" : "px-2 space-y-0.5"}`}>
-          {visibleMenuItems.map(renderMenuItem)}
+        <nav className={`flex-1 overflow-y-auto overflow-x-hidden scrollbar-hide ${collapsed ? "px-1 py-1 space-y-0.5" : "px-1.5 space-y-px"}`}>
+          {visibleMenuItems.map((item) => (
+            <MenuItem
+              key={item.path}
+              item={item}
+              collapsed={collapsed}
+              showBadge={item.path === "/settings" && isAdmin && pendingCount > 0}
+              badgeCount={pendingCount}
+            />
+          ))}
         </nav>
 
         {/* Footer */}
         <div className="mt-auto border-t border-sidebar-foreground/10 flex-shrink-0">
-          <div className={`${collapsed ? "py-3 px-2" : "p-3"}`}>
+          <div className={collapsed ? "py-2 px-1.5" : "p-2"}>
             {collapsed ? (
               <Tooltip delayDuration={0}>
                 <TooltipTrigger asChild>
-                  <button
-                    onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-                    className="w-full flex justify-center"
-                  >
-                    <div className="h-9 w-9 rounded-lg bg-sidebar-foreground/10 flex items-center justify-center text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-foreground/15 transition-all duration-200">
-                      <span className="text-base leading-none">
-                        {theme === "dark" ? "☀️" : "🌙"}
-                      </span>
+                  <button onClick={toggleTheme} className="w-full flex justify-center">
+                    <div className="h-9 w-9 rounded-md flex items-center justify-center text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-foreground/10 transition-colors duration-150">
+                      <span className="text-sm">{theme === "dark" ? "☀️" : "🌙"}</span>
                     </div>
                   </button>
                 </TooltipTrigger>
-                <TooltipContent side="right" sideOffset={12} className="bg-popover text-popover-foreground border text-xs">
+                <TooltipContent side="right" sideOffset={10} className="bg-popover text-popover-foreground border text-xs">
                   {theme === "dark" ? "Light Mode" : "Dark Mode"}
                 </TooltipContent>
               </Tooltip>
             ) : (
-              <Button
-                variant="ghost"
-                onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-                className="w-full h-10 justify-start gap-3 px-3 rounded-lg text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-foreground/10 transition-all duration-200"
+              <button
+                onClick={toggleTheme}
+                className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-md text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-foreground/10 transition-colors duration-150"
               >
-                <span className="text-base leading-none flex-shrink-0">
-                  {theme === "dark" ? "☀️" : "🌙"}
-                </span>
-                <span className="text-sm font-medium truncate">
-                  {theme === "dark" ? "Light Mode" : "Dark Mode"}
-                </span>
-              </Button>
+                <span className="text-sm flex-shrink-0">{theme === "dark" ? "☀️" : "🌙"}</span>
+                <span className="text-[13px] truncate">{theme === "dark" ? "Light Mode" : "Dark Mode"}</span>
+              </button>
             )}
           </div>
           {!collapsed && (
-            <div className="px-3 pb-3 text-center">
-              <p className="text-[10px] text-sidebar-foreground/30 font-medium">© RZ Corp</p>
+            <div className="px-3 pb-2 text-center">
+              <p className="text-[9px] text-sidebar-foreground/25">© RZ Corp</p>
             </div>
           )}
         </div>
