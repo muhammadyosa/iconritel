@@ -47,6 +47,7 @@ import { StatusBadge } from "@/components/StatusBadge";
 import { TicketDetailDialog } from "@/components/TicketDetailDialog";
 import { DurationCell } from "@/components/DurationCell";
 import { RegionBadge } from "@/components/RegionBadge";
+import { OverSLATab } from "@/components/OverSLATab";
 import { toast } from "sonner";
 import { useActivityLog } from "@/hooks/useActivityLog";
 
@@ -574,6 +575,7 @@ export default function TicketManagement() {
           <TabsList className="inline-flex w-auto min-w-full sm:min-w-0 gap-1 h-auto flex-wrap sm:flex-nowrap p-1">
             <TabsTrigger value="preview-data" className="text-[11px] sm:text-sm px-2.5 sm:px-3 py-1.5 sm:py-2 whitespace-nowrap">📋 Preview Data</TabsTrigger>
             <TabsTrigger value="daftar-ticket" className="text-[11px] sm:text-sm px-2.5 sm:px-3 py-1.5 sm:py-2 whitespace-nowrap">📑 List Incident</TabsTrigger>
+            <TabsTrigger value="over-sla" className="text-[11px] sm:text-sm px-2.5 sm:px-3 py-1.5 sm:py-2 whitespace-nowrap">📢 List Over SLA</TabsTrigger>
           </TabsList>
         </div>
 
@@ -1061,6 +1063,9 @@ export default function TicketManagement() {
               </div>
             </CardContent>
           </Card>
+        </TabsContent>
+        <TabsContent value="over-sla" className="mt-2 sm:mt-3">
+          <OverSLATab tickets={tickets} getTicketRegion={getTicketRegion} />
         </TabsContent>
 
       </Tabs>
