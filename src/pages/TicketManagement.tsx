@@ -46,6 +46,7 @@ import {
 import { StatusBadge } from "@/components/StatusBadge";
 import { TicketDetailDialog } from "@/components/TicketDetailDialog";
 import { DurationCell } from "@/components/DurationCell";
+import { RegionBadge } from "@/components/RegionBadge";
 import { toast } from "sonner";
 import { useActivityLog } from "@/hooks/useActivityLog";
 
