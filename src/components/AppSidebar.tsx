@@ -197,7 +197,7 @@ export function AppSidebar() {
                   </div>
                 </div>
               </TooltipTrigger>
-              <TooltipContent side="right" sideOffset={12} className="bg-sidebar-background text-sidebar-foreground border-sidebar-border font-bold text-xs">
+              <TooltipContent side="right" sideOffset={12} className="bg-popover text-popover-foreground border font-bold text-xs">
                 NOC RITEL - Iconnet
               </TooltipContent>
             </Tooltip>
