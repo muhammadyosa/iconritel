@@ -402,9 +402,10 @@ export function OverSLATab({ tickets, getTicketRegion, onTicketClick }: OverSLAT
                           <tr
                             key={t.id}
                             className={cn(
-                              "border-b border-border/10 hover:bg-muted/30 transition-colors relative",
+                              "border-b border-border/10 hover:bg-muted/30 transition-colors relative cursor-pointer",
                               isTop3 && "bg-muted/10"
                             )}
+                            onClick={() => onTicketClick?.(t)}
                           >
                             <td className="text-center py-1.5 font-bold text-muted-foreground">{rankIcon}</td>
                             <td className="py-1.5 font-mono font-semibold">{t.id}</td>
