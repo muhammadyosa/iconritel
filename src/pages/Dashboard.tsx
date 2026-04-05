@@ -22,6 +22,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip, Cell, LineChart, Line, PieChart, Pie, Cell as RechartsCell } from "recharts";
 import { loadDefaultRegionalTeamData } from "@/lib/defaultRegionalData";
 import { NOCStatistikIncident } from "@/components/NOCStatistikIncident";
+import { DashboardTierOverSLA } from "@/components/DashboardTierOverSLA";
 import { RegionalTeamRecord } from "@/types/regionalTeam";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ShiftReportCard } from "@/components/ShiftReportCard";
@@ -104,19 +105,37 @@ export default function Dashboard() {
     loadDefaultRegionalTeamData().then(setTeamData).catch(() => {});
   }, []);
 
+  // Hostname to Region mapping
+  const hostnameToRegionMap = useMemo(() => {
+    const map: Record<string, string> = {};
+    teamData.forEach((rec) => {
+      const region = rec.region.trim().toUpperCase();
+      if (!region) return;
+      rec.hostnames.forEach((h) => {
+        const normalized = h.trim().toUpperCase();
+        if (normalized) map[normalized] = region;
+      });
+    });
+    return map;
+  }, [teamData]);
+
+  const getTicketRegion = useMemo(() => {
+    return (serpo: string) => {
+      // Try matching hostname from tickets
+      const ticket = tickets.find(t => t.serpo === serpo);
+      const hostname = ticket?.hostname || serpo;
+      return hostnameToRegionMap[hostname.trim().toUpperCase()] || "-";
+    };
+  }, [hostnameToRegionMap, tickets]);
+
   // Regional incident data for pie chart and stats
   const regionalIncidentData = useMemo(() => {
-    const hostnameToRegion: Record<string, string> = {};
     const regionMap: Record<string, RegionalTeamRecord[]> = {};
     teamData.forEach((rec) => {
       const region = rec.region.trim().toUpperCase();
       if (!region) return;
       if (!regionMap[region]) regionMap[region] = [];
       regionMap[region].push(rec);
-      rec.hostnames.forEach((h) => {
-        const normalized = h.trim().toUpperCase();
-        if (normalized) hostnameToRegion[normalized] = region;
-      });
     });
 
     const regionStats: Record<string, { total: number; resolved: number; pending: number; critical: number; ritel: number; feeder: number }> = {};
@@ -125,7 +144,7 @@ export default function Dashboard() {
     });
 
     tickets.forEach((ticket) => {
-      const region = hostnameToRegion[(ticket.hostname || "").trim().toUpperCase()];
+      const region = hostnameToRegionMap[(ticket.hostname || "").trim().toUpperCase()];
       if (!region || !regionStats[region]) return;
       regionStats[region].total++;
       if (ticket.status === "Resolved") regionStats[region].resolved++;
@@ -139,7 +158,7 @@ export default function Dashboard() {
       .filter(([, s]) => s.total > 0)
       .sort((a, b) => b[1].total - a[1].total)
       .map(([region, stats]) => ({ region, ...stats }));
-  }, [teamData, tickets]);
+  }, [teamData, tickets, hostnameToRegionMap]);
 
   const ritelTickets = useMemo(() => tickets.filter(t => !FEEDER_CONSTRAINTS_SET.has(t.constraint)), [tickets]);
   const feederTickets = useMemo(() => tickets.filter(t => FEEDER_CONSTRAINTS_SET.has(t.constraint)), [tickets]);
@@ -864,6 +883,8 @@ export default function Dashboard() {
           {/* NOC Statistik Incident */}
           <NOCStatistikIncident tickets={tickets} variant="noc" />
 
+          {/* Tier Incident OVER SLA */}
+          <DashboardTierOverSLA tickets={tickets} getTicketRegion={getTicketRegion} />
 
         </motion.div>
 
