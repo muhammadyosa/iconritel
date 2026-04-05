@@ -54,6 +54,7 @@ export function OverSLATab({ tickets, getTicketRegion, onTicketClick }: OverSLAT
   const [searchQuery, setSearchQuery] = useState("");
   const [searchField, setSearchField] = useState("all");
   const [activeCard, setActiveCard] = useState<CardType | null>(null);
+  const [selectedRegion, setSelectedRegion] = useState<string | null>(null);
   const [now, setNow] = useState(Date.now());
 
   // Real-time ticker for accurate calculations
