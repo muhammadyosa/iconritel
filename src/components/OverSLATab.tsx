@@ -377,7 +377,7 @@ export function OverSLATab({ tickets, getTicketRegion }: OverSLATabProps) {
                       <div
                         key={t.id}
                         className={cn(
-                          "grid grid-cols-[24px_1fr_90px_70px_80px] gap-1 items-center px-1.5 py-1 rounded transition-colors hover:bg-muted/40",
+                          "grid grid-cols-[20px_1fr_80px_60px_72px] sm:grid-cols-[24px_1fr_90px_70px_80px] gap-1 items-center px-1.5 py-1 rounded transition-colors hover:bg-muted/40",
                           isTop3 && "bg-muted/20"
                         )}
                       >
