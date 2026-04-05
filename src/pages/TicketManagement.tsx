@@ -45,6 +45,7 @@ import {
 } from "@/types/ticket";
 import { StatusBadge } from "@/components/StatusBadge";
 import { TicketDetailDialog } from "@/components/TicketDetailDialog";
+import { DurationCell } from "@/components/DurationCell";
 import { toast } from "sonner";
 import { useActivityLog } from "@/hooks/useActivityLog";
 
