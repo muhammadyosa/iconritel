@@ -15,6 +15,7 @@ import { UserMenu } from "@/components/UserMenu";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { useTicketNotifications } from "@/hooks/useTicketNotifications";
 import { ScrollToTop } from "@/components/ScrollToTop";
+import { useSwipeToOpenSidebar } from "@/hooks/useSwipeSidebar";
 import { TopNavTabs } from "@/components/TopNavTabs";
 import { TabProvider, useOpenTabs, pathMap } from "@/contexts/TabContext";
 import { NetworkStatus } from "@/components/NetworkStatus";
