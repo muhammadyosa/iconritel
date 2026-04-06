@@ -1632,7 +1632,7 @@ export default function Teams() {
                           size="sm"
                           variant={rankingPeriod === p ? "default" : "outline"}
                           className="h-6 text-[10px] px-2.5"
-                          onClick={() => { setRankingPeriod(p); setRankingCustomDate(undefined); }}
+                          onClick={() => { setRankingPeriod(p); setRankingCustomRange(undefined); }}
                         >
                           {p === "7d" ? "7 Hari" : p === "14d" ? "14 Hari" : "30 Hari"}
                         </Button>
