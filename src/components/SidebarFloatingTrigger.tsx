@@ -7,19 +7,28 @@ import {
 } from "@/components/ui/tooltip";
 
 export function SidebarFloatingTrigger() {
-  const { state, toggleSidebar, isMobile } = useSidebar();
+  const { state, toggleSidebar, isMobile, openMobile } = useSidebar();
   const collapsed = state === "collapsed";
 
   // On mobile: show a hamburger menu button fixed top-left
   if (isMobile) {
     return (
-      <button
-        onClick={toggleSidebar}
-        className="fixed z-30 top-2.5 left-2 h-8 w-8 rounded-md border border-border bg-background/90 backdrop-blur-sm text-muted-foreground shadow-sm flex items-center justify-center hover:bg-accent hover:text-accent-foreground active:scale-95 transition-all duration-200 touch-target-sm"
-        aria-label="Open menu"
-      >
-        <Menu className="h-4 w-4" />
-      </button>
+      <>
+        {/* Swipe hint indicator - thin line on left edge */}
+        {!openMobile && (
+          <div
+            className="fixed left-0 top-1/3 z-20 h-1/3 w-1 rounded-r-full bg-primary/25 animate-pulse pointer-events-none"
+            aria-hidden="true"
+          />
+        )}
+        <button
+          onClick={toggleSidebar}
+          className="fixed z-30 top-2.5 left-2 h-8 w-8 rounded-md border border-border bg-background/90 backdrop-blur-sm text-muted-foreground shadow-sm flex items-center justify-center hover:bg-accent hover:text-accent-foreground active:scale-95 transition-all duration-200 touch-target-sm"
+          aria-label="Open menu"
+        >
+          <Menu className="h-4 w-4" />
+        </button>
+      </>
     );
   }
 
