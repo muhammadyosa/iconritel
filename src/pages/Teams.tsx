@@ -1741,7 +1741,6 @@ export default function Teams() {
                       for (let d = days; d >= 0; d--) {
                         dateKeys.push(format(subDays(today, d), "yyyy-MM-dd"));
                       }
-                      }
                       const activeUsers = rankingUserStats.filter(u => u.total > 0).slice(0, 8);
                       const dailyMap: Record<string, Record<string, number>> = {};
                       dateKeys.forEach(dk => { dailyMap[dk] = {}; activeUsers.forEach(u => { dailyMap[dk][u.name] = 0; }); });
