@@ -117,7 +117,8 @@ export default function Teams() {
   const [expandedDrillTeam, setExpandedDrillTeam] = useState<string | null>(null);
   const [userDrillSheet, setUserDrillSheet] = useState<{ users: { name: string; tickets: any[] }[] } | null>(null);
   const [expandedDrillUser, setExpandedDrillUser] = useState<string | null>(null);
-  const [rankingPeriod, setRankingPeriod] = useState<"7d" | "14d" | "30d">("7d");
+  const [rankingPeriod, setRankingPeriod] = useState<"7d" | "14d" | "30d" | "custom">("7d");
+  const [rankingCustomDate, setRankingCustomDate] = useState<Date | undefined>(undefined);
   // trendFilter is now unified with periodPreset
 
   // Handle period preset change
@@ -244,23 +245,38 @@ export default function Teams() {
   const [rankingDbTickets, setRankingDbTickets] = useState<any[]>([]);
 
   const fetchRankingData = useCallback(async () => {
-    const cutoff = startOfDay(subDays(new Date(), rankingDays)).toISOString().split("T")[0];
-    const cutoffISO = startOfDay(subDays(new Date(), rankingDays)).toISOString();
+    let cutoff: string;
+    let cutoffISO: string;
+    let cutoffEnd: string | undefined;
+    let cutoffEndISO: string | undefined;
+
+    if (rankingPeriod === "custom" && rankingCustomDate) {
+      cutoff = format(startOfDay(rankingCustomDate), "yyyy-MM-dd");
+      cutoffISO = startOfDay(rankingCustomDate).toISOString();
+      cutoffEnd = format(endOfDay(rankingCustomDate), "yyyy-MM-dd");
+      cutoffEndISO = endOfDay(rankingCustomDate).toISOString();
+    } else {
+      cutoff = startOfDay(subDays(new Date(), rankingDays)).toISOString().split("T")[0];
+      cutoffISO = startOfDay(subDays(new Date(), rankingDays)).toISOString();
+    }
+
+    let historyQuery = supabase
+      .from("daily_user_ticket_history")
+      .select("user_name, date, total_created, total_resolved")
+      .gte("date", cutoff);
+    if (cutoffEnd) historyQuery = historyQuery.lte("date", cutoffEnd);
+
+    let liveQuery = supabase
+      .from("tickets")
+      .select("created_by_name, status, created_iso")
+      .gte("created_iso", cutoffISO);
+    if (cutoffEndISO) liveQuery = liveQuery.lte("created_iso", cutoffEndISO);
     
-    const [historyRes, liveRes] = await Promise.all([
-      supabase
-        .from("daily_user_ticket_history")
-        .select("user_name, date, total_created, total_resolved")
-        .gte("date", cutoff),
-      supabase
-        .from("tickets")
-        .select("created_by_name, status, created_iso")
-        .gte("created_iso", cutoffISO),
-    ]);
+    const [historyRes, liveRes] = await Promise.all([historyQuery, liveQuery]);
     
     if (historyRes.data) setRankingHistoryData(historyRes.data);
     if (liveRes.data) setRankingDbTickets(liveRes.data);
-  }, [rankingDays]);
+  }, [rankingDays, rankingPeriod, rankingCustomDate]);
 
   useEffect(() => {
     fetchRankingData();
@@ -1608,18 +1624,47 @@ export default function Teams() {
                         {rankingTotals.total} incident • {rankingTotals.resolved} resolved
                       </span>
                     </div>
-                    <div className="flex items-center gap-1.5">
+                    <div className="flex items-center gap-1.5 flex-wrap">
                       {(["7d", "14d", "30d"] as const).map((p) => (
                         <Button
                           key={p}
                           size="sm"
                           variant={rankingPeriod === p ? "default" : "outline"}
                           className="h-6 text-[10px] px-2.5"
-                          onClick={() => setRankingPeriod(p)}
+                          onClick={() => { setRankingPeriod(p); setRankingCustomDate(undefined); }}
                         >
                           {p === "7d" ? "7 Hari" : p === "14d" ? "14 Hari" : "30 Hari"}
                         </Button>
                       ))}
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button
+                            size="sm"
+                            variant={rankingPeriod === "custom" ? "default" : "outline"}
+                            className="h-6 text-[10px] px-2.5 gap-1"
+                          >
+                            <CalendarIcon className="h-3 w-3" />
+                            {rankingPeriod === "custom" && rankingCustomDate
+                              ? format(rankingCustomDate, "dd MMM yyyy", { locale: localeId })
+                              : "Custom"}
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar
+                            mode="single"
+                            selected={rankingCustomDate}
+                            onSelect={(date) => {
+                              if (date) {
+                                setRankingCustomDate(date);
+                                setRankingPeriod("custom");
+                              }
+                            }}
+                            disabled={(date) => date > new Date()}
+                            initialFocus
+                            className={cn("p-3 pointer-events-auto")}
+                          />
+                        </PopoverContent>
+                      </Popover>
                     </div>
                   </CardTitle>
                 </CardHeader>
@@ -1643,7 +1688,7 @@ export default function Teams() {
                             {rankingUserStats.length === 0 ? (
                               <TableRow>
                                 <TableCell colSpan={7} className="text-center text-sm text-muted-foreground py-8">
-                                  Tidak ada data incident dalam {rankingPeriod === "7d" ? "7" : rankingPeriod === "14d" ? "14" : "30"} hari terakhir
+                                  Tidak ada data incident {rankingPeriod === "custom" && rankingCustomDate ? `pada ${format(rankingCustomDate, "dd MMM yyyy", { locale: localeId })}` : `dalam ${rankingPeriod === "7d" ? "7" : rankingPeriod === "14d" ? "14" : "30"} hari terakhir`}
                                 </TableCell>
                               </TableRow>
                             ) : rankingUserStats.map((u, i) => {
