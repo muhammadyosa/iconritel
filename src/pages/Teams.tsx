@@ -1732,11 +1732,15 @@ export default function Teams() {
                   <CardContent className="p-2 sm:p-4">
                     {(() => {
                       // Build daily data per user
-                      const days = rankingDays;
-                      const today = startOfDay(new Date());
+                      const fromDate = rankingCustomRange?.from || subDays(new Date(), 7);
+                      const toDate = rankingCustomRange?.to || fromDate;
+                      const diffMs = toDate.getTime() - fromDate.getTime();
+                      const days = Math.max(Math.ceil(diffMs / (1000 * 60 * 60 * 24)), 0);
+                      const today = startOfDay(toDate);
                       const dateKeys: string[] = [];
                       for (let d = days; d >= 0; d--) {
                         dateKeys.push(format(subDays(today, d), "yyyy-MM-dd"));
+                      }
                       }
                       const activeUsers = rankingUserStats.filter(u => u.total > 0).slice(0, 8);
                       const dailyMap: Record<string, Record<string, number>> = {};
