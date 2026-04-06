@@ -117,7 +117,8 @@ export default function Teams() {
   const [expandedDrillTeam, setExpandedDrillTeam] = useState<string | null>(null);
   const [userDrillSheet, setUserDrillSheet] = useState<{ users: { name: string; tickets: any[] }[] } | null>(null);
   const [expandedDrillUser, setExpandedDrillUser] = useState<string | null>(null);
-  const [rankingPeriod, setRankingPeriod] = useState<"7d" | "14d" | "30d">("7d");
+  const [rankingPeriod, setRankingPeriod] = useState<"7d" | "14d" | "30d" | "custom">("7d");
+  const [rankingCustomDate, setRankingCustomDate] = useState<Date | undefined>(undefined);
   // trendFilter is now unified with periodPreset
 
   // Handle period preset change
