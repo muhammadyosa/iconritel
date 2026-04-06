@@ -266,7 +266,7 @@ export default function Teams() {
     
     if (historyRes.data) setRankingHistoryData(historyRes.data);
     if (liveRes.data) setRankingDbTickets(liveRes.data);
-  }, [rankingDays, rankingPeriod, rankingCustomRange]);
+  }, [rankingCustomRange]);
 
   useEffect(() => {
     fetchRankingData();
