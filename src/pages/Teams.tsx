@@ -1615,30 +1615,19 @@ export default function Teams() {
                       </span>
                     </div>
                     <div className="flex items-center gap-1.5 flex-wrap">
-                      {(["7d", "14d", "30d"] as const).map((p) => (
-                        <Button
-                          key={p}
-                          size="sm"
-                          variant={rankingPeriod === p ? "default" : "outline"}
-                          className="h-6 text-[10px] px-2.5"
-                          onClick={() => { setRankingPeriod(p); setRankingCustomRange(undefined); }}
-                        >
-                          {p === "7d" ? "7 Hari" : p === "14d" ? "14 Hari" : "30 Hari"}
-                        </Button>
-                      ))}
                       <Popover>
                         <PopoverTrigger asChild>
                           <Button
                             size="sm"
-                            variant={rankingPeriod === "custom" ? "default" : "outline"}
+                            variant="default"
                             className="h-6 text-[10px] px-2.5 gap-1"
                           >
                             <CalendarIcon className="h-3 w-3" />
-                            {rankingPeriod === "custom" && rankingCustomRange?.from
+                            {rankingCustomRange?.from
                               ? rankingCustomRange.to && rankingCustomRange.to.getTime() !== rankingCustomRange.from.getTime()
                                 ? `${format(rankingCustomRange.from, "dd MMM", { locale: localeId })} - ${format(rankingCustomRange.to, "dd MMM", { locale: localeId })}`
                                 : format(rankingCustomRange.from, "dd MMM yyyy", { locale: localeId })
-                              : "Custom"}
+                              : "Pilih Tanggal"}
                           </Button>
                         </PopoverTrigger>
                         <PopoverContent className="w-auto p-0" align="start">
@@ -1647,10 +1636,14 @@ export default function Teams() {
                             selected={rankingCustomRange}
                             onSelect={(range) => {
                               setRankingCustomRange(range);
-                              if (range?.from) {
-                                setRankingPeriod("custom");
-                              }
                             }}
+                            disabled={(date) => date > new Date()}
+                            numberOfMonths={1}
+                            initialFocus
+                            className={cn("p-3 pointer-events-auto")}
+                          />
+                        </PopoverContent>
+                      </Popover>
                             disabled={(date) => date > new Date()}
                             numberOfMonths={1}
                             initialFocus
