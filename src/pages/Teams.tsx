@@ -1644,13 +1644,6 @@ export default function Teams() {
                           />
                         </PopoverContent>
                       </Popover>
-                            disabled={(date) => date > new Date()}
-                            numberOfMonths={1}
-                            initialFocus
-                            className={cn("p-3 pointer-events-auto")}
-                          />
-                        </PopoverContent>
-                      </Popover>
                     </div>
                   </CardTitle>
                 </CardHeader>
