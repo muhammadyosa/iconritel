@@ -307,6 +307,28 @@ export default function Teams() {
       .sort((a, b) => b.total - a.total);
   }, [rankingHistoryData, rankingDbTickets]);
 
+  // Track previous ranking for rank change indicators
+  const prevRankingRef = useRef<Record<string, number>>({});
+  const rankChangeMap = useMemo(() => {
+    const changes: Record<string, number> = {};
+    const prevMap = prevRankingRef.current;
+    rankingUserStats.forEach((u, i) => {
+      const prevRank = prevMap[u.name];
+      if (prevRank !== undefined) {
+        changes[u.name] = prevRank - i; // positive = moved up, negative = moved down
+      } else {
+        changes[u.name] = 0; // new entry
+      }
+    });
+    return changes;
+  }, [rankingUserStats]);
+
+  useEffect(() => {
+    const newMap: Record<string, number> = {};
+    rankingUserStats.forEach((u, i) => { newMap[u.name] = i; });
+    prevRankingRef.current = newMap;
+  }, [rankingUserStats]);
+
   const rankingTotals = useMemo(() => {
     const t = { total: 0, resolved: 0, pending: 0, critical: 0 };
     rankingUserStats.forEach(u => { t.total += u.total; t.resolved += u.resolved; t.pending += u.pending; t.critical += u.critical; });
