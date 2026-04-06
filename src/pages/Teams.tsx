@@ -238,27 +238,17 @@ export default function Teams() {
       .sort((a, b) => b.total - a.total);
   }, [filteredTickets]);
 
-  // === Ranking User NOC with local period filter (uses persistent history table) ===
-  const rankingDays = rankingPeriod === "7d" ? 7 : rankingPeriod === "14d" ? 14 : 30;
+  // === Ranking User NOC with custom date range filter (uses persistent history table) ===
   const [rankingHistoryData, setRankingHistoryData] = useState<any[]>([]);
   const [rankingDbTickets, setRankingDbTickets] = useState<any[]>([]);
 
   const fetchRankingData = useCallback(async () => {
-    let cutoff: string;
-    let cutoffISO: string;
-    let cutoffEnd: string | undefined;
-    let cutoffEndISO: string | undefined;
-
-    if (rankingPeriod === "custom" && rankingCustomRange?.from) {
-      cutoff = format(startOfDay(rankingCustomRange.from), "yyyy-MM-dd");
-      cutoffISO = startOfDay(rankingCustomRange.from).toISOString();
-      const endDate = rankingCustomRange.to || rankingCustomRange.from;
-      cutoffEnd = format(endOfDay(endDate), "yyyy-MM-dd");
-      cutoffEndISO = endOfDay(endDate).toISOString();
-    } else {
-      cutoff = startOfDay(subDays(new Date(), rankingDays)).toISOString().split("T")[0];
-      cutoffISO = startOfDay(subDays(new Date(), rankingDays)).toISOString();
-    }
+    const fromDate = rankingCustomRange?.from || subDays(new Date(), 7);
+    const toDate = rankingCustomRange?.to || fromDate;
+    const cutoff = format(startOfDay(fromDate), "yyyy-MM-dd");
+    const cutoffISO = startOfDay(fromDate).toISOString();
+    const cutoffEnd = format(endOfDay(toDate), "yyyy-MM-dd");
+    const cutoffEndISO = endOfDay(toDate).toISOString();
 
     let historyQuery = supabase
       .from("daily_user_ticket_history")
