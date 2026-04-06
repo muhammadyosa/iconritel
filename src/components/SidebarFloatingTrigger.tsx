@@ -7,7 +7,7 @@ import {
 } from "@/components/ui/tooltip";
 
 export function SidebarFloatingTrigger() {
-  const { state, toggleSidebar, isMobile } = useSidebar();
+  const { state, toggleSidebar, isMobile, openMobile } = useSidebar();
   const collapsed = state === "collapsed";
 
   // On mobile: show a hamburger menu button fixed top-left
