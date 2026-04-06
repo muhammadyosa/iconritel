@@ -1209,16 +1209,14 @@ export default function Dashboard() {
           <NOCStatistikIncident tickets={tickets} variant="noc" />
         </motion.div>
 
-        {/* Recent Activity - Admin Only */}
-        {isAdmin && (
-          <motion.div
+        {/* Recent Activity - All Roles */}
+        <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.9 }}
           >
             <RecentActivity />
-          </motion.div>
-        )}
+        </motion.div>
       </div>
 
       {/* Ticket Detail Dialog */}
