@@ -117,8 +117,7 @@ export default function Teams() {
   const [expandedDrillTeam, setExpandedDrillTeam] = useState<string | null>(null);
   const [userDrillSheet, setUserDrillSheet] = useState<{ users: { name: string; tickets: any[] }[] } | null>(null);
   const [expandedDrillUser, setExpandedDrillUser] = useState<string | null>(null);
-  const [rankingPeriod, setRankingPeriod] = useState<"7d" | "14d" | "30d" | "custom">("7d");
-  const [rankingCustomRange, setRankingCustomRange] = useState<DateRange | undefined>(undefined);
+  const [rankingCustomRange, setRankingCustomRange] = useState<DateRange | undefined>({ from: subDays(new Date(), 7), to: new Date() });
   // trendFilter is now unified with periodPreset
 
   // Handle period preset change
@@ -239,27 +238,17 @@ export default function Teams() {
       .sort((a, b) => b.total - a.total);
   }, [filteredTickets]);
 
-  // === Ranking User NOC with local period filter (uses persistent history table) ===
-  const rankingDays = rankingPeriod === "7d" ? 7 : rankingPeriod === "14d" ? 14 : 30;
+  // === Ranking User NOC with custom date range filter (uses persistent history table) ===
   const [rankingHistoryData, setRankingHistoryData] = useState<any[]>([]);
   const [rankingDbTickets, setRankingDbTickets] = useState<any[]>([]);
 
   const fetchRankingData = useCallback(async () => {
-    let cutoff: string;
-    let cutoffISO: string;
-    let cutoffEnd: string | undefined;
-    let cutoffEndISO: string | undefined;
-
-    if (rankingPeriod === "custom" && rankingCustomRange?.from) {
-      cutoff = format(startOfDay(rankingCustomRange.from), "yyyy-MM-dd");
-      cutoffISO = startOfDay(rankingCustomRange.from).toISOString();
-      const endDate = rankingCustomRange.to || rankingCustomRange.from;
-      cutoffEnd = format(endOfDay(endDate), "yyyy-MM-dd");
-      cutoffEndISO = endOfDay(endDate).toISOString();
-    } else {
-      cutoff = startOfDay(subDays(new Date(), rankingDays)).toISOString().split("T")[0];
-      cutoffISO = startOfDay(subDays(new Date(), rankingDays)).toISOString();
-    }
+    const fromDate = rankingCustomRange?.from || subDays(new Date(), 7);
+    const toDate = rankingCustomRange?.to || fromDate;
+    const cutoff = format(startOfDay(fromDate), "yyyy-MM-dd");
+    const cutoffISO = startOfDay(fromDate).toISOString();
+    const cutoffEnd = format(endOfDay(toDate), "yyyy-MM-dd");
+    const cutoffEndISO = endOfDay(toDate).toISOString();
 
     let historyQuery = supabase
       .from("daily_user_ticket_history")
@@ -277,7 +266,7 @@ export default function Teams() {
     
     if (historyRes.data) setRankingHistoryData(historyRes.data);
     if (liveRes.data) setRankingDbTickets(liveRes.data);
-  }, [rankingDays, rankingPeriod, rankingCustomRange]);
+  }, [rankingCustomRange]);
 
   useEffect(() => {
     fetchRankingData();
@@ -1626,30 +1615,19 @@ export default function Teams() {
                       </span>
                     </div>
                     <div className="flex items-center gap-1.5 flex-wrap">
-                      {(["7d", "14d", "30d"] as const).map((p) => (
-                        <Button
-                          key={p}
-                          size="sm"
-                          variant={rankingPeriod === p ? "default" : "outline"}
-                          className="h-6 text-[10px] px-2.5"
-                          onClick={() => { setRankingPeriod(p); setRankingCustomRange(undefined); }}
-                        >
-                          {p === "7d" ? "7 Hari" : p === "14d" ? "14 Hari" : "30 Hari"}
-                        </Button>
-                      ))}
                       <Popover>
                         <PopoverTrigger asChild>
                           <Button
                             size="sm"
-                            variant={rankingPeriod === "custom" ? "default" : "outline"}
+                            variant="default"
                             className="h-6 text-[10px] px-2.5 gap-1"
                           >
                             <CalendarIcon className="h-3 w-3" />
-                            {rankingPeriod === "custom" && rankingCustomRange?.from
+                            {rankingCustomRange?.from
                               ? rankingCustomRange.to && rankingCustomRange.to.getTime() !== rankingCustomRange.from.getTime()
                                 ? `${format(rankingCustomRange.from, "dd MMM", { locale: localeId })} - ${format(rankingCustomRange.to, "dd MMM", { locale: localeId })}`
                                 : format(rankingCustomRange.from, "dd MMM yyyy", { locale: localeId })
-                              : "Custom"}
+                              : "Pilih Tanggal"}
                           </Button>
                         </PopoverTrigger>
                         <PopoverContent className="w-auto p-0" align="start">
@@ -1658,9 +1636,6 @@ export default function Teams() {
                             selected={rankingCustomRange}
                             onSelect={(range) => {
                               setRankingCustomRange(range);
-                              if (range?.from) {
-                                setRankingPeriod("custom");
-                              }
                             }}
                             disabled={(date) => date > new Date()}
                             numberOfMonths={1}
@@ -1692,7 +1667,7 @@ export default function Teams() {
                             {rankingUserStats.length === 0 ? (
                               <TableRow>
                                 <TableCell colSpan={7} className="text-center text-sm text-muted-foreground py-8">
-                                  Tidak ada data incident {rankingPeriod === "custom" && rankingCustomRange?.from ? (rankingCustomRange.to && rankingCustomRange.to.getTime() !== rankingCustomRange.from.getTime() ? `${format(rankingCustomRange.from, "dd MMM", { locale: localeId })} - ${format(rankingCustomRange.to, "dd MMM yyyy", { locale: localeId })}` : `pada ${format(rankingCustomRange.from, "dd MMM yyyy", { locale: localeId })}`) : `dalam ${rankingPeriod === "7d" ? "7" : rankingPeriod === "14d" ? "14" : "30"} hari terakhir`}
+                                  Tidak ada data incident {rankingCustomRange?.from ? (rankingCustomRange.to && rankingCustomRange.to.getTime() !== rankingCustomRange.from.getTime() ? `${format(rankingCustomRange.from, "dd MMM", { locale: localeId })} - ${format(rankingCustomRange.to, "dd MMM yyyy", { locale: localeId })}` : `pada ${format(rankingCustomRange.from, "dd MMM yyyy", { locale: localeId })}`) : "pada periode yang dipilih"}
                                 </TableCell>
                               </TableRow>
                             ) : rankingUserStats.map((u, i) => {
@@ -1751,14 +1726,17 @@ export default function Teams() {
                     <CardTitle className="flex items-center gap-2 text-sm sm:text-base">
                       <TrendingUp className="h-4 w-4 text-primary" />
                       <span>Trend Incident per User</span>
-                      <Badge variant="secondary" className="text-[10px]">{rankingPeriod === "7d" ? "7 Hari" : rankingPeriod === "14d" ? "14 Hari" : "30 Hari"}</Badge>
+                      <Badge variant="secondary" className="text-[10px]">{rankingCustomRange?.from ? (rankingCustomRange.to && rankingCustomRange.to.getTime() !== rankingCustomRange.from.getTime() ? `${format(rankingCustomRange.from, "dd MMM", { locale: localeId })} - ${format(rankingCustomRange.to, "dd MMM", { locale: localeId })}` : format(rankingCustomRange.from, "dd MMM yyyy", { locale: localeId })) : "7 Hari"}</Badge>
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="p-2 sm:p-4">
                     {(() => {
                       // Build daily data per user
-                      const days = rankingDays;
-                      const today = startOfDay(new Date());
+                      const fromDate = rankingCustomRange?.from || subDays(new Date(), 7);
+                      const toDate = rankingCustomRange?.to || fromDate;
+                      const diffMs = toDate.getTime() - fromDate.getTime();
+                      const days = Math.max(Math.ceil(diffMs / (1000 * 60 * 60 * 24)), 0);
+                      const today = startOfDay(toDate);
                       const dateKeys: string[] = [];
                       for (let d = days; d >= 0; d--) {
                         dateKeys.push(format(subDays(today, d), "yyyy-MM-dd"));
