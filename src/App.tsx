@@ -132,6 +132,11 @@ function TicketNotificationProvider({ children }: { children: React.ReactNode })
   return <>{children}</>;
 }
 
+function SwipeHandler() {
+  useSwipeToOpenSidebar();
+  return null;
+}
+
 function AppLayout() {
   const location = useLocation();
   const isLoginPage = location.pathname === "/login";
