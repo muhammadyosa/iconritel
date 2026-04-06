@@ -15,6 +15,7 @@ import { UserMenu } from "@/components/UserMenu";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { useTicketNotifications } from "@/hooks/useTicketNotifications";
 import { ScrollToTop } from "@/components/ScrollToTop";
+import { useSwipeToOpenSidebar } from "@/hooks/useSwipeSidebar";
 import { TopNavTabs } from "@/components/TopNavTabs";
 import { TabProvider, useOpenTabs, pathMap } from "@/contexts/TabContext";
 import { NetworkStatus } from "@/components/NetworkStatus";
@@ -131,6 +132,11 @@ function TicketNotificationProvider({ children }: { children: React.ReactNode })
   return <>{children}</>;
 }
 
+function SwipeHandler() {
+  useSwipeToOpenSidebar();
+  return null;
+}
+
 function AppLayout() {
   const location = useLocation();
   const isLoginPage = location.pathname === "/login";
@@ -151,6 +157,7 @@ function AppLayout() {
 
   return (
     <SidebarProvider>
+      <SwipeHandler />
       <div className="flex min-h-screen w-full overflow-x-hidden">
         <AppSidebar />
         <SidebarFloatingTrigger />
