@@ -34,7 +34,7 @@ import {
   type ChartConfig,
 } from "@/components/ui/chart";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, PieChart, Pie, Cell as RechartsCell, LineChart, Line } from "recharts";
-import { useState, useMemo, useCallback, useEffect } from "react";
+import { useState, useMemo, useCallback, useEffect, useRef } from "react";
 import { format, isWithinInterval, startOfDay, endOfDay, subDays } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { id as localeId } from "date-fns/locale";
@@ -306,6 +306,28 @@ export default function Teams() {
       .filter(u => u.total > 0 || u.resolved > 0 || u.pending > 0 || u.critical > 0)
       .sort((a, b) => b.total - a.total);
   }, [rankingHistoryData, rankingDbTickets]);
+
+  // Track previous ranking for rank change indicators
+  const prevRankingRef = useRef<Record<string, number>>({});
+  const rankChangeMap = useMemo(() => {
+    const changes: Record<string, number> = {};
+    const prevMap = prevRankingRef.current;
+    rankingUserStats.forEach((u, i) => {
+      const prevRank = prevMap[u.name];
+      if (prevRank !== undefined) {
+        changes[u.name] = prevRank - i; // positive = moved up, negative = moved down
+      } else {
+        changes[u.name] = 0; // new entry
+      }
+    });
+    return changes;
+  }, [rankingUserStats]);
+
+  useEffect(() => {
+    const newMap: Record<string, number> = {};
+    rankingUserStats.forEach((u, i) => { newMap[u.name] = i; });
+    prevRankingRef.current = newMap;
+  }, [rankingUserStats]);
 
   const rankingTotals = useMemo(() => {
     const t = { total: 0, resolved: 0, pending: 0, critical: 0 };
@@ -1672,6 +1694,7 @@ export default function Teams() {
                               </TableRow>
                             ) : rankingUserStats.map((u, i) => {
                               const rate = u.total > 0 ? Math.round((u.resolved / u.total) * 100) : 0;
+                              const change = rankChangeMap[u.name] || 0;
                               return (
                                 <TableRow
                                   key={u.name}
@@ -1679,21 +1702,33 @@ export default function Teams() {
                                   onClick={() => setNocUserSheet(u.name)}
                                 >
                                   <TableCell className="py-2 w-[40px]">
-                                    {i === 0 ? (
-                                      <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-yellow-100 dark:bg-yellow-900/30" title="🥇 Peringkat 1">
-                                        <Trophy className="h-3.5 w-3.5 text-yellow-500" />
-                                      </span>
-                                    ) : i === 1 ? (
-                                      <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-slate-100 dark:bg-slate-700/30" title="🥈 Peringkat 2">
-                                        <Medal className="h-3.5 w-3.5 text-slate-400" />
-                                      </span>
-                                    ) : i === 2 ? (
-                                      <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-orange-100 dark:bg-orange-900/30" title="🥉 Peringkat 3">
-                                        <Medal className="h-3.5 w-3.5 text-orange-500" />
-                                      </span>
-                                    ) : (
-                                      <span className="text-xs font-medium text-muted-foreground">{i + 1}</span>
-                                    )}
+                                    <div className="flex items-center gap-0.5">
+                                      {i === 0 ? (
+                                        <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-yellow-100 dark:bg-yellow-900/30" title="🥇 Peringkat 1">
+                                          <Trophy className="h-3.5 w-3.5 text-yellow-500" />
+                                        </span>
+                                      ) : i === 1 ? (
+                                        <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-slate-100 dark:bg-slate-700/30" title="🥈 Peringkat 2">
+                                          <Medal className="h-3.5 w-3.5 text-slate-400" />
+                                        </span>
+                                      ) : i === 2 ? (
+                                        <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-orange-100 dark:bg-orange-900/30" title="🥉 Peringkat 3">
+                                          <Medal className="h-3.5 w-3.5 text-orange-500" />
+                                        </span>
+                                      ) : (
+                                        <span className="text-xs font-medium text-muted-foreground">{i + 1}</span>
+                                      )}
+                                      {change > 0 && (
+                                        <span className="inline-flex items-center text-success" title={`Naik ${change} peringkat`}>
+                                          <TrendingUp className="h-3 w-3" />
+                                        </span>
+                                      )}
+                                      {change < 0 && (
+                                        <span className="inline-flex items-center text-destructive" title={`Turun ${Math.abs(change)} peringkat`}>
+                                          <TrendingDown className="h-3 w-3" />
+                                        </span>
+                                      )}
+                                    </div>
                                   </TableCell>
                                   <TableCell className="py-2">
                                     <span className={cn("text-xs sm:text-sm font-semibold truncate block max-w-[140px] sm:max-w-[200px]", i === 0 ? "text-yellow-600 dark:text-yellow-400" : i === 1 ? "text-slate-500 dark:text-slate-300" : i === 2 ? "text-orange-600 dark:text-orange-400" : "")}>{u.name}</span>
