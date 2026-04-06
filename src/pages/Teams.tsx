@@ -1645,22 +1645,25 @@ export default function Teams() {
                             className="h-6 text-[10px] px-2.5 gap-1"
                           >
                             <CalendarIcon className="h-3 w-3" />
-                            {rankingPeriod === "custom" && rankingCustomDate
-                              ? format(rankingCustomDate, "dd MMM yyyy", { locale: localeId })
+                            {rankingPeriod === "custom" && rankingCustomRange?.from
+                              ? rankingCustomRange.to && rankingCustomRange.to.getTime() !== rankingCustomRange.from.getTime()
+                                ? `${format(rankingCustomRange.from, "dd MMM", { locale: localeId })} - ${format(rankingCustomRange.to, "dd MMM", { locale: localeId })}`
+                                : format(rankingCustomRange.from, "dd MMM yyyy", { locale: localeId })
                               : "Custom"}
                           </Button>
                         </PopoverTrigger>
                         <PopoverContent className="w-auto p-0" align="start">
                           <Calendar
-                            mode="single"
-                            selected={rankingCustomDate}
-                            onSelect={(date) => {
-                              if (date) {
-                                setRankingCustomDate(date);
+                            mode="range"
+                            selected={rankingCustomRange}
+                            onSelect={(range) => {
+                              setRankingCustomRange(range);
+                              if (range?.from) {
                                 setRankingPeriod("custom");
                               }
                             }}
                             disabled={(date) => date > new Date()}
+                            numberOfMonths={1}
                             initialFocus
                             className={cn("p-3 pointer-events-auto")}
                           />
