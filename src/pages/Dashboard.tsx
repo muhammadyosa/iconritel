@@ -1216,8 +1216,7 @@ export default function Dashboard() {
             transition={{ duration: 0.6, delay: 0.9 }}
           >
             <RecentActivity />
-          </motion.div>
-        )}
+        </motion.div>
       </div>
 
       {/* Ticket Detail Dialog */}
