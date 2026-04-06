@@ -152,6 +152,7 @@ function AppLayout() {
 
   return (
     <SidebarProvider>
+      <SwipeHandler />
       <div className="flex min-h-screen w-full overflow-x-hidden">
         <AppSidebar />
         <SidebarFloatingTrigger />
