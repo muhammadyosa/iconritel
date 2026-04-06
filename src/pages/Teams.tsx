@@ -1688,7 +1688,7 @@ export default function Teams() {
                             {rankingUserStats.length === 0 ? (
                               <TableRow>
                                 <TableCell colSpan={7} className="text-center text-sm text-muted-foreground py-8">
-                                  Tidak ada data incident dalam {rankingPeriod === "7d" ? "7" : rankingPeriod === "14d" ? "14" : "30"} hari terakhir
+                                  Tidak ada data incident {rankingPeriod === "custom" && rankingCustomDate ? `pada ${format(rankingCustomDate, "dd MMM yyyy", { locale: localeId })}` : `dalam ${rankingPeriod === "7d" ? "7" : rankingPeriod === "14d" ? "14" : "30"} hari terakhir`}
                                 </TableCell>
                               </TableRow>
                             ) : rankingUserStats.map((u, i) => {
