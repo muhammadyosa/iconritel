@@ -118,7 +118,7 @@ export default function Teams() {
   const [userDrillSheet, setUserDrillSheet] = useState<{ users: { name: string; tickets: any[] }[] } | null>(null);
   const [expandedDrillUser, setExpandedDrillUser] = useState<string | null>(null);
   const [rankingPeriod, setRankingPeriod] = useState<"7d" | "14d" | "30d" | "custom">("7d");
-  const [rankingCustomDate, setRankingCustomDate] = useState<Date | undefined>(undefined);
+  const [rankingCustomRange, setRankingCustomRange] = useState<DateRange | undefined>(undefined);
   // trendFilter is now unified with periodPreset
 
   // Handle period preset change
@@ -250,11 +250,12 @@ export default function Teams() {
     let cutoffEnd: string | undefined;
     let cutoffEndISO: string | undefined;
 
-    if (rankingPeriod === "custom" && rankingCustomDate) {
-      cutoff = format(startOfDay(rankingCustomDate), "yyyy-MM-dd");
-      cutoffISO = startOfDay(rankingCustomDate).toISOString();
-      cutoffEnd = format(endOfDay(rankingCustomDate), "yyyy-MM-dd");
-      cutoffEndISO = endOfDay(rankingCustomDate).toISOString();
+    if (rankingPeriod === "custom" && rankingCustomRange?.from) {
+      cutoff = format(startOfDay(rankingCustomRange.from), "yyyy-MM-dd");
+      cutoffISO = startOfDay(rankingCustomRange.from).toISOString();
+      const endDate = rankingCustomRange.to || rankingCustomRange.from;
+      cutoffEnd = format(endOfDay(endDate), "yyyy-MM-dd");
+      cutoffEndISO = endOfDay(endDate).toISOString();
     } else {
       cutoff = startOfDay(subDays(new Date(), rankingDays)).toISOString().split("T")[0];
       cutoffISO = startOfDay(subDays(new Date(), rankingDays)).toISOString();
@@ -276,7 +277,7 @@ export default function Teams() {
     
     if (historyRes.data) setRankingHistoryData(historyRes.data);
     if (liveRes.data) setRankingDbTickets(liveRes.data);
-  }, [rankingDays, rankingPeriod, rankingCustomDate]);
+  }, [rankingDays, rankingPeriod, rankingCustomRange]);
 
   useEffect(() => {
     fetchRankingData();
@@ -1631,7 +1632,7 @@ export default function Teams() {
                           size="sm"
                           variant={rankingPeriod === p ? "default" : "outline"}
                           className="h-6 text-[10px] px-2.5"
-                          onClick={() => { setRankingPeriod(p); setRankingCustomDate(undefined); }}
+                          onClick={() => { setRankingPeriod(p); setRankingCustomRange(undefined); }}
                         >
                           {p === "7d" ? "7 Hari" : p === "14d" ? "14 Hari" : "30 Hari"}
                         </Button>
@@ -1644,22 +1645,25 @@ export default function Teams() {
                             className="h-6 text-[10px] px-2.5 gap-1"
                           >
                             <CalendarIcon className="h-3 w-3" />
-                            {rankingPeriod === "custom" && rankingCustomDate
-                              ? format(rankingCustomDate, "dd MMM yyyy", { locale: localeId })
+                            {rankingPeriod === "custom" && rankingCustomRange?.from
+                              ? rankingCustomRange.to && rankingCustomRange.to.getTime() !== rankingCustomRange.from.getTime()
+                                ? `${format(rankingCustomRange.from, "dd MMM", { locale: localeId })} - ${format(rankingCustomRange.to, "dd MMM", { locale: localeId })}`
+                                : format(rankingCustomRange.from, "dd MMM yyyy", { locale: localeId })
                               : "Custom"}
                           </Button>
                         </PopoverTrigger>
                         <PopoverContent className="w-auto p-0" align="start">
                           <Calendar
-                            mode="single"
-                            selected={rankingCustomDate}
-                            onSelect={(date) => {
-                              if (date) {
-                                setRankingCustomDate(date);
+                            mode="range"
+                            selected={rankingCustomRange}
+                            onSelect={(range) => {
+                              setRankingCustomRange(range);
+                              if (range?.from) {
                                 setRankingPeriod("custom");
                               }
                             }}
                             disabled={(date) => date > new Date()}
+                            numberOfMonths={1}
                             initialFocus
                             className={cn("p-3 pointer-events-auto")}
                           />
@@ -1688,7 +1692,7 @@ export default function Teams() {
                             {rankingUserStats.length === 0 ? (
                               <TableRow>
                                 <TableCell colSpan={7} className="text-center text-sm text-muted-foreground py-8">
-                                  Tidak ada data incident {rankingPeriod === "custom" && rankingCustomDate ? `pada ${format(rankingCustomDate, "dd MMM yyyy", { locale: localeId })}` : `dalam ${rankingPeriod === "7d" ? "7" : rankingPeriod === "14d" ? "14" : "30"} hari terakhir`}
+                                  Tidak ada data incident {rankingPeriod === "custom" && rankingCustomRange?.from ? (rankingCustomRange.to && rankingCustomRange.to.getTime() !== rankingCustomRange.from.getTime() ? `${format(rankingCustomRange.from, "dd MMM", { locale: localeId })} - ${format(rankingCustomRange.to, "dd MMM yyyy", { locale: localeId })}` : `pada ${format(rankingCustomRange.from, "dd MMM yyyy", { locale: localeId })}`) : `dalam ${rankingPeriod === "7d" ? "7" : rankingPeriod === "14d" ? "14" : "30"} hari terakhir`}
                                 </TableCell>
                               </TableRow>
                             ) : rankingUserStats.map((u, i) => {
