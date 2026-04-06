@@ -1624,18 +1624,47 @@ export default function Teams() {
                         {rankingTotals.total} incident • {rankingTotals.resolved} resolved
                       </span>
                     </div>
-                    <div className="flex items-center gap-1.5">
+                    <div className="flex items-center gap-1.5 flex-wrap">
                       {(["7d", "14d", "30d"] as const).map((p) => (
                         <Button
                           key={p}
                           size="sm"
                           variant={rankingPeriod === p ? "default" : "outline"}
                           className="h-6 text-[10px] px-2.5"
-                          onClick={() => setRankingPeriod(p)}
+                          onClick={() => { setRankingPeriod(p); setRankingCustomDate(undefined); }}
                         >
                           {p === "7d" ? "7 Hari" : p === "14d" ? "14 Hari" : "30 Hari"}
                         </Button>
                       ))}
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button
+                            size="sm"
+                            variant={rankingPeriod === "custom" ? "default" : "outline"}
+                            className="h-6 text-[10px] px-2.5 gap-1"
+                          >
+                            <CalendarIcon className="h-3 w-3" />
+                            {rankingPeriod === "custom" && rankingCustomDate
+                              ? format(rankingCustomDate, "dd MMM yyyy", { locale: localeId })
+                              : "Custom"}
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar
+                            mode="single"
+                            selected={rankingCustomDate}
+                            onSelect={(date) => {
+                              if (date) {
+                                setRankingCustomDate(date);
+                                setRankingPeriod("custom");
+                              }
+                            }}
+                            disabled={(date) => date > new Date()}
+                            initialFocus
+                            className={cn("p-3 pointer-events-auto")}
+                          />
+                        </PopoverContent>
+                      </Popover>
                     </div>
                   </CardTitle>
                 </CardHeader>
