@@ -1726,7 +1726,7 @@ export default function Teams() {
                     <CardTitle className="flex items-center gap-2 text-sm sm:text-base">
                       <TrendingUp className="h-4 w-4 text-primary" />
                       <span>Trend Incident per User</span>
-                      <Badge variant="secondary" className="text-[10px]">{rankingPeriod === "7d" ? "7 Hari" : rankingPeriod === "14d" ? "14 Hari" : "30 Hari"}</Badge>
+                      <Badge variant="secondary" className="text-[10px]">{rankingCustomRange?.from ? (rankingCustomRange.to && rankingCustomRange.to.getTime() !== rankingCustomRange.from.getTime() ? `${format(rankingCustomRange.from, "dd MMM", { locale: localeId })} - ${format(rankingCustomRange.to, "dd MMM", { locale: localeId })}` : format(rankingCustomRange.from, "dd MMM yyyy", { locale: localeId })) : "7 Hari"}</Badge>
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="p-2 sm:p-4">
