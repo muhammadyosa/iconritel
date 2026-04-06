@@ -245,23 +245,38 @@ export default function Teams() {
   const [rankingDbTickets, setRankingDbTickets] = useState<any[]>([]);
 
   const fetchRankingData = useCallback(async () => {
-    const cutoff = startOfDay(subDays(new Date(), rankingDays)).toISOString().split("T")[0];
-    const cutoffISO = startOfDay(subDays(new Date(), rankingDays)).toISOString();
+    let cutoff: string;
+    let cutoffISO: string;
+    let cutoffEnd: string | undefined;
+    let cutoffEndISO: string | undefined;
+
+    if (rankingPeriod === "custom" && rankingCustomDate) {
+      cutoff = format(startOfDay(rankingCustomDate), "yyyy-MM-dd");
+      cutoffISO = startOfDay(rankingCustomDate).toISOString();
+      cutoffEnd = format(endOfDay(rankingCustomDate), "yyyy-MM-dd");
+      cutoffEndISO = endOfDay(rankingCustomDate).toISOString();
+    } else {
+      cutoff = startOfDay(subDays(new Date(), rankingDays)).toISOString().split("T")[0];
+      cutoffISO = startOfDay(subDays(new Date(), rankingDays)).toISOString();
+    }
+
+    let historyQuery = supabase
+      .from("daily_user_ticket_history")
+      .select("user_name, date, total_created, total_resolved")
+      .gte("date", cutoff);
+    if (cutoffEnd) historyQuery = historyQuery.lte("date", cutoffEnd);
+
+    let liveQuery = supabase
+      .from("tickets")
+      .select("created_by_name, status, created_iso")
+      .gte("created_iso", cutoffISO);
+    if (cutoffEndISO) liveQuery = liveQuery.lte("created_iso", cutoffEndISO);
     
-    const [historyRes, liveRes] = await Promise.all([
-      supabase
-        .from("daily_user_ticket_history")
-        .select("user_name, date, total_created, total_resolved")
-        .gte("date", cutoff),
-      supabase
-        .from("tickets")
-        .select("created_by_name, status, created_iso")
-        .gte("created_iso", cutoffISO),
-    ]);
+    const [historyRes, liveRes] = await Promise.all([historyQuery, liveQuery]);
     
     if (historyRes.data) setRankingHistoryData(historyRes.data);
     if (liveRes.data) setRankingDbTickets(liveRes.data);
-  }, [rankingDays]);
+  }, [rankingDays, rankingPeriod, rankingCustomDate]);
 
   useEffect(() => {
     fetchRankingData();
