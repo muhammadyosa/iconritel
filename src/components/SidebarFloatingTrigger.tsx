@@ -15,7 +15,7 @@ export function SidebarFloatingTrigger() {
     return (
       <>
         {/* Swipe hint indicator - thin line on left edge */}
-        {!state.includes("open") && (
+        {!openMobile && (
           <div
             className="fixed left-0 top-1/3 z-20 h-1/3 w-1 rounded-r-full bg-primary/25 animate-pulse pointer-events-none"
             aria-hidden="true"
