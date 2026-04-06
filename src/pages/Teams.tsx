@@ -250,11 +250,12 @@ export default function Teams() {
     let cutoffEnd: string | undefined;
     let cutoffEndISO: string | undefined;
 
-    if (rankingPeriod === "custom" && rankingCustomDate) {
-      cutoff = format(startOfDay(rankingCustomDate), "yyyy-MM-dd");
-      cutoffISO = startOfDay(rankingCustomDate).toISOString();
-      cutoffEnd = format(endOfDay(rankingCustomDate), "yyyy-MM-dd");
-      cutoffEndISO = endOfDay(rankingCustomDate).toISOString();
+    if (rankingPeriod === "custom" && rankingCustomRange?.from) {
+      cutoff = format(startOfDay(rankingCustomRange.from), "yyyy-MM-dd");
+      cutoffISO = startOfDay(rankingCustomRange.from).toISOString();
+      const endDate = rankingCustomRange.to || rankingCustomRange.from;
+      cutoffEnd = format(endOfDay(endDate), "yyyy-MM-dd");
+      cutoffEndISO = endOfDay(endDate).toISOString();
     } else {
       cutoff = startOfDay(subDays(new Date(), rankingDays)).toISOString().split("T")[0];
       cutoffISO = startOfDay(subDays(new Date(), rankingDays)).toISOString();
@@ -276,7 +277,7 @@ export default function Teams() {
     
     if (historyRes.data) setRankingHistoryData(historyRes.data);
     if (liveRes.data) setRankingDbTickets(liveRes.data);
-  }, [rankingDays, rankingPeriod, rankingCustomDate]);
+  }, [rankingDays, rankingPeriod, rankingCustomRange]);
 
   useEffect(() => {
     fetchRankingData();
