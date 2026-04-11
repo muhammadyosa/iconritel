@@ -839,6 +839,46 @@ export default function Teams() {
                               {rCritical > 0 && <div className="h-full bg-destructive transition-all" style={{ width: `${(rCritical / teamStatsByCategory.ritelTotal) * 100}%` }} />}
                             </div>
                           </div>
+                          {/* Analisa Statistik RITEL */}
+                          {(() => {
+                            const topConstraint = ritelCategoryTrend.categories.length > 0
+                              ? ritelCategoryTrend.categories.reduce((best, cat) => {
+                                  const sum = ritelCategoryTrend.data.reduce((s, row) => s + (Number(row[cat]) || 0), 0);
+                                  return sum > best.val ? { name: cat, val: sum } : best;
+                                }, { name: "-", val: 0 })
+                              : { name: "-", val: 0 };
+                            const avgPerDay = ritelCategoryTrend.data.length > 0 ? Math.round(teamStatsByCategory.ritelTotal / ritelCategoryTrend.data.length) : 0;
+                            const peakDay = ritelCategoryTrend.data.reduce((best, row) => {
+                              const dayTotal = ritelCategoryTrend.categories.reduce((s, k) => s + (Number(row[k]) || 0), 0);
+                              return dayTotal > best.val ? { date: String(row.date), val: dayTotal } : best;
+                            }, { date: "-", val: 0 });
+                            const criticalPct = teamStatsByCategory.ritelTotal > 0 ? Math.round((rCritical / teamStatsByCategory.ritelTotal) * 100) : 0;
+                            const pendingPct = teamStatsByCategory.ritelTotal > 0 ? Math.round((rPending / teamStatsByCategory.ritelTotal) * 100) : 0;
+                            return (
+                              <div className="rounded-lg border border-primary/20 bg-primary/5 p-2.5 space-y-1.5">
+                                <p className="text-[9px] sm:text-[10px] font-semibold text-primary flex items-center gap-1">📊 Analisa Statistik Ritel</p>
+                                <div className="grid grid-cols-2 gap-x-3 gap-y-1">
+                                  <div className="text-[8px] sm:text-[9px] text-muted-foreground">📌 Kategori Dominan</div>
+                                  <div className="text-[8px] sm:text-[9px] font-semibold text-right">{topConstraint.name} ({topConstraint.val})</div>
+                                  <div className="text-[8px] sm:text-[9px] text-muted-foreground">📈 Rata-rata/hari</div>
+                                  <div className="text-[8px] sm:text-[9px] font-semibold text-right">{avgPerDay} incident</div>
+                                  <div className="text-[8px] sm:text-[9px] text-muted-foreground">🔥 Peak Day</div>
+                                  <div className="text-[8px] sm:text-[9px] font-semibold text-right">{peakDay.date} ({peakDay.val})</div>
+                                  <div className="text-[8px] sm:text-[9px] text-muted-foreground">⚠️ Critical</div>
+                                  <div className="text-[8px] sm:text-[9px] font-semibold text-right text-destructive">{rCritical} ({criticalPct}%)</div>
+                                  <div className="text-[8px] sm:text-[9px] text-muted-foreground">⏳ Pending</div>
+                                  <div className="text-[8px] sm:text-[9px] font-semibold text-right text-warning">{rPending} ({pendingPct}%)</div>
+                                </div>
+                                <p className={cn("text-[7px] sm:text-[8px] italic pt-1 border-t border-primary/10",
+                                  rRate >= 70 ? "text-success" : rRate >= 40 ? "text-warning" : "text-destructive"
+                                )}>
+                                  {rRate >= 70 ? "✅ Resolution rate sangat baik, pertahankan performa!" :
+                                   rRate >= 40 ? "⚠️ Resolution rate cukup, perlu peningkatan penanganan." :
+                                   "🔴 Resolution rate rendah, perlu evaluasi segera!"}
+                                </p>
+                              </div>
+                            );
+                          })()}
                           {/* Top 5 Ritel teams */}
                           <div className="space-y-0.5">
                             <div className="flex items-center justify-between pb-1 border-b border-border/50">
@@ -952,6 +992,46 @@ export default function Teams() {
                               {fCritical > 0 && <div className="h-full bg-destructive transition-all" style={{ width: `${(fCritical / teamStatsByCategory.feederTotal) * 100}%` }} />}
                             </div>
                           </div>
+                          {/* Analisa Statistik FEEDER */}
+                          {(() => {
+                            const topConstraint = feederCategoryTrend.categories.length > 0
+                              ? feederCategoryTrend.categories.reduce((best, cat) => {
+                                  const sum = feederCategoryTrend.data.reduce((s, row) => s + (Number(row[cat]) || 0), 0);
+                                  return sum > best.val ? { name: cat, val: sum } : best;
+                                }, { name: "-", val: 0 })
+                              : { name: "-", val: 0 };
+                            const avgPerDay = feederCategoryTrend.data.length > 0 ? Math.round(teamStatsByCategory.feederTotal / feederCategoryTrend.data.length) : 0;
+                            const peakDay = feederCategoryTrend.data.reduce((best, row) => {
+                              const dayTotal = feederCategoryTrend.categories.reduce((s, k) => s + (Number(row[k]) || 0), 0);
+                              return dayTotal > best.val ? { date: String(row.date), val: dayTotal } : best;
+                            }, { date: "-", val: 0 });
+                            const criticalPct = teamStatsByCategory.feederTotal > 0 ? Math.round((fCritical / teamStatsByCategory.feederTotal) * 100) : 0;
+                            const pendingPct = teamStatsByCategory.feederTotal > 0 ? Math.round((fPending / teamStatsByCategory.feederTotal) * 100) : 0;
+                            return (
+                              <div className="rounded-lg border border-warning/20 bg-warning/5 p-2.5 space-y-1.5">
+                                <p className="text-[9px] sm:text-[10px] font-semibold text-warning flex items-center gap-1">📊 Analisa Statistik Feeder</p>
+                                <div className="grid grid-cols-2 gap-x-3 gap-y-1">
+                                  <div className="text-[8px] sm:text-[9px] text-muted-foreground">📌 Kategori Dominan</div>
+                                  <div className="text-[8px] sm:text-[9px] font-semibold text-right">{topConstraint.name} ({topConstraint.val})</div>
+                                  <div className="text-[8px] sm:text-[9px] text-muted-foreground">📈 Rata-rata/hari</div>
+                                  <div className="text-[8px] sm:text-[9px] font-semibold text-right">{avgPerDay} incident</div>
+                                  <div className="text-[8px] sm:text-[9px] text-muted-foreground">🔥 Peak Day</div>
+                                  <div className="text-[8px] sm:text-[9px] font-semibold text-right">{peakDay.date} ({peakDay.val})</div>
+                                  <div className="text-[8px] sm:text-[9px] text-muted-foreground">⚠️ Critical</div>
+                                  <div className="text-[8px] sm:text-[9px] font-semibold text-right text-destructive">{fCritical} ({criticalPct}%)</div>
+                                  <div className="text-[8px] sm:text-[9px] text-muted-foreground">⏳ Pending</div>
+                                  <div className="text-[8px] sm:text-[9px] font-semibold text-right text-warning">{fPending} ({pendingPct}%)</div>
+                                </div>
+                                <p className={cn("text-[7px] sm:text-[8px] italic pt-1 border-t border-warning/10",
+                                  fRate >= 70 ? "text-success" : fRate >= 40 ? "text-warning" : "text-destructive"
+                                )}>
+                                  {fRate >= 70 ? "✅ Resolution rate sangat baik, pertahankan performa!" :
+                                   fRate >= 40 ? "⚠️ Resolution rate cukup, perlu peningkatan penanganan." :
+                                   "🔴 Resolution rate rendah, perlu evaluasi segera!"}
+                                </p>
+                              </div>
+                            );
+                          })()}
                           {/* Top 5 Serpo teams */}
                           <div className="space-y-0.5">
                             <div className="flex items-center justify-between pb-1 border-b border-border/50">
