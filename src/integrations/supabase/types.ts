@@ -261,6 +261,8 @@ export type Database = {
           hostname: string
           id: string
           resolved_at: string | null
+          resolved_by_name: string | null
+          resolved_by_user_id: string | null
           serpo: string
           service_id: string
           sn_ont: string
@@ -280,6 +282,8 @@ export type Database = {
           hostname: string
           id?: string
           resolved_at?: string | null
+          resolved_by_name?: string | null
+          resolved_by_user_id?: string | null
           serpo: string
           service_id: string
           sn_ont: string
@@ -299,6 +303,8 @@ export type Database = {
           hostname?: string
           id?: string
           resolved_at?: string | null
+          resolved_by_name?: string | null
+          resolved_by_user_id?: string | null
           serpo?: string
           service_id?: string
           sn_ont?: string
