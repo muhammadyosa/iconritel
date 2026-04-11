@@ -78,8 +78,18 @@ export function TabProvider({ children }: { children: React.ReactNode }) {
     [location.pathname, navigate]
   );
 
+  const reorderTabs = useCallback((fromIndex: number, toIndex: number) => {
+    setOpenTabs((prev) => {
+      const next = [...prev];
+      const [moved] = next.splice(fromIndex, 1);
+      next.splice(toIndex, 0, moved);
+      saveTabs(next);
+      return next;
+    });
+  }, []);
+
   return (
-    <TabContext.Provider value={{ openTabs, closeTab }}>
+    <TabContext.Provider value={{ openTabs, closeTab, reorderTabs }}>
       {children}
     </TabContext.Provider>
   );
