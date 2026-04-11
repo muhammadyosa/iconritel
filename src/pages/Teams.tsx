@@ -1752,8 +1752,8 @@ export default function Teams() {
                               <TableHead className="text-[10px] sm:text-xs">Nama User</TableHead>
                               <TableHead className="text-[10px] sm:text-xs text-center w-14">Total</TableHead>
                               <TableHead className="text-[10px] sm:text-xs text-center text-success w-16">Resolved</TableHead>
-                              <TableHead className="text-[10px] sm:text-xs text-center text-primary w-16">On Progress</TableHead>
-                              <TableHead className="text-[10px] sm:text-xs text-center text-warning w-16">Pending</TableHead>
+                              <TableHead className="text-[10px] sm:text-xs text-center text-warning w-16">On Progress</TableHead>
+                              <TableHead className="text-[10px] sm:text-xs text-center text-primary w-16">Pending</TableHead>
                               <TableHead className="text-[10px] sm:text-xs text-center text-destructive w-16">Critical</TableHead>
                               <TableHead className="text-[10px] sm:text-xs w-[120px] sm:w-[160px]">Progress</TableHead>
                             </TableRow>
@@ -1808,8 +1808,8 @@ export default function Teams() {
                                   </TableCell>
                                   <TableCell className="text-center text-xs sm:text-sm font-bold py-2">{u.total}</TableCell>
                                   <TableCell className="text-center text-xs sm:text-sm font-medium text-success py-2">{u.resolved}</TableCell>
-                                  <TableCell className="text-center text-xs sm:text-sm font-medium text-primary py-2">{u.onProgress}</TableCell>
-                                  <TableCell className="text-center text-xs sm:text-sm font-medium text-warning py-2">{u.pending}</TableCell>
+                                  <TableCell className="text-center text-xs sm:text-sm font-medium text-warning py-2">{u.onProgress}</TableCell>
+                                  <TableCell className="text-center text-xs sm:text-sm font-medium text-primary py-2">{u.pending}</TableCell>
                                   <TableCell className="text-center text-xs sm:text-sm font-medium text-destructive py-2">{u.critical}</TableCell>
                                   <TableCell className="py-2">
                                     <div className="flex items-center gap-2">
