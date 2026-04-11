@@ -226,6 +226,34 @@ export function RecentActivity() {
     }
   }, []);
 
+  // Force re-render every 30s to keep "time ago" labels fresh
+  const [, setTick] = useState(0);
+  useEffect(() => {
+    const interval = setInterval(() => setTick((t) => t + 1), 30_000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Refresh online status from profiles every 60s
+  const refreshOnlineStatus = useCallback(async () => {
+    try {
+      const { data } = await supabase
+        .from("profiles")
+        .select("user_id, display_name, last_online");
+      if (!data) return;
+      setUserProfiles((prev) => {
+        const next = new Map(prev);
+        data.forEach((p) => {
+          const name = p.display_name?.toLowerCase();
+          if (name && next.has(name)) {
+            const existing = next.get(name)!;
+            next.set(name, { ...existing, lastOnline: p.last_online, isOnline: isUserOnline(p.last_online) });
+          }
+        });
+        return next;
+      });
+    } catch {}
+  }, []);
+
   useEffect(() => {
     fetchData();
 
@@ -239,11 +267,29 @@ export function RecentActivity() {
       .on("postgres_changes", { event: "*", schema: "public", table: "shift_reports" }, () => fetchData())
       .subscribe();
 
+    // Listen to profile changes (online status updates)
+    const profileChannel = supabase
+      .channel("recent-activity-profiles")
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "profiles" }, () => refreshOnlineStatus())
+      .subscribe();
+
+    // Listen to activity logs for broader activity awareness
+    const activityChannel = supabase
+      .channel("recent-activity-logs")
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "user_activity_logs" }, () => fetchData())
+      .subscribe();
+
+    // Periodic online status refresh
+    const onlineInterval = setInterval(refreshOnlineStatus, 60_000);
+
     return () => {
       supabase.removeChannel(ticketChannel);
       supabase.removeChannel(shiftChannel);
+      supabase.removeChannel(profileChannel);
+      supabase.removeChannel(activityChannel);
+      clearInterval(onlineInterval);
     };
-  }, [fetchData]);
+  }, [fetchData, refreshOnlineStatus]);
 
   const filteredItems = useMemo(() => {
     let result = items;
