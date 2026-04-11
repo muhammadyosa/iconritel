@@ -343,8 +343,8 @@ export default function Teams() {
   }, [rankingUserStats]);
 
   const rankingTotals = useMemo(() => {
-    const t = { total: 0, resolved: 0, pending: 0, critical: 0 };
-    rankingUserStats.forEach(u => { t.total += u.total; t.resolved += u.resolved; t.pending += u.pending; t.critical += u.critical; });
+    const t = { total: 0, resolved: 0, onProgress: 0, pending: 0, critical: 0 };
+    rankingUserStats.forEach(u => { t.total += u.total; t.resolved += u.resolved; t.onProgress += u.onProgress; t.pending += u.pending; t.critical += u.critical; });
     return t;
   }, [rankingUserStats]);
 
