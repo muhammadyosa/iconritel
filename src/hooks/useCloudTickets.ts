@@ -91,7 +91,7 @@ function dbToTicket(db: DbTicket, profilesMap: Map<string, ProfileData>): Ticket
     createdByName: currentDisplayName,
     resolvedAt: db.resolved_at || undefined,
     resolvedByUserId: db.resolved_by_user_id || undefined,
-    resolvedByName: db.resolved_by_name || undefined,
+    resolvedByName: resolvedByDisplayName,
   };
 }
 
