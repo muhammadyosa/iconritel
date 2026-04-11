@@ -1743,7 +1743,7 @@ export default function Teams() {
                 </CardHeader>
                 <CardContent className="p-0">
                   <div className="overflow-x-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
-                    <div className="min-w-[560px]">
+                    <div className="min-w-[640px]">
                       <ScrollArea className={rankingUserStats.length > 8 ? "h-[420px]" : ""}>
                         <Table>
                           <TableHeader className="sticky top-0 z-10 bg-background">
