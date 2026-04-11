@@ -19,9 +19,10 @@ interface DurationCellProps {
   createdISO: string;
   status: string;
   resolvedAt?: string;
+  resolvedByName?: string;
 }
 
-export function DurationCell({ createdISO, status, resolvedAt }: DurationCellProps) {
+export function DurationCell({ createdISO, status, resolvedAt, resolvedByName }: DurationCellProps) {
   const [now, setNow] = useState(Date.now());
 
   const isFinished = status === "Resolved" || status === "Pending";
@@ -40,16 +41,23 @@ export function DurationCell({ createdISO, status, resolvedAt }: DurationCellPro
   const isOverSLA = elapsed >= SLA_MS;
 
   return (
-    <span
-      className={`text-[9px] sm:text-[10px] font-mono whitespace-nowrap ${
-        isFinished
-          ? "text-muted-foreground"
-          : isOverSLA
-          ? "text-destructive font-semibold"
-          : "text-foreground"
-      }`}
-    >
-      {formatDuration(elapsed)}
-    </span>
+    <div className="flex flex-col gap-0">
+      <span
+        className={`text-[9px] sm:text-[10px] font-mono whitespace-nowrap ${
+          isFinished
+            ? "text-muted-foreground"
+            : isOverSLA
+            ? "text-destructive font-semibold"
+            : "text-foreground"
+        }`}
+      >
+        {formatDuration(elapsed)}
+      </span>
+      {status === "Resolved" && resolvedByName && (
+        <span className="text-[8px] sm:text-[9px] text-green-500 dark:text-green-400 truncate max-w-[100px]" title={`Resolved by ${resolvedByName}`}>
+          ✓ {resolvedByName}
+        </span>
+      )}
+    </div>
   );
 }
