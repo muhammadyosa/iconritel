@@ -350,8 +350,12 @@ export function useCloudTickets() {
         const merged = { ...t, ...updates };
         if (updates.status === "Resolved" && t.status !== "Resolved") {
           merged.resolvedAt = new Date().toISOString();
+          if (updates.resolvedByName) merged.resolvedByName = updates.resolvedByName;
+          if (updates.resolvedByUserId) merged.resolvedByUserId = updates.resolvedByUserId;
         } else if (updates.status && updates.status !== "Resolved") {
           merged.resolvedAt = undefined;
+          merged.resolvedByName = undefined;
+          merged.resolvedByUserId = undefined;
         }
         return merged;
       })
@@ -373,12 +377,16 @@ export function useCloudTickets() {
         dbUpdates.status = updates.status;
         if (updates.status === "Resolved") {
           dbUpdates.resolved_at = new Date().toISOString();
+          dbUpdates.resolved_by_user_id = updates.resolvedByUserId || null;
+          dbUpdates.resolved_by_name = updates.resolvedByName || null;
           const ticket = prevTickets.find(t => t.id === id);
           if (ticket?.createdByName) {
             upsertUserHistory(ticket.createdByName, ticket.createdByUserId, ticket.createdISO, "total_resolved", 1);
           }
         } else {
           dbUpdates.resolved_at = null;
+          dbUpdates.resolved_by_user_id = null;
+          dbUpdates.resolved_by_name = null;
         }
       }
 
