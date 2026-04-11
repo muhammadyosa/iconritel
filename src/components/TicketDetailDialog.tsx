@@ -41,6 +41,7 @@ interface TicketDetailDialogProps {
   deleteTicket: (id: string) => Promise<void>;
   logActivity?: (action: ActivityAction, detail?: string) => Promise<void>;
   currentUserName?: string;
+  currentUserId?: string;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
 }
@@ -53,6 +54,7 @@ export function TicketDetailDialog({
   deleteTicket,
   logActivity,
   currentUserName,
+  currentUserId,
   open: controlledOpen,
   onOpenChange,
 }: TicketDetailDialogProps) {
