@@ -320,6 +320,19 @@ export function OverSLATab({ tickets, getTicketRegion, onTicketClick }: OverSLAT
                     {regionData.map((r, i) => {
                       const pct = totalAll > 0 ? Math.round((r.total / totalAll) * 100) : 0;
                       const barPct = totalAll > 0 ? (r.total / regionData[0].total) * 100 : 0;
+                      const avgMins = Math.floor(r.avgDurationMs / 60000);
+                      const avgH = Math.floor(avgMins / 60);
+                      const avgM = avgMins % 60;
+                      const avgLabel = avgH > 0 ? `${avgH}j ${avgM}m` : `${avgM}m`;
+                      const maxMins = Math.floor(r.maxDurationMs / 60000);
+                      const maxD = Math.floor(maxMins / 1440);
+                      const maxH = Math.floor((maxMins % 1440) / 60);
+                      const maxM = maxMins % 60;
+                      const maxParts: string[] = [];
+                      if (maxD > 0) maxParts.push(`${maxD}h`);
+                      if (maxH > 0) maxParts.push(`${maxH}j`);
+                      maxParts.push(`${maxM}m`);
+                      const maxLabel = maxParts.join(" ");
                       return (
                         <div key={r.name} className="px-2 py-1.5 rounded-md hover:bg-muted/30 transition-colors cursor-pointer" onClick={() => setSelectedRegion(r.name)}>
                           <div className="flex items-center gap-1.5 mb-1">
@@ -333,14 +346,56 @@ export function OverSLATab({ tickets, getTicketRegion, onTicketClick }: OverSLAT
                               <div className="h-full rounded-full transition-all duration-500" style={{ width: `${barPct}%`, backgroundColor: REGION_COLORS[i % REGION_COLORS.length] }} />
                             </div>
                             <div className="flex items-center gap-1.5 text-[7px] sm:text-[8px] text-muted-foreground shrink-0">
+                              <span className="text-destructive font-semibold">{r.critical}🔴</span>
                               <span className="text-destructive font-semibold">{r.overSLA}⚡</span>
                               <span className="text-warning font-semibold">{r.pending}⏳</span>
                             </div>
+                          </div>
+                          <div className="flex items-center gap-1.5 mt-0.5 text-[7px] sm:text-[8px] text-muted-foreground/70 pl-3.5">
+                            <span>⏱ Avg: <span className="font-semibold text-foreground/70">{avgLabel}</span></span>
+                            <span className="text-border">|</span>
+                            <span>Max: <span className="font-semibold text-destructive/70">{maxLabel}</span></span>
                           </div>
                         </div>
                       );
                     })}
                   </div>
+
+                  {/* Analysis insights */}
+                  {regionData.length > 1 && (() => {
+                    const totalCritical = regionData.reduce((s, r) => s + r.critical, 0);
+                    const totalPending = regionData.reduce((s, r) => s + r.pending, 0);
+                    const avgAllMs = regionData.reduce((s, r) => s + r.avgDurationMs, 0) / regionData.length;
+                    const avgAllMins = Math.floor(avgAllMs / 60000);
+                    const avgAllH = Math.floor(avgAllMins / 60);
+                    const avgAllM = avgAllMins % 60;
+                    const longestRegion = [...regionData].sort((a, b) => b.avgDurationMs - a.avgDurationMs)[0];
+                    const longestAvgMins = Math.floor(longestRegion.avgDurationMs / 60000);
+                    const longestH = Math.floor(longestAvgMins / 60);
+                    const longestM = longestAvgMins % 60;
+                    return (
+                      <div className="mx-2 p-2 rounded-md bg-muted/30 border border-border/30 space-y-1">
+                        <p className="text-[8px] sm:text-[9px] font-semibold text-muted-foreground flex items-center gap-1">
+                          <TrendingUp className="h-3 w-3" /> Analisa Ringkas
+                        </p>
+                        <div className="grid grid-cols-2 gap-x-3 gap-y-0.5 text-[7px] sm:text-[8px]">
+                          <span className="text-muted-foreground">Rata-rata durasi:</span>
+                          <span className="font-semibold">{avgAllH > 0 ? `${avgAllH}j ${avgAllM}m` : `${avgAllM}m`}</span>
+                          <span className="text-muted-foreground">Region terlama:</span>
+                          <span className="font-semibold text-destructive">{longestRegion.name} ({longestH}j {longestM}m)</span>
+                          <span className="text-muted-foreground">Total Critical:</span>
+                          <span className="font-semibold text-destructive">{totalCritical} incident</span>
+                          <span className="text-muted-foreground">Total Pending:</span>
+                          <span className="font-semibold text-warning">{totalPending} incident</span>
+                        </div>
+                        {worstRegion && totalAll > 0 && (
+                          <p className="text-[7px] sm:text-[8px] text-muted-foreground/80 italic mt-1">
+                            💡 {worstRegion.name} menyumbang {Math.round((worstRegion.total / totalAll) * 100)}% dari total over SLA — perlu perhatian khusus
+                          </p>
+                        )}
+                      </div>
+                    );
+                  })()}
 
                   {/* Summary footer */}
                   <div className="flex items-center justify-between px-2 pt-1.5 border-t border-border/40">
