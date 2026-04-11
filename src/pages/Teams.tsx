@@ -1479,6 +1479,56 @@ export default function Teams() {
                             {nocTotals.critical > 0 && <div className="h-full bg-destructive transition-all" style={{ width: `${(nocTotals.critical / nocTotals.total) * 100}%` }} />}
                           </div>
                         </div>
+
+                        {/* Analisa Statistik */}
+                        {nocTotals.total > 0 && (() => {
+                          const topCat = nocCategoryTrend.categories[0];
+                          const topCatCount = nocCategoryTrend.data.reduce((s: number, row: any) => s + (row[topCat] || 0), 0);
+                          const avgPerDay = nocCategoryTrend.data.length > 0 ? Math.round(nocTotals.total / nocCategoryTrend.data.length) : 0;
+                          const peakDay = nocCategoryTrend.data.length > 0
+                            ? nocCategoryTrend.data.reduce((best: { date: string; val: number }, row: any) => {
+                                const dayTotal = nocCategoryTrend.categories.reduce((s: number, k: string) => s + (row[k] || 0), 0);
+                                return dayTotal > best.val ? { date: row.date, val: dayTotal } : best;
+                              }, { date: "", val: 0 })
+                            : { date: "-", val: 0 };
+                          return (
+                            <div className="p-2 rounded-md bg-muted/30 border border-border/30 space-y-1.5">
+                              <p className="text-[8px] sm:text-[9px] font-semibold text-muted-foreground flex items-center gap-1">
+                                <TrendingUp className="h-3 w-3" /> Analisa Statistik
+                              </p>
+                              <div className="grid grid-cols-2 gap-x-3 gap-y-0.5 text-[7px] sm:text-[8px]">
+                                <span className="text-muted-foreground">Resolution Rate:</span>
+                                <span className={cn("font-semibold", nRate >= 60 ? "text-success" : nRate >= 30 ? "text-warning" : "text-destructive")}>{nRate}% ({nocTotals.resolved}/{nocTotals.total})</span>
+                                <span className="text-muted-foreground">Kategori Dominan:</span>
+                                <span className="font-semibold">{topCat || "-"} ({topCatCount})</span>
+                                <span className="text-muted-foreground">Rata-rata/hari:</span>
+                                <span className="font-semibold">{avgPerDay} incident</span>
+                                <span className="text-muted-foreground">Peak Day:</span>
+                                <span className="font-semibold text-destructive">{peakDay.date} ({peakDay.val})</span>
+                                <span className="text-muted-foreground">Critical Ratio:</span>
+                                <span className={cn("font-semibold", nocTotals.critical > 0 ? "text-destructive" : "text-success")}>{Math.round((nocTotals.critical / nocTotals.total) * 100)}% ({nocTotals.critical})</span>
+                                <span className="text-muted-foreground">Pending Ratio:</span>
+                                <span className={cn("font-semibold", nocTotals.pending > 0 ? "text-warning" : "text-success")}>{Math.round((nocTotals.pending / nocTotals.total) * 100)}% ({nocTotals.pending})</span>
+                              </div>
+                              {nRate < 50 && (
+                                <p className="text-[7px] sm:text-[8px] text-muted-foreground/80 italic mt-1">
+                                  ⚠️ Resolution rate di bawah 50% — perlu peningkatan kecepatan penanganan
+                                </p>
+                              )}
+                              {nRate >= 50 && nRate < 80 && (
+                                <p className="text-[7px] sm:text-[8px] text-muted-foreground/80 italic mt-1">
+                                  💡 Resolution rate cukup baik, target di atas 80% untuk performa optimal
+                                </p>
+                              )}
+                              {nRate >= 80 && (
+                                <p className="text-[7px] sm:text-[8px] text-muted-foreground/80 italic mt-1">
+                                  ✅ Resolution rate sangat baik — pertahankan performa tim
+                                </p>
+                              )}
+                            </div>
+                          );
+                        })()}
+
                         {/* Top 5 NOC users */}
                         <div className="space-y-0.5">
                           <div className="flex items-center justify-between pb-1 border-b border-border/50">
