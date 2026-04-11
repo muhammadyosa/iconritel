@@ -347,6 +347,50 @@ export default function RegionalOfficeTab({ tickets }: RegionalOfficeTabProps) {
                         </div>
                       ))}
                     </div>
+
+                    {/* Proporsi Analysis */}
+                    {pieData.length > 1 && (() => {
+                      const totalAll = pieData.reduce((s, d) => s + d.value, 0);
+                      const top = pieData[0]; // already sorted by regionalData
+                      const topPct = totalAll > 0 ? Math.round((top.value / totalAll) * 100) : 0;
+                      const bottom = pieData[pieData.length - 1];
+                      const bottomPct = totalAll > 0 ? Math.round((bottom.value / totalAll) * 100) : 0;
+                      const avg = totalAll > 0 ? Math.round(totalAll / pieData.length) : 0;
+                      const sortedByVal = [...pieData].sort((a, b) => b.value - a.value);
+                      const topHalf = sortedByVal.slice(0, Math.ceil(sortedByVal.length / 2));
+                      const topHalfTotal = topHalf.reduce((s, d) => s + d.value, 0);
+                      const topHalfPct = totalAll > 0 ? Math.round((topHalfTotal / totalAll) * 100) : 0;
+                      const gap = top.value - bottom.value;
+                      return (
+                        <div className="w-full mt-3 p-2 rounded-md bg-muted/30 border border-border/30 space-y-1.5">
+                          <p className="text-[8px] sm:text-[9px] font-semibold text-muted-foreground flex items-center gap-1">
+                            <Activity className="h-3 w-3" /> Analisa Proporsi
+                          </p>
+                          <div className="grid grid-cols-2 gap-x-3 gap-y-0.5 text-[7px] sm:text-[8px]">
+                            <span className="text-muted-foreground">Tertinggi:</span>
+                            <span className="font-semibold">{top.name} ({top.value} · {topPct}%)</span>
+                            <span className="text-muted-foreground">Terendah:</span>
+                            <span className="font-semibold">{bottom.name} ({bottom.value} · {bottomPct}%)</span>
+                            <span className="text-muted-foreground">Rata-rata/region:</span>
+                            <span className="font-semibold">{avg} incident</span>
+                            <span className="text-muted-foreground">Top {topHalf.length} region:</span>
+                            <span className="font-semibold">{topHalfPct}% dari total</span>
+                            <span className="text-muted-foreground">Selisih max-min:</span>
+                            <span className="font-semibold">{gap} incident</span>
+                          </div>
+                          {topPct >= 30 && (
+                            <p className="text-[7px] sm:text-[8px] text-muted-foreground/80 italic mt-1">
+                              💡 {top.name} menyumbang {topPct}% — distribusi incident belum merata antar region
+                            </p>
+                          )}
+                          {topPct < 30 && (
+                            <p className="text-[7px] sm:text-[8px] text-muted-foreground/80 italic mt-1">
+                              ✅ Distribusi incident relatif merata di seluruh region
+                            </p>
+                          )}
+                        </div>
+                      );
+                    })()}
                   </div>
                 );
               })()}
