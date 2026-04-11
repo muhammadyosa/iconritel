@@ -258,6 +258,45 @@ export default function RegionalOfficeTab({ tickets }: RegionalOfficeTabProps) {
                   <Bar dataKey="resolved" fill="hsl(var(--success))" name="Resolved" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ChartContainer>
+
+              {/* Distribusi Analysis */}
+              {(() => {
+                const withIncidents = regionalData.filter(r => r.totalIncidents > 0);
+                const totalAll = withIncidents.reduce((s, r) => s + r.totalIncidents, 0);
+                const totalCritical = withIncidents.reduce((s, r) => s + r.critical, 0);
+                const totalPending = withIncidents.reduce((s, r) => s + r.pending, 0);
+                const totalResolved = withIncidents.reduce((s, r) => s + r.resolved, 0);
+                const resolveRate = totalAll > 0 ? Math.round((totalResolved / totalAll) * 100) : 0;
+                const mostCriticalRegion = [...withIncidents].sort((a, b) => b.critical - a.critical)[0];
+                const mostPendingRegion = [...withIncidents].sort((a, b) => b.pending - a.pending)[0];
+                const cleanRegions = regionalData.filter(r => r.totalIncidents === 0).length;
+                return withIncidents.length > 0 ? (
+                  <div className="mx-1 mt-2 p-2 rounded-md bg-muted/30 border border-border/30 space-y-1.5">
+                    <p className="text-[8px] sm:text-[9px] font-semibold text-muted-foreground flex items-center gap-1">
+                      <TrendingUp className="h-3 w-3" /> Analisa Distribusi
+                    </p>
+                    <div className="grid grid-cols-2 gap-x-3 gap-y-0.5 text-[7px] sm:text-[8px]">
+                      <span className="text-muted-foreground">Total Incident:</span>
+                      <span className="font-semibold">{totalAll} ({withIncidents.length} region)</span>
+                      <span className="text-muted-foreground">Resolution Rate:</span>
+                      <span className={cn("font-semibold", resolveRate >= 70 ? "text-success" : resolveRate >= 40 ? "text-warning" : "text-destructive")}>{resolveRate}%</span>
+                      <span className="text-muted-foreground">Most Critical:</span>
+                      <span className="font-semibold text-destructive">{mostCriticalRegion?.region} ({mostCriticalRegion?.critical})</span>
+                      <span className="text-muted-foreground">Most Pending:</span>
+                      <span className="font-semibold text-warning">{mostPendingRegion?.region} ({mostPendingRegion?.pending})</span>
+                      {cleanRegions > 0 && (<>
+                        <span className="text-muted-foreground">Region Clean:</span>
+                        <span className="font-semibold text-success">{cleanRegions} region</span>
+                      </>)}
+                    </div>
+                    {mostCriticalRegion && mostCriticalRegion.critical > 0 && (
+                      <p className="text-[7px] sm:text-[8px] text-muted-foreground/80 italic mt-1">
+                        💡 {mostCriticalRegion.region} memiliki {mostCriticalRegion.critical} incident critical — prioritaskan penanganan segera
+                      </p>
+                    )}
+                  </div>
+                ) : null;
+              })()}
             </CardContent>
           </Card>
 
@@ -308,6 +347,50 @@ export default function RegionalOfficeTab({ tickets }: RegionalOfficeTabProps) {
                         </div>
                       ))}
                     </div>
+
+                    {/* Proporsi Analysis */}
+                    {pieData.length > 1 && (() => {
+                      const totalAll = pieData.reduce((s, d) => s + d.value, 0);
+                      const top = pieData[0]; // already sorted by regionalData
+                      const topPct = totalAll > 0 ? Math.round((top.value / totalAll) * 100) : 0;
+                      const bottom = pieData[pieData.length - 1];
+                      const bottomPct = totalAll > 0 ? Math.round((bottom.value / totalAll) * 100) : 0;
+                      const avg = totalAll > 0 ? Math.round(totalAll / pieData.length) : 0;
+                      const sortedByVal = [...pieData].sort((a, b) => b.value - a.value);
+                      const topHalf = sortedByVal.slice(0, Math.ceil(sortedByVal.length / 2));
+                      const topHalfTotal = topHalf.reduce((s, d) => s + d.value, 0);
+                      const topHalfPct = totalAll > 0 ? Math.round((topHalfTotal / totalAll) * 100) : 0;
+                      const gap = top.value - bottom.value;
+                      return (
+                        <div className="w-full mt-3 p-2 rounded-md bg-muted/30 border border-border/30 space-y-1.5">
+                          <p className="text-[8px] sm:text-[9px] font-semibold text-muted-foreground flex items-center gap-1">
+                            <Activity className="h-3 w-3" /> Analisa Proporsi
+                          </p>
+                          <div className="grid grid-cols-2 gap-x-3 gap-y-0.5 text-[7px] sm:text-[8px]">
+                            <span className="text-muted-foreground">Tertinggi:</span>
+                            <span className="font-semibold">{top.name} ({top.value} · {topPct}%)</span>
+                            <span className="text-muted-foreground">Terendah:</span>
+                            <span className="font-semibold">{bottom.name} ({bottom.value} · {bottomPct}%)</span>
+                            <span className="text-muted-foreground">Rata-rata/region:</span>
+                            <span className="font-semibold">{avg} incident</span>
+                            <span className="text-muted-foreground">Top {topHalf.length} region:</span>
+                            <span className="font-semibold">{topHalfPct}% dari total</span>
+                            <span className="text-muted-foreground">Selisih max-min:</span>
+                            <span className="font-semibold">{gap} incident</span>
+                          </div>
+                          {topPct >= 30 && (
+                            <p className="text-[7px] sm:text-[8px] text-muted-foreground/80 italic mt-1">
+                              💡 {top.name} menyumbang {topPct}% — distribusi incident belum merata antar region
+                            </p>
+                          )}
+                          {topPct < 30 && (
+                            <p className="text-[7px] sm:text-[8px] text-muted-foreground/80 italic mt-1">
+                              ✅ Distribusi incident relatif merata di seluruh region
+                            </p>
+                          )}
+                        </div>
+                      );
+                    })()}
                   </div>
                 );
               })()}
