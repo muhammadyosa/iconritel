@@ -50,7 +50,7 @@ export function DashboardTierOverSLA({ tickets, getTicketRegion }: DashboardTier
         return { ...t, durationMs, durationLabel: parts.join(" ") };
       })
       .sort((a, b) => b.durationMs - a.durationMs)
-      .slice(0, 15);
+      .slice(0, 20);
   }, [overSLATickets, now]);
 
   const maxDuration = top15[0]?.durationMs || 1;
@@ -62,7 +62,7 @@ export function DashboardTierOverSLA({ tickets, getTicketRegion }: DashboardTier
       <Card className="overflow-hidden border">
         <CardHeader className="py-2.5 px-3 sm:px-4 border-b bg-muted/20">
           <CardTitle className="text-xs sm:text-sm flex items-center gap-2">🏆 Tier Incident OVER SLA</CardTitle>
-          <p className="text-[10px] sm:text-xs text-muted-foreground">Top 15 incident dengan durasi tertinggi</p>
+          <p className="text-[10px] sm:text-xs text-muted-foreground">Top 20 incident dengan durasi tertinggi</p>
         </CardHeader>
         <CardContent className="p-1.5 sm:p-2">
           <div className="overflow-x-auto">
@@ -126,7 +126,7 @@ export function DashboardTierOverSLA({ tickets, getTicketRegion }: DashboardTier
                 <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-warning" />Pending</span>
                 <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-primary" />On Progress</span>
               </div>
-              <span>Top {top15.length} / {overSLATickets.length}</span>
+              <span>Top {top15.length} / {overSLATickets.length} Over SLA</span>
             </div>
           </div>
         </CardContent>
