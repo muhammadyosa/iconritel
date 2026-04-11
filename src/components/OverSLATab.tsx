@@ -111,22 +111,36 @@ export function OverSLATab({ tickets, getTicketRegion, onTicketClick }: OverSLAT
     });
   }, [filteredTickets, now]);
 
-  // Region chart data
+  // Region chart data with extended analytics
   const regionData = useMemo(() => {
-    const map: Record<string, { overSLA: number; pending: number }> = {};
+    const map: Record<string, { overSLA: number; pending: number; critical: number; totalDurationMs: number; count: number; maxDurationMs: number }> = {};
     overSLATickets.forEach((t) => {
       const region = getTicketRegion(t.serpo);
-      if (!map[region]) map[region] = { overSLA: 0, pending: 0 };
+      if (!map[region]) map[region] = { overSLA: 0, pending: 0, critical: 0, totalDurationMs: 0, count: 0, maxDurationMs: 0 };
       if (t.status === "Pending") {
         map[region].pending++;
       } else {
         map[region].overSLA++;
       }
+      if (t.status === "Critical") {
+        map[region].critical++;
+      }
+      const endTime = (t.status === "Pending" || t.status === "Resolved") && t.resolvedAt
+        ? new Date(t.resolvedAt).getTime() : now;
+      const dur = endTime - new Date(t.createdISO).getTime();
+      map[region].totalDurationMs += dur;
+      map[region].count++;
+      if (dur > map[region].maxDurationMs) map[region].maxDurationMs = dur;
     });
     return Object.entries(map)
-      .map(([name, val]) => ({ name, ...val, total: val.overSLA + val.pending }))
+      .map(([name, val]) => ({
+        name,
+        ...val,
+        total: val.overSLA + val.pending,
+        avgDurationMs: val.count > 0 ? val.totalDurationMs / val.count : 0,
+      }))
       .sort((a, b) => b.total - a.total);
-  }, [overSLATickets, getTicketRegion]);
+  }, [overSLATickets, getTicketRegion, now]);
 
   const pieData = useMemo(() => {
     return regionData.map((r) => ({ name: r.name, value: r.total }));
