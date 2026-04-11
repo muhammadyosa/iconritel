@@ -57,11 +57,19 @@ interface DbTicketInsert {
 function dbToTicket(db: DbTicket, profilesMap: Map<string, ProfileData>): Ticket {
   // Get the current display name from profiles, fallback to stored name
   let currentDisplayName = db.created_by_name || undefined;
-  
   if (db.created_by_user_id) {
     const profile = profilesMap.get(db.created_by_user_id);
     if (profile) {
       currentDisplayName = profile.display_name || profile.email.split("@")[0];
+    }
+  }
+
+  // Resolve "resolved by" name from profiles
+  let resolvedByDisplayName = db.resolved_by_name || undefined;
+  if (db.resolved_by_user_id) {
+    const resolverProfile = profilesMap.get(db.resolved_by_user_id);
+    if (resolverProfile) {
+      resolvedByDisplayName = resolverProfile.display_name || resolverProfile.email.split("@")[0];
     }
   }
   
