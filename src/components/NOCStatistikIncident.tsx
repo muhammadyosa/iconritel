@@ -13,6 +13,20 @@ import {
   ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig,
 } from "@/components/ui/chart";
 import { format, subDays, startOfDay } from "date-fns";
+import { TrendingUp, TrendingDown, Activity } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { motion } from "framer-motion";
+import { cn } from "@/lib/utils";
+import { Ticket, FEEDER_CONSTRAINTS_SET } from "@/types/ticket";
+import { supabase } from "@/integrations/supabase/client";
+import {
+  LineChart, Line, XAxis, YAxis, CartesianGrid,
+} from "recharts";
+import {
+  ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig,
+} from "@/components/ui/chart";
+import { format, subDays, startOfDay } from "date-fns";
 
 type Variant = "noc" | "ritel";
 type TrendPeriod = "7d" | "14d" | "30d" | "all";
