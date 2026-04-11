@@ -246,9 +246,7 @@ export default function Teams() {
     const fromDate = rankingCustomRange?.from || subDays(new Date(), 7);
     const toDate = rankingCustomRange?.to || fromDate;
     const cutoff = format(startOfDay(fromDate), "yyyy-MM-dd");
-    const cutoffISO = startOfDay(fromDate).toISOString();
     const cutoffEnd = format(endOfDay(toDate), "yyyy-MM-dd");
-    const cutoffEndISO = endOfDay(toDate).toISOString();
 
     let historyQuery = supabase
       .from("daily_user_ticket_history")
@@ -256,11 +254,11 @@ export default function Teams() {
       .gte("date", cutoff);
     if (cutoffEnd) historyQuery = historyQuery.lte("date", cutoffEnd);
 
-    let liveQuery = supabase
+    // Fetch ALL current live tickets for realtime Pending/Critical status
+    const liveQuery = supabase
       .from("tickets")
-      .select("created_by_name, status, created_iso")
-      .gte("created_iso", cutoffISO);
-    if (cutoffEndISO) liveQuery = liveQuery.lte("created_iso", cutoffEndISO);
+      .select("created_by_name, status")
+      .in("status", ["Pending", "On Progress", "Critical"]);
     
     const [historyRes, liveRes] = await Promise.all([historyQuery, liveQuery]);
     
@@ -279,7 +277,21 @@ export default function Teams() {
       })
       .subscribe();
 
-    return () => { supabase.removeChannel(rankingChannel); };
+    // Listen for ticket status changes (Critical/Pending) in realtime
+    const ticketStatusChannel = supabase
+      .channel("ranking-ticket-status")
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "tickets" }, () => {
+        fetchRankingData();
+      })
+      .on("postgres_changes", { event: "DELETE", schema: "public", table: "tickets" }, () => {
+        fetchRankingData();
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(rankingChannel);
+      supabase.removeChannel(ticketStatusChannel);
+    };
   }, [fetchRankingData]);
 
   const rankingUserStats = useMemo(() => {
