@@ -1761,7 +1761,7 @@ export default function Teams() {
                           <TableBody>
                             {rankingUserStats.length === 0 ? (
                               <TableRow>
-                                <TableCell colSpan={7} className="text-center text-sm text-muted-foreground py-8">
+                                <TableCell colSpan={9} className="text-center text-sm text-muted-foreground py-8">
                                   Tidak ada data incident {rankingCustomRange?.from ? (rankingCustomRange.to && rankingCustomRange.to.getTime() !== rankingCustomRange.from.getTime() ? `${format(rankingCustomRange.from, "dd MMM", { locale: localeId })} - ${format(rankingCustomRange.to, "dd MMM yyyy", { locale: localeId })}` : `pada ${format(rankingCustomRange.from, "dd MMM yyyy", { locale: localeId })}`) : "pada periode yang dipilih"}
                                 </TableCell>
                               </TableRow>
