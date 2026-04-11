@@ -241,12 +241,15 @@ export default function Teams() {
   // === Ranking User NOC with custom date range filter (uses persistent history table) ===
   const [rankingHistoryData, setRankingHistoryData] = useState<any[]>([]);
   const [rankingDbTickets, setRankingDbTickets] = useState<any[]>([]);
+  const [rankingTrendTickets, setRankingTrendTickets] = useState<any[]>([]);
 
   const fetchRankingData = useCallback(async () => {
     const fromDate = rankingCustomRange?.from || subDays(new Date(), 7);
     const toDate = rankingCustomRange?.to || fromDate;
     const cutoff = format(startOfDay(fromDate), "yyyy-MM-dd");
+    const cutoffISO = startOfDay(fromDate).toISOString();
     const cutoffEnd = format(endOfDay(toDate), "yyyy-MM-dd");
+    const cutoffEndISO = endOfDay(toDate).toISOString();
 
     let historyQuery = supabase
       .from("daily_user_ticket_history")
@@ -254,16 +257,24 @@ export default function Teams() {
       .gte("date", cutoff);
     if (cutoffEnd) historyQuery = historyQuery.lte("date", cutoffEnd);
 
-    // Fetch ALL current live tickets for realtime Pending/Critical status
+    // Fetch ALL current live tickets for realtime Pending/Critical/On Progress status
     const liveQuery = supabase
       .from("tickets")
       .select("created_by_name, status")
       .in("status", ["Pending", "On Progress", "Critical"]);
+
+    // Fetch tickets within date range for trend chart
+    let trendQuery = supabase
+      .from("tickets")
+      .select("created_by_name, created_iso")
+      .gte("created_iso", cutoffISO);
+    if (cutoffEndISO) trendQuery = trendQuery.lte("created_iso", cutoffEndISO);
     
-    const [historyRes, liveRes] = await Promise.all([historyQuery, liveQuery]);
+    const [historyRes, liveRes, trendRes] = await Promise.all([historyQuery, liveQuery, trendQuery]);
     
     if (historyRes.data) setRankingHistoryData(historyRes.data);
     if (liveRes.data) setRankingDbTickets(liveRes.data);
+    if (trendRes.data) setRankingTrendTickets(trendRes.data);
   }, [rankingCustomRange]);
 
   useEffect(() => {
@@ -1657,19 +1668,37 @@ export default function Teams() {
                         dateKeys.push(format(subDays(today, d), "yyyy-MM-dd"));
                       }
                       const activeUsers = rankingUserStats.filter(u => u.total > 0).slice(0, 8);
-                      const dailyMap: Record<string, Record<string, number>> = {};
-                      dateKeys.forEach(dk => { dailyMap[dk] = {}; activeUsers.forEach(u => { dailyMap[dk][u.name] = 0; }); });
-                      rankingDbTickets.forEach(t => {
+                      const todayKey = format(new Date(), "yyyy-MM-dd");
+                      const finalDailyMap: Record<string, Record<string, number>> = {};
+                      dateKeys.forEach(dk => {
+                        finalDailyMap[dk] = {};
+                        activeUsers.forEach(u => { finalDailyMap[dk][u.name] = 0; });
+                      });
+
+                      // Fill from persistent history (past days)
+                      rankingHistoryData.forEach(rec => {
+                        const dk = rec.date;
+                        const name = rec.user_name;
+                        if (finalDailyMap[dk] && activeUsers.find(u => u.name === name)) {
+                          finalDailyMap[dk][name] += rec.total_created || 0;
+                        }
+                      });
+
+                      // Fill today from live tickets
+                      rankingTrendTickets.forEach(t => {
                         const creator = t.created_by_name || "Unknown";
                         if (!activeUsers.find(u => u.name === creator)) return;
                         try {
                           const dk = format(startOfDay(new Date(t.created_iso)), "yyyy-MM-dd");
-                          if (dailyMap[dk] && dailyMap[dk][creator] !== undefined) dailyMap[dk][creator]++;
+                          if (dk === todayKey && finalDailyMap[dk]) {
+                            finalDailyMap[dk][creator] = (finalDailyMap[dk][creator] || 0) + 1;
+                          }
                         } catch {}
                       });
+
                       const chartData = dateKeys.map(dk => {
                         const entry: any = { date: format(new Date(dk), "dd/MM") };
-                        activeUsers.forEach(u => { entry[u.name] = dailyMap[dk][u.name] || 0; });
+                        activeUsers.forEach(u => { entry[u.name] = finalDailyMap[dk][u.name] || 0; });
                         return entry;
                       });
                       const colors = ["hsl(var(--primary))", "hsl(var(--destructive))", "hsl(var(--warning))", "hsl(142 76% 36%)", "hsl(280 60% 55%)", "hsl(200 80% 50%)", "hsl(30 90% 55%)", "hsl(340 70% 50%)"];
