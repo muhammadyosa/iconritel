@@ -1747,11 +1747,12 @@ export default function Teams() {
                       <ScrollArea className={rankingUserStats.length > 8 ? "h-[420px]" : ""}>
                         <Table>
                           <TableHeader className="sticky top-0 z-10 bg-background">
-                            <TableRow className="bg-muted/30">
+                             <TableRow className="bg-muted/30">
                               <TableHead className="text-[10px] sm:text-xs w-8">#</TableHead>
                               <TableHead className="text-[10px] sm:text-xs">Nama User</TableHead>
                               <TableHead className="text-[10px] sm:text-xs text-center w-14">Total</TableHead>
                               <TableHead className="text-[10px] sm:text-xs text-center text-success w-16">Resolved</TableHead>
+                              <TableHead className="text-[10px] sm:text-xs text-center text-primary w-16">On Progress</TableHead>
                               <TableHead className="text-[10px] sm:text-xs text-center text-warning w-16">Pending</TableHead>
                               <TableHead className="text-[10px] sm:text-xs text-center text-destructive w-16">Critical</TableHead>
                               <TableHead className="text-[10px] sm:text-xs w-[120px] sm:w-[160px]">Progress</TableHead>
