@@ -1668,46 +1668,14 @@ export default function Teams() {
                         dateKeys.push(format(subDays(today, d), "yyyy-MM-dd"));
                       }
                       const activeUsers = rankingUserStats.filter(u => u.total > 0).slice(0, 8);
-                      const dailyMap: Record<string, Record<string, number>> = {};
-                      dateKeys.forEach(dk => { dailyMap[dk] = {}; activeUsers.forEach(u => { dailyMap[dk][u.name] = 0; }); });
-
-                      // Use persistent history data for past days
-                      rankingHistoryData.forEach(rec => {
-                        const dk = rec.date;
-                        const name = rec.user_name;
-                        if (dailyMap[dk] && activeUsers.find(u => u.name === name)) {
-                          dailyMap[dk][name] = Math.max(dailyMap[dk][name] || 0, rec.total_created || 0);
-                        }
-                      });
-
-                      // Overlay live ticket data (for today or recent entries still in tickets table)
-                      rankingTrendTickets.forEach(t => {
-                        const creator = t.created_by_name || "Unknown";
-                        if (!activeUsers.find(u => u.name === creator)) return;
-                        try {
-                          const dk = format(startOfDay(new Date(t.created_iso)), "yyyy-MM-dd");
-                          if (dailyMap[dk] && dailyMap[dk][creator] !== undefined) dailyMap[dk][creator]++;
-                        } catch {}
-                      });
-
-                      // For days that have both history and live data, use max to avoid double counting
                       const todayKey = format(new Date(), "yyyy-MM-dd");
-                      dateKeys.forEach(dk => {
-                        if (dk === todayKey) return; // today uses live data
-                        activeUsers.forEach(u => {
-                          // For past days, prefer history data (already set above)
-                          // Reset live additions for past days if history exists
-                        });
-                      });
-
-                      // Rebuild: for past days use history only, for today use live count
                       const finalDailyMap: Record<string, Record<string, number>> = {};
                       dateKeys.forEach(dk => {
                         finalDailyMap[dk] = {};
                         activeUsers.forEach(u => { finalDailyMap[dk][u.name] = 0; });
                       });
 
-                      // Fill from history
+                      // Fill from persistent history (past days)
                       rankingHistoryData.forEach(rec => {
                         const dk = rec.date;
                         const name = rec.user_name;
