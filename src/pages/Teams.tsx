@@ -1808,8 +1808,8 @@ export default function Teams() {
                                   </TableCell>
                                   <TableCell className="text-center text-xs sm:text-sm font-bold py-2">{u.total}</TableCell>
                                   <TableCell className="text-center text-xs sm:text-sm font-medium text-success py-2">{u.resolved}</TableCell>
-                                  <TableCell className="text-center text-xs sm:text-sm font-medium text-primary py-2">{u.onProgress}</TableCell>
-                                  <TableCell className="text-center text-xs sm:text-sm font-medium text-warning py-2">{u.pending}</TableCell>
+                                  <TableCell className="text-center text-xs sm:text-sm font-medium text-warning py-2">{u.onProgress}</TableCell>
+                                  <TableCell className="text-center text-xs sm:text-sm font-medium text-primary py-2">{u.pending}</TableCell>
                                   <TableCell className="text-center text-xs sm:text-sm font-medium text-destructive py-2">{u.critical}</TableCell>
                                   <TableCell className="py-2">
                                     <div className="flex items-center gap-2">
