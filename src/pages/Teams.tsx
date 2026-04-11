@@ -296,26 +296,27 @@ export default function Teams() {
 
   const rankingUserStats = useMemo(() => {
     // Aggregate from persistent history
-    const stats: Record<string, { total: number; resolved: number; pending: number; critical: number }> = {};
+    const stats: Record<string, { total: number; resolved: number; onProgress: number; pending: number; critical: number }> = {};
     
     rankingHistoryData.forEach((rec) => {
       const name = rec.user_name;
-      if (!stats[name]) stats[name] = { total: 0, resolved: 0, pending: 0, critical: 0 };
+      if (!stats[name]) stats[name] = { total: 0, resolved: 0, onProgress: 0, pending: 0, critical: 0 };
       stats[name].total += rec.total_created || 0;
       stats[name].resolved += rec.total_resolved || 0;
     });
 
-    // Add pending/critical counts from live tickets
+    // Add on-progress/pending/critical counts from live tickets
     rankingDbTickets.forEach((ticket) => {
       const creator = ticket.created_by_name || "Unknown";
-      if (!stats[creator]) stats[creator] = { total: 0, resolved: 0, pending: 0, critical: 0 };
-      if (ticket.status === "Pending" || ticket.status === "On Progress") stats[creator].pending++;
+      if (!stats[creator]) stats[creator] = { total: 0, resolved: 0, onProgress: 0, pending: 0, critical: 0 };
+      if (ticket.status === "On Progress") stats[creator].onProgress++;
+      if (ticket.status === "Pending") stats[creator].pending++;
       if (ticket.status === "Critical") stats[creator].critical++;
     });
 
     return Object.entries(stats)
       .map(([name, s]) => ({ name, ...s }))
-      .filter(u => u.total > 0 || u.resolved > 0 || u.pending > 0 || u.critical > 0)
+      .filter(u => u.total > 0 || u.resolved > 0 || u.pending > 0 || u.critical > 0 || u.onProgress > 0)
       .sort((a, b) => b.total - a.total);
   }, [rankingHistoryData, rankingDbTickets]);
 
@@ -342,8 +343,8 @@ export default function Teams() {
   }, [rankingUserStats]);
 
   const rankingTotals = useMemo(() => {
-    const t = { total: 0, resolved: 0, pending: 0, critical: 0 };
-    rankingUserStats.forEach(u => { t.total += u.total; t.resolved += u.resolved; t.pending += u.pending; t.critical += u.critical; });
+    const t = { total: 0, resolved: 0, onProgress: 0, pending: 0, critical: 0 };
+    rankingUserStats.forEach(u => { t.total += u.total; t.resolved += u.resolved; t.onProgress += u.onProgress; t.pending += u.pending; t.critical += u.critical; });
     return t;
   }, [rankingUserStats]);
 
@@ -1742,15 +1743,16 @@ export default function Teams() {
                 </CardHeader>
                 <CardContent className="p-0">
                   <div className="overflow-x-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
-                    <div className="min-w-[560px]">
+                    <div className="min-w-[640px]">
                       <ScrollArea className={rankingUserStats.length > 8 ? "h-[420px]" : ""}>
                         <Table>
                           <TableHeader className="sticky top-0 z-10 bg-background">
-                            <TableRow className="bg-muted/30">
+                             <TableRow className="bg-muted/30">
                               <TableHead className="text-[10px] sm:text-xs w-8">#</TableHead>
                               <TableHead className="text-[10px] sm:text-xs">Nama User</TableHead>
                               <TableHead className="text-[10px] sm:text-xs text-center w-14">Total</TableHead>
                               <TableHead className="text-[10px] sm:text-xs text-center text-success w-16">Resolved</TableHead>
+                              <TableHead className="text-[10px] sm:text-xs text-center text-primary w-16">On Progress</TableHead>
                               <TableHead className="text-[10px] sm:text-xs text-center text-warning w-16">Pending</TableHead>
                               <TableHead className="text-[10px] sm:text-xs text-center text-destructive w-16">Critical</TableHead>
                               <TableHead className="text-[10px] sm:text-xs w-[120px] sm:w-[160px]">Progress</TableHead>
@@ -1759,7 +1761,7 @@ export default function Teams() {
                           <TableBody>
                             {rankingUserStats.length === 0 ? (
                               <TableRow>
-                                <TableCell colSpan={7} className="text-center text-sm text-muted-foreground py-8">
+                                <TableCell colSpan={9} className="text-center text-sm text-muted-foreground py-8">
                                   Tidak ada data incident {rankingCustomRange?.from ? (rankingCustomRange.to && rankingCustomRange.to.getTime() !== rankingCustomRange.from.getTime() ? `${format(rankingCustomRange.from, "dd MMM", { locale: localeId })} - ${format(rankingCustomRange.to, "dd MMM yyyy", { locale: localeId })}` : `pada ${format(rankingCustomRange.from, "dd MMM yyyy", { locale: localeId })}`) : "pada periode yang dipilih"}
                                 </TableCell>
                               </TableRow>
@@ -1806,6 +1808,7 @@ export default function Teams() {
                                   </TableCell>
                                   <TableCell className="text-center text-xs sm:text-sm font-bold py-2">{u.total}</TableCell>
                                   <TableCell className="text-center text-xs sm:text-sm font-medium text-success py-2">{u.resolved}</TableCell>
+                                  <TableCell className="text-center text-xs sm:text-sm font-medium text-primary py-2">{u.onProgress}</TableCell>
                                   <TableCell className="text-center text-xs sm:text-sm font-medium text-warning py-2">{u.pending}</TableCell>
                                   <TableCell className="text-center text-xs sm:text-sm font-medium text-destructive py-2">{u.critical}</TableCell>
                                   <TableCell className="py-2">
