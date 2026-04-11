@@ -15,6 +15,8 @@ export interface Ticket {
   createdByUserId?: string;
   createdByName?: string;
   resolvedAt?: string; // ISO timestamp when ticket was resolved
+  resolvedByUserId?: string;
+  resolvedByName?: string;
 }
 
 export interface ExcelRecord {

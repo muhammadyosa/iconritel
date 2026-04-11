@@ -23,6 +23,8 @@ interface DbTicket {
   created_by_user_id: string | null;
   created_by_name: string | null;
   resolved_at: string | null;
+  resolved_by_user_id: string | null;
+  resolved_by_name: string | null;
 }
 
 interface ProfileData {
@@ -48,6 +50,8 @@ interface DbTicketInsert {
   created_by_user_id?: string;
   created_by_name?: string;
   resolved_at?: string | null;
+  resolved_by_user_id?: string | null;
+  resolved_by_name?: string | null;
 }
 
 function dbToTicket(db: DbTicket, profilesMap: Map<string, ProfileData>): Ticket {
@@ -78,6 +82,8 @@ function dbToTicket(db: DbTicket, profilesMap: Map<string, ProfileData>): Ticket
     createdByUserId: db.created_by_user_id || undefined,
     createdByName: currentDisplayName,
     resolvedAt: db.resolved_at || undefined,
+    resolvedByUserId: db.resolved_by_user_id || undefined,
+    resolvedByName: db.resolved_by_name || undefined,
   };
 }
 
@@ -100,6 +106,8 @@ function ticketToDb(ticket: Ticket): DbTicketInsert {
     created_by_user_id: ticket.createdByUserId,
     created_by_name: ticket.createdByName,
     resolved_at: ticket.resolvedAt || null,
+    resolved_by_user_id: ticket.resolvedByUserId || null,
+    resolved_by_name: ticket.resolvedByName || null,
   };
 }
 
