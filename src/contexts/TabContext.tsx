@@ -27,9 +27,10 @@ export const pathMap: Record<string, OpenTab> = {
 interface TabContextType {
   openTabs: OpenTab[];
   closeTab: (e: React.MouseEvent, path: string) => void;
+  reorderTabs: (fromIndex: number, toIndex: number) => void;
 }
 
-const TabContext = createContext<TabContextType>({ openTabs: [], closeTab: () => {} });
+const TabContext = createContext<TabContextType>({ openTabs: [], closeTab: () => {}, reorderTabs: () => {} });
 
 export const useOpenTabs = () => useContext(TabContext);
 
