@@ -1045,7 +1045,7 @@ export default function TicketManagement() {
                             <span className="text-muted-foreground">{ticket.createdByName || "-"}</span>
                           </TableCell>
                           <TableCell className="px-1 sm:px-1.5 py-0.5">
-                            <DurationCell createdISO={ticket.createdISO} status={ticket.status} resolvedAt={ticket.resolvedAt} />
+                            <DurationCell createdISO={ticket.createdISO} status={ticket.status} resolvedAt={ticket.resolvedAt} resolvedByName={ticket.resolvedByName} />
                           </TableCell>
                           <TableCell className="px-1 sm:px-1.5 py-0.5">
                             <div>
