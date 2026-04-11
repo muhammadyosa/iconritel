@@ -23,6 +23,8 @@ interface DbTicket {
   created_by_user_id: string | null;
   created_by_name: string | null;
   resolved_at: string | null;
+  resolved_by_user_id: string | null;
+  resolved_by_name: string | null;
 }
 
 interface ProfileData {
@@ -48,16 +50,26 @@ interface DbTicketInsert {
   created_by_user_id?: string;
   created_by_name?: string;
   resolved_at?: string | null;
+  resolved_by_user_id?: string | null;
+  resolved_by_name?: string | null;
 }
 
 function dbToTicket(db: DbTicket, profilesMap: Map<string, ProfileData>): Ticket {
   // Get the current display name from profiles, fallback to stored name
   let currentDisplayName = db.created_by_name || undefined;
-  
   if (db.created_by_user_id) {
     const profile = profilesMap.get(db.created_by_user_id);
     if (profile) {
       currentDisplayName = profile.display_name || profile.email.split("@")[0];
+    }
+  }
+
+  // Resolve "resolved by" name from profiles
+  let resolvedByDisplayName = db.resolved_by_name || undefined;
+  if (db.resolved_by_user_id) {
+    const resolverProfile = profilesMap.get(db.resolved_by_user_id);
+    if (resolverProfile) {
+      resolvedByDisplayName = resolverProfile.display_name || resolverProfile.email.split("@")[0];
     }
   }
   
@@ -78,6 +90,8 @@ function dbToTicket(db: DbTicket, profilesMap: Map<string, ProfileData>): Ticket
     createdByUserId: db.created_by_user_id || undefined,
     createdByName: currentDisplayName,
     resolvedAt: db.resolved_at || undefined,
+    resolvedByUserId: db.resolved_by_user_id || undefined,
+    resolvedByName: resolvedByDisplayName,
   };
 }
 
@@ -100,6 +114,8 @@ function ticketToDb(ticket: Ticket): DbTicketInsert {
     created_by_user_id: ticket.createdByUserId,
     created_by_name: ticket.createdByName,
     resolved_at: ticket.resolvedAt || null,
+    resolved_by_user_id: ticket.resolvedByUserId || null,
+    resolved_by_name: ticket.resolvedByName || null,
   };
 }
 
@@ -247,16 +263,26 @@ export function useCloudTickets() {
               // Update ticket names in-place without refetching from DB
               setTickets((prev) =>
                 prev.map((t) => {
+                  let updated = t;
                   if (t.createdByUserId) {
                     const profile = map.get(t.createdByUserId);
                     if (profile) {
                       const newName = profile.display_name || profile.email.split("@")[0];
                       if (newName !== t.createdByName) {
-                        return { ...t, createdByName: newName };
+                        updated = { ...updated, createdByName: newName };
                       }
                     }
                   }
-                  return t;
+                  if (t.resolvedByUserId) {
+                    const profile = map.get(t.resolvedByUserId);
+                    if (profile) {
+                      const newName = profile.display_name || profile.email.split("@")[0];
+                      if (newName !== t.resolvedByName) {
+                        updated = { ...updated, resolvedByName: newName };
+                      }
+                    }
+                  }
+                  return updated;
                 })
               );
             });
@@ -342,8 +368,12 @@ export function useCloudTickets() {
         const merged = { ...t, ...updates };
         if (updates.status === "Resolved" && t.status !== "Resolved") {
           merged.resolvedAt = new Date().toISOString();
+          if (updates.resolvedByName) merged.resolvedByName = updates.resolvedByName;
+          if (updates.resolvedByUserId) merged.resolvedByUserId = updates.resolvedByUserId;
         } else if (updates.status && updates.status !== "Resolved") {
           merged.resolvedAt = undefined;
+          merged.resolvedByName = undefined;
+          merged.resolvedByUserId = undefined;
         }
         return merged;
       })
@@ -365,12 +395,16 @@ export function useCloudTickets() {
         dbUpdates.status = updates.status;
         if (updates.status === "Resolved") {
           dbUpdates.resolved_at = new Date().toISOString();
+          dbUpdates.resolved_by_user_id = updates.resolvedByUserId || null;
+          dbUpdates.resolved_by_name = updates.resolvedByName || null;
           const ticket = prevTickets.find(t => t.id === id);
           if (ticket?.createdByName) {
             upsertUserHistory(ticket.createdByName, ticket.createdByUserId, ticket.createdISO, "total_resolved", 1);
           }
         } else {
           dbUpdates.resolved_at = null;
+          dbUpdates.resolved_by_user_id = null;
+          dbUpdates.resolved_by_name = null;
         }
       }
 

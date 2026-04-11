@@ -1079,6 +1079,7 @@ export default function TicketManagement() {
           deleteTicket={deleteTicket}
           logActivity={logActivity}
           currentUserName={profile?.display_name || user?.email?.split("@")[0] || "Unknown"}
+          currentUserId={user?.id}
           open={!!selectedTicketForDetail}
           onOpenChange={(open) => { if (!open) setSelectedTicketForDetail(null); }}
         />
