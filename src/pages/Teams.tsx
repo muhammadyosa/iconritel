@@ -296,26 +296,27 @@ export default function Teams() {
 
   const rankingUserStats = useMemo(() => {
     // Aggregate from persistent history
-    const stats: Record<string, { total: number; resolved: number; pending: number; critical: number }> = {};
+    const stats: Record<string, { total: number; resolved: number; onProgress: number; pending: number; critical: number }> = {};
     
     rankingHistoryData.forEach((rec) => {
       const name = rec.user_name;
-      if (!stats[name]) stats[name] = { total: 0, resolved: 0, pending: 0, critical: 0 };
+      if (!stats[name]) stats[name] = { total: 0, resolved: 0, onProgress: 0, pending: 0, critical: 0 };
       stats[name].total += rec.total_created || 0;
       stats[name].resolved += rec.total_resolved || 0;
     });
 
-    // Add pending/critical counts from live tickets
+    // Add on-progress/pending/critical counts from live tickets
     rankingDbTickets.forEach((ticket) => {
       const creator = ticket.created_by_name || "Unknown";
-      if (!stats[creator]) stats[creator] = { total: 0, resolved: 0, pending: 0, critical: 0 };
-      if (ticket.status === "Pending" || ticket.status === "On Progress") stats[creator].pending++;
+      if (!stats[creator]) stats[creator] = { total: 0, resolved: 0, onProgress: 0, pending: 0, critical: 0 };
+      if (ticket.status === "On Progress") stats[creator].onProgress++;
+      if (ticket.status === "Pending") stats[creator].pending++;
       if (ticket.status === "Critical") stats[creator].critical++;
     });
 
     return Object.entries(stats)
       .map(([name, s]) => ({ name, ...s }))
-      .filter(u => u.total > 0 || u.resolved > 0 || u.pending > 0 || u.critical > 0)
+      .filter(u => u.total > 0 || u.resolved > 0 || u.pending > 0 || u.critical > 0 || u.onProgress > 0)
       .sort((a, b) => b.total - a.total);
   }, [rankingHistoryData, rankingDbTickets]);
 
