@@ -252,7 +252,56 @@ export function NOCStatistikIncident({ tickets, variant }: Props) {
           </div>
         </div>
 
-        {/* Top 5 Ranking */}
+        {/* Analisa Ringkas */}
+        {total > 0 && (() => {
+          const topConstraint = constraintKeys[0];
+          const topConstraintCount = trendData.reduce((s, row) => s + (row[topConstraint] || 0), 0);
+          const avgPerDay = trendData.length > 0 ? Math.round(total / trendData.length) : 0;
+          const peakDay = trendData.length > 0
+            ? trendData.reduce((best, row) => {
+                const dayTotal = constraintKeys.reduce((s, k) => s + (row[k] || 0), 0);
+                return dayTotal > best.val ? { date: row.date, val: dayTotal } : best;
+              }, { date: "", val: 0 })
+            : { date: "-", val: 0 };
+          return (
+            <div className="p-2 rounded-md bg-muted/30 border border-border/30 space-y-1.5">
+              <p className="text-[8px] sm:text-[9px] font-semibold text-muted-foreground flex items-center gap-1">
+                <Activity className="h-3 w-3" /> Analisa Statistik
+              </p>
+              <div className="grid grid-cols-2 gap-x-3 gap-y-0.5 text-[7px] sm:text-[8px]">
+                <span className="text-muted-foreground">Resolution Rate:</span>
+                <span className={cn("font-semibold", resRate >= 60 ? "text-success" : resRate >= 30 ? "text-warning" : "text-destructive")}>{resRate}% ({resolved}/{total})</span>
+                <span className="text-muted-foreground">Kategori Dominan:</span>
+                <span className="font-semibold">{topConstraint || "-"} ({topConstraintCount})</span>
+                <span className="text-muted-foreground">Rata-rata/hari:</span>
+                <span className="font-semibold">{avgPerDay} incident</span>
+                <span className="text-muted-foreground">Peak Day:</span>
+                <span className="font-semibold text-destructive">{peakDay.date} ({peakDay.val})</span>
+                <span className="text-muted-foreground">Critical Ratio:</span>
+                <span className={cn("font-semibold", critical > 0 ? "text-destructive" : "text-success")}>{total > 0 ? Math.round((critical / total) * 100) : 0}% ({critical})</span>
+                <span className="text-muted-foreground">Pending Ratio:</span>
+                <span className={cn("font-semibold", pending > 0 ? "text-warning" : "text-success")}>{total > 0 ? Math.round((pending / total) * 100) : 0}% ({pending})</span>
+              </div>
+              {resRate < 50 && (
+                <p className="text-[7px] sm:text-[8px] text-muted-foreground/80 italic mt-1">
+                  ⚠️ Resolution rate di bawah 50% — perlu peningkatan kecepatan penanganan incident
+                </p>
+              )}
+              {resRate >= 50 && resRate < 80 && (
+                <p className="text-[7px] sm:text-[8px] text-muted-foreground/80 italic mt-1">
+                  💡 Resolution rate cukup baik, target di atas 80% untuk performa optimal
+                </p>
+              )}
+              {resRate >= 80 && (
+                <p className="text-[7px] sm:text-[8px] text-muted-foreground/80 italic mt-1">
+                  ✅ Resolution rate sangat baik — pertahankan performa tim
+                </p>
+              )}
+            </div>
+          );
+        })()}
+
+
         <div>
           <div className="flex items-center justify-between mb-2.5">
             <span className="text-[10px] sm:text-xs font-semibold">{config.top5Label}</span>
