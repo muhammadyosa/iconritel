@@ -241,12 +241,15 @@ export default function Teams() {
   // === Ranking User NOC with custom date range filter (uses persistent history table) ===
   const [rankingHistoryData, setRankingHistoryData] = useState<any[]>([]);
   const [rankingDbTickets, setRankingDbTickets] = useState<any[]>([]);
+  const [rankingTrendTickets, setRankingTrendTickets] = useState<any[]>([]);
 
   const fetchRankingData = useCallback(async () => {
     const fromDate = rankingCustomRange?.from || subDays(new Date(), 7);
     const toDate = rankingCustomRange?.to || fromDate;
     const cutoff = format(startOfDay(fromDate), "yyyy-MM-dd");
+    const cutoffISO = startOfDay(fromDate).toISOString();
     const cutoffEnd = format(endOfDay(toDate), "yyyy-MM-dd");
+    const cutoffEndISO = endOfDay(toDate).toISOString();
 
     let historyQuery = supabase
       .from("daily_user_ticket_history")
@@ -254,16 +257,24 @@ export default function Teams() {
       .gte("date", cutoff);
     if (cutoffEnd) historyQuery = historyQuery.lte("date", cutoffEnd);
 
-    // Fetch ALL current live tickets for realtime Pending/Critical status
+    // Fetch ALL current live tickets for realtime Pending/Critical/On Progress status
     const liveQuery = supabase
       .from("tickets")
       .select("created_by_name, status")
       .in("status", ["Pending", "On Progress", "Critical"]);
+
+    // Fetch tickets within date range for trend chart
+    let trendQuery = supabase
+      .from("tickets")
+      .select("created_by_name, created_iso")
+      .gte("created_iso", cutoffISO);
+    if (cutoffEndISO) trendQuery = trendQuery.lte("created_iso", cutoffEndISO);
     
-    const [historyRes, liveRes] = await Promise.all([historyQuery, liveQuery]);
+    const [historyRes, liveRes, trendRes] = await Promise.all([historyQuery, liveQuery, trendQuery]);
     
     if (historyRes.data) setRankingHistoryData(historyRes.data);
     if (liveRes.data) setRankingDbTickets(liveRes.data);
+    if (trendRes.data) setRankingTrendTickets(trendRes.data);
   }, [rankingCustomRange]);
 
   useEffect(() => {
