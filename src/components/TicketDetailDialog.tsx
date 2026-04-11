@@ -308,6 +308,18 @@ export function TicketDetailDialog({
                   <span className="text-muted-foreground">Created:</span>
                   <p className="text-xs">{ticket.createdAt}</p>
                 </div>
+                {ticket.status === "Resolved" && ticket.resolvedByName && (
+                  <div>
+                    <span className="text-muted-foreground">Resolved by:</span>
+                    <p className="font-medium text-green-600 dark:text-green-400">{ticket.resolvedByName}</p>
+                  </div>
+                )}
+                {ticket.status === "Resolved" && ticket.resolvedAt && (
+                  <div>
+                    <span className="text-muted-foreground">Resolved at:</span>
+                    <p className="text-xs">{new Date(ticket.resolvedAt).toLocaleString("id-ID")}</p>
+                  </div>
+                )}
               </div>
               <div className="pt-3 border-t">
                 <div className="flex items-center justify-between">
@@ -338,7 +350,11 @@ export function TicketDetailDialog({
                       onValueChange={async (value: any) => {
                         try {
                           const oldStatus = ticket.status;
-                          await updateTicket(ticket.id, { status: value });
+                          const resolveFields = value === "Resolved" ? {
+                            resolvedByUserId: undefined as string | undefined,
+                            resolvedByName: currentUserName,
+                          } : {};
+                          await updateTicket(ticket.id, { status: value, ...resolveFields });
                           toast.success(`Status insident ${ticket.id} berhasil diubah menjadi ${value}`);
                           
                           // Log activity for status changes
