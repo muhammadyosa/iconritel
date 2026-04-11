@@ -263,16 +263,26 @@ export function useCloudTickets() {
               // Update ticket names in-place without refetching from DB
               setTickets((prev) =>
                 prev.map((t) => {
+                  let updated = t;
                   if (t.createdByUserId) {
                     const profile = map.get(t.createdByUserId);
                     if (profile) {
                       const newName = profile.display_name || profile.email.split("@")[0];
                       if (newName !== t.createdByName) {
-                        return { ...t, createdByName: newName };
+                        updated = { ...updated, createdByName: newName };
                       }
                     }
                   }
-                  return t;
+                  if (t.resolvedByUserId) {
+                    const profile = map.get(t.resolvedByUserId);
+                    if (profile) {
+                      const newName = profile.display_name || profile.email.split("@")[0];
+                      if (newName !== t.resolvedByName) {
+                        updated = { ...updated, resolvedByName: newName };
+                      }
+                    }
+                  }
+                  return updated;
                 })
               );
             });
