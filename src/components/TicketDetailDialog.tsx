@@ -353,7 +353,7 @@ export function TicketDetailDialog({
                         try {
                           const oldStatus = ticket.status;
                           const resolveFields = value === "Resolved" ? {
-                            resolvedByUserId: undefined as string | undefined,
+                            resolvedByUserId: currentUserId,
                             resolvedByName: currentUserName,
                           } : {};
                           await updateTicket(ticket.id, { status: value, ...resolveFields });
