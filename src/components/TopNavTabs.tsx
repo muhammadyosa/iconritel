@@ -42,9 +42,15 @@ export function TopNavTabs() {
     didMove.current = false;
     dragStartPos.current = { x: e.clientX, y: e.clientY };
     e.dataTransfer.effectAllowed = "move";
-    // Make drag image semi-transparent
     const el = e.currentTarget as HTMLElement;
     e.dataTransfer.setDragImage(el, el.offsetWidth / 2, el.offsetHeight / 2);
+  };
+
+  const handleDrag = (e: React.DragEvent) => {
+    if (dragIndex === null) return;
+    const dx = Math.abs(e.clientX - dragStartPos.current.x);
+    const dy = Math.abs(e.clientY - dragStartPos.current.y);
+    if (dx > 5 || dy > 5) didMove.current = true;
   };
 
   const handleDragOver = (e: React.DragEvent, index: number) => {
