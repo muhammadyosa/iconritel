@@ -55,6 +55,70 @@ export function DashboardTierOverSLA({ tickets, getTicketRegion }: DashboardTier
 
   const maxDuration = top15[0]?.durationMs || 1;
 
+  // Analysis data
+  const analysis = useMemo(() => {
+    if (top15.length === 0) return null;
+
+    // Average duration
+    const avgMs = top15.reduce((s, t) => s + t.durationMs, 0) / top15.length;
+    const avgMins = Math.floor(avgMs / 60000);
+    const avgDays = Math.floor(avgMins / 1440);
+    const avgHours = Math.floor((avgMins % 1440) / 60);
+    const avgM = avgMins % 60;
+    const avgParts: string[] = [];
+    if (avgDays > 0) avgParts.push(`${avgDays} Hari`);
+    if (avgHours > 0) avgParts.push(`${avgHours} Jam`);
+    avgParts.push(`${avgM} Menit`);
+    const avgLabel = avgParts.join(" ");
+
+    // Max duration
+    const maxMs = top15[0].durationMs;
+    const maxMins = Math.floor(maxMs / 60000);
+    const maxDays = Math.floor(maxMins / 1440);
+    const maxHours = Math.floor((maxMins % 1440) / 60);
+    const maxM = maxMins % 60;
+    const maxParts: string[] = [];
+    if (maxDays > 0) maxParts.push(`${maxDays} Hari`);
+    if (maxHours > 0) maxParts.push(`${maxHours} Jam`);
+    maxParts.push(`${maxM} Menit`);
+    const maxLabel = maxParts.join(" ");
+
+    // Region counts
+    const regionMap: Record<string, number> = {};
+    top15.forEach((t) => {
+      const r = getTicketRegion(t.serpo);
+      if (r && r !== "-") regionMap[r] = (regionMap[r] || 0) + 1;
+    });
+    const topRegion = Object.entries(regionMap).sort((a, b) => b[1] - a[1])[0];
+
+    // Status breakdown
+    const criticalCount = top15.filter((t) => t.status === "Critical").length;
+    const pendingCount = top15.filter((t) => t.status === "Pending").length;
+    const onProgressCount = top15.filter((t) => t.status === "On Progress").length;
+
+    // Recommendation
+    let recommendation = "";
+    let recColor = "text-muted-foreground";
+    if (criticalCount > top15.length * 0.5) {
+      recommendation = "⚠️ Mayoritas incident berstatus Critical. Prioritaskan eskalasi dan penanganan segera untuk mengurangi dampak layanan.";
+      recColor = "text-destructive";
+    } else if (pendingCount > top15.length * 0.4) {
+      recommendation = "⏳ Banyak incident berstatus Pending. Percepat proses resolusi agar tidak menumpuk lebih lama.";
+      recColor = "text-warning";
+    } else if (avgMs > 48 * 60 * 60 * 1000) {
+      recommendation = "📈 Rata-rata durasi sangat tinggi (>48 jam). Evaluasi SOP penanganan dan alokasi resource untuk mempercepat resolusi.";
+      recColor = "text-destructive";
+    } else if (avgMs > 24 * 60 * 60 * 1000) {
+      recommendation = "📊 Rata-rata durasi cukup tinggi (>24 jam). Tingkatkan koordinasi antar tim untuk mempercepat penyelesaian.";
+      recColor = "text-warning";
+    } else {
+      recommendation = "✅ Durasi incident masih terkendali. Pertahankan performa dan pantau trend secara berkala.";
+      recColor = "text-emerald-600 dark:text-emerald-400";
+    }
+
+    return { avgLabel, maxLabel, topRegion, criticalCount, pendingCount, onProgressCount, recommendation, recColor, regionMap };
+  }, [top15, getTicketRegion]);
+
   if (top15.length === 0) return null;
 
   return (
@@ -128,6 +192,54 @@ export function DashboardTierOverSLA({ tickets, getTicketRegion }: DashboardTier
               </div>
               <span>Top {top15.length} / {overSLATickets.length} Over SLA</span>
             </div>
+
+            {/* Analisa Statistik Panel */}
+            {analysis && (
+              <div className="mt-2 border border-border/40 rounded-lg bg-muted/10 p-2 sm:p-2.5 space-y-2">
+                <h4 className="text-[9px] sm:text-[10px] font-semibold text-foreground flex items-center gap-1.5">
+                  📊 Analisa Statistik
+                </h4>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 sm:gap-2">
+                  <div className="bg-background/60 rounded-md p-1.5 sm:p-2 border border-border/30">
+                    <span className="text-[7px] sm:text-[8px] text-muted-foreground block">⏱️ Rata-rata Durasi</span>
+                    <span className="text-[9px] sm:text-[10px] font-bold text-foreground">{analysis.avgLabel}</span>
+                  </div>
+                  <div className="bg-background/60 rounded-md p-1.5 sm:p-2 border border-border/30">
+                    <span className="text-[7px] sm:text-[8px] text-muted-foreground block">🔥 Durasi Tertinggi</span>
+                    <span className="text-[9px] sm:text-[10px] font-bold text-destructive">{analysis.maxLabel}</span>
+                  </div>
+                  <div className="bg-background/60 rounded-md p-1.5 sm:p-2 border border-border/30">
+                    <span className="text-[7px] sm:text-[8px] text-muted-foreground block">📍 Region Terbanyak</span>
+                    <span className="text-[9px] sm:text-[10px] font-bold text-foreground">
+                      {analysis.topRegion ? `${analysis.topRegion[0]} (${analysis.topRegion[1]})` : "-"}
+                    </span>
+                  </div>
+                  <div className="bg-background/60 rounded-md p-1.5 sm:p-2 border border-border/30">
+                    <span className="text-[7px] sm:text-[8px] text-muted-foreground block">📋 Breakdown Status</span>
+                    <div className="flex items-center gap-1.5 text-[8px] sm:text-[9px] font-semibold">
+                      <span className="text-destructive">{analysis.criticalCount}C</span>
+                      <span className="text-warning">{analysis.pendingCount}P</span>
+                      <span className="text-primary">{analysis.onProgressCount}O</span>
+                    </div>
+                  </div>
+                </div>
+                {/* Region distribution */}
+                {analysis.regionMap && Object.keys(analysis.regionMap).length > 1 && (
+                  <div className="flex flex-wrap gap-1">
+                    {Object.entries(analysis.regionMap).sort((a, b) => b[1] - a[1]).map(([region, count]) => (
+                      <span key={region} className="inline-flex items-center gap-0.5 text-[7px] sm:text-[8px] bg-background/60 border border-border/30 rounded px-1 py-0.5">
+                        <RegionBadge region={region} />
+                        <span className="font-bold ml-0.5">{count}</span>
+                      </span>
+                    ))}
+                  </div>
+                )}
+                {/* Recommendation */}
+                <div className={cn("text-[8px] sm:text-[9px] leading-relaxed p-1.5 rounded-md bg-background/40 border border-border/20", analysis.recColor)}>
+                  {analysis.recommendation}
+                </div>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
