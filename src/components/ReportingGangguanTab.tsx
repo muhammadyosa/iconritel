@@ -262,6 +262,30 @@ export function ReportingGangguanTab({
     toast({ title: "Data manual direset" });
   };
 
+  const previewRef = useRef<HTMLDivElement>(null);
+  const [isExporting, setIsExporting] = useState(false);
+
+  const handleExportImage = async () => {
+    if (!previewRef.current) return;
+    setIsExporting(true);
+    try {
+      const canvas = await html2canvas(previewRef.current, {
+        scale: 2,
+        backgroundColor: "#ffffff",
+        useCORS: true,
+      });
+      const link = document.createElement("a");
+      link.download = `Reporting_Gangguan_${realtimeDate}.png`;
+      link.href = canvas.toDataURL("image/png");
+      link.click();
+      toast({ title: "Export berhasil", description: "Gambar berhasil didownload." });
+    } catch {
+      toast({ title: "Export gagal", variant: "destructive" });
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
   const cellClass = "text-center text-[10px] sm:text-xs py-1.5 px-1.5 sm:px-3";
   const headerCellClass = "text-center text-[10px] sm:text-xs font-bold py-1.5 px-1.5 sm:px-3";
 
