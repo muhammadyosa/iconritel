@@ -350,6 +350,9 @@ export function ReportingGangguanTab({
               <Button variant="outline" size="sm" className="h-7 text-[10px] px-2" onClick={handleReset}>
                 <RotateCcw className="h-3 w-3 mr-1" /> Reset
               </Button>
+              <Button variant="outline" size="sm" className="h-7 text-[10px] px-2" onClick={handleExportImage} disabled={isExporting}>
+                <ImageIcon className="h-3 w-3 mr-1" /> {isExporting ? "Exporting..." : "Export PNG"}
+              </Button>
               <Button variant="default" size="sm" className="h-7 text-[10px] px-2" onClick={handleCopy}>
                 <Copy className="h-3 w-3 mr-1" /> Salin
               </Button>
