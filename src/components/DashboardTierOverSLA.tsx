@@ -55,6 +55,70 @@ export function DashboardTierOverSLA({ tickets, getTicketRegion }: DashboardTier
 
   const maxDuration = top15[0]?.durationMs || 1;
 
+  // Analysis data
+  const analysis = useMemo(() => {
+    if (top15.length === 0) return null;
+
+    // Average duration
+    const avgMs = top15.reduce((s, t) => s + t.durationMs, 0) / top15.length;
+    const avgMins = Math.floor(avgMs / 60000);
+    const avgDays = Math.floor(avgMins / 1440);
+    const avgHours = Math.floor((avgMins % 1440) / 60);
+    const avgM = avgMins % 60;
+    const avgParts: string[] = [];
+    if (avgDays > 0) avgParts.push(`${avgDays} Hari`);
+    if (avgHours > 0) avgParts.push(`${avgHours} Jam`);
+    avgParts.push(`${avgM} Menit`);
+    const avgLabel = avgParts.join(" ");
+
+    // Max duration
+    const maxMs = top15[0].durationMs;
+    const maxMins = Math.floor(maxMs / 60000);
+    const maxDays = Math.floor(maxMins / 1440);
+    const maxHours = Math.floor((maxMins % 1440) / 60);
+    const maxM = maxMins % 60;
+    const maxParts: string[] = [];
+    if (maxDays > 0) maxParts.push(`${maxDays} Hari`);
+    if (maxHours > 0) maxParts.push(`${maxHours} Jam`);
+    maxParts.push(`${maxM} Menit`);
+    const maxLabel = maxParts.join(" ");
+
+    // Region counts
+    const regionMap: Record<string, number> = {};
+    top15.forEach((t) => {
+      const r = getTicketRegion(t.serpo);
+      if (r && r !== "-") regionMap[r] = (regionMap[r] || 0) + 1;
+    });
+    const topRegion = Object.entries(regionMap).sort((a, b) => b[1] - a[1])[0];
+
+    // Status breakdown
+    const criticalCount = top15.filter((t) => t.status === "Critical").length;
+    const pendingCount = top15.filter((t) => t.status === "Pending").length;
+    const onProgressCount = top15.filter((t) => t.status === "On Progress").length;
+
+    // Recommendation
+    let recommendation = "";
+    let recColor = "text-muted-foreground";
+    if (criticalCount > top15.length * 0.5) {
+      recommendation = "⚠️ Mayoritas incident berstatus Critical. Prioritaskan eskalasi dan penanganan segera untuk mengurangi dampak layanan.";
+      recColor = "text-destructive";
+    } else if (pendingCount > top15.length * 0.4) {
+      recommendation = "⏳ Banyak incident berstatus Pending. Percepat proses resolusi agar tidak menumpuk lebih lama.";
+      recColor = "text-warning";
+    } else if (avgMs > 48 * 60 * 60 * 1000) {
+      recommendation = "📈 Rata-rata durasi sangat tinggi (>48 jam). Evaluasi SOP penanganan dan alokasi resource untuk mempercepat resolusi.";
+      recColor = "text-destructive";
+    } else if (avgMs > 24 * 60 * 60 * 1000) {
+      recommendation = "📊 Rata-rata durasi cukup tinggi (>24 jam). Tingkatkan koordinasi antar tim untuk mempercepat penyelesaian.";
+      recColor = "text-warning";
+    } else {
+      recommendation = "✅ Durasi incident masih terkendali. Pertahankan performa dan pantau trend secara berkala.";
+      recColor = "text-emerald-600 dark:text-emerald-400";
+    }
+
+    return { avgLabel, maxLabel, topRegion, criticalCount, pendingCount, onProgressCount, recommendation, recColor, regionMap };
+  }, [top15, getTicketRegion]);
+
   if (top15.length === 0) return null;
 
   return (
