@@ -5,9 +5,11 @@ export interface OpenTab {
   title: string;
   path: string;
   emoji: string;
+  pinned?: boolean;
 }
 
 const STORAGE_KEY = "noc-open-tabs";
+const PINNED_KEY = "noc-pinned-tabs";
 
 export const pathMap: Record<string, OpenTab> = {
   "/": { title: "Dashboard", path: "/", emoji: "🖥️" },
@@ -28,9 +30,19 @@ interface TabContextType {
   openTabs: OpenTab[];
   closeTab: (e: React.MouseEvent, path: string) => void;
   reorderTabs: (fromIndex: number, toIndex: number) => void;
+  togglePin: (path: string) => void;
+  pinnedPaths: Set<string>;
+  activeTransition: string | null;
 }
 
-const TabContext = createContext<TabContextType>({ openTabs: [], closeTab: () => {}, reorderTabs: () => {} });
+const TabContext = createContext<TabContextType>({
+  openTabs: [],
+  closeTab: () => {},
+  reorderTabs: () => {},
+  togglePin: () => {},
+  pinnedPaths: new Set(),
+  activeTransition: null,
+});
 
 export const useOpenTabs = () => useContext(TabContext);
 
@@ -45,26 +57,58 @@ function saveTabs(tabs: OpenTab[]) {
   sessionStorage.setItem(STORAGE_KEY, JSON.stringify(tabs));
 }
 
+function loadPinned(): Set<string> {
+  try {
+    const raw = localStorage.getItem(PINNED_KEY);
+    return raw ? new Set(JSON.parse(raw)) : new Set();
+  } catch { return new Set(); }
+}
+
+function savePinned(pinned: Set<string>) {
+  localStorage.setItem(PINNED_KEY, JSON.stringify([...pinned]));
+}
+
+function sortWithPins(tabs: OpenTab[], pinned: Set<string>): OpenTab[] {
+  const pinnedTabs = tabs.filter(t => pinned.has(t.path));
+  const unpinnedTabs = tabs.filter(t => !pinned.has(t.path));
+  return [...pinnedTabs, ...unpinnedTabs];
+}
+
 export function TabProvider({ children }: { children: React.ReactNode }) {
   const location = useLocation();
   const navigate = useNavigate();
   const [openTabs, setOpenTabs] = useState<OpenTab[]>(loadTabs);
+  const [pinnedPaths, setPinnedPaths] = useState<Set<string>>(loadPinned);
+  const [activeTransition, setActiveTransition] = useState<string | null>(null);
+  const prevPath = React.useRef(location.pathname);
+
+  // Trigger transition animation on path change
+  useEffect(() => {
+    if (prevPath.current !== location.pathname) {
+      setActiveTransition(location.pathname);
+      const timer = setTimeout(() => setActiveTransition(null), 200);
+      prevPath.current = location.pathname;
+      return () => clearTimeout(timer);
+    }
+  }, [location.pathname]);
 
   useEffect(() => {
     const tabInfo = pathMap[location.pathname];
     if (!tabInfo) return;
     setOpenTabs((prev) => {
       if (prev.some((t) => t.path === tabInfo.path)) return prev;
-      const next = [...prev, tabInfo];
+      const next = sortWithPins([...prev, tabInfo], pinnedPaths);
       saveTabs(next);
       return next;
     });
-  }, [location.pathname]);
+  }, [location.pathname, pinnedPaths]);
 
   const closeTab = useCallback(
     (e: React.MouseEvent, path: string) => {
       e.stopPropagation();
       e.preventDefault();
+      // Cannot close pinned tabs
+      if (pinnedPaths.has(path)) return;
       setOpenTabs((prev) => {
         const next = prev.filter((t) => t.path !== path);
         saveTabs(next);
@@ -75,21 +119,46 @@ export function TabProvider({ children }: { children: React.ReactNode }) {
         return next;
       });
     },
-    [location.pathname, navigate]
+    [location.pathname, navigate, pinnedPaths]
   );
 
   const reorderTabs = useCallback((fromIndex: number, toIndex: number) => {
     setOpenTabs((prev) => {
+      // Don't allow moving unpinned tabs into pinned zone or vice versa
+      const pinnedCount = prev.filter(t => pinnedPaths.has(t.path)).length;
+      const fromPinned = fromIndex < pinnedCount;
+      const toPinned = toIndex < pinnedCount;
+      if (fromPinned !== toPinned) return prev;
+
       const next = [...prev];
       const [moved] = next.splice(fromIndex, 1);
       next.splice(toIndex, 0, moved);
       saveTabs(next);
       return next;
     });
+  }, [pinnedPaths]);
+
+  const togglePin = useCallback((path: string) => {
+    setPinnedPaths((prev) => {
+      const next = new Set(prev);
+      if (next.has(path)) {
+        next.delete(path);
+      } else {
+        next.add(path);
+      }
+      savePinned(next);
+      // Re-sort tabs
+      setOpenTabs((tabs) => {
+        const sorted = sortWithPins(tabs, next);
+        saveTabs(sorted);
+        return sorted;
+      });
+      return next;
+    });
   }, []);
 
   return (
-    <TabContext.Provider value={{ openTabs, closeTab, reorderTabs }}>
+    <TabContext.Provider value={{ openTabs, closeTab, reorderTabs, togglePin, pinnedPaths, activeTransition }}>
       {children}
     </TabContext.Provider>
   );
