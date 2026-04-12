@@ -192,6 +192,54 @@ export function DashboardTierOverSLA({ tickets, getTicketRegion }: DashboardTier
               </div>
               <span>Top {top15.length} / {overSLATickets.length} Over SLA</span>
             </div>
+
+            {/* Analisa Statistik Panel */}
+            {analysis && (
+              <div className="mt-2 border border-border/40 rounded-lg bg-muted/10 p-2 sm:p-2.5 space-y-2">
+                <h4 className="text-[9px] sm:text-[10px] font-semibold text-foreground flex items-center gap-1.5">
+                  📊 Analisa Statistik
+                </h4>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 sm:gap-2">
+                  <div className="bg-background/60 rounded-md p-1.5 sm:p-2 border border-border/30">
+                    <span className="text-[7px] sm:text-[8px] text-muted-foreground block">⏱️ Rata-rata Durasi</span>
+                    <span className="text-[9px] sm:text-[10px] font-bold text-foreground">{analysis.avgLabel}</span>
+                  </div>
+                  <div className="bg-background/60 rounded-md p-1.5 sm:p-2 border border-border/30">
+                    <span className="text-[7px] sm:text-[8px] text-muted-foreground block">🔥 Durasi Tertinggi</span>
+                    <span className="text-[9px] sm:text-[10px] font-bold text-destructive">{analysis.maxLabel}</span>
+                  </div>
+                  <div className="bg-background/60 rounded-md p-1.5 sm:p-2 border border-border/30">
+                    <span className="text-[7px] sm:text-[8px] text-muted-foreground block">📍 Region Terbanyak</span>
+                    <span className="text-[9px] sm:text-[10px] font-bold text-foreground">
+                      {analysis.topRegion ? `${analysis.topRegion[0]} (${analysis.topRegion[1]})` : "-"}
+                    </span>
+                  </div>
+                  <div className="bg-background/60 rounded-md p-1.5 sm:p-2 border border-border/30">
+                    <span className="text-[7px] sm:text-[8px] text-muted-foreground block">📋 Breakdown Status</span>
+                    <div className="flex items-center gap-1.5 text-[8px] sm:text-[9px] font-semibold">
+                      <span className="text-destructive">{analysis.criticalCount}C</span>
+                      <span className="text-warning">{analysis.pendingCount}P</span>
+                      <span className="text-primary">{analysis.onProgressCount}O</span>
+                    </div>
+                  </div>
+                </div>
+                {/* Region distribution */}
+                {analysis.regionMap && Object.keys(analysis.regionMap).length > 1 && (
+                  <div className="flex flex-wrap gap-1">
+                    {Object.entries(analysis.regionMap).sort((a, b) => b[1] - a[1]).map(([region, count]) => (
+                      <span key={region} className="inline-flex items-center gap-0.5 text-[7px] sm:text-[8px] bg-background/60 border border-border/30 rounded px-1 py-0.5">
+                        <RegionBadge region={region} />
+                        <span className="font-bold ml-0.5">{count}</span>
+                      </span>
+                    ))}
+                  </div>
+                )}
+                {/* Recommendation */}
+                <div className={cn("text-[8px] sm:text-[9px] leading-relaxed p-1.5 rounded-md bg-background/40 border border-border/20", analysis.recColor)}>
+                  {analysis.recommendation}
+                </div>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
