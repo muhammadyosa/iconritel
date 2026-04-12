@@ -360,6 +360,7 @@ export function ReportingGangguanTab({
           </div>
         </CardHeader>
         <CardContent className="px-2 sm:px-6 pb-4">
+          <div ref={previewRef} className="bg-white p-4 rounded-lg">
           {/* Header preview */}
           <div className="mb-3 text-center space-y-1">
             <p className="text-sm sm:text-base font-bold text-primary">{getGreeting()}</p>
