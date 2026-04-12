@@ -2,7 +2,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { X, Pin } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useOpenTabs } from "@/contexts/TabContext";
-import { useRef, useState, useEffect, useCallback } from "react";
+import React, { useRef, useState, useEffect, useCallback } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import {
   ContextMenu,
