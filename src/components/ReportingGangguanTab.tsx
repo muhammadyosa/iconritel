@@ -475,6 +475,7 @@ export function ReportingGangguanTab({
               </Table>
             </div>
           </div>
+          </div>
         </CardContent>
       </Card>
     </div>
