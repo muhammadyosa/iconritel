@@ -1,11 +1,12 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Ticket, FEEDER_CONSTRAINTS_SET } from "@/types/ticket";
 import { RegionalTeamRecord } from "@/types/regionalTeam";
-import { Copy, RefreshCw, RotateCcw } from "lucide-react";
+import { Copy, RefreshCw, RotateCcw, Download, Image as ImageIcon } from "lucide-react";
+import html2canvas from "html2canvas";
 import { toast } from "@/hooks/use-toast";
 import { useRealtimeDate } from "@/hooks/useRealtimeDate";
 import { format, parse } from "date-fns";
@@ -261,6 +262,30 @@ export function ReportingGangguanTab({
     toast({ title: "Data manual direset" });
   };
 
+  const previewRef = useRef<HTMLDivElement>(null);
+  const [isExporting, setIsExporting] = useState(false);
+
+  const handleExportImage = async () => {
+    if (!previewRef.current) return;
+    setIsExporting(true);
+    try {
+      const canvas = await html2canvas(previewRef.current, {
+        scale: 2,
+        backgroundColor: "#ffffff",
+        useCORS: true,
+      });
+      const link = document.createElement("a");
+      link.download = `Reporting_Gangguan_${realtimeDate}.png`;
+      link.href = canvas.toDataURL("image/png");
+      link.click();
+      toast({ title: "Export berhasil", description: "Gambar berhasil didownload." });
+    } catch {
+      toast({ title: "Export gagal", variant: "destructive" });
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
   const cellClass = "text-center text-[10px] sm:text-xs py-1.5 px-1.5 sm:px-3";
   const headerCellClass = "text-center text-[10px] sm:text-xs font-bold py-1.5 px-1.5 sm:px-3";
 
@@ -325,6 +350,9 @@ export function ReportingGangguanTab({
               <Button variant="outline" size="sm" className="h-7 text-[10px] px-2" onClick={handleReset}>
                 <RotateCcw className="h-3 w-3 mr-1" /> Reset
               </Button>
+              <Button variant="outline" size="sm" className="h-7 text-[10px] px-2" onClick={handleExportImage} disabled={isExporting}>
+                <ImageIcon className="h-3 w-3 mr-1" /> {isExporting ? "Exporting..." : "Export PNG"}
+              </Button>
               <Button variant="default" size="sm" className="h-7 text-[10px] px-2" onClick={handleCopy}>
                 <Copy className="h-3 w-3 mr-1" /> Salin
               </Button>
@@ -332,6 +360,7 @@ export function ReportingGangguanTab({
           </div>
         </CardHeader>
         <CardContent className="px-2 sm:px-6 pb-4">
+          <div ref={previewRef} className="bg-white p-4 rounded-lg">
           {/* Header preview */}
           <div className="mb-3 text-center space-y-1">
             <p className="text-sm sm:text-base font-bold text-primary">{getGreeting()}</p>
@@ -445,6 +474,7 @@ export function ReportingGangguanTab({
                 </TableBody>
               </Table>
             </div>
+          </div>
           </div>
         </CardContent>
       </Card>
