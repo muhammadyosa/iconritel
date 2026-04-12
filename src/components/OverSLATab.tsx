@@ -416,11 +416,11 @@ export function OverSLATab({ tickets, getTicketRegion, onTicketClick }: OverSLAT
           </CardContent>
         </Card>
 
-        {/* Tier Incident OVER SLA - Top 15 by Duration */}
+        {/* Tier Incident OVER SLA - Top 20 by Duration */}
         <Card className="overflow-hidden border">
           <CardHeader className="py-2.5 px-3 sm:px-4 border-b bg-muted/20">
             <CardTitle className="text-xs sm:text-sm flex items-center gap-2">🏆 Tier Incident OVER SLA</CardTitle>
-            <p className="text-[10px] sm:text-xs text-muted-foreground">Top 15 incident dengan durasi tertinggi</p>
+            <p className="text-[10px] sm:text-xs text-muted-foreground">Top 20 incident dengan durasi tertinggi</p>
           </CardHeader>
           <CardContent className="p-1.5 sm:p-2">
             {overSLATickets.length > 0 ? (() => {
@@ -440,7 +440,7 @@ export function OverSLATab({ tickets, getTicketRegion, onTicketClick }: OverSLAT
                   return { ...t, durationMs, durationLabel: parts.join(" ") };
                 })
                 .sort((a, b) => b.durationMs - a.durationMs)
-                .slice(0, 15);
+                .slice(0, 20);
               const maxDuration = top15[0]?.durationMs || 1;
 
               return (
