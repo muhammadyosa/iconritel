@@ -33,6 +33,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { z } from "zod";
 import { Ticket } from "@/types/ticket";
 import { DashboardIconnetTab } from "@/components/DashboardIconnetTab";
+import { ReportingGangguanTab } from "@/components/ReportingGangguanTab";
 import { useUserRole } from "@/hooks/useUserRole";
 import { StatusBadge } from "@/components/StatusBadge";
 import { TicketDetailDialog } from "@/components/TicketDetailDialog";
@@ -392,6 +393,7 @@ Dibuat: ${new Date(r.createdAt).toLocaleString("id-ID")}
               )}
             </TabsTrigger>
             <TabsTrigger value="dashboard-iconnet" className="text-[11px] sm:text-sm px-2.5 sm:px-3 py-1.5 sm:py-2 whitespace-nowrap">📊 Iconnet</TabsTrigger>
+            <TabsTrigger value="reporting-gangguan" className="text-[11px] sm:text-sm px-2.5 sm:px-3 py-1.5 sm:py-2 whitespace-nowrap">📊 Reporting Gangguan</TabsTrigger>
           </TabsList>
         </div>
 
