@@ -3,6 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { cn } from "@/lib/utils";
 import { ThemeProvider } from "next-themes";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { SidebarFloatingTrigger } from "@/components/SidebarFloatingTrigger";
@@ -93,10 +94,9 @@ function NonTabRoutes() {
 // Renders all open tabs, keeping them mounted but hiding inactive ones
 function TabbedContent() {
   const location = useLocation();
-  const { openTabs } = useOpenTabs();
+  const { openTabs, activeTransition } = useOpenTabs();
   const currentPath = location.pathname;
   
-  // Check if current path is a known tab path
   const isTabPath = currentPath in pathMap;
 
   if (!isTabPath) {
@@ -109,11 +109,15 @@ function TabbedContent() {
         const PageComponent = pageComponents[tab.path];
         if (!PageComponent) return null;
         const isActive = currentPath === tab.path;
+        const isTransitioning = activeTransition === tab.path;
         return (
           <div
             key={tab.path}
             style={{ display: isActive ? "block" : "none" }}
-            className="h-full"
+            className={cn(
+              "h-full",
+              isActive && isTransitioning && "animate-fade-in"
+            )}
           >
             <Suspense fallback={<PageLoader />}>
               <ProtectedRoute>
@@ -126,7 +130,6 @@ function TabbedContent() {
     </>
   );
 }
-
 function TicketNotificationProvider({ children }: { children: React.ReactNode }) {
   useTicketNotifications();
   return <>{children}</>;
