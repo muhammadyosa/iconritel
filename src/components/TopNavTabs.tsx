@@ -42,9 +42,15 @@ export function TopNavTabs() {
     didMove.current = false;
     dragStartPos.current = { x: e.clientX, y: e.clientY };
     e.dataTransfer.effectAllowed = "move";
-    // Make drag image semi-transparent
     const el = e.currentTarget as HTMLElement;
     e.dataTransfer.setDragImage(el, el.offsetWidth / 2, el.offsetHeight / 2);
+  };
+
+  const handleDrag = (e: React.DragEvent) => {
+    if (dragIndex === null) return;
+    const dx = Math.abs(e.clientX - dragStartPos.current.x);
+    const dy = Math.abs(e.clientY - dragStartPos.current.y);
+    if (dx > 5 || dy > 5) didMove.current = true;
   };
 
   const handleDragOver = (e: React.DragEvent, index: number) => {
@@ -131,13 +137,18 @@ export function TopNavTabs() {
               data-tab-index={index}
               draggable
               onDragStart={(e) => handleDragStart(e, index)}
+              onDrag={handleDrag}
               onDragOver={(e) => handleDragOver(e, index)}
               onDragEnd={handleDragEnd}
               onTouchStart={(e) => handleTouchStart(e, index)}
               onTouchMove={handleTouchMove}
               onTouchEnd={handleTouchEnd}
-              onClick={() => {
-                if (!didMove.current) navigate(tab.path);
+              onMouseDown={() => { didMove.current = false; }}
+              onClick={(e) => {
+                if (!didMove.current) {
+                  e.stopPropagation();
+                  navigate(tab.path);
+                }
               }}
               className={cn(
                 "group flex items-center gap-1.5 pl-3 pr-1.5 py-1.5 cursor-grab border-r border-border/50 text-xs font-medium whitespace-nowrap transition-all select-none flex-shrink-0",
