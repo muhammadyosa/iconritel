@@ -116,6 +116,12 @@ const Report = () => {
   // User role for permission-based UI
   const { isAdmin } = useUserRole();
   
+  // Regional data for Reporting Gangguan
+  const [reportRegionalData, setReportRegionalData] = useState<RegionalTeamRecord[]>([]);
+  useEffect(() => {
+    loadDefaultRegionalTeamData().then(setReportRegionalData).catch(() => {});
+  }, []);
+
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // State for SLA Report
@@ -715,6 +721,25 @@ UPDATE : `}
 
         <TabsContent value="dashboard-iconnet" className="space-y-4">
           <DashboardIconnetTab />
+        </TabsContent>
+
+        <TabsContent value="reporting-gangguan" className="space-y-4">
+          <ReportingGangguanTab
+            tickets={allCloudTickets}
+            regionalTeamData={reportRegionalData}
+            getTicketRegion={(hostname, serpo) => {
+              // Find region from regional data
+              for (const r of reportRegionalData) {
+                if (r.mitraName.toUpperCase() === serpo.toUpperCase()) return r.region;
+                if (r.hostnames?.some(h => h.toUpperCase() === hostname.toUpperCase())) return r.region;
+              }
+              // Partial match
+              for (const r of reportRegionalData) {
+                if (serpo.toUpperCase().includes(r.mitraName.toUpperCase()) || r.mitraName.toUpperCase().includes(serpo.toUpperCase())) return r.region;
+              }
+              return "-";
+            }}
+          />
         </TabsContent>
       </Tabs>
     </div>
