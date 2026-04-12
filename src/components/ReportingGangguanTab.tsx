@@ -1,11 +1,12 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Ticket, FEEDER_CONSTRAINTS_SET } from "@/types/ticket";
 import { RegionalTeamRecord } from "@/types/regionalTeam";
-import { Copy, RefreshCw, RotateCcw } from "lucide-react";
+import { Copy, RefreshCw, RotateCcw, Download, Image as ImageIcon } from "lucide-react";
+import html2canvas from "html2canvas";
 import { toast } from "@/hooks/use-toast";
 import { useRealtimeDate } from "@/hooks/useRealtimeDate";
 import { format, parse } from "date-fns";
