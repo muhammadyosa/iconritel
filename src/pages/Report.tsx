@@ -33,6 +33,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { z } from "zod";
 import { Ticket } from "@/types/ticket";
 import { DashboardIconnetTab } from "@/components/DashboardIconnetTab";
+import { ReportingGangguanTab } from "@/components/ReportingGangguanTab";
 import { useUserRole } from "@/hooks/useUserRole";
 import { StatusBadge } from "@/components/StatusBadge";
 import { TicketDetailDialog } from "@/components/TicketDetailDialog";
@@ -115,6 +116,12 @@ const Report = () => {
   // User role for permission-based UI
   const { isAdmin } = useUserRole();
   
+  // Regional data for Reporting Gangguan
+  const [reportRegionalData, setReportRegionalData] = useState<RegionalTeamRecord[]>([]);
+  useEffect(() => {
+    loadDefaultRegionalTeamData().then(setReportRegionalData).catch(() => {});
+  }, []);
+
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // State for SLA Report
@@ -392,6 +399,7 @@ Dibuat: ${new Date(r.createdAt).toLocaleString("id-ID")}
               )}
             </TabsTrigger>
             <TabsTrigger value="dashboard-iconnet" className="text-[11px] sm:text-sm px-2.5 sm:px-3 py-1.5 sm:py-2 whitespace-nowrap">📊 Iconnet</TabsTrigger>
+            <TabsTrigger value="reporting-gangguan" className="text-[11px] sm:text-sm px-2.5 sm:px-3 py-1.5 sm:py-2 whitespace-nowrap">📊 Reporting Gangguan</TabsTrigger>
           </TabsList>
         </div>
 
@@ -713,6 +721,25 @@ UPDATE : `}
 
         <TabsContent value="dashboard-iconnet" className="space-y-4">
           <DashboardIconnetTab />
+        </TabsContent>
+
+        <TabsContent value="reporting-gangguan" className="space-y-4">
+          <ReportingGangguanTab
+            tickets={allCloudTickets}
+            regionalTeamData={reportRegionalData}
+            getTicketRegion={(hostname, serpo) => {
+              // Find region from regional data
+              for (const r of reportRegionalData) {
+                if (r.mitraName.toUpperCase() === serpo.toUpperCase()) return r.region;
+                if (r.hostnames?.some(h => h.toUpperCase() === hostname.toUpperCase())) return r.region;
+              }
+              // Partial match
+              for (const r of reportRegionalData) {
+                if (serpo.toUpperCase().includes(r.mitraName.toUpperCase()) || r.mitraName.toUpperCase().includes(serpo.toUpperCase())) return r.region;
+              }
+              return "-";
+            }}
+          />
         </TabsContent>
       </Tabs>
     </div>
