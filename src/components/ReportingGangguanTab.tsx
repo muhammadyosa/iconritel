@@ -332,9 +332,9 @@ export function ReportingGangguanTab({
           {/* Preview content - always light for export and readability */}
           <div ref={previewRef} className="bg-white text-gray-900 p-3 sm:p-5 rounded-lg max-w-2xl mx-auto">
             {/* Logos aligned to table edges + greeting centered */}
-            <div className="flex items-center justify-between mb-0.5">
+            <div className="flex items-center mb-0.5">
               <img src={iconnetLogo} alt="Iconnet" className="h-7 sm:h-9 object-contain flex-shrink-0" />
-              <p className="text-sm sm:text-lg font-bold text-blue-700 tracking-wide">{getGreeting()}</p>
+              <p className="flex-1 text-center text-sm sm:text-lg font-bold text-blue-700 tracking-wide">{getGreeting()}</p>
               <img src={plnLogo} alt="PLN Icon Plus" className="h-7 sm:h-9 object-contain flex-shrink-0" />
             </div>
             {/* Subtitle */}
