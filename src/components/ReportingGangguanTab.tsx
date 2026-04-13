@@ -333,10 +333,12 @@ export function ReportingGangguanTab({
           <div ref={previewRef} className="bg-white text-gray-900 p-4 rounded-lg">
             {/* Header preview with logos */}
             <div className="mb-3 space-y-1">
-              <div className="flex items-center justify-between">
-                <img src={iconnetLogo} alt="Iconnet" className="h-8 sm:h-10 object-contain" />
-                <p className="text-sm sm:text-base font-bold text-blue-700">{getGreeting()}</p>
-                <img src={plnLogo} alt="PLN Icon Plus" className="h-8 sm:h-10 object-contain" />
+              <div className="flex items-start justify-between px-1">
+                <img src={iconnetLogo} alt="Iconnet" className="h-10 sm:h-12 object-contain flex-shrink-0" />
+                <div className="flex-1 text-center pt-1">
+                  <p className="text-sm sm:text-lg font-bold text-blue-700">{getGreeting()}</p>
+                </div>
+                <img src={plnLogo} alt="PLN Icon Plus" className="h-10 sm:h-12 object-contain flex-shrink-0" />
               </div>
               <p className="text-[10px] sm:text-xs text-gray-600 text-center">
                 Berikut Resume Laporan Gangguan Layanan ICONNET {formattedDate} Pukul {pukul} WIB
