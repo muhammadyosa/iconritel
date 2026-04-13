@@ -330,22 +330,19 @@ export function ReportingGangguanTab({
         </CardHeader>
         <CardContent className="px-2 sm:px-6 pb-4">
           {/* Preview content - always light for export and readability */}
-          <div ref={previewRef} className="bg-white text-gray-900 p-4 rounded-lg">
-            {/* Header preview with logos */}
-            <div className="mb-3 space-y-1">
-              <div className="flex items-start justify-between px-1">
-                <img src={iconnetLogo} alt="Iconnet" className="h-10 sm:h-12 object-contain flex-shrink-0" />
-                <div className="flex-1 text-center pt-1">
-                  <p className="text-sm sm:text-lg font-bold text-blue-700">{getGreeting()}</p>
-                </div>
-                <img src={plnLogo} alt="PLN Icon Plus" className="h-10 sm:h-12 object-contain flex-shrink-0" />
-              </div>
-              <p className="text-[10px] sm:text-xs text-gray-600 text-center">
-                Berikut Resume Laporan Gangguan Layanan ICONNET {formattedDate} Pukul {pukul} WIB
-              </p>
+          <div ref={previewRef} className="bg-white text-gray-900 p-3 sm:p-5 rounded-lg max-w-2xl mx-auto">
+            {/* Logos at top corners + greeting */}
+            <div className="flex items-start justify-between mb-1">
+              <img src={iconnetLogo} alt="Iconnet" className="h-8 sm:h-10 object-contain" />
+              <p className="text-sm sm:text-base font-bold text-blue-700 pt-1">{getGreeting()}</p>
+              <img src={plnLogo} alt="PLN Icon Plus" className="h-8 sm:h-10 object-contain" />
             </div>
-            {/* Team info - tabular layout */}
-            <div className="text-[10px] sm:text-xs max-w-md mx-auto mt-2 mb-3">
+            {/* Subtitle */}
+            <p className="text-[9px] sm:text-[11px] text-gray-600 text-center mb-2">
+              Berikut Resume Laporan Gangguan Layanan ICONNET {formattedDate} Pukul {pukul} WIB
+            </p>
+            {/* Team info */}
+            <div className="text-[9px] sm:text-[11px] max-w-sm mx-auto mb-3">
               <table className="w-full">
                 <tbody>
                   <tr>
@@ -364,62 +361,61 @@ export function ReportingGangguanTab({
               </table>
             </div>
 
-            {/* TIKET AGING SBS */}
-            <div className="border border-gray-300 rounded-lg overflow-hidden">
-              {/* Title */}
-              <div className="bg-blue-700 text-white text-center py-1.5 text-[11px] sm:text-xs font-bold tracking-wider">
+            {/* TIKET AGING SBS - compact table */}
+            <div className="border border-gray-300 rounded overflow-hidden text-[9px] sm:text-[11px]">
+              <div className="bg-blue-700 text-white text-center py-1 font-bold tracking-wider">
                 TIKET AGING SBS
               </div>
 
               {/* Tiket Lama */}
-              <div className="bg-blue-100 text-blue-900 text-center py-1 text-[10px] sm:text-xs font-semibold border-b border-gray-300">
+              <div className="bg-blue-100 text-blue-900 text-center py-0.5 font-semibold border-b border-gray-300">
                 Tiket Lama
               </div>
-              <table className="w-full text-[10px] sm:text-xs">
+              <table className="w-full">
                 <thead>
                   <tr className="bg-gray-100 border-b border-gray-300">
-                    <th className="py-1.5 px-2 sm:px-3 text-center font-bold text-gray-700">WILAYAH</th>
-                    <th className="py-1.5 px-2 sm:px-3 text-center font-bold text-gray-700">TOTAL</th>
-                    <th className="py-1.5 px-2 sm:px-3 text-center font-bold text-gray-700">RITEL</th>
-                    <th className="py-1.5 px-2 sm:px-3 text-center font-bold text-gray-700">CORPORATE</th>
-                    <th className="py-1.5 px-2 sm:px-3 text-center font-bold text-gray-700">CLOSE</th>
+                    <th className="py-1 px-2 text-center font-bold text-gray-700 w-[28%]">WILAYAH</th>
+                    <th className="py-1 px-2 text-center font-bold text-gray-700 w-[18%]">TOTAL</th>
+                    <th className="py-1 px-2 text-center font-bold text-gray-700 w-[18%]">RITEL</th>
+                    <th className="py-1 px-2 text-center font-bold text-gray-700 w-[18%]">CORPORATE</th>
+                    <th className="py-1 px-2 text-center font-bold text-gray-700 w-[18%]">CLOSE</th>
                   </tr>
                 </thead>
                 <tbody>
                   {REGIONS.map((r) => (
                     <tr key={`lama-${r}`} className="border-b border-gray-200">
-                      <td className="py-1.5 px-2 sm:px-3 font-medium text-left text-gray-900">{r}</td>
-                      <td className="py-1.5 px-2 sm:px-3 text-center font-semibold text-gray-900">{tiketLama[r].total}</td>
-                      <td className="py-1.5 px-2 sm:px-3 text-center text-gray-800">{tiketLama[r].ritel}</td>
-                      <td className="py-1.5 px-2 sm:px-3 text-center text-gray-800">{tiketLama[r].corporate}</td>
-                      <td className="py-1.5 px-2 sm:px-3 text-center text-gray-800">{tiketLama[r].close}</td>
+                      <td className="py-1 px-2 font-medium text-left text-gray-900">{r}</td>
+                      <td className="py-1 px-2 text-center font-semibold text-gray-900">{tiketLama[r].total}</td>
+                      <td className="py-1 px-2 text-center text-gray-800">{tiketLama[r].ritel}</td>
+                      <td className="py-1 px-2 text-center text-gray-800">{tiketLama[r].corporate}</td>
+                      <td className="py-1 px-2 text-center text-gray-800">{tiketLama[r].close}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
 
               {/* Tiket Baru */}
-              <div className="bg-blue-100 text-blue-900 text-center py-1 text-[10px] sm:text-xs font-semibold border-y border-gray-300">
+              <div className="bg-blue-100 text-blue-900 text-center py-0.5 font-semibold border-y border-gray-300">
                 Tiket Baru
               </div>
-              <table className="w-full text-[10px] sm:text-xs">
+              <table className="w-full">
                 <thead>
                   <tr className="bg-gray-100 border-b border-gray-300">
-                    <th className="py-1.5 px-2 sm:px-3 text-center font-bold text-gray-700">WILAYAH</th>
-                    <th className="py-1.5 px-2 sm:px-3 text-center font-bold text-gray-700">TOTAL</th>
-                    <th className="py-1.5 px-2 sm:px-3 text-center font-bold text-gray-700">RITEL</th>
-                    <th className="py-1.5 px-2 sm:px-3 text-center font-bold text-gray-700">CORPORATE</th>
-                    <th className="py-1.5 px-2 sm:px-3 text-center font-bold text-gray-700">CLOSE</th>
+                    <th className="py-1 px-2 text-center font-bold text-gray-700 w-[28%]">WILAYAH</th>
+                    <th className="py-1 px-2 text-center font-bold text-gray-700 w-[18%]">TOTAL</th>
+                    <th className="py-1 px-2 text-center font-bold text-gray-700 w-[18%]">RITEL</th>
+                    <th className="py-1 px-2 text-center font-bold text-gray-700 w-[18%]">CORPORATE</th>
+                    <th className="py-1 px-2 text-center font-bold text-gray-700 w-[18%]">CLOSE</th>
                   </tr>
                 </thead>
                 <tbody>
                   {REGIONS.map((r) => (
                     <tr key={`baru-${r}`} className="border-b border-gray-200">
-                      <td className="py-1.5 px-2 sm:px-3 font-medium text-left text-gray-900">{r}</td>
-                      <td className="py-1.5 px-2 sm:px-3 text-center font-semibold text-gray-900">{tiketBaru[r].total}</td>
-                      <td className="py-1.5 px-2 sm:px-3 text-center text-gray-800">{tiketBaru[r].ritel}</td>
-                      <td className="py-1.5 px-2 sm:px-3 text-center text-gray-800">{tiketBaru[r].corporate}</td>
-                      <td className="py-1.5 px-2 sm:px-3 text-center text-gray-800">{tiketBaru[r].close}</td>
+                      <td className="py-1 px-2 font-medium text-left text-gray-900">{r}</td>
+                      <td className="py-1 px-2 text-center font-semibold text-gray-900">{tiketBaru[r].total}</td>
+                      <td className="py-1 px-2 text-center text-gray-800">{tiketBaru[r].ritel}</td>
+                      <td className="py-1 px-2 text-center text-gray-800">{tiketBaru[r].corporate}</td>
+                      <td className="py-1 px-2 text-center text-gray-800">{tiketBaru[r].close}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -427,14 +423,14 @@ export function ReportingGangguanTab({
 
               {/* Totals */}
               <div className="border-t-2 border-blue-400">
-                <table className="w-full text-[10px] sm:text-xs">
+                <table className="w-full">
                   <tbody>
                     <tr className="bg-blue-50">
-                      <td className="py-1.5 px-2 sm:px-3 font-bold text-left text-blue-900">Total Gangguan</td>
-                      <td className="py-1.5 px-2 sm:px-3 text-center font-bold text-blue-900">{grandTotal.total}</td>
-                      <td className="py-1.5 px-2 sm:px-3 text-center font-bold text-blue-800">{grandTotal.ritel}</td>
-                      <td className="py-1.5 px-2 sm:px-3 text-center font-bold text-blue-800">{grandTotal.corporate}</td>
-                      <td className="py-1.5 px-2 sm:px-3 text-center font-bold text-blue-800">{grandTotal.close}</td>
+                      <td className="py-1 px-2 font-bold text-left text-blue-900 w-[28%]">Total Gangguan</td>
+                      <td className="py-1 px-2 text-center font-bold text-blue-900 w-[18%]">{grandTotal.total}</td>
+                      <td className="py-1 px-2 text-center font-bold text-blue-800 w-[18%]">{grandTotal.ritel}</td>
+                      <td className="py-1 px-2 text-center font-bold text-blue-800 w-[18%]">{grandTotal.corporate}</td>
+                      <td className="py-1 px-2 text-center font-bold text-blue-800 w-[18%]">{grandTotal.close}</td>
                     </tr>
                   </tbody>
                 </table>
