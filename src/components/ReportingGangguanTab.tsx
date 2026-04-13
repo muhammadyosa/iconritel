@@ -68,10 +68,17 @@ export function ReportingGangguanTab({
   const [teamName, setTeamName] = useState("Tim NOC Retail SBU Palembang");
   const [teamCount, setTeamCount] = useState("3");
   const [teamMembers, setTeamMembers] = useState<string[]>(["", "", ""]);
-  const [pukul, setPukul] = useState(() => {
-    const now = new Date();
-    return `${String(now.getHours()).padStart(2, "0")}.00`;
-  });
+  const [pukul, setPukul] = useState(getCurrentPukul);
+  const [greeting, setGreeting] = useState(getGreeting);
+
+  // Auto-update pukul and greeting every minute
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setPukul(getCurrentPukul());
+      setGreeting(getGreeting());
+    }, 60 * 1000);
+    return () => clearInterval(interval);
+  }, []);
 
   // Adjust team members array when count changes
   useEffect(() => {
