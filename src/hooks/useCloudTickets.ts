@@ -397,8 +397,9 @@ export function useCloudTickets() {
           dbUpdates.resolved_at = new Date().toISOString();
           dbUpdates.resolved_by_user_id = updates.resolvedByUserId || null;
           dbUpdates.resolved_by_name = updates.resolvedByName || null;
+          // Only increment resolved history if ticket was NOT already Resolved (prevent double-counting)
           const ticket = prevTickets.find(t => t.id === id);
-          if (ticket?.createdByName) {
+          if (ticket?.createdByName && ticket.status !== "Resolved") {
             upsertUserHistory(ticket.createdByName, ticket.createdByUserId, ticket.createdISO, "total_resolved", 1);
           }
         } else {

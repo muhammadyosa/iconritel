@@ -257,11 +257,12 @@ export default function Teams() {
       .gte("date", cutoff);
     if (cutoffEnd) historyQuery = historyQuery.lte("date", cutoffEnd);
 
-    // Fetch ALL current live tickets for realtime Pending/Critical/On Progress status
-    const liveQuery = supabase
+    // Fetch live tickets within date range for accurate status breakdown by creator
+    let liveQuery = supabase
       .from("tickets")
-      .select("created_by_name, status")
-      .in("status", ["Pending", "On Progress", "Critical"]);
+      .select("created_by_name, status, created_iso")
+      .gte("created_iso", cutoffISO);
+    if (cutoffEndISO) liveQuery = liveQuery.lte("created_iso", cutoffEndISO);
 
     // Fetch tickets within date range for trend chart
     let trendQuery = supabase
@@ -288,13 +289,10 @@ export default function Teams() {
       })
       .subscribe();
 
-    // Listen for ticket status changes (Critical/Pending) in realtime
+    // Listen for ticket status changes in realtime
     const ticketStatusChannel = supabase
       .channel("ranking-ticket-status")
-      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "tickets" }, () => {
-        fetchRankingData();
-      })
-      .on("postgres_changes", { event: "DELETE", schema: "public", table: "tickets" }, () => {
+      .on("postgres_changes", { event: "*", schema: "public", table: "tickets" }, () => {
         fetchRankingData();
       })
       .subscribe();
@@ -306,7 +304,7 @@ export default function Teams() {
   }, [fetchRankingData]);
 
   const rankingUserStats = useMemo(() => {
-    // Aggregate from persistent history
+    // Step 1: Aggregate Total & Resolved from persistent history
     const stats: Record<string, { total: number; resolved: number; onProgress: number; pending: number; critical: number }> = {};
     
     rankingHistoryData.forEach((rec) => {
@@ -316,13 +314,35 @@ export default function Teams() {
       stats[name].resolved += rec.total_resolved || 0;
     });
 
-    // Add on-progress/pending/critical counts from live tickets
+    // Step 2: Count live ticket statuses within date range by creator
+    const liveStatusByCreator: Record<string, { resolved: number; onProgress: number; pending: number; critical: number; total: number }> = {};
     rankingDbTickets.forEach((ticket) => {
       const creator = ticket.created_by_name || "Unknown";
-      if (!stats[creator]) stats[creator] = { total: 0, resolved: 0, onProgress: 0, pending: 0, critical: 0 };
-      if (ticket.status === "On Progress") stats[creator].onProgress++;
-      if (ticket.status === "Pending") stats[creator].pending++;
-      if (ticket.status === "Critical") stats[creator].critical++;
+      if (!liveStatusByCreator[creator]) liveStatusByCreator[creator] = { resolved: 0, onProgress: 0, pending: 0, critical: 0, total: 0 };
+      liveStatusByCreator[creator].total++;
+      if (ticket.status === "Resolved") liveStatusByCreator[creator].resolved++;
+      if (ticket.status === "On Progress") liveStatusByCreator[creator].onProgress++;
+      if (ticket.status === "Pending") liveStatusByCreator[creator].pending++;
+      if (ticket.status === "Critical") liveStatusByCreator[creator].critical++;
+    });
+
+    // Step 3: Merge - use live data for status breakdown, history for totals
+    // For users with live tickets, use live status counts directly
+    // For Total, use max(history total, live total) to account for auto-deleted tickets
+    Object.entries(liveStatusByCreator).forEach(([name, live]) => {
+      if (!stats[name]) stats[name] = { total: 0, resolved: 0, onProgress: 0, pending: 0, critical: 0 };
+      stats[name].onProgress = live.onProgress;
+      stats[name].pending = live.pending;
+      stats[name].critical = live.critical;
+      // Use live resolved count if higher or if history has no data
+      // History total_created is authoritative for Total (persists after auto-delete)
+      // Use max to handle case where live tickets still exist
+      stats[name].total = Math.max(stats[name].total, live.total);
+    });
+
+    // Step 4: Cap resolved to never exceed total
+    Object.values(stats).forEach(s => {
+      s.resolved = Math.min(s.resolved, s.total);
     });
 
     return Object.entries(stats)
