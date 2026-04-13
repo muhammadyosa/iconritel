@@ -206,8 +206,8 @@ Dengan Penyebaran :
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <span className="text-xl">📊</span>
-          Dashboard Iconnet
+           <span className="text-xl">📡</span>
+           Dashboard Iconnet
         </CardTitle>
         <CardDescription>
           Isi data resume gangguan untuk Dashboard Iconnet
