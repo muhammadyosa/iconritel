@@ -39,6 +39,11 @@ function getGreeting(): string {
   return "SELAMAT MALAM";
 }
 
+function getCurrentPukul(): string {
+  const now = new Date();
+  return `${String(now.getHours()).padStart(2, "0")}.00`;
+}
+
 interface RegionData {
   total: number;
   ritel: number;
@@ -63,10 +68,17 @@ export function ReportingGangguanTab({
   const [teamName, setTeamName] = useState("Tim NOC Retail SBU Palembang");
   const [teamCount, setTeamCount] = useState("3");
   const [teamMembers, setTeamMembers] = useState<string[]>(["", "", ""]);
-  const [pukul, setPukul] = useState(() => {
-    const now = new Date();
-    return `${String(now.getHours()).padStart(2, "0")}.00`;
-  });
+  const [pukul, setPukul] = useState(getCurrentPukul);
+  const [greeting, setGreeting] = useState(getGreeting);
+
+  // Auto-update pukul and greeting every minute
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setPukul(getCurrentPukul());
+      setGreeting(getGreeting());
+    }, 60 * 1000);
+    return () => clearInterval(interval);
+  }, []);
 
   // Adjust team members array when count changes
   useEffect(() => {
@@ -334,7 +346,7 @@ export function ReportingGangguanTab({
             {/* Logos aligned to table edges + greeting centered */}
             <div className="flex items-center mb-0.5">
               <img src={iconnetLogo} alt="Iconnet" className="h-7 sm:h-9 object-contain flex-shrink-0" />
-              <p className="flex-1 text-center text-sm sm:text-lg font-bold text-blue-700 tracking-wide">{getGreeting()}</p>
+              <p className="flex-1 text-center text-sm sm:text-lg font-bold text-blue-700 tracking-wide">{greeting}</p>
               <img src={plnLogo} alt="PLN Icon Plus" className="h-7 sm:h-9 object-contain flex-shrink-0" />
             </div>
             {/* Subtitle */}
