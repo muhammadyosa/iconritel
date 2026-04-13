@@ -33,9 +33,9 @@ const REGION_FULL_NAMES: Record<string, string> = {
 
 function getGreeting(): string {
   const hour = new Date().getHours();
-  if (hour >= 5 && hour < 11) return "SELAMAT PAGI";
-  if (hour >= 11 && hour < 15) return "SELAMAT SIANG";
-  if (hour >= 15 && hour < 18) return "SELAMAT SORE";
+  if (hour >= 6 && hour < 10) return "SELAMAT PAGI";
+  if (hour >= 10 && hour < 14) return "SELAMAT SIANG";
+  if (hour >= 14 && hour < 18) return "SELAMAT SORE";
   return "SELAMAT MALAM";
 }
 
