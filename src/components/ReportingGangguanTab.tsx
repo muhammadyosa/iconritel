@@ -345,11 +345,11 @@ export function ReportingGangguanTab({
           <div ref={previewRef} className="bg-white text-gray-900 p-3 sm:p-5 rounded-lg max-w-2xl mx-auto">
             {/* Logos aligned to table edges + greeting centered */}
             <div className="flex items-center mb-0.5">
-              <div className="w-24 sm:w-32 flex-shrink-0 flex items-center justify-start">
-                <img src={iconnetLogo} alt="Iconnet" className="h-7 sm:h-9 object-contain" />
+              <div className="w-28 sm:w-36 flex-shrink-0 flex items-center justify-start">
+                <img src={iconnetLogo} alt="Iconnet" className="h-5 sm:h-7 w-auto object-contain" />
               </div>
               <p className="flex-1 text-center text-sm sm:text-lg font-bold text-blue-700 tracking-wide">{greeting}</p>
-              <div className="w-24 sm:w-32 flex-shrink-0 flex items-center justify-end">
+              <div className="w-28 sm:w-36 flex-shrink-0 flex items-center justify-end">
                 <img src={plnLogo} alt="PLN Icon Plus" className="h-7 sm:h-9 object-contain" />
               </div>
             </div>
