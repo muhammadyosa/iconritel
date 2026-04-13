@@ -9,6 +9,8 @@ import { Copy, RotateCcw, Image as ImageIcon } from "lucide-react";
 import html2canvas from "html2canvas";
 import { toast } from "@/hooks/use-toast";
 import { useRealtimeDate } from "@/hooks/useRealtimeDate";
+import iconnetLogo from "@/assets/iconnet-logo-full.png";
+import plnLogo from "@/assets/pln-icon-plus.png";
 import { format, parse } from "date-fns";
 import { id as idLocale } from "date-fns/locale";
 import {
@@ -329,10 +331,14 @@ export function ReportingGangguanTab({
         <CardContent className="px-2 sm:px-6 pb-4">
           {/* Preview content - always light for export and readability */}
           <div ref={previewRef} className="bg-white text-gray-900 p-4 rounded-lg">
-            {/* Header preview */}
-            <div className="mb-3 text-center space-y-1">
-              <p className="text-sm sm:text-base font-bold text-blue-700">{getGreeting()}</p>
-              <p className="text-[10px] sm:text-xs text-gray-600">
+            {/* Header preview with logos */}
+            <div className="mb-3 space-y-1">
+              <div className="flex items-center justify-between">
+                <img src={iconnetLogo} alt="Iconnet" className="h-8 sm:h-10 object-contain" />
+                <p className="text-sm sm:text-base font-bold text-blue-700">{getGreeting()}</p>
+                <img src={plnLogo} alt="PLN Icon Plus" className="h-8 sm:h-10 object-contain" />
+              </div>
+              <p className="text-[10px] sm:text-xs text-gray-600 text-center">
                 Berikut Resume Laporan Gangguan Layanan ICONNET {formattedDate} Pukul {pukul} WIB
               </p>
             </div>
