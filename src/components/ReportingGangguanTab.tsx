@@ -331,11 +331,11 @@ export function ReportingGangguanTab({
         <CardContent className="px-2 sm:px-6 pb-4">
           {/* Preview content - always light for export and readability */}
           <div ref={previewRef} className="bg-white text-gray-900 p-3 sm:p-5 rounded-lg max-w-2xl mx-auto">
-            {/* Logos at top corners + greeting */}
-            <div className="flex items-start justify-between mb-1">
-              <img src={iconnetLogo} alt="Iconnet" className="h-8 sm:h-10 object-contain" />
-              <p className="text-sm sm:text-base font-bold text-blue-700 pt-1">{getGreeting()}</p>
-              <img src={plnLogo} alt="PLN Icon Plus" className="h-8 sm:h-10 object-contain" />
+            {/* Logos aligned to table edges + greeting centered */}
+            <div className="flex items-center justify-between mb-0.5">
+              <img src={iconnetLogo} alt="Iconnet" className="h-7 sm:h-9 object-contain flex-shrink-0" />
+              <p className="text-sm sm:text-lg font-bold text-blue-700 tracking-wide">{getGreeting()}</p>
+              <img src={plnLogo} alt="PLN Icon Plus" className="h-7 sm:h-9 object-contain flex-shrink-0" />
             </div>
             {/* Subtitle */}
             <p className="text-[9px] sm:text-[11px] text-gray-600 text-center mb-2">
