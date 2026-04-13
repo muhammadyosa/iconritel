@@ -41,7 +41,7 @@ function getGreeting(): string {
 
 function getCurrentPukul(): string {
   const now = new Date();
-  return `${String(now.getHours()).padStart(2, "0")}.00`;
+  return `${String(now.getHours()).padStart(2, "0")}.${String(now.getMinutes()).padStart(2, "0")}`;
 }
 
 interface RegionData {
