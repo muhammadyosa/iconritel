@@ -346,7 +346,7 @@ export function ReportingGangguanTab({
             {/* Logos aligned to table edges + greeting centered */}
             <div className="flex items-center mb-0.5">
               <img src={iconnetLogo} alt="Iconnet" className="h-7 sm:h-9 object-contain flex-shrink-0" />
-              <p className="flex-1 text-center text-sm sm:text-lg font-bold text-blue-700 tracking-wide">{getGreeting()}</p>
+              <p className="flex-1 text-center text-sm sm:text-lg font-bold text-blue-700 tracking-wide">{greeting}</p>
               <img src={plnLogo} alt="PLN Icon Plus" className="h-7 sm:h-9 object-contain flex-shrink-0" />
             </div>
             {/* Subtitle */}
