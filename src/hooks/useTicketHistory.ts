@@ -141,18 +141,25 @@ export function useTicketHistory(tickets: Ticket[]) {
       Object.entries(ticketsByDate).forEach(([date, data]) => {
         const existing = existingRecords.get(date);
         if (existing && date < today) {
+          const finalTotal = Math.max(existing.total, data.total);
+          const finalCreated = Math.max(existing.created, data.created);
+          const finalRitel = Math.max(existing.ritel, data.ritel);
+          const finalFeeder = Math.max(existing.feeder, data.feeder);
+          const finalInProgress = data.inProgress;
+          const finalResolved = Math.max(finalTotal - finalInProgress, 0);
           existingRecords.set(date, {
             date,
-            ritel: Math.max(existing.ritel, data.ritel),
-            feeder: Math.max(existing.feeder, data.feeder),
-            total: Math.max(existing.total, data.total),
-            created: Math.max(existing.created, data.created),
-            inProgress: Math.max(existing.inProgress, data.inProgress),
-            resolved: Math.max(existing.resolved, data.resolved),
+            ritel: finalRitel,
+            feeder: finalFeeder,
+            total: finalTotal,
+            created: finalCreated,
+            inProgress: finalInProgress,
+            resolved: finalResolved,
             slaOk: Math.max(existing.slaOk, data.slaOk),
             ticketIds: data.ticketIds.length >= existing.ticketIds.length ? data.ticketIds : existing.ticketIds,
           });
         } else {
+          const finalResolved = Math.max(data.total - data.inProgress, 0);
           existingRecords.set(date, {
             date,
             ritel: data.ritel,
@@ -160,7 +167,7 @@ export function useTicketHistory(tickets: Ticket[]) {
             total: data.total,
             created: data.created,
             inProgress: data.inProgress,
-            resolved: data.resolved,
+            resolved: finalResolved,
             slaOk: data.slaOk,
             ticketIds: data.ticketIds,
           });
@@ -225,8 +232,8 @@ export function useTicketHistory(tickets: Ticket[]) {
             const finalFeeder = isPast && cloud ? Math.max(cloud.feeder, data.feeder) : data.feeder;
             const finalTotal = isPast && cloud ? Math.max(cloud.total, data.total) : data.total;
             const finalCreated = isPast && cloud ? Math.max(cloud.created, data.created) : data.created;
-            const finalInProgress = isPast && cloud ? Math.max(cloud.in_progress, data.inProgress) : data.inProgress;
-            const finalResolved = isPast && cloud ? Math.max(cloud.resolved, data.resolved) : data.resolved;
+            const finalInProgress = data.inProgress;
+            const finalResolved = Math.max(finalTotal - finalInProgress, 0);
             const finalSlaOk = isPast && cloud ? Math.max(cloud.sla_ok ?? 0, data.slaOk) : data.slaOk;
 
             if (!cloud ||

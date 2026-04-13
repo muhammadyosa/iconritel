@@ -313,15 +313,15 @@ export function useCloudTickets() {
 
       if (existing) {
         const updates: Record<string, unknown> = {};
-        updates[field] = (existing[field] as number) + increment;
+        updates[field] = Math.max(0, (existing[field] as number) + increment);
         await supabase.from("daily_user_ticket_history").update(updates as never).eq("id", existing.id);
       } else {
         const row: Record<string, unknown> = {
           date,
           user_name: userName,
           user_id: userId || null,
-          total_created: field === "total_created" ? increment : 0,
-          total_resolved: field === "total_resolved" ? increment : 0,
+          total_created: field === "total_created" ? Math.max(0, increment) : 0,
+          total_resolved: field === "total_resolved" ? Math.max(0, increment) : 0,
         };
         await supabase.from("daily_user_ticket_history").insert(row as never);
       }
@@ -381,6 +381,7 @@ export function useCloudTickets() {
 
     try {
       const dbUpdates: Record<string, unknown> = {};
+      const ticket = prevTickets.find((t) => t.id === id);
       if (updates.id !== undefined) dbUpdates.ticket_id = updates.id;
       if (updates.serviceId !== undefined) dbUpdates.service_id = updates.serviceId;
       if (updates.customerName !== undefined) dbUpdates.customer_name = updates.customerName;
@@ -398,7 +399,6 @@ export function useCloudTickets() {
           dbUpdates.resolved_by_user_id = updates.resolvedByUserId || null;
           dbUpdates.resolved_by_name = updates.resolvedByName || null;
           // Only increment resolved history if ticket was NOT already Resolved (prevent double-counting)
-          const ticket = prevTickets.find(t => t.id === id);
           if (ticket?.createdByName && ticket.status !== "Resolved") {
             upsertUserHistory(ticket.createdByName, ticket.createdByUserId, ticket.createdISO, "total_resolved", 1);
           }
@@ -406,6 +406,9 @@ export function useCloudTickets() {
           dbUpdates.resolved_at = null;
           dbUpdates.resolved_by_user_id = null;
           dbUpdates.resolved_by_name = null;
+          if (ticket?.createdByName && ticket.status === "Resolved") {
+            upsertUserHistory(ticket.createdByName, ticket.createdByUserId, ticket.createdISO, "total_resolved", -1);
+          }
         }
       }
 

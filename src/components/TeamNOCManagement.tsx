@@ -64,15 +64,30 @@ export function TeamNOCManagement() {
   }, [data, periodDays]);
 
   const userSummary = useMemo(() => {
-    const map: Record<string, { total_created: number; total_resolved: number; days: number }> = {};
+    const map: Record<string, { name: string; total_created: number; total_resolved: number; days: number }> = {};
     filteredData.forEach((row) => {
-      if (!map[row.user_name]) map[row.user_name] = { total_created: 0, total_resolved: 0, days: 0 };
-      map[row.user_name].total_created += row.total_created;
-      map[row.user_name].total_resolved += row.total_resolved;
-      map[row.user_name].days++;
+      const key = row.user_id || row.user_name.trim().toLowerCase();
+      if (!map[key]) {
+        map[key] = {
+          name: row.user_name,
+          total_created: 0,
+          total_resolved: 0,
+          days: 0,
+        };
+      }
+
+      map[key].name = row.user_name || map[key].name;
+      map[key].total_created += row.total_created;
+      map[key].total_resolved += row.total_resolved;
+      map[key].days++;
     });
-    return Object.entries(map)
-      .map(([name, s]) => ({ name, ...s }))
+    return Object.values(map)
+      .map((s) => ({
+        name: s.name,
+        total_created: s.total_created,
+        total_resolved: Math.min(s.total_resolved, s.total_created),
+        days: s.days,
+      }))
       .sort((a, b) => b.total_created - a.total_created);
   }, [filteredData]);
 

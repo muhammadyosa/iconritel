@@ -240,43 +240,40 @@ export default function Teams() {
 
   // === Ranking User NOC with custom date range filter (uses persistent history table) ===
   const [rankingHistoryData, setRankingHistoryData] = useState<any[]>([]);
-  const [rankingDbTickets, setRankingDbTickets] = useState<any[]>([]);
-  const [rankingTrendTickets, setRankingTrendTickets] = useState<any[]>([]);
 
-  const fetchRankingData = useCallback(async () => {
+  const rankingRange = useMemo(() => {
     const fromDate = rankingCustomRange?.from || subDays(new Date(), 7);
     const toDate = rankingCustomRange?.to || fromDate;
-    const cutoff = format(startOfDay(fromDate), "yyyy-MM-dd");
-    const cutoffISO = startOfDay(fromDate).toISOString();
-    const cutoffEnd = format(endOfDay(toDate), "yyyy-MM-dd");
-    const cutoffEndISO = endOfDay(toDate).toISOString();
 
+    return {
+      fromDate,
+      toDate,
+      cutoff: format(startOfDay(fromDate), "yyyy-MM-dd"),
+      cutoffEnd: format(endOfDay(toDate), "yyyy-MM-dd"),
+    };
+  }, [rankingCustomRange]);
+
+  const rankingLiveTickets = useMemo(() => {
+    const from = startOfDay(rankingRange.fromDate);
+    const to = endOfDay(rankingRange.toDate);
+
+    return tickets.filter((ticket) => {
+      const createdAt = new Date(ticket.createdISO);
+      return isWithinInterval(createdAt, { start: from, end: to });
+    });
+  }, [tickets, rankingRange]);
+
+  const fetchRankingData = useCallback(async () => {
     let historyQuery = supabase
       .from("daily_user_ticket_history")
-      .select("user_name, date, total_created, total_resolved")
-      .gte("date", cutoff);
-    if (cutoffEnd) historyQuery = historyQuery.lte("date", cutoffEnd);
+      .select("user_id, user_name, date, total_created, total_resolved")
+      .gte("date", rankingRange.cutoff)
+      .lte("date", rankingRange.cutoffEnd);
 
-    // Fetch live tickets within date range for accurate status breakdown by creator
-    let liveQuery = supabase
-      .from("tickets")
-      .select("created_by_name, status, created_iso")
-      .gte("created_iso", cutoffISO);
-    if (cutoffEndISO) liveQuery = liveQuery.lte("created_iso", cutoffEndISO);
-
-    // Fetch tickets within date range for trend chart
-    let trendQuery = supabase
-      .from("tickets")
-      .select("created_by_name, created_iso")
-      .gte("created_iso", cutoffISO);
-    if (cutoffEndISO) trendQuery = trendQuery.lte("created_iso", cutoffEndISO);
-    
-    const [historyRes, liveRes, trendRes] = await Promise.all([historyQuery, liveQuery, trendQuery]);
+    const historyRes = await historyQuery;
     
     if (historyRes.data) setRankingHistoryData(historyRes.data);
-    if (liveRes.data) setRankingDbTickets(liveRes.data);
-    if (trendRes.data) setRankingTrendTickets(trendRes.data);
-  }, [rankingCustomRange]);
+  }, [rankingRange]);
 
   useEffect(() => {
     fetchRankingData();
@@ -289,67 +286,77 @@ export default function Teams() {
       })
       .subscribe();
 
-    // Listen for ticket status changes in realtime
-    const ticketStatusChannel = supabase
-      .channel("ranking-ticket-status")
-      .on("postgres_changes", { event: "*", schema: "public", table: "tickets" }, () => {
-        fetchRankingData();
-      })
-      .subscribe();
-
     return () => {
       supabase.removeChannel(rankingChannel);
-      supabase.removeChannel(ticketStatusChannel);
     };
   }, [fetchRankingData]);
 
   const rankingUserStats = useMemo(() => {
-    // Step 1: Aggregate Total & Resolved from persistent history
-    const stats: Record<string, { total: number; resolved: number; onProgress: number; pending: number; critical: number }> = {};
-    
+    const stats: Record<string, { name: string; total: number; resolved: number; onProgress: number; pending: number; critical: number }> = {};
+    const liveStatusByCreator: Record<string, { total: number; onProgress: number; pending: number; critical: number }> = {};
+
+    const getUserKey = (userId?: string | null, userName?: string | null) => userId || userName?.trim().toLowerCase() || "unknown";
+    const getDisplayName = (userName?: string | null) => userName?.trim() || "Unknown";
+
     rankingHistoryData.forEach((rec) => {
-      const name = rec.user_name;
-      if (!stats[name]) stats[name] = { total: 0, resolved: 0, onProgress: 0, pending: 0, critical: 0 };
-      stats[name].total += rec.total_created || 0;
-      stats[name].resolved += rec.total_resolved || 0;
+      const key = getUserKey(rec.user_id, rec.user_name);
+      if (!stats[key]) {
+        stats[key] = {
+          name: getDisplayName(rec.user_name),
+          total: 0,
+          resolved: 0,
+          onProgress: 0,
+          pending: 0,
+          critical: 0,
+        };
+      }
+
+      stats[key].name = getDisplayName(rec.user_name) || stats[key].name;
+      stats[key].total += rec.total_created || 0;
     });
 
-    // Step 2: Count live ticket statuses within date range by creator
-    const liveStatusByCreator: Record<string, { resolved: number; onProgress: number; pending: number; critical: number; total: number }> = {};
-    rankingDbTickets.forEach((ticket) => {
-      const creator = ticket.created_by_name || "Unknown";
-      if (!liveStatusByCreator[creator]) liveStatusByCreator[creator] = { resolved: 0, onProgress: 0, pending: 0, critical: 0, total: 0 };
-      liveStatusByCreator[creator].total++;
-      if (ticket.status === "Resolved") liveStatusByCreator[creator].resolved++;
-      if (ticket.status === "On Progress") liveStatusByCreator[creator].onProgress++;
-      if (ticket.status === "Pending") liveStatusByCreator[creator].pending++;
-      if (ticket.status === "Critical") liveStatusByCreator[creator].critical++;
+    rankingLiveTickets.forEach((ticket) => {
+      const key = getUserKey(ticket.createdByUserId, ticket.createdByName);
+      if (!stats[key]) {
+        stats[key] = {
+          name: getDisplayName(ticket.createdByName),
+          total: 0,
+          resolved: 0,
+          onProgress: 0,
+          pending: 0,
+          critical: 0,
+        };
+      }
+
+      stats[key].name = getDisplayName(ticket.createdByName) || stats[key].name;
+
+      if (!liveStatusByCreator[key]) {
+        liveStatusByCreator[key] = { total: 0, onProgress: 0, pending: 0, critical: 0 };
+      }
+
+      liveStatusByCreator[key].total += 1;
+      if (ticket.status === "Critical") liveStatusByCreator[key].critical += 1;
+      else if (ticket.status === "Pending") liveStatusByCreator[key].pending += 1;
+      else if (ticket.status === "On Progress") liveStatusByCreator[key].onProgress += 1;
     });
 
-    // Step 3: Merge - use live data for status breakdown, history for totals
-    // For users with live tickets, use live status counts directly
-    // For Total, use max(history total, live total) to account for auto-deleted tickets
-    Object.entries(liveStatusByCreator).forEach(([name, live]) => {
-      if (!stats[name]) stats[name] = { total: 0, resolved: 0, onProgress: 0, pending: 0, critical: 0 };
-      stats[name].onProgress = live.onProgress;
-      stats[name].pending = live.pending;
-      stats[name].critical = live.critical;
-      // Use live resolved count if higher or if history has no data
-      // History total_created is authoritative for Total (persists after auto-delete)
-      // Use max to handle case where live tickets still exist
-      stats[name].total = Math.max(stats[name].total, live.total);
+    Object.entries(liveStatusByCreator).forEach(([key, live]) => {
+      stats[key].total = Math.max(stats[key].total, live.total);
+      stats[key].onProgress = live.onProgress;
+      stats[key].pending = live.pending;
+      stats[key].critical = live.critical;
     });
 
-    // Step 4: Cap resolved to never exceed total
-    Object.values(stats).forEach(s => {
-      s.resolved = Math.min(s.resolved, s.total);
+    Object.values(stats).forEach((stat) => {
+      const activeCount = stat.onProgress + stat.pending + stat.critical;
+      stat.resolved = Math.max(stat.total - activeCount, 0);
     });
 
     return Object.entries(stats)
-      .map(([name, s]) => ({ name, ...s }))
+      .map(([userKey, s]) => ({ userKey, ...s }))
       .filter(u => u.total > 0 || u.resolved > 0 || u.pending > 0 || u.critical > 0 || u.onProgress > 0)
       .sort((a, b) => b.total - a.total);
-  }, [rankingHistoryData, rankingDbTickets]);
+  }, [rankingHistoryData, rankingLiveTickets]);
 
   // Track previous ranking for rank change indicators
   const prevRankingRef = useRef<Record<string, number>>({});
@@ -357,11 +364,11 @@ export default function Teams() {
     const changes: Record<string, number> = {};
     const prevMap = prevRankingRef.current;
     rankingUserStats.forEach((u, i) => {
-      const prevRank = prevMap[u.name];
+      const prevRank = prevMap[u.userKey];
       if (prevRank !== undefined) {
-        changes[u.name] = prevRank - i; // positive = moved up, negative = moved down
+        changes[u.userKey] = prevRank - i; // positive = moved up, negative = moved down
       } else {
-        changes[u.name] = 0; // new entry
+        changes[u.userKey] = 0; // new entry
       }
     });
     return changes;
@@ -369,7 +376,7 @@ export default function Teams() {
 
   useEffect(() => {
     const newMap: Record<string, number> = {};
-    rankingUserStats.forEach((u, i) => { newMap[u.name] = i; });
+    rankingUserStats.forEach((u, i) => { newMap[u.userKey] = i; });
     prevRankingRef.current = newMap;
   }, [rankingUserStats]);
 
@@ -1835,11 +1842,11 @@ export default function Teams() {
                       });
 
                       // Fill today from live tickets
-                      rankingTrendTickets.forEach(t => {
-                        const creator = t.created_by_name || "Unknown";
+                      rankingLiveTickets.forEach(t => {
+                        const creator = t.createdByName || "Unknown";
                         if (!activeUsers.find(u => u.name === creator)) return;
                         try {
-                          const dk = format(startOfDay(new Date(t.created_iso)), "yyyy-MM-dd");
+                          const dk = format(startOfDay(new Date(t.createdISO)), "yyyy-MM-dd");
                           if (dk === todayKey && finalDailyMap[dk]) {
                             finalDailyMap[dk][creator] = (finalDailyMap[dk][creator] || 0) + 1;
                           }
@@ -1946,10 +1953,10 @@ export default function Teams() {
                               </TableRow>
                             ) : rankingUserStats.map((u, i) => {
                               const rate = u.total > 0 ? Math.round((u.resolved / u.total) * 100) : 0;
-                              const change = rankChangeMap[u.name] || 0;
+                              const change = rankChangeMap[u.userKey] || 0;
                               return (
                                 <TableRow
-                                  key={u.name}
+                                  key={u.userKey}
                                   className="cursor-pointer transition-colors hover:bg-accent/5"
                                   onClick={() => setNocUserSheet(u.name)}
                                 >
