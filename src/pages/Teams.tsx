@@ -1733,18 +1733,28 @@ export default function Teams() {
                       const chartConfig: ChartConfig = {};
                       activeUsers.forEach((u, i) => { chartConfig[u.name] = { label: u.name, color: colors[i % colors.length] }; });
                       return (
-                        <ChartContainer config={chartConfig} className="h-[220px] sm:h-[260px] w-full">
-                          <LineChart data={chartData} margin={{ top: 5, right: 10, left: -10, bottom: 5 }}>
-                            <CartesianGrid strokeDasharray="3 3" className="stroke-muted/30" />
-                            <XAxis dataKey="date" tick={{ fontSize: 10 }} className="text-muted-foreground" />
-                            <YAxis allowDecimals={false} tick={{ fontSize: 10 }} className="text-muted-foreground" />
-                            <ChartTooltip content={<ChartTooltipContent />} />
-                            <ChartLegend content={<ChartLegendContent />} />
+                        <div className="space-y-2">
+                          <ChartContainer config={chartConfig} className="h-[200px] sm:h-[240px] w-full">
+                            <LineChart data={chartData} margin={{ top: 5, right: 10, left: -10, bottom: 5 }}>
+                              <CartesianGrid strokeDasharray="3 3" className="stroke-muted/30" />
+                              <XAxis dataKey="date" tick={{ fontSize: 10 }} className="text-muted-foreground" />
+                              <YAxis allowDecimals={false} tick={{ fontSize: 10 }} className="text-muted-foreground" />
+                              <ChartTooltip content={<ChartTooltipContent />} />
+                              {activeUsers.map((u, i) => (
+                                <Line key={u.name} type="monotone" dataKey={u.name} stroke={colors[i % colors.length]} strokeWidth={2} dot={{ r: 2 }} activeDot={{ r: 4 }} />
+                              ))}
+                            </LineChart>
+                          </ChartContainer>
+                          {/* Custom legend with proper wrapping */}
+                          <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 px-2">
                             {activeUsers.map((u, i) => (
-                              <Line key={u.name} type="monotone" dataKey={u.name} stroke={colors[i % colors.length]} strokeWidth={2} dot={{ r: 2 }} activeDot={{ r: 4 }} />
+                              <div key={u.name} className="flex items-center gap-1.5 shrink-0">
+                                <div className="h-2 w-2 rounded-full shrink-0" style={{ backgroundColor: colors[i % colors.length] }} />
+                                <span className="text-[9px] sm:text-[10px] text-muted-foreground whitespace-nowrap">{u.name}</span>
+                              </div>
                             ))}
-                          </LineChart>
-                        </ChartContainer>
+                          </div>
+                        </div>
                       );
                     })()}
                   </CardContent>
