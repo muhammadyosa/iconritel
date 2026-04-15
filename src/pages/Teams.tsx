@@ -1551,7 +1551,7 @@ export default function Teams() {
                               <p className="text-[9px] sm:text-xs font-semibold text-muted-foreground">Category Trend</p>
                               <Badge variant="outline" className="text-[8px] sm:text-[9px] px-1.5 py-0">{trendPeriodLabel}</Badge>
                             </div>
-                            <ChartContainer config={nocCategoryTrend.config} className="aspect-[2/1] w-full max-h-[180px] sm:max-h-[220px]">
+                            <ChartContainer config={nocCategoryTrend.config} className="aspect-[2/1] w-full max-h-[150px] sm:max-h-[180px]">
                               <LineChart data={nocCategoryTrend.data} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
                                 <CartesianGrid strokeDasharray="3 3" className="stroke-border/30" />
                                 <XAxis
@@ -1864,7 +1864,7 @@ export default function Teams() {
                       const chartConfig: ChartConfig = {};
                       activeUsers.forEach((u, i) => { chartConfig[u.name] = { label: u.name, color: colors[i % colors.length] }; });
                       return (
-                        <ChartContainer config={chartConfig} className="h-[250px] sm:h-[300px] w-full">
+                        <ChartContainer config={chartConfig} className="h-[220px] sm:h-[280px] w-full">
                           <LineChart data={chartData} margin={{ top: 5, right: 10, left: -10, bottom: 5 }}>
                             <CartesianGrid strokeDasharray="3 3" className="stroke-muted/30" />
                             <XAxis dataKey="date" tick={{ fontSize: 10 }} className="text-muted-foreground" />
