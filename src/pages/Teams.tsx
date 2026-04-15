@@ -1378,7 +1378,7 @@ export default function Teams() {
         </TabsContent>
 
         {/* ===== TAB 2: Team NOC ===== */}
-        <TabsContent value="team-noc" className="space-y-4">
+        <TabsContent value="team-noc" className="space-y-2 sm:space-y-3">
           {dateFilter}
 
           {userStats.length === 0 ? (
@@ -1500,7 +1500,7 @@ export default function Teams() {
               </div>
 
               {/* NOC Statistik & Trend - Side by Side */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 items-start">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 sm:gap-3 items-start">
               {/* Statistik Incident NOC Card */}
               <Card className="shadow-card overflow-hidden">
                 <CardHeader className="py-2.5 px-3 sm:px-4 border-b bg-accent/5">
