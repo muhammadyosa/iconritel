@@ -1499,8 +1499,8 @@ export default function Teams() {
                 ))}
               </div>
 
-              {/* NOC Statistik & Trend - Side by Side */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 items-start">
+              {/* NOC Statistik & Trend - Stacked */}
+              <div className="grid grid-cols-1 gap-3 sm:gap-4 items-start">
               {/* Statistik Incident NOC Card */}
               <Card className="shadow-card overflow-hidden">
                 <CardHeader className="py-2.5 px-3 sm:px-4 border-b bg-accent/5">
