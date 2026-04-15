@@ -1672,6 +1672,8 @@ export default function Teams() {
                 </CardContent>
               </Card>
 
+              {/* Right column: Trend + Ranking */}
+              <div className="space-y-4">
               {/* Grafik Trend Incident per User */}
               {rankingUserStats.filter(u => u.total > 0).length > 0 && (
                 <Card className="shadow-card overflow-hidden">
@@ -1703,7 +1705,6 @@ export default function Teams() {
                         activeUsers.forEach(u => { finalDailyMap[dk][u.name] = 0; });
                       });
 
-                      // Fill from persistent history (past days)
                       rankingHistoryData.forEach(rec => {
                         const dk = rec.date;
                         const name = rec.user_name;
@@ -1712,7 +1713,6 @@ export default function Teams() {
                         }
                       });
 
-                      // Fill today from live tickets
                       rankingLiveTickets.forEach(t => {
                         const creator = t.createdByName || "Unknown";
                         if (!activeUsers.find(u => u.name === creator)) return;
@@ -1733,7 +1733,7 @@ export default function Teams() {
                       const chartConfig: ChartConfig = {};
                       activeUsers.forEach((u, i) => { chartConfig[u.name] = { label: u.name, color: colors[i % colors.length] }; });
                       return (
-                        <ChartContainer config={chartConfig} className="h-[220px] sm:h-[280px] w-full">
+                        <ChartContainer config={chartConfig} className="h-[200px] sm:h-[240px] w-full">
                           <LineChart data={chartData} margin={{ top: 5, right: 10, left: -10, bottom: 5 }}>
                             <CartesianGrid strokeDasharray="3 3" className="stroke-muted/30" />
                             <XAxis dataKey="date" tick={{ fontSize: 10 }} className="text-muted-foreground" />
@@ -1750,6 +1750,7 @@ export default function Teams() {
                   </CardContent>
                 </Card>
               )}
+              </div>
               </div>
 
               {/* NOC Status Sheet */}
