@@ -1750,6 +1750,132 @@ export default function Teams() {
                   </CardContent>
                 </Card>
               )}
+
+              {/* Ranking User NOC */}
+              <Card className="shadow-card overflow-hidden">
+                <CardHeader className="py-2.5 px-3 sm:px-4 border-b bg-accent/5">
+                  <CardTitle className="flex flex-col gap-2 text-xs sm:text-sm">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Badge className="bg-accent text-accent-foreground text-[9px] sm:text-[10px] px-1.5 sm:px-2">NOC</Badge>
+                        <span>Ranking User NOC</span>
+                        <Badge variant="secondary" className="text-[8px] sm:text-[9px]">{rankingUserStats.length} user</Badge>
+                      </div>
+                      <span className="text-[10px] sm:text-xs text-muted-foreground font-normal">
+                        {rankingTotals.total} • {rankingTotals.resolved} ✅
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button
+                            size="sm"
+                            variant="default"
+                            className="h-6 text-[10px] px-2.5 gap-1"
+                          >
+                            <CalendarIcon className="h-3 w-3" />
+                            {rankingCustomRange?.from
+                              ? rankingCustomRange.to && rankingCustomRange.to.getTime() !== rankingCustomRange.from.getTime()
+                                ? `${format(rankingCustomRange.from, "dd MMM", { locale: localeId })} - ${format(rankingCustomRange.to, "dd MMM", { locale: localeId })}`
+                                : format(rankingCustomRange.from, "dd MMM yyyy", { locale: localeId })
+                              : "Pilih Tanggal"}
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar
+                            mode="range"
+                            selected={rankingCustomRange}
+                            onSelect={(range) => {
+                              setRankingCustomRange(range);
+                            }}
+                            disabled={(date) => date > new Date()}
+                            numberOfMonths={1}
+                            initialFocus
+                            className={cn("p-3 pointer-events-auto")}
+                          />
+                        </PopoverContent>
+                      </Popover>
+                    </div>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-0">
+                  <div className="overflow-x-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
+                    <div className="min-w-[500px]">
+                      <ScrollArea className={rankingUserStats.length > 6 ? "h-[320px]" : ""}>
+                        <Table>
+                          <TableHeader className="sticky top-0 z-10 bg-background">
+                            <TableRow className="bg-muted/30">
+                              <TableHead className="text-[9px] sm:text-[10px] w-8">#</TableHead>
+                              <TableHead className="text-[9px] sm:text-[10px]">Nama User</TableHead>
+                              <TableHead className="text-[9px] sm:text-[10px] text-center w-10">Total</TableHead>
+                              <TableHead className="text-[9px] sm:text-[10px] text-center text-success w-10">✅</TableHead>
+                              <TableHead className="text-[9px] sm:text-[10px] text-center text-warning w-10">⏳</TableHead>
+                              <TableHead className="text-[9px] sm:text-[10px] text-center text-primary w-10">📋</TableHead>
+                              <TableHead className="text-[9px] sm:text-[10px] text-center text-destructive w-10">🔴</TableHead>
+                              <TableHead className="text-[9px] sm:text-[10px] w-[80px] sm:w-[110px]">Progress</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {rankingUserStats.length === 0 ? (
+                              <TableRow>
+                                <TableCell colSpan={8} className="text-center text-xs text-muted-foreground py-6">
+                                  Tidak ada data
+                                </TableCell>
+                              </TableRow>
+                            ) : rankingUserStats.map((u, i) => {
+                              const rate = u.total > 0 ? Math.round((u.resolved / u.total) * 100) : 0;
+                              const change = rankChangeMap[u.userKey] || 0;
+                              return (
+                                <TableRow
+                                  key={u.userKey}
+                                  className="cursor-pointer transition-colors hover:bg-accent/5"
+                                  onClick={() => setNocUserSheet(u.name)}
+                                >
+                                  <TableCell className="py-1.5 w-[36px]">
+                                    <div className="flex items-center gap-0.5">
+                                      {i === 0 ? (
+                                        <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-yellow-100 dark:bg-yellow-900/30" title="🥇 Peringkat 1">
+                                          <Trophy className="h-3 w-3 text-yellow-500" />
+                                        </span>
+                                      ) : i === 1 ? (
+                                        <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-slate-100 dark:bg-slate-700/30" title="🥈 Peringkat 2">
+                                          <Medal className="h-3 w-3 text-slate-400" />
+                                        </span>
+                                      ) : i === 2 ? (
+                                        <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-orange-100 dark:bg-orange-900/30" title="🥉 Peringkat 3">
+                                          <Medal className="h-3 w-3 text-orange-500" />
+                                        </span>
+                                      ) : (
+                                        <span className="text-[10px] font-medium text-muted-foreground">{i + 1}</span>
+                                      )}
+                                      {change > 0 && <TrendingUp className="h-2.5 w-2.5 text-success" />}
+                                      {change < 0 && <TrendingDown className="h-2.5 w-2.5 text-destructive" />}
+                                    </div>
+                                  </TableCell>
+                                  <TableCell className="py-1.5">
+                                    <span className={cn("text-[10px] sm:text-xs font-semibold truncate block max-w-[100px] sm:max-w-[160px]", i === 0 ? "text-yellow-600 dark:text-yellow-400" : i === 1 ? "text-slate-500 dark:text-slate-300" : i === 2 ? "text-orange-600 dark:text-orange-400" : "")}>{u.name}</span>
+                                  </TableCell>
+                                  <TableCell className="text-center text-[10px] sm:text-xs font-bold py-1.5">{u.total}</TableCell>
+                                  <TableCell className="text-center text-[10px] sm:text-xs font-medium text-success py-1.5">{u.resolved}</TableCell>
+                                  <TableCell className="text-center text-[10px] sm:text-xs font-medium text-warning py-1.5">{u.onProgress}</TableCell>
+                                  <TableCell className="text-center text-[10px] sm:text-xs font-medium text-primary py-1.5">{u.pending}</TableCell>
+                                  <TableCell className="text-center text-[10px] sm:text-xs font-medium text-destructive py-1.5">{u.critical}</TableCell>
+                                  <TableCell className="py-1.5">
+                                    <div className="flex items-center gap-1.5">
+                                      <Progress value={rate} className="h-1.5 flex-1" />
+                                      <span className={cn("text-[9px] sm:text-[10px] font-bold min-w-[28px] text-right", rate >= 70 ? "text-success" : rate >= 40 ? "text-warning" : "text-destructive")}>{rate}%</span>
+                                    </div>
+                                  </TableCell>
+                                </TableRow>
+                              );
+                            })}
+                          </TableBody>
+                        </Table>
+                      </ScrollArea>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
               </div>
               </div>
 
