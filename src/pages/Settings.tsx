@@ -241,8 +241,23 @@ export default function Settings() {
     }
   };
 
+  const loadLastUpload = async () => {
+    try {
+      const { data } = await supabase
+        .from("master_data_uploads")
+        .select("uploaded_by_name, created_at, total_records, file_name")
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (data) setLastUpload(data);
+    } catch (error) {
+      if (import.meta.env.DEV) console.error("Error loading last upload:", error);
+    }
+  };
+
   useEffect(() => {
     loadDataCounts();
+    loadLastUpload();
   }, []);
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
