@@ -484,13 +484,9 @@ function processRegionalTeamSheet(sheet: any, XLSX: any): RegionalTeamRecord[] {
 
 // Main function to import multi-sheet Excel file
 export async function importMultiSheetExcel(file: File): Promise<ImportResult> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    
-    reader.onload = (evt) => {
-      try {
-        const data = evt.target?.result;
-        const workbook = XLSX.read(data, { type: "binary" });
+  const XLSX = await loadXLSX();
+  const data = await file.arrayBuffer();
+  const workbook = XLSX.read(data, { type: "array" });
         
         const result: ImportResult = {
           userRecords: [],
