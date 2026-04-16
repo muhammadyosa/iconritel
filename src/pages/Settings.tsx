@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
-import { Settings as SettingsIcon, Info, FileSpreadsheet, FileUp, Check, X, AlertCircle, RefreshCw, Database, Trash2, Users, ClipboardList, Trophy } from "lucide-react";
+import { Settings as SettingsIcon, Info, FileSpreadsheet, FileUp, Check, X, AlertCircle, RefreshCw, Database, Trash2, Users, ClipboardList, Trophy, Clock, User as UserIcon } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -119,7 +121,9 @@ async function loadBNGData(): Promise<any[]> {
 
 export default function Settings() {
   const { isAdmin } = useUserRole();
+  const { user, profile } = useAuth();
   const [file, setFile] = useState<File | null>(null);
+  const [lastUpload, setLastUpload] = useState<{ uploaded_by_name: string; created_at: string; total_records: number; file_name: string } | null>(null);
   const [sheets, setSheets] = useState<SheetPreview[]>([]);
   const [importResult, setImportResult] = useState<ImportResult | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -237,8 +241,23 @@ export default function Settings() {
     }
   };
 
+  const loadLastUpload = async () => {
+    try {
+      const { data } = await supabase
+        .from("master_data_uploads")
+        .select("uploaded_by_name, created_at, total_records, file_name")
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (data) setLastUpload(data);
+    } catch (error) {
+      if (import.meta.env.DEV) console.error("Error loading last upload:", error);
+    }
+  };
+
   useEffect(() => {
     loadDataCounts();
+    loadLastUpload();
   }, []);
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -323,6 +342,22 @@ export default function Settings() {
       await loadDataCounts();
 
       const totalRecords = result.summary.user + result.summary.olt + result.summary.fat + result.summary.upe + result.summary.bng + result.summary.fdt + result.summary.akv + result.summary.regionalTeam;
+
+      // Record upload metadata in Supabase so all team members can see who uploaded last
+      try {
+        const uploaderName = profile?.display_name || user?.email?.split("@")[0] || "Unknown";
+        await supabase.from("master_data_uploads").insert({
+          uploaded_by_user_id: user?.id ?? null,
+          uploaded_by_name: uploaderName,
+          file_name: file.name,
+          total_records: totalRecords,
+          summary: result.summary as any,
+        });
+        await loadLastUpload();
+      } catch (logErr) {
+        if (import.meta.env.DEV) console.error("Failed to record upload metadata:", logErr);
+      }
+
       toast.success(`Berhasil import ${totalRecords.toLocaleString()} data dari ${result.summary.processedSheets.length} sheet`);
     } catch (error) {
       toast.error("Gagal mengimport data");
@@ -447,6 +482,28 @@ export default function Settings() {
             </CardHeader>
             <CardContent>
               <div className="flex flex-col gap-4">
+                {/* Last upload metadata - visible to all team members */}
+                {lastUpload && (
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 rounded-md border border-border bg-muted/40 p-3 text-xs">
+                    <div className="flex items-center gap-1.5">
+                      <Clock className="h-3.5 w-3.5 text-muted-foreground" />
+                      <span className="text-muted-foreground">Terakhir diupload:</span>
+                      <span className="font-medium text-foreground">
+                        {new Date(lastUpload.created_at).toLocaleString("id-ID", { dateStyle: "medium", timeStyle: "short" })} WIB
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <UserIcon className="h-3.5 w-3.5 text-muted-foreground" />
+                      <span className="text-muted-foreground">oleh</span>
+                      <span className="font-medium text-foreground">{lastUpload.uploaded_by_name}</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <FileSpreadsheet className="h-3.5 w-3.5 text-muted-foreground" />
+                      <span className="font-medium text-foreground truncate max-w-[200px]" title={lastUpload.file_name}>{lastUpload.file_name}</span>
+                      <span className="text-muted-foreground">({lastUpload.total_records.toLocaleString()} data)</span>
+                    </div>
+                  </div>
+                )}
                 <div className="flex items-center gap-4">
                   <input
                     type="file"

@@ -116,6 +116,36 @@ export type Database = {
         }
         Relationships: []
       }
+      master_data_uploads: {
+        Row: {
+          created_at: string
+          file_name: string
+          id: string
+          summary: Json | null
+          total_records: number
+          uploaded_by_name: string
+          uploaded_by_user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          file_name: string
+          id?: string
+          summary?: Json | null
+          total_records?: number
+          uploaded_by_name: string
+          uploaded_by_user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          file_name?: string
+          id?: string
+          summary?: Json | null
+          total_records?: number
+          uploaded_by_name?: string
+          uploaded_by_user_id?: string | null
+        }
+        Relationships: []
+      }
       notes: {
         Row: {
           content: string
