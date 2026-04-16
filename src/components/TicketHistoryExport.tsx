@@ -8,7 +8,7 @@ import { FileDown, Download, FileSpreadsheet, FileText } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import * as XLSX from "xlsx";
+
 
 interface HistoryRecord {
   date: string;
@@ -72,8 +72,9 @@ export function TicketHistoryExport() {
       Resolved: r.resolved,
     }));
 
-  const handleExportExcel = () => {
+  const handleExportExcel = async () => {
     if (records.length === 0) return toast.error("Tidak ada data untuk di-export");
+    const XLSX = await import("xlsx");
     const ws = XLSX.utils.json_to_sheet(buildExportData());
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Histori Incident");
@@ -81,8 +82,9 @@ export function TicketHistoryExport() {
     toast.success("File Excel berhasil diunduh");
   };
 
-  const handleExportCSV = () => {
+  const handleExportCSV = async () => {
     if (records.length === 0) return toast.error("Tidak ada data untuk di-export");
+    const XLSX = await import("xlsx");
     const ws = XLSX.utils.json_to_sheet(buildExportData());
     const csv = XLSX.utils.sheet_to_csv(ws);
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });

@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Ticket, FEEDER_CONSTRAINTS_SET } from "@/types/ticket";
 import { RegionalTeamRecord } from "@/types/regionalTeam";
 import { Copy, RotateCcw, Image as ImageIcon } from "lucide-react";
-import html2canvas from "html2canvas";
+
 import { toast } from "@/hooks/use-toast";
 import { useRealtimeDate } from "@/hooks/useRealtimeDate";
 import iconnetLogo from "@/assets/iconnet-logo.svg";
@@ -256,6 +256,7 @@ export function ReportingGangguanTab({
     if (!previewRef.current) return;
     setIsExporting(true);
     try {
+      const { default: html2canvas } = await import("html2canvas");
       const canvas = await html2canvas(previewRef.current, {
         scale: 2,
         backgroundColor: "#ffffff",

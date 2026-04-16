@@ -1,4 +1,4 @@
-import * as XLSX from "xlsx";
+const loadXLSX = () => import("xlsx");
 import { ExcelRecord } from "@/types/ticket";
 import { OLT } from "@/types/olt";
 import { FAT } from "@/types/fat";
@@ -348,7 +348,7 @@ function processAKVSheet(data: any[]): AKV[] {
 }
 
 // Process Regional Team sheet (hierarchical format: Region → SERPO → Mitra → Hostnames)
-function processRegionalTeamSheet(sheet: XLSX.WorkSheet): RegionalTeamRecord[] {
+function processRegionalTeamSheet(sheet: any, XLSX: any): RegionalTeamRecord[] {
   const rawRows: any[][] = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: "" });
   const records: RegionalTeamRecord[] = [];
   
@@ -484,13 +484,9 @@ function processRegionalTeamSheet(sheet: XLSX.WorkSheet): RegionalTeamRecord[] {
 
 // Main function to import multi-sheet Excel file
 export async function importMultiSheetExcel(file: File): Promise<ImportResult> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    
-    reader.onload = (evt) => {
-      try {
-        const data = evt.target?.result;
-        const workbook = XLSX.read(data, { type: "binary" });
+  const XLSX = await loadXLSX();
+  const data = await file.arrayBuffer();
+  const workbook = XLSX.read(data, { type: "array" });
         
         const result: ImportResult = {
           userRecords: [],
@@ -533,7 +529,7 @@ export async function importMultiSheetExcel(file: File): Promise<ImportResult> {
             const normalizedName = sheetName.toLowerCase().trim().replace(/\s+/g, ' ');
             const isRegionalTeam = SHEET_PATTERNS.regionalTeam.some(p => normalizedName.includes(p));
             if (isRegionalTeam) {
-              result.regionalTeamRecords = processRegionalTeamSheet(sheet);
+              result.regionalTeamRecords = processRegionalTeamSheet(sheet, XLSX);
               result.summary.regionalTeam = result.regionalTeamRecords.length;
               result.summary.processedSheets.push(`${sheetName} → Regional Team (${result.regionalTeamRecords.length})`);
               continue;
@@ -593,59 +589,30 @@ export async function importMultiSheetExcel(file: File): Promise<ImportResult> {
               break;
               
             case "regionalTeam":
-              result.regionalTeamRecords = processRegionalTeamSheet(sheet);
+              result.regionalTeamRecords = processRegionalTeamSheet(sheet, XLSX);
               result.summary.regionalTeam = result.regionalTeamRecords.length;
               result.summary.processedSheets.push(`${sheetName} → Regional Team (${result.regionalTeamRecords.length})`);
               break;
           }
         }
         
-        resolve(result);
-      } catch (error) {
-        reject(error);
-      }
-    };
-    
-    reader.onerror = () => {
-      reject(new Error("Gagal membaca file"));
-    };
-    
-    reader.readAsBinaryString(file);
-  });
+  return result;
 }
 
 // Get available sheets from Excel file
 export async function getExcelSheets(file: File): Promise<{ name: string; rowCount: number; type: string | null }[]> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    
-    reader.onload = (evt) => {
-      try {
-        const data = evt.target?.result;
-        const workbook = XLSX.read(data, { type: "binary" });
-        
-        const sheets = workbook.SheetNames.map((sheetName) => {
-          const sheet = workbook.Sheets[sheetName];
-          const jsonData = XLSX.utils.sheet_to_json(sheet, { defval: "", raw: false });
-          const type = detectSheetType(sheetName, jsonData);
-          
-          return {
-            name: sheetName,
-            rowCount: jsonData.length,
-            type: type,
-          };
-        });
-        
-        resolve(sheets);
-      } catch (error) {
-        reject(error);
-      }
+  const XLSX = await loadXLSX();
+  const data = await file.arrayBuffer();
+  const workbook = XLSX.read(data, { type: "array" });
+
+  return workbook.SheetNames.map((sheetName) => {
+    const sheet = workbook.Sheets[sheetName];
+    const jsonData = XLSX.utils.sheet_to_json(sheet, { defval: "", raw: false });
+    const type = detectSheetType(sheetName, jsonData);
+    return {
+      name: sheetName,
+      rowCount: jsonData.length,
+      type: type,
     };
-    
-    reader.onerror = () => {
-      reject(new Error("Gagal membaca file"));
-    };
-    
-    reader.readAsBinaryString(file);
   });
 }

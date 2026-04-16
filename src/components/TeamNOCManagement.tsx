@@ -15,7 +15,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useActivityLog } from "@/hooks/useActivityLog";
 import { cn } from "@/lib/utils";
-import * as XLSX from "xlsx";
+
 import { subDays, startOfDay } from "date-fns";
 
 interface UserHistoryRow {
@@ -117,8 +117,9 @@ export function TeamNOCManagement() {
     }
   };
 
-  const handleExport = () => {
+  const handleExport = async () => {
     if (filteredData.length === 0) return toast.error("Tidak ada data untuk diexport");
+    const XLSX = await import("xlsx");
     const ws = XLSX.utils.json_to_sheet(filteredData.map(r => ({
       Tanggal: r.date,
       "Nama User": r.user_name,

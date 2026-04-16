@@ -1,4 +1,4 @@
-import * as XLSX from "xlsx";
+const loadXLSX = () => import("xlsx");
 import { RegionalTeamRecord } from "@/types/regionalTeam";
 import { loadRegionalTeamData, saveRegionalTeamData } from "./indexedDB";
 
@@ -26,7 +26,8 @@ const isOltHostname = (val: string) => {
 };
 
 // Process Regional Team sheet (same logic as multiSheetImport)
-function processRegionalTeamSheet(sheet: XLSX.WorkSheet): RegionalTeamRecord[] {
+async function processRegionalTeamSheet(sheet: any): Promise<RegionalTeamRecord[]> {
+  const XLSX = await loadXLSX();
   const rawRows: any[][] = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: "" });
   const records: RegionalTeamRecord[] = [];
 
@@ -147,6 +148,7 @@ export async function loadDefaultRegionalTeamData(): Promise<RegionalTeamRecord[
     }
 
     const arrayBuffer = await response.arrayBuffer();
+    const XLSX = await loadXLSX();
     const workbook = XLSX.read(arrayBuffer, { type: "array" });
 
     // Parse ALL sheets, not just the first one
@@ -154,7 +156,7 @@ export async function loadDefaultRegionalTeamData(): Promise<RegionalTeamRecord[
     for (const sheetName of workbook.SheetNames) {
       const sheet = workbook.Sheets[sheetName];
       if (!sheet) continue;
-      const records = processRegionalTeamSheet(sheet);
+      const records = await processRegionalTeamSheet(sheet);
       allRecords.push(...records);
     }
 

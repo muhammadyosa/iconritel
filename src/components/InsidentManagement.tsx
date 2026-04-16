@@ -20,7 +20,7 @@ import { toast } from "sonner";
 import { useCloudTickets } from "@/hooks/useCloudTickets";
 import { Ticket } from "@/types/ticket";
 import { supabase } from "@/integrations/supabase/client";
-import * as XLSX from "xlsx";
+
 import { useActivityLog } from "@/hooks/useActivityLog";
 
 const STATUS_OPTIONS = ["All", "On Progress", "Critical", "Resolved", "Pending"] as const;
@@ -174,9 +174,10 @@ export function InsidentManagement() {
     }));
   }, []);
 
-  const handleExportExcel = useCallback(() => {
+  const handleExportExcel = useCallback(async () => {
     const data = buildExportData(filteredTickets);
     if (data.length === 0) { toast.info("Tidak ada data untuk diexport"); return; }
+    const XLSX = await import("xlsx");
     const ws = XLSX.utils.json_to_sheet(data);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Insident");
@@ -195,6 +196,7 @@ export function InsidentManagement() {
     setIsImporting(true);
     try {
       const data = await file.arrayBuffer();
+      const XLSX = await import("xlsx");
       const wb = XLSX.read(data);
       const ws = wb.Sheets[wb.SheetNames[0]];
       const rows = XLSX.utils.sheet_to_json<Record<string, string>>(ws);
