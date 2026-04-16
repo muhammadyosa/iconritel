@@ -15,7 +15,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useActivityLog } from "@/hooks/useActivityLog";
 import { cn } from "@/lib/utils";
-import * as XLSX from "xlsx";
+
 import { subDays, startOfDay } from "date-fns";
 
 interface UserHistoryRow {

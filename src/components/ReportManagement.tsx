@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
 import { useCloudShiftReports, CloudShiftReport } from "@/hooks/useCloudShiftReports";
-import * as XLSX from "xlsx";
+
 import { useActivityLog } from "@/hooks/useActivityLog";
 const SHIFT_FILTER_OPTIONS = ["All", "pagi", "siang", "malam"] as const;
 

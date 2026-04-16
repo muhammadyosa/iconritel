@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Ticket, FEEDER_CONSTRAINTS_SET } from "@/types/ticket";
 import { RegionalTeamRecord } from "@/types/regionalTeam";
 import { Copy, RotateCcw, Image as ImageIcon } from "lucide-react";
-import html2canvas from "html2canvas";
+
 import { toast } from "@/hooks/use-toast";
 import { useRealtimeDate } from "@/hooks/useRealtimeDate";
 import iconnetLogo from "@/assets/iconnet-logo.svg";

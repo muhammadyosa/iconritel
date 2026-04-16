@@ -1,4 +1,4 @@
-import * as XLSX from "xlsx";
+const loadXLSX = () => import("xlsx");
 import { ExcelRecord } from "@/types/ticket";
 import { OLT } from "@/types/olt";
 import { FAT } from "@/types/fat";

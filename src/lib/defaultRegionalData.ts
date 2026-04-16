@@ -1,4 +1,4 @@
-import * as XLSX from "xlsx";
+const loadXLSX = () => import("xlsx");
 import { RegionalTeamRecord } from "@/types/regionalTeam";
 import { loadRegionalTeamData, saveRegionalTeamData } from "./indexedDB";
 

@@ -20,7 +20,7 @@ import { toast } from "sonner";
 import { useCloudTickets } from "@/hooks/useCloudTickets";
 import { Ticket } from "@/types/ticket";
 import { supabase } from "@/integrations/supabase/client";
-import * as XLSX from "xlsx";
+
 import { useActivityLog } from "@/hooks/useActivityLog";
 
 const STATUS_OPTIONS = ["All", "On Progress", "Critical", "Resolved", "Pending"] as const;
