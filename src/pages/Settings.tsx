@@ -482,6 +482,28 @@ export default function Settings() {
             </CardHeader>
             <CardContent>
               <div className="flex flex-col gap-4">
+                {/* Last upload metadata - visible to all team members */}
+                {lastUpload && (
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 rounded-md border border-border bg-muted/40 p-3 text-xs">
+                    <div className="flex items-center gap-1.5">
+                      <Clock className="h-3.5 w-3.5 text-muted-foreground" />
+                      <span className="text-muted-foreground">Terakhir diupload:</span>
+                      <span className="font-medium text-foreground">
+                        {new Date(lastUpload.created_at).toLocaleString("id-ID", { dateStyle: "medium", timeStyle: "short" })} WIB
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <UserIcon className="h-3.5 w-3.5 text-muted-foreground" />
+                      <span className="text-muted-foreground">oleh</span>
+                      <span className="font-medium text-foreground">{lastUpload.uploaded_by_name}</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <FileSpreadsheet className="h-3.5 w-3.5 text-muted-foreground" />
+                      <span className="font-medium text-foreground truncate max-w-[200px]" title={lastUpload.file_name}>{lastUpload.file_name}</span>
+                      <span className="text-muted-foreground">({lastUpload.total_records.toLocaleString()} data)</span>
+                    </div>
+                  </div>
+                )}
                 <div className="flex items-center gap-4">
                   <input
                     type="file"
