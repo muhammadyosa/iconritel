@@ -244,7 +244,8 @@ export default function TicketManagement() {
         getTicketRegion(ticket.serpo).toLowerCase().includes(query) ||
         ticket.status.toLowerCase().includes(query) ||
         ticket.createdAt.toLowerCase().includes(query) ||
-        (ticket.createdByName || "").toLowerCase().includes(query)
+        (ticket.createdByName || "").toLowerCase().includes(query) ||
+        (ticket.resolvedByName || "").toLowerCase().includes(query)
       );
     }
 
@@ -259,6 +260,7 @@ export default function TicketManagement() {
       case "status": return ticket.status.toLowerCase().includes(query);
       case "created": return ticket.createdAt.toLowerCase().includes(query);
       case "createdBy": return (ticket.createdByName || "").toLowerCase().includes(query);
+      case "resolvedBy": return (ticket.resolvedByName || "").toLowerCase().includes(query);
       default: return true;
     }
   });
