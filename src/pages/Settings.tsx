@@ -342,6 +342,22 @@ export default function Settings() {
       await loadDataCounts();
 
       const totalRecords = result.summary.user + result.summary.olt + result.summary.fat + result.summary.upe + result.summary.bng + result.summary.fdt + result.summary.akv + result.summary.regionalTeam;
+
+      // Record upload metadata in Supabase so all team members can see who uploaded last
+      try {
+        const uploaderName = profile?.display_name || user?.email?.split("@")[0] || "Unknown";
+        await supabase.from("master_data_uploads").insert({
+          uploaded_by_user_id: user?.id ?? null,
+          uploaded_by_name: uploaderName,
+          file_name: file.name,
+          total_records: totalRecords,
+          summary: result.summary as any,
+        });
+        await loadLastUpload();
+      } catch (logErr) {
+        if (import.meta.env.DEV) console.error("Failed to record upload metadata:", logErr);
+      }
+
       toast.success(`Berhasil import ${totalRecords.toLocaleString()} data dari ${result.summary.processedSheets.length} sheet`);
     } catch (error) {
       toast.error("Gagal mengimport data");
