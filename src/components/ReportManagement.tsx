@@ -183,16 +183,16 @@ export function ReportManagement() {
     }));
   }, []);
 
-  const handleExportExcel = useCallback(() => {
+  const handleExportExcel = useCallback(async () => {
     const data = buildExportData(filteredReports);
     if (data.length === 0) {
       toast.info("Tidak ada data untuk diexport");
       return;
     }
+    const XLSX = await import("xlsx");
     const ws = XLSX.utils.json_to_sheet(data);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Report Shift");
-    // Auto column widths
     ws["!cols"] = Object.keys(data[0]).map((key) => ({
       wch: Math.max(key.length, ...data.map((r) => String((r as any)[key]).length).slice(0, 50)) + 2,
     }));
@@ -208,6 +208,7 @@ export function ReportManagement() {
     setIsImporting(true);
     try {
       const data = await file.arrayBuffer();
+      const XLSX = await import("xlsx");
       const wb = XLSX.read(data);
       const ws = wb.Sheets[wb.SheetNames[0]];
       const rows = XLSX.utils.sheet_to_json<Record<string, string>>(ws);

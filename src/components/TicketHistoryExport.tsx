@@ -72,8 +72,9 @@ export function TicketHistoryExport() {
       Resolved: r.resolved,
     }));
 
-  const handleExportExcel = () => {
+  const handleExportExcel = async () => {
     if (records.length === 0) return toast.error("Tidak ada data untuk di-export");
+    const XLSX = await import("xlsx");
     const ws = XLSX.utils.json_to_sheet(buildExportData());
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Histori Incident");
@@ -81,8 +82,9 @@ export function TicketHistoryExport() {
     toast.success("File Excel berhasil diunduh");
   };
 
-  const handleExportCSV = () => {
+  const handleExportCSV = async () => {
     if (records.length === 0) return toast.error("Tidak ada data untuk di-export");
+    const XLSX = await import("xlsx");
     const ws = XLSX.utils.json_to_sheet(buildExportData());
     const csv = XLSX.utils.sheet_to_csv(ws);
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });

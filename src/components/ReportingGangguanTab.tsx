@@ -256,6 +256,7 @@ export function ReportingGangguanTab({
     if (!previewRef.current) return;
     setIsExporting(true);
     try {
+      const { default: html2canvas } = await import("html2canvas");
       const canvas = await html2canvas(previewRef.current, {
         scale: 2,
         backgroundColor: "#ffffff",
