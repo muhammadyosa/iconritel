@@ -348,7 +348,7 @@ function processAKVSheet(data: any[]): AKV[] {
 }
 
 // Process Regional Team sheet (hierarchical format: Region → SERPO → Mitra → Hostnames)
-function processRegionalTeamSheet(sheet: XLSX.WorkSheet): RegionalTeamRecord[] {
+function processRegionalTeamSheet(sheet: any, XLSX: any): RegionalTeamRecord[] {
   const rawRows: any[][] = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: "" });
   const records: RegionalTeamRecord[] = [];
   

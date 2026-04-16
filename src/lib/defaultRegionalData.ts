@@ -156,7 +156,7 @@ export async function loadDefaultRegionalTeamData(): Promise<RegionalTeamRecord[
     for (const sheetName of workbook.SheetNames) {
       const sheet = workbook.Sheets[sheetName];
       if (!sheet) continue;
-      const records = processRegionalTeamSheet(sheet);
+      const records = await processRegionalTeamSheet(sheet);
       allRecords.push(...records);
     }
 
