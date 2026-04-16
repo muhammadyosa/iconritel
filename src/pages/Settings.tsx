@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
-import { Settings as SettingsIcon, Info, FileSpreadsheet, FileUp, Check, X, AlertCircle, RefreshCw, Database, Trash2, Users, ClipboardList, Trophy } from "lucide-react";
+import { Settings as SettingsIcon, Info, FileSpreadsheet, FileUp, Check, X, AlertCircle, RefreshCw, Database, Trash2, Users, ClipboardList, Trophy, Clock, User as UserIcon } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
