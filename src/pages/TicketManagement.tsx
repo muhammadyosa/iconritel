@@ -959,6 +959,7 @@ export default function TicketManagement() {
                       <SelectItem value="serpo">Serpo</SelectItem>
                       <SelectItem value="region">Region</SelectItem>
                       <SelectItem value="createdBy">Create by</SelectItem>
+                      <SelectItem value="resolvedBy">Resolved by</SelectItem>
                       <SelectItem value="status">Status</SelectItem>
                       <SelectItem value="created">Tanggal</SelectItem>
                     </SelectContent>
