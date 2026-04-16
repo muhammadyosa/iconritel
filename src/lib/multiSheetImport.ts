@@ -529,7 +529,7 @@ export async function importMultiSheetExcel(file: File): Promise<ImportResult> {
             const normalizedName = sheetName.toLowerCase().trim().replace(/\s+/g, ' ');
             const isRegionalTeam = SHEET_PATTERNS.regionalTeam.some(p => normalizedName.includes(p));
             if (isRegionalTeam) {
-              result.regionalTeamRecords = processRegionalTeamSheet(sheet);
+              result.regionalTeamRecords = processRegionalTeamSheet(sheet, XLSX);
               result.summary.regionalTeam = result.regionalTeamRecords.length;
               result.summary.processedSheets.push(`${sheetName} → Regional Team (${result.regionalTeamRecords.length})`);
               continue;
@@ -589,7 +589,7 @@ export async function importMultiSheetExcel(file: File): Promise<ImportResult> {
               break;
               
             case "regionalTeam":
-              result.regionalTeamRecords = processRegionalTeamSheet(sheet);
+              result.regionalTeamRecords = processRegionalTeamSheet(sheet, XLSX);
               result.summary.regionalTeam = result.regionalTeamRecords.length;
               result.summary.processedSheets.push(`${sheetName} → Regional Team (${result.regionalTeamRecords.length})`);
               break;
@@ -601,36 +601,18 @@ export async function importMultiSheetExcel(file: File): Promise<ImportResult> {
 
 // Get available sheets from Excel file
 export async function getExcelSheets(file: File): Promise<{ name: string; rowCount: number; type: string | null }[]> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    
-    reader.onload = (evt) => {
-      try {
-        const data = evt.target?.result;
-        const workbook = XLSX.read(data, { type: "binary" });
-        
-        const sheets = workbook.SheetNames.map((sheetName) => {
-          const sheet = workbook.Sheets[sheetName];
-          const jsonData = XLSX.utils.sheet_to_json(sheet, { defval: "", raw: false });
-          const type = detectSheetType(sheetName, jsonData);
-          
-          return {
-            name: sheetName,
-            rowCount: jsonData.length,
-            type: type,
-          };
-        });
-        
-        resolve(sheets);
-      } catch (error) {
-        reject(error);
-      }
+  const XLSX = await loadXLSX();
+  const data = await file.arrayBuffer();
+  const workbook = XLSX.read(data, { type: "array" });
+
+  return workbook.SheetNames.map((sheetName) => {
+    const sheet = workbook.Sheets[sheetName];
+    const jsonData = XLSX.utils.sheet_to_json(sheet, { defval: "", raw: false });
+    const type = detectSheetType(sheetName, jsonData);
+    return {
+      name: sheetName,
+      rowCount: jsonData.length,
+      type: type,
     };
-    
-    reader.onerror = () => {
-      reject(new Error("Gagal membaca file"));
-    };
-    
-    reader.readAsBinaryString(file);
   });
 }
