@@ -442,7 +442,7 @@ export default function Settings() {
                 📥 Upload File Excel
               </CardTitle>
               <CardDescription>
-                Pilih file Excel (.xlsx, .xls) - data tersimpan permanen di aplikasi (hanya perlu upload 1x)
+                Pilih file Excel (.xlsx, .xls) — cukup upload sekali, data tersimpan permanen di aplikasi dan tidak akan hilang. Hanya 🕵️ Admin yang dapat menghapus data.
               </CardDescription>
             </CardHeader>
             <CardContent>
