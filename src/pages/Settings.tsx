@@ -121,7 +121,9 @@ async function loadBNGData(): Promise<any[]> {
 
 export default function Settings() {
   const { isAdmin } = useUserRole();
+  const { user, profile } = useAuth();
   const [file, setFile] = useState<File | null>(null);
+  const [lastUpload, setLastUpload] = useState<{ uploaded_by_name: string; created_at: string; total_records: number; file_name: string } | null>(null);
   const [sheets, setSheets] = useState<SheetPreview[]>([]);
   const [importResult, setImportResult] = useState<ImportResult | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
