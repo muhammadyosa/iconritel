@@ -442,7 +442,7 @@ export default function Settings() {
                 📥 Upload File Excel
               </CardTitle>
               <CardDescription>
-                Pilih file Excel (.xlsx, .xls) - data tersimpan permanen di aplikasi (hanya perlu upload 1x)
+                Pilih file Excel (.xlsx, .xls) — cukup upload sekali, data tersimpan permanen di aplikasi dan tidak akan hilang. Hanya 🕵️ Admin yang dapat menghapus data.
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -491,7 +491,7 @@ export default function Settings() {
                 )}
 
                 {/* Delete All Data Button - Admin Only */}
-                {isAdmin && (
+                {isAdmin ? (
                   <div className="pt-4 border-t">
                     <Button
                       variant="destructive"
@@ -504,6 +504,15 @@ export default function Settings() {
                     <p className="text-xs text-muted-foreground mt-2">
                       Menghapus data list inventaris (User, OLT, FAT, UPE, BNG, FDT, AKV). Tidak menghapus 📋 List Incident dan 📝 Report.
                     </p>
+                  </div>
+                ) : (
+                  <div className="pt-4 border-t">
+                    <div className="flex items-start gap-2 rounded-md border border-border bg-muted/40 p-3">
+                      <AlertCircle className="h-4 w-4 mt-0.5 text-muted-foreground shrink-0" />
+                      <p className="text-xs text-muted-foreground">
+                        Data inventaris tersimpan permanen setelah upload. Hanya 🕵️ <strong>Admin</strong> yang dapat menghapus data list.
+                      </p>
+                    </div>
                   </div>
                 )}
               </div>
