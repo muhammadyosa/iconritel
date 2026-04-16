@@ -596,18 +596,7 @@ export async function importMultiSheetExcel(file: File): Promise<ImportResult> {
           }
         }
         
-        resolve(result);
-      } catch (error) {
-        reject(error);
-      }
-    };
-    
-    reader.onerror = () => {
-      reject(new Error("Gagal membaca file"));
-    };
-    
-    reader.readAsBinaryString(file);
-  });
+  return result;
 }
 
 // Get available sheets from Excel file
