@@ -383,21 +383,14 @@ export function TicketDetailDialog({
                     <Select
                       value={ticket.status}
                       onValueChange={async (value: any) => {
+                        if (value === ticket.status) return;
+                        if (value === "Pending") {
+                          setPendingReasonInput(ticket.pendingReason || "");
+                          setPendingDialogOpen(true);
+                          return;
+                        }
                         try {
-                          const oldStatus = ticket.status;
-                          const resolveFields = value === "Resolved" ? {
-                            resolvedByUserId: currentUserId,
-                            resolvedByName: currentUserName,
-                          } : {};
-                          await updateTicket(ticket.id, { status: value, ...resolveFields });
-                          toast.success(`Status insident ${ticket.id} berhasil diubah menjadi ${value}`);
-                          
-                          // Log activity for status changes
-                          if (logActivity) {
-                            const actionType = value === "Resolved" ? "resolve_ticket" : "update_ticket";
-                            const detail = `${currentUserName || "User"} mengubah status ${ticket.id} dari ${oldStatus} → ${value}`;
-                            logActivity(actionType as ActivityAction, detail);
-                          }
+                          await applyStatusChange(value);
                         } catch (error) {
                           // Error already shown by hook
                         }
