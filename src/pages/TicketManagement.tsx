@@ -170,7 +170,7 @@ export default function TicketManagement() {
 
   // Compute serpo options for manual form
   const manualSerpoOptions = useMemo(() => {
-    if (!manualFormData.constraint) return [];
+    if (!manualConstraintManualEdit && !manualFormData.constraint) return [];
     const hostname = manualFormData.hostname.trim().toUpperCase();
     const isFeeder = manualConstraintManualEdit
       ? manualSerpoTypeOverride === "FEEDER"
