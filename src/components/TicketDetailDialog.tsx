@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { Trash2, Edit, X, Check, Copy } from "lucide-react";
+import { Trash2, Edit, X, Check, Copy, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -59,6 +60,8 @@ export function TicketDetailDialog({
   onOpenChange,
 }: TicketDetailDialogProps) {
   const [isEditing, setIsEditing] = useState(false);
+  const [pendingDialogOpen, setPendingDialogOpen] = useState(false);
+  const [pendingReasonInput, setPendingReasonInput] = useState("");
   const [editData, setEditData] = useState({
     ticketId: ticket.id,
     customerName: ticket.customerName,
@@ -69,6 +72,21 @@ export function TicketDetailDialog({
     serpo: ticket.serpo,
     constraint: ticket.constraint,
   });
+
+  const applyStatusChange = async (value: string, extra: Partial<Ticket> = {}) => {
+    const oldStatus = ticket.status;
+    const resolveFields = value === "Resolved" ? {
+      resolvedByUserId: currentUserId,
+      resolvedByName: currentUserName,
+    } : {};
+    await updateTicket(ticket.id, { status: value as Ticket["status"], ...resolveFields, ...extra });
+    toast.success(`Status insident ${ticket.id} berhasil diubah menjadi ${value}`);
+    if (logActivity) {
+      const actionType = value === "Resolved" ? "resolve_ticket" : "update_ticket";
+      const detail = `${currentUserName || "User"} mengubah status ${ticket.id} dari ${oldStatus} → ${value}`;
+      logActivity(actionType as ActivityAction, detail);
+    }
+  };
 
   const handleStartEdit = () => {
     setEditData({
