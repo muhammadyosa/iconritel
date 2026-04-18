@@ -25,6 +25,10 @@ interface DbTicket {
   resolved_at: string | null;
   resolved_by_user_id: string | null;
   resolved_by_name: string | null;
+  pending_reason?: string | null;
+  pending_at?: string | null;
+  pending_by_name?: string | null;
+  pending_by_user_id?: string | null;
 }
 
 interface ProfileData {
@@ -92,6 +96,10 @@ function dbToTicket(db: DbTicket, profilesMap: Map<string, ProfileData>): Ticket
     resolvedAt: db.resolved_at || undefined,
     resolvedByUserId: db.resolved_by_user_id || undefined,
     resolvedByName: resolvedByDisplayName,
+    pendingReason: db.pending_reason || undefined,
+    pendingAt: db.pending_at || undefined,
+    pendingByName: db.pending_by_name || undefined,
+    pendingByUserId: db.pending_by_user_id || undefined,
   };
 }
 
@@ -392,8 +400,19 @@ export function useCloudTickets() {
       if (updates.constraint !== undefined) dbUpdates.constraint_type = updates.constraint;
       if (updates.category !== undefined) dbUpdates.category = updates.category;
       if (updates.ticketResult !== undefined) dbUpdates.ticket_result = updates.ticketResult;
+      if (updates.pendingReason !== undefined) dbUpdates.pending_reason = updates.pendingReason || null;
+      if (updates.pendingAt !== undefined) dbUpdates.pending_at = updates.pendingAt || null;
+      if (updates.pendingByName !== undefined) dbUpdates.pending_by_name = updates.pendingByName || null;
+      if (updates.pendingByUserId !== undefined) dbUpdates.pending_by_user_id = updates.pendingByUserId || null;
       if (updates.status !== undefined) {
         dbUpdates.status = updates.status;
+        if (updates.status !== "Pending" && updates.pendingReason === undefined) {
+          // Clear pending fields when moving away from Pending
+          dbUpdates.pending_reason = null;
+          dbUpdates.pending_at = null;
+          dbUpdates.pending_by_name = null;
+          dbUpdates.pending_by_user_id = null;
+        }
         if (updates.status === "Resolved") {
           dbUpdates.resolved_at = new Date().toISOString();
           dbUpdates.resolved_by_user_id = updates.resolvedByUserId || null;
