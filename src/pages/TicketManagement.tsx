@@ -1294,7 +1294,12 @@ export default function TicketManagement() {
                           </TableCell>
                           <TableCell className="px-1 sm:px-1.5 py-0.5">
                             <div>
-                              <StatusBadge status={ticket.status} />
+                              <div className="flex items-center gap-1">
+                                <StatusBadge status={ticket.status} />
+                                {ticket.status === "Pending" && ticket.pendingReason && (
+                                  <span title={`Alasan: ${ticket.pendingReason}`} className="text-amber-500 text-[10px] leading-none cursor-help">⚠️</span>
+                                )}
+                              </div>
                               <div className="text-[7px] sm:text-[8px] text-muted-foreground mt-0.5">
                                 {ticket.createdAt}
                               </div>
