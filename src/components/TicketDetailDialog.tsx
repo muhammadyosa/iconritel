@@ -406,7 +406,7 @@ export function TicketDetailDialog({
                       <SelectItem value="Pending">Pending</SelectItem>
                     </SelectContent>
                   </Select>
-                {isAdmin && (
+                {(isAdmin || (currentUserId && ticket.createdByUserId === currentUserId)) && (
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
                       <Button variant="destructive">
