@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { Trash2, Edit, X, Check, Copy } from "lucide-react";
+import { Trash2, Edit, X, Check, Copy, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -59,6 +60,8 @@ export function TicketDetailDialog({
   onOpenChange,
 }: TicketDetailDialogProps) {
   const [isEditing, setIsEditing] = useState(false);
+  const [pendingDialogOpen, setPendingDialogOpen] = useState(false);
+  const [pendingReasonInput, setPendingReasonInput] = useState("");
   const [editData, setEditData] = useState({
     ticketId: ticket.id,
     customerName: ticket.customerName,
@@ -69,6 +72,21 @@ export function TicketDetailDialog({
     serpo: ticket.serpo,
     constraint: ticket.constraint,
   });
+
+  const applyStatusChange = async (value: string, extra: Partial<Ticket> = {}) => {
+    const oldStatus = ticket.status;
+    const resolveFields = value === "Resolved" ? {
+      resolvedByUserId: currentUserId,
+      resolvedByName: currentUserName,
+    } : {};
+    await updateTicket(ticket.id, { status: value as Ticket["status"], ...resolveFields, ...extra });
+    toast.success(`Status insident ${ticket.id} berhasil diubah menjadi ${value}`);
+    if (logActivity) {
+      const actionType = value === "Resolved" ? "resolve_ticket" : "update_ticket";
+      const detail = `${currentUserName || "User"} mengubah status ${ticket.id} dari ${oldStatus} → ${value}`;
+      logActivity(actionType as ActivityAction, detail);
+    }
+  };
 
   const handleStartEdit = () => {
     setEditData({
@@ -323,6 +341,21 @@ export function TicketDetailDialog({
                   </div>
                 )}
               </div>
+              {ticket.status === "Pending" && ticket.pendingReason && (
+                <div className="pt-3 border-t">
+                  <div className="flex items-center gap-2 mb-2">
+                    <AlertCircle className="h-4 w-4 text-amber-500" />
+                    <span className="text-sm font-medium">Alasan Pending</span>
+                  </div>
+                  <div className="p-3 bg-amber-500/10 border border-amber-500/30 rounded-lg space-y-1">
+                    <p className="text-sm whitespace-pre-wrap break-words">{ticket.pendingReason}</p>
+                    <p className="text-xs text-muted-foreground pt-1 border-t border-amber-500/20">
+                      Oleh: <span className="font-medium">{ticket.pendingByName || "-"}</span>
+                      {ticket.pendingAt && ` • ${new Date(ticket.pendingAt).toLocaleString("id-ID")}`}
+                    </p>
+                  </div>
+                </div>
+              )}
               <div className="pt-3 border-t">
                 <div className="flex items-center justify-between">
                   <span className="text-muted-foreground text-sm">Format Insident:</span>
@@ -350,21 +383,14 @@ export function TicketDetailDialog({
                     <Select
                       value={ticket.status}
                       onValueChange={async (value: any) => {
+                        if (value === ticket.status) return;
+                        if (value === "Pending") {
+                          setPendingReasonInput(ticket.pendingReason || "");
+                          setPendingDialogOpen(true);
+                          return;
+                        }
                         try {
-                          const oldStatus = ticket.status;
-                          const resolveFields = value === "Resolved" ? {
-                            resolvedByUserId: currentUserId,
-                            resolvedByName: currentUserName,
-                          } : {};
-                          await updateTicket(ticket.id, { status: value, ...resolveFields });
-                          toast.success(`Status insident ${ticket.id} berhasil diubah menjadi ${value}`);
-                          
-                          // Log activity for status changes
-                          if (logActivity) {
-                            const actionType = value === "Resolved" ? "resolve_ticket" : "update_ticket";
-                            const detail = `${currentUserName || "User"} mengubah status ${ticket.id} dari ${oldStatus} → ${value}`;
-                            logActivity(actionType as ActivityAction, detail);
-                          }
+                          await applyStatusChange(value);
                         } catch (error) {
                           // Error already shown by hook
                         }
@@ -421,6 +447,54 @@ export function TicketDetailDialog({
           )}
         </div>
       </DialogContent>
+
+      <AlertDialog open={pendingDialogOpen} onOpenChange={setPendingDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <AlertCircle className="h-5 w-5 text-amber-500" />
+              Alasan Pending
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Berikan alasan kenapa insident <strong>{ticket.id}</strong> diset ke status Pending. Catatan ini akan terlihat oleh anggota tim lain di Detail Insident.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <Textarea
+            value={pendingReasonInput}
+            onChange={(e) => setPendingReasonInput(e.target.value)}
+            placeholder="Contoh: Menunggu konfirmasi pelanggan, perlu visit teknisi, dll."
+            rows={4}
+            autoFocus
+          />
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setPendingReasonInput("")}>Batal</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={async (e) => {
+                const reason = pendingReasonInput.trim();
+                if (!reason) {
+                  e.preventDefault();
+                  toast.error("Alasan wajib diisi");
+                  return;
+                }
+                try {
+                  await applyStatusChange("Pending", {
+                    pendingReason: reason,
+                    pendingAt: new Date().toISOString(),
+                    pendingByName: currentUserName,
+                    pendingByUserId: currentUserId,
+                  });
+                  setPendingReasonInput("");
+                  setPendingDialogOpen(false);
+                } catch {
+                  // already toasted
+                }
+              }}
+            >
+              Simpan & Set Pending
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Dialog>
   );
 }

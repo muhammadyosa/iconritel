@@ -17,6 +17,10 @@ export interface Ticket {
   resolvedAt?: string; // ISO timestamp when ticket was resolved
   resolvedByUserId?: string;
   resolvedByName?: string;
+  pendingReason?: string;
+  pendingAt?: string;
+  pendingByName?: string;
+  pendingByUserId?: string;
 }
 
 export interface ExcelRecord {

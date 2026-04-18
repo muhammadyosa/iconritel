@@ -290,6 +290,10 @@ export type Database = {
           fat_id: string
           hostname: string
           id: string
+          pending_at: string | null
+          pending_by_name: string | null
+          pending_by_user_id: string | null
+          pending_reason: string | null
           resolved_at: string | null
           resolved_by_name: string | null
           resolved_by_user_id: string | null
@@ -311,6 +315,10 @@ export type Database = {
           fat_id: string
           hostname: string
           id?: string
+          pending_at?: string | null
+          pending_by_name?: string | null
+          pending_by_user_id?: string | null
+          pending_reason?: string | null
           resolved_at?: string | null
           resolved_by_name?: string | null
           resolved_by_user_id?: string | null
@@ -332,6 +340,10 @@ export type Database = {
           fat_id?: string
           hostname?: string
           id?: string
+          pending_at?: string | null
+          pending_by_name?: string | null
+          pending_by_user_id?: string | null
+          pending_reason?: string | null
           resolved_at?: string | null
           resolved_by_name?: string | null
           resolved_by_user_id?: string | null
