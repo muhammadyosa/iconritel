@@ -165,13 +165,15 @@ export default function TicketManagement() {
     // Fallback: show all mitra for this serpoType
     const fallback = regionalTeamData.filter(r => r.serpoType.toUpperCase() === targetType);
     return [...new Set(fallback.map(r => r.mitraName))];
-  }, [selectedRecord, formData.constraint, regionalTeamData]);
+  }, [selectedRecord, formData.constraint, regionalTeamData, autoConstraintManualEdit, autoSerpoTypeOverride]);
 
   // Compute serpo options for manual form
   const manualSerpoOptions = useMemo(() => {
     if (!manualFormData.constraint) return [];
     const hostname = manualFormData.hostname.trim().toUpperCase();
-    const isFeeder = FEEDER_CONSTRAINTS_SET.has(manualFormData.constraint);
+    const isFeeder = manualConstraintManualEdit
+      ? manualSerpoTypeOverride === "FEEDER"
+      : FEEDER_CONSTRAINTS_SET.has(manualFormData.constraint);
     const targetType = isFeeder ? "FEEDER" : "RITEL";
     
     if (hostname) {
