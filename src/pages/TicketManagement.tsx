@@ -124,13 +124,19 @@ export default function TicketManagement() {
   // Manual edit toggle for Constraint (allow free-text)
   const [autoConstraintManualEdit, setAutoConstraintManualEdit] = useState(false);
   const [manualConstraintManualEdit, setManualConstraintManualEdit] = useState(false);
+  // When constraint is manually typed (custom), let user pick which team list to show
+  const [autoSerpoTypeOverride, setAutoSerpoTypeOverride] = useState<"RITEL" | "FEEDER">("RITEL");
+  const [manualSerpoTypeOverride, setManualSerpoTypeOverride] = useState<"RITEL" | "FEEDER">("RITEL");
 
   // Compute serpo options for auto form based on hostname + constraint
   // If RITEL constraint has no matching RITEL mitra, fallback to FEEDER mitra
   const autoSerpoOptions = useMemo(() => {
     if (!selectedRecord || !formData.constraint) return [];
     const hostname = String(selectedRecord.hostname || "").trim().toUpperCase();
-    const isFeeder = FEEDER_CONSTRAINTS_SET.has(formData.constraint);
+    // If constraint typed manually (custom), use the user-selected team type
+    const isFeeder = autoConstraintManualEdit
+      ? autoSerpoTypeOverride === "FEEDER"
+      : FEEDER_CONSTRAINTS_SET.has(formData.constraint);
     const targetType = isFeeder ? "FEEDER" : "RITEL";
     
     // Find mitra matching hostname and serpoType
