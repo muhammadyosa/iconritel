@@ -800,7 +800,28 @@ export default function TicketManagement() {
                           <TableCell className="px-1 sm:px-1.5 py-0.5 font-mono text-[9px] sm:text-[10px]">{String(record.service || "")}</TableCell>
                           <TableCell className="px-1 sm:px-1.5 py-0.5 text-[9px] sm:text-[10px] font-medium">{String(record.hostname || "")}</TableCell>
                           <TableCell className="px-1 sm:px-1.5 py-0.5 font-mono text-[9px] sm:text-[10px]">{String(record.fat || "")}</TableCell>
-                          <TableCell className="px-1 sm:px-1.5 py-0.5 font-mono text-[9px] sm:text-[10px]">{String(record.sn || "")}</TableCell>
+                          <TableCell className="px-1 sm:px-1.5 py-0.5 font-mono text-[9px] sm:text-[10px]">
+                            {record.sn ? (
+                              <button
+                                type="button"
+                                onClick={async (e) => {
+                                  e.stopPropagation();
+                                  const value = String(record.sn);
+                                  try {
+                                    await navigator.clipboard.writeText(value);
+                                    toast.success(`SN ONT disalin: ${value}`);
+                                  } catch {
+                                    toast.error("Gagal menyalin SN ONT");
+                                  }
+                                }}
+                                className="inline-flex items-center gap-1 hover:text-primary hover:underline focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring rounded px-0.5 transition-colors group"
+                                title="Klik untuk menyalin SN ONT"
+                              >
+                                <span>{String(record.sn)}</span>
+                                <Copy className="h-2.5 w-2.5 opacity-40 group-hover:opacity-100 transition-opacity" />
+                              </button>
+                            ) : ""}
+                          </TableCell>
                           <TableCell className="px-1 sm:px-1.5 py-0.5 text-[9px] sm:text-[10px]">{String(record.customer || "")}</TableCell>
                         </TableRow>
                       ))}
