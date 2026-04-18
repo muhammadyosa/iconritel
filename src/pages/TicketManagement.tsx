@@ -985,6 +985,26 @@ export default function TicketManagement() {
                     </SelectContent>
                   </Select>
                 </div>
+                <div className="w-full xs:w-32 sm:w-44">
+                  <Label className="text-[9px] sm:text-[10px]">📡 Region FEEDER</Label>
+                  <Select value={feederRegionFilter} onValueChange={setFeederRegionFilter}>
+                    <SelectTrigger className="h-6 sm:h-7 text-[9px] sm:text-[10px]">
+                      <SelectValue placeholder="Semua Region" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Semua (Non-filter)</SelectItem>
+                      {feederRegionsAvailable.length === 0 ? (
+                        <SelectItem value="__none" disabled>
+                          Tidak ada insiden FEEDER
+                        </SelectItem>
+                      ) : (
+                        feederRegionsAvailable.map((r) => (
+                          <SelectItem key={r} value={r}>{r}</SelectItem>
+                        ))
+                      )}
+                    </SelectContent>
+                  </Select>
+                </div>
                 <div className="flex-1">
                   <Label className="text-[9px] sm:text-[10px]">Pencarian</Label>
                   <div className="relative">
@@ -998,6 +1018,19 @@ export default function TicketManagement() {
                   </div>
                 </div>
               </div>
+              {feederRegionFilter !== "all" && (
+                <div className="flex items-center gap-2 text-[9px] sm:text-[10px] text-muted-foreground bg-muted/40 rounded-md px-2 py-1 border border-dashed">
+                  <span>📡 Filter aktif: insiden <strong className="text-foreground">FEEDER</strong> region <strong className="text-foreground">{feederRegionFilter}</strong> ({filteredTickets.length} insiden)</span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-5 px-1.5 text-[9px] ml-auto"
+                    onClick={() => setFeederRegionFilter("all")}
+                  >
+                    Reset
+                  </Button>
+                </div>
+              )}
               <div className="rounded-md border overflow-x-auto overflow-y-auto max-h-[220px] xs:max-h-[250px] sm:max-h-[50vh] md:max-h-[55vh] lg:max-h-[60vh]">
                 <Table className="min-w-[600px]">
                   <TableHeader className="sticky top-0 bg-background z-10">
