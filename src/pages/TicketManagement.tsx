@@ -219,8 +219,26 @@ export default function TicketManagement() {
     );
   });
 
+  // Daftar region yang tersedia dari insiden FEEDER (untuk dropdown filter)
+  const feederRegionsAvailable = useMemo(() => {
+    const set = new Set<string>();
+    tickets.forEach((t) => {
+      if (!FEEDER_CONSTRAINTS_SET.has(t.constraint)) return;
+      const region = mitraToRegion[t.serpo.trim().toUpperCase()];
+      if (region) set.add(region);
+    });
+    return Array.from(set).sort();
+  }, [tickets, mitraToRegion]);
+
   // Filter untuk Daftar Incident
   const filteredTickets = tickets.filter((ticket) => {
+    // Filter Region FEEDER: jika dipilih, hanya tampilkan insiden FEEDER pada region tsb
+    if (feederRegionFilter !== "all") {
+      if (!FEEDER_CONSTRAINTS_SET.has(ticket.constraint)) return false;
+      const region = mitraToRegion[ticket.serpo.trim().toUpperCase()] || "";
+      if (region !== feederRegionFilter) return false;
+    }
+
     if (!ticketSearchQuery.trim()) return true;
     
     const query = ticketSearchQuery.toLowerCase();
