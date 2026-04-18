@@ -124,13 +124,20 @@ export default function TicketManagement() {
   // Manual edit toggle for Constraint (allow free-text)
   const [autoConstraintManualEdit, setAutoConstraintManualEdit] = useState(false);
   const [manualConstraintManualEdit, setManualConstraintManualEdit] = useState(false);
+  // When constraint is manually typed (custom), let user pick which team list to show
+  const [autoSerpoTypeOverride, setAutoSerpoTypeOverride] = useState<"RITEL" | "FEEDER">("RITEL");
+  const [manualSerpoTypeOverride, setManualSerpoTypeOverride] = useState<"RITEL" | "FEEDER">("RITEL");
 
   // Compute serpo options for auto form based on hostname + constraint
   // If RITEL constraint has no matching RITEL mitra, fallback to FEEDER mitra
   const autoSerpoOptions = useMemo(() => {
-    if (!selectedRecord || !formData.constraint) return [];
+    if (!selectedRecord) return [];
+    if (!autoConstraintManualEdit && !formData.constraint) return [];
     const hostname = String(selectedRecord.hostname || "").trim().toUpperCase();
-    const isFeeder = FEEDER_CONSTRAINTS_SET.has(formData.constraint);
+    // If constraint typed manually (custom), use the user-selected team type
+    const isFeeder = autoConstraintManualEdit
+      ? autoSerpoTypeOverride === "FEEDER"
+      : FEEDER_CONSTRAINTS_SET.has(formData.constraint);
     const targetType = isFeeder ? "FEEDER" : "RITEL";
     
     // Find mitra matching hostname and serpoType
@@ -159,13 +166,15 @@ export default function TicketManagement() {
     // Fallback: show all mitra for this serpoType
     const fallback = regionalTeamData.filter(r => r.serpoType.toUpperCase() === targetType);
     return [...new Set(fallback.map(r => r.mitraName))];
-  }, [selectedRecord, formData.constraint, regionalTeamData]);
+  }, [selectedRecord, formData.constraint, regionalTeamData, autoConstraintManualEdit, autoSerpoTypeOverride]);
 
   // Compute serpo options for manual form
   const manualSerpoOptions = useMemo(() => {
-    if (!manualFormData.constraint) return [];
+    if (!manualConstraintManualEdit && !manualFormData.constraint) return [];
     const hostname = manualFormData.hostname.trim().toUpperCase();
-    const isFeeder = FEEDER_CONSTRAINTS_SET.has(manualFormData.constraint);
+    const isFeeder = manualConstraintManualEdit
+      ? manualSerpoTypeOverride === "FEEDER"
+      : FEEDER_CONSTRAINTS_SET.has(manualFormData.constraint);
     const targetType = isFeeder ? "FEEDER" : "RITEL";
     
     if (hostname) {
@@ -192,7 +201,7 @@ export default function TicketManagement() {
     // Fallback: all mitra for this type
     const fallback = regionalTeamData.filter(r => r.serpoType.toUpperCase() === targetType);
     return [...new Set(fallback.map(r => r.mitraName))];
-  }, [manualFormData.constraint, manualFormData.hostname, regionalTeamData]);
+  }, [manualFormData.constraint, manualFormData.hostname, regionalTeamData, manualConstraintManualEdit, manualSerpoTypeOverride]);
   // Build mitraName → region map for resolving ticket region
   const mitraToRegion = useMemo(() => {
     const map: Record<string, string> = {};
@@ -497,18 +506,38 @@ export default function TicketManagement() {
               />
             </div>
             <div>
-              <div className="flex items-center justify-between mb-1">
+              <div className="flex items-center justify-between mb-1 gap-2 flex-wrap">
                 <Label>Serpo / Tim</Label>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="h-6 px-2 text-xs gap-1"
-                  onClick={() => { setAutoSerpoManualEdit(!autoSerpoManualEdit); setFormData({ ...formData, serpo: "" }); }}
-                >
-                  <Pencil className="h-3 w-3" />
-                  {autoSerpoManualEdit ? "Pilih dari list" : "Edit manual"}
-                </Button>
+                <div className="flex items-center gap-1">
+                  {autoConstraintManualEdit && !autoSerpoManualEdit && (
+                    <div className="flex items-center rounded-md border border-input overflow-hidden">
+                      <button
+                        type="button"
+                        onClick={() => { setAutoSerpoTypeOverride("RITEL"); setFormData({ ...formData, serpo: "" }); }}
+                        className={`px-2 py-0.5 text-[10px] font-semibold transition-colors ${autoSerpoTypeOverride === "RITEL" ? "bg-primary text-primary-foreground" : "bg-background text-muted-foreground hover:bg-muted"}`}
+                      >
+                        RITEL
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => { setAutoSerpoTypeOverride("FEEDER"); setFormData({ ...formData, serpo: "" }); }}
+                        className={`px-2 py-0.5 text-[10px] font-semibold transition-colors ${autoSerpoTypeOverride === "FEEDER" ? "bg-primary text-primary-foreground" : "bg-background text-muted-foreground hover:bg-muted"}`}
+                      >
+                        FEEDER
+                      </button>
+                    </div>
+                  )}
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="h-6 px-2 text-xs gap-1"
+                    onClick={() => { setAutoSerpoManualEdit(!autoSerpoManualEdit); setFormData({ ...formData, serpo: "" }); }}
+                  >
+                    <Pencil className="h-3 w-3" />
+                    {autoSerpoManualEdit ? "Pilih dari list" : "Edit manual"}
+                  </Button>
+                </div>
               </div>
               {autoSerpoManualEdit ? (
                 <Input
@@ -852,18 +881,38 @@ export default function TicketManagement() {
                           />
                         </div>
                         <div>
-                          <div className="flex items-center justify-between mb-1">
+                          <div className="flex items-center justify-between mb-1 gap-2 flex-wrap">
                             <Label>Serpo / Tim *</Label>
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="sm"
-                              className="h-6 px-2 text-xs gap-1"
-                              onClick={() => { setManualSerpoManualEdit(!manualSerpoManualEdit); setManualFormData({ ...manualFormData, serpo: "" }); }}
-                            >
-                              <Pencil className="h-3 w-3" />
-                              {manualSerpoManualEdit ? "Pilih dari list" : "Edit manual"}
-                            </Button>
+                            <div className="flex items-center gap-1">
+                              {manualConstraintManualEdit && !manualSerpoManualEdit && (
+                                <div className="flex items-center rounded-md border border-input overflow-hidden">
+                                  <button
+                                    type="button"
+                                    onClick={() => { setManualSerpoTypeOverride("RITEL"); setManualFormData({ ...manualFormData, serpo: "" }); }}
+                                    className={`px-2 py-0.5 text-[10px] font-semibold transition-colors ${manualSerpoTypeOverride === "RITEL" ? "bg-primary text-primary-foreground" : "bg-background text-muted-foreground hover:bg-muted"}`}
+                                  >
+                                    RITEL
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => { setManualSerpoTypeOverride("FEEDER"); setManualFormData({ ...manualFormData, serpo: "" }); }}
+                                    className={`px-2 py-0.5 text-[10px] font-semibold transition-colors ${manualSerpoTypeOverride === "FEEDER" ? "bg-primary text-primary-foreground" : "bg-background text-muted-foreground hover:bg-muted"}`}
+                                  >
+                                    FEEDER
+                                  </button>
+                                </div>
+                              )}
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                className="h-6 px-2 text-xs gap-1"
+                                onClick={() => { setManualSerpoManualEdit(!manualSerpoManualEdit); setManualFormData({ ...manualFormData, serpo: "" }); }}
+                              >
+                                <Pencil className="h-3 w-3" />
+                                {manualSerpoManualEdit ? "Pilih dari list" : "Edit manual"}
+                              </Button>
+                            </div>
                           </div>
                           {manualSerpoManualEdit ? (
                             <Input
