@@ -200,7 +200,7 @@ export default function TicketManagement() {
     // Fallback: all mitra for this type
     const fallback = regionalTeamData.filter(r => r.serpoType.toUpperCase() === targetType);
     return [...new Set(fallback.map(r => r.mitraName))];
-  }, [manualFormData.constraint, manualFormData.hostname, regionalTeamData]);
+  }, [manualFormData.constraint, manualFormData.hostname, regionalTeamData, manualConstraintManualEdit, manualSerpoTypeOverride]);
   // Build mitraName → region map for resolving ticket region
   const mitraToRegion = useMemo(() => {
     const map: Record<string, string> = {};
