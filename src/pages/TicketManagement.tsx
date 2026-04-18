@@ -93,6 +93,8 @@ export default function TicketManagement() {
   const [ticketSearchQuery, setTicketSearchQuery] = useState("");
   // Filter Region khusus untuk insiden FEEDER
   const [feederRegionFilter, setFeederRegionFilter] = useState<string>("all");
+  // Filter Region khusus untuk insiden RITEL
+  const [ritelRegionFilter, setRitelRegionFilter] = useState<string>("all");
 
   const [selectedRecord, setSelectedRecord] = useState<ExcelRecord | null>(null);
   const [formData, setFormData] = useState({
