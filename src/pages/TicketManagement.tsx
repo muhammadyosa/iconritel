@@ -93,6 +93,8 @@ export default function TicketManagement() {
   const [ticketSearchQuery, setTicketSearchQuery] = useState("");
   // Filter Region khusus untuk insiden FEEDER
   const [feederRegionFilter, setFeederRegionFilter] = useState<string>("all");
+  // Filter Region khusus untuk insiden RITEL
+  const [ritelRegionFilter, setRitelRegionFilter] = useState<string>("all");
 
   const [selectedRecord, setSelectedRecord] = useState<ExcelRecord | null>(null);
   const [formData, setFormData] = useState({
@@ -230,6 +232,17 @@ export default function TicketManagement() {
     return Array.from(set).sort();
   }, [tickets, mitraToRegion]);
 
+  // Daftar region yang tersedia dari insiden RITEL (untuk dropdown filter)
+  const ritelRegionsAvailable = useMemo(() => {
+    const set = new Set<string>();
+    tickets.forEach((t) => {
+      if (FEEDER_CONSTRAINTS_SET.has(t.constraint)) return;
+      const region = mitraToRegion[t.serpo.trim().toUpperCase()];
+      if (region) set.add(region);
+    });
+    return Array.from(set).sort();
+  }, [tickets, mitraToRegion]);
+
   // Filter untuk Daftar Incident
   const filteredTickets = tickets.filter((ticket) => {
     // Filter Region FEEDER: jika dipilih, hanya tampilkan insiden FEEDER pada region tsb
@@ -237,6 +250,13 @@ export default function TicketManagement() {
       if (!FEEDER_CONSTRAINTS_SET.has(ticket.constraint)) return false;
       const region = mitraToRegion[ticket.serpo.trim().toUpperCase()] || "";
       if (region !== feederRegionFilter) return false;
+    }
+
+    // Filter Region RITEL: jika dipilih, hanya tampilkan insiden RITEL pada region tsb
+    if (ritelRegionFilter !== "all") {
+      if (FEEDER_CONSTRAINTS_SET.has(ticket.constraint)) return false;
+      const region = mitraToRegion[ticket.serpo.trim().toUpperCase()] || "";
+      if (region !== ritelRegionFilter) return false;
     }
 
     if (!ticketSearchQuery.trim()) return true;
@@ -1005,6 +1025,26 @@ export default function TicketManagement() {
                     </SelectContent>
                   </Select>
                 </div>
+                <div className="w-full xs:w-32 sm:w-44">
+                  <Label className="text-[9px] sm:text-[10px]">🏠 Region RITEL</Label>
+                  <Select value={ritelRegionFilter} onValueChange={setRitelRegionFilter}>
+                    <SelectTrigger className="h-6 sm:h-7 text-[9px] sm:text-[10px]">
+                      <SelectValue placeholder="Semua Region" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Semua (Non-filter)</SelectItem>
+                      {ritelRegionsAvailable.length === 0 ? (
+                        <SelectItem value="__none" disabled>
+                          Tidak ada insiden RITEL
+                        </SelectItem>
+                      ) : (
+                        ritelRegionsAvailable.map((r) => (
+                          <SelectItem key={r} value={r}>{r}</SelectItem>
+                        ))
+                      )}
+                    </SelectContent>
+                  </Select>
+                </div>
                 <div className="flex-1">
                   <Label className="text-[9px] sm:text-[10px]">Pencarian</Label>
                   <div className="relative">
@@ -1018,14 +1058,20 @@ export default function TicketManagement() {
                   </div>
                 </div>
               </div>
-              {feederRegionFilter !== "all" && (
-                <div className="flex items-center gap-2 text-[9px] sm:text-[10px] text-muted-foreground bg-muted/40 rounded-md px-2 py-1 border border-dashed">
-                  <span>📡 Filter aktif: insiden <strong className="text-foreground">FEEDER</strong> region <strong className="text-foreground">{feederRegionFilter}</strong> ({filteredTickets.length} insiden)</span>
+              {(feederRegionFilter !== "all" || ritelRegionFilter !== "all") && (
+                <div className="flex flex-wrap items-center gap-2 text-[9px] sm:text-[10px] text-muted-foreground bg-muted/40 rounded-md px-2 py-1 border border-dashed">
+                  {feederRegionFilter !== "all" && (
+                    <span>📡 <strong className="text-foreground">FEEDER</strong> · <strong className="text-foreground">{feederRegionFilter}</strong></span>
+                  )}
+                  {ritelRegionFilter !== "all" && (
+                    <span>🏠 <strong className="text-foreground">RITEL</strong> · <strong className="text-foreground">{ritelRegionFilter}</strong></span>
+                  )}
+                  <span>({filteredTickets.length} insiden)</span>
                   <Button
                     variant="ghost"
                     size="sm"
                     className="h-5 px-1.5 text-[9px] ml-auto"
-                    onClick={() => setFeederRegionFilter("all")}
+                    onClick={() => { setFeederRegionFilter("all"); setRitelRegionFilter("all"); }}
                   >
                     Reset
                   </Button>
