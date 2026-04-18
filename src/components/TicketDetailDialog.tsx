@@ -339,11 +339,22 @@ export function TicketDetailDialog({
                     <span className="text-muted-foreground">Resolved at:</span>
                     <p className="text-xs">{new Date(ticket.resolvedAt).toLocaleString("id-ID")}</p>
                   </div>
-                )}
               </div>
-              <div className="pt-3 border-t">
-                <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground text-sm">Format Insident:</span>
+              {ticket.status === "Pending" && ticket.pendingReason && (
+                <div className="pt-3 border-t">
+                  <div className="flex items-center gap-2 mb-2">
+                    <AlertCircle className="h-4 w-4 text-amber-500" />
+                    <span className="text-sm font-medium">Alasan Pending</span>
+                  </div>
+                  <div className="p-3 bg-amber-500/10 border border-amber-500/30 rounded-lg space-y-1">
+                    <p className="text-sm whitespace-pre-wrap break-words">{ticket.pendingReason}</p>
+                    <p className="text-xs text-muted-foreground pt-1 border-t border-amber-500/20">
+                      Oleh: <span className="font-medium">{ticket.pendingByName || "-"}</span>
+                      {ticket.pendingAt && ` • ${new Date(ticket.pendingAt).toLocaleString("id-ID")}`}
+                    </p>
+                  </div>
+                </div>
+              )}
                   <Button
                     variant="outline"
                     size="sm"
