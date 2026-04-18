@@ -447,6 +447,54 @@ export function TicketDetailDialog({
           )}
         </div>
       </DialogContent>
+
+      <AlertDialog open={pendingDialogOpen} onOpenChange={setPendingDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <AlertCircle className="h-5 w-5 text-amber-500" />
+              Alasan Pending
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Berikan alasan kenapa insident <strong>{ticket.id}</strong> diset ke status Pending. Catatan ini akan terlihat oleh anggota tim lain di Detail Insident.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <Textarea
+            value={pendingReasonInput}
+            onChange={(e) => setPendingReasonInput(e.target.value)}
+            placeholder="Contoh: Menunggu konfirmasi pelanggan, perlu visit teknisi, dll."
+            rows={4}
+            autoFocus
+          />
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setPendingReasonInput("")}>Batal</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={async (e) => {
+                const reason = pendingReasonInput.trim();
+                if (!reason) {
+                  e.preventDefault();
+                  toast.error("Alasan wajib diisi");
+                  return;
+                }
+                try {
+                  await applyStatusChange("Pending", {
+                    pendingReason: reason,
+                    pendingAt: new Date().toISOString(),
+                    pendingByName: currentUserName,
+                    pendingByUserId: currentUserId,
+                  });
+                  setPendingReasonInput("");
+                  setPendingDialogOpen(false);
+                } catch {
+                  // already toasted
+                }
+              }}
+            >
+              Simpan & Set Pending
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Dialog>
   );
 }
