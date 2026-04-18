@@ -506,18 +506,38 @@ export default function TicketManagement() {
               />
             </div>
             <div>
-              <div className="flex items-center justify-between mb-1">
+              <div className="flex items-center justify-between mb-1 gap-2 flex-wrap">
                 <Label>Serpo / Tim</Label>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="h-6 px-2 text-xs gap-1"
-                  onClick={() => { setAutoSerpoManualEdit(!autoSerpoManualEdit); setFormData({ ...formData, serpo: "" }); }}
-                >
-                  <Pencil className="h-3 w-3" />
-                  {autoSerpoManualEdit ? "Pilih dari list" : "Edit manual"}
-                </Button>
+                <div className="flex items-center gap-1">
+                  {autoConstraintManualEdit && !autoSerpoManualEdit && (
+                    <div className="flex items-center rounded-md border border-input overflow-hidden">
+                      <button
+                        type="button"
+                        onClick={() => { setAutoSerpoTypeOverride("RITEL"); setFormData({ ...formData, serpo: "" }); }}
+                        className={`px-2 py-0.5 text-[10px] font-semibold transition-colors ${autoSerpoTypeOverride === "RITEL" ? "bg-primary text-primary-foreground" : "bg-background text-muted-foreground hover:bg-muted"}`}
+                      >
+                        RITEL
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => { setAutoSerpoTypeOverride("FEEDER"); setFormData({ ...formData, serpo: "" }); }}
+                        className={`px-2 py-0.5 text-[10px] font-semibold transition-colors ${autoSerpoTypeOverride === "FEEDER" ? "bg-primary text-primary-foreground" : "bg-background text-muted-foreground hover:bg-muted"}`}
+                      >
+                        FEEDER
+                      </button>
+                    </div>
+                  )}
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="h-6 px-2 text-xs gap-1"
+                    onClick={() => { setAutoSerpoManualEdit(!autoSerpoManualEdit); setFormData({ ...formData, serpo: "" }); }}
+                  >
+                    <Pencil className="h-3 w-3" />
+                    {autoSerpoManualEdit ? "Pilih dari list" : "Edit manual"}
+                  </Button>
+                </div>
               </div>
               {autoSerpoManualEdit ? (
                 <Input
