@@ -339,6 +339,7 @@ export function TicketDetailDialog({
                     <span className="text-muted-foreground">Resolved at:</span>
                     <p className="text-xs">{new Date(ticket.resolvedAt).toLocaleString("id-ID")}</p>
                   </div>
+                )}
               </div>
               {ticket.status === "Pending" && ticket.pendingReason && (
                 <div className="pt-3 border-t">
@@ -355,6 +356,9 @@ export function TicketDetailDialog({
                   </div>
                 </div>
               )}
+              <div className="pt-3 border-t">
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground text-sm">Format Insident:</span>
                   <Button
                     variant="outline"
                     size="sm"
