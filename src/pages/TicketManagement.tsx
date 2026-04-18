@@ -775,7 +775,35 @@ export default function TicketManagement() {
                         <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap bg-muted/80">👨‍💼 Service ID</TableHead>
                         <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap bg-muted/80">📍 Hostname</TableHead>
                         <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap bg-muted/80">🛠️ ID FAT</TableHead>
-                        <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap bg-muted/80">💻 SN ONT</TableHead>
+                        <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap bg-muted/80">
+                          <div className="flex items-center gap-1">
+                            <span>💻 SN ONT</span>
+                            <button
+                              type="button"
+                              onClick={async (e) => {
+                                e.stopPropagation();
+                                const sns = filteredData
+                                  .slice(0, 200)
+                                  .map((r) => String(r.sn || "").trim())
+                                  .filter(Boolean);
+                                if (sns.length === 0) {
+                                  toast.error("Tidak ada SN ONT untuk disalin");
+                                  return;
+                                }
+                                try {
+                                  await navigator.clipboard.writeText(sns.join("\n"));
+                                  toast.success(`${sns.length} SN ONT disalin`);
+                                } catch {
+                                  toast.error("Gagal menyalin SN ONT");
+                                }
+                              }}
+                              className="inline-flex items-center justify-center h-4 w-4 rounded hover:bg-primary/10 hover:text-primary transition-colors"
+                              title="Salin semua SN ONT dari hasil pencarian"
+                            >
+                              <Copy className="h-2.5 w-2.5" />
+                            </button>
+                          </div>
+                        </TableHead>
                         <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap bg-muted/80">👤 Customer</TableHead>
                       </TableRow>
                     </TableHeader>
