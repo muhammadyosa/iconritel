@@ -91,6 +91,8 @@ export default function TicketManagement() {
   // Filter untuk Daftar Incident - single search with field selector
   const [ticketSearchField, setTicketSearchField] = useState<string>("all");
   const [ticketSearchQuery, setTicketSearchQuery] = useState("");
+  // Filter Region khusus untuk insiden FEEDER
+  const [feederRegionFilter, setFeederRegionFilter] = useState<string>("all");
 
   const [selectedRecord, setSelectedRecord] = useState<ExcelRecord | null>(null);
   const [formData, setFormData] = useState({
