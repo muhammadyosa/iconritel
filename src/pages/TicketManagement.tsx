@@ -232,6 +232,17 @@ export default function TicketManagement() {
     return Array.from(set).sort();
   }, [tickets, mitraToRegion]);
 
+  // Daftar region yang tersedia dari insiden RITEL (untuk dropdown filter)
+  const ritelRegionsAvailable = useMemo(() => {
+    const set = new Set<string>();
+    tickets.forEach((t) => {
+      if (FEEDER_CONSTRAINTS_SET.has(t.constraint)) return;
+      const region = mitraToRegion[t.serpo.trim().toUpperCase()];
+      if (region) set.add(region);
+    });
+    return Array.from(set).sort();
+  }, [tickets, mitraToRegion]);
+
   // Filter untuk Daftar Incident
   const filteredTickets = tickets.filter((ticket) => {
     // Filter Region FEEDER: jika dipilih, hanya tampilkan insiden FEEDER pada region tsb
@@ -239,6 +250,13 @@ export default function TicketManagement() {
       if (!FEEDER_CONSTRAINTS_SET.has(ticket.constraint)) return false;
       const region = mitraToRegion[ticket.serpo.trim().toUpperCase()] || "";
       if (region !== feederRegionFilter) return false;
+    }
+
+    // Filter Region RITEL: jika dipilih, hanya tampilkan insiden RITEL pada region tsb
+    if (ritelRegionFilter !== "all") {
+      if (FEEDER_CONSTRAINTS_SET.has(ticket.constraint)) return false;
+      const region = mitraToRegion[ticket.serpo.trim().toUpperCase()] || "";
+      if (region !== ritelRegionFilter) return false;
     }
 
     if (!ticketSearchQuery.trim()) return true;
