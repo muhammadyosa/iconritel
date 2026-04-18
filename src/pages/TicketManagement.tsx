@@ -121,6 +121,9 @@ export default function TicketManagement() {
   // Manual edit toggle for Serpo/Tim
   const [autoSerpoManualEdit, setAutoSerpoManualEdit] = useState(false);
   const [manualSerpoManualEdit, setManualSerpoManualEdit] = useState(false);
+  // Manual edit toggle for Constraint (allow free-text)
+  const [autoConstraintManualEdit, setAutoConstraintManualEdit] = useState(false);
+  const [manualConstraintManualEdit, setManualConstraintManualEdit] = useState(false);
 
   // Compute serpo options for auto form based on hostname + constraint
   // If RITEL constraint has no matching RITEL mitra, fallback to FEEDER mitra
