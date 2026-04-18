@@ -121,6 +121,9 @@ export default function TicketManagement() {
   // Manual edit toggle for Serpo/Tim
   const [autoSerpoManualEdit, setAutoSerpoManualEdit] = useState(false);
   const [manualSerpoManualEdit, setManualSerpoManualEdit] = useState(false);
+  // Manual edit toggle for Constraint (allow free-text)
+  const [autoConstraintManualEdit, setAutoConstraintManualEdit] = useState(false);
+  const [manualConstraintManualEdit, setManualConstraintManualEdit] = useState(false);
 
   // Compute serpo options for auto form based on hostname + constraint
   // If RITEL constraint has no matching RITEL mitra, fallback to FEEDER mitra
@@ -536,33 +539,54 @@ export default function TicketManagement() {
               )}
             </div>
             <div>
-              <Label>Constraint</Label>
-              <Select
-                value={formData.constraint}
-                onValueChange={(value) => { setFormData({ ...formData, constraint: value, serpo: "" }); setAutoSerpoManualEdit(false); }}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Pilih constraint" />
-                </SelectTrigger>
-                <SelectContent>
-                  <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">
-                    RITEL
-                  </div>
-                  {ALL_CONSTRAINTS.filter(c => !FEEDER_CONSTRAINTS_SET.has(c)).map((c) => (
-                    <SelectItem key={c} value={c}>
-                      {c}
-                    </SelectItem>
-                  ))}
-                  <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground border-t mt-1">
-                    FEEDER (PROACTIVE NOC RETAIL)
-                  </div>
-                  {ALL_CONSTRAINTS.filter(c => FEEDER_CONSTRAINTS_SET.has(c)).map((c) => (
-                    <SelectItem key={c} value={c}>
-                      {c}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <div className="flex items-center justify-between mb-1">
+                <Label>Constraint</Label>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="h-6 px-2 text-[11px]"
+                  onClick={() => setAutoConstraintManualEdit((v) => !v)}
+                >
+                  <Pencil className="h-3 w-3 mr-1" />
+                  {autoConstraintManualEdit ? "Pilih dari Daftar" : "Edit Manual"}
+                </Button>
+              </div>
+              {autoConstraintManualEdit ? (
+                <Input
+                  value={formData.constraint}
+                  onChange={(e) => setFormData({ ...formData, constraint: e.target.value.toUpperCase(), serpo: "" })}
+                  placeholder="Tulis constraint manual (UPPERCASE)"
+                  className="uppercase"
+                />
+              ) : (
+                <Select
+                  value={formData.constraint}
+                  onValueChange={(value) => { setFormData({ ...formData, constraint: value, serpo: "" }); setAutoSerpoManualEdit(false); }}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Pilih constraint" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">
+                      RITEL
+                    </div>
+                    {ALL_CONSTRAINTS.filter(c => !FEEDER_CONSTRAINTS_SET.has(c)).map((c) => (
+                      <SelectItem key={c} value={c}>
+                        {c}
+                      </SelectItem>
+                    ))}
+                    <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground border-t mt-1">
+                      FEEDER (PROACTIVE NOC RETAIL)
+                    </div>
+                    {ALL_CONSTRAINTS.filter(c => FEEDER_CONSTRAINTS_SET.has(c)).map((c) => (
+                      <SelectItem key={c} value={c}>
+                        {c}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
             </div>
             
             {/* Show PORT text input only for PORT DOWN constraint */}
@@ -897,33 +921,54 @@ export default function TicketManagement() {
                         />
                       </div>
                       <div>
-                        <Label>Constraint *</Label>
-                        <Select
-                          value={manualFormData.constraint}
-                          onValueChange={(value) => { setManualFormData({ ...manualFormData, constraint: value, serpo: "" }); setManualSerpoManualEdit(false); }}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Pilih constraint" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">
-                              RITEL
-                            </div>
-                            {ALL_CONSTRAINTS.filter(c => !FEEDER_CONSTRAINTS_SET.has(c)).map((c) => (
-                              <SelectItem key={c} value={c}>
-                                {c}
-                              </SelectItem>
-                            ))}
-                            <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground border-t mt-1">
-                              FEEDER (PROACTIVE NOC RETAIL)
-                            </div>
-                            {ALL_CONSTRAINTS.filter(c => FEEDER_CONSTRAINTS_SET.has(c)).map((c) => (
-                              <SelectItem key={c} value={c}>
-                                {c}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                        <div className="flex items-center justify-between mb-1">
+                          <Label>Constraint *</Label>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            className="h-6 px-2 text-[11px]"
+                            onClick={() => setManualConstraintManualEdit((v) => !v)}
+                          >
+                            <Pencil className="h-3 w-3 mr-1" />
+                            {manualConstraintManualEdit ? "Pilih dari Daftar" : "Edit Manual"}
+                          </Button>
+                        </div>
+                        {manualConstraintManualEdit ? (
+                          <Input
+                            value={manualFormData.constraint}
+                            onChange={(e) => setManualFormData({ ...manualFormData, constraint: e.target.value.toUpperCase(), serpo: "" })}
+                            placeholder="Tulis constraint manual (UPPERCASE)"
+                            className="uppercase"
+                          />
+                        ) : (
+                          <Select
+                            value={manualFormData.constraint}
+                            onValueChange={(value) => { setManualFormData({ ...manualFormData, constraint: value, serpo: "" }); setManualSerpoManualEdit(false); }}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Pilih constraint" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">
+                                RITEL
+                              </div>
+                              {ALL_CONSTRAINTS.filter(c => !FEEDER_CONSTRAINTS_SET.has(c)).map((c) => (
+                                <SelectItem key={c} value={c}>
+                                  {c}
+                                </SelectItem>
+                              ))}
+                              <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground border-t mt-1">
+                                FEEDER (PROACTIVE NOC RETAIL)
+                              </div>
+                              {ALL_CONSTRAINTS.filter(c => FEEDER_CONSTRAINTS_SET.has(c)).map((c) => (
+                                <SelectItem key={c} value={c}>
+                                  {c}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        )}
                       </div>
                       
                       {manualFormData.constraint === "PORT DOWN" && (
