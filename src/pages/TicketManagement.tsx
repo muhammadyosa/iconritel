@@ -131,7 +131,8 @@ export default function TicketManagement() {
   // Compute serpo options for auto form based on hostname + constraint
   // If RITEL constraint has no matching RITEL mitra, fallback to FEEDER mitra
   const autoSerpoOptions = useMemo(() => {
-    if (!selectedRecord || !formData.constraint) return [];
+    if (!selectedRecord) return [];
+    if (!autoConstraintManualEdit && !formData.constraint) return [];
     const hostname = String(selectedRecord.hostname || "").trim().toUpperCase();
     // If constraint typed manually (custom), use the user-selected team type
     const isFeeder = autoConstraintManualEdit
