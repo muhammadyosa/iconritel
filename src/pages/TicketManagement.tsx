@@ -91,6 +91,8 @@ export default function TicketManagement() {
   // Filter untuk Daftar Incident - single search with field selector
   const [ticketSearchField, setTicketSearchField] = useState<string>("all");
   const [ticketSearchQuery, setTicketSearchQuery] = useState("");
+  // Filter Region khusus untuk insiden FEEDER
+  const [feederRegionFilter, setFeederRegionFilter] = useState<string>("all");
 
   const [selectedRecord, setSelectedRecord] = useState<ExcelRecord | null>(null);
   const [formData, setFormData] = useState({
@@ -217,8 +219,26 @@ export default function TicketManagement() {
     );
   });
 
+  // Daftar region yang tersedia dari insiden FEEDER (untuk dropdown filter)
+  const feederRegionsAvailable = useMemo(() => {
+    const set = new Set<string>();
+    tickets.forEach((t) => {
+      if (!FEEDER_CONSTRAINTS_SET.has(t.constraint)) return;
+      const region = mitraToRegion[t.serpo.trim().toUpperCase()];
+      if (region) set.add(region);
+    });
+    return Array.from(set).sort();
+  }, [tickets, mitraToRegion]);
+
   // Filter untuk Daftar Incident
   const filteredTickets = tickets.filter((ticket) => {
+    // Filter Region FEEDER: jika dipilih, hanya tampilkan insiden FEEDER pada region tsb
+    if (feederRegionFilter !== "all") {
+      if (!FEEDER_CONSTRAINTS_SET.has(ticket.constraint)) return false;
+      const region = mitraToRegion[ticket.serpo.trim().toUpperCase()] || "";
+      if (region !== feederRegionFilter) return false;
+    }
+
     if (!ticketSearchQuery.trim()) return true;
     
     const query = ticketSearchQuery.toLowerCase();
@@ -965,6 +985,26 @@ export default function TicketManagement() {
                     </SelectContent>
                   </Select>
                 </div>
+                <div className="w-full xs:w-32 sm:w-44">
+                  <Label className="text-[9px] sm:text-[10px]">📡 Region FEEDER</Label>
+                  <Select value={feederRegionFilter} onValueChange={setFeederRegionFilter}>
+                    <SelectTrigger className="h-6 sm:h-7 text-[9px] sm:text-[10px]">
+                      <SelectValue placeholder="Semua Region" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Semua (Non-filter)</SelectItem>
+                      {feederRegionsAvailable.length === 0 ? (
+                        <SelectItem value="__none" disabled>
+                          Tidak ada insiden FEEDER
+                        </SelectItem>
+                      ) : (
+                        feederRegionsAvailable.map((r) => (
+                          <SelectItem key={r} value={r}>{r}</SelectItem>
+                        ))
+                      )}
+                    </SelectContent>
+                  </Select>
+                </div>
                 <div className="flex-1">
                   <Label className="text-[9px] sm:text-[10px]">Pencarian</Label>
                   <div className="relative">
@@ -978,6 +1018,19 @@ export default function TicketManagement() {
                   </div>
                 </div>
               </div>
+              {feederRegionFilter !== "all" && (
+                <div className="flex items-center gap-2 text-[9px] sm:text-[10px] text-muted-foreground bg-muted/40 rounded-md px-2 py-1 border border-dashed">
+                  <span>📡 Filter aktif: insiden <strong className="text-foreground">FEEDER</strong> region <strong className="text-foreground">{feederRegionFilter}</strong> ({filteredTickets.length} insiden)</span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-5 px-1.5 text-[9px] ml-auto"
+                    onClick={() => setFeederRegionFilter("all")}
+                  >
+                    Reset
+                  </Button>
+                </div>
+              )}
               <div className="rounded-md border overflow-x-auto overflow-y-auto max-h-[220px] xs:max-h-[250px] sm:max-h-[50vh] md:max-h-[55vh] lg:max-h-[60vh]">
                 <Table className="min-w-[600px]">
                   <TableHeader className="sticky top-0 bg-background z-10">
