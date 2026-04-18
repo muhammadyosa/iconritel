@@ -431,7 +431,12 @@ export function InsidentManagement() {
                     <span className="text-[10px] text-muted-foreground">{idx + 1}.</span>
                     <span className="text-[10px] font-mono font-medium truncate">{ticket.id}</span>
                   </div>
-                  {statusBadge(ticket.status)}
+                  <div className="flex items-center gap-1">
+                    {statusBadge(ticket.status)}
+                    {ticket.status === "Pending" && ticket.pendingReason && (
+                      <span title={`Alasan: ${ticket.pendingReason}`} className="text-amber-500 text-xs leading-none">⚠️</span>
+                    )}
+                  </div>
                 </div>
                 <div className="grid grid-cols-2 gap-x-3 gap-y-0.5 text-[10px] pl-6">
                   <div className="truncate"><span className="text-muted-foreground">👤 </span>{ticket.customerName}</div>
@@ -498,7 +503,14 @@ export function InsidentManagement() {
                       <TableCell className="text-xs font-mono">{ticket.id}</TableCell>
                       <TableCell className="text-xs max-w-[150px] truncate">{ticket.customerName}</TableCell>
                       <TableCell className="text-xs">{ticket.constraint}</TableCell>
-                      <TableCell>{statusBadge(ticket.status)}</TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-1">
+                          {statusBadge(ticket.status)}
+                          {ticket.status === "Pending" && ticket.pendingReason && (
+                            <span title={`Alasan: ${ticket.pendingReason}`} className="text-amber-500 text-xs leading-none cursor-help">⚠️</span>
+                          )}
+                        </div>
+                      </TableCell>
                       <TableCell className="text-xs max-w-[120px] truncate">{ticket.createdByName || "—"}</TableCell>
                       <TableCell className="text-xs text-muted-foreground">{ticket.createdAt}</TableCell>
                       <TableCell className="text-xs">
