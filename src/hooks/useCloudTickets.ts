@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Ticket } from "@/types/ticket";
 import { toast } from "sonner";
+import { logTicketStatusChange } from "@/hooks/useTicketStatusHistory";
 
 const SLA_THRESHOLD_MS = 8 * 60 * 60 * 1000; // 8 hours
 
