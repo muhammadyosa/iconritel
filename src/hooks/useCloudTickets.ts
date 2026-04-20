@@ -374,6 +374,7 @@ export function useCloudTickets() {
         changedByUserId: ticket.createdByUserId,
         changedByName: ticket.createdByName,
       });
+    } catch (error) {
       // Rollback optimistic insert
       setTickets((prev) => prev.filter((t) => t.id !== ticket.id));
 
