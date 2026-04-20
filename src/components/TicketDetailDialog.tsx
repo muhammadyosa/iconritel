@@ -62,6 +62,7 @@ export function TicketDetailDialog({
   const [isEditing, setIsEditing] = useState(false);
   const [pendingDialogOpen, setPendingDialogOpen] = useState(false);
   const [pendingReasonInput, setPendingReasonInput] = useState("");
+  const [reasonOnlyMode, setReasonOnlyMode] = useState(false);
   const [editData, setEditData] = useState({
     ticketId: ticket.id,
     customerName: ticket.customerName,
@@ -343,9 +344,26 @@ export function TicketDetailDialog({
               </div>
               {ticket.status === "Pending" && (
                 <div className="pt-3 border-t">
-                  <div className="flex items-center gap-2 mb-2">
-                    <AlertCircle className="h-4 w-4 text-amber-500" />
-                    <span className="text-sm font-medium">Alasan Pending</span>
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <AlertCircle className="h-4 w-4 text-amber-500" />
+                      <span className="text-sm font-medium">Alasan Pending</span>
+                    </div>
+                    {!isReviewer && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-6 text-xs gap-1"
+                        onClick={() => {
+                          setPendingReasonInput(ticket.pendingReason || "");
+                          setReasonOnlyMode(true);
+                          setPendingDialogOpen(true);
+                        }}
+                      >
+                        <Edit className="h-3 w-3" />
+                        {ticket.pendingReason ? "Edit Alasan" : "Tambah Alasan"}
+                      </Button>
+                    )}
                   </div>
                   <div className="p-3 bg-amber-500/10 border border-amber-500/30 rounded-lg space-y-1">
                     {ticket.pendingReason ? (
@@ -454,15 +472,23 @@ export function TicketDetailDialog({
         </div>
       </DialogContent>
 
-      <AlertDialog open={pendingDialogOpen} onOpenChange={setPendingDialogOpen}>
+      <AlertDialog
+        open={pendingDialogOpen}
+        onOpenChange={(o) => {
+          setPendingDialogOpen(o);
+          if (!o) setReasonOnlyMode(false);
+        }}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2">
               <AlertCircle className="h-5 w-5 text-amber-500" />
-              Alasan Pending
+              {reasonOnlyMode ? (ticket.pendingReason ? "Edit Alasan Pending" : "Tambah Alasan Pending") : "Alasan Pending"}
             </AlertDialogTitle>
             <AlertDialogDescription>
-              Berikan alasan kenapa insident <strong>{ticket.id}</strong> diset ke status Pending. Catatan ini akan terlihat oleh anggota tim lain di Detail Insident.
+              {reasonOnlyMode
+                ? <>Perbarui catatan alasan untuk insident <strong>{ticket.id}</strong>. Status tetap <strong>Pending</strong>.</>
+                : <>Berikan alasan kenapa insident <strong>{ticket.id}</strong> diset ke status Pending. Catatan ini akan terlihat oleh anggota tim lain di Detail Insident.</>}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <Textarea
@@ -473,7 +499,7 @@ export function TicketDetailDialog({
             autoFocus
           />
           <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setPendingReasonInput("")}>Batal</AlertDialogCancel>
+            <AlertDialogCancel onClick={() => { setPendingReasonInput(""); setReasonOnlyMode(false); }}>Batal</AlertDialogCancel>
             <AlertDialogAction
               onClick={async (e) => {
                 const reason = pendingReasonInput.trim();
@@ -483,20 +509,34 @@ export function TicketDetailDialog({
                   return;
                 }
                 try {
-                  await applyStatusChange("Pending", {
-                    pendingReason: reason,
-                    pendingAt: new Date().toISOString(),
-                    pendingByName: currentUserName,
-                    pendingByUserId: currentUserId,
-                  });
+                  if (reasonOnlyMode) {
+                    await updateTicket(ticket.id, {
+                      pendingReason: reason,
+                      pendingAt: new Date().toISOString(),
+                      pendingByName: currentUserName,
+                      pendingByUserId: currentUserId,
+                    });
+                    toast.success("Alasan pending diperbarui");
+                    if (logActivity) {
+                      logActivity("update_ticket", `${currentUserName || "User"} memperbarui alasan pending ${ticket.id}`);
+                    }
+                  } else {
+                    await applyStatusChange("Pending", {
+                      pendingReason: reason,
+                      pendingAt: new Date().toISOString(),
+                      pendingByName: currentUserName,
+                      pendingByUserId: currentUserId,
+                    });
+                  }
                   setPendingReasonInput("");
+                  setReasonOnlyMode(false);
                   setPendingDialogOpen(false);
                 } catch {
                   // already toasted
                 }
               }}
             >
-              Simpan & Set Pending
+              {reasonOnlyMode ? "Simpan Alasan" : "Simpan & Set Pending"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
