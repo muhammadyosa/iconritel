@@ -44,6 +44,7 @@ import {
   ExcelRecord,
 } from "@/types/ticket";
 import { StatusBadge } from "@/components/StatusBadge";
+import { HighlightText } from "@/components/HighlightText";
 import { TicketDetailDialog } from "@/components/TicketDetailDialog";
 import { DurationCell } from "@/components/DurationCell";
 import { RegionBadge } from "@/components/RegionBadge";
