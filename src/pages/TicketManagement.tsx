@@ -1341,7 +1341,6 @@ export default function TicketManagement() {
                         );
                       })
                     )}
-                    )}
                   </TableBody>
                 </Table>
               </div>
