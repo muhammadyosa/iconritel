@@ -341,18 +341,24 @@ export function TicketDetailDialog({
                   </div>
                 )}
               </div>
-              {ticket.status === "Pending" && ticket.pendingReason && (
+              {ticket.status === "Pending" && (
                 <div className="pt-3 border-t">
                   <div className="flex items-center gap-2 mb-2">
                     <AlertCircle className="h-4 w-4 text-amber-500" />
                     <span className="text-sm font-medium">Alasan Pending</span>
                   </div>
                   <div className="p-3 bg-amber-500/10 border border-amber-500/30 rounded-lg space-y-1">
-                    <p className="text-sm whitespace-pre-wrap break-words">{ticket.pendingReason}</p>
-                    <p className="text-xs text-muted-foreground pt-1 border-t border-amber-500/20">
-                      Oleh: <span className="font-medium">{ticket.pendingByName || "-"}</span>
-                      {ticket.pendingAt && ` • ${new Date(ticket.pendingAt).toLocaleString("id-ID")}`}
-                    </p>
+                    {ticket.pendingReason ? (
+                      <p className="text-sm whitespace-pre-wrap break-words">{ticket.pendingReason}</p>
+                    ) : (
+                      <p className="text-sm italic text-muted-foreground">Belum ada alasan tercatat</p>
+                    )}
+                    {(ticket.pendingByName || ticket.pendingAt) && (
+                      <p className="text-xs text-muted-foreground pt-1 border-t border-amber-500/20">
+                        Oleh: <span className="font-medium">{ticket.pendingByName || "-"}</span>
+                        {ticket.pendingAt && ` • ${new Date(ticket.pendingAt).toLocaleString("id-ID")}`}
+                      </p>
+                    )}
                   </div>
                 </div>
               )}
