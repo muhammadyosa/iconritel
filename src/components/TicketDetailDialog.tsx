@@ -407,6 +407,7 @@ export function TicketDetailDialog({
               {!isReviewer && (
                 <div className="flex gap-2 pt-3">
                     <Select
+                      key={ticket.status}
                       value={ticket.status}
                       onValueChange={async (value: any) => {
                         if (value === ticket.status) return;
