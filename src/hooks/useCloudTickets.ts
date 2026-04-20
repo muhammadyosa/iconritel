@@ -461,6 +461,32 @@ export function useCloudTickets() {
         .eq("ticket_id" as never, id) as unknown as Promise<{ error: Error | null }>);
 
       if (error) throw error;
+
+      // Log to status history (non-blocking)
+      const oldStatus = ticket?.status || null;
+      const newStatus = updates.status;
+      const reasonChanged = updates.pendingReason !== undefined && updates.pendingReason !== ticket?.pendingReason;
+      if (newStatus !== undefined && newStatus !== oldStatus) {
+        // Status actually changed
+        logTicketStatusChange({
+          ticketId: id,
+          oldStatus,
+          newStatus,
+          reason: updates.pendingReason ?? (newStatus === "Pending" ? null : null),
+          changedByUserId: updates.resolvedByUserId || updates.pendingByUserId || null,
+          changedByName: updates.resolvedByName || updates.pendingByName || null,
+        });
+      } else if (reasonChanged && oldStatus === "Pending") {
+        // Pending reason updated without status change
+        logTicketStatusChange({
+          ticketId: id,
+          oldStatus: "Pending",
+          newStatus: "Pending",
+          reason: updates.pendingReason || null,
+          changedByUserId: updates.pendingByUserId || null,
+          changedByName: updates.pendingByName || null,
+        });
+      }
       // Realtime will reconcile if needed
     } catch (error) {
       // Rollback on failure
