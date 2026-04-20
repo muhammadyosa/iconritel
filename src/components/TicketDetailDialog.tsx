@@ -30,6 +30,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { StatusBadge } from "@/components/StatusBadge";
+import { TicketStatusHistory } from "@/components/TicketStatusHistory";
 import { Ticket, ALL_CONSTRAINTS, FEEDER_CONSTRAINTS_SET, generateTicketFormat } from "@/types/ticket";
 import { toast } from "sonner";
 import { ActivityAction } from "@/hooks/useActivityLog";
