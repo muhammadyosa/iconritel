@@ -239,7 +239,11 @@ export function useCloudTickets() {
         (payload) => {
           if (payload.eventType === "INSERT") {
             const newTicket = dbToTicket(payload.new as DbTicket, profilesMapRef.current);
-            setTickets((prev) => [newTicket, ...prev]);
+            setTickets((prev) => {
+              // Skip jika sudah ada (optimistic insert dari user sendiri)
+              if (prev.some((t) => t.id === newTicket.id)) return prev;
+              return [newTicket, ...prev];
+            });
           } else if (payload.eventType === "UPDATE") {
             const updatedTicket = dbToTicket(payload.new as DbTicket, profilesMapRef.current);
             setTickets((prev) =>
