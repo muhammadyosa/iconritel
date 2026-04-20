@@ -344,9 +344,26 @@ export function TicketDetailDialog({
               </div>
               {ticket.status === "Pending" && (
                 <div className="pt-3 border-t">
-                  <div className="flex items-center gap-2 mb-2">
-                    <AlertCircle className="h-4 w-4 text-amber-500" />
-                    <span className="text-sm font-medium">Alasan Pending</span>
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <AlertCircle className="h-4 w-4 text-amber-500" />
+                      <span className="text-sm font-medium">Alasan Pending</span>
+                    </div>
+                    {!isReviewer && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-6 text-xs gap-1"
+                        onClick={() => {
+                          setPendingReasonInput(ticket.pendingReason || "");
+                          setReasonOnlyMode(true);
+                          setPendingDialogOpen(true);
+                        }}
+                      >
+                        <Edit className="h-3 w-3" />
+                        {ticket.pendingReason ? "Edit Alasan" : "Tambah Alasan"}
+                      </Button>
+                    )}
                   </div>
                   <div className="p-3 bg-amber-500/10 border border-amber-500/30 rounded-lg space-y-1">
                     {ticket.pendingReason ? (
