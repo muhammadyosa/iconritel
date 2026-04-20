@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Ticket } from "@/types/ticket";
 import { toast } from "sonner";
+import { logTicketStatusChange } from "@/hooks/useTicketStatusHistory";
 
 const SLA_THRESHOLD_MS = 8 * 60 * 60 * 1000; // 8 hours
 
@@ -364,6 +365,15 @@ export function useCloudTickets() {
       if (ticket.createdByName) {
         upsertUserHistory(ticket.createdByName, ticket.createdByUserId, ticket.createdISO, "total_created", 1);
       }
+
+      // Log creation to status history (non-blocking)
+      logTicketStatusChange({
+        ticketId: ticket.id,
+        oldStatus: null,
+        newStatus: ticket.status,
+        changedByUserId: ticket.createdByUserId,
+        changedByName: ticket.createdByName,
+      });
     } catch (error) {
       // Rollback optimistic insert
       setTickets((prev) => prev.filter((t) => t.id !== ticket.id));
@@ -451,6 +461,32 @@ export function useCloudTickets() {
         .eq("ticket_id" as never, id) as unknown as Promise<{ error: Error | null }>);
 
       if (error) throw error;
+
+      // Log to status history (non-blocking)
+      const oldStatus = ticket?.status || null;
+      const newStatus = updates.status;
+      const reasonChanged = updates.pendingReason !== undefined && updates.pendingReason !== ticket?.pendingReason;
+      if (newStatus !== undefined && newStatus !== oldStatus) {
+        // Status actually changed
+        logTicketStatusChange({
+          ticketId: id,
+          oldStatus,
+          newStatus,
+          reason: updates.pendingReason ?? (newStatus === "Pending" ? null : null),
+          changedByUserId: updates.resolvedByUserId || updates.pendingByUserId || null,
+          changedByName: updates.resolvedByName || updates.pendingByName || null,
+        });
+      } else if (reasonChanged && oldStatus === "Pending") {
+        // Pending reason updated without status change
+        logTicketStatusChange({
+          ticketId: id,
+          oldStatus: "Pending",
+          newStatus: "Pending",
+          reason: updates.pendingReason || null,
+          changedByUserId: updates.pendingByUserId || null,
+          changedByName: updates.pendingByName || null,
+        });
+      }
       // Realtime will reconcile if needed
     } catch (error) {
       // Rollback on failure
