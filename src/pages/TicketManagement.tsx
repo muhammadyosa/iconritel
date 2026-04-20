@@ -1333,12 +1333,14 @@ export default function TicketManagement() {
                                 )}
                               </div>
                               <div className="text-[7px] sm:text-[8px] text-muted-foreground mt-0.5">
-                                {ticket.createdAt}
+                                <HighlightText text={ticket.createdAt} query={q} enabled={hl("created")} />
                               </div>
                             </div>
                           </TableCell>
                         </TableRow>
-                      ))
+                        );
+                      })
+                    )}
                     )}
                   </TableBody>
                 </Table>
