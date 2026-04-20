@@ -62,6 +62,7 @@ export function TicketDetailDialog({
   const [isEditing, setIsEditing] = useState(false);
   const [pendingDialogOpen, setPendingDialogOpen] = useState(false);
   const [pendingReasonInput, setPendingReasonInput] = useState("");
+  const [reasonOnlyMode, setReasonOnlyMode] = useState(false);
   const [editData, setEditData] = useState({
     ticketId: ticket.id,
     customerName: ticket.customerName,
