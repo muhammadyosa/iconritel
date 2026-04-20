@@ -28,17 +28,17 @@ export const HighlightText = memo(function HighlightText({
     return <span className={className}>{value}</span>;
   }
 
+  const lowerQ = q.toLowerCase();
   const regex = new RegExp(`(${escapeRegex(q)})`, "ig");
   const parts = value.split(regex);
 
   return (
     <span className={className}>
       {parts.map((part, i) =>
-        regex.test(part) && part.toLowerCase() === q.toLowerCase() ? (
+        part.toLowerCase() === lowerQ ? (
           <mark
             key={i}
-            className="bg-warning/30 text-warning-foreground font-bold rounded-sm px-0.5"
-            style={{ color: "hsl(var(--foreground))" }}
+            className="bg-warning/40 text-foreground font-bold rounded-sm px-0.5"
           >
             {part}
           </mark>
