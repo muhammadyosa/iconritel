@@ -294,6 +294,7 @@ export default function TicketManagement() {
         ticket.serviceId.toLowerCase().includes(query) ||
         ticket.constraint.toLowerCase().includes(query) ||
         (ticket.fatId || "").toLowerCase().includes(query) ||
+        (ticket.hostname || "").toLowerCase().includes(query) ||
         ticket.serpo.toLowerCase().includes(query) ||
         getTicketRegion(ticket.serpo).toLowerCase().includes(query) ||
         ticket.status.toLowerCase().includes(query) ||
@@ -310,6 +311,7 @@ export default function TicketManagement() {
       case "serviceId": return ticket.serviceId.toLowerCase().includes(query);
       case "constraint": return ticket.constraint.toLowerCase().includes(query);
       case "fatId": return (ticket.fatId || "").toLowerCase().includes(query);
+      case "olt": return (ticket.hostname || "").toLowerCase().includes(query);
       case "serpo": return ticket.serpo.toLowerCase().includes(query);
       case "region": return getTicketRegion(ticket.serpo).toLowerCase().includes(query);
       case "status": return ticket.status.toLowerCase().includes(query);
@@ -1143,6 +1145,7 @@ export default function TicketManagement() {
                       <SelectItem value="customerType">Customer/Type</SelectItem>
                       <SelectItem value="serviceId">Service ID</SelectItem>
                       <SelectItem value="fatId">📍 FAT ID</SelectItem>
+                      <SelectItem value="olt">📟 OLT (Hostname)</SelectItem>
                       <SelectItem value="serpo">Serpo</SelectItem>
                       <SelectItem value="region">Region</SelectItem>
                       <SelectItem value="createdBy">Create by</SelectItem>
