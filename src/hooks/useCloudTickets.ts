@@ -339,6 +339,13 @@ export function useCloudTickets() {
   }, []);
 
   const addTicket = useCallback(async (ticket: Ticket) => {
+    // Optimistic insert: tampilkan incident di UI secara instan, sebelum konfirmasi DB.
+    // Realtime akan reconcile jika ada perbedaan; jika gagal, kita rollback.
+    setTickets((prev) => {
+      if (prev.some((t) => t.id === ticket.id)) return prev;
+      return [ticket, ...prev];
+    });
+
     try {
       const dbData: DbTicketInsert = ticketToDb(ticket);
 
@@ -354,6 +361,9 @@ export function useCloudTickets() {
         upsertUserHistory(ticket.createdByName, ticket.createdByUserId, ticket.createdISO, "total_created", 1);
       }
     } catch (error) {
+      // Rollback optimistic insert
+      setTickets((prev) => prev.filter((t) => t.id !== ticket.id));
+
       if (import.meta.env.DEV) {
         console.error("Error adding ticket:", error);
       }
