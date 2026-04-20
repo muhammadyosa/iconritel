@@ -1247,9 +1247,15 @@ export default function TicketManagement() {
                         </TableCell>
                       </TableRow>
                     ) : (
-                      filteredTickets.map((ticket) => (
+                      filteredTickets.map((ticket) => {
+                        const hl = (field: string) =>
+                          ticketSearchField === "all" || ticketSearchField === field;
+                        const q = ticketSearchQuery;
+                        return (
                         <TableRow key={ticket.id} className="h-6 sm:h-7 cursor-pointer hover:bg-muted/70" onClick={() => setSelectedTicketForDetail(ticket)}>
-                          <TableCell className="px-1 sm:px-1.5 py-0.5 text-[9px] sm:text-[10px] font-medium">{ticket.id}</TableCell>
+                          <TableCell className="px-1 sm:px-1.5 py-0.5 text-[9px] sm:text-[10px] font-medium">
+                            <HighlightText text={ticket.id} query={q} enabled={hl("ticketId")} />
+                          </TableCell>
                           <TableCell className="px-1 sm:px-1.5 py-0.5">
                             <div>
                               <Badge
@@ -1259,39 +1265,61 @@ export default function TicketManagement() {
                                     : "bg-primary text-primary-foreground"
                                 }`}
                               >
-                                {ticket.category}
+                                <HighlightText text={ticket.category} query={q} enabled={hl("category")} />
                               </Badge>
                               <div className="text-[7px] sm:text-[8px] text-muted-foreground mt-0.5 truncate max-w-[80px] sm:max-w-none">
-                                {ticket.constraint}
+                                <HighlightText text={ticket.constraint} query={q} enabled={hl("constraint")} />
                               </div>
                             </div>
                           </TableCell>
                           <TableCell className="px-1 sm:px-1.5 py-0.5 text-[9px] sm:text-[10px]">
                             {ticket.category === "FEEDER" ? (
                               ticket.constraint === "OLT DOWN" ? (
-                                <span className="font-medium">{ticket.hostname}</span>
+                                <span className="font-medium">
+                                  <HighlightText text={ticket.hostname} query={q} enabled={hl("customerType")} />
+                                </span>
                               ) :
                               ticket.constraint === "PORT DOWN" ? (
                                 <div>
-                                  <div className="font-medium text-[9px] sm:text-[10px]">{ticket.ticketResult.match(/PORT - (.*?) - DOWN/)?.[1] || "PORT"}</div>
-                                  <div className="text-muted-foreground text-[7px] sm:text-[8px]">{ticket.hostname}</div>
+                                  <div className="font-medium text-[9px] sm:text-[10px]">
+                                    <HighlightText text={ticket.ticketResult.match(/PORT - (.*?) - DOWN/)?.[1] || "PORT"} query={q} enabled={hl("customerType")} />
+                                  </div>
+                                  <div className="text-muted-foreground text-[7px] sm:text-[8px]">
+                                    <HighlightText text={ticket.hostname} query={q} enabled={hl("customerType")} />
+                                  </div>
                                 </div>
                               ) :
                               ticket.constraint === "FAT LOSS" || ticket.constraint === "FAT LOW RX" ? (
                                 <div>
-                                  <div className="font-medium text-[9px] sm:text-[10px]">{ticket.fatId}</div>
-                                  <div className="text-muted-foreground text-[7px] sm:text-[8px]">{ticket.hostname}</div>
+                                  <div className="font-medium text-[9px] sm:text-[10px]">
+                                    <HighlightText text={ticket.fatId} query={q} enabled={hl("fatId") || hl("customerType")} />
+                                  </div>
+                                  <div className="text-muted-foreground text-[7px] sm:text-[8px]">
+                                    <HighlightText text={ticket.hostname} query={q} enabled={hl("customerType")} />
+                                  </div>
                                 </div>
-                              ) : ticket.constraint
-                            ) : ticket.customerName}
+                              ) : (
+                                <HighlightText text={ticket.constraint} query={q} enabled={hl("constraint")} />
+                              )
+                            ) : (
+                              <HighlightText text={ticket.customerName} query={q} enabled={hl("customerType")} />
+                            )}
                           </TableCell>
-                          <TableCell className="px-1 sm:px-1.5 py-0.5 font-mono text-[9px] sm:text-[10px]">{ticket.serviceId}</TableCell>
-                          <TableCell className="px-1 sm:px-1.5 py-0.5 text-[9px] sm:text-[10px]">{ticket.serpo}</TableCell>
+                          <TableCell className="px-1 sm:px-1.5 py-0.5 font-mono text-[9px] sm:text-[10px]">
+                            <HighlightText text={ticket.serviceId} query={q} enabled={hl("serviceId")} />
+                          </TableCell>
+                          <TableCell className="px-1 sm:px-1.5 py-0.5 text-[9px] sm:text-[10px]">
+                            <HighlightText text={ticket.serpo} query={q} enabled={hl("serpo")} />
+                          </TableCell>
                           <TableCell className="px-1 sm:px-1.5 py-0.5">
                             <RegionBadge region={getTicketRegion(ticket.serpo)} />
                           </TableCell>
                           <TableCell className="px-1 sm:px-1.5 py-0.5 text-[9px] sm:text-[10px]">
-                            <span className="text-muted-foreground">{ticket.createdByName || "-"}</span>
+                            <span className="text-muted-foreground">
+                              {ticket.createdByName ? (
+                                <HighlightText text={ticket.createdByName} query={q} enabled={hl("createdBy")} />
+                              ) : "-"}
+                            </span>
                           </TableCell>
                           <TableCell className="px-1 sm:px-1.5 py-0.5">
                             <DurationCell createdISO={ticket.createdISO} status={ticket.status} resolvedAt={ticket.resolvedAt} resolvedByName={ticket.resolvedByName} />
