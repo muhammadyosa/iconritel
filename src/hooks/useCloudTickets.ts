@@ -365,7 +365,15 @@ export function useCloudTickets() {
       if (ticket.createdByName) {
         upsertUserHistory(ticket.createdByName, ticket.createdByUserId, ticket.createdISO, "total_created", 1);
       }
-    } catch (error) {
+
+      // Log creation to status history (non-blocking)
+      logTicketStatusChange({
+        ticketId: ticket.id,
+        oldStatus: null,
+        newStatus: ticket.status,
+        changedByUserId: ticket.createdByUserId,
+        changedByName: ticket.createdByName,
+      });
       // Rollback optimistic insert
       setTickets((prev) => prev.filter((t) => t.id !== ticket.id));
 
