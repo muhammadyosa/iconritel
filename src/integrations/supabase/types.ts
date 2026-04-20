@@ -278,6 +278,39 @@ export type Database = {
         }
         Relationships: []
       }
+      ticket_status_history: {
+        Row: {
+          changed_by_name: string | null
+          changed_by_user_id: string | null
+          created_at: string
+          id: string
+          new_status: string
+          old_status: string | null
+          reason: string | null
+          ticket_id: string
+        }
+        Insert: {
+          changed_by_name?: string | null
+          changed_by_user_id?: string | null
+          created_at?: string
+          id?: string
+          new_status: string
+          old_status?: string | null
+          reason?: string | null
+          ticket_id: string
+        }
+        Update: {
+          changed_by_name?: string | null
+          changed_by_user_id?: string | null
+          created_at?: string
+          id?: string
+          new_status?: string
+          old_status?: string | null
+          reason?: string | null
+          ticket_id?: string
+        }
+        Relationships: []
+      }
       tickets: {
         Row: {
           category: string
