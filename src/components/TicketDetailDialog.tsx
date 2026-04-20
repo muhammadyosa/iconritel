@@ -381,6 +381,7 @@ export function TicketDetailDialog({
                   </div>
                 </div>
               )}
+              <TicketStatusHistory ticketId={ticket.id} enabled={controlledOpen !== false} />
               <div className="pt-3 border-t">
                 <div className="flex items-center justify-between">
                   <span className="text-muted-foreground text-sm">Format Insident:</span>
