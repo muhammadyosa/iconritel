@@ -433,8 +433,8 @@ export function InsidentManagement() {
                   </div>
                   <div className="flex items-center gap-1">
                     {statusBadge(ticket.status)}
-                    {ticket.status === "Pending" && ticket.pendingReason && (
-                      <span title={`Alasan: ${ticket.pendingReason}`} className="text-amber-500 text-xs leading-none">⚠️</span>
+                    {ticket.status === "Pending" && (
+                      <span title={ticket.pendingReason ? `Alasan: ${ticket.pendingReason}` : "Belum ada alasan tercatat"} className="text-amber-500 text-xs leading-none">⚠️</span>
                     )}
                   </div>
                 </div>
@@ -506,8 +506,8 @@ export function InsidentManagement() {
                       <TableCell>
                         <div className="flex items-center gap-1">
                           {statusBadge(ticket.status)}
-                          {ticket.status === "Pending" && ticket.pendingReason && (
-                            <span title={`Alasan: ${ticket.pendingReason}`} className="text-amber-500 text-xs leading-none cursor-help">⚠️</span>
+                          {ticket.status === "Pending" && (
+                            <span title={ticket.pendingReason ? `Alasan: ${ticket.pendingReason}` : "Belum ada alasan tercatat"} className="text-amber-500 text-xs leading-none cursor-help">⚠️</span>
                           )}
                         </div>
                       </TableCell>
