@@ -123,25 +123,30 @@ export default function Teams() {
   // Handle period preset change
   const handlePeriodChange = (value: string) => {
     setPeriodPreset(value);
+    const now = new Date();
     if (value === "all") {
       setDateRange(undefined);
+    } else if (value === "today") {
+      setDateRange({ from: startOfDay(now), to: endOfDay(now) });
     } else if (value === "7d") {
-      setDateRange({ from: subDays(new Date(), 7), to: new Date() });
+      setDateRange({ from: startOfDay(subDays(now, 6)), to: endOfDay(now) });
     } else if (value === "14d") {
-      setDateRange({ from: subDays(new Date(), 14), to: new Date() });
+      setDateRange({ from: startOfDay(subDays(now, 13)), to: endOfDay(now) });
     } else if (value === "30d") {
-      setDateRange({ from: subDays(new Date(), 30), to: new Date() });
+      setDateRange({ from: startOfDay(subDays(now, 29)), to: endOfDay(now) });
     }
   };
 
-  // Filter tickets by date range
-  const filteredTickets = tickets.filter((ticket) => {
-    if (!dateRange?.from) return true;
-    const ticketDate = new Date(ticket.createdISO);
+  // Filter tickets by date range — "all" returns realtime (unfiltered) tickets
+  const filteredTickets = useMemo(() => {
+    if (!dateRange?.from) return tickets;
     const from = startOfDay(dateRange.from);
     const to = dateRange.to ? endOfDay(dateRange.to) : endOfDay(dateRange.from);
-    return isWithinInterval(ticketDate, { start: from, end: to });
-  });
+    return tickets.filter((ticket) => {
+      const ticketDate = new Date(ticket.createdISO);
+      return isWithinInterval(ticketDate, { start: from, end: to });
+    });
+  }, [tickets, dateRange]);
 
   // Separate team stats by category (RITEL vs FEEDER)
   const teamStatsByCategory = useMemo(() => {
@@ -420,6 +425,7 @@ export default function Teams() {
   // Trend filter label for display
   const trendPeriodLabel = useMemo(() => {
     if (periodPreset === "all") return "Semua Data";
+    if (periodPreset === "today") return "Hari ini";
     if (periodPreset === "7d") return "7 Hari";
     if (periodPreset === "14d") return "14 Hari";
     if (periodPreset === "30d") return "30 Hari";
@@ -558,6 +564,7 @@ export default function Teams() {
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="all">Semua Data</SelectItem>
+          <SelectItem value="today">Hari ini</SelectItem>
           <SelectItem value="7d">7 Hari Terakhir</SelectItem>
           <SelectItem value="14d">14 Hari Terakhir</SelectItem>
           <SelectItem value="30d">30 Hari Terakhir</SelectItem>
