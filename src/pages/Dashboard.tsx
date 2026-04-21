@@ -1230,7 +1230,18 @@ export default function Dashboard() {
 
             {/* RIGHT COLUMN — Tier Incident OVER SLA (full height) */}
             <div className="min-w-0 lg:sticky lg:top-3 self-start w-full">
-              <DashboardTierOverSLA tickets={tickets} getTicketRegion={getTicketRegion} onOpenList={openIncidentList} />
+              <DashboardTierOverSLA
+                tickets={tickets}
+                getTicketRegion={getTicketRegion}
+                infoOpen={overSlaInfoOpen}
+                onInfoOpenChange={setOverSlaInfoOpen}
+                onOpenList={(title, list) =>
+                  openIncidentList(title, list, {
+                    label: "Ringkasan OVER SLA",
+                    run: () => setOverSlaInfoOpen(true),
+                  })
+                }
+              />
             </div>
           </div>
 
