@@ -757,7 +757,8 @@ export default function Dashboard() {
                   <div className="flex-1 min-w-0">
                     <CardTitle className="text-xs sm:text-sm flex items-center gap-1.5">
                       🗺️ Regional Office
-                      {regionalIncidentData.length > 0 && (() => {
+                      {(() => {
+                        // Always render the info button — even when empty, so the user can see status.
                         const totalAll = regionalIncidentData.reduce((s, r) => s + r.total, 0);
                         const totalResolved = regionalIncidentData.reduce((s, r) => s + r.resolved, 0);
                         const totalCritical = regionalIncidentData.reduce((s, r) => s + r.critical, 0);
@@ -768,44 +769,81 @@ export default function Dashboard() {
                         const worstRegion = [...regionalIncidentData].sort((a, b) => b.critical - a.critical)[0];
                         const topRegion = sorted[0];
 
-                        let insight: { tone: "success" | "warning" | "destructive" | "primary"; text: string };
-                        if (totalCritical > totalAll * 0.4) {
-                          insight = { tone: "destructive", text: `🚨 ${totalCritical} dari ${totalAll} incident (${Math.round((totalCritical/totalAll)*100)}%) berstatus Critical. Eskalasi dan koordinasi lintas region direkomendasikan segera.` };
-                        } else if (totalPendingAll > totalAll * 0.4) {
-                          insight = { tone: "warning", text: `⏳ Tingkat Pending ${Math.round((totalPendingAll/totalAll)*100)}% — banyak incident menunggu tindak lanjut. Tinjau alasan pending di setiap region.` };
-                        } else if (rate >= 70) {
-                          insight = { tone: "success", text: `✅ Performa resolusi sangat baik (${rate}%). Pertahankan ritme penanganan dan dokumentasikan praktik terbaik dari ${bestRegion?.region}.` };
-                        } else {
-                          insight = { tone: "primary", text: `📊 Resolution rate gabungan ${rate}%. Region paling sibuk: ${topRegion?.region} (${topRegion?.total} incident).` };
-                        }
+                        const insight = buildInsight({
+                          total: totalAll,
+                          resolved: totalResolved,
+                          pending: totalPendingAll,
+                          critical: totalCritical,
+                          rate,
+                          contextLabel: "incident lintas region",
+                          emptyText: "✅ Belum ada data region atau belum ada incident terdeteksi.",
+                        });
+
+                        // Filter helpers
+                        const allRegional = tickets.filter(t => {
+                          const region = hostnameToRegionMap[(t.hostname || "").trim().toUpperCase()];
+                          return !!region && regionalIncidentData.some(r => r.region === region);
+                        });
+                        const filterByStatus = (statuses: Ticket["status"][]) =>
+                          allRegional.filter(t => statuses.includes(t.status));
+                        const filterPendingBucket = () =>
+                          allRegional.filter(t => t.status !== "Resolved" && t.status !== "Critical");
+                        const filterByRegion = (region: string) =>
+                          tickets.filter(t => hostnameToRegionMap[(t.hostname || "").trim().toUpperCase()] === region);
 
                         const sections: InfoSection[] = [
                           {
                             heading: "Ringkasan Realtime",
                             emoji: "📈",
                             metrics: [
-                              { label: "Total Incident", value: totalAll, hint: `${regionalIncidentData.length} region aktif`, tone: "primary" },
-                              { label: "Resolved", value: totalResolved, hint: `${rate}% rate`, tone: "success" },
-                              { label: "Pending", value: totalPendingAll, hint: `${totalAll > 0 ? Math.round((totalPendingAll/totalAll)*100) : 0}%`, tone: "warning" },
-                              { label: "Critical", value: totalCritical, hint: `${totalAll > 0 ? Math.round((totalCritical/totalAll)*100) : 0}%`, tone: "destructive" },
+                              { label: "Total Incident", value: totalAll, hint: `${regionalIncidentData.length} region aktif`, tone: "primary",
+                                onClick: totalAll > 0 ? () => openIncidentList("🗺️ Semua Incident Regional", allRegional) : undefined },
+                              { label: "Resolved", value: totalResolved, hint: `${totalAll > 0 ? rate : 0}%`, tone: "success",
+                                onClick: totalResolved > 0 ? () => openIncidentList("✅ Resolved — Regional", filterByStatus(["Resolved"])) : undefined },
+                              { label: "Pending", value: totalPendingAll, hint: `${totalAll > 0 ? Math.round((totalPendingAll/totalAll)*100) : 0}%`, tone: "warning",
+                                onClick: totalPendingAll > 0 ? () => openIncidentList("⏳ Pending / On Progress — Regional", filterPendingBucket()) : undefined },
+                              { label: "Critical", value: totalCritical, hint: `${totalAll > 0 ? Math.round((totalCritical/totalAll)*100) : 0}%`, tone: "destructive",
+                                onClick: totalCritical > 0 ? () => openIncidentList("🚨 Critical — Regional", filterByStatus(["Critical"])) : undefined },
                             ],
                           },
                           {
                             heading: "Performa per Region",
                             emoji: "🗺️",
-                            bullets: sorted.map((r) => {
-                              const rRate = r.total > 0 ? Math.round((r.resolved / r.total) * 100) : 0;
-                              const tone: InfoMetric["tone"] = r.critical > r.total * 0.4 ? "destructive" : rRate >= 60 ? "success" : "warning";
-                              return { label: `${r.region} • ${r.total} incident`, value: `${rRate}% resolved`, tone };
-                            }),
+                            bullets: sorted.length === 0
+                              ? [{ label: "Belum ada region dengan incident.", tone: "default" }]
+                              : sorted.map((r) => {
+                                  const rRate = r.total > 0 ? Math.round((r.resolved / r.total) * 100) : 0;
+                                  const tone: InfoMetric["tone"] = r.critical > r.total * 0.4 ? "destructive" : rRate >= 60 ? "success" : "warning";
+                                  return {
+                                    label: `${r.region} • ${r.total} incident`,
+                                    value: `${rRate}% resolved`,
+                                    tone,
+                                    onClick: () => openIncidentList(`🗺️ Region: ${r.region}`, filterByRegion(r.region)),
+                                  };
+                                }),
                           },
                           {
                             heading: "Highlight",
                             emoji: "🏅",
-                            bullets: [
-                              ...(bestRegion ? [{ label: `🥇 Best Performance: ${bestRegion.region}`, value: `${bestRegion.total > 0 ? Math.round((bestRegion.resolved/bestRegion.total)*100) : 0}%`, tone: "success" as const }] : []),
-                              ...(worstRegion && worstRegion.critical > 0 ? [{ label: `⚠️ Most Critical: ${worstRegion.region}`, value: `${worstRegion.critical} tiket`, tone: "destructive" as const }] : []),
-                              { label: `📦 Region paling sibuk: ${topRegion?.region}`, value: `${topRegion?.total}`, tone: "primary" as const },
+                            bullets: totalAll === 0 ? [{ label: "Belum ada highlight tersedia.", tone: "default" }] : [
+                              ...(bestRegion ? [{
+                                label: `🥇 Best Performance: ${bestRegion.region}`,
+                                value: `${bestRegion.total > 0 ? Math.round((bestRegion.resolved/bestRegion.total)*100) : 0}%`,
+                                tone: "success" as const,
+                                onClick: () => openIncidentList(`🥇 Region terbaik: ${bestRegion.region}`, filterByRegion(bestRegion.region)),
+                              }] : []),
+                              ...(worstRegion && worstRegion.critical > 0 ? [{
+                                label: `⚠️ Most Critical: ${worstRegion.region}`,
+                                value: `${worstRegion.critical} tiket`,
+                                tone: "destructive" as const,
+                                onClick: () => openIncidentList(`🚨 Critical region: ${worstRegion.region}`, filterByRegion(worstRegion.region).filter(t => t.status === "Critical")),
+                              }] : []),
+                              ...(topRegion ? [{
+                                label: `📦 Region paling sibuk: ${topRegion.region}`,
+                                value: `${topRegion.total}`,
+                                tone: "primary" as const,
+                                onClick: () => openIncidentList(`📦 Region tersibuk: ${topRegion.region}`, filterByRegion(topRegion.region)),
+                              }] : []),
                             ],
                           },
                         ];
