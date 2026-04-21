@@ -23,7 +23,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Toolti
 import { loadDefaultRegionalTeamData } from "@/lib/defaultRegionalData";
 import { NOCStatistikIncident } from "@/components/NOCStatistikIncident";
 import { DashboardTierOverSLA } from "@/components/DashboardTierOverSLA";
-import { SectionInfoDialog, type InfoSection, type InfoMetric } from "@/components/SectionInfoDialog";
+import { SectionInfoDialog, buildInsight, type InfoSection, type InfoMetric } from "@/components/SectionInfoDialog";
 import { RegionalTeamRecord } from "@/types/regionalTeam";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ShiftReportCard } from "@/components/ShiftReportCard";
