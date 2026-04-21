@@ -2,6 +2,8 @@ import { useMemo, useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { Ticket, FEEDER_CONSTRAINTS_SET } from "@/types/ticket";
@@ -12,11 +14,13 @@ import {
 import {
   ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig,
 } from "@/components/ui/chart";
-import { format, subDays, startOfDay } from "date-fns";
-import { TrendingUp, Activity } from "lucide-react";
+import { format, subDays, startOfDay, endOfDay, isWithinInterval } from "date-fns";
+import { id as localeId } from "date-fns/locale";
+import { TrendingUp, Activity, Calendar as CalendarIcon } from "lucide-react";
+import type { DateRange } from "react-day-picker";
 
 type Variant = "noc" | "ritel";
-type TrendPeriod = "7d" | "14d" | "30d" | "all";
+type TrendPeriod = "today" | "7d" | "14d" | "30d" | "custom" | "all";
 
 interface Props {
   tickets: Ticket[];
