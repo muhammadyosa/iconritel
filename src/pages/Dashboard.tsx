@@ -557,62 +557,98 @@ export default function Dashboard() {
             </CardHeader>
             <CardContent className="p-2 sm:p-3">
               {(() => {
-                // Calculate chart data based on filter
-                const today = new Date();
-                let chartData: Array<{
-                  date: string; isoDate: string;
-                  ritel: number; feeder: number; total: number;
-                  created: number; inProgress: number; resolved: number;
-                }> = [];
-                
-                if (trendFilter === "today") {
-                  const todayStr = today.toISOString().split('T')[0];
-                  const displayDate = today.toLocaleDateString('id-ID', { day: '2-digit', month: 'short' });
-                  const dayTickets = tickets.filter((t) => new Date(t.createdISO).toISOString().split('T')[0] === todayStr);
-                  const ritelCount = dayTickets.filter((t) => !FEEDER_CONSTRAINTS_SET.has(t.constraint)).length;
-                  const feederCount = dayTickets.filter((t) => FEEDER_CONSTRAINTS_SET.has(t.constraint)).length;
-                  chartData = [{
-                    date: displayDate,
-                    isoDate: todayStr,
-                    ritel: ritelCount,
-                    feeder: feederCount,
-                    total: dayTickets.length,
-                    created: dayTickets.length,
-                    inProgress: dayTickets.filter((t) => t.status === "On Progress" || t.status === "Critical" || t.status === "Pending").length,
-                    resolved: dayTickets.filter((t) => t.status === "Resolved").length,
-                  }];
-                } else if (trendFilter === "custom") {
-                  const customD = new Date(trendCustomDate);
-                  const isoDate = trendCustomDate;
-                  const displayDate = customD.toLocaleDateString('id-ID', { day: '2-digit', month: 'short' });
-                  const dayTickets = tickets.filter((t) => new Date(t.createdISO).toISOString().split('T')[0] === isoDate);
-                  const ritelCount = dayTickets.filter((t) => !FEEDER_CONSTRAINTS_SET.has(t.constraint)).length;
-                  const feederCount = dayTickets.filter((t) => FEEDER_CONSTRAINTS_SET.has(t.constraint)).length;
-                  chartData = [{
+                // ---- Local-date helpers (WIB / browser local) ----
+                // Avoid toISOString() because it converts to UTC and shifts the calendar day.
+                const toLocalDateStr = (d: Date) => {
+                  const y = d.getFullYear();
+                  const m = String(d.getMonth() + 1).padStart(2, "0");
+                  const day = String(d.getDate()).padStart(2, "0");
+                  return `${y}-${m}-${day}`;
+                };
+                const ticketLocalDate = (t: Ticket) => toLocalDateStr(new Date(t.createdISO));
+
+                // Build a chart row from a flat list of tickets for one local-date.
+                const rowFor = (isoDate: string, displayDate: string) => {
+                  const dayTickets = tickets.filter((t) => ticketLocalDate(t) === isoDate);
+                  const ritel = dayTickets.filter((t) => !FEEDER_CONSTRAINTS_SET.has(t.constraint)).length;
+                  const feeder = dayTickets.filter((t) => FEEDER_CONSTRAINTS_SET.has(t.constraint)).length;
+                  const inProgress = dayTickets.filter((t) => t.status === "On Progress" || t.status === "Critical" || t.status === "Pending").length;
+                  const resolved = dayTickets.filter((t) => t.status === "Resolved").length;
+                  return {
                     date: displayDate,
                     isoDate,
-                    ritel: ritelCount,
-                    feeder: feederCount,
+                    ritel, feeder,
                     total: dayTickets.length,
                     created: dayTickets.length,
-                    inProgress: dayTickets.filter((t) => t.status === "On Progress" || t.status === "Critical" || t.status === "Pending").length,
-                    resolved: dayTickets.filter((t) => t.status === "Resolved").length,
-                  }];
+                    inProgress,
+                    resolved,
+                  };
+                };
+
+                // Build N consecutive local-days ending today. Merge live ticket counts
+                // with cloud history (history wins only when live data is empty for that day,
+                // so previously stored counts survive the 8-hour resolved cleanup).
+                const buildRange = (days: number) => {
+                  const todayLocal = new Date();
+                  todayLocal.setHours(0, 0, 0, 0);
+                  const historyMap = new Map(
+                    (getChartData(days) || []).map((r) => [r.isoDate, r])
+                  );
+                  const out: ReturnType<typeof rowFor>[] = [];
+                  for (let i = days - 1; i >= 0; i--) {
+                    const d = new Date(todayLocal);
+                    d.setDate(d.getDate() - i);
+                    const isoDate = toLocalDateStr(d);
+                    const displayDate = d.toLocaleDateString("id-ID", { day: "2-digit", month: "short" });
+                    const live = rowFor(isoDate, displayDate);
+                    const hist = historyMap.get(isoDate);
+                    if (live.total === 0 && hist && hist.total > 0) {
+                      out.push({
+                        date: displayDate,
+                        isoDate,
+                        ritel: hist.ritel,
+                        feeder: hist.feeder,
+                        total: hist.total,
+                        created: hist.created,
+                        inProgress: hist.inProgress,
+                        resolved: hist.resolved,
+                      });
+                    } else {
+                      out.push(live);
+                    }
+                  }
+                  return out;
+                };
+
+                let chartData: ReturnType<typeof rowFor>[] = [];
+
+                if (trendFilter === "today") {
+                  const today = new Date();
+                  chartData = [rowFor(toLocalDateStr(today), today.toLocaleDateString("id-ID", { day: "2-digit", month: "short" }))];
+                } else if (trendFilter === "custom") {
+                  // trendCustomDate is already a YYYY-MM-DD string from <input type="date">.
+                  const [yy, mm, dd] = trendCustomDate.split("-").map(Number);
+                  const customD = new Date(yy, (mm || 1) - 1, dd || 1);
+                  chartData = [rowFor(trendCustomDate, customD.toLocaleDateString("id-ID", { day: "2-digit", month: "short" }))];
                 } else if (trendFilter === "all") {
-                  // Find earliest ticket date
-                  const earliest = tickets.reduce((min, t) => {
-                    const d = new Date(t.createdISO);
-                    return d < min ? d : min;
-                  }, today);
-                  const days = Math.max(1, Math.ceil((today.getTime() - earliest.getTime()) / (1000 * 60 * 60 * 24)) + 1);
-                  chartData = getChartData(days);
+                  // Find earliest local-date among live tickets, fall back to 30 days.
+                  const today = new Date();
+                  today.setHours(0, 0, 0, 0);
+                  let earliest = today;
+                  tickets.forEach((t) => {
+                    const td = new Date(t.createdISO);
+                    td.setHours(0, 0, 0, 0);
+                    if (td < earliest) earliest = td;
+                  });
+                  const days = Math.max(1, Math.round((today.getTime() - earliest.getTime()) / (24 * 60 * 60 * 1000)) + 1);
+                  chartData = buildRange(Math.min(days, 90));
                 } else {
                   // 7, 14, 30 days
-                  const days = Number(trendFilter);
-                  chartData = getChartData(days);
+                  const days = Number(trendFilter) || 7;
+                  chartData = buildRange(days);
                 }
 
-                const numDays = trendFilter === "today" || trendFilter === "custom" ? 1 : trendFilter === "all" ? chartData.length : Number(trendFilter);
+                const numDays = chartData.length;
 
                 const chartConfig: ChartConfig = {
                   ritel: { label: "🏠 RITEL", color: "hsl(217, 91%, 60%)" },
