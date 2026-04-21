@@ -2,6 +2,8 @@ import { useMemo, useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { Ticket, FEEDER_CONSTRAINTS_SET } from "@/types/ticket";
@@ -12,11 +14,13 @@ import {
 import {
   ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig,
 } from "@/components/ui/chart";
-import { format, subDays, startOfDay } from "date-fns";
-import { TrendingUp, Activity } from "lucide-react";
+import { format, subDays, startOfDay, endOfDay, isWithinInterval } from "date-fns";
+import { id as localeId } from "date-fns/locale";
+import { TrendingUp, Activity, Calendar as CalendarIcon } from "lucide-react";
+import type { DateRange } from "react-day-picker";
 
 type Variant = "noc" | "ritel";
-type TrendPeriod = "7d" | "14d" | "30d" | "all";
+type TrendPeriod = "today" | "7d" | "14d" | "30d" | "custom" | "all";
 
 interface Props {
   tickets: Ticket[];
@@ -59,6 +63,7 @@ const VARIANT_CONFIG = {
 export function NOCStatistikIncident({ tickets, variant }: Props) {
   const [userHistory, setUserHistory] = useState<UserHistoryRow[]>([]);
   const [trendPeriod, setTrendPeriod] = useState<TrendPeriod>("all");
+  const [customRange, setCustomRange] = useState<DateRange | undefined>(undefined);
   const config = VARIANT_CONFIG[variant];
 
   // Fetch user history for NOC variant
@@ -74,22 +79,49 @@ export function NOCStatistikIncident({ tickets, variant }: Props) {
     })();
   }, [variant]);
 
+  // Local-date helper (WIB-accurate)
+  const toLocalDateStr = (d: Date) => {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${y}-${m}-${day}`;
+  };
+
+  // Resolve active date range based on trendPeriod
+  const activeRange = useMemo(() => {
+    const now = new Date();
+    if (trendPeriod === "all") return null;
+    if (trendPeriod === "today") return { from: startOfDay(now), to: endOfDay(now) };
+    if (trendPeriod === "7d") return { from: startOfDay(subDays(now, 6)), to: endOfDay(now) };
+    if (trendPeriod === "14d") return { from: startOfDay(subDays(now, 13)), to: endOfDay(now) };
+    if (trendPeriod === "30d") return { from: startOfDay(subDays(now, 29)), to: endOfDay(now) };
+    if (trendPeriod === "custom" && customRange?.from) {
+      return { from: startOfDay(customRange.from), to: endOfDay(customRange.to ?? customRange.from) };
+    }
+    return null;
+  }, [trendPeriod, customRange]);
+
+  // Tickets filtered by active range — drives ALL stats so they stay in sync with the filter
+  const filteredTickets = useMemo(() => {
+    if (!activeRange) return tickets;
+    return tickets.filter(t => {
+      const d = new Date(t.createdISO);
+      return isWithinInterval(d, { start: activeRange.from, end: activeRange.to });
+    });
+  }, [tickets, activeRange]);
+
   // Stats
-  const resolved = useMemo(() => tickets.filter(t => t.status === "Resolved").length, [tickets]);
-  const pending = useMemo(() => tickets.filter(t => t.status === "On Progress" || t.status === "Pending").length, [tickets]);
-  const critical = useMemo(() => tickets.filter(t => t.status === "Critical").length, [tickets]);
-  const total = tickets.length;
+  const resolved = useMemo(() => filteredTickets.filter(t => t.status === "Resolved").length, [filteredTickets]);
+  const pending = useMemo(() => filteredTickets.filter(t => t.status === "On Progress" || t.status === "Pending").length, [filteredTickets]);
+  const critical = useMemo(() => filteredTickets.filter(t => t.status === "Critical").length, [filteredTickets]);
+  const total = filteredTickets.length;
   const resRate = total > 0 ? Math.round((resolved / total) * 100) : 0;
 
   // Category trend
   const trendData = useMemo(() => {
-    const periodDays = trendPeriod === "7d" ? 7 : trendPeriod === "14d" ? 14 : trendPeriod === "30d" ? 30 : null;
-    const startDate = periodDays ? startOfDay(subDays(new Date(), periodDays)) : null;
-    const filtered = startDate ? tickets.filter(t => new Date(t.createdISO) >= startDate) : tickets;
-
     const dateMap: Record<string, Record<string, number>> = {};
-    filtered.forEach(t => {
-      const d = new Date(t.createdISO).toISOString().split("T")[0];
+    filteredTickets.forEach(t => {
+      const d = toLocalDateStr(new Date(t.createdISO));
       if (!dateMap[d]) dateMap[d] = {};
       const key = t.constraint || "Lainnya";
       dateMap[d][key] = (dateMap[d][key] || 0) + 1;
@@ -101,11 +133,11 @@ export function NOCStatistikIncident({ tickets, variant }: Props) {
     return Object.entries(dateMap)
       .sort((a, b) => a[0].localeCompare(b[0]))
       .map(([date, counts]) => {
-        const entry: Record<string, any> = { date: format(new Date(date), "dd MMM") };
+        const entry: Record<string, any> = { date: format(new Date(date + "T00:00:00"), "dd MMM", { locale: localeId }) };
         allConstraints.forEach(c => { entry[c] = counts[c] || 0; });
         return entry;
       });
-  }, [tickets, trendPeriod]);
+  }, [filteredTickets]);
 
   const constraintKeys = useMemo(() => {
     if (trendData.length === 0) return [];
@@ -121,10 +153,24 @@ export function NOCStatistikIncident({ tickets, variant }: Props) {
     return c;
   }, [constraintKeys]);
 
-  // Top 5 ranking
+  // Top 5 ranking — when a period filter is active, compute from filteredTickets so it syncs.
+  // Only fall back to cumulative cloud user-history for NOC variant when "Semua Data" is selected.
   const top5Data = useMemo(() => {
     if (variant === "noc") {
-      // Aggregate user history
+      if (activeRange) {
+        // Filtered: aggregate from live tickets by createdByName
+        const map: Record<string, { created: number; resolved: number }> = {};
+        filteredTickets.forEach(t => {
+          const name = (t.createdByName || "").trim() || "Unknown";
+          if (!map[name]) map[name] = { created: 0, resolved: 0 };
+          map[name].created++;
+          if (t.status === "Resolved") map[name].resolved++;
+        });
+        return Object.entries(map)
+          .map(([name, s]) => ({ name, count: s.created, rate: s.created > 0 ? Math.round((s.resolved / s.created) * 100) : 0 }))
+          .sort((a, b) => b.count - a.count);
+      }
+      // All data: use cumulative cloud history
       const map: Record<string, { created: number; resolved: number }> = {};
       userHistory.forEach(row => {
         if (!map[row.user_name]) map[row.user_name] = { created: 0, resolved: 0 };
@@ -135,9 +181,9 @@ export function NOCStatistikIncident({ tickets, variant }: Props) {
         .map(([name, s]) => ({ name, count: s.created, rate: s.created > 0 ? Math.round((s.resolved / s.created) * 100) : 0 }))
         .sort((a, b) => b.count - a.count);
     } else {
-      // Ritel: group by serpo (tim)
+      // Ritel: group by serpo (tim) from filtered tickets
       const map: Record<string, { total: number; resolved: number }> = {};
-      tickets.forEach(t => {
+      filteredTickets.forEach(t => {
         const serpo = (t.serpo || "").trim();
         if (!serpo) return;
         if (!map[serpo]) map[serpo] = { total: 0, resolved: 0 };
@@ -148,7 +194,7 @@ export function NOCStatistikIncident({ tickets, variant }: Props) {
         .map(([name, s]) => ({ name, count: s.total, rate: s.total > 0 ? Math.round((s.resolved / s.total) * 100) : 0 }))
         .sort((a, b) => b.count - a.count);
     }
-  }, [variant, tickets, userHistory]);
+  }, [variant, filteredTickets, userHistory, activeRange]);
 
   const activeCount = top5Data.length;
   const top5 = top5Data.slice(0, 5);
@@ -194,23 +240,64 @@ export function NOCStatistikIncident({ tickets, variant }: Props) {
 
         {/* Category Trend */}
         <div>
-          <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center justify-between mb-2 gap-2 flex-wrap">
             <span className="text-[10px] sm:text-xs font-semibold">Category Trend</span>
-            <div className="flex gap-0.5">
-              {(["7d", "14d", "30d", "all"] as const).map(p => (
-                <Button
-                  key={p}
-                  size="sm"
-                  variant={trendPeriod === p ? "default" : "ghost"}
-                  className={cn(
-                    "h-5 sm:h-6 text-[7px] sm:text-[9px] px-1.5 sm:px-2 rounded-md",
-                    trendPeriod === p && "font-bold"
-                  )}
-                  onClick={() => setTrendPeriod(p)}
-                >
-                  {p === "all" ? "Semua Data" : p.toUpperCase().replace("D", " Hari")}
-                </Button>
-              ))}
+            <div className="flex items-center gap-0.5 flex-wrap">
+              {(["today", "7d", "14d", "30d", "custom", "all"] as const).map(p => {
+                const labelMap = {
+                  today: "Today",
+                  "7d": "7 Hari",
+                  "14d": "14 Hari",
+                  "30d": "30 Hari",
+                  custom: "Custom",
+                  all: "Semua Data",
+                } as const;
+                return (
+                  <Button
+                    key={p}
+                    size="sm"
+                    variant={trendPeriod === p ? "default" : "ghost"}
+                    className={cn(
+                      "h-5 sm:h-6 text-[7px] sm:text-[9px] px-1.5 sm:px-2 rounded-md",
+                      trendPeriod === p && "font-bold"
+                    )}
+                    onClick={() => setTrendPeriod(p)}
+                  >
+                    {labelMap[p]}
+                  </Button>
+                );
+              })}
+              {trendPeriod === "custom" && (
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-5 sm:h-6 text-[7px] sm:text-[9px] px-1.5 sm:px-2 rounded-md gap-1"
+                    >
+                      <CalendarIcon className="h-3 w-3" />
+                      {customRange?.from ? (
+                        customRange.to
+                          ? `${format(customRange.from, "dd MMM", { locale: localeId })} - ${format(customRange.to, "dd MMM", { locale: localeId })}`
+                          : format(customRange.from, "dd MMM yyyy", { locale: localeId })
+                      ) : (
+                        "Pilih tanggal"
+                      )}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="end">
+                    <Calendar
+                      initialFocus
+                      mode="range"
+                      defaultMonth={customRange?.from}
+                      selected={customRange}
+                      onSelect={setCustomRange}
+                      numberOfMonths={1}
+                      className="p-3 pointer-events-auto"
+                    />
+                  </PopoverContent>
+                </Popover>
+              )}
             </div>
           </div>
           {trendData.length > 0 ? (
