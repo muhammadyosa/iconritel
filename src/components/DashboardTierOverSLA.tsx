@@ -6,6 +6,7 @@ import { RegionBadge } from "@/components/RegionBadge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { DurationCell } from "@/components/DurationCell";
+import { SectionInfoDialog, type InfoSection, type InfoMetric } from "@/components/SectionInfoDialog";
 import { cn } from "@/lib/utils";
 
 const SLA_MS = 8 * 60 * 60 * 1000;
