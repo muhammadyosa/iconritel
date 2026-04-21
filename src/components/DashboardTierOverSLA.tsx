@@ -16,9 +16,12 @@ interface DashboardTierOverSLAProps {
   getTicketRegion: (hostname: string) => string;
   /** Optional callback to open the global filter dialog with a ticket subset */
   onOpenList?: (title: string, list: Ticket[]) => void;
+  /** Controlled open state for the info ringkasan dialog (enables "Kembali ke ringkasan" flow) */
+  infoOpen?: boolean;
+  onInfoOpenChange?: (open: boolean) => void;
 }
 
-export function DashboardTierOverSLA({ tickets, getTicketRegion, onOpenList }: DashboardTierOverSLAProps) {
+export function DashboardTierOverSLA({ tickets, getTicketRegion, onOpenList, infoOpen, onInfoOpenChange }: DashboardTierOverSLAProps) {
   const [now, setNow] = useState(Date.now());
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
 
@@ -202,6 +205,8 @@ export function DashboardTierOverSLA({ tickets, getTicketRegion, onOpenList }: D
                   description="Analisa lengkap incident yang melewati SLA berdasarkan data realtime."
                   insight={insight}
                   sections={sections}
+                  open={infoOpen}
+                  onOpenChange={onInfoOpenChange}
                 />
               );
             })()}

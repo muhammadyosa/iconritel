@@ -96,14 +96,30 @@ export default function Dashboard() {
   const [regionStatusFilter, setRegionStatusFilter] = useState<string>("all");
   const [regionProportionOpen, setRegionProportionOpen] = useState(false);
 
+  // Controlled open-state for each SectionInfoDialog so we can reopen them via "Kembali ke ringkasan"
+  const [regionalInfoOpen, setRegionalInfoOpen] = useState(false);
+  const [ritelInfoOpen, setRitelInfoOpen] = useState(false);
+  const [feederInfoOpen, setFeederInfoOpen] = useState(false);
+  const [overSlaInfoOpen, setOverSlaInfoOpen] = useState(false);
+
+  // When a metric inside a SectionInfoDialog is clicked, the section dialog closes and the
+  // filter dialog opens. We remember a "return" callback so the user can jump back to the
+  // originating ringkasan dialog with one click.
+  const [infoReturn, setInfoReturn] = useState<{ label: string; run: () => void } | null>(null);
+
   // Helper: open the existing filter dialog with a filtered subset of incidents.
   // Used by clickable metrics inside SectionInfoDialog across all dashboard cards.
-  const openIncidentList = (title: string, list: Ticket[]) => {
+  const openIncidentList = (
+    title: string,
+    list: Ticket[],
+    returnTo?: { label: string; run: () => void } | null,
+  ) => {
     setShowOltList(false);
     setInlineSelectedTicket(null);
     setPreviousDialogState(null);
     setFilterDialogTickets(list);
     setFilterDialogTitle(title);
+    setInfoReturn(returnTo ?? null);
     setFilterDialogOpen(true);
   };
 
@@ -791,19 +807,22 @@ export default function Dashboard() {
                         const filterByRegion = (region: string) =>
                           tickets.filter(t => hostnameToRegionMap[(t.hostname || "").trim().toUpperCase()] === region);
 
+                        const returnTo = { label: "Ringkasan Regional Office", run: () => setRegionalInfoOpen(true) };
+                        const openList = (title: string, list: Ticket[]) => openIncidentList(title, list, returnTo);
+
                         const sections: InfoSection[] = [
                           {
                             heading: "Ringkasan Realtime",
                             emoji: "📈",
                             metrics: [
                               { label: "Total Incident", value: totalAll, hint: `${regionalIncidentData.length} region aktif`, tone: "primary",
-                                onClick: totalAll > 0 ? () => openIncidentList("🗺️ Semua Incident Regional", allRegional) : undefined },
+                                onClick: totalAll > 0 ? () => openList("🗺️ Semua Incident Regional", allRegional) : undefined },
                               { label: "Resolved", value: totalResolved, hint: `${totalAll > 0 ? rate : 0}%`, tone: "success",
-                                onClick: totalResolved > 0 ? () => openIncidentList("✅ Resolved — Regional", filterByStatus(["Resolved"])) : undefined },
+                                onClick: totalResolved > 0 ? () => openList("✅ Resolved — Regional", filterByStatus(["Resolved"])) : undefined },
                               { label: "Pending", value: totalPendingAll, hint: `${totalAll > 0 ? Math.round((totalPendingAll/totalAll)*100) : 0}%`, tone: "warning",
-                                onClick: totalPendingAll > 0 ? () => openIncidentList("⏳ Pending / On Progress — Regional", filterPendingBucket()) : undefined },
+                                onClick: totalPendingAll > 0 ? () => openList("⏳ Pending / On Progress — Regional", filterPendingBucket()) : undefined },
                               { label: "Critical", value: totalCritical, hint: `${totalAll > 0 ? Math.round((totalCritical/totalAll)*100) : 0}%`, tone: "destructive",
-                                onClick: totalCritical > 0 ? () => openIncidentList("🚨 Critical — Regional", filterByStatus(["Critical"])) : undefined },
+                                onClick: totalCritical > 0 ? () => openList("🚨 Critical — Regional", filterByStatus(["Critical"])) : undefined },
                             ],
                           },
                           {
@@ -818,7 +837,7 @@ export default function Dashboard() {
                                     label: `${r.region} • ${r.total} incident`,
                                     value: `${rRate}% resolved`,
                                     tone,
-                                    onClick: () => openIncidentList(`🗺️ Region: ${r.region}`, filterByRegion(r.region)),
+                                    onClick: () => openList(`🗺️ Region: ${r.region}`, filterByRegion(r.region)),
                                   };
                                 }),
                           },
@@ -830,19 +849,19 @@ export default function Dashboard() {
                                 label: `🥇 Best Performance: ${bestRegion.region}`,
                                 value: `${bestRegion.total > 0 ? Math.round((bestRegion.resolved/bestRegion.total)*100) : 0}%`,
                                 tone: "success" as const,
-                                onClick: () => openIncidentList(`🥇 Region terbaik: ${bestRegion.region}`, filterByRegion(bestRegion.region)),
+                                onClick: () => openList(`🥇 Region terbaik: ${bestRegion.region}`, filterByRegion(bestRegion.region)),
                               }] : []),
                               ...(worstRegion && worstRegion.critical > 0 ? [{
                                 label: `⚠️ Most Critical: ${worstRegion.region}`,
                                 value: `${worstRegion.critical} tiket`,
                                 tone: "destructive" as const,
-                                onClick: () => openIncidentList(`🚨 Critical region: ${worstRegion.region}`, filterByRegion(worstRegion.region).filter(t => t.status === "Critical")),
+                                onClick: () => openList(`🚨 Critical region: ${worstRegion.region}`, filterByRegion(worstRegion.region).filter(t => t.status === "Critical")),
                               }] : []),
                               ...(topRegion ? [{
                                 label: `📦 Region paling sibuk: ${topRegion.region}`,
                                 value: `${topRegion.total}`,
                                 tone: "primary" as const,
-                                onClick: () => openIncidentList(`📦 Region tersibuk: ${topRegion.region}`, filterByRegion(topRegion.region)),
+                                onClick: () => openList(`📦 Region tersibuk: ${topRegion.region}`, filterByRegion(topRegion.region)),
                               }] : []),
                             ],
                           },
@@ -855,6 +874,8 @@ export default function Dashboard() {
                             description="Distribusi incident per region beserta tingkat resolusi terkini."
                             insight={insight}
                             sections={sections}
+                            open={regionalInfoOpen}
+                            onOpenChange={setRegionalInfoOpen}
                           />
                         );
                       })()}
@@ -1073,23 +1094,32 @@ export default function Dashboard() {
                               const filterStatus = (status: Ticket["status"]) => section.data.filter(t => t.status === status);
                               const filterByConstraint = (name: string) => section.data.filter(t => t.constraint === name);
 
+                              const isRitel = section.label === "Incident Ritel";
+                              const setInfoOpen = isRitel ? setRitelInfoOpen : setFeederInfoOpen;
+                              const isInfoOpen = isRitel ? ritelInfoOpen : feederInfoOpen;
+                              const returnTo = {
+                                label: `Ringkasan ${section.label}`,
+                                run: () => setInfoOpen(true),
+                              };
+                              const openList = (title: string, list: Ticket[]) => openIncidentList(title, list, returnTo);
+
                               const sections: InfoSection[] = [
                                 {
                                   heading: "Status Realtime",
                                   emoji: "📊",
                                   metrics: [
                                     { label: "Total", value: section.data.length, tone: section.accent as InfoMetric["tone"],
-                                      onClick: section.data.length > 0 ? () => openIncidentList(`${section.icon} Semua ${section.label}`, section.data) : undefined },
+                                      onClick: section.data.length > 0 ? () => openList(`${section.icon} Semua ${section.label}`, section.data) : undefined },
                                     { label: "Resolved", value: resolved, hint: `${rate}%`, tone: "success",
-                                      onClick: resolved > 0 ? () => openIncidentList(`✅ Resolved — ${section.label}`, filterStatus("Resolved")) : undefined },
+                                      onClick: resolved > 0 ? () => openList(`✅ Resolved — ${section.label}`, filterStatus("Resolved")) : undefined },
                                     { label: "On Progress", value: onProgress, tone: "primary",
-                                      onClick: onProgress > 0 ? () => openIncidentList(`🔧 On Progress — ${section.label}`, filterStatus("On Progress")) : undefined },
+                                      onClick: onProgress > 0 ? () => openList(`🔧 On Progress — ${section.label}`, filterStatus("On Progress")) : undefined },
                                     { label: "Pending", value: pendingStatus, tone: "warning",
-                                      onClick: pendingStatus > 0 ? () => openIncidentList(`⏳ Pending — ${section.label}`, filterStatus("Pending")) : undefined },
+                                      onClick: pendingStatus > 0 ? () => openList(`⏳ Pending — ${section.label}`, filterStatus("Pending")) : undefined },
                                     { label: "Critical", value: critical, tone: "destructive",
-                                      onClick: critical > 0 ? () => openIncidentList(`🚨 Critical — ${section.label}`, filterStatus("Critical")) : undefined },
+                                      onClick: critical > 0 ? () => openList(`🚨 Critical — ${section.label}`, filterStatus("Critical")) : undefined },
                                     { label: "Belum Selesai", value: pending, tone: "destructive",
-                                      onClick: pending > 0 ? () => openIncidentList(`📌 Belum Selesai — ${section.label}`, section.data.filter(t => t.status !== "Resolved")) : undefined },
+                                      onClick: pending > 0 ? () => openList(`📌 Belum Selesai — ${section.label}`, section.data.filter(t => t.status !== "Resolved")) : undefined },
                                   ],
                                 },
                                 {
@@ -1099,7 +1129,7 @@ export default function Dashboard() {
                                     label: `${i + 1}. ${name}`,
                                     value: `${count} (${Math.round((count/section.data.length)*100)}%)`,
                                     tone: i === 0 ? (section.accent as InfoMetric["tone"]) : "default",
-                                    onClick: () => openIncidentList(`🎯 ${name} — ${section.label}`, filterByConstraint(name)),
+                                    onClick: () => openList(`🎯 ${name} — ${section.label}`, filterByConstraint(name)),
                                   })) : [{ label: "Belum ada data constraint", tone: "default" as const }],
                                 },
                                 {
@@ -1118,6 +1148,8 @@ export default function Dashboard() {
                                   description={`Analisa lengkap ${section.label.toLowerCase()} berdasarkan data realtime.`}
                                   insight={insight}
                                   sections={sections}
+                                  open={isInfoOpen}
+                                  onOpenChange={setInfoOpen}
                                 />
                               );
                             })()}
@@ -1198,7 +1230,18 @@ export default function Dashboard() {
 
             {/* RIGHT COLUMN — Tier Incident OVER SLA (full height) */}
             <div className="min-w-0 lg:sticky lg:top-3 self-start w-full">
-              <DashboardTierOverSLA tickets={tickets} getTicketRegion={getTicketRegion} onOpenList={openIncidentList} />
+              <DashboardTierOverSLA
+                tickets={tickets}
+                getTicketRegion={getTicketRegion}
+                infoOpen={overSlaInfoOpen}
+                onInfoOpenChange={setOverSlaInfoOpen}
+                onOpenList={(title, list) =>
+                  openIncidentList(title, list, {
+                    label: "Ringkasan OVER SLA",
+                    run: () => setOverSlaInfoOpen(true),
+                  })
+                }
+              />
             </div>
           </div>
 
@@ -1561,11 +1604,12 @@ export default function Dashboard() {
         if (!open) {
           setPreviousDialogState(null);
           setInlineSelectedTicket(null);
+          setInfoReturn(null);
         }
       }}>
         <DialogContent className="w-[95vw] max-w-4xl max-h-[85vh] overflow-hidden flex flex-col p-4 sm:p-6">
           <DialogHeader className="flex-shrink-0">
-            {(previousDialogState || inlineSelectedTicket) && (
+            {(previousDialogState || inlineSelectedTicket) ? (
               <button
                 onClick={() => {
                   if (inlineSelectedTicket) {
@@ -1583,7 +1627,22 @@ export default function Dashboard() {
                 <span className="text-sm">←</span>
                 Kembali
               </button>
-            )}
+            ) : infoReturn ? (
+              <button
+                onClick={() => {
+                  const run = infoReturn.run;
+                  setInfoReturn(null);
+                  setFilterDialogOpen(false);
+                  // Re-open the originating ringkasan dialog after the filter dialog closes
+                  setTimeout(() => run(), 60);
+                }}
+                className="inline-flex items-center gap-1.5 text-xs font-medium text-primary hover:text-primary/80 bg-primary/10 hover:bg-primary/15 border border-primary/20 rounded-full px-3 py-1 w-fit transition-all duration-200 active:scale-95 mb-1"
+                title={`Kembali ke ${infoReturn.label}`}
+              >
+                <span className="text-sm">←</span>
+                Kembali ke {infoReturn.label}
+              </button>
+            ) : null}
             <DialogTitle className="flex items-center gap-2 text-lg">
               <BarChart3 className="h-5 w-5 text-primary" />
               {inlineSelectedTicket ? `🎫 Detail Incident: ${inlineSelectedTicket.id}` : filterDialogTitle}
