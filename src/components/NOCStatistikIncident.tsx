@@ -63,6 +63,7 @@ const VARIANT_CONFIG = {
 export function NOCStatistikIncident({ tickets, variant }: Props) {
   const [userHistory, setUserHistory] = useState<UserHistoryRow[]>([]);
   const [trendPeriod, setTrendPeriod] = useState<TrendPeriod>("all");
+  const [customRange, setCustomRange] = useState<DateRange | undefined>(undefined);
   const config = VARIANT_CONFIG[variant];
 
   // Fetch user history for NOC variant
@@ -78,22 +79,49 @@ export function NOCStatistikIncident({ tickets, variant }: Props) {
     })();
   }, [variant]);
 
+  // Local-date helper (WIB-accurate)
+  const toLocalDateStr = (d: Date) => {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${y}-${m}-${day}`;
+  };
+
+  // Resolve active date range based on trendPeriod
+  const activeRange = useMemo(() => {
+    const now = new Date();
+    if (trendPeriod === "all") return null;
+    if (trendPeriod === "today") return { from: startOfDay(now), to: endOfDay(now) };
+    if (trendPeriod === "7d") return { from: startOfDay(subDays(now, 6)), to: endOfDay(now) };
+    if (trendPeriod === "14d") return { from: startOfDay(subDays(now, 13)), to: endOfDay(now) };
+    if (trendPeriod === "30d") return { from: startOfDay(subDays(now, 29)), to: endOfDay(now) };
+    if (trendPeriod === "custom" && customRange?.from) {
+      return { from: startOfDay(customRange.from), to: endOfDay(customRange.to ?? customRange.from) };
+    }
+    return null;
+  }, [trendPeriod, customRange]);
+
+  // Tickets filtered by active range — drives ALL stats so they stay in sync with the filter
+  const filteredTickets = useMemo(() => {
+    if (!activeRange) return tickets;
+    return tickets.filter(t => {
+      const d = new Date(t.createdISO);
+      return isWithinInterval(d, { start: activeRange.from, end: activeRange.to });
+    });
+  }, [tickets, activeRange]);
+
   // Stats
-  const resolved = useMemo(() => tickets.filter(t => t.status === "Resolved").length, [tickets]);
-  const pending = useMemo(() => tickets.filter(t => t.status === "On Progress" || t.status === "Pending").length, [tickets]);
-  const critical = useMemo(() => tickets.filter(t => t.status === "Critical").length, [tickets]);
-  const total = tickets.length;
+  const resolved = useMemo(() => filteredTickets.filter(t => t.status === "Resolved").length, [filteredTickets]);
+  const pending = useMemo(() => filteredTickets.filter(t => t.status === "On Progress" || t.status === "Pending").length, [filteredTickets]);
+  const critical = useMemo(() => filteredTickets.filter(t => t.status === "Critical").length, [filteredTickets]);
+  const total = filteredTickets.length;
   const resRate = total > 0 ? Math.round((resolved / total) * 100) : 0;
 
   // Category trend
   const trendData = useMemo(() => {
-    const periodDays = trendPeriod === "7d" ? 7 : trendPeriod === "14d" ? 14 : trendPeriod === "30d" ? 30 : null;
-    const startDate = periodDays ? startOfDay(subDays(new Date(), periodDays)) : null;
-    const filtered = startDate ? tickets.filter(t => new Date(t.createdISO) >= startDate) : tickets;
-
     const dateMap: Record<string, Record<string, number>> = {};
-    filtered.forEach(t => {
-      const d = new Date(t.createdISO).toISOString().split("T")[0];
+    filteredTickets.forEach(t => {
+      const d = toLocalDateStr(new Date(t.createdISO));
       if (!dateMap[d]) dateMap[d] = {};
       const key = t.constraint || "Lainnya";
       dateMap[d][key] = (dateMap[d][key] || 0) + 1;
@@ -105,11 +133,11 @@ export function NOCStatistikIncident({ tickets, variant }: Props) {
     return Object.entries(dateMap)
       .sort((a, b) => a[0].localeCompare(b[0]))
       .map(([date, counts]) => {
-        const entry: Record<string, any> = { date: format(new Date(date), "dd MMM") };
+        const entry: Record<string, any> = { date: format(new Date(date + "T00:00:00"), "dd MMM", { locale: localeId }) };
         allConstraints.forEach(c => { entry[c] = counts[c] || 0; });
         return entry;
       });
-  }, [tickets, trendPeriod]);
+  }, [filteredTickets]);
 
   const constraintKeys = useMemo(() => {
     if (trendData.length === 0) return [];
