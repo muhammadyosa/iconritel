@@ -126,8 +126,72 @@ export function DashboardTierOverSLA({ tickets, getTicketRegion }: DashboardTier
     <>
       <Card className="overflow-hidden border">
         <CardHeader className="py-2.5 px-3 sm:px-4 border-b bg-muted/20">
-          <CardTitle className="text-xs sm:text-sm flex items-center gap-2">🏆 Tier Incident OVER SLA</CardTitle>
-          <p className="text-[10px] sm:text-xs text-muted-foreground">Top 20 incident dengan durasi tertinggi</p>
+          <div className="flex items-start justify-between gap-2">
+            <div className="min-w-0">
+              <CardTitle className="text-xs sm:text-sm flex items-center gap-2">🏆 Tier Incident OVER SLA</CardTitle>
+              <p className="text-[10px] sm:text-xs text-muted-foreground">Top 20 incident dengan durasi tertinggi</p>
+            </div>
+            {analysis && (() => {
+              const totalOver = overSLATickets.length;
+              const longestHours = Math.floor(top15[0].durationMs / 3600000);
+              let insight: { tone: "success" | "warning" | "destructive" | "primary"; text: string };
+              if (analysis.criticalCount > top15.length * 0.5) {
+                insight = { tone: "destructive", text: `🚨 ${analysis.criticalCount} dari ${top15.length} incident teratas berstatus Critical. Eskalasi penanganan diperlukan segera.` };
+              } else if (longestHours > 48) {
+                insight = { tone: "destructive", text: `🔥 Incident terlama sudah berjalan ${analysis.maxLabel}. Tinjau hambatan dan alokasi resource untuk percepatan.` };
+              } else if (analysis.pendingCount > top15.length * 0.4) {
+                insight = { tone: "warning", text: `⏳ ${analysis.pendingCount} incident berstatus Pending mendominasi. Verifikasi alasan pending dan rencana resolusi.` };
+              } else {
+                insight = { tone: "primary", text: `📊 ${totalOver} incident telah melewati SLA 8 jam. Pantau Top 20 untuk memastikan tidak terjadi eskalasi lebih lanjut.` };
+              }
+
+              const sections: InfoSection[] = [
+                {
+                  heading: "Statistik Realtime",
+                  emoji: "📈",
+                  metrics: [
+                    { label: "Total Over SLA", value: totalOver, hint: `Top ${top15.length} ditampilkan`, tone: "destructive" },
+                    { label: "Rata-rata Durasi", value: analysis.avgLabel, tone: "warning" },
+                    { label: "Durasi Tertinggi", value: analysis.maxLabel, tone: "destructive" },
+                    { label: "Critical", value: analysis.criticalCount, tone: "destructive" },
+                    { label: "Pending", value: analysis.pendingCount, tone: "warning" },
+                    { label: "On Progress", value: analysis.onProgressCount, tone: "primary" },
+                  ],
+                },
+                {
+                  heading: "Distribusi Region",
+                  emoji: "🗺️",
+                  bullets: Object.entries(analysis.regionMap)
+                    .sort((a, b) => b[1] - a[1])
+                    .map(([region, count]) => ({
+                      label: region,
+                      value: `${count} incident`,
+                      tone: count >= 5 ? "destructive" as const : count >= 3 ? "warning" as const : "default" as const,
+                    })),
+                },
+                {
+                  heading: "Kriteria Over SLA",
+                  emoji: "ℹ️",
+                  paragraph: "Incident dianggap melewati SLA jika berstatus Pending, atau jika durasi sejak dibuat sudah melampaui 8 jam (untuk status Critical/On Progress). Daftar diurutkan dari durasi terlama ke tersingkat untuk memudahkan prioritas penanganan.",
+                },
+                {
+                  heading: "Rekomendasi",
+                  emoji: "🎯",
+                  paragraph: analysis.recommendation,
+                },
+              ];
+
+              return (
+                <SectionInfoDialog
+                  title="Tier Incident OVER SLA"
+                  emoji="🏆"
+                  description="Analisa lengkap incident yang melewati SLA berdasarkan data realtime."
+                  insight={insight}
+                  sections={sections}
+                />
+              );
+            })()}
+          </div>
         </CardHeader>
         <CardContent className="p-1.5 sm:p-2">
           <div className="overflow-x-auto">
