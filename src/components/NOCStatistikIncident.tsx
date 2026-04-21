@@ -240,23 +240,64 @@ export function NOCStatistikIncident({ tickets, variant }: Props) {
 
         {/* Category Trend */}
         <div>
-          <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center justify-between mb-2 gap-2 flex-wrap">
             <span className="text-[10px] sm:text-xs font-semibold">Category Trend</span>
-            <div className="flex gap-0.5">
-              {(["7d", "14d", "30d", "all"] as const).map(p => (
-                <Button
-                  key={p}
-                  size="sm"
-                  variant={trendPeriod === p ? "default" : "ghost"}
-                  className={cn(
-                    "h-5 sm:h-6 text-[7px] sm:text-[9px] px-1.5 sm:px-2 rounded-md",
-                    trendPeriod === p && "font-bold"
-                  )}
-                  onClick={() => setTrendPeriod(p)}
-                >
-                  {p === "all" ? "Semua Data" : p.toUpperCase().replace("D", " Hari")}
-                </Button>
-              ))}
+            <div className="flex items-center gap-0.5 flex-wrap">
+              {(["today", "7d", "14d", "30d", "custom", "all"] as const).map(p => {
+                const labelMap = {
+                  today: "Today",
+                  "7d": "7 Hari",
+                  "14d": "14 Hari",
+                  "30d": "30 Hari",
+                  custom: "Custom",
+                  all: "Semua Data",
+                } as const;
+                return (
+                  <Button
+                    key={p}
+                    size="sm"
+                    variant={trendPeriod === p ? "default" : "ghost"}
+                    className={cn(
+                      "h-5 sm:h-6 text-[7px] sm:text-[9px] px-1.5 sm:px-2 rounded-md",
+                      trendPeriod === p && "font-bold"
+                    )}
+                    onClick={() => setTrendPeriod(p)}
+                  >
+                    {labelMap[p]}
+                  </Button>
+                );
+              })}
+              {trendPeriod === "custom" && (
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-5 sm:h-6 text-[7px] sm:text-[9px] px-1.5 sm:px-2 rounded-md gap-1"
+                    >
+                      <CalendarIcon className="h-3 w-3" />
+                      {customRange?.from ? (
+                        customRange.to
+                          ? `${format(customRange.from, "dd MMM", { locale: localeId })} - ${format(customRange.to, "dd MMM", { locale: localeId })}`
+                          : format(customRange.from, "dd MMM yyyy", { locale: localeId })
+                      ) : (
+                        "Pilih tanggal"
+                      )}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="end">
+                    <Calendar
+                      initialFocus
+                      mode="range"
+                      defaultMonth={customRange?.from}
+                      selected={customRange}
+                      onSelect={setCustomRange}
+                      numberOfMonths={1}
+                      className="p-3 pointer-events-auto"
+                    />
+                  </PopoverContent>
+                </Popover>
+              )}
             </div>
           </div>
           {trendData.length > 0 ? (
