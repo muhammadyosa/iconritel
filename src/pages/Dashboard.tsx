@@ -807,6 +807,9 @@ export default function Dashboard() {
                         const filterByRegion = (region: string) =>
                           tickets.filter(t => hostnameToRegionMap[(t.hostname || "").trim().toUpperCase()] === region);
 
+                        const returnTo = { label: "Ringkasan Regional Office", run: () => setRegionalInfoOpen(true) };
+                        const openList = (title: string, list: Ticket[]) => openIncidentList(title, list, returnTo);
+
                         const sections: InfoSection[] = [
                           {
                             heading: "Ringkasan Realtime",
