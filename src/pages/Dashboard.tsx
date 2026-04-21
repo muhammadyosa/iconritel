@@ -96,14 +96,30 @@ export default function Dashboard() {
   const [regionStatusFilter, setRegionStatusFilter] = useState<string>("all");
   const [regionProportionOpen, setRegionProportionOpen] = useState(false);
 
+  // Controlled open-state for each SectionInfoDialog so we can reopen them via "Kembali ke ringkasan"
+  const [regionalInfoOpen, setRegionalInfoOpen] = useState(false);
+  const [ritelInfoOpen, setRitelInfoOpen] = useState(false);
+  const [feederInfoOpen, setFeederInfoOpen] = useState(false);
+  const [overSlaInfoOpen, setOverSlaInfoOpen] = useState(false);
+
+  // When a metric inside a SectionInfoDialog is clicked, the section dialog closes and the
+  // filter dialog opens. We remember a "return" callback so the user can jump back to the
+  // originating ringkasan dialog with one click.
+  const [infoReturn, setInfoReturn] = useState<{ label: string; run: () => void } | null>(null);
+
   // Helper: open the existing filter dialog with a filtered subset of incidents.
   // Used by clickable metrics inside SectionInfoDialog across all dashboard cards.
-  const openIncidentList = (title: string, list: Ticket[]) => {
+  const openIncidentList = (
+    title: string,
+    list: Ticket[],
+    returnTo?: { label: string; run: () => void } | null,
+  ) => {
     setShowOltList(false);
     setInlineSelectedTicket(null);
     setPreviousDialogState(null);
     setFilterDialogTickets(list);
     setFilterDialogTitle(title);
+    setInfoReturn(returnTo ?? null);
     setFilterDialogOpen(true);
   };
 
