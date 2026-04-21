@@ -6,7 +6,7 @@ import { RegionBadge } from "@/components/RegionBadge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { DurationCell } from "@/components/DurationCell";
-import { SectionInfoDialog, type InfoSection, type InfoMetric } from "@/components/SectionInfoDialog";
+import { SectionInfoDialog, buildInsight, type InfoSection, type InfoMetric } from "@/components/SectionInfoDialog";
 import { cn } from "@/lib/utils";
 
 const SLA_MS = 8 * 60 * 60 * 1000;
@@ -14,9 +14,11 @@ const SLA_MS = 8 * 60 * 60 * 1000;
 interface DashboardTierOverSLAProps {
   tickets: Ticket[];
   getTicketRegion: (hostname: string) => string;
+  /** Optional callback to open the global filter dialog with a ticket subset */
+  onOpenList?: (title: string, list: Ticket[]) => void;
 }
 
-export function DashboardTierOverSLA({ tickets, getTicketRegion }: DashboardTierOverSLAProps) {
+export function DashboardTierOverSLA({ tickets, getTicketRegion, onOpenList }: DashboardTierOverSLAProps) {
   const [now, setNow] = useState(Date.now());
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
 
