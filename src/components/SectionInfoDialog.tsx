@@ -41,6 +41,9 @@ interface SectionInfoDialogProps {
   triggerClassName?: string;
   triggerTitle?: string;
   footer?: ReactNode;
+  /** Optional controlled open state — useful for "Kembali ke ringkasan" flow */
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
 const toneText: Record<InfoTone, string> = {
@@ -83,9 +86,11 @@ export function SectionInfoDialog({
   triggerClassName,
   triggerTitle = "Lihat detail informasi",
   footer,
+  open,
+  onOpenChange,
 }: SectionInfoDialogProps) {
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogTrigger asChild>
         <Button
           type="button"
