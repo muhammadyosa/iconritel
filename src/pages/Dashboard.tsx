@@ -23,6 +23,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Toolti
 import { loadDefaultRegionalTeamData } from "@/lib/defaultRegionalData";
 import { NOCStatistikIncident } from "@/components/NOCStatistikIncident";
 import { DashboardTierOverSLA } from "@/components/DashboardTierOverSLA";
+import { SectionInfoDialog, type InfoSection, type InfoMetric } from "@/components/SectionInfoDialog";
 import { RegionalTeamRecord } from "@/types/regionalTeam";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ShiftReportCard } from "@/components/ShiftReportCard";
@@ -743,7 +744,72 @@ export default function Dashboard() {
               <CardHeader className="py-2.5 px-3 sm:px-4 border-b bg-muted/10">
                 <div className="flex items-center gap-3">
                   <div className="flex-1 min-w-0">
-                    <CardTitle className="text-xs sm:text-sm flex items-center gap-1.5">🗺️ Regional Office</CardTitle>
+                    <CardTitle className="text-xs sm:text-sm flex items-center gap-1.5">
+                      🗺️ Regional Office
+                      {regionalIncidentData.length > 0 && (() => {
+                        const totalAll = regionalIncidentData.reduce((s, r) => s + r.total, 0);
+                        const totalResolved = regionalIncidentData.reduce((s, r) => s + r.resolved, 0);
+                        const totalCritical = regionalIncidentData.reduce((s, r) => s + r.critical, 0);
+                        const totalPendingAll = regionalIncidentData.reduce((s, r) => s + r.pending, 0);
+                        const rate = totalAll > 0 ? Math.round((totalResolved / totalAll) * 100) : 0;
+                        const sorted = [...regionalIncidentData].sort((a, b) => b.total - a.total);
+                        const bestRegion = [...regionalIncidentData].sort((a, b) => (b.total > 0 ? b.resolved / b.total : 0) - (a.total > 0 ? a.resolved / a.total : 0))[0];
+                        const worstRegion = [...regionalIncidentData].sort((a, b) => b.critical - a.critical)[0];
+                        const topRegion = sorted[0];
+
+                        let insight: { tone: "success" | "warning" | "destructive" | "primary"; text: string };
+                        if (totalCritical > totalAll * 0.4) {
+                          insight = { tone: "destructive", text: `🚨 ${totalCritical} dari ${totalAll} incident (${Math.round((totalCritical/totalAll)*100)}%) berstatus Critical. Eskalasi dan koordinasi lintas region direkomendasikan segera.` };
+                        } else if (totalPendingAll > totalAll * 0.4) {
+                          insight = { tone: "warning", text: `⏳ Tingkat Pending ${Math.round((totalPendingAll/totalAll)*100)}% — banyak incident menunggu tindak lanjut. Tinjau alasan pending di setiap region.` };
+                        } else if (rate >= 70) {
+                          insight = { tone: "success", text: `✅ Performa resolusi sangat baik (${rate}%). Pertahankan ritme penanganan dan dokumentasikan praktik terbaik dari ${bestRegion?.region}.` };
+                        } else {
+                          insight = { tone: "primary", text: `📊 Resolution rate gabungan ${rate}%. Region paling sibuk: ${topRegion?.region} (${topRegion?.total} incident).` };
+                        }
+
+                        const sections: InfoSection[] = [
+                          {
+                            heading: "Ringkasan Realtime",
+                            emoji: "📈",
+                            metrics: [
+                              { label: "Total Incident", value: totalAll, hint: `${regionalIncidentData.length} region aktif`, tone: "primary" },
+                              { label: "Resolved", value: totalResolved, hint: `${rate}% rate`, tone: "success" },
+                              { label: "Pending", value: totalPendingAll, hint: `${totalAll > 0 ? Math.round((totalPendingAll/totalAll)*100) : 0}%`, tone: "warning" },
+                              { label: "Critical", value: totalCritical, hint: `${totalAll > 0 ? Math.round((totalCritical/totalAll)*100) : 0}%`, tone: "destructive" },
+                            ],
+                          },
+                          {
+                            heading: "Performa per Region",
+                            emoji: "🗺️",
+                            bullets: sorted.map((r) => {
+                              const rRate = r.total > 0 ? Math.round((r.resolved / r.total) * 100) : 0;
+                              const tone: InfoMetric["tone"] = r.critical > r.total * 0.4 ? "destructive" : rRate >= 60 ? "success" : "warning";
+                              return { label: `${r.region} • ${r.total} incident`, value: `${rRate}% resolved`, tone };
+                            }),
+                          },
+                          {
+                            heading: "Highlight",
+                            emoji: "🏅",
+                            bullets: [
+                              ...(bestRegion ? [{ label: `🥇 Best Performance: ${bestRegion.region}`, value: `${bestRegion.total > 0 ? Math.round((bestRegion.resolved/bestRegion.total)*100) : 0}%`, tone: "success" as const }] : []),
+                              ...(worstRegion && worstRegion.critical > 0 ? [{ label: `⚠️ Most Critical: ${worstRegion.region}`, value: `${worstRegion.critical} tiket`, tone: "destructive" as const }] : []),
+                              { label: `📦 Region paling sibuk: ${topRegion?.region}`, value: `${topRegion?.total}`, tone: "primary" as const },
+                            ],
+                          },
+                        ];
+
+                        return (
+                          <SectionInfoDialog
+                            title="Regional Office"
+                            emoji="🗺️"
+                            description="Distribusi incident per region beserta tingkat resolusi terkini."
+                            insight={insight}
+                            sections={sections}
+                          />
+                        );
+                      })()}
+                    </CardTitle>
                     <p className="text-[8px] sm:text-[9px] text-muted-foreground mt-0.5">Klik region untuk detail incident</p>
                   </div>
                   {/* Mini Donut Chart in header */}
@@ -933,9 +999,75 @@ export default function Dashboard() {
                               <p className="text-[8px] sm:text-[9px] text-muted-foreground leading-tight mt-0.5">Resolution rate {rate}%</p>
                             </div>
                           </div>
-                          <div className="text-right shrink-0">
-                            <div className={`text-xl sm:text-2xl font-bold ${section.text} tabular-nums leading-none`}>{section.data.length}</div>
-                            <div className="text-[7px] sm:text-[8px] text-muted-foreground uppercase tracking-wider mt-0.5">Total</div>
+                          <div className="flex items-center gap-1 shrink-0">
+                            {(() => {
+                              const critical = section.data.filter(t => t.status === "Critical").length;
+                              const onProgress = section.data.filter(t => t.status === "On Progress").length;
+                              const pendingStatus = section.data.filter(t => t.status === "Pending").length;
+                              const sortedConstraints = Object.entries(
+                                section.data.reduce((acc, t) => { acc[t.constraint] = (acc[t.constraint] || 0) + 1; return acc; }, {} as Record<string, number>)
+                              ).sort((a, b) => b[1] - a[1]);
+                              const top5 = sortedConstraints.slice(0, 5);
+                              const totalConstraintTypes = sortedConstraints.length;
+
+                              let insight: { tone: "success" | "warning" | "destructive" | "primary"; text: string };
+                              if (section.data.length === 0) {
+                                insight = { tone: "success", text: "✅ Belum ada incident pada kategori ini. Layanan dalam kondisi stabil." };
+                              } else if (critical > section.data.length * 0.3) {
+                                insight = { tone: "destructive", text: `🚨 ${critical} incident Critical (${Math.round((critical/section.data.length)*100)}%). Perlu eskalasi prioritas tinggi.` };
+                              } else if (rate < 30) {
+                                insight = { tone: "warning", text: `⏳ Resolution rate baru ${rate}%. Percepat penanganan ${pending} incident yang belum selesai.` };
+                              } else if (rate >= 60) {
+                                insight = { tone: "success", text: `✅ Performa baik dengan resolution rate ${rate}%. Pertahankan ritme penanganan.` };
+                              } else {
+                                insight = { tone: "primary", text: `📊 ${section.data.length} incident terdeteksi. Top constraint: ${top5[0]?.[0] || "-"} (${top5[0]?.[1] || 0}).` };
+                              }
+
+                              const sections: InfoSection[] = [
+                                {
+                                  heading: "Status Realtime",
+                                  emoji: "📊",
+                                  metrics: [
+                                    { label: "Total", value: section.data.length, tone: section.accent as InfoMetric["tone"] },
+                                    { label: "Resolved", value: resolved, hint: `${rate}%`, tone: "success" },
+                                    { label: "On Progress", value: onProgress, tone: "primary" },
+                                    { label: "Pending", value: pendingStatus, tone: "warning" },
+                                    { label: "Critical", value: critical, tone: "destructive" },
+                                    { label: "Belum Selesai", value: pending, tone: "destructive" },
+                                  ],
+                                },
+                                {
+                                  heading: `Top Constraint (${totalConstraintTypes} kategori)`,
+                                  emoji: "🎯",
+                                  bullets: top5.length > 0 ? top5.map(([name, count], i) => ({
+                                    label: `${i + 1}. ${name}`,
+                                    value: `${count} (${Math.round((count/section.data.length)*100)}%)`,
+                                    tone: i === 0 ? (section.accent as InfoMetric["tone"]) : "default",
+                                  })) : [{ label: "Belum ada data constraint", tone: "default" as const }],
+                                },
+                                {
+                                  heading: "Tentang Kategori",
+                                  emoji: "ℹ️",
+                                  paragraph: section.label === "Incident Ritel"
+                                    ? "Kategori RITEL mencakup gangguan pelanggan akhir seperti LINK LOSS, BAD RX, ONT PROBLEM, INTERMITTENT, dan permasalahan layanan ICONPLAY/INET. Penanganan biasanya melibatkan tim mitra/serpo lokal."
+                                    : "Kategori FEEDER mencakup gangguan infrastruktur backbone seperti FAT BAD RX, FAT LOSS, PORT DOWN, OLT DOWN/BAD RX. Format incident mengikuti standar [PROACTIVE NOC RETAIL] dan menjadi prioritas operasional NOC.",
+                                },
+                              ];
+
+                              return (
+                                <SectionInfoDialog
+                                  title={section.label}
+                                  emoji={section.icon}
+                                  description={`Analisa lengkap ${section.label.toLowerCase()} berdasarkan data realtime.`}
+                                  insight={insight}
+                                  sections={sections}
+                                />
+                              );
+                            })()}
+                            <div className="text-right">
+                              <div className={`text-xl sm:text-2xl font-bold ${section.text} tabular-nums leading-none`}>{section.data.length}</div>
+                              <div className="text-[7px] sm:text-[8px] text-muted-foreground uppercase tracking-wider mt-0.5">Total</div>
+                            </div>
                           </div>
                         </div>
                       </CardHeader>
