@@ -1053,36 +1053,43 @@ export default function Dashboard() {
                               const critical = section.data.filter(t => t.status === "Critical").length;
                               const onProgress = section.data.filter(t => t.status === "On Progress").length;
                               const pendingStatus = section.data.filter(t => t.status === "Pending").length;
+                              // Pending bucket = everything not Resolved (matches `pending` var above)
                               const sortedConstraints = Object.entries(
                                 section.data.reduce((acc, t) => { acc[t.constraint] = (acc[t.constraint] || 0) + 1; return acc; }, {} as Record<string, number>)
                               ).sort((a, b) => b[1] - a[1]);
                               const top5 = sortedConstraints.slice(0, 5);
                               const totalConstraintTypes = sortedConstraints.length;
 
-                              let insight: { tone: "success" | "warning" | "destructive" | "primary"; text: string };
-                              if (section.data.length === 0) {
-                                insight = { tone: "success", text: "✅ Belum ada incident pada kategori ini. Layanan dalam kondisi stabil." };
-                              } else if (critical > section.data.length * 0.3) {
-                                insight = { tone: "destructive", text: `🚨 ${critical} incident Critical (${Math.round((critical/section.data.length)*100)}%). Perlu eskalasi prioritas tinggi.` };
-                              } else if (rate < 30) {
-                                insight = { tone: "warning", text: `⏳ Resolution rate baru ${rate}%. Percepat penanganan ${pending} incident yang belum selesai.` };
-                              } else if (rate >= 60) {
-                                insight = { tone: "success", text: `✅ Performa baik dengan resolution rate ${rate}%. Pertahankan ritme penanganan.` };
-                              } else {
-                                insight = { tone: "primary", text: `📊 ${section.data.length} incident terdeteksi. Top constraint: ${top5[0]?.[0] || "-"} (${top5[0]?.[1] || 0}).` };
-                              }
+                              const insight = buildInsight({
+                                total: section.data.length,
+                                resolved,
+                                pending: pendingStatus,  // pending status only for pct calc consistency
+                                critical,
+                                rate,
+                                contextLabel: section.label.toLowerCase(),
+                                emptyText: `✅ Belum ada ${section.label.toLowerCase()} terdeteksi. Layanan ${section.label === "Incident Ritel" ? "RITEL" : "FEEDER"} dalam kondisi stabil.`,
+                              });
+
+                              const filterStatus = (status: Ticket["status"]) => section.data.filter(t => t.status === status);
+                              const filterByConstraint = (name: string) => section.data.filter(t => t.constraint === name);
 
                               const sections: InfoSection[] = [
                                 {
                                   heading: "Status Realtime",
                                   emoji: "📊",
                                   metrics: [
-                                    { label: "Total", value: section.data.length, tone: section.accent as InfoMetric["tone"] },
-                                    { label: "Resolved", value: resolved, hint: `${rate}%`, tone: "success" },
-                                    { label: "On Progress", value: onProgress, tone: "primary" },
-                                    { label: "Pending", value: pendingStatus, tone: "warning" },
-                                    { label: "Critical", value: critical, tone: "destructive" },
-                                    { label: "Belum Selesai", value: pending, tone: "destructive" },
+                                    { label: "Total", value: section.data.length, tone: section.accent as InfoMetric["tone"],
+                                      onClick: section.data.length > 0 ? () => openIncidentList(`${section.icon} Semua ${section.label}`, section.data) : undefined },
+                                    { label: "Resolved", value: resolved, hint: `${rate}%`, tone: "success",
+                                      onClick: resolved > 0 ? () => openIncidentList(`✅ Resolved — ${section.label}`, filterStatus("Resolved")) : undefined },
+                                    { label: "On Progress", value: onProgress, tone: "primary",
+                                      onClick: onProgress > 0 ? () => openIncidentList(`🔧 On Progress — ${section.label}`, filterStatus("On Progress")) : undefined },
+                                    { label: "Pending", value: pendingStatus, tone: "warning",
+                                      onClick: pendingStatus > 0 ? () => openIncidentList(`⏳ Pending — ${section.label}`, filterStatus("Pending")) : undefined },
+                                    { label: "Critical", value: critical, tone: "destructive",
+                                      onClick: critical > 0 ? () => openIncidentList(`🚨 Critical — ${section.label}`, filterStatus("Critical")) : undefined },
+                                    { label: "Belum Selesai", value: pending, tone: "destructive",
+                                      onClick: pending > 0 ? () => openIncidentList(`📌 Belum Selesai — ${section.label}`, section.data.filter(t => t.status !== "Resolved")) : undefined },
                                   ],
                                 },
                                 {
@@ -1092,6 +1099,7 @@ export default function Dashboard() {
                                     label: `${i + 1}. ${name}`,
                                     value: `${count} (${Math.round((count/section.data.length)*100)}%)`,
                                     tone: i === 0 ? (section.accent as InfoMetric["tone"]) : "default",
+                                    onClick: () => openIncidentList(`🎯 ${name} — ${section.label}`, filterByConstraint(name)),
                                   })) : [{ label: "Belum ada data constraint", tone: "default" as const }],
                                 },
                                 {
