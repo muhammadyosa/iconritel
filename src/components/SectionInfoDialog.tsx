@@ -1,22 +1,34 @@
-import { Info } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from "@/components/ui/dialog";
+import { Info, ChevronRight } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger, DialogClose } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
+export type InfoTone = "default" | "success" | "warning" | "destructive" | "primary";
+
 export interface InfoMetric {
   label: string;
   value: string | number;
   hint?: string;
-  tone?: "default" | "success" | "warning" | "destructive" | "primary";
+  tone?: InfoTone;
+  /** When provided, the metric becomes clickable and the dialog auto-closes after invocation */
+  onClick?: () => void;
+}
+
+export interface InfoBullet {
+  label: string;
+  value?: string | number;
+  tone?: InfoTone;
+  /** When provided, the bullet becomes clickable and the dialog auto-closes after invocation */
+  onClick?: () => void;
 }
 
 export interface InfoSection {
   heading: string;
   emoji?: string;
   metrics?: InfoMetric[];
-  bullets?: { label: string; value?: string | number; tone?: InfoMetric["tone"] }[];
+  bullets?: InfoBullet[];
   paragraph?: string;
 }
 
@@ -31,21 +43,29 @@ interface SectionInfoDialogProps {
   footer?: ReactNode;
 }
 
-const toneText = {
+const toneText: Record<InfoTone, string> = {
   default: "text-foreground",
   primary: "text-primary",
   success: "text-success",
   warning: "text-warning",
   destructive: "text-destructive",
-} as const;
+};
 
-const toneBg = {
+const toneBg: Record<InfoTone, string> = {
   default: "bg-muted/30 border-border/40",
   primary: "bg-primary/5 border-primary/20",
   success: "bg-success/5 border-success/20",
   warning: "bg-warning/5 border-warning/20",
   destructive: "bg-destructive/5 border-destructive/20",
-} as const;
+};
+
+const toneHover: Record<InfoTone, string> = {
+  default: "hover:bg-muted/60 hover:border-border/70",
+  primary: "hover:bg-primary/10 hover:border-primary/40",
+  success: "hover:bg-success/10 hover:border-success/40",
+  warning: "hover:bg-warning/10 hover:border-warning/40",
+  destructive: "hover:bg-destructive/10 hover:border-destructive/40",
+};
 
 const insightBg = {
   primary: "bg-primary/10 border-primary/30 text-primary",
@@ -95,6 +115,9 @@ export function SectionInfoDialog({
               {description}
             </DialogDescription>
           )}
+          <p className="text-[9px] sm:text-[10px] text-muted-foreground/80 mt-1">
+            💡 Klik metrik atau item untuk membuka daftar incident terkait.
+          </p>
         </DialogHeader>
 
         <ScrollArea className="max-h-[65vh]">
@@ -120,15 +143,33 @@ export function SectionInfoDialog({
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
                     {sec.metrics.map((m, i) => {
                       const tone = m.tone || "default";
-                      return (
-                        <div key={i} className={cn("rounded-md border p-2", toneBg[tone])}>
-                          <div className="text-[8px] sm:text-[9px] uppercase tracking-wider text-muted-foreground">{m.label}</div>
+                      const clickable = !!m.onClick;
+                      const inner = (
+                        <div className={cn(
+                          "relative rounded-md border p-2 text-left w-full transition-all",
+                          toneBg[tone],
+                          clickable && cn("cursor-pointer active:scale-[0.97]", toneHover[tone])
+                        )}>
+                          <div className="text-[8px] sm:text-[9px] uppercase tracking-wider text-muted-foreground flex items-center justify-between gap-1">
+                            <span className="truncate">{m.label}</span>
+                            {clickable && <ChevronRight className="h-2.5 w-2.5 opacity-50 shrink-0" />}
+                          </div>
                           <div className={cn("text-sm sm:text-base font-bold tabular-nums leading-tight mt-0.5", toneText[tone])}>{m.value}</div>
                           {m.hint && (
                             <div className="text-[8px] sm:text-[9px] text-muted-foreground/80 mt-0.5">{m.hint}</div>
                           )}
                         </div>
                       );
+                      if (clickable) {
+                        return (
+                          <DialogClose key={i} asChild>
+                            <button type="button" onClick={m.onClick} className="block">
+                              {inner}
+                            </button>
+                          </DialogClose>
+                        );
+                      }
+                      return <div key={i}>{inner}</div>;
                     })}
                   </div>
                 )}
@@ -137,14 +178,34 @@ export function SectionInfoDialog({
                   <ul className="space-y-1 text-[10px] sm:text-xs">
                     {sec.bullets.map((b, i) => {
                       const tone = b.tone || "default";
-                      return (
-                        <li key={i} className="flex items-center justify-between gap-2 px-2 py-1 rounded border border-border/30 bg-muted/10">
-                          <span className="text-foreground/80 truncate">{b.label}</span>
+                      const clickable = !!b.onClick;
+                      const row = (
+                        <div className={cn(
+                          "flex items-center justify-between gap-2 px-2 py-1 rounded border bg-muted/10 transition-all",
+                          "border-border/30",
+                          clickable && cn("cursor-pointer active:scale-[0.99]", toneHover[tone])
+                        )}>
+                          <span className="text-foreground/80 truncate flex-1 flex items-center gap-1">
+                            {b.label}
+                          </span>
                           {b.value !== undefined && (
                             <span className={cn("font-bold tabular-nums shrink-0", toneText[tone])}>{b.value}</span>
                           )}
-                        </li>
+                          {clickable && <ChevronRight className="h-3 w-3 opacity-50 shrink-0" />}
+                        </div>
                       );
+                      if (clickable) {
+                        return (
+                          <li key={i}>
+                            <DialogClose asChild>
+                              <button type="button" onClick={b.onClick} className="block w-full text-left">
+                                {row}
+                              </button>
+                            </DialogClose>
+                          </li>
+                        );
+                      }
+                      return <li key={i}>{row}</li>;
                     })}
                   </ul>
                 )}
@@ -157,4 +218,75 @@ export function SectionInfoDialog({
       </DialogContent>
     </Dialog>
   );
+}
+
+// ============================================================
+// Shared insight builder — keeps tone logic consistent across all sections
+// ============================================================
+
+export interface InsightInput {
+  total: number;
+  resolved: number;
+  pending: number;       // includes "Pending" status only OR everything not resolved (caller decides)
+  critical: number;
+  rate: number;          // 0-100, resolution percentage
+  contextLabel?: string; // e.g. "incident", "Top 20"
+  emptyText?: string;    // optional override for empty state
+}
+
+export function buildInsight({
+  total,
+  resolved,
+  pending,
+  critical,
+  rate,
+  contextLabel = "incident",
+  emptyText,
+}: InsightInput): { tone: "success" | "warning" | "destructive" | "primary"; text: string } {
+  // Empty state — always success/clean
+  if (total === 0) {
+    return {
+      tone: "success",
+      text: emptyText || `✅ Belum ada ${contextLabel} terdeteksi. Layanan dalam kondisi stabil.`,
+    };
+  }
+
+  const criticalPct = (critical / total) * 100;
+  const pendingPct = (pending / total) * 100;
+
+  // Priority order: Critical > Pending > Low rate > High rate > Neutral
+  if (criticalPct >= 40) {
+    return {
+      tone: "destructive",
+      text: `🚨 ${critical} dari ${total} ${contextLabel} (${Math.round(criticalPct)}%) berstatus Critical. Eskalasi prioritas tinggi diperlukan.`,
+    };
+  }
+  if (criticalPct >= 20) {
+    return {
+      tone: "destructive",
+      text: `⚠️ ${critical} ${contextLabel} (${Math.round(criticalPct)}%) berstatus Critical. Pantau dan percepat penanganan.`,
+    };
+  }
+  if (pendingPct >= 40) {
+    return {
+      tone: "warning",
+      text: `⏳ Tingkat Pending tinggi (${Math.round(pendingPct)}%). Tinjau alasan pending dan rencana resolusi.`,
+    };
+  }
+  if (rate < 30 && total >= 5) {
+    return {
+      tone: "warning",
+      text: `📉 Resolution rate baru ${rate}%. Percepat penanganan ${total - resolved} ${contextLabel} yang belum selesai.`,
+    };
+  }
+  if (rate >= 70) {
+    return {
+      tone: "success",
+      text: `✅ Performa sangat baik dengan resolution rate ${rate}%. Pertahankan ritme penanganan.`,
+    };
+  }
+  return {
+    tone: "primary",
+    text: `📊 Total ${total} ${contextLabel} aktif dengan resolution rate ${rate}%.`,
+  };
 }
