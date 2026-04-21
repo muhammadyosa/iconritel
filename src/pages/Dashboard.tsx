@@ -816,13 +816,13 @@ export default function Dashboard() {
                             emoji: "📈",
                             metrics: [
                               { label: "Total Incident", value: totalAll, hint: `${regionalIncidentData.length} region aktif`, tone: "primary",
-                                onClick: totalAll > 0 ? () => openIncidentList("🗺️ Semua Incident Regional", allRegional) : undefined },
+                                onClick: totalAll > 0 ? () => openList("🗺️ Semua Incident Regional", allRegional) : undefined },
                               { label: "Resolved", value: totalResolved, hint: `${totalAll > 0 ? rate : 0}%`, tone: "success",
-                                onClick: totalResolved > 0 ? () => openIncidentList("✅ Resolved — Regional", filterByStatus(["Resolved"])) : undefined },
+                                onClick: totalResolved > 0 ? () => openList("✅ Resolved — Regional", filterByStatus(["Resolved"])) : undefined },
                               { label: "Pending", value: totalPendingAll, hint: `${totalAll > 0 ? Math.round((totalPendingAll/totalAll)*100) : 0}%`, tone: "warning",
-                                onClick: totalPendingAll > 0 ? () => openIncidentList("⏳ Pending / On Progress — Regional", filterPendingBucket()) : undefined },
+                                onClick: totalPendingAll > 0 ? () => openList("⏳ Pending / On Progress — Regional", filterPendingBucket()) : undefined },
                               { label: "Critical", value: totalCritical, hint: `${totalAll > 0 ? Math.round((totalCritical/totalAll)*100) : 0}%`, tone: "destructive",
-                                onClick: totalCritical > 0 ? () => openIncidentList("🚨 Critical — Regional", filterByStatus(["Critical"])) : undefined },
+                                onClick: totalCritical > 0 ? () => openList("🚨 Critical — Regional", filterByStatus(["Critical"])) : undefined },
                             ],
                           },
                           {
@@ -837,7 +837,7 @@ export default function Dashboard() {
                                     label: `${r.region} • ${r.total} incident`,
                                     value: `${rRate}% resolved`,
                                     tone,
-                                    onClick: () => openIncidentList(`🗺️ Region: ${r.region}`, filterByRegion(r.region)),
+                                    onClick: () => openList(`🗺️ Region: ${r.region}`, filterByRegion(r.region)),
                                   };
                                 }),
                           },
@@ -849,19 +849,19 @@ export default function Dashboard() {
                                 label: `🥇 Best Performance: ${bestRegion.region}`,
                                 value: `${bestRegion.total > 0 ? Math.round((bestRegion.resolved/bestRegion.total)*100) : 0}%`,
                                 tone: "success" as const,
-                                onClick: () => openIncidentList(`🥇 Region terbaik: ${bestRegion.region}`, filterByRegion(bestRegion.region)),
+                                onClick: () => openList(`🥇 Region terbaik: ${bestRegion.region}`, filterByRegion(bestRegion.region)),
                               }] : []),
                               ...(worstRegion && worstRegion.critical > 0 ? [{
                                 label: `⚠️ Most Critical: ${worstRegion.region}`,
                                 value: `${worstRegion.critical} tiket`,
                                 tone: "destructive" as const,
-                                onClick: () => openIncidentList(`🚨 Critical region: ${worstRegion.region}`, filterByRegion(worstRegion.region).filter(t => t.status === "Critical")),
+                                onClick: () => openList(`🚨 Critical region: ${worstRegion.region}`, filterByRegion(worstRegion.region).filter(t => t.status === "Critical")),
                               }] : []),
                               ...(topRegion ? [{
                                 label: `📦 Region paling sibuk: ${topRegion.region}`,
                                 value: `${topRegion.total}`,
                                 tone: "primary" as const,
-                                onClick: () => openIncidentList(`📦 Region tersibuk: ${topRegion.region}`, filterByRegion(topRegion.region)),
+                                onClick: () => openList(`📦 Region tersibuk: ${topRegion.region}`, filterByRegion(topRegion.region)),
                               }] : []),
                             ],
                           },
@@ -874,6 +874,8 @@ export default function Dashboard() {
                             description="Distribusi incident per region beserta tingkat resolusi terkini."
                             insight={insight}
                             sections={sections}
+                            open={regionalInfoOpen}
+                            onOpenChange={setRegionalInfoOpen}
                           />
                         );
                       })()}
