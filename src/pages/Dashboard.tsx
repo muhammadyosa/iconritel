@@ -1946,7 +1946,7 @@ export default function Dashboard() {
             <Table>
               <TableHeader>
                 <TableRow className="text-[10px] sm:text-xs">
-                  <TableHead className="py-1.5">Ticket ID</TableHead>
+                  <TableHead className="py-1.5">Incident ID</TableHead>
                   <TableHead className="py-1.5">Hostname</TableHead>
                   <TableHead className="py-1.5">Kendala</TableHead>
                   <TableHead className="py-1.5">Status</TableHead>
@@ -1967,7 +1967,7 @@ export default function Dashboard() {
                   );
                   return filtered.map((t) => (
                     <TableRow key={t.id} className="text-[10px] sm:text-xs">
-                      <TableCell className="py-1.5 font-mono text-[9px]">{t.id.slice(0, 8)}</TableCell>
+                      <TableCell className="py-1.5 font-mono text-[10px] font-semibold whitespace-nowrap">{t.id}</TableCell>
                       <TableCell className="py-1.5 font-medium truncate max-w-[120px]">{t.hostname}</TableCell>
                       <TableCell className="py-1.5">{t.constraint}</TableCell>
                       <TableCell className="py-1.5"><StatusBadge status={t.status} /></TableCell>
