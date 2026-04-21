@@ -125,10 +125,24 @@ export function NOCStatistikIncident({ tickets, variant }: Props) {
     return c;
   }, [constraintKeys]);
 
-  // Top 5 ranking
+  // Top 5 ranking — when a period filter is active, compute from filteredTickets so it syncs.
+  // Only fall back to cumulative cloud user-history for NOC variant when "Semua Data" is selected.
   const top5Data = useMemo(() => {
     if (variant === "noc") {
-      // Aggregate user history
+      if (activeRange) {
+        // Filtered: aggregate from live tickets by createdByName
+        const map: Record<string, { created: number; resolved: number }> = {};
+        filteredTickets.forEach(t => {
+          const name = (t.createdByName || "").trim() || "Unknown";
+          if (!map[name]) map[name] = { created: 0, resolved: 0 };
+          map[name].created++;
+          if (t.status === "Resolved") map[name].resolved++;
+        });
+        return Object.entries(map)
+          .map(([name, s]) => ({ name, count: s.created, rate: s.created > 0 ? Math.round((s.resolved / s.created) * 100) : 0 }))
+          .sort((a, b) => b.count - a.count);
+      }
+      // All data: use cumulative cloud history
       const map: Record<string, { created: number; resolved: number }> = {};
       userHistory.forEach(row => {
         if (!map[row.user_name]) map[row.user_name] = { created: 0, resolved: 0 };
@@ -139,9 +153,9 @@ export function NOCStatistikIncident({ tickets, variant }: Props) {
         .map(([name, s]) => ({ name, count: s.created, rate: s.created > 0 ? Math.round((s.resolved / s.created) * 100) : 0 }))
         .sort((a, b) => b.count - a.count);
     } else {
-      // Ritel: group by serpo (tim)
+      // Ritel: group by serpo (tim) from filtered tickets
       const map: Record<string, { total: number; resolved: number }> = {};
-      tickets.forEach(t => {
+      filteredTickets.forEach(t => {
         const serpo = (t.serpo || "").trim();
         if (!serpo) return;
         if (!map[serpo]) map[serpo] = { total: 0, resolved: 0 };
@@ -152,7 +166,7 @@ export function NOCStatistikIncident({ tickets, variant }: Props) {
         .map(([name, s]) => ({ name, count: s.total, rate: s.total > 0 ? Math.round((s.resolved / s.total) * 100) : 0 }))
         .sort((a, b) => b.count - a.count);
     }
-  }, [variant, tickets, userHistory]);
+  }, [variant, filteredTickets, userHistory, activeRange]);
 
   const activeCount = top5Data.length;
   const top5 = top5Data.slice(0, 5);
