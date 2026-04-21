@@ -1604,11 +1604,12 @@ export default function Dashboard() {
         if (!open) {
           setPreviousDialogState(null);
           setInlineSelectedTicket(null);
+          setInfoReturn(null);
         }
       }}>
         <DialogContent className="w-[95vw] max-w-4xl max-h-[85vh] overflow-hidden flex flex-col p-4 sm:p-6">
           <DialogHeader className="flex-shrink-0">
-            {(previousDialogState || inlineSelectedTicket) && (
+            {(previousDialogState || inlineSelectedTicket) ? (
               <button
                 onClick={() => {
                   if (inlineSelectedTicket) {
@@ -1626,7 +1627,22 @@ export default function Dashboard() {
                 <span className="text-sm">←</span>
                 Kembali
               </button>
-            )}
+            ) : infoReturn ? (
+              <button
+                onClick={() => {
+                  const run = infoReturn.run;
+                  setInfoReturn(null);
+                  setFilterDialogOpen(false);
+                  // Re-open the originating ringkasan dialog after the filter dialog closes
+                  setTimeout(() => run(), 60);
+                }}
+                className="inline-flex items-center gap-1.5 text-xs font-medium text-primary hover:text-primary/80 bg-primary/10 hover:bg-primary/15 border border-primary/20 rounded-full px-3 py-1 w-fit transition-all duration-200 active:scale-95 mb-1"
+                title={`Kembali ke ${infoReturn.label}`}
+              >
+                <span className="text-sm">←</span>
+                Kembali ke {infoReturn.label}
+              </button>
+            ) : null}
             <DialogTitle className="flex items-center gap-2 text-lg">
               <BarChart3 className="h-5 w-5 text-primary" />
               {inlineSelectedTicket ? `🎫 Detail Incident: ${inlineSelectedTicket.id}` : filterDialogTitle}
