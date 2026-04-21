@@ -882,80 +882,131 @@ export default function Dashboard() {
             <DashboardTierOverSLA tickets={tickets} getTicketRegion={getTicketRegion} />
           </div>
 
-          {/* Ritel & Feeder Stats */}
+          {/* Ritel & Feeder Stats — Premium Twin Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full">
             {[
-              { 
-                label: "📦 Incident Ritel", data: ritelTickets, 
-                color: "primary", borderColor: "border-primary/20", bgColor: "bg-primary/5",
-                progressBg: "bg-primary/20", progressFill: "bg-primary",
+              {
+                label: "Incident Ritel", icon: "📦", data: ritelTickets,
+                accent: "primary",
+                gradient: "from-primary/10 via-primary/5 to-transparent",
+                ring: "ring-primary/20",
+                dot: "bg-primary",
+                text: "text-primary",
+                border: "border-primary/25",
+                progressBg: "bg-primary/15",
+                progressFill: "bg-gradient-to-r from-primary to-primary/70",
               },
-              { 
-                label: "⚡ Incident Feeder", data: feederTickets, 
-                color: "warning", borderColor: "border-warning/20", bgColor: "bg-warning/5",
-                progressBg: "bg-warning/20", progressFill: "bg-warning",
+              {
+                label: "Incident Feeder", icon: "⚡", data: feederTickets,
+                accent: "warning",
+                gradient: "from-warning/10 via-warning/5 to-transparent",
+                ring: "ring-warning/20",
+                dot: "bg-warning",
+                text: "text-warning",
+                border: "border-warning/25",
+                progressBg: "bg-warning/15",
+                progressFill: "bg-gradient-to-r from-warning to-warning/70",
               },
-            ].map((section) => {
+            ].map((section, idx) => {
               const resolved = section.data.filter(t => t.status === "Resolved").length;
               const pending = section.data.filter(t => t.status !== "Resolved").length;
               const rate = section.data.length > 0 ? Math.round((resolved / section.data.length) * 100) : 0;
               const constraintCount: Record<string, number> = {};
               section.data.forEach(t => { constraintCount[t.constraint] = (constraintCount[t.constraint] || 0) + 1; });
               const topConstraints = Object.entries(constraintCount).sort((a, b) => b[1] - a[1]).slice(0, 3);
+              const maxConstraint = topConstraints[0]?.[1] || 1;
 
               return (
-                <Card key={section.label} className={`overflow-hidden border ${section.borderColor}`}>
-                  <CardHeader className={`py-2 px-3 sm:px-4 border-b ${section.bgColor}`}>
-                    <div className="flex items-center justify-between">
-                      <CardTitle className="text-xs sm:text-sm flex items-center gap-2">{section.label}</CardTitle>
-                      <span className={`text-lg sm:text-xl font-bold text-${section.color}`}>{section.data.length}</span>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="p-3 space-y-2.5">
-                    <div className="space-y-1">
-                      <div className="flex items-center justify-between text-[9px] sm:text-[10px]">
-                        <span className="text-muted-foreground">Resolution Rate</span>
-                        <span className={`font-bold text-${section.color}`}>{rate}%</span>
-                      </div>
-                      <div className={`w-full h-2 rounded-full ${section.progressBg} overflow-hidden`}>
-                        <motion.div 
-                          className={`h-full rounded-full ${section.progressFill}`}
-                          initial={{ width: 0 }}
-                          animate={{ width: `${rate}%` }}
-                          transition={{ duration: 1, delay: 0.5 }}
-                        />
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-3 gap-1.5">
-                      <div className="text-center p-1.5 rounded-md bg-muted/40">
-                        <div className={`text-sm sm:text-base font-bold text-${section.color}`}>{section.data.length}</div>
-                        <div className="text-[8px] sm:text-[9px] text-muted-foreground">Total</div>
-                      </div>
-                      <div className="text-center p-1.5 rounded-md bg-success/5">
-                        <div className="text-sm sm:text-base font-bold text-success">{resolved}</div>
-                        <div className="text-[8px] sm:text-[9px] text-muted-foreground">Resolved</div>
-                      </div>
-                      <div className="text-center p-1.5 rounded-md bg-destructive/5">
-                        <div className="text-sm sm:text-base font-bold text-destructive">{pending}</div>
-                        <div className="text-[8px] sm:text-[9px] text-muted-foreground">Pending</div>
-                      </div>
-                    </div>
-                    {topConstraints.length > 0 && (
-                      <div className="space-y-1">
-                        <span className="text-[8px] sm:text-[9px] font-semibold text-muted-foreground uppercase tracking-wider">Top Constraint</span>
-                        {topConstraints.map(([name, count]) => (
-                          <div key={name} className="flex items-center gap-2 text-[9px] sm:text-[10px]">
-                            <span className="text-muted-foreground truncate flex-1">{name}</span>
-                            <div className="w-12 sm:w-16 h-1.5 rounded-full bg-muted/60 overflow-hidden">
-                              <div className={`h-full rounded-full ${section.progressFill}/70`} style={{ width: `${section.data.length > 0 ? (count / section.data.length) * 100 : 0}%` }} />
-                            </div>
-                            <span className="font-semibold text-foreground w-5 text-right">{count}</span>
+                <motion.div
+                  key={section.label}
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4, delay: 0.1 + idx * 0.08 }}
+                >
+                  <Card className={`overflow-hidden border ${section.border} hover:shadow-md transition-all duration-300 group h-full`}>
+                    {/* Header with gradient backdrop */}
+                    <CardHeader className={`relative py-2.5 px-3 sm:px-4 border-b bg-gradient-to-br ${section.gradient}`}>
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center ring-1 ${section.ring} bg-background/60 backdrop-blur-sm shrink-0`}>
+                            <span className="text-sm sm:text-base">{section.icon}</span>
                           </div>
-                        ))}
+                          <div className="min-w-0">
+                            <CardTitle className="text-[11px] sm:text-xs font-semibold leading-tight truncate">{section.label}</CardTitle>
+                            <p className="text-[8px] sm:text-[9px] text-muted-foreground leading-tight mt-0.5">Resolution rate {rate}%</p>
+                          </div>
+                        </div>
+                        <div className="text-right shrink-0">
+                          <div className={`text-xl sm:text-2xl font-bold ${section.text} tabular-nums leading-none`}>{section.data.length}</div>
+                          <div className="text-[7px] sm:text-[8px] text-muted-foreground uppercase tracking-wider mt-0.5">Total</div>
+                        </div>
                       </div>
-                    )}
-                  </CardContent>
-                </Card>
+                    </CardHeader>
+
+                    <CardContent className="p-3 space-y-3">
+                      {/* Progress with milestone markers */}
+                      <div className="space-y-1.5">
+                        <div className="flex items-center justify-between text-[9px] sm:text-[10px]">
+                          <span className="text-muted-foreground font-medium">Progress</span>
+                          <span className={`font-bold ${section.text} tabular-nums`}>{rate}%</span>
+                        </div>
+                        <div className={`relative w-full h-2 rounded-full ${section.progressBg} overflow-hidden`}>
+                          <motion.div
+                            className={`h-full rounded-full ${section.progressFill} shadow-sm`}
+                            initial={{ width: 0 }}
+                            animate={{ width: `${rate}%` }}
+                            transition={{ duration: 1, delay: 0.3, ease: "easeOut" }}
+                          />
+                        </div>
+                      </div>
+
+                      {/* KPI grid with subtle dividers */}
+                      <div className="grid grid-cols-3 gap-1.5">
+                        <div className={`text-center p-2 rounded-lg bg-muted/30 border border-border/40`}>
+                          <div className={`text-base sm:text-lg font-bold ${section.text} tabular-nums leading-none`}>{section.data.length}</div>
+                          <div className="text-[8px] sm:text-[9px] text-muted-foreground mt-1">Total</div>
+                        </div>
+                        <div className="text-center p-2 rounded-lg bg-success/5 border border-success/20">
+                          <div className="text-base sm:text-lg font-bold text-success tabular-nums leading-none">{resolved}</div>
+                          <div className="text-[8px] sm:text-[9px] text-muted-foreground mt-1">Resolved</div>
+                        </div>
+                        <div className="text-center p-2 rounded-lg bg-destructive/5 border border-destructive/20">
+                          <div className="text-base sm:text-lg font-bold text-destructive tabular-nums leading-none">{pending}</div>
+                          <div className="text-[8px] sm:text-[9px] text-muted-foreground mt-1">Pending</div>
+                        </div>
+                      </div>
+
+                      {/* Top constraints with ranked bars */}
+                      {topConstraints.length > 0 && (
+                        <div className="space-y-1.5 pt-1 border-t border-border/40">
+                          <div className="flex items-center justify-between">
+                            <span className="text-[8px] sm:text-[9px] font-semibold text-muted-foreground uppercase tracking-wider">Top Constraint</span>
+                            <span className="text-[7px] sm:text-[8px] text-muted-foreground/70">{topConstraints.length} kategori</span>
+                          </div>
+                          <div className="space-y-1">
+                            {topConstraints.map(([name, count], i) => (
+                              <div key={name} className="flex items-center gap-2 text-[9px] sm:text-[10px]">
+                                <span className={`w-3.5 h-3.5 rounded flex items-center justify-center text-[7px] font-bold ${i === 0 ? `${section.text} bg-current/10` : 'text-muted-foreground bg-muted/50'}`} style={{ backgroundColor: i === 0 ? undefined : undefined }}>
+                                  {i + 1}
+                                </span>
+                                <span className="text-foreground/80 truncate flex-1 font-medium">{name}</span>
+                                <div className={`w-14 sm:w-20 h-1.5 rounded-full ${section.progressBg} overflow-hidden`}>
+                                  <motion.div
+                                    className={`h-full rounded-full ${section.progressFill}`}
+                                    initial={{ width: 0 }}
+                                    animate={{ width: `${(count / maxConstraint) * 100}%` }}
+                                    transition={{ duration: 0.6, delay: 0.4 + i * 0.1 }}
+                                  />
+                                </div>
+                                <span className={`font-bold ${section.text} w-6 text-right tabular-nums`}>{count}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                </motion.div>
               );
             })}
           </div>
