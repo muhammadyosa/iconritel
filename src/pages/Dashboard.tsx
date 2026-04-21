@@ -1089,23 +1089,32 @@ export default function Dashboard() {
                               const filterStatus = (status: Ticket["status"]) => section.data.filter(t => t.status === status);
                               const filterByConstraint = (name: string) => section.data.filter(t => t.constraint === name);
 
+                              const isRitel = section.label === "Incident Ritel";
+                              const setInfoOpen = isRitel ? setRitelInfoOpen : setFeederInfoOpen;
+                              const isInfoOpen = isRitel ? ritelInfoOpen : feederInfoOpen;
+                              const returnTo = {
+                                label: `Ringkasan ${section.label}`,
+                                run: () => setInfoOpen(true),
+                              };
+                              const openList = (title: string, list: Ticket[]) => openIncidentList(title, list, returnTo);
+
                               const sections: InfoSection[] = [
                                 {
                                   heading: "Status Realtime",
                                   emoji: "📊",
                                   metrics: [
                                     { label: "Total", value: section.data.length, tone: section.accent as InfoMetric["tone"],
-                                      onClick: section.data.length > 0 ? () => openIncidentList(`${section.icon} Semua ${section.label}`, section.data) : undefined },
+                                      onClick: section.data.length > 0 ? () => openList(`${section.icon} Semua ${section.label}`, section.data) : undefined },
                                     { label: "Resolved", value: resolved, hint: `${rate}%`, tone: "success",
-                                      onClick: resolved > 0 ? () => openIncidentList(`✅ Resolved — ${section.label}`, filterStatus("Resolved")) : undefined },
+                                      onClick: resolved > 0 ? () => openList(`✅ Resolved — ${section.label}`, filterStatus("Resolved")) : undefined },
                                     { label: "On Progress", value: onProgress, tone: "primary",
-                                      onClick: onProgress > 0 ? () => openIncidentList(`🔧 On Progress — ${section.label}`, filterStatus("On Progress")) : undefined },
+                                      onClick: onProgress > 0 ? () => openList(`🔧 On Progress — ${section.label}`, filterStatus("On Progress")) : undefined },
                                     { label: "Pending", value: pendingStatus, tone: "warning",
-                                      onClick: pendingStatus > 0 ? () => openIncidentList(`⏳ Pending — ${section.label}`, filterStatus("Pending")) : undefined },
+                                      onClick: pendingStatus > 0 ? () => openList(`⏳ Pending — ${section.label}`, filterStatus("Pending")) : undefined },
                                     { label: "Critical", value: critical, tone: "destructive",
-                                      onClick: critical > 0 ? () => openIncidentList(`🚨 Critical — ${section.label}`, filterStatus("Critical")) : undefined },
+                                      onClick: critical > 0 ? () => openList(`🚨 Critical — ${section.label}`, filterStatus("Critical")) : undefined },
                                     { label: "Belum Selesai", value: pending, tone: "destructive",
-                                      onClick: pending > 0 ? () => openIncidentList(`📌 Belum Selesai — ${section.label}`, section.data.filter(t => t.status !== "Resolved")) : undefined },
+                                      onClick: pending > 0 ? () => openList(`📌 Belum Selesai — ${section.label}`, section.data.filter(t => t.status !== "Resolved")) : undefined },
                                   ],
                                 },
                                 {
@@ -1115,7 +1124,7 @@ export default function Dashboard() {
                                     label: `${i + 1}. ${name}`,
                                     value: `${count} (${Math.round((count/section.data.length)*100)}%)`,
                                     tone: i === 0 ? (section.accent as InfoMetric["tone"]) : "default",
-                                    onClick: () => openIncidentList(`🎯 ${name} — ${section.label}`, filterByConstraint(name)),
+                                    onClick: () => openList(`🎯 ${name} — ${section.label}`, filterByConstraint(name)),
                                   })) : [{ label: "Belum ada data constraint", tone: "default" as const }],
                                 },
                                 {
@@ -1134,6 +1143,8 @@ export default function Dashboard() {
                                   description={`Analisa lengkap ${section.label.toLowerCase()} berdasarkan data realtime.`}
                                   insight={insight}
                                   sections={sections}
+                                  open={isInfoOpen}
+                                  onOpenChange={setInfoOpen}
                                 />
                               );
                             })()}
