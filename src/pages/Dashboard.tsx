@@ -734,8 +734,10 @@ export default function Dashboard() {
         transition={{ duration: 0.6, delay: 0.7 }}
         className="space-y-3"
       >
-          {/* Proporsi Incident + Tier OVER SLA side by side */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {/* Left column: Regional Office + Ritel + Feeder stacked. Right column: Tier OVER SLA full height */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 items-start">
+            {/* LEFT COLUMN — stacked */}
+            <div className="space-y-3 min-w-0">
             {/* Regional Office Summary — Modern Minimalist */}
             <Card className="overflow-hidden border">
               <CardHeader className="py-2.5 px-3 sm:px-4 border-b bg-muted/10">
