@@ -6,7 +6,7 @@ import { RegionBadge } from "@/components/RegionBadge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { DurationCell } from "@/components/DurationCell";
-import { SectionInfoDialog, type InfoSection, type InfoMetric } from "@/components/SectionInfoDialog";
+import { SectionInfoDialog, buildInsight, type InfoSection, type InfoMetric } from "@/components/SectionInfoDialog";
 import { cn } from "@/lib/utils";
 
 const SLA_MS = 8 * 60 * 60 * 1000;
@@ -14,9 +14,11 @@ const SLA_MS = 8 * 60 * 60 * 1000;
 interface DashboardTierOverSLAProps {
   tickets: Ticket[];
   getTicketRegion: (hostname: string) => string;
+  /** Optional callback to open the global filter dialog with a ticket subset */
+  onOpenList?: (title: string, list: Ticket[]) => void;
 }
 
-export function DashboardTierOverSLA({ tickets, getTicketRegion }: DashboardTierOverSLAProps) {
+export function DashboardTierOverSLA({ tickets, getTicketRegion, onOpenList }: DashboardTierOverSLAProps) {
   const [now, setNow] = useState(Date.now());
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
 
@@ -133,41 +135,53 @@ export function DashboardTierOverSLA({ tickets, getTicketRegion }: DashboardTier
             </div>
             {analysis && (() => {
               const totalOver = overSLATickets.length;
-              const longestHours = Math.floor(top15[0].durationMs / 3600000);
-              let insight: { tone: "success" | "warning" | "destructive" | "primary"; text: string };
-              if (analysis.criticalCount > top15.length * 0.5) {
-                insight = { tone: "destructive", text: `🚨 ${analysis.criticalCount} dari ${top15.length} incident teratas berstatus Critical. Eskalasi penanganan diperlukan segera.` };
-              } else if (longestHours > 48) {
-                insight = { tone: "destructive", text: `🔥 Incident terlama sudah berjalan ${analysis.maxLabel}. Tinjau hambatan dan alokasi resource untuk percepatan.` };
-              } else if (analysis.pendingCount > top15.length * 0.4) {
-                insight = { tone: "warning", text: `⏳ ${analysis.pendingCount} incident berstatus Pending mendominasi. Verifikasi alasan pending dan rencana resolusi.` };
-              } else {
-                insight = { tone: "primary", text: `📊 ${totalOver} incident telah melewati SLA 8 jam. Pantau Top 20 untuk memastikan tidak terjadi eskalasi lebih lanjut.` };
-              }
+
+              const insight = buildInsight({
+                total: top15.length,
+                resolved: 0, // resolved incidents are excluded from over-SLA list
+                pending: analysis.pendingCount,
+                critical: analysis.criticalCount,
+                rate: 0,
+                contextLabel: "incident over SLA",
+                emptyText: "✅ Tidak ada incident yang melewati SLA. Performa layanan sangat baik.",
+              });
+
+              const filterStatus = (status: Ticket["status"]) =>
+                overSLATickets.filter(t => t.status === status);
+              const filterRegion = (region: string) =>
+                overSLATickets.filter(t => getTicketRegion(t.serpo) === region);
 
               const sections: InfoSection[] = [
                 {
                   heading: "Statistik Realtime",
                   emoji: "📈",
                   metrics: [
-                    { label: "Total Over SLA", value: totalOver, hint: `Top ${top15.length} ditampilkan`, tone: "destructive" },
+                    { label: "Total Over SLA", value: totalOver, hint: `Top ${top15.length} ditampilkan`, tone: "destructive",
+                      onClick: totalOver > 0 && onOpenList ? () => onOpenList("⏰ Semua Incident Over SLA", overSLATickets) : undefined },
                     { label: "Rata-rata Durasi", value: analysis.avgLabel, tone: "warning" },
-                    { label: "Durasi Tertinggi", value: analysis.maxLabel, tone: "destructive" },
-                    { label: "Critical", value: analysis.criticalCount, tone: "destructive" },
-                    { label: "Pending", value: analysis.pendingCount, tone: "warning" },
-                    { label: "On Progress", value: analysis.onProgressCount, tone: "primary" },
+                    { label: "Durasi Tertinggi", value: analysis.maxLabel, tone: "destructive",
+                      onClick: top15[0] && onOpenList ? () => onOpenList(`🔥 Incident terlama: ${top15[0].id}`, [top15[0]]) : undefined },
+                    { label: "Critical", value: analysis.criticalCount, tone: "destructive",
+                      onClick: analysis.criticalCount > 0 && onOpenList ? () => onOpenList("🚨 Critical — Over SLA", filterStatus("Critical")) : undefined },
+                    { label: "Pending", value: analysis.pendingCount, tone: "warning",
+                      onClick: analysis.pendingCount > 0 && onOpenList ? () => onOpenList("⏳ Pending — Over SLA", filterStatus("Pending")) : undefined },
+                    { label: "On Progress", value: analysis.onProgressCount, tone: "primary",
+                      onClick: analysis.onProgressCount > 0 && onOpenList ? () => onOpenList("🔧 On Progress — Over SLA", filterStatus("On Progress")) : undefined },
                   ],
                 },
                 {
                   heading: "Distribusi Region",
                   emoji: "🗺️",
-                  bullets: Object.entries(analysis.regionMap)
-                    .sort((a, b) => b[1] - a[1])
-                    .map(([region, count]) => ({
-                      label: region,
-                      value: `${count} incident`,
-                      tone: count >= 5 ? "destructive" as const : count >= 3 ? "warning" as const : "default" as const,
-                    })),
+                  bullets: Object.keys(analysis.regionMap).length === 0
+                    ? [{ label: "Belum ada region terdeteksi.", tone: "default" }]
+                    : Object.entries(analysis.regionMap)
+                      .sort((a, b) => b[1] - a[1])
+                      .map(([region, count]) => ({
+                        label: region,
+                        value: `${count} incident`,
+                        tone: count >= 5 ? "destructive" as const : count >= 3 ? "warning" as const : "default" as const,
+                        onClick: onOpenList ? () => onOpenList(`🗺️ Over SLA — ${region}`, filterRegion(region)) : undefined,
+                      })),
                 },
                 {
                   heading: "Kriteria Over SLA",
