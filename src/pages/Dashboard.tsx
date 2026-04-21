@@ -96,6 +96,17 @@ export default function Dashboard() {
   const [regionStatusFilter, setRegionStatusFilter] = useState<string>("all");
   const [regionProportionOpen, setRegionProportionOpen] = useState(false);
 
+  // Helper: open the existing filter dialog with a filtered subset of incidents.
+  // Used by clickable metrics inside SectionInfoDialog across all dashboard cards.
+  const openIncidentList = (title: string, list: Ticket[]) => {
+    setShowOltList(false);
+    setInlineSelectedTicket(null);
+    setPreviousDialogState(null);
+    setFilterDialogTickets(list);
+    setFilterDialogTitle(title);
+    setFilterDialogOpen(true);
+  };
+
   // Load OLT data
   useEffect(() => {
     loadOLTData().then(setOltData).catch((error) => {
