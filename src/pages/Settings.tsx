@@ -505,7 +505,7 @@ export default function Settings() {
             </CardHeader>
             <CardContent>
               <div className="flex flex-col gap-4">
-                {/* Last upload metadata - visible to all team members */}
+                {/* Last upload metadata - LOKAL per device (tidak disinkronkan antar user) */}
                 {lastUpload && (
                   <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 rounded-md border border-border bg-muted/40 p-3 text-xs">
                     <div className="flex items-center gap-1.5">
@@ -525,6 +525,9 @@ export default function Settings() {
                       <span className="font-medium text-foreground truncate max-w-[200px]" title={lastUpload.file_name}>{lastUpload.file_name}</span>
                       <span className="text-muted-foreground">({lastUpload.total_records.toLocaleString()} data)</span>
                     </div>
+                    <span className="ml-auto text-[10px] uppercase tracking-wide text-muted-foreground/80 font-medium">
+                      💾 Info lokal
+                    </span>
                   </div>
                 )}
                 <div className="flex items-center gap-4">
