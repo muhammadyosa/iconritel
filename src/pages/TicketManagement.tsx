@@ -1228,27 +1228,27 @@ export default function TicketManagement() {
                 </div>
               )}
               <div className="rounded-md border overflow-x-auto overflow-y-auto max-h-[55vh] sm:max-h-[60vh] lg:max-h-[65vh]">
-                <Table className="min-w-[1100px] table-fixed">
+                <Table className="w-full table-fixed">
                   <colgroup>
-                    <col className="w-[90px]" />
-                    <col className="w-[110px]" />
-                    <col className="w-[160px]" />
-                    <col className="w-[110px]" />
-                    <col className="w-[120px]" />
-                    <col className="w-[90px]" />
-                    <col className="w-[110px]" />
-                    <col className="w-[110px]" />
-                    <col className="w-[110px]" />
+                    <col className="w-[14%] sm:w-[10%]" />
+                    <col className="w-[16%] sm:w-[10%]" />
+                    <col className="w-[22%] sm:w-[15%]" />
+                    <col className="hidden sm:table-column sm:w-[11%]" />
+                    <col className="hidden md:table-column md:w-[11%]" />
+                    <col className="hidden lg:table-column lg:w-[8%]" />
+                    <col className="hidden lg:table-column lg:w-[10%]" />
+                    <col className="w-[24%] sm:w-[14%]" />
+                    <col className="w-[24%] sm:w-[11%]" />
                   </colgroup>
                   <TableHeader className="sticky top-0 bg-background z-10">
-                    <TableRow className="h-6">
-                      <TableHead className="px-1.5 py-1 text-[9px] sm:text-[10px] whitespace-nowrap bg-muted/80 font-semibold">🎫 Insident ID</TableHead>
+                    <TableRow className="h-7">
+                      <TableHead className="px-1.5 py-1 text-[9px] sm:text-[10px] whitespace-nowrap bg-muted/80 font-semibold">🎫 ID</TableHead>
                       <TableHead className="px-1.5 py-1 text-[9px] sm:text-[10px] whitespace-nowrap bg-muted/80 font-semibold">📦 Type</TableHead>
-                      <TableHead className="px-1.5 py-1 text-[9px] sm:text-[10px] whitespace-nowrap bg-muted/80 font-semibold">👤 Customer/Type</TableHead>
-                      <TableHead className="px-1.5 py-1 text-[9px] sm:text-[10px] whitespace-nowrap bg-muted/80 font-semibold">👨‍💼 Service ID</TableHead>
-                      <TableHead className="px-1.5 py-1 text-[9px] sm:text-[10px] whitespace-nowrap bg-muted/80 font-semibold">👥 Serpo</TableHead>
-                      <TableHead className="px-1.5 py-1 text-[9px] sm:text-[10px] whitespace-nowrap bg-muted/80 font-semibold">🌐 Region</TableHead>
-                      <TableHead className="px-1.5 py-1 text-[9px] sm:text-[10px] whitespace-nowrap bg-muted/80 font-semibold">✍️ Create by</TableHead>
+                      <TableHead className="px-1.5 py-1 text-[9px] sm:text-[10px] whitespace-nowrap bg-muted/80 font-semibold">👤 Customer</TableHead>
+                      <TableHead className="hidden sm:table-cell px-1.5 py-1 text-[9px] sm:text-[10px] whitespace-nowrap bg-muted/80 font-semibold">👨‍💼 Service</TableHead>
+                      <TableHead className="hidden md:table-cell px-1.5 py-1 text-[9px] sm:text-[10px] whitespace-nowrap bg-muted/80 font-semibold">👥 Serpo</TableHead>
+                      <TableHead className="hidden lg:table-cell px-1.5 py-1 text-[9px] sm:text-[10px] whitespace-nowrap bg-muted/80 font-semibold">🌐 Region</TableHead>
+                      <TableHead className="hidden lg:table-cell px-1.5 py-1 text-[9px] sm:text-[10px] whitespace-nowrap bg-muted/80 font-semibold">✍️ Create by</TableHead>
                       <TableHead className="px-1.5 py-1 text-[9px] sm:text-[10px] whitespace-nowrap bg-muted/80 font-semibold">⏱️ Durasi</TableHead>
                       <TableHead className="px-1.5 py-1 text-[9px] sm:text-[10px] whitespace-nowrap bg-muted/80 font-semibold">⚙️ Status</TableHead>
                     </TableRow>
