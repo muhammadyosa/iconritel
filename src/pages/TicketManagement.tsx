@@ -1266,7 +1266,7 @@ export default function TicketManagement() {
                           ticketSearchField === "all" || ticketSearchField === field;
                         const q = ticketSearchQuery;
                         return (
-                        <TableRow key={ticket.id} className="h-6 sm:h-7 cursor-pointer hover:bg-muted/70" onClick={() => setSelectedTicketForDetail(ticket)}>
+                        <TableRow key={ticket.id} className="h-8 cursor-pointer hover:bg-muted/70 align-middle" onClick={() => setSelectedTicketForDetail(ticket)}>
                           <TableCell className="px-1 sm:px-1.5 py-0.5 text-[9px] sm:text-[10px] font-medium">
                             <HighlightText text={ticket.id} query={q} enabled={hl("ticketId")} />
                           </TableCell>
