@@ -1230,27 +1230,36 @@ export default function TicketManagement() {
               <div className="rounded-md border overflow-x-auto overflow-y-auto max-h-[55vh] sm:max-h-[60vh] lg:max-h-[65vh]">
                 <Table className="w-full table-fixed">
                   <colgroup>
-                    <col className="w-[14%] sm:w-[10%]" />
-                    <col className="w-[16%] sm:w-[10%]" />
-                    <col className="w-[22%] sm:w-[15%]" />
-                    <col className="hidden sm:table-column sm:w-[11%]" />
-                    <col className="hidden md:table-column md:w-[11%]" />
+                    {/* ID */}
+                    <col className="w-[18%] sm:w-[14%] md:w-[12%] lg:w-[10%]" />
+                    {/* Type */}
+                    <col className="w-[20%] sm:w-[14%] md:w-[12%] lg:w-[10%]" />
+                    {/* Customer */}
+                    <col className="w-[26%] sm:w-[22%] md:w-[18%] lg:w-[16%]" />
+                    {/* Service (sm+) */}
+                    <col className="hidden sm:table-column sm:w-[14%] md:w-[12%] lg:w-[11%]" />
+                    {/* Serpo (md+) */}
+                    <col className="hidden md:table-column md:w-[12%] lg:w-[11%]" />
+                    {/* Region (lg+) */}
                     <col className="hidden lg:table-column lg:w-[8%]" />
-                    <col className="hidden lg:table-column lg:w-[10%]" />
-                    <col className="w-[24%] sm:w-[14%]" />
-                    <col className="w-[24%] sm:w-[11%]" />
+                    {/* Create by (lg+) */}
+                    <col className="hidden lg:table-column lg:w-[12%]" />
+                    {/* Durasi */}
+                    <col className="w-[18%] sm:w-[18%] md:w-[14%] lg:w-[12%]" />
+                    {/* Status */}
+                    <col className="w-[18%] sm:w-[18%] md:w-[16%] lg:w-[10%]" />
                   </colgroup>
                   <TableHeader className="sticky top-0 bg-background z-10">
                     <TableRow className="h-7">
-                      <TableHead className="px-1.5 py-1 text-[9px] sm:text-[10px] whitespace-nowrap bg-muted/80 font-semibold">🎫 ID</TableHead>
-                      <TableHead className="px-1.5 py-1 text-[9px] sm:text-[10px] whitespace-nowrap bg-muted/80 font-semibold">📦 Type</TableHead>
-                      <TableHead className="px-1.5 py-1 text-[9px] sm:text-[10px] whitespace-nowrap bg-muted/80 font-semibold">👤 Customer</TableHead>
-                      <TableHead className="hidden sm:table-cell px-1.5 py-1 text-[9px] sm:text-[10px] whitespace-nowrap bg-muted/80 font-semibold">👨‍💼 Service</TableHead>
-                      <TableHead className="hidden md:table-cell px-1.5 py-1 text-[9px] sm:text-[10px] whitespace-nowrap bg-muted/80 font-semibold">👥 Serpo</TableHead>
-                      <TableHead className="hidden lg:table-cell px-1.5 py-1 text-[9px] sm:text-[10px] whitespace-nowrap bg-muted/80 font-semibold">🌐 Region</TableHead>
-                      <TableHead className="hidden lg:table-cell px-1.5 py-1 text-[9px] sm:text-[10px] whitespace-nowrap bg-muted/80 font-semibold">✍️ Create by</TableHead>
-                      <TableHead className="px-1.5 py-1 text-[9px] sm:text-[10px] whitespace-nowrap bg-muted/80 font-semibold">⏱️ Durasi</TableHead>
-                      <TableHead className="px-1.5 py-1 text-[9px] sm:text-[10px] whitespace-nowrap bg-muted/80 font-semibold">⚙️ Status</TableHead>
+                      <TableHead className="px-1.5 py-1 text-[9px] sm:text-[10px] whitespace-nowrap bg-muted/80 font-semibold text-left align-middle">🎫 ID</TableHead>
+                      <TableHead className="px-1.5 py-1 text-[9px] sm:text-[10px] whitespace-nowrap bg-muted/80 font-semibold text-left align-middle">📦 Type</TableHead>
+                      <TableHead className="px-1.5 py-1 text-[9px] sm:text-[10px] whitespace-nowrap bg-muted/80 font-semibold text-left align-middle">👤 Customer</TableHead>
+                      <TableHead className="hidden sm:table-cell px-1.5 py-1 text-[9px] sm:text-[10px] whitespace-nowrap bg-muted/80 font-semibold text-left align-middle">👨‍💼 Service</TableHead>
+                      <TableHead className="hidden md:table-cell px-1.5 py-1 text-[9px] sm:text-[10px] whitespace-nowrap bg-muted/80 font-semibold text-left align-middle">👥 Serpo</TableHead>
+                      <TableHead className="hidden lg:table-cell px-1.5 py-1 text-[9px] sm:text-[10px] whitespace-nowrap bg-muted/80 font-semibold text-left align-middle">🌐 Region</TableHead>
+                      <TableHead className="hidden lg:table-cell px-1.5 py-1 text-[9px] sm:text-[10px] whitespace-nowrap bg-muted/80 font-semibold text-left align-middle">✍️ Create by</TableHead>
+                      <TableHead className="px-1.5 py-1 text-[9px] sm:text-[10px] whitespace-nowrap bg-muted/80 font-semibold text-left align-middle">⏱️ Durasi</TableHead>
+                      <TableHead className="px-1.5 py-1 text-[9px] sm:text-[10px] whitespace-nowrap bg-muted/80 font-semibold text-left align-middle">⚙️ Status</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
