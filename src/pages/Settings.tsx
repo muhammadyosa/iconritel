@@ -931,6 +931,33 @@ export default function Settings() {
                     <li>✅ Nama Mitra + Hostname OLT</li>
                     <li>✅ Nama Tim</li>
                   </ul>
+                  {/* Info update khusus — hanya 🕵️ Admin yang dapat update bagian ini */}
+                  <div className="mt-3 pt-3 border-t border-border/60">
+                    {lastRegionalUpload ? (
+                      <div className="flex flex-col gap-1 text-[11px]">
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <Badge variant="outline" className="text-[10px] px-1.5 py-0 border-amber-500/40 text-amber-600 dark:text-amber-400 bg-amber-500/10">
+                            🕵️ Update by Admin
+                          </Badge>
+                          <span className="text-muted-foreground">
+                            {new Date(lastRegionalUpload.created_at).toLocaleString("id-ID", { dateStyle: "medium", timeStyle: "short" })} WIB
+                          </span>
+                        </div>
+                        <div className="text-muted-foreground truncate" title={lastRegionalUpload.file_name}>
+                          oleh <span className="font-medium text-foreground">{lastRegionalUpload.uploaded_by_name}</span>
+                          <span className="mx-1">·</span>
+                          <span className="font-medium text-foreground">{lastRegionalUpload.total_records.toLocaleString()} data</span>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+                        <Badge variant="outline" className="text-[10px] px-1.5 py-0 border-amber-500/40 text-amber-600 dark:text-amber-400 bg-amber-500/10">
+                          🕵️ Update by Admin
+                        </Badge>
+                        <span>Hanya Admin yang dapat memperbarui data master ini.</span>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             </CardContent>
