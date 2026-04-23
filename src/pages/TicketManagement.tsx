@@ -1281,7 +1281,7 @@ export default function TicketManagement() {
                               >
                                 <HighlightText text={ticket.category} query={q} enabled={hl("category")} />
                               </Badge>
-                              <div className="text-[7px] sm:text-[8px] text-muted-foreground mt-0.5 truncate max-w-[80px] sm:max-w-none">
+                              <div className="text-[7px] sm:text-[8px] text-muted-foreground mt-0.5 truncate">
                                 <HighlightText text={ticket.constraint} query={q} enabled={hl("constraint")} />
                               </div>
                             </div>
