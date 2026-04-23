@@ -1227,19 +1227,30 @@ export default function TicketManagement() {
                   </Button>
                 </div>
               )}
-              <div className="rounded-md border overflow-x-auto overflow-y-auto max-h-[220px] xs:max-h-[250px] sm:max-h-[50vh] md:max-h-[55vh] lg:max-h-[60vh]">
-                <Table className="min-w-[600px]">
+              <div className="rounded-md border overflow-x-auto overflow-y-auto max-h-[55vh] sm:max-h-[60vh] lg:max-h-[65vh]">
+                <Table className="min-w-[1100px] table-fixed">
+                  <colgroup>
+                    <col className="w-[90px]" />
+                    <col className="w-[110px]" />
+                    <col className="w-[160px]" />
+                    <col className="w-[110px]" />
+                    <col className="w-[120px]" />
+                    <col className="w-[90px]" />
+                    <col className="w-[110px]" />
+                    <col className="w-[110px]" />
+                    <col className="w-[110px]" />
+                  </colgroup>
                   <TableHeader className="sticky top-0 bg-background z-10">
-                    <TableRow className="h-5">
-                      <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap bg-muted/80">🎫 Insident ID</TableHead>
-                      <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap bg-muted/80">📦 Type</TableHead>
-                      <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap bg-muted/80">👤 Customer/Type</TableHead>
-                      <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap bg-muted/80">👨‍💼 Service ID</TableHead>
-                      <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap bg-muted/80">👥 Serpo</TableHead>
-                      <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap bg-muted/80">🌐 Region</TableHead>
-                      <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap bg-muted/80">✍️ Create by</TableHead>
-                      <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap bg-muted/80">⏱️ Durasi</TableHead>
-                      <TableHead className="px-1 py-0.5 text-[8px] sm:text-[9px] whitespace-nowrap bg-muted/80">⚙️ Status</TableHead>
+                    <TableRow className="h-6">
+                      <TableHead className="px-1.5 py-1 text-[9px] sm:text-[10px] whitespace-nowrap bg-muted/80 font-semibold">🎫 Insident ID</TableHead>
+                      <TableHead className="px-1.5 py-1 text-[9px] sm:text-[10px] whitespace-nowrap bg-muted/80 font-semibold">📦 Type</TableHead>
+                      <TableHead className="px-1.5 py-1 text-[9px] sm:text-[10px] whitespace-nowrap bg-muted/80 font-semibold">👤 Customer/Type</TableHead>
+                      <TableHead className="px-1.5 py-1 text-[9px] sm:text-[10px] whitespace-nowrap bg-muted/80 font-semibold">👨‍💼 Service ID</TableHead>
+                      <TableHead className="px-1.5 py-1 text-[9px] sm:text-[10px] whitespace-nowrap bg-muted/80 font-semibold">👥 Serpo</TableHead>
+                      <TableHead className="px-1.5 py-1 text-[9px] sm:text-[10px] whitespace-nowrap bg-muted/80 font-semibold">🌐 Region</TableHead>
+                      <TableHead className="px-1.5 py-1 text-[9px] sm:text-[10px] whitespace-nowrap bg-muted/80 font-semibold">✍️ Create by</TableHead>
+                      <TableHead className="px-1.5 py-1 text-[9px] sm:text-[10px] whitespace-nowrap bg-muted/80 font-semibold">⏱️ Durasi</TableHead>
+                      <TableHead className="px-1.5 py-1 text-[9px] sm:text-[10px] whitespace-nowrap bg-muted/80 font-semibold">⚙️ Status</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -1255,8 +1266,8 @@ export default function TicketManagement() {
                           ticketSearchField === "all" || ticketSearchField === field;
                         const q = ticketSearchQuery;
                         return (
-                        <TableRow key={ticket.id} className="h-6 sm:h-7 cursor-pointer hover:bg-muted/70" onClick={() => setSelectedTicketForDetail(ticket)}>
-                          <TableCell className="px-1 sm:px-1.5 py-0.5 text-[9px] sm:text-[10px] font-medium">
+                        <TableRow key={ticket.id} className="h-8 cursor-pointer hover:bg-muted/70 align-middle" onClick={() => setSelectedTicketForDetail(ticket)}>
+                          <TableCell className="px-1.5 py-1 text-[9px] sm:text-[10px] font-medium truncate">
                             <HighlightText text={ticket.id} query={q} enabled={hl("ticketId")} />
                           </TableCell>
                           <TableCell className="px-1 sm:px-1.5 py-0.5">
@@ -1270,64 +1281,64 @@ export default function TicketManagement() {
                               >
                                 <HighlightText text={ticket.category} query={q} enabled={hl("category")} />
                               </Badge>
-                              <div className="text-[7px] sm:text-[8px] text-muted-foreground mt-0.5 truncate max-w-[80px] sm:max-w-none">
+                              <div className="text-[7px] sm:text-[8px] text-muted-foreground mt-0.5 truncate">
                                 <HighlightText text={ticket.constraint} query={q} enabled={hl("constraint")} />
                               </div>
                             </div>
                           </TableCell>
-                          <TableCell className="px-1 sm:px-1.5 py-0.5 text-[9px] sm:text-[10px]">
+                          <TableCell className="px-1.5 py-1 text-[9px] sm:text-[10px] truncate">
                             {ticket.category === "FEEDER" ? (
                               ticket.constraint === "OLT DOWN" ? (
-                                <span className="font-medium">
+                                <span className="font-medium truncate block">
                                   <HighlightText text={ticket.hostname} query={q} enabled={hl("customerType")} />
                                 </span>
                               ) :
                               ticket.constraint === "PORT DOWN" ? (
-                                <div>
-                                  <div className="font-medium text-[9px] sm:text-[10px]">
+                                <div className="min-w-0">
+                                  <div className="font-medium text-[9px] sm:text-[10px] truncate">
                                     <HighlightText text={ticket.ticketResult.match(/PORT - (.*?) - DOWN/)?.[1] || "PORT"} query={q} enabled={hl("customerType")} />
                                   </div>
-                                  <div className="text-muted-foreground text-[7px] sm:text-[8px]">
+                                  <div className="text-muted-foreground text-[7px] sm:text-[8px] truncate">
                                     <HighlightText text={ticket.hostname} query={q} enabled={hl("customerType")} />
                                   </div>
                                 </div>
                               ) :
                               ticket.constraint === "FAT LOSS" || ticket.constraint === "FAT LOW RX" ? (
-                                <div>
-                                  <div className="font-medium text-[9px] sm:text-[10px]">
+                                <div className="min-w-0">
+                                  <div className="font-medium text-[9px] sm:text-[10px] truncate">
                                     <HighlightText text={ticket.fatId} query={q} enabled={hl("fatId") || hl("customerType")} />
                                   </div>
-                                  <div className="text-muted-foreground text-[7px] sm:text-[8px]">
+                                  <div className="text-muted-foreground text-[7px] sm:text-[8px] truncate">
                                     <HighlightText text={ticket.hostname} query={q} enabled={hl("customerType")} />
                                   </div>
                                 </div>
                               ) : (
-                                <HighlightText text={ticket.constraint} query={q} enabled={hl("constraint")} />
+                                <span className="truncate block"><HighlightText text={ticket.constraint} query={q} enabled={hl("constraint")} /></span>
                               )
                             ) : (
-                              <HighlightText text={ticket.customerName} query={q} enabled={hl("customerType")} />
+                              <span className="truncate block"><HighlightText text={ticket.customerName} query={q} enabled={hl("customerType")} /></span>
                             )}
                           </TableCell>
-                          <TableCell className="px-1 sm:px-1.5 py-0.5 font-mono text-[9px] sm:text-[10px]">
+                          <TableCell className="px-1.5 py-1 font-mono text-[9px] sm:text-[10px] truncate">
                             <HighlightText text={ticket.serviceId} query={q} enabled={hl("serviceId")} />
                           </TableCell>
-                          <TableCell className="px-1 sm:px-1.5 py-0.5 text-[9px] sm:text-[10px]">
+                          <TableCell className="px-1.5 py-1 text-[9px] sm:text-[10px] truncate">
                             <HighlightText text={ticket.serpo} query={q} enabled={hl("serpo")} />
                           </TableCell>
-                          <TableCell className="px-1 sm:px-1.5 py-0.5">
+                          <TableCell className="px-1.5 py-1">
                             <RegionBadge region={getTicketRegion(ticket.serpo)} />
                           </TableCell>
-                          <TableCell className="px-1 sm:px-1.5 py-0.5 text-[9px] sm:text-[10px]">
-                            <span className="text-muted-foreground">
+                          <TableCell className="px-1.5 py-1 text-[9px] sm:text-[10px] truncate">
+                            <span className="text-muted-foreground truncate block">
                               {ticket.createdByName ? (
                                 <HighlightText text={ticket.createdByName} query={q} enabled={hl("createdBy")} />
                               ) : "-"}
                             </span>
                           </TableCell>
-                          <TableCell className="px-1 sm:px-1.5 py-0.5">
+                          <TableCell className="px-1.5 py-1">
                             <DurationCell createdISO={ticket.createdISO} status={ticket.status} resolvedAt={ticket.resolvedAt} resolvedByName={ticket.resolvedByName} />
                           </TableCell>
-                          <TableCell className="px-1 sm:px-1.5 py-0.5">
+                          <TableCell className="px-1.5 py-1">
                             <div>
                               <div className="flex items-center gap-1">
                                 <StatusBadge status={ticket.status} />
