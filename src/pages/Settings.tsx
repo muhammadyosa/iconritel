@@ -123,7 +123,10 @@ export default function Settings() {
   const { isAdmin } = useUserRole();
   const { user, profile } = useAuth();
   const [file, setFile] = useState<File | null>(null);
+  // Info upload LOKAL (per device) — disimpan di localStorage, bukan Supabase
   const [lastUpload, setLastUpload] = useState<{ uploaded_by_name: string; created_at: string; total_records: number; file_name: string } | null>(null);
+  // Info update untuk 🗺 List Team Region (master data — hanya Admin yang bisa update)
+  const [lastRegionalUpload, setLastRegionalUpload] = useState<{ uploaded_by_name: string; created_at: string; total_records: number; file_name: string } | null>(null);
   const [sheets, setSheets] = useState<SheetPreview[]>([]);
   const [importResult, setImportResult] = useState<ImportResult | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -241,15 +244,16 @@ export default function Settings() {
     }
   };
 
-  const loadLastUpload = async () => {
+  // Baca info upload LOKAL dari localStorage (per device, tidak disinkronkan ke server)
+  const LOCAL_UPLOAD_KEY = "iconnet_last_master_upload_local";
+  const LOCAL_REGIONAL_UPLOAD_KEY = "iconnet_last_regional_team_upload";
+
+  const loadLastUpload = () => {
     try {
-      const { data } = await supabase
-        .from("master_data_uploads")
-        .select("uploaded_by_name, created_at, total_records, file_name")
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .maybeSingle();
-      if (data) setLastUpload(data);
+      const raw = localStorage.getItem(LOCAL_UPLOAD_KEY);
+      if (raw) setLastUpload(JSON.parse(raw));
+      const rawReg = localStorage.getItem(LOCAL_REGIONAL_UPLOAD_KEY);
+      if (rawReg) setLastRegionalUpload(JSON.parse(rawReg));
     } catch (error) {
       if (import.meta.env.DEV) console.error("Error loading last upload:", error);
     }
@@ -343,19 +347,38 @@ export default function Settings() {
 
       const totalRecords = result.summary.user + result.summary.olt + result.summary.fat + result.summary.upe + result.summary.bng + result.summary.fdt + result.summary.akv + result.summary.regionalTeam;
 
-      // Record upload metadata in Supabase so all team members can see who uploaded last
+      // Simpan info upload terakhir secara LOKAL (per device) — tidak disinkronkan antar user
       try {
         const uploaderName = profile?.display_name || user?.email?.split("@")[0] || "Unknown";
-        await supabase.from("master_data_uploads").insert({
-          uploaded_by_user_id: user?.id ?? null,
-          uploaded_by_name: uploaderName,
-          file_name: file.name,
-          total_records: totalRecords,
-          summary: result.summary as any,
-        });
-        await loadLastUpload();
+        const nowIso = new Date().toISOString();
+
+        // Hitung total non-regional (untuk info upload lokal umum)
+        const nonRegionalTotal = totalRecords - (result.summary.regionalTeam || 0);
+
+        if (nonRegionalTotal > 0) {
+          const meta = {
+            uploaded_by_name: uploaderName,
+            created_at: nowIso,
+            total_records: nonRegionalTotal,
+            file_name: file.name,
+          };
+          localStorage.setItem(LOCAL_UPLOAD_KEY, JSON.stringify(meta));
+          setLastUpload(meta);
+        }
+
+        // Untuk 🗺 List Team Region — hanya Admin yang dapat update bagian ini
+        if (isAdmin && result.summary.regionalTeam > 0) {
+          const regMeta = {
+            uploaded_by_name: `🕵️ Admin · ${uploaderName}`,
+            created_at: nowIso,
+            total_records: result.summary.regionalTeam,
+            file_name: file.name,
+          };
+          localStorage.setItem(LOCAL_REGIONAL_UPLOAD_KEY, JSON.stringify(regMeta));
+          setLastRegionalUpload(regMeta);
+        }
       } catch (logErr) {
-        if (import.meta.env.DEV) console.error("Failed to record upload metadata:", logErr);
+        if (import.meta.env.DEV) console.error("Failed to record local upload metadata:", logErr);
       }
 
       toast.success(`Berhasil import ${totalRecords.toLocaleString()} data dari ${result.summary.processedSheets.length} sheet`);
@@ -482,7 +505,7 @@ export default function Settings() {
             </CardHeader>
             <CardContent>
               <div className="flex flex-col gap-4">
-                {/* Last upload metadata - visible to all team members */}
+                {/* Last upload metadata - LOKAL per device (tidak disinkronkan antar user) */}
                 {lastUpload && (
                   <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 rounded-md border border-border bg-muted/40 p-3 text-xs">
                     <div className="flex items-center gap-1.5">
@@ -502,6 +525,9 @@ export default function Settings() {
                       <span className="font-medium text-foreground truncate max-w-[200px]" title={lastUpload.file_name}>{lastUpload.file_name}</span>
                       <span className="text-muted-foreground">({lastUpload.total_records.toLocaleString()} data)</span>
                     </div>
+                    <span className="ml-auto text-[10px] uppercase tracking-wide text-muted-foreground/80 font-medium">
+                      💾 Info lokal
+                    </span>
                   </div>
                 )}
                 <div className="flex items-center gap-4">
@@ -905,6 +931,33 @@ export default function Settings() {
                     <li>✅ Nama Mitra + Hostname OLT</li>
                     <li>✅ Nama Tim</li>
                   </ul>
+                  {/* Info update khusus — hanya 🕵️ Admin yang dapat update bagian ini */}
+                  <div className="mt-3 pt-3 border-t border-border/60">
+                    {lastRegionalUpload ? (
+                      <div className="flex flex-col gap-1 text-[11px]">
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <Badge variant="outline" className="text-[10px] px-1.5 py-0 border-amber-500/40 text-amber-600 dark:text-amber-400 bg-amber-500/10">
+                            🕵️ Update by Admin
+                          </Badge>
+                          <span className="text-muted-foreground">
+                            {new Date(lastRegionalUpload.created_at).toLocaleString("id-ID", { dateStyle: "medium", timeStyle: "short" })} WIB
+                          </span>
+                        </div>
+                        <div className="text-muted-foreground truncate" title={lastRegionalUpload.file_name}>
+                          oleh <span className="font-medium text-foreground">{lastRegionalUpload.uploaded_by_name}</span>
+                          <span className="mx-1">·</span>
+                          <span className="font-medium text-foreground">{lastRegionalUpload.total_records.toLocaleString()} data</span>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+                        <Badge variant="outline" className="text-[10px] px-1.5 py-0 border-amber-500/40 text-amber-600 dark:text-amber-400 bg-amber-500/10">
+                          🕵️ Update by Admin
+                        </Badge>
+                        <span>Hanya Admin yang dapat memperbarui data master ini.</span>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             </CardContent>
