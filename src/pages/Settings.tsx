@@ -347,19 +347,38 @@ export default function Settings() {
 
       const totalRecords = result.summary.user + result.summary.olt + result.summary.fat + result.summary.upe + result.summary.bng + result.summary.fdt + result.summary.akv + result.summary.regionalTeam;
 
-      // Record upload metadata in Supabase so all team members can see who uploaded last
+      // Simpan info upload terakhir secara LOKAL (per device) — tidak disinkronkan antar user
       try {
         const uploaderName = profile?.display_name || user?.email?.split("@")[0] || "Unknown";
-        await supabase.from("master_data_uploads").insert({
-          uploaded_by_user_id: user?.id ?? null,
-          uploaded_by_name: uploaderName,
-          file_name: file.name,
-          total_records: totalRecords,
-          summary: result.summary as any,
-        });
-        await loadLastUpload();
+        const nowIso = new Date().toISOString();
+
+        // Hitung total non-regional (untuk info upload lokal umum)
+        const nonRegionalTotal = totalRecords - (result.summary.regionalTeam || 0);
+
+        if (nonRegionalTotal > 0) {
+          const meta = {
+            uploaded_by_name: uploaderName,
+            created_at: nowIso,
+            total_records: nonRegionalTotal,
+            file_name: file.name,
+          };
+          localStorage.setItem(LOCAL_UPLOAD_KEY, JSON.stringify(meta));
+          setLastUpload(meta);
+        }
+
+        // Untuk 🗺 List Team Region — hanya Admin yang dapat update bagian ini
+        if (isAdmin && result.summary.regionalTeam > 0) {
+          const regMeta = {
+            uploaded_by_name: `🕵️ Admin · ${uploaderName}`,
+            created_at: nowIso,
+            total_records: result.summary.regionalTeam,
+            file_name: file.name,
+          };
+          localStorage.setItem(LOCAL_REGIONAL_UPLOAD_KEY, JSON.stringify(regMeta));
+          setLastRegionalUpload(regMeta);
+        }
       } catch (logErr) {
-        if (import.meta.env.DEV) console.error("Failed to record upload metadata:", logErr);
+        if (import.meta.env.DEV) console.error("Failed to record local upload metadata:", logErr);
       }
 
       toast.success(`Berhasil import ${totalRecords.toLocaleString()} data dari ${result.summary.processedSheets.length} sheet`);
