@@ -1286,59 +1286,59 @@ export default function TicketManagement() {
                               </div>
                             </div>
                           </TableCell>
-                          <TableCell className="px-1 sm:px-1.5 py-0.5 text-[9px] sm:text-[10px]">
+                          <TableCell className="px-1.5 py-1 text-[9px] sm:text-[10px] truncate">
                             {ticket.category === "FEEDER" ? (
                               ticket.constraint === "OLT DOWN" ? (
-                                <span className="font-medium">
+                                <span className="font-medium truncate block">
                                   <HighlightText text={ticket.hostname} query={q} enabled={hl("customerType")} />
                                 </span>
                               ) :
                               ticket.constraint === "PORT DOWN" ? (
-                                <div>
-                                  <div className="font-medium text-[9px] sm:text-[10px]">
+                                <div className="min-w-0">
+                                  <div className="font-medium text-[9px] sm:text-[10px] truncate">
                                     <HighlightText text={ticket.ticketResult.match(/PORT - (.*?) - DOWN/)?.[1] || "PORT"} query={q} enabled={hl("customerType")} />
                                   </div>
-                                  <div className="text-muted-foreground text-[7px] sm:text-[8px]">
+                                  <div className="text-muted-foreground text-[7px] sm:text-[8px] truncate">
                                     <HighlightText text={ticket.hostname} query={q} enabled={hl("customerType")} />
                                   </div>
                                 </div>
                               ) :
                               ticket.constraint === "FAT LOSS" || ticket.constraint === "FAT LOW RX" ? (
-                                <div>
-                                  <div className="font-medium text-[9px] sm:text-[10px]">
+                                <div className="min-w-0">
+                                  <div className="font-medium text-[9px] sm:text-[10px] truncate">
                                     <HighlightText text={ticket.fatId} query={q} enabled={hl("fatId") || hl("customerType")} />
                                   </div>
-                                  <div className="text-muted-foreground text-[7px] sm:text-[8px]">
+                                  <div className="text-muted-foreground text-[7px] sm:text-[8px] truncate">
                                     <HighlightText text={ticket.hostname} query={q} enabled={hl("customerType")} />
                                   </div>
                                 </div>
                               ) : (
-                                <HighlightText text={ticket.constraint} query={q} enabled={hl("constraint")} />
+                                <span className="truncate block"><HighlightText text={ticket.constraint} query={q} enabled={hl("constraint")} /></span>
                               )
                             ) : (
-                              <HighlightText text={ticket.customerName} query={q} enabled={hl("customerType")} />
+                              <span className="truncate block"><HighlightText text={ticket.customerName} query={q} enabled={hl("customerType")} /></span>
                             )}
                           </TableCell>
-                          <TableCell className="px-1 sm:px-1.5 py-0.5 font-mono text-[9px] sm:text-[10px]">
+                          <TableCell className="px-1.5 py-1 font-mono text-[9px] sm:text-[10px] truncate">
                             <HighlightText text={ticket.serviceId} query={q} enabled={hl("serviceId")} />
                           </TableCell>
-                          <TableCell className="px-1 sm:px-1.5 py-0.5 text-[9px] sm:text-[10px]">
+                          <TableCell className="px-1.5 py-1 text-[9px] sm:text-[10px] truncate">
                             <HighlightText text={ticket.serpo} query={q} enabled={hl("serpo")} />
                           </TableCell>
-                          <TableCell className="px-1 sm:px-1.5 py-0.5">
+                          <TableCell className="px-1.5 py-1">
                             <RegionBadge region={getTicketRegion(ticket.serpo)} />
                           </TableCell>
-                          <TableCell className="px-1 sm:px-1.5 py-0.5 text-[9px] sm:text-[10px]">
-                            <span className="text-muted-foreground">
+                          <TableCell className="px-1.5 py-1 text-[9px] sm:text-[10px] truncate">
+                            <span className="text-muted-foreground truncate block">
                               {ticket.createdByName ? (
                                 <HighlightText text={ticket.createdByName} query={q} enabled={hl("createdBy")} />
                               ) : "-"}
                             </span>
                           </TableCell>
-                          <TableCell className="px-1 sm:px-1.5 py-0.5">
+                          <TableCell className="px-1.5 py-1">
                             <DurationCell createdISO={ticket.createdISO} status={ticket.status} resolvedAt={ticket.resolvedAt} resolvedByName={ticket.resolvedByName} />
                           </TableCell>
-                          <TableCell className="px-1 sm:px-1.5 py-0.5">
+                          <TableCell className="px-1.5 py-1">
                             <div>
                               <div className="flex items-center gap-1">
                                 <StatusBadge status={ticket.status} />
