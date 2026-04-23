@@ -1319,16 +1319,16 @@ export default function TicketManagement() {
                               <span className="truncate block"><HighlightText text={ticket.customerName} query={q} enabled={hl("customerType")} /></span>
                             )}
                           </TableCell>
-                          <TableCell className="px-1.5 py-1 font-mono text-[9px] sm:text-[10px] truncate">
+                          <TableCell className="hidden sm:table-cell px-1.5 py-1 font-mono text-[9px] sm:text-[10px] truncate">
                             <HighlightText text={ticket.serviceId} query={q} enabled={hl("serviceId")} />
                           </TableCell>
-                          <TableCell className="px-1.5 py-1 text-[9px] sm:text-[10px] truncate">
+                          <TableCell className="hidden md:table-cell px-1.5 py-1 text-[9px] sm:text-[10px] truncate">
                             <HighlightText text={ticket.serpo} query={q} enabled={hl("serpo")} />
                           </TableCell>
-                          <TableCell className="px-1.5 py-1">
+                          <TableCell className="hidden lg:table-cell px-1.5 py-1">
                             <RegionBadge region={getTicketRegion(ticket.serpo)} />
                           </TableCell>
-                          <TableCell className="px-1.5 py-1 text-[9px] sm:text-[10px] truncate">
+                          <TableCell className="hidden lg:table-cell px-1.5 py-1 text-[9px] sm:text-[10px] truncate">
                             <span className="text-muted-foreground truncate block">
                               {ticket.createdByName ? (
                                 <HighlightText text={ticket.createdByName} query={q} enabled={hl("createdBy")} />
