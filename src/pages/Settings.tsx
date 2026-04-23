@@ -244,15 +244,16 @@ export default function Settings() {
     }
   };
 
-  const loadLastUpload = async () => {
+  // Baca info upload LOKAL dari localStorage (per device, tidak disinkronkan ke server)
+  const LOCAL_UPLOAD_KEY = "iconnet_last_master_upload_local";
+  const LOCAL_REGIONAL_UPLOAD_KEY = "iconnet_last_regional_team_upload";
+
+  const loadLastUpload = () => {
     try {
-      const { data } = await supabase
-        .from("master_data_uploads")
-        .select("uploaded_by_name, created_at, total_records, file_name")
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .maybeSingle();
-      if (data) setLastUpload(data);
+      const raw = localStorage.getItem(LOCAL_UPLOAD_KEY);
+      if (raw) setLastUpload(JSON.parse(raw));
+      const rawReg = localStorage.getItem(LOCAL_REGIONAL_UPLOAD_KEY);
+      if (rawReg) setLastRegionalUpload(JSON.parse(rawReg));
     } catch (error) {
       if (import.meta.env.DEV) console.error("Error loading last upload:", error);
     }
