@@ -1233,8 +1233,6 @@ export default function TicketManagement() {
               <div className="rounded-md border overflow-x-auto overflow-y-auto max-h-[55vh] sm:max-h-[60vh] lg:max-h-[65vh]">
                 <Table className="w-full table-fixed">
                   <colgroup>
-                    {/* Checkbox */}
-                    <col className="w-[28px] sm:w-[32px]" />
                     {/* ID */}
                     <col className="w-[18%] sm:w-[14%] md:w-[12%] lg:w-[10%]" />
                     {/* Type */}
