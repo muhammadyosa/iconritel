@@ -1268,7 +1268,7 @@ export default function TicketManagement() {
                   <TableBody>
                     {tickets.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={10} className="text-center text-muted-foreground text-[8px] sm:text-[9px] py-2">
+                        <TableCell colSpan={9} className="text-center text-muted-foreground text-[8px] sm:text-[9px] py-2">
                           Belum ada incident
                         </TableCell>
                       </TableRow>
@@ -1278,22 +1278,7 @@ export default function TicketManagement() {
                           ticketSearchField === "all" || ticketSearchField === field;
                         const q = ticketSearchQuery;
                         return (
-                        <TableRow key={ticket.id} data-state={selectedIds.has(ticket.id) ? "selected" : undefined} className="h-8 cursor-pointer hover:bg-muted/70 align-middle" onClick={() => setSelectedTicketForDetail(ticket)}>
-                          <TableCell
-                            className="px-1 py-1 align-middle text-center"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              toggleSelectId(ticket.id);
-                            }}
-                          >
-                            <Checkbox
-                              aria-label={`Pilih incident ${ticket.id}`}
-                              checked={selectedIds.has(ticket.id)}
-                              onCheckedChange={() => toggleSelectId(ticket.id)}
-                              onClick={(e) => e.stopPropagation()}
-                              className="h-3.5 w-3.5"
-                            />
-                          </TableCell>
+                        <TableRow key={ticket.id} className="h-8 cursor-pointer hover:bg-muted/70 align-middle" onClick={() => setSelectedTicketForDetail(ticket)}>
                           <TableCell
                             className="px-1.5 py-1 text-[9px] sm:text-[10px] font-medium cursor-copy group/idcell"
                             onClick={(e) => {
