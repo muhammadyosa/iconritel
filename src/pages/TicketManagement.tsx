@@ -904,13 +904,42 @@ export default function TicketManagement() {
         <TabsContent value="daftar-ticket" className="mt-2 sm:mt-3">
           <Card className="shadow-sm border">
             <CardHeader className="py-1.5 sm:py-2 px-2 sm:px-3 border-b bg-muted/30 flex flex-row items-center justify-between gap-2">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
                 <CardTitle className="text-xs sm:text-sm whitespace-nowrap">📋 List Incident ({filteredTickets.length})</CardTitle>
                 {isLoadingTickets && (
                   <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />
                 )}
+                {selectedIds.size > 0 && (
+                  <span className="text-[9px] sm:text-[10px] text-muted-foreground bg-accent px-1.5 py-0.5 rounded">
+                    {selectedIds.size} dipilih
+                  </span>
+                )}
               </div>
-              <div className="flex gap-1 sm:gap-1.5">
+              <div className="flex gap-1 sm:gap-1.5 flex-wrap justify-end">
+                {selectedIds.size > 0 && (
+                  <>
+                    <Button
+                      variant="default"
+                      size="sm"
+                      className="h-6 sm:h-7 text-[9px] sm:text-[10px] px-1.5 sm:px-2 gap-1"
+                      onClick={handleCopySelectedIds}
+                      title="Salin Incident ID terpilih ke clipboard"
+                    >
+                      <CopyCheck className="h-3 w-3" />
+                      <span className="hidden xs:inline">Salin ID Terpilih ({selectedIds.size})</span>
+                      <span className="xs:hidden">Salin ({selectedIds.size})</span>
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-6 sm:h-7 text-[9px] sm:text-[10px] px-1.5"
+                      onClick={() => setSelectedIds(new Set())}
+                      title="Batal pilih semua"
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                  </>
+                )}
                 <Button 
                   variant="ghost" 
                   size="sm" 
