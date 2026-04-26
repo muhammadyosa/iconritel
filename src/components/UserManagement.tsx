@@ -255,6 +255,34 @@ export function UserManagement() {
     }
   };
 
+  const handleDeleteUser = async () => {
+    if (!deletingUser) return;
+    if (deletingUser.user_id === currentAuthUser?.id) {
+      toast.error("Tidak dapat menghapus akun sendiri");
+      return;
+    }
+    setIsDeleting(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("delete-user", {
+        body: { user_id: deletingUser.user_id },
+      });
+      if (error) throw error;
+      if ((data as any)?.error) throw new Error((data as any).error);
+
+      setUsers((prev) => prev.filter((u) => u.user_id !== deletingUser.user_id));
+      toast.success(`User ${deletingUser.display_name || deletingUser.email} berhasil dihapus`);
+      logActivity("revoke_user", `Deleted: ${deletingUser.email}`);
+      setDeletingUser(null);
+    } catch (err) {
+      if (import.meta.env.DEV) {
+        console.error("Error deleting user:", err);
+      }
+      toast.error((err as Error).message || "Gagal menghapus user");
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   const getInitials = (name: string | null, email: string) => {
     if (name) {
       return name
