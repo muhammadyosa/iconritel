@@ -8,9 +8,20 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Loader2, RefreshCw, Shield, User, Users, Clock, ArrowUpDown, ArrowUp, ArrowDown, Pencil, Activity, CheckCircle2, XCircle, Search } from "lucide-react";
+import { Loader2, RefreshCw, Shield, User, Users, Clock, ArrowUpDown, ArrowUp, ArrowDown, Pencil, Activity, CheckCircle2, XCircle, Search, Trash2 } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { getActionLabel, useActivityLog } from "@/hooks/useActivityLog";
 
@@ -36,6 +47,7 @@ interface UserWithRole {
 
 export function UserManagement() {
   const { isAdmin } = useUserRole();
+  const { user: currentAuthUser } = useAuth();
   const [users, setUsers] = useState<UserWithRole[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [updatingUserId, setUpdatingUserId] = useState<string | null>(null);
@@ -45,6 +57,8 @@ export function UserManagement() {
   const [sortOrder, setSortOrder] = useState<"asc" | "desc" | null>(null);
   const [sortField, setSortField] = useState<"online" | "role" | "approval">("online");
   const [searchQuery, setSearchQuery] = useState("");
+  const [deletingUser, setDeletingUser] = useState<UserWithRole | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const { logActivity } = useActivityLog();
 
   const fetchUsers = async () => {
@@ -238,6 +252,34 @@ export function UserManagement() {
       toast.error("Gagal memperbarui username");
     } finally {
       setIsSavingName(false);
+    }
+  };
+
+  const handleDeleteUser = async () => {
+    if (!deletingUser) return;
+    if (deletingUser.user_id === currentAuthUser?.id) {
+      toast.error("Tidak dapat menghapus akun sendiri");
+      return;
+    }
+    setIsDeleting(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("delete-user", {
+        body: { user_id: deletingUser.user_id },
+      });
+      if (error) throw error;
+      if ((data as any)?.error) throw new Error((data as any).error);
+
+      setUsers((prev) => prev.filter((u) => u.user_id !== deletingUser.user_id));
+      toast.success(`User ${deletingUser.display_name || deletingUser.email} berhasil dihapus`);
+      logActivity("revoke_user", `Deleted: ${deletingUser.email}`);
+      setDeletingUser(null);
+    } catch (err) {
+      if (import.meta.env.DEV) {
+        console.error("Error deleting user:", err);
+      }
+      toast.error((err as Error).message || "Gagal menghapus user");
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -505,6 +547,18 @@ export function UserManagement() {
                     {user.is_approved ? "Approved" : "Not Approved"}
                   </Button>
 
+                  {user.user_id !== currentAuthUser?.id && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-7 w-7 text-destructive hover:bg-destructive/10"
+                      onClick={() => setDeletingUser(user)}
+                      title="Hapus user"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
+                  )}
+
                   <span className="text-[10px] text-muted-foreground ml-auto">
                     {new Date(user.created_at).toLocaleDateString("id-ID", {
                       day: "numeric",
@@ -584,6 +638,7 @@ export function UserManagement() {
                     </div>
                   </TableHead>
                   <TableHead className="p-2 hidden xl:table-cell w-[90px] text-xs">Bergabung</TableHead>
+                  <TableHead className="p-2 w-[50px] text-xs text-center">Aksi</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -730,6 +785,21 @@ export function UserManagement() {
                         year: "2-digit",
                       })}
                     </TableCell>
+                    <TableCell className="p-2 text-center">
+                      {user.user_id !== currentAuthUser?.id ? (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7 text-destructive hover:bg-destructive/10"
+                          onClick={() => setDeletingUser(user)}
+                          title="Hapus user"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </Button>
+                      ) : (
+                        <span className="text-muted-foreground/40 text-[10px]">—</span>
+                      )}
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -832,6 +902,39 @@ export function UserManagement() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+
+        {/* Delete User Confirmation */}
+        <AlertDialog open={!!deletingUser} onOpenChange={(open) => !open && !isDeleting && setDeletingUser(null)}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle className="flex items-center gap-2">
+                <Trash2 className="h-5 w-5 text-destructive" />
+                Hapus User
+              </AlertDialogTitle>
+              <AlertDialogDescription>
+                Apakah Anda yakin ingin menghapus user{" "}
+                <span className="font-semibold text-foreground">
+                  {deletingUser?.display_name || deletingUser?.email}
+                </span>
+                ? Tindakan ini akan menghapus akun secara permanen termasuk profil dan role-nya. Tindakan ini tidak dapat dibatalkan.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel disabled={isDeleting}>Batal</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleDeleteUser();
+                }}
+                disabled={isDeleting}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                {isDeleting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                Hapus Permanen
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </CardContent>
     </Card>
   );
