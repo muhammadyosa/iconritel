@@ -1309,6 +1309,23 @@ export default function TicketManagement() {
                   </colgroup>
                   <TableHeader className="sticky top-0 bg-background z-10">
                     <TableRow className="h-7">
+                      <TableHead className="px-1 py-1 bg-muted/80 align-middle text-center">
+                        <Checkbox
+                          aria-label="Pilih semua incident yang terlihat"
+                          checked={
+                            filteredTickets.length > 0 &&
+                            filteredTickets.every((t) => selectedIds.has(t.id))
+                          }
+                          onCheckedChange={(checked) => {
+                            if (checked) {
+                              setSelectedIds(new Set(filteredTickets.map((t) => t.id)));
+                            } else {
+                              setSelectedIds(new Set());
+                            }
+                          }}
+                          className="h-3.5 w-3.5"
+                        />
+                      </TableHead>
                       <TableHead className="px-1.5 py-1 text-[9px] sm:text-[10px] whitespace-nowrap bg-muted/80 font-semibold text-left align-middle">🎫 ID</TableHead>
                       <TableHead className="px-1.5 py-1 text-[9px] sm:text-[10px] whitespace-nowrap bg-muted/80 font-semibold text-left align-middle">📦 Type</TableHead>
                       <TableHead className="px-1.5 py-1 text-[9px] sm:text-[10px] whitespace-nowrap bg-muted/80 font-semibold text-left align-middle">👤 Customer</TableHead>
