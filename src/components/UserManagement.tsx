@@ -638,6 +638,7 @@ export function UserManagement() {
                     </div>
                   </TableHead>
                   <TableHead className="p-2 hidden xl:table-cell w-[90px] text-xs">Bergabung</TableHead>
+                  <TableHead className="p-2 w-[50px] text-xs text-center">Aksi</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
