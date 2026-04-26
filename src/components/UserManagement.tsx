@@ -902,6 +902,39 @@ export function UserManagement() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+
+        {/* Delete User Confirmation */}
+        <AlertDialog open={!!deletingUser} onOpenChange={(open) => !open && !isDeleting && setDeletingUser(null)}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle className="flex items-center gap-2">
+                <Trash2 className="h-5 w-5 text-destructive" />
+                Hapus User
+              </AlertDialogTitle>
+              <AlertDialogDescription>
+                Apakah Anda yakin ingin menghapus user{" "}
+                <span className="font-semibold text-foreground">
+                  {deletingUser?.display_name || deletingUser?.email}
+                </span>
+                ? Tindakan ini akan menghapus akun secara permanen termasuk profil dan role-nya. Tindakan ini tidak dapat dibatalkan.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel disabled={isDeleting}>Batal</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleDeleteUser();
+                }}
+                disabled={isDeleting}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                {isDeleting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                Hapus Permanen
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </CardContent>
     </Card>
   );
