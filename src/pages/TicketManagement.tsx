@@ -1276,8 +1276,27 @@ export default function TicketManagement() {
                         const q = ticketSearchQuery;
                         return (
                         <TableRow key={ticket.id} className="h-8 cursor-pointer hover:bg-muted/70 align-middle" onClick={() => setSelectedTicketForDetail(ticket)}>
-                          <TableCell className="px-1.5 py-1 text-[9px] sm:text-[10px] font-medium truncate">
-                            <HighlightText text={ticket.id} query={q} enabled={hl("ticketId")} />
+                          <TableCell className="px-1.5 py-1 text-[9px] sm:text-[10px] font-medium">
+                            <div className="flex items-center gap-1 min-w-0">
+                              <span className="truncate">
+                                <HighlightText text={ticket.id} query={q} enabled={hl("ticketId")} />
+                              </span>
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  navigator.clipboard.writeText(ticket.id).then(
+                                    () => toast.success(`ID disalin: ${ticket.id}`),
+                                    () => toast.error("Gagal menyalin ID"),
+                                  );
+                                }}
+                                className="shrink-0 p-0.5 rounded hover:bg-accent text-muted-foreground hover:text-foreground transition-colors"
+                                title="Salin Incident ID"
+                                aria-label="Salin Incident ID"
+                              >
+                                <Copy className="h-2.5 w-2.5" />
+                              </button>
+                            </div>
                           </TableCell>
                           <TableCell className="px-1 sm:px-1.5 py-0.5">
                             <div>
