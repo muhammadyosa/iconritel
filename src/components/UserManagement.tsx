@@ -785,6 +785,21 @@ export function UserManagement() {
                         year: "2-digit",
                       })}
                     </TableCell>
+                    <TableCell className="p-2 text-center">
+                      {user.user_id !== currentAuthUser?.id ? (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7 text-destructive hover:bg-destructive/10"
+                          onClick={() => setDeletingUser(user)}
+                          title="Hapus user"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </Button>
+                      ) : (
+                        <span className="text-muted-foreground/40 text-[10px]">—</span>
+                      )}
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
