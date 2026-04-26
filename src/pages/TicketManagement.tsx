@@ -417,32 +417,6 @@ export default function TicketManagement() {
     });
   };
   const [selectedTicketForDetail, setSelectedTicketForDetail] = useState<Ticket | null>(null);
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
-
-  const toggleSelectId = (id: string) => {
-    setSelectedIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-  };
-
-  const handleCopySelectedIds = async () => {
-    if (selectedIds.size === 0) {
-      toast.info("Pilih minimal satu Incident terlebih dahulu");
-      return;
-    }
-    // Preserve order based on filteredTickets visible order
-    const ordered = filteredTickets.filter((t) => selectedIds.has(t.id)).map((t) => t.id);
-    const text = ordered.join("\n");
-    try {
-      await navigator.clipboard.writeText(text);
-      toast.success(`${ordered.length} Incident ID disalin`);
-    } catch {
-      toast.error("Gagal menyalin ID terpilih");
-    }
-  };
 
 
   const handleSubmitManualTicket = async () => {
@@ -909,37 +883,10 @@ export default function TicketManagement() {
                 {isLoadingTickets && (
                   <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />
                 )}
-                {selectedIds.size > 0 && (
-                  <span className="text-[9px] sm:text-[10px] text-muted-foreground bg-accent px-1.5 py-0.5 rounded">
-                    {selectedIds.size} dipilih
-                  </span>
-                )}
+                {/* selection UI removed */}
               </div>
               <div className="flex gap-1 sm:gap-1.5 flex-wrap justify-end">
-                {selectedIds.size > 0 && (
-                  <>
-                    <Button
-                      variant="default"
-                      size="sm"
-                      className="h-6 sm:h-7 text-[9px] sm:text-[10px] px-1.5 sm:px-2 gap-1"
-                      onClick={handleCopySelectedIds}
-                      title="Salin Incident ID terpilih ke clipboard"
-                    >
-                      <CopyCheck className="h-3 w-3" />
-                      <span className="hidden xs:inline">Salin ID Terpilih ({selectedIds.size})</span>
-                      <span className="xs:hidden">Salin ({selectedIds.size})</span>
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-6 sm:h-7 text-[9px] sm:text-[10px] px-1.5"
-                      onClick={() => setSelectedIds(new Set())}
-                      title="Batal pilih semua"
-                    >
-                      <X className="h-3 w-3" />
-                    </Button>
-                  </>
-                )}
+
                 <Button 
                   variant="ghost" 
                   size="sm" 
@@ -1286,8 +1233,6 @@ export default function TicketManagement() {
               <div className="rounded-md border overflow-x-auto overflow-y-auto max-h-[55vh] sm:max-h-[60vh] lg:max-h-[65vh]">
                 <Table className="w-full table-fixed">
                   <colgroup>
-                    {/* Checkbox */}
-                    <col className="w-[28px] sm:w-[32px]" />
                     {/* ID */}
                     <col className="w-[18%] sm:w-[14%] md:w-[12%] lg:w-[10%]" />
                     {/* Type */}
@@ -1309,23 +1254,6 @@ export default function TicketManagement() {
                   </colgroup>
                   <TableHeader className="sticky top-0 bg-background z-10">
                     <TableRow className="h-7">
-                      <TableHead className="px-1 py-1 bg-muted/80 align-middle text-center">
-                        <Checkbox
-                          aria-label="Pilih semua incident yang terlihat"
-                          checked={
-                            filteredTickets.length > 0 &&
-                            filteredTickets.every((t) => selectedIds.has(t.id))
-                          }
-                          onCheckedChange={(checked) => {
-                            if (checked) {
-                              setSelectedIds(new Set(filteredTickets.map((t) => t.id)));
-                            } else {
-                              setSelectedIds(new Set());
-                            }
-                          }}
-                          className="h-3.5 w-3.5"
-                        />
-                      </TableHead>
                       <TableHead className="px-1.5 py-1 text-[9px] sm:text-[10px] whitespace-nowrap bg-muted/80 font-semibold text-left align-middle">🎫 ID</TableHead>
                       <TableHead className="px-1.5 py-1 text-[9px] sm:text-[10px] whitespace-nowrap bg-muted/80 font-semibold text-left align-middle">📦 Type</TableHead>
                       <TableHead className="px-1.5 py-1 text-[9px] sm:text-[10px] whitespace-nowrap bg-muted/80 font-semibold text-left align-middle">👤 Customer</TableHead>
@@ -1340,7 +1268,7 @@ export default function TicketManagement() {
                   <TableBody>
                     {tickets.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={10} className="text-center text-muted-foreground text-[8px] sm:text-[9px] py-2">
+                        <TableCell colSpan={9} className="text-center text-muted-foreground text-[8px] sm:text-[9px] py-2">
                           Belum ada incident
                         </TableCell>
                       </TableRow>
@@ -1350,22 +1278,7 @@ export default function TicketManagement() {
                           ticketSearchField === "all" || ticketSearchField === field;
                         const q = ticketSearchQuery;
                         return (
-                        <TableRow key={ticket.id} data-state={selectedIds.has(ticket.id) ? "selected" : undefined} className="h-8 cursor-pointer hover:bg-muted/70 align-middle" onClick={() => setSelectedTicketForDetail(ticket)}>
-                          <TableCell
-                            className="px-1 py-1 align-middle text-center"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              toggleSelectId(ticket.id);
-                            }}
-                          >
-                            <Checkbox
-                              aria-label={`Pilih incident ${ticket.id}`}
-                              checked={selectedIds.has(ticket.id)}
-                              onCheckedChange={() => toggleSelectId(ticket.id)}
-                              onClick={(e) => e.stopPropagation()}
-                              className="h-3.5 w-3.5"
-                            />
-                          </TableCell>
+                        <TableRow key={ticket.id} className="h-8 cursor-pointer hover:bg-muted/70 align-middle" onClick={() => setSelectedTicketForDetail(ticket)}>
                           <TableCell
                             className="px-1.5 py-1 text-[9px] sm:text-[10px] font-medium cursor-copy group/idcell"
                             onClick={(e) => {
