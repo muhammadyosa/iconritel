@@ -547,6 +547,18 @@ export function UserManagement() {
                     {user.is_approved ? "Approved" : "Not Approved"}
                   </Button>
 
+                  {user.user_id !== currentAuthUser?.id && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-7 w-7 text-destructive hover:bg-destructive/10"
+                      onClick={() => setDeletingUser(user)}
+                      title="Hapus user"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
+                  )}
+
                   <span className="text-[10px] text-muted-foreground ml-auto">
                     {new Date(user.created_at).toLocaleDateString("id-ID", {
                       day: "numeric",
