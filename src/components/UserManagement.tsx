@@ -47,6 +47,7 @@ interface UserWithRole {
 
 export function UserManagement() {
   const { isAdmin } = useUserRole();
+  const { user: currentAuthUser } = useAuth();
   const [users, setUsers] = useState<UserWithRole[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [updatingUserId, setUpdatingUserId] = useState<string | null>(null);
@@ -56,6 +57,8 @@ export function UserManagement() {
   const [sortOrder, setSortOrder] = useState<"asc" | "desc" | null>(null);
   const [sortField, setSortField] = useState<"online" | "role" | "approval">("online");
   const [searchQuery, setSearchQuery] = useState("");
+  const [deletingUser, setDeletingUser] = useState<UserWithRole | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const { logActivity } = useActivityLog();
 
   const fetchUsers = async () => {
