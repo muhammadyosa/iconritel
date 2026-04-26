@@ -3,7 +3,6 @@ import { RegionalTeamRecord } from "@/types/regionalTeam";
 import { loadDefaultRegionalTeamData } from "@/lib/defaultRegionalData";
 import { TablePageSkeleton } from "@/components/PageSkeleton";
 import { Download, Plus, Search, Trash2, Edit, Info, FileEdit, RefreshCw, Loader2, FileDown, Pencil, Copy, CopyCheck, X } from "lucide-react";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
