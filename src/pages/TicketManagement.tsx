@@ -417,6 +417,32 @@ export default function TicketManagement() {
     });
   };
   const [selectedTicketForDetail, setSelectedTicketForDetail] = useState<Ticket | null>(null);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+
+  const toggleSelectId = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const handleCopySelectedIds = async () => {
+    if (selectedIds.size === 0) {
+      toast.info("Pilih minimal satu Incident terlebih dahulu");
+      return;
+    }
+    // Preserve order based on filteredTickets visible order
+    const ordered = filteredTickets.filter((t) => selectedIds.has(t.id)).map((t) => t.id);
+    const text = ordered.join("\n");
+    try {
+      await navigator.clipboard.writeText(text);
+      toast.success(`${ordered.length} Incident ID disalin`);
+    } catch {
+      toast.error("Gagal menyalin ID terpilih");
+    }
+  };
 
 
   const handleSubmitManualTicket = async () => {
