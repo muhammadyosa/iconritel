@@ -560,10 +560,10 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
       return {
         title: `📈 SLA Compliance — ${selectedMonthLabel}`,
         emoji: "📈",
-        tone: (slaPct >= 80 ? "success" : "destructive") as const,
+        tone: (slaPct >= 80 ? "success" : "destructive") as "success" | "destructive",
         summary: `${slaOk.length} dari ${total} incident memenuhi SLA (≤ 24 jam). Tingkat kepatuhan: ${slaPct}%.`,
         metrics: [
-          { label: "SLA Rate", value: `${slaPct}%`, tone: (slaPct >= 80 ? "success" : "destructive") as const },
+          { label: "SLA Rate", value: `${slaPct}%`, tone: (slaPct >= 80 ? "success" : "destructive") as "success" | "destructive" },
           { label: "✅ SLA OK", value: slaOk.length, tone: "success" as const },
           { label: "❌ Breach", value: slaBreached.length, tone: "destructive" as const },
           { label: "⏳ Belum selesai", value: unresolved.length, tone: "warning" as const },
