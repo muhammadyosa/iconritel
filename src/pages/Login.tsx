@@ -60,6 +60,11 @@ export default function Login() {
     try {
       const result = await lovable.auth.signInWithOAuth("google", {
         redirect_uri: window.location.origin,
+        extraParams: {
+          // Selalu paksa pemilihan akun + masukkan password Google ulang setiap login
+          prompt: "select_account consent",
+          access_type: "offline",
+        },
       });
 
       if (result.redirected) return;
