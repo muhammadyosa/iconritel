@@ -258,15 +258,14 @@ export function RecentActivity() {
     } catch {}
   }, []);
 
+  // Debounced refetch — coalesces bursts of realtime events into one fetch
+  const { debounced: scheduleRefetch, cancel: cancelDebounce } = useDebouncedCallback(
+    fetchData,
+    250
+  );
+
   useEffect(() => {
     fetchData();
-
-    // Debounced refetch so a burst of changes triggers only one fetch
-    let debounceTimer: ReturnType<typeof setTimeout> | null = null;
-    const scheduleRefetch = () => {
-      if (debounceTimer) clearTimeout(debounceTimer);
-      debounceTimer = setTimeout(() => fetchData(), 250);
-    };
 
     // Initial connectivity check
     if (typeof navigator !== "undefined" && !navigator.onLine) {
