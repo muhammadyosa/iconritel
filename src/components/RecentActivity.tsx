@@ -315,7 +315,7 @@ export function RecentActivity() {
     window.addEventListener("offline", handleOffline);
 
     return () => {
-      if (debounceTimer) clearTimeout(debounceTimer);
+      cancelDebounce();
       supabase.removeChannel(channel);
       clearInterval(pollInterval);
       clearInterval(onlineInterval);
