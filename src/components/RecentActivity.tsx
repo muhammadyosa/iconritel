@@ -267,6 +267,13 @@ export function RecentActivity() {
       debounceTimer = setTimeout(() => fetchData(), 250);
     };
 
+    // Initial connectivity check
+    if (typeof navigator !== "undefined" && !navigator.onLine) {
+      setRealtimeStatus("offline");
+    } else {
+      setRealtimeStatus("connecting");
+    }
+
     // Single multiplexed realtime channel — more reliable than 4 separate ones
     let channel = supabase
       .channel("recent-activity-stream")
@@ -276,6 +283,13 @@ export function RecentActivity() {
       .on("postgres_changes", { event: "UPDATE", schema: "public", table: "profiles" }, () => refreshOnlineStatus())
       .subscribe((status) => {
         if (import.meta.env.DEV) console.log("[RecentActivity] realtime status:", status);
+        if (typeof navigator !== "undefined" && !navigator.onLine) {
+          setRealtimeStatus("offline");
+        } else if (status === "SUBSCRIBED") {
+          setRealtimeStatus("live");
+        } else if (status === "CHANNEL_ERROR" || status === "TIMED_OUT" || status === "CLOSED") {
+          setRealtimeStatus("polling");
+        }
       });
 
     // Polling fallback — guarantees freshness even if websocket drops
@@ -291,9 +305,14 @@ export function RecentActivity() {
         refreshOnlineStatus();
       }
     };
-    const handleOnline = () => fetchData();
+    const handleOnline = () => {
+      setRealtimeStatus("connecting");
+      fetchData();
+    };
+    const handleOffline = () => setRealtimeStatus("offline");
     document.addEventListener("visibilitychange", handleVisibility);
     window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
 
     return () => {
       if (debounceTimer) clearTimeout(debounceTimer);
@@ -302,6 +321,7 @@ export function RecentActivity() {
       clearInterval(onlineInterval);
       document.removeEventListener("visibilitychange", handleVisibility);
       window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
     };
   }, [fetchData, refreshOnlineStatus]);
 
