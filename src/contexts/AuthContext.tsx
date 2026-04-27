@@ -202,10 +202,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }, 5 * 60 * 1000);
 
     return () => {
+      cancelled = true;
       subscription.unsubscribe();
       clearInterval(intervalId);
     };
-  }, [fetchProfile, updateLastOnline]);
+  }, [fetchProfile, updateLastOnline, consumeExplicitLogout]);
 
   const signOut = async () => {
     // Clear state first to prevent flicker
