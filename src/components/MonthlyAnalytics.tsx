@@ -601,7 +601,8 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
         breakdownTitle: "Kategori dengan SLA Breach Terbanyak",
         statusBreakdown: Array.from(breachByCat.entries()).sort((a, b) => b[1] - a[1]).slice(0, 8),
         categoryBreakdown: [],
-        tickets: slaBreached,
+        basePool: slaBreached,
+        tickets: applyKpiFilters(slaBreached, kpiCategories),
       };
     }
     return null;
