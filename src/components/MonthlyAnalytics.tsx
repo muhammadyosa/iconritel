@@ -451,7 +451,147 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
     );
   };
 
-  
+  // ===== KPI Detail computation =====
+  const kpiDetail = useMemo(() => {
+    if (!kpiDetailType) return null;
+    const total = monthTickets.length;
+    const resolved = monthTickets.filter((t) => t.status === "Resolved");
+    const unresolved = monthTickets.filter((t) => t.status !== "Resolved");
+    const slaOk = monthTickets.filter((t) => {
+      if (t.status === "Resolved" && t.resolvedAt) {
+        return new Date(t.resolvedAt).getTime() - new Date(t.createdISO).getTime() <= 24 * 60 * 60 * 1000;
+      }
+      return false;
+    });
+    const slaBreached = monthTickets.filter((t) => {
+      if (t.status === "Resolved" && t.resolvedAt) {
+        return new Date(t.resolvedAt).getTime() - new Date(t.createdISO).getTime() > 24 * 60 * 60 * 1000;
+      }
+      return false;
+    });
+
+    if (kpiDetailType === "total") {
+      const byStatus = new Map<string, number>();
+      const byCategory = new Map<string, number>();
+      monthTickets.forEach((t) => {
+        byStatus.set(t.status, (byStatus.get(t.status) || 0) + 1);
+        byCategory.set(t.constraint, (byCategory.get(t.constraint) || 0) + 1);
+      });
+      return {
+        title: `🗃️ Total Incident — ${selectedMonthLabel}`,
+        emoji: "🗃️",
+        tone: "primary" as const,
+        summary: `Total ${total} incident tercatat (${kpis.ritel} Ritel, ${kpis.feeder} Feeder).`,
+        metrics: [
+          { label: "Total", value: total, tone: "primary" as const },
+          { label: "🏠 Ritel", value: kpis.ritel, tone: "primary" as const },
+          { label: "🏬 Feeder", value: kpis.feeder, tone: "primary" as const },
+          { label: "✅ Resolved", value: resolved.length, tone: "success" as const },
+          { label: "⏳ Belum", value: unresolved.length, tone: "warning" as const },
+        ],
+        breakdownTitle: "Distribusi Status & Kategori",
+        statusBreakdown: Array.from(byStatus.entries()).sort((a, b) => b[1] - a[1]),
+        categoryBreakdown: Array.from(byCategory.entries()).sort((a, b) => b[1] - a[1]).slice(0, 8),
+        tickets: monthTickets,
+      };
+    }
+    if (kpiDetailType === "resolved") {
+      const rate = total > 0 ? Math.round((resolved.length / total) * 100) : 0;
+      const ritelRes = resolved.filter((t) => !FEEDER_CONSTRAINTS_SET.has(t.constraint)).length;
+      const feederRes = resolved.filter((t) => FEEDER_CONSTRAINTS_SET.has(t.constraint)).length;
+      const byResolver = new Map<string, number>();
+      resolved.forEach((t) => {
+        const name = t.resolvedByName || "Tidak diketahui";
+        byResolver.set(name, (byResolver.get(name) || 0) + 1);
+      });
+      return {
+        title: `✅ Resolved Incident — ${selectedMonthLabel}`,
+        emoji: "✅",
+        tone: "success" as const,
+        summary: `${resolved.length} dari ${total} incident telah diselesaikan (${rate}%).`,
+        metrics: [
+          { label: "Resolved", value: resolved.length, tone: "success" as const },
+          { label: "Resolution Rate", value: `${rate}%`, tone: "success" as const },
+          { label: "🏠 Ritel", value: ritelRes, tone: "primary" as const },
+          { label: "🏬 Feeder", value: feederRes, tone: "primary" as const },
+          { label: "⏳ Pending", value: unresolved.length, tone: "warning" as const },
+        ],
+        breakdownTitle: "Top Resolver",
+        statusBreakdown: Array.from(byResolver.entries()).sort((a, b) => b[1] - a[1]).slice(0, 8),
+        categoryBreakdown: [],
+        tickets: resolved,
+      };
+    }
+    if (kpiDetailType === "avg") {
+      const durations = resolved
+        .filter((t) => t.resolvedAt)
+        .map((t) => ({
+          ticket: t,
+          hours: (new Date(t.resolvedAt!).getTime() - new Date(t.createdISO).getTime()) / 3600000,
+        }));
+      const fast = durations.filter((d) => d.hours <= 4).length;
+      const medium = durations.filter((d) => d.hours > 4 && d.hours <= 24).length;
+      const slow = durations.filter((d) => d.hours > 24).length;
+      const longest = [...durations].sort((a, b) => b.hours - a.hours).slice(0, 5);
+      const fastest = [...durations].sort((a, b) => a.hours - b.hours).slice(0, 5);
+      return {
+        title: `⏱️ Rata-rata Waktu Resolusi — ${selectedMonthLabel}`,
+        emoji: "⏱️",
+        tone: "warning" as const,
+        summary: `Rata-rata waktu resolusi: ${kpis.avgResolutionHours} jam dari ${resolved.length} incident yang diselesaikan.`,
+        metrics: [
+          { label: "Avg Waktu", value: `${kpis.avgResolutionHours}h`, tone: "warning" as const },
+          { label: "⚡ ≤ 4 jam", value: fast, tone: "success" as const },
+          { label: "🕐 4–24 jam", value: medium, tone: "primary" as const },
+          { label: "🐢 > 24 jam", value: slow, tone: "destructive" as const },
+          { label: "Sample", value: durations.length, tone: "default" as const },
+        ],
+        breakdownTitle: "🐢 Resolusi Terlama (Top 5)",
+        statusBreakdown: longest.map((d) => [`${d.ticket.id} — ${d.ticket.constraint}`, `${d.hours.toFixed(1)}h`] as [string, string | number]),
+        categoryBreakdown: fastest.map((d) => [`${d.ticket.id} — ${d.ticket.constraint}`, `${d.hours.toFixed(1)}h`] as [string, string | number]),
+        breakdownTitle2: "⚡ Resolusi Tercepat (Top 5)",
+        tickets: longest.map((d) => d.ticket),
+      };
+    }
+    if (kpiDetailType === "sla") {
+      const slaPct = total > 0 ? Math.round((slaOk.length / total) * 100) : 0;
+      const breachByCat = new Map<string, number>();
+      slaBreached.forEach((t) => breachByCat.set(t.constraint, (breachByCat.get(t.constraint) || 0) + 1));
+      return {
+        title: `📈 SLA Compliance — ${selectedMonthLabel}`,
+        emoji: "📈",
+        tone: (slaPct >= 80 ? "success" : "destructive") as const,
+        summary: `${slaOk.length} dari ${total} incident memenuhi SLA (≤ 24 jam). Tingkat kepatuhan: ${slaPct}%.`,
+        metrics: [
+          { label: "SLA Rate", value: `${slaPct}%`, tone: (slaPct >= 80 ? "success" : "destructive") as const },
+          { label: "✅ SLA OK", value: slaOk.length, tone: "success" as const },
+          { label: "❌ Breach", value: slaBreached.length, tone: "destructive" as const },
+          { label: "⏳ Belum selesai", value: unresolved.length, tone: "warning" as const },
+          { label: "Total", value: total, tone: "primary" as const },
+        ],
+        breakdownTitle: "Kategori dengan SLA Breach Terbanyak",
+        statusBreakdown: Array.from(breachByCat.entries()).sort((a, b) => b[1] - a[1]).slice(0, 8),
+        categoryBreakdown: [],
+        tickets: slaBreached,
+      };
+    }
+    return null;
+  }, [kpiDetailType, monthTickets, kpis, selectedMonthLabel]);
+
+  const openKpiDetail = (type: "total" | "resolved" | "avg" | "sla") => {
+    setKpiDetailType(type);
+    setKpiDetailOpen(true);
+  };
+
+  const openTicketsFromKpi = () => {
+    if (!kpiDetail) return;
+    setKpiDetailOpen(false);
+    setDrillSelectedTicket(null);
+    setDrillTickets(kpiDetail.tickets);
+    setDrillTitle(`${kpiDetail.emoji} ${kpiDetail.tickets.length} incident terkait`);
+    setDrillOpen(true);
+  };
+
 
   return (
     <div className="space-y-3">
