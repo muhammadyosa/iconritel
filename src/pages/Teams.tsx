@@ -280,21 +280,23 @@ export default function Teams() {
     if (historyRes.data) setRankingHistoryData(historyRes.data);
   }, [rankingRange]);
 
+  const { debounced: debouncedFetchRanking } = useDebouncedCallback(fetchRankingData, 400);
+
   useEffect(() => {
     fetchRankingData();
 
-    // Listen for changes to refresh ranking
+    // Listen for changes to refresh ranking — debounced to coalesce bursts
     const rankingChannel = supabase
       .channel("ranking-refresh")
       .on("postgres_changes", { event: "*", schema: "public", table: "daily_user_ticket_history" }, () => {
-        fetchRankingData();
+        debouncedFetchRanking();
       })
       .subscribe();
 
     return () => {
       supabase.removeChannel(rankingChannel);
     };
-  }, [fetchRankingData]);
+  }, [fetchRankingData, debouncedFetchRanking]);
 
   const rankingUserStats = useMemo(() => {
     const stats: Record<string, { name: string; total: number; resolved: number; onProgress: number; pending: number; critical: number }> = {};
