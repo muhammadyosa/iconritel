@@ -630,38 +630,47 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
 
       {/* KPI Summary - compact cards with glow effect matching Dashboard KPI */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-        {[
+        {([
           {
+            type: "total" as const,
             emoji: "🗃️", title: "Total Incident", value: kpis.total,
             bgClass: "bg-primary/8 hover:bg-primary/15", borderClass: "border-primary/30 hover:border-primary/50",
             valueClass: "text-primary", glowClass: "hover:shadow-[0_0_15px_-4px_hsl(var(--primary)/0.3)]",
           },
           {
+            type: "resolved" as const,
             emoji: "✅", title: "Resolved", value: kpis.resolved,
             bgClass: "bg-success/8 hover:bg-success/15", borderClass: "border-success/30 hover:border-success/50",
             valueClass: "text-success", glowClass: "hover:shadow-[0_0_15px_-4px_hsl(var(--success)/0.3)]",
           },
           {
+            type: "avg" as const,
             emoji: "⏱️", title: "Avg Resolusi", value: `${kpis.avgResolutionHours}h`,
             bgClass: "bg-warning/8 hover:bg-warning/15", borderClass: "border-warning/30 hover:border-warning/50",
             valueClass: "text-warning", glowClass: "hover:shadow-[0_0_15px_-4px_hsl(var(--warning)/0.3)]",
           },
           {
+            type: "sla" as const,
             emoji: "📈", title: "SLA Rate", value: `${kpis.slaRate}%`,
             bgClass: kpis.slaRate >= 80 ? "bg-success/8 hover:bg-success/15" : "bg-destructive/8 hover:bg-destructive/15",
             borderClass: kpis.slaRate >= 80 ? "border-success/30 hover:border-success/50" : "border-destructive/30 hover:border-destructive/50",
             valueClass: kpis.slaRate >= 80 ? "text-success" : "text-destructive",
             glowClass: kpis.slaRate >= 80 ? "hover:shadow-[0_0_15px_-4px_hsl(var(--success)/0.3)]" : "hover:shadow-[0_0_15px_-4px_hsl(var(--destructive)/0.3)]",
           },
-        ].map((card, i) => (
-          <div key={i} className={`rounded-lg border p-2 sm:p-2.5 transition-all duration-300 cursor-default ${card.bgClass} ${card.borderClass} ${card.glowClass}`}>
+        ]).map((card, i) => (
+          <button
+            key={i}
+            type="button"
+            onClick={() => openKpiDetail(card.type)}
+            className={`text-left rounded-lg border p-2 sm:p-2.5 transition-all duration-300 cursor-pointer active:scale-[0.97] ${card.bgClass} ${card.borderClass} ${card.glowClass}`}
+            title="Klik untuk detail"
+          >
             <div className="flex items-center gap-1.5 mb-1">
               <span className="text-sm sm:text-base">{card.emoji}</span>
               <p className="text-[9px] sm:text-[10px] text-muted-foreground font-medium truncate">{card.title}</p>
             </div>
             <p className={`text-xl sm:text-2xl font-bold tabular-nums text-center ${card.valueClass}`}>{card.value}</p>
-            
-          </div>
+          </button>
         ))}
       </div>
 
