@@ -323,7 +323,7 @@ export function RecentActivity() {
       window.removeEventListener("online", handleOnline);
       window.removeEventListener("offline", handleOffline);
     };
-  }, [fetchData, refreshOnlineStatus]);
+  }, [fetchData, refreshOnlineStatus, scheduleRefetch, cancelDebounce]);
 
   const filteredItems = useMemo(() => {
     let result = items;
