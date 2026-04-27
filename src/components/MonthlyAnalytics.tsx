@@ -518,7 +518,8 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
         breakdownTitle: "Distribusi Status & Kategori",
         statusBreakdown: Array.from(byStatus.entries()).sort((a, b) => b[1] - a[1]),
         categoryBreakdown: Array.from(byCategory.entries()).sort((a, b) => b[1] - a[1]).slice(0, 8),
-        tickets: monthTickets,
+        basePool: monthTickets,
+        tickets: applyKpiFilters(monthTickets, kpiCategories),
       };
     }
     if (kpiDetailType === "resolved") {
