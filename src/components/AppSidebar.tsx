@@ -9,6 +9,7 @@ import { useTheme } from "next-themes";
 import { useEffect, useState, useMemo, useCallback, memo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useUserRole } from "@/hooks/useUserRole";
+import { useDebouncedCallback } from "@/hooks/useDebouncedCallback";
 import {
   Tooltip,
   TooltipContent,
@@ -37,26 +38,30 @@ function usePendingUserCount() {
   const { isAdmin } = useUserRole();
   const [count, setCount] = useState(0);
 
+  const fetchCount = useCallback(async () => {
+    const { count: c, error } = await supabase
+      .from("profiles")
+      .select("*", { count: "exact", head: true })
+      .eq("is_approved", false);
+    if (!error && c !== null) setCount(c);
+  }, []);
+
+  const { debounced: debouncedFetchCount } = useDebouncedCallback(fetchCount, 300);
+
   useEffect(() => {
     if (!isAdmin) return;
-
-    const fetchCount = async () => {
-      const { count: c, error } = await supabase
-        .from("profiles")
-        .select("*", { count: "exact", head: true })
-        .eq("is_approved", false);
-      if (!error && c !== null) setCount(c);
-    };
 
     fetchCount();
 
     const channel = supabase
       .channel("pending-users-count")
-      .on("postgres_changes", { event: "*", schema: "public", table: "profiles" }, fetchCount)
+      .on("postgres_changes", { event: "*", schema: "public", table: "profiles" }, () => {
+        debouncedFetchCount();
+      })
       .subscribe();
 
     return () => { supabase.removeChannel(channel); };
-  }, [isAdmin]);
+  }, [isAdmin, fetchCount, debouncedFetchCount]);
 
   return { count, isAdmin };
 }
