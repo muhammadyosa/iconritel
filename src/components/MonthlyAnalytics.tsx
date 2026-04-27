@@ -1029,8 +1029,9 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
             <>
               <DialogHeader className="px-4 sm:px-5 pt-4 pb-2 border-b bg-muted/20 flex-shrink-0">
                 <DialogTitle className="text-sm sm:text-base flex items-center gap-2">
-                  <span>{kpiDetail.title}</span>
-                  <span className="ml-auto text-[9px] sm:text-[10px] font-normal text-muted-foreground bg-background/60 border border-border/40 rounded-full px-2 py-0.5">
+                  <span className="truncate">{kpiDetail.title}</span>
+                  <span className="ml-auto inline-flex items-center gap-1 text-[9px] sm:text-[10px] font-medium text-success bg-success/10 border border-success/30 rounded-full px-2 py-0.5 shrink-0">
+                    <span className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" />
                     Realtime
                   </span>
                 </DialogTitle>
