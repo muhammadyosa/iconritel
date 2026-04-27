@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Input } from "@/components/ui/input";
-import { Activity, CheckCircle, Clock, RefreshCw, Loader2, ExternalLink, Search, X, FileText, AlertTriangle, CalendarDays, User, Zap, Copy, CheckCheck, Circle } from "lucide-react";
+import { Activity, CheckCircle, Clock, RefreshCw, Loader2, ExternalLink, Search, X, FileText, AlertTriangle, CalendarDays, User, Zap, Copy, CheckCheck, Circle, Wifi, WifiOff, RadioTower } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
