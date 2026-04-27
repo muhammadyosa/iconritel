@@ -546,7 +546,8 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
         breakdownTitle: "Top Resolver",
         statusBreakdown: Array.from(byResolver.entries()).sort((a, b) => b[1] - a[1]).slice(0, 8),
         categoryBreakdown: [],
-        tickets: resolved,
+        basePool: resolved,
+        tickets: applyKpiFilters(resolved, kpiCategories),
       };
     }
     if (kpiDetailType === "avg") {
