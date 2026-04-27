@@ -1066,6 +1066,116 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
                   })}
                 </div>
 
+                {/* === Filter Section === */}
+                <div className="rounded-lg border border-border/40 bg-muted/20 p-2.5 space-y-2">
+                  <div className="flex items-center justify-between gap-2">
+                    <h4 className="text-[10px] sm:text-xs font-semibold text-foreground flex items-center gap-1.5">
+                      🔎 Filter Incident
+                    </h4>
+                    {(kpiSegment !== "all" || kpiStatus !== "all" || kpiCategories.size > 0) && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="h-6 px-2 text-[10px]"
+                        onClick={() => {
+                          setKpiSegment("all");
+                          setKpiStatus(kpiDetailType === "resolved" ? "resolved" : "all");
+                          setKpiCategories(new Set());
+                        }}
+                      >
+                        Reset
+                      </Button>
+                    )}
+                  </div>
+
+                  {/* Segment Ritel/Feeder */}
+                  <div className="space-y-1">
+                    <p className="text-[9px] uppercase tracking-wider text-muted-foreground">Segment</p>
+                    <div className="flex flex-wrap gap-1">
+                      {([
+                        { v: "all", label: "Semua", emoji: "🌐" },
+                        { v: "ritel", label: "Ritel", emoji: "🏠" },
+                        { v: "feeder", label: "Feeder", emoji: "🏬" },
+                      ] as const).map((opt) => (
+                        <button
+                          key={opt.v}
+                          type="button"
+                          onClick={() => setKpiSegment(opt.v)}
+                          className={`px-2 py-1 rounded-md border text-[10px] transition-all ${
+                            kpiSegment === opt.v
+                              ? "bg-primary text-primary-foreground border-primary shadow-sm"
+                              : "bg-background border-border/50 hover:bg-muted text-foreground/80"
+                          }`}
+                        >
+                          {opt.emoji} {opt.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Status */}
+                  <div className="space-y-1">
+                    <p className="text-[9px] uppercase tracking-wider text-muted-foreground">Status</p>
+                    <div className="flex flex-wrap gap-1">
+                      {([
+                        { v: "all", label: "Semua", cls: "bg-primary text-primary-foreground border-primary" },
+                        { v: "resolved", label: "✅ Resolved", cls: "bg-success text-success-foreground border-success" },
+                        { v: "unresolved", label: "⏳ Belum", cls: "bg-warning text-warning-foreground border-warning" },
+                      ] as const).map((opt) => (
+                        <button
+                          key={opt.v}
+                          type="button"
+                          onClick={() => setKpiStatus(opt.v)}
+                          className={`px-2 py-1 rounded-md border text-[10px] transition-all ${
+                            kpiStatus === opt.v
+                              ? `${opt.cls} shadow-sm`
+                              : "bg-background border-border/50 hover:bg-muted text-foreground/80"
+                          }`}
+                        >
+                          {opt.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Categories */}
+                  {kpiAvailableCategories.length > 0 && (
+                    <div className="space-y-1">
+                      <p className="text-[9px] uppercase tracking-wider text-muted-foreground flex items-center justify-between">
+                        <span>Kategori Kendala {kpiCategories.size > 0 && `(${kpiCategories.size} dipilih)`}</span>
+                        <span className="text-muted-foreground/60 normal-case">Klik untuk pilih multi</span>
+                      </p>
+                      <div className="flex flex-wrap gap-1 max-h-24 overflow-auto">
+                        {kpiAvailableCategories.map((cat) => {
+                          const active = kpiCategories.has(cat);
+                          return (
+                            <button
+                              key={cat}
+                              type="button"
+                              onClick={() => toggleKpiCategory(cat)}
+                              className={`px-2 py-0.5 rounded-full border text-[9px] transition-all ${
+                                active
+                                  ? "bg-primary text-primary-foreground border-primary"
+                                  : "bg-background border-border/50 hover:bg-muted text-foreground/70"
+                              }`}
+                            >
+                              {FEEDER_CONSTRAINTS_SET.has(cat) ? "🏬" : "🏠"} {cat}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="flex items-center justify-between gap-2 pt-1 border-t border-border/40">
+                    <span className="text-[10px] text-muted-foreground">Hasil filter</span>
+                    <span className="text-[11px] font-bold text-primary tabular-nums">
+                      {kpiDetail.tickets.length} incident
+                    </span>
+                  </div>
+                </div>
+
                 {/* Breakdown 1 */}
                 {kpiDetail.statusBreakdown.length > 0 && (
                   <div className="space-y-1.5">
