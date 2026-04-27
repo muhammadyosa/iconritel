@@ -386,17 +386,63 @@ export function RecentActivity() {
               Recent Activity
               <Badge variant="secondary" className="ml-1 text-[8px] px-1.5 py-0 h-4">{counts.all}</Badge>
             </CardTitle>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={fetchData}
-              disabled={loading}
-              className="h-7 w-7"
-              title="Refresh"
-            >
-              {loading ? <Loader2 className="h-3 w-3 animate-spin" /> : <RefreshCw className="h-3 w-3" />}
-            </Button>
+            <div className="flex items-center gap-1">
+              <TooltipProvider delayDuration={150}>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div
+                      className={`flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[8px] sm:text-[9px] font-medium border transition-colors ${
+                        realtimeStatus === "live"
+                          ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30"
+                          : realtimeStatus === "polling"
+                            ? "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/30"
+                            : realtimeStatus === "offline"
+                              ? "bg-destructive/10 text-destructive border-destructive/30"
+                              : "bg-muted text-muted-foreground border-border"
+                      }`}
+                      aria-label={`Status realtime: ${realtimeStatus}`}
+                    >
+                      {realtimeStatus === "live" && (
+                        <span className="relative flex h-1.5 w-1.5">
+                          <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75 animate-ping" />
+                          <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                        </span>
+                      )}
+                      {realtimeStatus === "polling" && <RadioTower className="h-2.5 w-2.5" />}
+                      {realtimeStatus === "offline" && <WifiOff className="h-2.5 w-2.5" />}
+                      {realtimeStatus === "connecting" && <Loader2 className="h-2.5 w-2.5 animate-spin" />}
+                      <span className="hidden sm:inline">
+                        {realtimeStatus === "live" && "Live"}
+                        {realtimeStatus === "polling" && "Polling"}
+                        {realtimeStatus === "offline" && "Offline"}
+                        {realtimeStatus === "connecting" && "Connecting"}
+                      </span>
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom" className="text-[10px]">
+                    {realtimeStatus === "live" && "Realtime aktif via WebSocket"}
+                    {realtimeStatus === "polling" && "WebSocket terputus — sinkron via polling 20 detik"}
+                    {realtimeStatus === "offline" && "Tidak ada koneksi internet"}
+                    {realtimeStatus === "connecting" && "Menyambungkan ke realtime..."}
+                    {lastSyncAt && (
+                      <div className="mt-0.5 opacity-70">Sinkron terakhir: {lastSyncAt.toLocaleTimeString("id-ID")}</div>
+                    )}
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={fetchData}
+                disabled={loading}
+                className="h-7 w-7"
+                title="Refresh"
+              >
+                {loading ? <Loader2 className="h-3 w-3 animate-spin" /> : <RefreshCw className="h-3 w-3" />}
+              </Button>
+            </div>
           </div>
+
 
           {/* Filter chips with counts */}
           <div className="flex gap-1 flex-wrap">
