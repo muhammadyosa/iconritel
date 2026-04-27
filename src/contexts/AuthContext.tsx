@@ -64,10 +64,79 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Store user id in ref to avoid re-subscribing
   const userIdRef = React.useRef<string | null>(null);
 
+  // Helper: detect & honor an explicit-logout flag from the previous session.
+  // If the user explicitly signed out, we MUST NOT silently re-hydrate any
+  // leftover Supabase session from storage on the next app boot.
+  const consumeExplicitLogout = useCallback(async (): Promise<boolean> => {
+    let flagged = false;
+    try {
+      flagged = sessionStorage.getItem('explicit_logout') === 'true';
+    } catch {
+      flagged = false;
+    }
+    if (!flagged) return false;
+
+    // Purge any cached Supabase auth tokens so getSession() cannot revive them.
+    try {
+      const purge = (storage: Storage) => {
+        const keys: string[] = [];
+        for (let i = 0; i < storage.length; i++) {
+          const k = storage.key(i);
+          if (!k) continue;
+          if (k.startsWith('sb-') || k.includes('supabase.auth')) keys.push(k);
+        }
+        keys.forEach((k) => storage.removeItem(k));
+      };
+      purge(localStorage);
+      purge(sessionStorage);
+    } catch {
+      // ignore storage access errors
+    }
+
+    // Belt-and-suspenders: ask Supabase to drop any in-memory session too.
+    try {
+      await supabase.auth.signOut({ scope: 'local' });
+    } catch {
+      // ignore — we're already in a logged-out intent
+    }
+
+    // Re-set the flag (purge above wiped sessionStorage) so subsequent
+    // SIGNED_IN events from a fresh login flow can clear it explicitly.
+    try {
+      sessionStorage.setItem('explicit_logout', 'true');
+    } catch {
+      // ignore
+    }
+    return true;
+  }, []);
+
   useEffect(() => {
+    let cancelled = false;
+
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        // Guard: if user explicitly logged out, ignore any rehydrated session
+        // until a real SIGNED_IN event arrives from a fresh login.
+        const loggedOut = (() => {
+          try { return sessionStorage.getItem('explicit_logout') === 'true'; }
+          catch { return false; }
+        })();
+
+        if (loggedOut && event !== 'SIGNED_IN') {
+          setSession(null);
+          setUser(null);
+          setProfile(null);
+          userIdRef.current = null;
+          setIsLoading(false);
+          return;
+        }
+
+        // A genuine new login clears the explicit-logout flag.
+        if (event === 'SIGNED_IN') {
+          try { sessionStorage.removeItem('explicit_logout'); } catch { /* ignore */ }
+        }
+
         setSession(session);
         setUser(session?.user ?? null);
 
@@ -95,19 +164,35 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     );
 
-    // THEN get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    // THEN initialize: honor explicit-logout BEFORE touching getSession().
+    (async () => {
+      const wasLoggedOut = await consumeExplicitLogout();
+      if (cancelled) return;
+
+      if (wasLoggedOut) {
+        // Stay signed out. Do not call getSession() — nothing to rehydrate.
+        setSession(null);
+        setUser(null);
+        setProfile(null);
+        userIdRef.current = null;
+        setIsLoading(false);
+        return;
+      }
+
+      const { data: { session } } = await supabase.auth.getSession();
+      if (cancelled) return;
+
       setSession(session);
       setUser(session?.user ?? null);
-      
+
       if (session?.user) {
         userIdRef.current = session.user.id;
         fetchProfile(session.user.id);
         updateLastOnline(session.user.id);
       }
-      
+
       setIsLoading(false);
-    });
+    })();
 
     // Update last_online periodically (every 5 minutes)
     const intervalId = setInterval(() => {
@@ -117,10 +202,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }, 5 * 60 * 1000);
 
     return () => {
+      cancelled = true;
       subscription.unsubscribe();
       clearInterval(intervalId);
     };
-  }, [fetchProfile, updateLastOnline]);
+  }, [fetchProfile, updateLastOnline, consumeExplicitLogout]);
 
   const signOut = async () => {
     // Clear state first to prevent flicker
