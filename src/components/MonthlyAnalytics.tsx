@@ -922,7 +922,17 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
                 <span className="truncate">Detail Incident</span>
               </DialogTitle>
             ) : (
-              <DialogTitle className="text-sm sm:text-base">{drillTitle}</DialogTitle>
+              <DialogTitle className="text-sm sm:text-base flex items-center gap-2">
+                <span className="truncate">{drillTitle}</span>
+                <span className="ml-auto text-[10px] font-bold text-primary tabular-nums shrink-0">
+                  {effectiveDrillTickets.length}
+                </span>
+                {drillSource?.kind === "kpi" && (
+                  <span className="text-[9px] font-normal text-muted-foreground bg-success/10 border border-success/30 text-success rounded-full px-2 py-0.5 shrink-0">
+                    ● Live
+                  </span>
+                )}
+              </DialogTitle>
             )}
           </DialogHeader>
 
