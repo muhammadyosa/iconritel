@@ -654,16 +654,34 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
 
   const openKpiDetail = (type: "total" | "resolved" | "avg" | "sla") => {
     setKpiDetailType(type);
+    setKpiSegment("all");
+    setKpiStatus(type === "resolved" ? "resolved" : "all");
+    setKpiCategories(new Set());
     setKpiDetailOpen(true);
   };
 
   const openTicketsFromKpi = () => {
-    if (!kpiDetail) return;
-    setKpiDetailOpen(false);
+    if (!kpiDetail || !kpiDetailType) return;
     setDrillSelectedTicket(null);
-    setDrillTickets(kpiDetail.tickets);
-    setDrillTitle(`${kpiDetail.emoji} ${kpiDetail.tickets.length} incident terkait`);
+    setDrillSource({
+      kind: "kpi",
+      type: kpiDetailType,
+      segment: kpiSegment,
+      status: kpiStatus,
+      categories: Array.from(kpiCategories),
+    });
+    setDrillTitle(`${kpiDetail.emoji} Incident terkait`);
+    setKpiDetailOpen(false);
     setDrillOpen(true);
+  };
+
+  const toggleKpiCategory = (cat: string) => {
+    setKpiCategories((prev) => {
+      const next = new Set(prev);
+      if (next.has(cat)) next.delete(cat);
+      else next.add(cat);
+      return next;
+    });
   };
 
 
