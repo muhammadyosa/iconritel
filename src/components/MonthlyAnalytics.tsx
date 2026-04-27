@@ -917,6 +917,115 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* KPI Detail Dialog */}
+      <Dialog open={kpiDetailOpen} onOpenChange={setKpiDetailOpen}>
+        <DialogContent className="max-w-lg max-h-[85vh] flex flex-col p-0 overflow-hidden">
+          {kpiDetail && (
+            <>
+              <DialogHeader className="px-4 sm:px-5 pt-4 pb-2 border-b bg-muted/20 flex-shrink-0">
+                <DialogTitle className="text-sm sm:text-base flex items-center gap-2">
+                  <span>{kpiDetail.title}</span>
+                  <span className="ml-auto text-[9px] sm:text-[10px] font-normal text-muted-foreground bg-background/60 border border-border/40 rounded-full px-2 py-0.5">
+                    Realtime
+                  </span>
+                </DialogTitle>
+              </DialogHeader>
+
+              <div className="flex-1 overflow-auto px-4 sm:px-5 py-3 space-y-3 min-h-0">
+                {/* Insight summary */}
+                <div className={`rounded-lg border px-3 py-2 text-[11px] sm:text-xs leading-relaxed font-medium ${
+                  kpiDetail.tone === "success" ? "bg-success/10 border-success/30 text-success" :
+                  kpiDetail.tone === "destructive" ? "bg-destructive/10 border-destructive/30 text-destructive" :
+                  kpiDetail.tone === "warning" ? "bg-warning/10 border-warning/30 text-warning" :
+                  "bg-primary/10 border-primary/30 text-primary"
+                }`}>
+                  💡 {kpiDetail.summary}
+                </div>
+
+                {/* Metrics grid */}
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
+                  {kpiDetail.metrics.map((m, i) => {
+                    const toneColor =
+                      m.tone === "success" ? "text-success border-success/20 bg-success/5" :
+                      m.tone === "destructive" ? "text-destructive border-destructive/20 bg-destructive/5" :
+                      m.tone === "warning" ? "text-warning border-warning/20 bg-warning/5" :
+                      m.tone === "primary" ? "text-primary border-primary/20 bg-primary/5" :
+                      "text-foreground border-border/40 bg-muted/30";
+                    return (
+                      <div key={i} className={`rounded-md border p-2 ${toneColor}`}>
+                        <div className="text-[8px] sm:text-[9px] uppercase tracking-wider text-muted-foreground truncate">{m.label}</div>
+                        <div className="text-base sm:text-lg font-bold tabular-nums leading-tight mt-0.5">{m.value}</div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Breakdown 1 */}
+                {kpiDetail.statusBreakdown.length > 0 && (
+                  <div className="space-y-1.5">
+                    <h4 className="text-[10px] sm:text-xs font-semibold text-foreground">{kpiDetail.breakdownTitle}</h4>
+                    <ul className="space-y-1 text-[10px] sm:text-xs">
+                      {kpiDetail.statusBreakdown.map(([label, value], i) => (
+                        <li key={i} className="flex items-center justify-between gap-2 px-2 py-1 rounded border border-border/30 bg-muted/10">
+                          <span className="text-foreground/80 truncate flex-1">{label}</span>
+                          <span className="font-bold tabular-nums shrink-0 text-primary">{value}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {/* Breakdown 2 (avg only) */}
+                {kpiDetailType === "avg" && kpiDetail.categoryBreakdown.length > 0 && (
+                  <div className="space-y-1.5">
+                    <h4 className="text-[10px] sm:text-xs font-semibold text-foreground">{(kpiDetail as any).breakdownTitle2}</h4>
+                    <ul className="space-y-1 text-[10px] sm:text-xs">
+                      {kpiDetail.categoryBreakdown.map(([label, value], i) => (
+                        <li key={i} className="flex items-center justify-between gap-2 px-2 py-1 rounded border border-border/30 bg-muted/10">
+                          <span className="text-foreground/80 truncate flex-1">{label}</span>
+                          <span className="font-bold tabular-nums shrink-0 text-success">{value}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {/* Top category breakdown for total */}
+                {kpiDetailType === "total" && kpiDetail.categoryBreakdown.length > 0 && (
+                  <div className="space-y-1.5">
+                    <h4 className="text-[10px] sm:text-xs font-semibold text-foreground">Top Kategori Kendala</h4>
+                    <ul className="space-y-1 text-[10px] sm:text-xs">
+                      {kpiDetail.categoryBreakdown.map(([label, value], i) => (
+                        <li key={i} className="flex items-center justify-between gap-2 px-2 py-1 rounded border border-border/30 bg-muted/10">
+                          <span className="text-foreground/80 truncate flex-1 flex items-center gap-1">
+                            <span>{FEEDER_CONSTRAINTS_SET.has(label) ? "🏬" : "🏠"}</span>
+                            {label}
+                          </span>
+                          <span className="font-bold tabular-nums shrink-0 text-primary">{value}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex justify-between items-center gap-2 px-4 sm:px-5 py-2 border-t bg-muted/10 flex-shrink-0">
+                <Button
+                  variant="default"
+                  size="sm"
+                  className="text-xs"
+                  onClick={openTicketsFromKpi}
+                  disabled={!kpiDetail.tickets || kpiDetail.tickets.length === 0}
+                >
+                  Lihat {kpiDetail.tickets.length} Incident
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => setKpiDetailOpen(false)}>Tutup</Button>
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
