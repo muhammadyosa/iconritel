@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Input } from "@/components/ui/input";
-import { Activity, CheckCircle, Clock, RefreshCw, Loader2, ExternalLink, Search, X, FileText, AlertTriangle, CalendarDays, User, Zap, Copy, CheckCheck, Circle } from "lucide-react";
+import { Activity, CheckCircle, Clock, RefreshCw, Loader2, ExternalLink, Search, X, FileText, AlertTriangle, CalendarDays, User, Zap, Copy, CheckCheck, Circle, Wifi, WifiOff, RadioTower } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
@@ -105,6 +105,8 @@ export function RecentActivity() {
   const [selectedShift, setSelectedShift] = useState<any>(null);
   const [loadingDetail, setLoadingDetail] = useState(false);
   const [copiedField, setCopiedField] = useState<string | null>(null);
+  const [realtimeStatus, setRealtimeStatus] = useState<"connecting" | "live" | "polling" | "offline">("connecting");
+  const [lastSyncAt, setLastSyncAt] = useState<Date | null>(null);
 
   const copyToClipboard = useCallback((text: string, fieldName: string) => {
     navigator.clipboard.writeText(text).then(() => {
@@ -219,6 +221,7 @@ export function RecentActivity() {
 
       setUserProfiles(mergedProfiles);
       setItems(combined);
+      setLastSyncAt(new Date());
     } catch (err) {
       if (import.meta.env.DEV) console.error("Error fetching recent activity:", err);
     } finally {
@@ -264,6 +267,13 @@ export function RecentActivity() {
       debounceTimer = setTimeout(() => fetchData(), 250);
     };
 
+    // Initial connectivity check
+    if (typeof navigator !== "undefined" && !navigator.onLine) {
+      setRealtimeStatus("offline");
+    } else {
+      setRealtimeStatus("connecting");
+    }
+
     // Single multiplexed realtime channel — more reliable than 4 separate ones
     let channel = supabase
       .channel("recent-activity-stream")
@@ -273,6 +283,13 @@ export function RecentActivity() {
       .on("postgres_changes", { event: "UPDATE", schema: "public", table: "profiles" }, () => refreshOnlineStatus())
       .subscribe((status) => {
         if (import.meta.env.DEV) console.log("[RecentActivity] realtime status:", status);
+        if (typeof navigator !== "undefined" && !navigator.onLine) {
+          setRealtimeStatus("offline");
+        } else if (status === "SUBSCRIBED") {
+          setRealtimeStatus("live");
+        } else if (status === "CHANNEL_ERROR" || status === "TIMED_OUT" || status === "CLOSED") {
+          setRealtimeStatus("polling");
+        }
       });
 
     // Polling fallback — guarantees freshness even if websocket drops
@@ -288,9 +305,14 @@ export function RecentActivity() {
         refreshOnlineStatus();
       }
     };
-    const handleOnline = () => fetchData();
+    const handleOnline = () => {
+      setRealtimeStatus("connecting");
+      fetchData();
+    };
+    const handleOffline = () => setRealtimeStatus("offline");
     document.addEventListener("visibilitychange", handleVisibility);
     window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
 
     return () => {
       if (debounceTimer) clearTimeout(debounceTimer);
@@ -299,6 +321,7 @@ export function RecentActivity() {
       clearInterval(onlineInterval);
       document.removeEventListener("visibilitychange", handleVisibility);
       window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
     };
   }, [fetchData, refreshOnlineStatus]);
 
@@ -363,17 +386,63 @@ export function RecentActivity() {
               Recent Activity
               <Badge variant="secondary" className="ml-1 text-[8px] px-1.5 py-0 h-4">{counts.all}</Badge>
             </CardTitle>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={fetchData}
-              disabled={loading}
-              className="h-7 w-7"
-              title="Refresh"
-            >
-              {loading ? <Loader2 className="h-3 w-3 animate-spin" /> : <RefreshCw className="h-3 w-3" />}
-            </Button>
+            <div className="flex items-center gap-1">
+              <TooltipProvider delayDuration={150}>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div
+                      className={`flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[8px] sm:text-[9px] font-medium border transition-colors ${
+                        realtimeStatus === "live"
+                          ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30"
+                          : realtimeStatus === "polling"
+                            ? "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/30"
+                            : realtimeStatus === "offline"
+                              ? "bg-destructive/10 text-destructive border-destructive/30"
+                              : "bg-muted text-muted-foreground border-border"
+                      }`}
+                      aria-label={`Status realtime: ${realtimeStatus}`}
+                    >
+                      {realtimeStatus === "live" && (
+                        <span className="relative flex h-1.5 w-1.5">
+                          <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75 animate-ping" />
+                          <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                        </span>
+                      )}
+                      {realtimeStatus === "polling" && <RadioTower className="h-2.5 w-2.5" />}
+                      {realtimeStatus === "offline" && <WifiOff className="h-2.5 w-2.5" />}
+                      {realtimeStatus === "connecting" && <Loader2 className="h-2.5 w-2.5 animate-spin" />}
+                      <span className="hidden sm:inline">
+                        {realtimeStatus === "live" && "Live"}
+                        {realtimeStatus === "polling" && "Polling"}
+                        {realtimeStatus === "offline" && "Offline"}
+                        {realtimeStatus === "connecting" && "Connecting"}
+                      </span>
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom" className="text-[10px]">
+                    {realtimeStatus === "live" && "Realtime aktif via WebSocket"}
+                    {realtimeStatus === "polling" && "WebSocket terputus — sinkron via polling 20 detik"}
+                    {realtimeStatus === "offline" && "Tidak ada koneksi internet"}
+                    {realtimeStatus === "connecting" && "Menyambungkan ke realtime..."}
+                    {lastSyncAt && (
+                      <div className="mt-0.5 opacity-70">Sinkron terakhir: {lastSyncAt.toLocaleTimeString("id-ID")}</div>
+                    )}
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={fetchData}
+                disabled={loading}
+                className="h-7 w-7"
+                title="Refresh"
+              >
+                {loading ? <Loader2 className="h-3 w-3 animate-spin" /> : <RefreshCw className="h-3 w-3" />}
+              </Button>
+            </div>
           </div>
+
 
           {/* Filter chips with counts */}
           <div className="flex gap-1 flex-wrap">
