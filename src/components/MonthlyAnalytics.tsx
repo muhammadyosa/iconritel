@@ -465,6 +465,18 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
     );
   };
 
+  // Apply KPI filters to a base list — used both inside the dialog and the drill list
+  const applyKpiFilters = useCallback((list: Ticket[], categoriesSet: Set<string>) => {
+    return list.filter((t) => {
+      if (kpiSegment === "ritel" && FEEDER_CONSTRAINTS_SET.has(t.constraint)) return false;
+      if (kpiSegment === "feeder" && !FEEDER_CONSTRAINTS_SET.has(t.constraint)) return false;
+      if (kpiStatus === "resolved" && t.status !== "Resolved") return false;
+      if (kpiStatus === "unresolved" && t.status === "Resolved") return false;
+      if (categoriesSet.size > 0 && !categoriesSet.has(t.constraint)) return false;
+      return true;
+    });
+  }, [kpiSegment, kpiStatus]);
+
   // ===== KPI Detail computation =====
   const kpiDetail = useMemo(() => {
     if (!kpiDetailType) return null;
