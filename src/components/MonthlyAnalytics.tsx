@@ -578,7 +578,8 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
         statusBreakdown: longest.map((d) => [`${d.ticket.id} — ${d.ticket.constraint}`, `${d.hours.toFixed(1)}h`] as [string, string | number]),
         categoryBreakdown: fastest.map((d) => [`${d.ticket.id} — ${d.ticket.constraint}`, `${d.hours.toFixed(1)}h`] as [string, string | number]),
         breakdownTitle2: "⚡ Resolusi Tercepat (Top 5)",
-        tickets: longest.map((d) => d.ticket),
+        basePool: resolved,
+        tickets: applyKpiFilters(longest.map((d) => d.ticket), kpiCategories),
       };
     }
     if (kpiDetailType === "sla") {
