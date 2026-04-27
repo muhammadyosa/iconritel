@@ -65,6 +65,10 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
   const [drillTickets, setDrillTickets] = useState<Ticket[]>([]);
   const [drillSelectedTicket, setDrillSelectedTicket] = useState<Ticket | null>(null);
 
+  // KPI detail dialog state
+  const [kpiDetailOpen, setKpiDetailOpen] = useState(false);
+  const [kpiDetailType, setKpiDetailType] = useState<"total" | "resolved" | "avg" | "sla" | null>(null);
+
   const monthOptions = useMemo(() => {
     const options: { value: string; label: string }[] = [];
     const now = new Date();
