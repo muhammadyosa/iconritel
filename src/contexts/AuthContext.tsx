@@ -127,9 +127,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(null);
     setSession(null);
     setProfile(null);
-    // Sign out with global scope to invalidate all sessions
-    await supabase.auth.signOut({ scope: 'global' });
-    // Mark that user explicitly logged out to prevent auto-login
+    // Sign out with global scope to invalidate all sessions on the server
+    try {
+      await supabase.auth.signOut({ scope: 'global' });
+    } catch (e) {
+      if (import.meta.env.DEV) console.error("signOut error:", e);
+    }
+    // Hard-clear any cached Supabase auth tokens from browser storage so the
+    // next visit cannot silently re-hydrate a session.
+    try {
+      const purge = (storage: Storage) => {
+        const keys: string[] = [];
+        for (let i = 0; i < storage.length; i++) {
+          const k = storage.key(i);
+          if (!k) continue;
+          if (k.startsWith('sb-') || k.includes('supabase.auth')) keys.push(k);
+        }
+        keys.forEach((k) => storage.removeItem(k));
+      };
+      purge(localStorage);
+      purge(sessionStorage);
+    } catch {
+      // ignore storage access errors
+    }
+    // Mark that user explicitly logged out to prevent auto-login redirect
     sessionStorage.setItem('explicit_logout', 'true');
   };
 
