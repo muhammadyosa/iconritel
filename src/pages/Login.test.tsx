@@ -65,18 +65,19 @@ describe("Login — Google OAuth flow", () => {
   });
 
   it("re-sends prompt=select_account on a second sign-in attempt (no auto-login)", async () => {
-    renderLogin();
-    const btn = await screen.findByRole("button", { name: /google/i });
-
-    fireEvent.click(btn);
+    // First attempt
+    const { unmount } = renderLogin();
+    fireEvent.click(await screen.findByRole("button", { name: /google/i }));
     await waitFor(() => expect(signInWithOAuth).toHaveBeenCalledTimes(1));
+    unmount();
 
-    // Simulate the user returning to the login page and clicking again.
-    fireEvent.click(btn);
+    // Simulate the user returning to the login page (e.g. after logout)
+    renderLogin();
+    fireEvent.click(await screen.findByRole("button", { name: /google/i }));
+    await waitFor(() => expect(signInWithOAuth).toHaveBeenCalledTimes(2));
 
     // Both calls must include the select_account prompt — Google must always
     // show the account chooser, never silently reuse a cached session.
-    await waitFor(() => expect(signInWithOAuth).toHaveBeenCalledTimes(2));
     for (const [, opts] of signInWithOAuth.mock.calls) {
       expect(opts.extraParams.prompt).toContain("select_account");
     }
