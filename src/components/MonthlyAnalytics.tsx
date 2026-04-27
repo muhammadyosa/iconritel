@@ -69,6 +69,20 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
   const [kpiDetailOpen, setKpiDetailOpen] = useState(false);
   const [kpiDetailType, setKpiDetailType] = useState<"total" | "resolved" | "avg" | "sla" | null>(null);
 
+  // KPI detail filters (segment, status, categories) — applied to "Lihat N Incident"
+  const [kpiSegment, setKpiSegment] = useState<"all" | "ritel" | "feeder">("all");
+  const [kpiStatus, setKpiStatus] = useState<"all" | "resolved" | "unresolved">("all");
+  const [kpiCategories, setKpiCategories] = useState<Set<string>>(new Set());
+
+  // Drill source — when set, drill list is computed realtime from monthTickets
+  const [drillSource, setDrillSource] = useState<{
+    kind: "kpi";
+    type: "total" | "resolved" | "avg" | "sla";
+    segment: "all" | "ritel" | "feeder";
+    status: "all" | "resolved" | "unresolved";
+    categories: string[];
+  } | null>(null);
+
   const monthOptions = useMemo(() => {
     const options: { value: string; label: string }[] = [];
     const now = new Date();
@@ -236,6 +250,7 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
       const constraint = data.activePayload[0].payload.name;
       const filtered = categoryFilteredTickets.filter((t) => t.constraint === constraint);
       setDrillSelectedTicket(null);
+      setDrillSource(null);
       setDrillTickets(filtered);
       const filterLabel = categoryFilter === "all" ? "Semua Data" : categoryFilter === "custom" ? categoryCustomDate : categoryFilter === "today" ? "Hari ini" : `${categoryFilter} Hari`;
       setDrillTitle(`📊 ${constraint} — ${filtered.length} incident (${filterLabel})`);
@@ -251,6 +266,7 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
         return tDate === isoDate;
       });
       setDrillSelectedTicket(null);
+      setDrillSource(null);
       setDrillTickets(filtered);
       setDrillTitle(`📅 ${day} — ${filtered.length} incident`);
       setDrillOpen(true);
@@ -451,6 +467,18 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
     );
   };
 
+  // Apply KPI filters to a base list — used both inside the dialog and the drill list
+  const applyKpiFilters = useCallback((list: Ticket[], categoriesSet: Set<string>) => {
+    return list.filter((t) => {
+      if (kpiSegment === "ritel" && FEEDER_CONSTRAINTS_SET.has(t.constraint)) return false;
+      if (kpiSegment === "feeder" && !FEEDER_CONSTRAINTS_SET.has(t.constraint)) return false;
+      if (kpiStatus === "resolved" && t.status !== "Resolved") return false;
+      if (kpiStatus === "unresolved" && t.status === "Resolved") return false;
+      if (categoriesSet.size > 0 && !categoriesSet.has(t.constraint)) return false;
+      return true;
+    });
+  }, [kpiSegment, kpiStatus]);
+
   // ===== KPI Detail computation =====
   const kpiDetail = useMemo(() => {
     if (!kpiDetailType) return null;
@@ -492,7 +520,8 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
         breakdownTitle: "Distribusi Status & Kategori",
         statusBreakdown: Array.from(byStatus.entries()).sort((a, b) => b[1] - a[1]),
         categoryBreakdown: Array.from(byCategory.entries()).sort((a, b) => b[1] - a[1]).slice(0, 8),
-        tickets: monthTickets,
+        basePool: monthTickets,
+        tickets: applyKpiFilters(monthTickets, kpiCategories),
       };
     }
     if (kpiDetailType === "resolved") {
@@ -519,7 +548,8 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
         breakdownTitle: "Top Resolver",
         statusBreakdown: Array.from(byResolver.entries()).sort((a, b) => b[1] - a[1]).slice(0, 8),
         categoryBreakdown: [],
-        tickets: resolved,
+        basePool: resolved,
+        tickets: applyKpiFilters(resolved, kpiCategories),
       };
     }
     if (kpiDetailType === "avg") {
@@ -550,7 +580,8 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
         statusBreakdown: longest.map((d) => [`${d.ticket.id} — ${d.ticket.constraint}`, `${d.hours.toFixed(1)}h`] as [string, string | number]),
         categoryBreakdown: fastest.map((d) => [`${d.ticket.id} — ${d.ticket.constraint}`, `${d.hours.toFixed(1)}h`] as [string, string | number]),
         breakdownTitle2: "⚡ Resolusi Tercepat (Top 5)",
-        tickets: longest.map((d) => d.ticket),
+        basePool: resolved,
+        tickets: applyKpiFilters(longest.map((d) => d.ticket), kpiCategories),
       };
     }
     if (kpiDetailType === "sla") {
@@ -572,24 +603,87 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
         breakdownTitle: "Kategori dengan SLA Breach Terbanyak",
         statusBreakdown: Array.from(breachByCat.entries()).sort((a, b) => b[1] - a[1]).slice(0, 8),
         categoryBreakdown: [],
-        tickets: slaBreached,
+        basePool: slaBreached,
+        tickets: applyKpiFilters(slaBreached, kpiCategories),
       };
     }
     return null;
-  }, [kpiDetailType, monthTickets, kpis, selectedMonthLabel]);
+  }, [kpiDetailType, monthTickets, kpis, selectedMonthLabel, applyKpiFilters, kpiCategories]);
+
+  // Available categories for the filter, derived from the current KPI base pool (realtime)
+  const kpiAvailableCategories = useMemo(() => {
+    if (!kpiDetail) return [] as string[];
+    const set = new Set<string>();
+    (kpiDetail as any).basePool?.forEach((t: Ticket) => set.add(t.constraint));
+    return Array.from(set).sort();
+  }, [kpiDetail]);
+
+  // Realtime-derived drill list when source = "kpi"
+  const realtimeDrillTickets = useMemo(() => {
+    if (!drillSource || drillSource.kind !== "kpi") return null;
+    // Recompute base pool for the active type from current monthTickets
+    const resolved = monthTickets.filter((t) => t.status === "Resolved");
+    const slaBreached = monthTickets.filter((t) => {
+      if (t.status === "Resolved" && t.resolvedAt) {
+        return new Date(t.resolvedAt).getTime() - new Date(t.createdISO).getTime() > 24 * 60 * 60 * 1000;
+      }
+      return false;
+    });
+    let pool: Ticket[] = monthTickets;
+    if (drillSource.type === "resolved") pool = resolved;
+    else if (drillSource.type === "sla") pool = slaBreached;
+    else if (drillSource.type === "avg") {
+      pool = resolved
+        .filter((t) => t.resolvedAt)
+        .map((t) => ({ t, h: (new Date(t.resolvedAt!).getTime() - new Date(t.createdISO).getTime()) / 3600000 }))
+        .sort((a, b) => b.h - a.h)
+        .slice(0, 5)
+        .map((d) => d.t);
+    }
+    const cats = new Set(drillSource.categories);
+    return pool.filter((t) => {
+      if (drillSource.segment === "ritel" && FEEDER_CONSTRAINTS_SET.has(t.constraint)) return false;
+      if (drillSource.segment === "feeder" && !FEEDER_CONSTRAINTS_SET.has(t.constraint)) return false;
+      if (drillSource.status === "resolved" && t.status !== "Resolved") return false;
+      if (drillSource.status === "unresolved" && t.status === "Resolved") return false;
+      if (cats.size > 0 && !cats.has(t.constraint)) return false;
+      return true;
+    });
+  }, [drillSource, monthTickets]);
+
+  // Effective drill list (realtime when from KPI, snapshot for chart drill-downs)
+  const effectiveDrillTickets = realtimeDrillTickets ?? drillTickets;
 
   const openKpiDetail = (type: "total" | "resolved" | "avg" | "sla") => {
     setKpiDetailType(type);
+    setKpiSegment("all");
+    setKpiStatus(type === "resolved" ? "resolved" : "all");
+    setKpiCategories(new Set());
     setKpiDetailOpen(true);
   };
 
   const openTicketsFromKpi = () => {
-    if (!kpiDetail) return;
-    setKpiDetailOpen(false);
+    if (!kpiDetail || !kpiDetailType) return;
     setDrillSelectedTicket(null);
-    setDrillTickets(kpiDetail.tickets);
-    setDrillTitle(`${kpiDetail.emoji} ${kpiDetail.tickets.length} incident terkait`);
+    setDrillSource({
+      kind: "kpi",
+      type: kpiDetailType,
+      segment: kpiSegment,
+      status: kpiStatus,
+      categories: Array.from(kpiCategories),
+    });
+    setDrillTitle(`${kpiDetail.emoji} Incident terkait`);
+    setKpiDetailOpen(false);
     setDrillOpen(true);
+  };
+
+  const toggleKpiCategory = (cat: string) => {
+    setKpiCategories((prev) => {
+      const next = new Set(prev);
+      if (next.has(cat)) next.delete(cat);
+      else next.add(cat);
+      return next;
+    });
   };
 
 
@@ -828,7 +922,17 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
                 <span className="truncate">Detail Incident</span>
               </DialogTitle>
             ) : (
-              <DialogTitle className="text-sm sm:text-base">{drillTitle}</DialogTitle>
+              <DialogTitle className="text-sm sm:text-base flex items-center gap-2">
+                <span className="truncate">{drillTitle}</span>
+                <span className="ml-auto text-[10px] font-bold text-primary tabular-nums shrink-0">
+                  {effectiveDrillTickets.length}
+                </span>
+                {drillSource?.kind === "kpi" && (
+                  <span className="text-[9px] font-normal text-muted-foreground bg-success/10 border border-success/30 text-success rounded-full px-2 py-0.5 shrink-0">
+                    ● Live
+                  </span>
+                )}
+              </DialogTitle>
             )}
           </DialogHeader>
 
@@ -880,10 +984,10 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
                   transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
                   className="space-y-1.5"
                 >
-                  {drillTickets.length === 0 ? (
+                  {effectiveDrillTickets.length === 0 ? (
                     <p className="text-sm text-muted-foreground text-center py-8">Tidak ada incident</p>
                   ) : (
-                    drillTickets.map((ticket) => (
+                    effectiveDrillTickets.map((ticket) => (
                       <div
                         key={ticket.id}
                         className="flex items-center justify-between p-2 rounded-lg border bg-card hover:bg-muted/50 cursor-pointer transition-colors"
@@ -925,8 +1029,9 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
             <>
               <DialogHeader className="px-4 sm:px-5 pt-4 pb-2 border-b bg-muted/20 flex-shrink-0">
                 <DialogTitle className="text-sm sm:text-base flex items-center gap-2">
-                  <span>{kpiDetail.title}</span>
-                  <span className="ml-auto text-[9px] sm:text-[10px] font-normal text-muted-foreground bg-background/60 border border-border/40 rounded-full px-2 py-0.5">
+                  <span className="truncate">{kpiDetail.title}</span>
+                  <span className="ml-auto inline-flex items-center gap-1 text-[9px] sm:text-[10px] font-medium text-success bg-success/10 border border-success/30 rounded-full px-2 py-0.5 shrink-0">
+                    <span className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" />
                     Realtime
                   </span>
                 </DialogTitle>
@@ -959,6 +1064,116 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
                       </div>
                     );
                   })}
+                </div>
+
+                {/* === Filter Section === */}
+                <div className="rounded-lg border border-border/40 bg-muted/20 p-2.5 space-y-2">
+                  <div className="flex items-center justify-between gap-2">
+                    <h4 className="text-[10px] sm:text-xs font-semibold text-foreground flex items-center gap-1.5">
+                      🔎 Filter Incident
+                    </h4>
+                    {(kpiSegment !== "all" || kpiStatus !== "all" || kpiCategories.size > 0) && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="h-6 px-2 text-[10px]"
+                        onClick={() => {
+                          setKpiSegment("all");
+                          setKpiStatus(kpiDetailType === "resolved" ? "resolved" : "all");
+                          setKpiCategories(new Set());
+                        }}
+                      >
+                        Reset
+                      </Button>
+                    )}
+                  </div>
+
+                  {/* Segment Ritel/Feeder */}
+                  <div className="space-y-1">
+                    <p className="text-[9px] uppercase tracking-wider text-muted-foreground">Segment</p>
+                    <div className="flex flex-wrap gap-1">
+                      {([
+                        { v: "all", label: "Semua", emoji: "🌐" },
+                        { v: "ritel", label: "Ritel", emoji: "🏠" },
+                        { v: "feeder", label: "Feeder", emoji: "🏬" },
+                      ] as const).map((opt) => (
+                        <button
+                          key={opt.v}
+                          type="button"
+                          onClick={() => setKpiSegment(opt.v)}
+                          className={`px-2 py-1 rounded-md border text-[10px] transition-all ${
+                            kpiSegment === opt.v
+                              ? "bg-primary text-primary-foreground border-primary shadow-sm"
+                              : "bg-background border-border/50 hover:bg-muted text-foreground/80"
+                          }`}
+                        >
+                          {opt.emoji} {opt.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Status */}
+                  <div className="space-y-1">
+                    <p className="text-[9px] uppercase tracking-wider text-muted-foreground">Status</p>
+                    <div className="flex flex-wrap gap-1">
+                      {([
+                        { v: "all", label: "Semua", cls: "bg-primary text-primary-foreground border-primary" },
+                        { v: "resolved", label: "✅ Resolved", cls: "bg-success text-success-foreground border-success" },
+                        { v: "unresolved", label: "⏳ Belum", cls: "bg-warning text-warning-foreground border-warning" },
+                      ] as const).map((opt) => (
+                        <button
+                          key={opt.v}
+                          type="button"
+                          onClick={() => setKpiStatus(opt.v)}
+                          className={`px-2 py-1 rounded-md border text-[10px] transition-all ${
+                            kpiStatus === opt.v
+                              ? `${opt.cls} shadow-sm`
+                              : "bg-background border-border/50 hover:bg-muted text-foreground/80"
+                          }`}
+                        >
+                          {opt.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Categories */}
+                  {kpiAvailableCategories.length > 0 && (
+                    <div className="space-y-1">
+                      <p className="text-[9px] uppercase tracking-wider text-muted-foreground flex items-center justify-between">
+                        <span>Kategori Kendala {kpiCategories.size > 0 && `(${kpiCategories.size} dipilih)`}</span>
+                        <span className="text-muted-foreground/60 normal-case">Klik untuk pilih multi</span>
+                      </p>
+                      <div className="flex flex-wrap gap-1 max-h-24 overflow-auto">
+                        {kpiAvailableCategories.map((cat) => {
+                          const active = kpiCategories.has(cat);
+                          return (
+                            <button
+                              key={cat}
+                              type="button"
+                              onClick={() => toggleKpiCategory(cat)}
+                              className={`px-2 py-0.5 rounded-full border text-[9px] transition-all ${
+                                active
+                                  ? "bg-primary text-primary-foreground border-primary"
+                                  : "bg-background border-border/50 hover:bg-muted text-foreground/70"
+                              }`}
+                            >
+                              {FEEDER_CONSTRAINTS_SET.has(cat) ? "🏬" : "🏠"} {cat}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="flex items-center justify-between gap-2 pt-1 border-t border-border/40">
+                    <span className="text-[10px] text-muted-foreground">Hasil filter</span>
+                    <span className="text-[11px] font-bold text-primary tabular-nums">
+                      {kpiDetail.tickets.length} incident
+                    </span>
+                  </div>
                 </div>
 
                 {/* Breakdown 1 */}
