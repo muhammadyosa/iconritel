@@ -984,10 +984,10 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
                   transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
                   className="space-y-1.5"
                 >
-                  {drillTickets.length === 0 ? (
+                  {effectiveDrillTickets.length === 0 ? (
                     <p className="text-sm text-muted-foreground text-center py-8">Tidak ada incident</p>
                   ) : (
-                    drillTickets.map((ticket) => (
+                    effectiveDrillTickets.map((ticket) => (
                       <div
                         key={ticket.id}
                         className="flex items-center justify-between p-2 rounded-lg border bg-card hover:bg-muted/50 cursor-pointer transition-colors"
