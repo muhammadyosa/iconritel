@@ -221,6 +221,7 @@ export function RecentActivity() {
 
       setUserProfiles(mergedProfiles);
       setItems(combined);
+      setLastSyncAt(new Date());
     } catch (err) {
       if (import.meta.env.DEV) console.error("Error fetching recent activity:", err);
     } finally {
