@@ -69,6 +69,20 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
   const [kpiDetailOpen, setKpiDetailOpen] = useState(false);
   const [kpiDetailType, setKpiDetailType] = useState<"total" | "resolved" | "avg" | "sla" | null>(null);
 
+  // KPI detail filters (segment, status, categories) — applied to "Lihat N Incident"
+  const [kpiSegment, setKpiSegment] = useState<"all" | "ritel" | "feeder">("all");
+  const [kpiStatus, setKpiStatus] = useState<"all" | "resolved" | "unresolved">("all");
+  const [kpiCategories, setKpiCategories] = useState<Set<string>>(new Set());
+
+  // Drill source — when set, drill list is computed realtime from monthTickets
+  const [drillSource, setDrillSource] = useState<{
+    kind: "kpi";
+    type: "total" | "resolved" | "avg" | "sla";
+    segment: "all" | "ritel" | "feeder";
+    status: "all" | "resolved" | "unresolved";
+    categories: string[];
+  } | null>(null);
+
   const monthOptions = useMemo(() => {
     const options: { value: string; label: string }[] = [];
     const now = new Date();
