@@ -105,6 +105,8 @@ export function RecentActivity() {
   const [selectedShift, setSelectedShift] = useState<any>(null);
   const [loadingDetail, setLoadingDetail] = useState(false);
   const [copiedField, setCopiedField] = useState<string | null>(null);
+  const [realtimeStatus, setRealtimeStatus] = useState<"connecting" | "live" | "polling" | "offline">("connecting");
+  const [lastSyncAt, setLastSyncAt] = useState<Date | null>(null);
 
   const copyToClipboard = useCallback((text: string, fieldName: string) => {
     navigator.clipboard.writeText(text).then(() => {
