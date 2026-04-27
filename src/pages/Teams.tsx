@@ -37,6 +37,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, PieChart, Pie, Cell as Rech
 import { useState, useMemo, useCallback, useEffect, useRef } from "react";
 import { format, isWithinInterval, startOfDay, endOfDay, subDays } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
+import { useDebouncedCallback } from "@/hooks/useDebouncedCallback";
 import { id as localeId } from "date-fns/locale";
 import { Calendar } from "@/components/ui/calendar";
 import {
