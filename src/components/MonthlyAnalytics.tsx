@@ -250,6 +250,7 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
       const constraint = data.activePayload[0].payload.name;
       const filtered = categoryFilteredTickets.filter((t) => t.constraint === constraint);
       setDrillSelectedTicket(null);
+      setDrillSource(null);
       setDrillTickets(filtered);
       const filterLabel = categoryFilter === "all" ? "Semua Data" : categoryFilter === "custom" ? categoryCustomDate : categoryFilter === "today" ? "Hari ini" : `${categoryFilter} Hari`;
       setDrillTitle(`📊 ${constraint} — ${filtered.length} incident (${filterLabel})`);
