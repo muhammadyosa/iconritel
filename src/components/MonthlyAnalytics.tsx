@@ -606,7 +606,51 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
       };
     }
     return null;
-  }, [kpiDetailType, monthTickets, kpis, selectedMonthLabel]);
+  }, [kpiDetailType, monthTickets, kpis, selectedMonthLabel, applyKpiFilters, kpiCategories]);
+
+  // Available categories for the filter, derived from the current KPI base pool (realtime)
+  const kpiAvailableCategories = useMemo(() => {
+    if (!kpiDetail) return [] as string[];
+    const set = new Set<string>();
+    (kpiDetail as any).basePool?.forEach((t: Ticket) => set.add(t.constraint));
+    return Array.from(set).sort();
+  }, [kpiDetail]);
+
+  // Realtime-derived drill list when source = "kpi"
+  const realtimeDrillTickets = useMemo(() => {
+    if (!drillSource || drillSource.kind !== "kpi") return null;
+    // Recompute base pool for the active type from current monthTickets
+    const resolved = monthTickets.filter((t) => t.status === "Resolved");
+    const slaBreached = monthTickets.filter((t) => {
+      if (t.status === "Resolved" && t.resolvedAt) {
+        return new Date(t.resolvedAt).getTime() - new Date(t.createdISO).getTime() > 24 * 60 * 60 * 1000;
+      }
+      return false;
+    });
+    let pool: Ticket[] = monthTickets;
+    if (drillSource.type === "resolved") pool = resolved;
+    else if (drillSource.type === "sla") pool = slaBreached;
+    else if (drillSource.type === "avg") {
+      pool = resolved
+        .filter((t) => t.resolvedAt)
+        .map((t) => ({ t, h: (new Date(t.resolvedAt!).getTime() - new Date(t.createdISO).getTime()) / 3600000 }))
+        .sort((a, b) => b.h - a.h)
+        .slice(0, 5)
+        .map((d) => d.t);
+    }
+    const cats = new Set(drillSource.categories);
+    return pool.filter((t) => {
+      if (drillSource.segment === "ritel" && FEEDER_CONSTRAINTS_SET.has(t.constraint)) return false;
+      if (drillSource.segment === "feeder" && !FEEDER_CONSTRAINTS_SET.has(t.constraint)) return false;
+      if (drillSource.status === "resolved" && t.status !== "Resolved") return false;
+      if (drillSource.status === "unresolved" && t.status === "Resolved") return false;
+      if (cats.size > 0 && !cats.has(t.constraint)) return false;
+      return true;
+    });
+  }, [drillSource, monthTickets]);
+
+  // Effective drill list (realtime when from KPI, snapshot for chart drill-downs)
+  const effectiveDrillTickets = realtimeDrillTickets ?? drillTickets;
 
   const openKpiDetail = (type: "total" | "resolved" | "avg" | "sla") => {
     setKpiDetailType(type);
