@@ -266,6 +266,7 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
         return tDate === isoDate;
       });
       setDrillSelectedTicket(null);
+      setDrillSource(null);
       setDrillTickets(filtered);
       setDrillTitle(`📅 ${day} — ${filtered.length} incident`);
       setDrillOpen(true);
