@@ -257,37 +257,48 @@ export function RecentActivity() {
   useEffect(() => {
     fetchData();
 
-    const ticketChannel = supabase
-      .channel("recent-activity-tickets")
-      .on("postgres_changes", { event: "*", schema: "public", table: "tickets" }, () => fetchData())
-      .subscribe();
+    // Debounced refetch so a burst of changes triggers only one fetch
+    let debounceTimer: ReturnType<typeof setTimeout> | null = null;
+    const scheduleRefetch = () => {
+      if (debounceTimer) clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => fetchData(), 250);
+    };
 
-    const shiftChannel = supabase
-      .channel("recent-activity-shifts")
-      .on("postgres_changes", { event: "*", schema: "public", table: "shift_reports" }, () => fetchData())
-      .subscribe();
-
-    // Listen to profile changes (online status updates)
-    const profileChannel = supabase
-      .channel("recent-activity-profiles")
+    // Single multiplexed realtime channel — more reliable than 4 separate ones
+    let channel = supabase
+      .channel("recent-activity-stream")
+      .on("postgres_changes", { event: "*", schema: "public", table: "tickets" }, scheduleRefetch)
+      .on("postgres_changes", { event: "*", schema: "public", table: "shift_reports" }, scheduleRefetch)
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "user_activity_logs" }, scheduleRefetch)
       .on("postgres_changes", { event: "UPDATE", schema: "public", table: "profiles" }, () => refreshOnlineStatus())
-      .subscribe();
+      .subscribe((status) => {
+        if (import.meta.env.DEV) console.log("[RecentActivity] realtime status:", status);
+      });
 
-    // Listen to activity logs for broader activity awareness
-    const activityChannel = supabase
-      .channel("recent-activity-logs")
-      .on("postgres_changes", { event: "INSERT", schema: "public", table: "user_activity_logs" }, () => fetchData())
-      .subscribe();
+    // Polling fallback — guarantees freshness even if websocket drops
+    const pollInterval = setInterval(() => fetchData(), 20_000);
 
     // Periodic online status refresh
     const onlineInterval = setInterval(refreshOnlineStatus, 60_000);
 
+    // Refresh when tab becomes visible or network comes back
+    const handleVisibility = () => {
+      if (document.visibilityState === "visible") {
+        fetchData();
+        refreshOnlineStatus();
+      }
+    };
+    const handleOnline = () => fetchData();
+    document.addEventListener("visibilitychange", handleVisibility);
+    window.addEventListener("online", handleOnline);
+
     return () => {
-      supabase.removeChannel(ticketChannel);
-      supabase.removeChannel(shiftChannel);
-      supabase.removeChannel(profileChannel);
-      supabase.removeChannel(activityChannel);
+      if (debounceTimer) clearTimeout(debounceTimer);
+      supabase.removeChannel(channel);
+      clearInterval(pollInterval);
       clearInterval(onlineInterval);
+      document.removeEventListener("visibilitychange", handleVisibility);
+      window.removeEventListener("online", handleOnline);
     };
   }, [fetchData, refreshOnlineStatus]);
 
