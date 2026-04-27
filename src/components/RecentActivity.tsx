@@ -1,4 +1,5 @@
 import { useEffect, useState, useMemo, useCallback } from "react";
+import { useDebouncedCallback } from "@/hooks/useDebouncedCallback";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -257,15 +258,14 @@ export function RecentActivity() {
     } catch {}
   }, []);
 
+  // Debounced refetch — coalesces bursts of realtime events into one fetch
+  const { debounced: scheduleRefetch, cancel: cancelDebounce } = useDebouncedCallback(
+    fetchData,
+    250
+  );
+
   useEffect(() => {
     fetchData();
-
-    // Debounced refetch so a burst of changes triggers only one fetch
-    let debounceTimer: ReturnType<typeof setTimeout> | null = null;
-    const scheduleRefetch = () => {
-      if (debounceTimer) clearTimeout(debounceTimer);
-      debounceTimer = setTimeout(() => fetchData(), 250);
-    };
 
     // Initial connectivity check
     if (typeof navigator !== "undefined" && !navigator.onLine) {
@@ -315,7 +315,7 @@ export function RecentActivity() {
     window.addEventListener("offline", handleOffline);
 
     return () => {
-      if (debounceTimer) clearTimeout(debounceTimer);
+      cancelDebounce();
       supabase.removeChannel(channel);
       clearInterval(pollInterval);
       clearInterval(onlineInterval);
@@ -323,7 +323,7 @@ export function RecentActivity() {
       window.removeEventListener("online", handleOnline);
       window.removeEventListener("offline", handleOffline);
     };
-  }, [fetchData, refreshOnlineStatus]);
+  }, [fetchData, refreshOnlineStatus, scheduleRefetch, cancelDebounce]);
 
   const filteredItems = useMemo(() => {
     let result = items;

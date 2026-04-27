@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { useDebouncedCallback } from "@/hooks/useDebouncedCallback";
 import { toast } from "sonner";
 
 export interface CloudNote {
@@ -37,23 +38,46 @@ export function useCloudNotes(tabKey: string) {
     fetchNotes();
   }, [fetchNotes]);
 
-  // Realtime subscription
+  // Debounced refetch — coalesces bursts of realtime events into one DB call
+  const { debounced: debouncedRefetch } = useDebouncedCallback(fetchNotes, 300);
+
+  // Realtime subscription with fine-grained updates + debounced fallback refetch
   useEffect(() => {
     const channel = supabase
       .channel(`notes-${tabKey}`)
       .on(
         "postgres_changes",
-        { event: "*", schema: "public", table: "notes", filter: `tab_key=eq.${tabKey}` },
-        () => {
-          fetchNotes();
+        { event: "INSERT", schema: "public", table: "notes", filter: `tab_key=eq.${tabKey}` },
+        (payload) => {
+          const note = payload.new as CloudNote;
+          setNotes((prev) => (prev.some((n) => n.id === note.id) ? prev : [note, ...prev]));
         }
       )
-      .subscribe();
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "notes", filter: `tab_key=eq.${tabKey}` },
+        (payload) => {
+          const note = payload.new as CloudNote;
+          setNotes((prev) => prev.map((n) => (n.id === note.id ? note : n)));
+        }
+      )
+      .on(
+        "postgres_changes",
+        { event: "DELETE", schema: "public", table: "notes", filter: `tab_key=eq.${tabKey}` },
+        (payload) => {
+          const id = (payload.old as { id: string }).id;
+          setNotes((prev) => prev.filter((n) => n.id !== id));
+        }
+      )
+      .subscribe((status) => {
+        // If channel reconnects after drop, do one debounced refetch to catch missed events
+        if (status === "SUBSCRIBED") debouncedRefetch();
+      });
 
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [tabKey, fetchNotes]);
+  }, [tabKey, debouncedRefetch]);
 
   const addNote = async (title: string, content: string) => {
     if (!user) return false;
