@@ -564,6 +564,7 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
       const slow = durations.filter((d) => d.hours > 24).length;
       const longest = [...durations].sort((a, b) => b.hours - a.hours).slice(0, 5);
       const fastest = [...durations].sort((a, b) => a.hours - b.hours).slice(0, 5);
+      const avgPool = durations.map((d) => d.ticket);
       return {
         title: `⏱️ Rata-rata Waktu Resolusi — ${selectedMonthLabel}`,
         emoji: "⏱️",
@@ -580,8 +581,8 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
         statusBreakdown: longest.map((d) => [`${d.ticket.id} — ${d.ticket.constraint}`, `${d.hours.toFixed(1)}h`] as [string, string | number]),
         categoryBreakdown: fastest.map((d) => [`${d.ticket.id} — ${d.ticket.constraint}`, `${d.hours.toFixed(1)}h`] as [string, string | number]),
         breakdownTitle2: "⚡ Resolusi Tercepat (Top 5)",
-        basePool: resolved,
-        tickets: applyKpiFilters(longest.map((d) => d.ticket), kpiCategories),
+        basePool: avgPool,
+        tickets: applyKpiFilters(avgPool, kpiCategories),
       };
     }
     if (kpiDetailType === "sla") {
@@ -633,12 +634,7 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
     if (drillSource.type === "resolved") pool = resolved;
     else if (drillSource.type === "sla") pool = slaBreached;
     else if (drillSource.type === "avg") {
-      pool = resolved
-        .filter((t) => t.resolvedAt)
-        .map((t) => ({ t, h: (new Date(t.resolvedAt!).getTime() - new Date(t.createdISO).getTime()) / 3600000 }))
-        .sort((a, b) => b.h - a.h)
-        .slice(0, 5)
-        .map((d) => d.t);
+      pool = resolved.filter((t) => t.resolvedAt);
     }
     const cats = new Set(drillSource.categories);
     return pool.filter((t) => {
@@ -657,7 +653,7 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
   const openKpiDetail = (type: "total" | "resolved" | "avg" | "sla") => {
     setKpiDetailType(type);
     setKpiSegment("all");
-    setKpiStatus(type === "resolved" ? "resolved" : "all");
+    setKpiStatus("all");
     setKpiCategories(new Set());
     setKpiDetailOpen(true);
   };
@@ -1080,7 +1076,7 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
                         className="h-6 px-2 text-[10px]"
                         onClick={() => {
                           setKpiSegment("all");
-                          setKpiStatus(kpiDetailType === "resolved" ? "resolved" : "all");
+                          setKpiStatus("all");
                           setKpiCategories(new Set());
                         }}
                       >
@@ -1114,30 +1110,32 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
                     </div>
                   </div>
 
-                  {/* Status */}
-                  <div className="space-y-1">
-                    <p className="text-[9px] uppercase tracking-wider text-muted-foreground">Status</p>
-                    <div className="flex flex-wrap gap-1">
-                      {([
-                        { v: "all", label: "Semua", cls: "bg-primary text-primary-foreground border-primary" },
-                        { v: "resolved", label: "✅ Resolved", cls: "bg-success text-success-foreground border-success" },
-                        { v: "unresolved", label: "⏳ Belum", cls: "bg-warning text-warning-foreground border-warning" },
-                      ] as const).map((opt) => (
-                        <button
-                          key={opt.v}
-                          type="button"
-                          onClick={() => setKpiStatus(opt.v)}
-                          className={`px-2 py-1 rounded-md border text-[10px] transition-all ${
-                            kpiStatus === opt.v
-                              ? `${opt.cls} shadow-sm`
-                              : "bg-background border-border/50 hover:bg-muted text-foreground/80"
-                          }`}
-                        >
-                          {opt.label}
-                        </button>
-                      ))}
+                  {/* Status — hanya relevan saat basePool berisi campuran (mis. "total") */}
+                  {kpiDetailType === "total" && (
+                    <div className="space-y-1">
+                      <p className="text-[9px] uppercase tracking-wider text-muted-foreground">Status</p>
+                      <div className="flex flex-wrap gap-1">
+                        {([
+                          { v: "all", label: "Semua", cls: "bg-primary text-primary-foreground border-primary" },
+                          { v: "resolved", label: "✅ Resolved", cls: "bg-success text-success-foreground border-success" },
+                          { v: "unresolved", label: "⏳ Belum", cls: "bg-warning text-warning-foreground border-warning" },
+                        ] as const).map((opt) => (
+                          <button
+                            key={opt.v}
+                            type="button"
+                            onClick={() => setKpiStatus(opt.v)}
+                            className={`px-2 py-1 rounded-md border text-[10px] transition-all ${
+                              kpiStatus === opt.v
+                                ? `${opt.cls} shadow-sm`
+                                : "bg-background border-border/50 hover:bg-muted text-foreground/80"
+                            }`}
+                          >
+                            {opt.label}
+                          </button>
+                        ))}
+                      </div>
                     </div>
-                  </div>
+                  )}
 
                   {/* Categories */}
                   {kpiAvailableCategories.length > 0 && (
