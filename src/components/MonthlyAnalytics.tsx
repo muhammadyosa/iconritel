@@ -72,6 +72,7 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
   // KPI detail filters (segment, status, categories) — applied to "Lihat N Incident"
   const [kpiSegment, setKpiSegment] = useState<"all" | "ritel" | "feeder">("all");
   const [kpiStatus, setKpiStatus] = useState<"all" | "resolved" | "unresolved">("all");
+  const [kpiSla, setKpiSla] = useState<"all" | "ontime" | "breached">("all");
   const [kpiCategories, setKpiCategories] = useState<Set<string>>(new Set());
 
   // Drill source — when set, drill list is computed realtime from monthTickets
@@ -80,8 +81,21 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
     type: "total" | "resolved" | "avg" | "sla";
     segment: "all" | "ritel" | "feeder";
     status: "all" | "resolved" | "unresolved";
+    sla: "all" | "ontime" | "breached";
     categories: string[];
   } | null>(null);
+
+  // SLA classifier — shared across filter/drill computations
+  const SLA_THRESHOLD_MS = 24 * 60 * 60 * 1000;
+  const classifySla = useCallback((t: Ticket): "ontime" | "breached" | "pending" => {
+    if (t.status === "Resolved" && t.resolvedAt) {
+      const dur = new Date(t.resolvedAt).getTime() - new Date(t.createdISO).getTime();
+      return dur <= SLA_THRESHOLD_MS ? "ontime" : "breached";
+    }
+    // Unresolved: breached if age already exceeds threshold, else still pending
+    const age = Date.now() - new Date(t.createdISO).getTime();
+    return age > SLA_THRESHOLD_MS ? "breached" : "pending";
+  }, []);
 
   const monthOptions = useMemo(() => {
     const options: { value: string; label: string }[] = [];
