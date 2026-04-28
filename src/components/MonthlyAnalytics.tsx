@@ -1108,7 +1108,7 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
                     <h4 className="text-[10px] sm:text-xs font-semibold text-foreground flex items-center gap-1.5">
                       🔎 Filter Incident
                     </h4>
-                    {(kpiSegment !== "all" || kpiStatus !== "all" || kpiCategories.size > 0) && (
+                    {(kpiSegment !== "all" || kpiStatus !== "all" || kpiSla !== "all" || kpiCategories.size > 0) && (
                       <Button
                         type="button"
                         variant="ghost"
@@ -1117,6 +1117,7 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
                         onClick={() => {
                           setKpiSegment("all");
                           setKpiStatus("all");
+                          setKpiSla("all");
                           setKpiCategories(new Set());
                         }}
                       >
