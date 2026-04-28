@@ -1,4 +1,4 @@
-import { useMemo, useState, useCallback } from "react";
+import { useMemo, useState, useCallback, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
@@ -72,6 +72,7 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
   // KPI detail filters (segment, status, categories) — applied to "Lihat N Incident"
   const [kpiSegment, setKpiSegment] = useState<"all" | "ritel" | "feeder">("all");
   const [kpiStatus, setKpiStatus] = useState<"all" | "resolved" | "unresolved">("all");
+  const [kpiSla, setKpiSla] = useState<"all" | "ontime" | "breached">("all");
   const [kpiCategories, setKpiCategories] = useState<Set<string>>(new Set());
 
   // Drill source — when set, drill list is computed realtime from monthTickets
@@ -80,8 +81,21 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
     type: "total" | "resolved" | "avg" | "sla";
     segment: "all" | "ritel" | "feeder";
     status: "all" | "resolved" | "unresolved";
+    sla: "all" | "ontime" | "breached";
     categories: string[];
   } | null>(null);
+
+  // SLA classifier — shared across filter/drill computations
+  const SLA_THRESHOLD_MS = 24 * 60 * 60 * 1000;
+  const classifySla = useCallback((t: Ticket): "ontime" | "breached" | "pending" => {
+    if (t.status === "Resolved" && t.resolvedAt) {
+      const dur = new Date(t.resolvedAt).getTime() - new Date(t.createdISO).getTime();
+      return dur <= SLA_THRESHOLD_MS ? "ontime" : "breached";
+    }
+    // Unresolved: breached if age already exceeds threshold, else still pending
+    const age = Date.now() - new Date(t.createdISO).getTime();
+    return age > SLA_THRESHOLD_MS ? "breached" : "pending";
+  }, []);
 
   const monthOptions = useMemo(() => {
     const options: { value: string; label: string }[] = [];
@@ -474,10 +488,15 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
       if (kpiSegment === "feeder" && !FEEDER_CONSTRAINTS_SET.has(t.constraint)) return false;
       if (kpiStatus === "resolved" && t.status !== "Resolved") return false;
       if (kpiStatus === "unresolved" && t.status === "Resolved") return false;
+      if (kpiSla !== "all") {
+        const cls = classifySla(t);
+        if (kpiSla === "ontime" && cls !== "ontime") return false;
+        if (kpiSla === "breached" && cls !== "breached") return false;
+      }
       if (categoriesSet.size > 0 && !categoriesSet.has(t.constraint)) return false;
       return true;
     });
-  }, [kpiSegment, kpiStatus]);
+  }, [kpiSegment, kpiStatus, kpiSla, classifySla]);
 
   // ===== KPI Detail computation =====
   const kpiDetail = useMemo(() => {
@@ -619,6 +638,20 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
     return Array.from(set).sort();
   }, [kpiDetail]);
 
+  // Auto-prune selected categories that are no longer present in the realtime pool
+  // (keeps the chip selection consistent without requiring the user to close the dialog)
+  useEffect(() => {
+    if (!kpiDetailOpen || kpiCategories.size === 0) return;
+    const available = new Set(kpiAvailableCategories);
+    let changed = false;
+    const next = new Set<string>();
+    kpiCategories.forEach((c) => {
+      if (available.has(c)) next.add(c);
+      else changed = true;
+    });
+    if (changed) setKpiCategories(next);
+  }, [kpiAvailableCategories, kpiDetailOpen, kpiCategories]);
+
   // Realtime-derived drill list when source = "kpi"
   const realtimeDrillTickets = useMemo(() => {
     if (!drillSource || drillSource.kind !== "kpi") return null;
@@ -642,10 +675,15 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
       if (drillSource.segment === "feeder" && !FEEDER_CONSTRAINTS_SET.has(t.constraint)) return false;
       if (drillSource.status === "resolved" && t.status !== "Resolved") return false;
       if (drillSource.status === "unresolved" && t.status === "Resolved") return false;
+      if (drillSource.sla !== "all") {
+        const cls = classifySla(t);
+        if (drillSource.sla === "ontime" && cls !== "ontime") return false;
+        if (drillSource.sla === "breached" && cls !== "breached") return false;
+      }
       if (cats.size > 0 && !cats.has(t.constraint)) return false;
       return true;
     });
-  }, [drillSource, monthTickets]);
+  }, [drillSource, monthTickets, classifySla]);
 
   // Effective drill list (realtime when from KPI, snapshot for chart drill-downs)
   const effectiveDrillTickets = realtimeDrillTickets ?? drillTickets;
@@ -654,6 +692,7 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
     setKpiDetailType(type);
     setKpiSegment("all");
     setKpiStatus("all");
+    setKpiSla("all");
     setKpiCategories(new Set());
     setKpiDetailOpen(true);
   };
@@ -666,6 +705,7 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
       type: kpiDetailType,
       segment: kpiSegment,
       status: kpiStatus,
+      sla: kpiSla,
       categories: Array.from(kpiCategories),
     });
     setDrillTitle(`${kpiDetail.emoji} Incident terkait`);
@@ -1068,7 +1108,7 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
                     <h4 className="text-[10px] sm:text-xs font-semibold text-foreground flex items-center gap-1.5">
                       🔎 Filter Incident
                     </h4>
-                    {(kpiSegment !== "all" || kpiStatus !== "all" || kpiCategories.size > 0) && (
+                    {(kpiSegment !== "all" || kpiStatus !== "all" || kpiSla !== "all" || kpiCategories.size > 0) && (
                       <Button
                         type="button"
                         variant="ghost"
@@ -1077,6 +1117,7 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
                         onClick={() => {
                           setKpiSegment("all");
                           setKpiStatus("all");
+                          setKpiSla("all");
                           setKpiCategories(new Set());
                         }}
                       >
@@ -1136,6 +1177,34 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
                       </div>
                     </div>
                   )}
+
+                  {/* SLA — applies to every KPI type. 24-jam threshold sesuai konvensi SLA Compliance. */}
+                  <div className="space-y-1">
+                    <p className="text-[9px] uppercase tracking-wider text-muted-foreground">SLA</p>
+                    <div className="flex flex-wrap gap-1">
+                      {([
+                        { v: "all", label: "Semua", cls: "bg-primary text-primary-foreground border-primary" },
+                        { v: "ontime", label: "✅ On Time", cls: "bg-success text-success-foreground border-success" },
+                        { v: "breached", label: "⛔ Breached", cls: "bg-destructive text-destructive-foreground border-destructive" },
+                      ] as const).map((opt) => (
+                        <button
+                          key={opt.v}
+                          type="button"
+                          onClick={() => setKpiSla(opt.v)}
+                          className={`px-2 py-1 rounded-md border text-[10px] transition-all ${
+                            kpiSla === opt.v
+                              ? `${opt.cls} shadow-sm`
+                              : "bg-background border-border/50 hover:bg-muted text-foreground/80"
+                          }`}
+                        >
+                          {opt.label}
+                        </button>
+                      ))}
+                    </div>
+                    <p className="text-[9px] text-muted-foreground/70">
+                      Threshold 24 jam · Breached mencakup resolved &gt; 24 jam dan unresolved yang sudah lewat batas.
+                    </p>
+                  </div>
 
                   {/* Categories */}
                   {kpiAvailableCategories.length > 0 && (
