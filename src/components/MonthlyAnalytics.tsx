@@ -1076,7 +1076,7 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
                         className="h-6 px-2 text-[10px]"
                         onClick={() => {
                           setKpiSegment("all");
-                          setKpiStatus(kpiDetailType === "resolved" ? "resolved" : "all");
+                          setKpiStatus("all");
                           setKpiCategories(new Set());
                         }}
                       >
