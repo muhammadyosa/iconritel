@@ -634,12 +634,7 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
     if (drillSource.type === "resolved") pool = resolved;
     else if (drillSource.type === "sla") pool = slaBreached;
     else if (drillSource.type === "avg") {
-      pool = resolved
-        .filter((t) => t.resolvedAt)
-        .map((t) => ({ t, h: (new Date(t.resolvedAt!).getTime() - new Date(t.createdISO).getTime()) / 3600000 }))
-        .sort((a, b) => b.h - a.h)
-        .slice(0, 5)
-        .map((d) => d.t);
+      pool = resolved.filter((t) => t.resolvedAt);
     }
     const cats = new Set(drillSource.categories);
     return pool.filter((t) => {
