@@ -638,6 +638,20 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
     return Array.from(set).sort();
   }, [kpiDetail]);
 
+  // Auto-prune selected categories that are no longer present in the realtime pool
+  // (keeps the chip selection consistent without requiring the user to close the dialog)
+  useEffect(() => {
+    if (!kpiDetailOpen || kpiCategories.size === 0) return;
+    const available = new Set(kpiAvailableCategories);
+    let changed = false;
+    const next = new Set<string>();
+    kpiCategories.forEach((c) => {
+      if (available.has(c)) next.add(c);
+      else changed = true;
+    });
+    if (changed) setKpiCategories(next);
+  }, [kpiAvailableCategories, kpiDetailOpen, kpiCategories]);
+
   // Realtime-derived drill list when source = "kpi"
   const realtimeDrillTickets = useMemo(() => {
     if (!drillSource || drillSource.kind !== "kpi") return null;
@@ -661,10 +675,15 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
       if (drillSource.segment === "feeder" && !FEEDER_CONSTRAINTS_SET.has(t.constraint)) return false;
       if (drillSource.status === "resolved" && t.status !== "Resolved") return false;
       if (drillSource.status === "unresolved" && t.status === "Resolved") return false;
+      if (drillSource.sla !== "all") {
+        const cls = classifySla(t);
+        if (drillSource.sla === "ontime" && cls !== "ontime") return false;
+        if (drillSource.sla === "breached" && cls !== "breached") return false;
+      }
       if (cats.size > 0 && !cats.has(t.constraint)) return false;
       return true;
     });
-  }, [drillSource, monthTickets]);
+  }, [drillSource, monthTickets, classifySla]);
 
   // Effective drill list (realtime when from KPI, snapshot for chart drill-downs)
   const effectiveDrillTickets = realtimeDrillTickets ?? drillTickets;
@@ -673,6 +692,7 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
     setKpiDetailType(type);
     setKpiSegment("all");
     setKpiStatus("all");
+    setKpiSla("all");
     setKpiCategories(new Set());
     setKpiDetailOpen(true);
   };
@@ -685,6 +705,7 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
       type: kpiDetailType,
       segment: kpiSegment,
       status: kpiStatus,
+      sla: kpiSla,
       categories: Array.from(kpiCategories),
     });
     setDrillTitle(`${kpiDetail.emoji} Incident terkait`);
