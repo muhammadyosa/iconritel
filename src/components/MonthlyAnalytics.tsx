@@ -1110,30 +1110,32 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
                     </div>
                   </div>
 
-                  {/* Status */}
-                  <div className="space-y-1">
-                    <p className="text-[9px] uppercase tracking-wider text-muted-foreground">Status</p>
-                    <div className="flex flex-wrap gap-1">
-                      {([
-                        { v: "all", label: "Semua", cls: "bg-primary text-primary-foreground border-primary" },
-                        { v: "resolved", label: "✅ Resolved", cls: "bg-success text-success-foreground border-success" },
-                        { v: "unresolved", label: "⏳ Belum", cls: "bg-warning text-warning-foreground border-warning" },
-                      ] as const).map((opt) => (
-                        <button
-                          key={opt.v}
-                          type="button"
-                          onClick={() => setKpiStatus(opt.v)}
-                          className={`px-2 py-1 rounded-md border text-[10px] transition-all ${
-                            kpiStatus === opt.v
-                              ? `${opt.cls} shadow-sm`
-                              : "bg-background border-border/50 hover:bg-muted text-foreground/80"
-                          }`}
-                        >
-                          {opt.label}
-                        </button>
-                      ))}
+                  {/* Status — hanya relevan saat basePool berisi campuran (mis. "total") */}
+                  {kpiDetailType === "total" && (
+                    <div className="space-y-1">
+                      <p className="text-[9px] uppercase tracking-wider text-muted-foreground">Status</p>
+                      <div className="flex flex-wrap gap-1">
+                        {([
+                          { v: "all", label: "Semua", cls: "bg-primary text-primary-foreground border-primary" },
+                          { v: "resolved", label: "✅ Resolved", cls: "bg-success text-success-foreground border-success" },
+                          { v: "unresolved", label: "⏳ Belum", cls: "bg-warning text-warning-foreground border-warning" },
+                        ] as const).map((opt) => (
+                          <button
+                            key={opt.v}
+                            type="button"
+                            onClick={() => setKpiStatus(opt.v)}
+                            className={`px-2 py-1 rounded-md border text-[10px] transition-all ${
+                              kpiStatus === opt.v
+                                ? `${opt.cls} shadow-sm`
+                                : "bg-background border-border/50 hover:bg-muted text-foreground/80"
+                            }`}
+                          >
+                            {opt.label}
+                          </button>
+                        ))}
+                      </div>
                     </div>
-                  </div>
+                  )}
 
                   {/* Categories */}
                   {kpiAvailableCategories.length > 0 && (
