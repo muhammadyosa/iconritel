@@ -564,6 +564,7 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
       const slow = durations.filter((d) => d.hours > 24).length;
       const longest = [...durations].sort((a, b) => b.hours - a.hours).slice(0, 5);
       const fastest = [...durations].sort((a, b) => a.hours - b.hours).slice(0, 5);
+      const avgPool = durations.map((d) => d.ticket);
       return {
         title: `⏱️ Rata-rata Waktu Resolusi — ${selectedMonthLabel}`,
         emoji: "⏱️",
@@ -580,8 +581,8 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
         statusBreakdown: longest.map((d) => [`${d.ticket.id} — ${d.ticket.constraint}`, `${d.hours.toFixed(1)}h`] as [string, string | number]),
         categoryBreakdown: fastest.map((d) => [`${d.ticket.id} — ${d.ticket.constraint}`, `${d.hours.toFixed(1)}h`] as [string, string | number]),
         breakdownTitle2: "⚡ Resolusi Tercepat (Top 5)",
-        basePool: resolved,
-        tickets: applyKpiFilters(longest.map((d) => d.ticket), kpiCategories),
+        basePool: avgPool,
+        tickets: applyKpiFilters(avgPool, kpiCategories),
       };
     }
     if (kpiDetailType === "sla") {
