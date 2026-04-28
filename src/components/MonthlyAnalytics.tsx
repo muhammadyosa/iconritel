@@ -488,10 +488,15 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
       if (kpiSegment === "feeder" && !FEEDER_CONSTRAINTS_SET.has(t.constraint)) return false;
       if (kpiStatus === "resolved" && t.status !== "Resolved") return false;
       if (kpiStatus === "unresolved" && t.status === "Resolved") return false;
+      if (kpiSla !== "all") {
+        const cls = classifySla(t);
+        if (kpiSla === "ontime" && cls !== "ontime") return false;
+        if (kpiSla === "breached" && cls !== "breached") return false;
+      }
       if (categoriesSet.size > 0 && !categoriesSet.has(t.constraint)) return false;
       return true;
     });
-  }, [kpiSegment, kpiStatus]);
+  }, [kpiSegment, kpiStatus, kpiSla, classifySla]);
 
   // ===== KPI Detail computation =====
   const kpiDetail = useMemo(() => {
