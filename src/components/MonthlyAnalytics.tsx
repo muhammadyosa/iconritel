@@ -653,7 +653,7 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
   const openKpiDetail = (type: "total" | "resolved" | "avg" | "sla") => {
     setKpiDetailType(type);
     setKpiSegment("all");
-    setKpiStatus(type === "resolved" ? "resolved" : "all");
+    setKpiStatus("all");
     setKpiCategories(new Set());
     setKpiDetailOpen(true);
   };
