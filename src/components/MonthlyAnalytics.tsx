@@ -1178,6 +1178,34 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
                     </div>
                   )}
 
+                  {/* SLA — applies to every KPI type. 24-jam threshold sesuai konvensi SLA Compliance. */}
+                  <div className="space-y-1">
+                    <p className="text-[9px] uppercase tracking-wider text-muted-foreground">SLA</p>
+                    <div className="flex flex-wrap gap-1">
+                      {([
+                        { v: "all", label: "Semua", cls: "bg-primary text-primary-foreground border-primary" },
+                        { v: "ontime", label: "✅ On Time", cls: "bg-success text-success-foreground border-success" },
+                        { v: "breached", label: "⛔ Breached", cls: "bg-destructive text-destructive-foreground border-destructive" },
+                      ] as const).map((opt) => (
+                        <button
+                          key={opt.v}
+                          type="button"
+                          onClick={() => setKpiSla(opt.v)}
+                          className={`px-2 py-1 rounded-md border text-[10px] transition-all ${
+                            kpiSla === opt.v
+                              ? `${opt.cls} shadow-sm`
+                              : "bg-background border-border/50 hover:bg-muted text-foreground/80"
+                          }`}
+                        >
+                          {opt.label}
+                        </button>
+                      ))}
+                    </div>
+                    <p className="text-[9px] text-muted-foreground/70">
+                      Threshold 24 jam · Breached mencakup resolved &gt; 24 jam dan unresolved yang sudah lewat batas.
+                    </p>
+                  </div>
+
                   {/* Categories */}
                   {kpiAvailableCategories.length > 0 && (
                     <div className="space-y-1">
