@@ -102,6 +102,24 @@ export default function Dashboard() {
   const [ritelInfoOpen, setRitelInfoOpen] = useState(false);
   const [feederInfoOpen, setFeederInfoOpen] = useState(false);
   const [overSlaInfoOpen, setOverSlaInfoOpen] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const handleManualRefresh = async () => {
+    if (isRefreshing) return;
+    setIsRefreshing(true);
+    try {
+      await refetchTickets();
+      toast.success("✅ Data dashboard diperbarui", {
+        description: "KPI, Trend Chart, dan Monthly Analysis telah disinkronkan ulang.",
+      });
+    } catch (err) {
+      toast.error("Gagal memperbarui data", {
+        description: err instanceof Error ? err.message : "Coba lagi sebentar.",
+      });
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
 
   // When a metric inside a SectionInfoDialog is clicked, the section dialog closes and the
   // filter dialog opens. We remember a "return" callback so the user can jump back to the
