@@ -116,13 +116,7 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
     const avgResolutionMs = resolved.length > 0 ? totalResolutionMs / resolved.length : 0;
     const avgResolutionHours = Math.round((avgResolutionMs / (1000 * 60 * 60)) * 10) / 10;
 
-    const slaCompliant = monthTickets.filter((t) => {
-      if (t.status === "Resolved" && t.resolvedAt) {
-        const resMs = new Date(t.resolvedAt).getTime() - new Date(t.createdISO).getTime();
-        return resMs <= 24 * 60 * 60 * 1000;
-      }
-      return false;
-    }).length;
+    const slaCompliant = monthTickets.filter(isSlaOkResolved).length;
     const slaRate = monthTickets.length > 0 ? Math.round((slaCompliant / monthTickets.length) * 100) : 0;
 
     const ritel = monthTickets.filter((t) => !FEEDER_CONSTRAINTS_SET.has(t.constraint)).length;
