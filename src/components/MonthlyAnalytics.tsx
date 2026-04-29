@@ -146,11 +146,11 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
     const today = new Date();
     if (categoryFilter === "all") return tickets;
     if (categoryFilter === "custom") {
-      return tickets.filter((t) => new Date(t.createdISO).toISOString().split('T')[0] === categoryCustomDate);
+      return tickets.filter((t) => toLocalDateStr(new Date(t.createdISO)) === categoryCustomDate);
     }
     if (categoryFilter === "today") {
-      const todayStr = today.toISOString().split('T')[0];
-      return tickets.filter((t) => new Date(t.createdISO).toISOString().split('T')[0] === todayStr);
+      const todayStr = toLocalDateStr(today);
+      return tickets.filter((t) => toLocalDateStr(new Date(t.createdISO)) === todayStr);
     }
     const days = Number(categoryFilter);
     const start = new Date(today);
