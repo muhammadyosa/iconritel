@@ -370,7 +370,7 @@ export function useTicketHistory(tickets: Ticket[]) {
     let filteredRecords: DailyCategoryRecord[];
 
     if (filter === "today") {
-      const todayStr = today.toISOString().split('T')[0];
+      const todayStr = toLocalDateStr(today);
       filteredRecords = history.categoryRecords.filter(r => r.date === todayStr);
     } else if (filter === "custom" && customDate) {
       filteredRecords = history.categoryRecords.filter(r => r.date === customDate);
