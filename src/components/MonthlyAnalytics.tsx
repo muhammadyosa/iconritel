@@ -213,13 +213,7 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
       
       const dayTickets = tickets.filter((t) => toLocalDateStr(new Date(t.createdISO)) === isoDate);
       const resolvedDay = dayTickets.filter((t) => t.status === "Resolved");
-      const slaOk = resolvedDay.filter((t) => {
-        if (t.resolvedAt) {
-          const ms = new Date(t.resolvedAt).getTime() - new Date(t.createdISO).getTime();
-          return ms <= 24 * 60 * 60 * 1000;
-        }
-        return false;
-      }).length;
+      const slaOk = resolvedDay.filter(isSlaOkResolved).length;
       data.push({ day: displayDay, isoDate, dayNum: date.getDate(), total: dayTickets.length, resolved: resolvedDay.length, slaOk });
     }
     return data;
