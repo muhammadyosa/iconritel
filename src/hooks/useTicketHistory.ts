@@ -90,7 +90,7 @@ export function useTicketHistory(tickets: Ticket[]) {
     if (signature === lastTicketSignature.current) return;
     lastTicketSignature.current = signature;
 
-    const today = new Date().toISOString().split('T')[0];
+    const today = toLocalDateStr(new Date());
 
     // Build counts by date
     const ticketsByDate: Record<string, {
