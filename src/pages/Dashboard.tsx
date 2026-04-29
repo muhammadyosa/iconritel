@@ -208,9 +208,9 @@ export default function Dashboard() {
   const totalIncidents = tickets.length;
   const resolvedCount = useMemo(() => tickets.filter(t => t.status === "Resolved").length, [tickets]);
   const resolutionRate = totalIncidents > 0 ? Math.round((resolvedCount / totalIncidents) * 100) : 0;
-  const todayStr = useMemo(() => new Date().toISOString().split('T')[0], []);
-  const todayCreated = useMemo(() => tickets.filter(t => new Date(t.createdISO).toISOString().split('T')[0] === todayStr).length, [tickets, todayStr]);
-  const todayResolved = useMemo(() => tickets.filter(t => t.status === "Resolved" && t.resolvedAt && new Date(t.resolvedAt).toISOString().split('T')[0] === todayStr).length, [tickets, todayStr]);
+  const todayStr = useMemo(() => toLocalDateStr(new Date()), []);
+  const todayCreated = useMemo(() => tickets.filter(t => toLocalDateStr(new Date(t.createdISO)) === todayStr).length, [tickets, todayStr]);
+  const todayResolved = useMemo(() => tickets.filter(t => t.status === "Resolved" && t.resolvedAt && toLocalDateStr(new Date(t.resolvedAt)) === todayStr).length, [tickets, todayStr]);
   const overSLA = useMemo(() => tickets.filter((t) => {
     const ageMs = new Date().getTime() - new Date(t.createdISO).getTime();
     return ageMs > 24 * 60 * 60 * 1000 && t.status !== "Resolved";
