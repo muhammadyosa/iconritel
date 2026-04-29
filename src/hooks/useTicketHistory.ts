@@ -321,7 +321,7 @@ export function useTicketHistory(tickets: Ticket[]) {
     for (let i = days - 1; i >= 0; i--) {
       const date = new Date(today);
       date.setDate(date.getDate() - i);
-      const isoDate = date.toISOString().split('T')[0];
+      const isoDate = toLocalDateStr(date);
       const displayDate = date.toLocaleDateString('id-ID', { day: '2-digit', month: 'short' });
       const record = recordMap.get(isoDate);
 
