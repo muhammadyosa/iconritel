@@ -38,7 +38,7 @@ export function useTicketHistory(tickets: Ticket[]) {
       try {
         const thirtyDaysAgo = new Date();
         thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-        const cutoff = thirtyDaysAgo.toISOString().split('T')[0];
+        const cutoff = toLocalDateStr(thirtyDaysAgo);
 
         const [histRes, catRes] = await Promise.all([
           supabase
