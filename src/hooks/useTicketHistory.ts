@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { Ticket, FEEDER_CONSTRAINTS_SET } from "@/types/ticket";
 import { supabase } from "@/integrations/supabase/client";
 import { toLocalDateStr } from "@/lib/dateUtils";
+import { isSlaOkResolved } from "@/lib/sla";
 
 export interface DailyTicketRecord {
   date: string;
