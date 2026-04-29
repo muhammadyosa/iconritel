@@ -380,7 +380,7 @@ export function useTicketHistory(tickets: Ticket[]) {
       const days = Number(filter);
       const start = new Date(today);
       start.setDate(start.getDate() - days + 1);
-      const startStr = start.toISOString().split('T')[0];
+      const startStr = toLocalDateStr(start);
       filteredRecords = history.categoryRecords.filter(r => r.date >= startStr);
     }
 
