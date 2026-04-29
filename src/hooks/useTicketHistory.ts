@@ -103,7 +103,7 @@ export function useTicketHistory(tickets: Ticket[]) {
     const categoryByDateConstraint: Record<string, Record<string, number>> = {};
 
     tickets.forEach((ticket) => {
-      const ticketDate = new Date(ticket.createdISO).toISOString().split('T')[0];
+      const ticketDate = toLocalDateStr(new Date(ticket.createdISO));
       if (!ticketsByDate[ticketDate]) {
         ticketsByDate[ticketDate] = { ritel: 0, feeder: 0, total: 0, created: 0, inProgress: 0, resolved: 0, slaOk: 0, ticketIds: [] };
       }
