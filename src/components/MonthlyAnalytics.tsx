@@ -614,12 +614,7 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
     if (!drillSource || drillSource.kind !== "kpi") return null;
     // Recompute base pool for the active type from current monthTickets
     const resolved = monthTickets.filter((t) => t.status === "Resolved");
-    const slaBreached = monthTickets.filter((t) => {
-      if (t.status === "Resolved" && t.resolvedAt) {
-        return new Date(t.resolvedAt).getTime() - new Date(t.createdISO).getTime() > 24 * 60 * 60 * 1000;
-      }
-      return false;
-    });
+    const slaBreached = monthTickets.filter(isSlaBreachedResolved);
     let pool: Ticket[] = monthTickets;
     if (drillSource.type === "resolved") pool = resolved;
     else if (drillSource.type === "sla") pool = slaBreached;
