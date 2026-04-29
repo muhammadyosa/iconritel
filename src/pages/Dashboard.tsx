@@ -33,6 +33,7 @@ import {
   ChartTooltipContent,
   type ChartConfig,
 } from "@/components/ui/chart";
+import { toLocalDateStr } from "@/lib/dateUtils";
 
 interface ShiftReport {
   id: string;
