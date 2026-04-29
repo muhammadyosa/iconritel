@@ -327,10 +327,7 @@ export default function Dashboard() {
                 filtered = tickets;
                 title = "🗃️ Semua Incident";
               } else if (card.metric === "overSLA") {
-                filtered = tickets.filter((t) => {
-                  const ageMs = new Date().getTime() - new Date(t.createdISO).getTime();
-                  return ageMs > 24 * 60 * 60 * 1000 && t.status !== "Resolved";
-                });
+                filtered = tickets.filter(isOverSlaUnresolved);
                 title = "⚠️ Incident Over SLA (>24h)";
               } else if (card.metric === "feeder") {
                 filtered = tickets.filter((t) => FEEDER_CONSTRAINTS_SET.has(t.constraint));
