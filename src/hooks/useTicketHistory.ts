@@ -397,14 +397,8 @@ export function useTicketHistory(tickets: Ticket[]) {
 
   // Get tickets for a specific date and category (uses LOCAL date for WIB accuracy)
   const getTicketsForDate = useCallback((isoDate: string, category?: "RITEL" | "FEEDER") => {
-    const toLocal = (d: Date) => {
-      const y = d.getFullYear();
-      const m = String(d.getMonth() + 1).padStart(2, "0");
-      const day = String(d.getDate()).padStart(2, "0");
-      return `${y}-${m}-${day}`;
-    };
     return tickets.filter((ticket) => {
-      const ticketDate = toLocal(new Date(ticket.createdISO));
+      const ticketDate = toLocalDateStr(new Date(ticket.createdISO));
       if (ticketDate !== isoDate) return false;
       if (category) {
         const isFeeder = FEEDER_CONSTRAINTS_SET.has(ticket.constraint);
@@ -416,14 +410,8 @@ export function useTicketHistory(tickets: Ticket[]) {
 
   // Get tickets for a specific date and status (uses LOCAL date for WIB accuracy)
   const getTicketsForDateByStatus = useCallback((isoDate: string, status: "created" | "inProgress" | "resolved") => {
-    const toLocal = (d: Date) => {
-      const y = d.getFullYear();
-      const m = String(d.getMonth() + 1).padStart(2, "0");
-      const day = String(d.getDate()).padStart(2, "0");
-      return `${y}-${m}-${day}`;
-    };
     return tickets.filter((ticket) => {
-      const ticketDate = toLocal(new Date(ticket.createdISO));
+      const ticketDate = toLocalDateStr(new Date(ticket.createdISO));
       if (ticketDate !== isoDate) return false;
       if (status === "created") return true;
       if (status === "inProgress") return ticket.status === "On Progress" || ticket.status === "Critical" || ticket.status === "Pending";
