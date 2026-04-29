@@ -77,9 +77,7 @@ export default function Dashboard() {
   const [selectedConstraint, setSelectedConstraint] = useState<string>("all");
   const [inlineSelectedTicket, setInlineSelectedTicket] = useState<Ticket | null>(null);
   const [trendFilter, setTrendFilter] = useState<string>("7");
-  const [trendCustomDate, setTrendCustomDate] = useState<string>(() => {
-    return new Date().toISOString().split('T')[0];
-  });
+  const [trendCustomDate, setTrendCustomDate] = useState<string>(() => toLocalDateStr(new Date()));
   const [previousDialogState, setPreviousDialogState] = useState<{
     title: string;
     tickets: Ticket[];
