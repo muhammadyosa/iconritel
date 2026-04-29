@@ -471,18 +471,8 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
     const total = monthTickets.length;
     const resolved = monthTickets.filter((t) => t.status === "Resolved");
     const unresolved = monthTickets.filter((t) => t.status !== "Resolved");
-    const slaOk = monthTickets.filter((t) => {
-      if (t.status === "Resolved" && t.resolvedAt) {
-        return new Date(t.resolvedAt).getTime() - new Date(t.createdISO).getTime() <= 24 * 60 * 60 * 1000;
-      }
-      return false;
-    });
-    const slaBreached = monthTickets.filter((t) => {
-      if (t.status === "Resolved" && t.resolvedAt) {
-        return new Date(t.resolvedAt).getTime() - new Date(t.createdISO).getTime() > 24 * 60 * 60 * 1000;
-      }
-      return false;
-    });
+    const slaOk = monthTickets.filter(isSlaOkResolved);
+    const slaBreached = monthTickets.filter(isSlaBreachedResolved);
 
     if (kpiDetailType === "total") {
       const byStatus = new Map<string, number>();
