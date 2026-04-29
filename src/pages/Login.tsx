@@ -11,6 +11,7 @@ import iconnetMascot from "@/assets/iconnet-mascot.png";
 import plnIconPlusLogo from "@/assets/pln-icon-plus-new.png";
 import iconnetLogo from "@/assets/iconnet-logo-new.png";
 import indonesiaMap from "@/assets/indonesia-map.png";
+import { SAFE_PROTECTED_PATHS } from "@/components/ProtectedRoute";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -48,13 +49,29 @@ export default function Login() {
         sessionStorage.removeItem('explicit_logout');
         return;
       }
-      // Redirect ke halaman tujuan awal jika ada, jika tidak ke dashboard
+      // Redirect ke halaman tujuan awal jika valid, fallback aman ke "/"
       let target = "/";
       try {
-        const intended = sessionStorage.getItem("intended_path");
-        if (intended && intended !== "/login") {
-          target = intended;
+        // Migrasi dari sessionStorage lama (bila ada) ke localStorage agar
+        // intended_path tetap ada walau user me-refresh halaman login.
+        const legacy = sessionStorage.getItem("intended_path");
+        if (legacy) {
+          try { localStorage.setItem("intended_path", legacy); } catch { /* ignore */ }
           sessionStorage.removeItem("intended_path");
+        }
+        const intended = localStorage.getItem("intended_path");
+        if (intended) {
+          const pathOnly = intended.split("?")[0];
+          if (
+            pathOnly &&
+            pathOnly !== "/login" &&
+            pathOnly !== "/pending-approval" &&
+            SAFE_PROTECTED_PATHS.has(pathOnly)
+          ) {
+            target = intended;
+          }
+          // Selalu konsumsi flag agar tidak loop di sesi berikutnya
+          localStorage.removeItem("intended_path");
         }
       } catch {
         /* ignore */
