@@ -16,6 +16,7 @@ import {
   ChartTooltipContent,
   type ChartConfig,
 } from "@/components/ui/chart";
+import { toLocalDateStr, parseLocalDateStr } from "@/lib/dateUtils";
 
 interface MonthlyAnalyticsProps {
   tickets: Ticket[];
