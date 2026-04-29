@@ -11,21 +11,49 @@ interface ProtectedRouteProps {
 const INTERN_ALLOWED_PATHS = new Set(["/", "/tickets", "/teams"]);
 const ADMIN_NOC_ONLY_PATHS = new Set(["/notes"]);
 
+// Daftar rute valid yang bisa dipakai sebagai intended_path.
+// Harus selaras dengan pageComponents di App.tsx + halaman protected lain.
+export const SAFE_PROTECTED_PATHS = new Set<string>([
+  "/",
+  "/tickets",
+  "/teams",
+  "/akv",
+  "/fat",
+  "/fdt",
+  "/olt",
+  "/upe",
+  "/bng",
+  "/notes",
+  "/report",
+  "/settings",
+  "/install",
+]);
+
 export function ProtectedRoute({ children }: ProtectedRouteProps) {
   const { user, profile, isLoading } = useAuth();
   const { isIntern, isAdmin, isNOC, isLoading: isRoleLoading } = useUserRole();
   const location = useLocation();
 
-  // Simpan tujuan awal saat user belum login, agar bisa di-redirect kembali setelah login
+  // Simpan tujuan awal saat user belum login, agar bisa di-redirect kembali setelah login.
+  // Pakai localStorage supaya tetap bertahan kalau user me-refresh halaman login
+  // atau menyelesaikan OAuth di tab/sesi baru.
   useEffect(() => {
     if (!isLoading && !user && location.pathname !== "/login") {
-      try {
-        sessionStorage.setItem(
-          "intended_path",
-          location.pathname + location.search,
-        );
-      } catch {
-        /* ignore */
+      const fullPath = location.pathname + location.search;
+      // Hanya simpan kalau path-nya memang rute valid & aman
+      if (SAFE_PROTECTED_PATHS.has(location.pathname)) {
+        try {
+          localStorage.setItem("intended_path", fullPath);
+        } catch {
+          /* ignore */
+        }
+      } else {
+        // Bersihkan kalau path tidak dikenali untuk hindari loop ke rute mati
+        try {
+          localStorage.removeItem("intended_path");
+        } catch {
+          /* ignore */
+        }
       }
     }
   }, [isLoading, user, location.pathname, location.search]);
