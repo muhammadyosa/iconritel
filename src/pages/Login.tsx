@@ -56,14 +56,14 @@ export default function Login() {
   }, [user, isLoading, navigate]);
 
   const handleGoogleSignIn = async () => {
+    if (isSigningIn) return;
     setIsSigningIn(true);
     try {
       const result = await lovable.auth.signInWithOAuth("google", {
         redirect_uri: window.location.origin,
         extraParams: {
-          // Selalu paksa pemilihan akun + masukkan password Google ulang setiap login
-          prompt: "select_account consent",
-          access_type: "offline",
+          // Hanya tampilkan pemilih akun (tanpa consent ulang) → lebih cepat
+          prompt: "select_account",
         },
       });
 
@@ -83,6 +83,20 @@ export default function Login() {
       setIsSigningIn(false);
     }
   };
+
+  // Auto-reset tombol bila user kembali ke halaman ini (mis. tekan Back dari Google)
+  useEffect(() => {
+    const onPageShow = () => setIsSigningIn(false);
+    const onVisibility = () => {
+      if (document.visibilityState === "visible") setIsSigningIn(false);
+    };
+    window.addEventListener("pageshow", onPageShow);
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => {
+      window.removeEventListener("pageshow", onPageShow);
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
+  }, []);
 
   if (isLoading) {
     return (
