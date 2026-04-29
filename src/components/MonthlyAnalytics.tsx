@@ -199,13 +199,7 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
       const displayDay = customD.toLocaleDateString('id-ID', { day: '2-digit', month: 'short' });
       const dayTickets = tickets.filter((t) => toLocalDateStr(new Date(t.createdISO)) === isoDate);
       const resolvedDay = dayTickets.filter((t) => t.status === "Resolved");
-      const slaOk = resolvedDay.filter((t) => {
-        if (t.resolvedAt) {
-          const ms = new Date(t.resolvedAt).getTime() - new Date(t.createdISO).getTime();
-          return ms <= 24 * 60 * 60 * 1000;
-        }
-        return false;
-      }).length;
+      const slaOk = resolvedDay.filter(isSlaOkResolved).length;
       return [{ day: displayDay, isoDate, dayNum: customD.getDate(), total: dayTickets.length, resolved: resolvedDay.length, slaOk }];
     } else {
       days = Number(trendFilter);
