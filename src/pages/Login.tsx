@@ -48,8 +48,18 @@ export default function Login() {
         sessionStorage.removeItem('explicit_logout');
         return;
       }
-      // Navigasi instan tanpa delay agar transisi terasa snappy
-      navigate("/", { replace: true });
+      // Redirect ke halaman tujuan awal jika ada, jika tidak ke dashboard
+      let target = "/";
+      try {
+        const intended = sessionStorage.getItem("intended_path");
+        if (intended && intended !== "/login") {
+          target = intended;
+          sessionStorage.removeItem("intended_path");
+        }
+      } catch {
+        /* ignore */
+      }
+      navigate(target, { replace: true });
     }
   }, [user, isLoading, navigate]);
 
