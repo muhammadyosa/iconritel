@@ -193,7 +193,7 @@ export function useTicketHistory(tickets: Ticket[]) {
 
       const thirtyDaysAgo = new Date();
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-      const cutoffDate = thirtyDaysAgo.toISOString().split('T')[0];
+      const cutoffDate = toLocalDateStr(thirtyDaysAgo);
 
       const newRecords = Array.from(existingRecords.values())
         .filter(r => r.date >= cutoffDate)
