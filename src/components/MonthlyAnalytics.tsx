@@ -17,6 +17,7 @@ import {
   type ChartConfig,
 } from "@/components/ui/chart";
 import { toLocalDateStr, parseLocalDateStr } from "@/lib/dateUtils";
+import { classifySla, isSlaOkResolved, isSlaBreachedResolved, SLA_THRESHOLD_MS } from "@/lib/sla";
 
 interface MonthlyAnalyticsProps {
   tickets: Ticket[];
