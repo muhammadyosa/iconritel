@@ -180,7 +180,7 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
     // Use cloud-persisted historical data if available
     if (getTrendChartData) {
       if (trendFilter === "custom") {
-        const customD = new Date(trendCustomDate);
+        const customD = parseLocalDateStr(trendCustomDate);
         return getTrendChartData(1).length > 0
           ? [getTrendChartData(Math.max(1, Math.ceil((today.getTime() - customD.getTime()) / (1000 * 60 * 60 * 24)) + 1))
               .find(d => d.isoDate === trendCustomDate) || {
@@ -198,7 +198,7 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
       return getTrendChartData(days);
     }
 
-    // Fallback to live tickets
+    // Fallback to live tickets (LOCAL date for WIB accuracy)
     const data: { day: string; isoDate: string; dayNum: number; total: number; resolved: number; slaOk: number }[] = [];
     
     let days: number;
@@ -209,10 +209,10 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
       }, today);
       days = Math.max(1, Math.ceil((today.getTime() - earliest.getTime()) / (1000 * 60 * 60 * 24)) + 1);
     } else if (trendFilter === "custom") {
-      const customD = new Date(trendCustomDate);
+      const customD = parseLocalDateStr(trendCustomDate);
       const isoDate = trendCustomDate;
       const displayDay = customD.toLocaleDateString('id-ID', { day: '2-digit', month: 'short' });
-      const dayTickets = tickets.filter((t) => new Date(t.createdISO).toISOString().split('T')[0] === isoDate);
+      const dayTickets = tickets.filter((t) => toLocalDateStr(new Date(t.createdISO)) === isoDate);
       const resolvedDay = dayTickets.filter((t) => t.status === "Resolved");
       const slaOk = resolvedDay.filter((t) => {
         if (t.resolvedAt) {
@@ -229,13 +229,10 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
     for (let i = days - 1; i >= 0; i--) {
       const date = new Date(today);
       date.setDate(date.getDate() - i);
-      const isoDate = date.toISOString().split('T')[0];
+      const isoDate = toLocalDateStr(date);
       const displayDay = date.toLocaleDateString('id-ID', { day: '2-digit', month: 'short' });
       
-      const dayTickets = tickets.filter((t) => {
-        const tDate = new Date(t.createdISO).toISOString().split('T')[0];
-        return tDate === isoDate;
-      });
+      const dayTickets = tickets.filter((t) => toLocalDateStr(new Date(t.createdISO)) === isoDate);
       const resolvedDay = dayTickets.filter((t) => t.status === "Resolved");
       const slaOk = resolvedDay.filter((t) => {
         if (t.resolvedAt) {
