@@ -52,13 +52,9 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
   });
 
   const [trendFilter, setTrendFilter] = useState<string>("7");
-  const [trendCustomDate, setTrendCustomDate] = useState<string>(() => {
-    return new Date().toISOString().split('T')[0];
-  });
+  const [trendCustomDate, setTrendCustomDate] = useState<string>(() => toLocalDateStr(new Date()));
   const [categoryFilter, setCategoryFilter] = useState<string>("today");
-  const [categoryCustomDate, setCategoryCustomDate] = useState<string>(() => {
-    return new Date().toISOString().split('T')[0];
-  });
+  const [categoryCustomDate, setCategoryCustomDate] = useState<string>(() => toLocalDateStr(new Date()));
 
   // Drill-down state
   const [drillOpen, setDrillOpen] = useState(false);
