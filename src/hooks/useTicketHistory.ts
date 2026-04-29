@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { Ticket, FEEDER_CONSTRAINTS_SET } from "@/types/ticket";
 import { supabase } from "@/integrations/supabase/client";
+import { toLocalDateStr } from "@/lib/dateUtils";
 
 export interface DailyTicketRecord {
   date: string;
@@ -37,7 +38,7 @@ export function useTicketHistory(tickets: Ticket[]) {
       try {
         const thirtyDaysAgo = new Date();
         thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-        const cutoff = thirtyDaysAgo.toISOString().split('T')[0];
+        const cutoff = toLocalDateStr(thirtyDaysAgo);
 
         const [histRes, catRes] = await Promise.all([
           supabase
@@ -89,7 +90,7 @@ export function useTicketHistory(tickets: Ticket[]) {
     if (signature === lastTicketSignature.current) return;
     lastTicketSignature.current = signature;
 
-    const today = new Date().toISOString().split('T')[0];
+    const today = toLocalDateStr(new Date());
 
     // Build counts by date
     const ticketsByDate: Record<string, {
@@ -102,7 +103,7 @@ export function useTicketHistory(tickets: Ticket[]) {
     const categoryByDateConstraint: Record<string, Record<string, number>> = {};
 
     tickets.forEach((ticket) => {
-      const ticketDate = new Date(ticket.createdISO).toISOString().split('T')[0];
+      const ticketDate = toLocalDateStr(new Date(ticket.createdISO));
       if (!ticketsByDate[ticketDate]) {
         ticketsByDate[ticketDate] = { ritel: 0, feeder: 0, total: 0, created: 0, inProgress: 0, resolved: 0, slaOk: 0, ticketIds: [] };
       }
@@ -192,7 +193,7 @@ export function useTicketHistory(tickets: Ticket[]) {
 
       const thirtyDaysAgo = new Date();
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-      const cutoffDate = thirtyDaysAgo.toISOString().split('T')[0];
+      const cutoffDate = toLocalDateStr(thirtyDaysAgo);
 
       const newRecords = Array.from(existingRecords.values())
         .filter(r => r.date >= cutoffDate)
@@ -320,7 +321,7 @@ export function useTicketHistory(tickets: Ticket[]) {
     for (let i = days - 1; i >= 0; i--) {
       const date = new Date(today);
       date.setDate(date.getDate() - i);
-      const isoDate = date.toISOString().split('T')[0];
+      const isoDate = toLocalDateStr(date);
       const displayDate = date.toLocaleDateString('id-ID', { day: '2-digit', month: 'short' });
       const record = recordMap.get(isoDate);
 
@@ -349,7 +350,7 @@ export function useTicketHistory(tickets: Ticket[]) {
     for (let i = days - 1; i >= 0; i--) {
       const date = new Date(today);
       date.setDate(date.getDate() - i);
-      const isoDate = date.toISOString().split('T')[0];
+      const isoDate = toLocalDateStr(date);
       const displayDay = date.toLocaleDateString('id-ID', { day: '2-digit', month: 'short' });
       const record = recordMap.get(isoDate);
 
@@ -369,7 +370,7 @@ export function useTicketHistory(tickets: Ticket[]) {
     let filteredRecords: DailyCategoryRecord[];
 
     if (filter === "today") {
-      const todayStr = today.toISOString().split('T')[0];
+      const todayStr = toLocalDateStr(today);
       filteredRecords = history.categoryRecords.filter(r => r.date === todayStr);
     } else if (filter === "custom" && customDate) {
       filteredRecords = history.categoryRecords.filter(r => r.date === customDate);
@@ -379,7 +380,7 @@ export function useTicketHistory(tickets: Ticket[]) {
       const days = Number(filter);
       const start = new Date(today);
       start.setDate(start.getDate() - days + 1);
-      const startStr = start.toISOString().split('T')[0];
+      const startStr = toLocalDateStr(start);
       filteredRecords = history.categoryRecords.filter(r => r.date >= startStr);
     }
 
@@ -396,14 +397,8 @@ export function useTicketHistory(tickets: Ticket[]) {
 
   // Get tickets for a specific date and category (uses LOCAL date for WIB accuracy)
   const getTicketsForDate = useCallback((isoDate: string, category?: "RITEL" | "FEEDER") => {
-    const toLocal = (d: Date) => {
-      const y = d.getFullYear();
-      const m = String(d.getMonth() + 1).padStart(2, "0");
-      const day = String(d.getDate()).padStart(2, "0");
-      return `${y}-${m}-${day}`;
-    };
     return tickets.filter((ticket) => {
-      const ticketDate = toLocal(new Date(ticket.createdISO));
+      const ticketDate = toLocalDateStr(new Date(ticket.createdISO));
       if (ticketDate !== isoDate) return false;
       if (category) {
         const isFeeder = FEEDER_CONSTRAINTS_SET.has(ticket.constraint);
@@ -415,14 +410,8 @@ export function useTicketHistory(tickets: Ticket[]) {
 
   // Get tickets for a specific date and status (uses LOCAL date for WIB accuracy)
   const getTicketsForDateByStatus = useCallback((isoDate: string, status: "created" | "inProgress" | "resolved") => {
-    const toLocal = (d: Date) => {
-      const y = d.getFullYear();
-      const m = String(d.getMonth() + 1).padStart(2, "0");
-      const day = String(d.getDate()).padStart(2, "0");
-      return `${y}-${m}-${day}`;
-    };
     return tickets.filter((ticket) => {
-      const ticketDate = toLocal(new Date(ticket.createdISO));
+      const ticketDate = toLocalDateStr(new Date(ticket.createdISO));
       if (ticketDate !== isoDate) return false;
       if (status === "created") return true;
       if (status === "inProgress") return ticket.status === "On Progress" || ticket.status === "Critical" || ticket.status === "Pending";
