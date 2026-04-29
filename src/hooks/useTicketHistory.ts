@@ -116,12 +116,8 @@ export function useTicketHistory(tickets: Ticket[]) {
         d.inProgress++;
       } else if (ticket.status === "Resolved") {
         d.resolved++;
-        // Check SLA compliance
-        if (ticket.resolvedAt) {
-          const resMs = new Date(ticket.resolvedAt).getTime() - new Date(ticket.createdISO).getTime();
-          if (resMs <= 24 * 60 * 60 * 1000) {
-            d.slaOk++;
-          }
+        if (isSlaOkResolved(ticket)) {
+          d.slaOk++;
         }
       }
       if (FEEDER_CONSTRAINTS_SET.has(ticket.constraint)) {
