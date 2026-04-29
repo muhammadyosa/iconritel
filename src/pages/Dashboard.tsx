@@ -265,13 +265,32 @@ export default function Dashboard() {
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
+        className="flex items-start justify-between gap-3"
       >
-        <h1 className="text-xl sm:text-2xl md:text-3xl font-bold">
-          🖥️ Dashboard Overview
-        </h1>
-        <p className="text-muted-foreground text-[11px] sm:text-sm">
-          Monitoring incident NOC RITEL
-        </p>
+        <div className="min-w-0">
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold">
+            🖥️ Dashboard Overview
+          </h1>
+          <p className="text-muted-foreground text-[11px] sm:text-sm">
+            Monitoring incident NOC RITEL
+          </p>
+        </div>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleManualRefresh}
+          disabled={isRefreshing}
+          className="shrink-0 gap-1.5 h-8 px-2.5 sm:px-3 text-[11px] sm:text-xs"
+          aria-label="Refresh data dashboard"
+          title="Refresh KPI, Trend Chart & Monthly Analysis"
+        >
+          {isRefreshing ? (
+            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+          ) : (
+            <RefreshCw className="h-3.5 w-3.5" />
+          )}
+          <span className="hidden sm:inline">{isRefreshing ? "Memuat..." : "Refresh"}</span>
+        </Button>
       </motion.div>
 
       {/* KPI Cards Section */}
