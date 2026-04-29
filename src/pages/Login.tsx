@@ -48,10 +48,8 @@ export default function Login() {
         sessionStorage.removeItem('explicit_logout');
         return;
       }
-      const timer = setTimeout(() => {
-        navigate("/", { replace: true });
-      }, 100);
-      return () => clearTimeout(timer);
+      // Navigasi instan tanpa delay agar transisi terasa snappy
+      navigate("/", { replace: true });
     }
   }, [user, isLoading, navigate]);
 
