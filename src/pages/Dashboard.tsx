@@ -225,8 +225,7 @@ export default function Dashboard() {
     if (selectedCategory && ticket.category !== selectedCategory) return false;
     
     if (selectedMetric === "overSLA") {
-      const ageMs = new Date().getTime() - new Date(ticket.createdISO).getTime();
-      return ageMs > 24 * 60 * 60 * 1000 && ticket.status !== "Resolved";
+      return isOverSlaUnresolved(ticket);
     }
     if (selectedMetric === "feeder") {
       return FEEDER_CONSTRAINTS_SET.has(ticket.constraint);
