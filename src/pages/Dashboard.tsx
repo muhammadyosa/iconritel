@@ -211,10 +211,7 @@ export default function Dashboard() {
   const todayStr = useMemo(() => toLocalDateStr(new Date()), []);
   const todayCreated = useMemo(() => tickets.filter(t => toLocalDateStr(new Date(t.createdISO)) === todayStr).length, [tickets, todayStr]);
   const todayResolved = useMemo(() => tickets.filter(t => t.status === "Resolved" && t.resolvedAt && toLocalDateStr(new Date(t.resolvedAt)) === todayStr).length, [tickets, todayStr]);
-  const overSLA = useMemo(() => tickets.filter((t) => {
-    const ageMs = new Date().getTime() - new Date(t.createdISO).getTime();
-    return ageMs > 24 * 60 * 60 * 1000 && t.status !== "Resolved";
-  }).length, [tickets]);
+  const overSLA = useMemo(() => tickets.filter(isOverSlaUnresolved).length, [tickets]);
   const feederImpact = useMemo(() => tickets.filter((t) => FEEDER_CONSTRAINTS_SET.has(t.constraint)).length, [tickets]);
   const totalOLT = useMemo(() => new Set(tickets.map((t) => t.hostname).filter(Boolean)).size || 0, [tickets]);
   const activeIncidents = useMemo(() => tickets.filter(t => t.status !== "Resolved").length, [tickets]);
