@@ -17,6 +17,7 @@ import {
   type ChartConfig,
 } from "@/components/ui/chart";
 import { toLocalDateStr, parseLocalDateStr } from "@/lib/dateUtils";
+import { classifySla, isSlaOkResolved, isSlaBreachedResolved, SLA_THRESHOLD_MS } from "@/lib/sla";
 
 interface MonthlyAnalyticsProps {
   tickets: Ticket[];
@@ -82,17 +83,7 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
     categories: string[];
   } | null>(null);
 
-  // SLA classifier — shared across filter/drill computations
-  const SLA_THRESHOLD_MS = 24 * 60 * 60 * 1000;
-  const classifySla = useCallback((t: Ticket): "ontime" | "breached" | "pending" => {
-    if (t.status === "Resolved" && t.resolvedAt) {
-      const dur = new Date(t.resolvedAt).getTime() - new Date(t.createdISO).getTime();
-      return dur <= SLA_THRESHOLD_MS ? "ontime" : "breached";
-    }
-    // Unresolved: breached if age already exceeds threshold, else still pending
-    const age = Date.now() - new Date(t.createdISO).getTime();
-    return age > SLA_THRESHOLD_MS ? "breached" : "pending";
-  }, []);
+  // SLA classifier — single source of truth (see @/lib/sla)
 
   const monthOptions = useMemo(() => {
     const options: { value: string; label: string }[] = [];
@@ -125,13 +116,7 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
     const avgResolutionMs = resolved.length > 0 ? totalResolutionMs / resolved.length : 0;
     const avgResolutionHours = Math.round((avgResolutionMs / (1000 * 60 * 60)) * 10) / 10;
 
-    const slaCompliant = monthTickets.filter((t) => {
-      if (t.status === "Resolved" && t.resolvedAt) {
-        const resMs = new Date(t.resolvedAt).getTime() - new Date(t.createdISO).getTime();
-        return resMs <= 24 * 60 * 60 * 1000;
-      }
-      return false;
-    }).length;
+    const slaCompliant = monthTickets.filter(isSlaOkResolved).length;
     const slaRate = monthTickets.length > 0 ? Math.round((slaCompliant / monthTickets.length) * 100) : 0;
 
     const ritel = monthTickets.filter((t) => !FEEDER_CONSTRAINTS_SET.has(t.constraint)).length;
@@ -214,13 +199,7 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
       const displayDay = customD.toLocaleDateString('id-ID', { day: '2-digit', month: 'short' });
       const dayTickets = tickets.filter((t) => toLocalDateStr(new Date(t.createdISO)) === isoDate);
       const resolvedDay = dayTickets.filter((t) => t.status === "Resolved");
-      const slaOk = resolvedDay.filter((t) => {
-        if (t.resolvedAt) {
-          const ms = new Date(t.resolvedAt).getTime() - new Date(t.createdISO).getTime();
-          return ms <= 24 * 60 * 60 * 1000;
-        }
-        return false;
-      }).length;
+      const slaOk = resolvedDay.filter(isSlaOkResolved).length;
       return [{ day: displayDay, isoDate, dayNum: customD.getDate(), total: dayTickets.length, resolved: resolvedDay.length, slaOk }];
     } else {
       days = Number(trendFilter);
@@ -234,13 +213,7 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
       
       const dayTickets = tickets.filter((t) => toLocalDateStr(new Date(t.createdISO)) === isoDate);
       const resolvedDay = dayTickets.filter((t) => t.status === "Resolved");
-      const slaOk = resolvedDay.filter((t) => {
-        if (t.resolvedAt) {
-          const ms = new Date(t.resolvedAt).getTime() - new Date(t.createdISO).getTime();
-          return ms <= 24 * 60 * 60 * 1000;
-        }
-        return false;
-      }).length;
+      const slaOk = resolvedDay.filter(isSlaOkResolved).length;
       data.push({ day: displayDay, isoDate, dayNum: date.getDate(), total: dayTickets.length, resolved: resolvedDay.length, slaOk });
     }
     return data;
@@ -498,18 +471,8 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
     const total = monthTickets.length;
     const resolved = monthTickets.filter((t) => t.status === "Resolved");
     const unresolved = monthTickets.filter((t) => t.status !== "Resolved");
-    const slaOk = monthTickets.filter((t) => {
-      if (t.status === "Resolved" && t.resolvedAt) {
-        return new Date(t.resolvedAt).getTime() - new Date(t.createdISO).getTime() <= 24 * 60 * 60 * 1000;
-      }
-      return false;
-    });
-    const slaBreached = monthTickets.filter((t) => {
-      if (t.status === "Resolved" && t.resolvedAt) {
-        return new Date(t.resolvedAt).getTime() - new Date(t.createdISO).getTime() > 24 * 60 * 60 * 1000;
-      }
-      return false;
-    });
+    const slaOk = monthTickets.filter(isSlaOkResolved);
+    const slaBreached = monthTickets.filter(isSlaBreachedResolved);
 
     if (kpiDetailType === "total") {
       const byStatus = new Map<string, number>();
@@ -651,12 +614,7 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
     if (!drillSource || drillSource.kind !== "kpi") return null;
     // Recompute base pool for the active type from current monthTickets
     const resolved = monthTickets.filter((t) => t.status === "Resolved");
-    const slaBreached = monthTickets.filter((t) => {
-      if (t.status === "Resolved" && t.resolvedAt) {
-        return new Date(t.resolvedAt).getTime() - new Date(t.createdISO).getTime() > 24 * 60 * 60 * 1000;
-      }
-      return false;
-    });
+    const slaBreached = monthTickets.filter(isSlaBreachedResolved);
     let pool: Ticket[] = monthTickets;
     if (drillSource.type === "resolved") pool = resolved;
     else if (drillSource.type === "sla") pool = slaBreached;
