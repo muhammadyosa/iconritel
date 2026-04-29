@@ -270,7 +270,7 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
     if (data?.activePayload?.[0]?.payload?.isoDate) {
       const { isoDate, day } = data.activePayload[0].payload;
       const filtered = tickets.filter((t) => {
-        const tDate = new Date(t.createdISO).toISOString().split('T')[0];
+        const tDate = toLocalDateStr(new Date(t.createdISO));
         return tDate === isoDate;
       });
       setDrillSelectedTicket(null);
