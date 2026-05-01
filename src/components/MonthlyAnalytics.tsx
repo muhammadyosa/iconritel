@@ -738,28 +738,44 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
           {
             type: "total" as const,
             emoji: "🗃️", title: "Total Incident", value: kpis.total,
+            sub: `🏠 ${kpis.ritel} • 🏬 ${kpis.feeder}`,
             bgClass: "bg-primary/8 hover:bg-primary/15", borderClass: "border-primary/30 hover:border-primary/50",
             valueClass: "text-primary", glowClass: "hover:shadow-[0_0_15px_-4px_hsl(var(--primary)/0.3)]",
+            tooltip: "Total incident bulan ini (Ritel + Feeder). Klik untuk detail.",
           },
           {
             type: "resolved" as const,
             emoji: "✅", title: "Resolved", value: kpis.resolved,
+            sub: kpis.total > 0 ? `${kpis.resolutionRate}% selesai` : "Belum ada data",
             bgClass: "bg-success/8 hover:bg-success/15", borderClass: "border-success/30 hover:border-success/50",
             valueClass: "text-success", glowClass: "hover:shadow-[0_0_15px_-4px_hsl(var(--success)/0.3)]",
+            tooltip: "Incident dengan status Resolved. Klik untuk detail.",
           },
           {
             type: "avg" as const,
-            emoji: "⏱️", title: "Avg Resolusi", value: `${kpis.avgResolutionHours}h`,
+            emoji: "⏱️", title: "Avg Resolusi", value: kpis.avgResolutionLabel,
+            sub: kpis.resolved > 0 ? `dari ${kpis.resolved} resolved` : "Belum ada resolved",
             bgClass: "bg-warning/8 hover:bg-warning/15", borderClass: "border-warning/30 hover:border-warning/50",
             valueClass: "text-warning", glowClass: "hover:shadow-[0_0_15px_-4px_hsl(var(--warning)/0.3)]",
+            tooltip: "Rata-rata waktu penyelesaian incident. Klik untuk detail.",
           },
           {
             type: "sla" as const,
-            emoji: "📈", title: "SLA Rate", value: `${kpis.slaRate}%`,
-            bgClass: kpis.slaRate >= 80 ? "bg-success/8 hover:bg-success/15" : "bg-destructive/8 hover:bg-destructive/15",
-            borderClass: kpis.slaRate >= 80 ? "border-success/30 hover:border-success/50" : "border-destructive/30 hover:border-destructive/50",
-            valueClass: kpis.slaRate >= 80 ? "text-success" : "text-destructive",
-            glowClass: kpis.slaRate >= 80 ? "hover:shadow-[0_0_15px_-4px_hsl(var(--success)/0.3)]" : "hover:shadow-[0_0_15px_-4px_hsl(var(--destructive)/0.3)]",
+            emoji: "📈", title: "SLA Rate", value: kpis.slaRateLabel,
+            sub: kpis.resolved > 0 ? `${kpis.slaCompliant}/${kpis.resolved} ≤ 24h` : "Belum ada resolved",
+            bgClass: kpis.resolved === 0
+              ? "bg-muted/30 hover:bg-muted/50"
+              : kpis.slaRate >= 80 ? "bg-success/8 hover:bg-success/15" : "bg-destructive/8 hover:bg-destructive/15",
+            borderClass: kpis.resolved === 0
+              ? "border-muted-foreground/20 hover:border-muted-foreground/40"
+              : kpis.slaRate >= 80 ? "border-success/30 hover:border-success/50" : "border-destructive/30 hover:border-destructive/50",
+            valueClass: kpis.resolved === 0
+              ? "text-muted-foreground"
+              : kpis.slaRate >= 80 ? "text-success" : "text-destructive",
+            glowClass: kpis.resolved === 0
+              ? ""
+              : kpis.slaRate >= 80 ? "hover:shadow-[0_0_15px_-4px_hsl(var(--success)/0.3)]" : "hover:shadow-[0_0_15px_-4px_hsl(var(--destructive)/0.3)]",
+            tooltip: "Tingkat kepatuhan SLA (≤24 jam) di antara incident yang sudah resolved. Klik untuk detail.",
           },
         ]).map((card, i) => (
           <button
@@ -767,13 +783,14 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
             type="button"
             onClick={() => openKpiDetail(card.type)}
             className={`text-left rounded-lg border p-2 sm:p-2.5 transition-all duration-300 cursor-pointer active:scale-[0.97] ${card.bgClass} ${card.borderClass} ${card.glowClass}`}
-            title="Klik untuk detail"
+            title={card.tooltip}
           >
             <div className="flex items-center gap-1.5 mb-1">
               <span className="text-sm sm:text-base">{card.emoji}</span>
               <p className="text-[9px] sm:text-[10px] text-muted-foreground font-medium truncate">{card.title}</p>
             </div>
-            <p className={`text-xl sm:text-2xl font-bold tabular-nums text-center ${card.valueClass}`}>{card.value}</p>
+            <p className={`text-xl sm:text-2xl font-bold tabular-nums text-center leading-tight ${card.valueClass}`}>{card.value}</p>
+            <p className="text-[9px] sm:text-[10px] text-muted-foreground/80 text-center mt-0.5 truncate">{card.sub}</p>
           </button>
         ))}
       </div>
