@@ -1098,7 +1098,7 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
       </Dialog>
 
       {/* KPI Detail Dialog */}
-      <Dialog open={kpiDetailOpen} onOpenChange={setKpiDetailOpen}>
+      <Dialog open={kpiDetailOpen} onOpenChange={(open) => { setKpiDetailOpen(open); if (!open) { setTeamSlaSearch(""); setTeamSlaSort("rate-asc"); } }}>
         <DialogContent className="max-w-lg max-h-[85vh] flex flex-col p-0 overflow-hidden">
           {kpiDetail && (
             <>
