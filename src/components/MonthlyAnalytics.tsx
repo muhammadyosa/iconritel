@@ -675,6 +675,8 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
     setDrillSource(null);
     setDrillTickets([]);
     setDrillTitle("");
+    setTeamSlaSearch("");
+    setTeamSlaSort("rate-asc");
   }, [selectedMonth]);
 
   // Realtime-derived drill list when source = "kpi"
