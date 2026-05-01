@@ -1321,8 +1321,56 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
                     </ul>
                   </div>
                 )}
-              </div>
 
+                {/* SLA Rate per Tim — only for SLA card */}
+                {kpiDetailType === "sla" && (kpiDetail as any).teamSlaBreakdown?.length > 0 && (
+                  <div className="space-y-1.5">
+                    <h4 className="text-[10px] sm:text-xs font-semibold text-foreground flex items-center gap-1.5">
+                      👥 SLA Rate per Tim (≤ 24 jam)
+                      <span className="text-[9px] font-normal text-muted-foreground">basis: resolved</span>
+                    </h4>
+                    <ul className="space-y-1 text-[10px] sm:text-xs max-h-56 overflow-auto pr-1">
+                      {((kpiDetail as any).teamSlaBreakdown as Array<{ team: string; resolved: number; ok: number; breach: number; rate: number }>).map((row) => {
+                        const tone =
+                          row.rate >= 80 ? "text-success border-success/30 bg-success/5" :
+                          row.rate >= 50 ? "text-warning border-warning/30 bg-warning/5" :
+                          "text-destructive border-destructive/30 bg-destructive/5";
+                        return (
+                          <li
+                            key={row.team}
+                            className="rounded border border-border/30 bg-muted/10 px-2 py-1.5 space-y-1"
+                          >
+                            <div className="flex items-center justify-between gap-2">
+                              <span className="font-medium text-foreground/90 truncate flex-1">{row.team}</span>
+                              <span className={`shrink-0 inline-flex items-center gap-1 rounded-full border px-1.5 py-0.5 text-[10px] font-bold tabular-nums ${tone}`}>
+                                {row.rate}%
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-3 text-[9px] text-muted-foreground tabular-nums">
+                              <span>✅ {row.ok} OK</span>
+                              <span>❌ {row.breach} Breach</span>
+                              <span className="ml-auto">n={row.resolved}</span>
+                            </div>
+                            {/* Mini progress bar */}
+                            <div className="h-1 w-full rounded-full bg-muted overflow-hidden">
+                              <div
+                                className={
+                                  row.rate >= 80 ? "h-full bg-success" :
+                                  row.rate >= 50 ? "h-full bg-warning" :
+                                  "h-full bg-destructive"
+                                }
+                                style={{ width: `${row.rate}%` }}
+                              />
+                            </div>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                    <p className="text-[9px] text-muted-foreground/70">
+                      Tim diambil dari field SERPO. Persentase = SLA OK / Resolved per tim.
+                    </p>
+                  </div>
+                )}
               <div className="flex justify-between items-center gap-2 px-4 sm:px-5 py-2 border-t bg-muted/10 flex-shrink-0">
                 <Button
                   variant="default"
