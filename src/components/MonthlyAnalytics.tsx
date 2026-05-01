@@ -1371,6 +1371,8 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
                     </p>
                   </div>
                 )}
+              </div>
+
               <div className="flex justify-between items-center gap-2 px-4 sm:px-5 py-2 border-t bg-muted/10 flex-shrink-0">
                 <Button
                   variant="default"
