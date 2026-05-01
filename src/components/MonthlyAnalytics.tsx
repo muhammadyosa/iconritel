@@ -658,6 +658,19 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
     if (changed) setKpiCategories(next);
   }, [kpiAvailableCategories, kpiDetailOpen, kpiCategories]);
 
+  // When the user changes the selected month, KPI cards / charts / tables must
+  // all reflect the new month immediately. Close any open drill / KPI dialog
+  // and clear snapshot drill state so a stale list from the previous month
+  // can never be shown.
+  useEffect(() => {
+    setDrillOpen(false);
+    setKpiDetailOpen(false);
+    setDrillSelectedTicket(null);
+    setDrillSource(null);
+    setDrillTickets([]);
+    setDrillTitle("");
+  }, [selectedMonth]);
+
   // Realtime-derived drill list when source = "kpi"
   const realtimeDrillTickets = useMemo(() => {
     if (!drillSource || drillSource.kind !== "kpi") return null;
