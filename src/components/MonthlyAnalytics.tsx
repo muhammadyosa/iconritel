@@ -584,16 +584,20 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
       };
     }
     if (kpiDetailType === "sla") {
-      const slaPct = total > 0 ? Math.round((slaOk.length / total) * 100) : 0;
+      // SLA Rate is computed against RESOLVED tickets (consistent with the KPI card)
+      const slaPct = resolved.length > 0 ? Math.round((slaOk.length / resolved.length) * 100) : 0;
+      const slaPctLabel = resolved.length > 0 ? `${slaPct}%` : "—";
       const breachByCat = new Map<string, number>();
       slaBreached.forEach((t) => breachByCat.set(t.constraint, (breachByCat.get(t.constraint) || 0) + 1));
       return {
         title: `📈 SLA Compliance — ${selectedMonthLabel}`,
         emoji: "📈",
-        tone: (slaPct >= 80 ? "success" : "destructive") as "success" | "destructive",
-        summary: `${slaOk.length} dari ${total} incident memenuhi SLA (≤ 24 jam). Tingkat kepatuhan: ${slaPct}%.`,
+        tone: (resolved.length === 0 ? "primary" : slaPct >= 80 ? "success" : "destructive") as "success" | "destructive" | "primary",
+        summary: resolved.length > 0
+          ? `${slaOk.length} dari ${resolved.length} incident yang sudah resolved memenuhi SLA (≤ 24 jam). Tingkat kepatuhan: ${slaPct}%.`
+          : `Belum ada incident resolved bulan ini, sehingga SLA Rate belum dapat dihitung.`,
         metrics: [
-          { label: "SLA Rate", value: `${slaPct}%`, tone: (slaPct >= 80 ? "success" : "destructive") as "success" | "destructive" },
+          { label: "SLA Rate", value: slaPctLabel, tone: (resolved.length === 0 ? "default" : slaPct >= 80 ? "success" : "destructive") as "success" | "destructive" | "default" },
           { label: "✅ SLA OK", value: slaOk.length, tone: "success" as const },
           { label: "❌ Breach", value: slaBreached.length, tone: "destructive" as const },
           { label: "⏳ Belum selesai", value: unresolved.length, tone: "warning" as const },
