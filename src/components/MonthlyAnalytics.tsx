@@ -1331,14 +1331,56 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
                 )}
 
                 {/* SLA Rate per Tim — only for SLA card */}
-                {kpiDetailType === "sla" && (kpiDetail as any).teamSlaBreakdown?.length > 0 && (
+                {kpiDetailType === "sla" && (kpiDetail as any).teamSlaBreakdown?.length > 0 && (() => {
+                  const allRows = (kpiDetail as any).teamSlaBreakdown as Array<{ team: string; resolved: number; ok: number; breach: number; rate: number }>;
+                  const q = teamSlaSearch.trim().toLowerCase();
+                  const filtered = q ? allRows.filter(r => r.team.toLowerCase().includes(q)) : allRows;
+                  const sorted = [...filtered].sort((a, b) => {
+                    switch (teamSlaSort) {
+                      case "rate-asc": return a.rate - b.rate || b.resolved - a.resolved;
+                      case "rate-desc": return b.rate - a.rate || b.resolved - a.resolved;
+                      case "breach-desc": return b.breach - a.breach || a.rate - b.rate;
+                      case "ok-desc": return b.ok - a.ok || b.rate - a.rate;
+                      case "resolved-desc": return b.resolved - a.resolved || a.rate - b.rate;
+                      case "team-asc": return a.team.localeCompare(b.team);
+                      default: return 0;
+                    }
+                  });
+                  return (
                   <div className="space-y-1.5">
                     <h4 className="text-[10px] sm:text-xs font-semibold text-foreground flex items-center gap-1.5">
                       👥 SLA Rate per Tim (≤ 24 jam)
                       <span className="text-[9px] font-normal text-muted-foreground">basis: resolved</span>
                     </h4>
+                    {/* Search & Sort Controls */}
+                    <div className="flex flex-col sm:flex-row gap-1.5">
+                      <Input
+                        type="search"
+                        placeholder="🔍 Cari tim…"
+                        value={teamSlaSearch}
+                        onChange={(e) => setTeamSlaSearch(e.target.value)}
+                        className="h-7 text-[10px] sm:text-xs flex-1"
+                      />
+                      <Select value={teamSlaSort} onValueChange={(v) => setTeamSlaSort(v as TeamSlaSortKey)}>
+                        <SelectTrigger className="h-7 text-[10px] sm:text-xs sm:w-[180px]">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="rate-asc" className="text-xs">📉 Rate terendah</SelectItem>
+                          <SelectItem value="rate-desc" className="text-xs">📈 Rate tertinggi</SelectItem>
+                          <SelectItem value="breach-desc" className="text-xs">❌ Breach terbanyak</SelectItem>
+                          <SelectItem value="ok-desc" className="text-xs">✅ OK terbanyak</SelectItem>
+                          <SelectItem value="resolved-desc" className="text-xs">🗃️ Resolved terbanyak</SelectItem>
+                          <SelectItem value="team-asc" className="text-xs">🔤 Nama (A→Z)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="flex items-center justify-between text-[9px] text-muted-foreground tabular-nums">
+                      <span>Menampilkan {sorted.length} dari {allRows.length} tim</span>
+                      {q && sorted.length === 0 && <span className="text-warning">tidak ada hasil</span>}
+                    </div>
                     <ul className="space-y-1 text-[10px] sm:text-xs max-h-56 overflow-auto pr-1">
-                      {((kpiDetail as any).teamSlaBreakdown as Array<{ team: string; resolved: number; ok: number; breach: number; rate: number }>).map((row) => {
+                      {sorted.map((row) => {
                         const tone =
                           row.rate >= 80 ? "text-success border-success/30 bg-success/5" :
                           row.rate >= 50 ? "text-warning border-warning/30 bg-warning/5" :
@@ -1349,7 +1391,9 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
                             className="rounded border border-border/30 bg-muted/10 px-2 py-1.5 space-y-1"
                           >
                             <div className="flex items-center justify-between gap-2">
-                              <span className="font-medium text-foreground/90 truncate flex-1">{row.team}</span>
+                              <span className="font-medium text-foreground/90 truncate flex-1">
+                                <HighlightText text={row.team} query={teamSlaSearch} />
+                              </span>
                               <span className={`shrink-0 inline-flex items-center gap-1 rounded-full border px-1.5 py-0.5 text-[10px] font-bold tabular-nums ${tone}`}>
                                 {row.rate}%
                               </span>
@@ -1378,7 +1422,8 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
                       Tim diambil dari field SERPO. Persentase = SLA OK / Resolved per tim.
                     </p>
                   </div>
-                )}
+                  );
+                })()}
               </div>
 
               <div className="flex justify-between items-center gap-2 px-4 sm:px-5 py-2 border-t bg-muted/10 flex-shrink-0">
