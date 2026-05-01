@@ -85,7 +85,11 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
     categories: string[];
   } | null>(null);
 
-  // SLA classifier — single source of truth (see @/lib/sla)
+  // Team SLA breakdown — search & sort controls (within KPI SLA dialog)
+  type TeamSlaSortKey = "rate-asc" | "rate-desc" | "breach-desc" | "ok-desc" | "resolved-desc" | "team-asc";
+  const [teamSlaSearch, setTeamSlaSearch] = useState("");
+  const [teamSlaSort, setTeamSlaSort] = useState<TeamSlaSortKey>("rate-asc");
+
 
   const monthOptions = useMemo(() => {
     const options: { value: string; label: string }[] = [];
