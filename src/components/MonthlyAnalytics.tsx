@@ -589,6 +589,28 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
       const slaPctLabel = resolved.length > 0 ? `${slaPct}%` : "—";
       const breachByCat = new Map<string, number>();
       slaBreached.forEach((t) => breachByCat.set(t.constraint, (breachByCat.get(t.constraint) || 0) + 1));
+
+      // === SLA Rate per Tim (grouped by serpo) ===
+      // For each team: total resolved, SLA OK count, breach count, and rate %.
+      const teamMap = new Map<string, { resolved: number; ok: number; breach: number }>();
+      resolved.forEach((t) => {
+        const team = (t.serpo || "TANPA TIM").trim() || "TANPA TIM";
+        const cur = teamMap.get(team) || { resolved: 0, ok: 0, breach: 0 };
+        cur.resolved += 1;
+        if (isSlaOkResolved(t)) cur.ok += 1;
+        else if (isSlaBreachedResolved(t)) cur.breach += 1;
+        teamMap.set(team, cur);
+      });
+      const teamSlaBreakdown = Array.from(teamMap.entries())
+        .map(([team, s]) => ({
+          team,
+          resolved: s.resolved,
+          ok: s.ok,
+          breach: s.breach,
+          rate: s.resolved > 0 ? Math.round((s.ok / s.resolved) * 100) : 0,
+        }))
+        .sort((a, b) => b.rate - a.rate || b.resolved - a.resolved);
+
       return {
         title: `📈 SLA Compliance — ${selectedMonthLabel}`,
         emoji: "📈",
@@ -606,6 +628,7 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
         breakdownTitle: "Kategori dengan SLA Breach Terbanyak",
         statusBreakdown: Array.from(breachByCat.entries()).sort((a, b) => b[1] - a[1]).slice(0, 8),
         categoryBreakdown: [],
+        teamSlaBreakdown,
         basePool: slaBreached,
         tickets: applyKpiFilters(slaBreached, kpiCategories),
       };
