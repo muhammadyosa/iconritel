@@ -106,23 +106,45 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
   }, [tickets, selectedMonth]);
 
   const kpis = useMemo(() => {
-    const resolved = monthTickets.filter((t) => t.status === "Resolved");
-    const totalResolutionMs = resolved.reduce((sum, t) => {
-      if (t.resolvedAt) {
-        return sum + (new Date(t.resolvedAt).getTime() - new Date(t.createdISO).getTime());
-      }
-      return sum;
-    }, 0);
+    const resolved = monthTickets.filter((t) => t.status === "Resolved" && t.resolvedAt);
+    const totalResolutionMs = resolved.reduce(
+      (sum, t) => sum + (new Date(t.resolvedAt!).getTime() - new Date(t.createdISO).getTime()),
+      0,
+    );
     const avgResolutionMs = resolved.length > 0 ? totalResolutionMs / resolved.length : 0;
     const avgResolutionHours = Math.round((avgResolutionMs / (1000 * 60 * 60)) * 10) / 10;
 
-    const slaCompliant = monthTickets.filter(isSlaOkResolved).length;
-    const slaRate = monthTickets.length > 0 ? Math.round((slaCompliant / monthTickets.length) * 100) : 0;
+    // Format avg as "Xh Ym" (or "Ym" when <1h) — easier to read than "0.3h"
+    let avgResolutionLabel = "—";
+    if (resolved.length > 0) {
+      const totalMinutes = Math.round(avgResolutionMs / 60000);
+      const h = Math.floor(totalMinutes / 60);
+      const m = totalMinutes % 60;
+      avgResolutionLabel = h > 0 ? (m > 0 ? `${h}h ${m}m` : `${h}h`) : `${m}m`;
+    }
+
+    // SLA Rate: compliance among RESOLVED tickets (standard ITIL definition).
+    // Showing slaOk/total inflates failure when most tickets are still in progress.
+    const slaCompliant = resolved.filter(isSlaOkResolved).length;
+    const slaRate = resolved.length > 0 ? Math.round((slaCompliant / resolved.length) * 100) : 0;
+    const slaRateLabel = resolved.length > 0 ? `${slaRate}%` : "—";
 
     const ritel = monthTickets.filter((t) => !FEEDER_CONSTRAINTS_SET.has(t.constraint)).length;
     const feeder = monthTickets.filter((t) => FEEDER_CONSTRAINTS_SET.has(t.constraint)).length;
+    const resolutionRate = monthTickets.length > 0 ? Math.round((resolved.length / monthTickets.length) * 100) : 0;
 
-    return { total: monthTickets.length, resolved: resolved.length, avgResolutionHours, slaRate, slaCompliant, ritel, feeder };
+    return {
+      total: monthTickets.length,
+      resolved: resolved.length,
+      avgResolutionHours,
+      avgResolutionLabel,
+      slaRate,
+      slaRateLabel,
+      slaCompliant,
+      ritel,
+      feeder,
+      resolutionRate,
+    };
   }, [monthTickets]);
 
   const selectedMonthLabel = monthOptions.find((o) => o.value === selectedMonth)?.label || selectedMonth;
