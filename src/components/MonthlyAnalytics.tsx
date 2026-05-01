@@ -589,6 +589,28 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
       const slaPctLabel = resolved.length > 0 ? `${slaPct}%` : "—";
       const breachByCat = new Map<string, number>();
       slaBreached.forEach((t) => breachByCat.set(t.constraint, (breachByCat.get(t.constraint) || 0) + 1));
+
+      // === SLA Rate per Tim (grouped by serpo) ===
+      // For each team: total resolved, SLA OK count, breach count, and rate %.
+      const teamMap = new Map<string, { resolved: number; ok: number; breach: number }>();
+      resolved.forEach((t) => {
+        const team = (t.serpo || "TANPA TIM").trim() || "TANPA TIM";
+        const cur = teamMap.get(team) || { resolved: 0, ok: 0, breach: 0 };
+        cur.resolved += 1;
+        if (isSlaOkResolved(t)) cur.ok += 1;
+        else if (isSlaBreachedResolved(t)) cur.breach += 1;
+        teamMap.set(team, cur);
+      });
+      const teamSlaBreakdown = Array.from(teamMap.entries())
+        .map(([team, s]) => ({
+          team,
+          resolved: s.resolved,
+          ok: s.ok,
+          breach: s.breach,
+          rate: s.resolved > 0 ? Math.round((s.ok / s.resolved) * 100) : 0,
+        }))
+        .sort((a, b) => b.rate - a.rate || b.resolved - a.resolved);
+
       return {
         title: `📈 SLA Compliance — ${selectedMonthLabel}`,
         emoji: "📈",
@@ -606,6 +628,7 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
         breakdownTitle: "Kategori dengan SLA Breach Terbanyak",
         statusBreakdown: Array.from(breachByCat.entries()).sort((a, b) => b[1] - a[1]).slice(0, 8),
         categoryBreakdown: [],
+        teamSlaBreakdown,
         basePool: slaBreached,
         tickets: applyKpiFilters(slaBreached, kpiCategories),
       };
@@ -634,6 +657,19 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
     });
     if (changed) setKpiCategories(next);
   }, [kpiAvailableCategories, kpiDetailOpen, kpiCategories]);
+
+  // When the user changes the selected month, KPI cards / charts / tables must
+  // all reflect the new month immediately. Close any open drill / KPI dialog
+  // and clear snapshot drill state so a stale list from the previous month
+  // can never be shown.
+  useEffect(() => {
+    setDrillOpen(false);
+    setKpiDetailOpen(false);
+    setDrillSelectedTicket(null);
+    setDrillSource(null);
+    setDrillTickets([]);
+    setDrillTitle("");
+  }, [selectedMonth]);
 
   // Realtime-derived drill list when source = "kpi"
   const realtimeDrillTickets = useMemo(() => {
@@ -1283,6 +1319,56 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
                         </li>
                       ))}
                     </ul>
+                  </div>
+                )}
+
+                {/* SLA Rate per Tim — only for SLA card */}
+                {kpiDetailType === "sla" && (kpiDetail as any).teamSlaBreakdown?.length > 0 && (
+                  <div className="space-y-1.5">
+                    <h4 className="text-[10px] sm:text-xs font-semibold text-foreground flex items-center gap-1.5">
+                      👥 SLA Rate per Tim (≤ 24 jam)
+                      <span className="text-[9px] font-normal text-muted-foreground">basis: resolved</span>
+                    </h4>
+                    <ul className="space-y-1 text-[10px] sm:text-xs max-h-56 overflow-auto pr-1">
+                      {((kpiDetail as any).teamSlaBreakdown as Array<{ team: string; resolved: number; ok: number; breach: number; rate: number }>).map((row) => {
+                        const tone =
+                          row.rate >= 80 ? "text-success border-success/30 bg-success/5" :
+                          row.rate >= 50 ? "text-warning border-warning/30 bg-warning/5" :
+                          "text-destructive border-destructive/30 bg-destructive/5";
+                        return (
+                          <li
+                            key={row.team}
+                            className="rounded border border-border/30 bg-muted/10 px-2 py-1.5 space-y-1"
+                          >
+                            <div className="flex items-center justify-between gap-2">
+                              <span className="font-medium text-foreground/90 truncate flex-1">{row.team}</span>
+                              <span className={`shrink-0 inline-flex items-center gap-1 rounded-full border px-1.5 py-0.5 text-[10px] font-bold tabular-nums ${tone}`}>
+                                {row.rate}%
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-3 text-[9px] text-muted-foreground tabular-nums">
+                              <span>✅ {row.ok} OK</span>
+                              <span>❌ {row.breach} Breach</span>
+                              <span className="ml-auto">n={row.resolved}</span>
+                            </div>
+                            {/* Mini progress bar */}
+                            <div className="h-1 w-full rounded-full bg-muted overflow-hidden">
+                              <div
+                                className={
+                                  row.rate >= 80 ? "h-full bg-success" :
+                                  row.rate >= 50 ? "h-full bg-warning" :
+                                  "h-full bg-destructive"
+                                }
+                                style={{ width: `${row.rate}%` }}
+                              />
+                            </div>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                    <p className="text-[9px] text-muted-foreground/70">
+                      Tim diambil dari field SERPO. Persentase = SLA OK / Resolved per tim.
+                    </p>
                   </div>
                 )}
               </div>
