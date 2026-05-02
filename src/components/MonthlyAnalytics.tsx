@@ -426,7 +426,7 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
       const kpiItems = [
         { label: "Total Incident", value: String(kpis.total), sub: `R:${kpis.ritel} | F:${kpis.feeder}`, color: [30, 64, 144] as const },
         { label: "Resolved", value: String(kpis.resolved), sub: `${kpis.resolutionRate}%`, color: [39, 174, 96] as const },
-        { label: "Avg Resolusi", value: kpis.avgResolutionLabel, sub: kpis.resolved > 0 ? `n=${kpis.resolved}` : "n/a", color: [243, 156, 18] as const },
+        { label: "Avg Resolution", value: kpis.avgResolutionLabel, sub: kpis.resolved > 0 ? `n=${kpis.resolved}` : "n/a", color: [243, 156, 18] as const },
         { label: "SLA Rate", value: kpis.slaRateLabel, sub: kpis.resolved > 0 ? `${kpis.slaCompliant}/${kpis.resolved} OK` : "n/a", color: (kpis.resolved === 0 ? [140, 140, 140] : kpis.slaRate >= 80 ? [39, 174, 96] : [231, 76, 60]) as readonly [number, number, number] },
       ];
 
