@@ -93,14 +93,14 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
 
   const monthOptions = useMemo(() => {
     const options: { value: string; label: string }[] = [
-      { value: "all", label: "🌐 Semua Bulan" },
-      { value: "current", label: "📍 Saat Ini (Bulan Berjalan)" },
+      { value: "all", label: "🌐 All Months" },
+      { value: "current", label: "📍 Current Month" },
     ];
     const now = new Date();
     for (let i = 0; i < 6; i++) {
       const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
       const value = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
-      const label = d.toLocaleDateString("id-ID", { month: "long", year: "numeric" });
+      const label = d.toLocaleDateString("en-US", { month: "long", year: "numeric" });
       options.push({ value, label });
     }
     return options;
