@@ -918,6 +918,53 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
         ))}
       </div>
 
+      {/* Status Distribution — counts per status for the active scope (month / current / all) */}
+      <Card className="overflow-hidden border">
+        <CardHeader className="py-2 px-3 sm:px-4 border-b bg-muted/20">
+          <div className="flex items-center justify-between gap-2">
+            <CardTitle className="flex items-center gap-1.5 text-xs sm:text-sm">
+              <CheckCircle className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary" />
+              Status Distribution
+            </CardTitle>
+            <span className="text-[9px] sm:text-[10px] text-muted-foreground truncate">
+              {selectedMonthLabel} • {kpis.total} incident
+            </span>
+          </div>
+        </CardHeader>
+        <CardContent className="p-2 sm:p-3">
+          {kpis.total === 0 ? (
+            <p className="text-xs text-muted-foreground text-center py-4">Tidak ada data</p>
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              {statusDistribution.map((s) => {
+                const toneMap: Record<string, { bg: string; text: string; bar: string; border: string }> = {
+                  success: { bg: "bg-success/8", text: "text-success", bar: "bg-success", border: "border-success/30" },
+                  warning: { bg: "bg-warning/8", text: "text-warning", bar: "bg-warning", border: "border-warning/30" },
+                  destructive: { bg: "bg-destructive/8", text: "text-destructive", bar: "bg-destructive", border: "border-destructive/30" },
+                  muted: { bg: "bg-muted/30", text: "text-muted-foreground", bar: "bg-muted-foreground/50", border: "border-muted-foreground/20" },
+                };
+                const c = toneMap[s.tone];
+                return (
+                  <div key={s.key} className={`rounded-lg border p-2 ${c.bg} ${c.border}`}>
+                    <div className="flex items-center justify-between gap-1 mb-1">
+                      <span className="flex items-center gap-1 text-[10px] font-medium text-muted-foreground truncate">
+                        <span>{s.emoji}</span>
+                        <span className="truncate">{s.label}</span>
+                      </span>
+                      <span className={`text-[9px] tabular-nums ${c.text}`}>{s.pct}%</span>
+                    </div>
+                    <p className={`text-xl sm:text-2xl font-bold tabular-nums leading-none ${c.text}`}>{s.value}</p>
+                    <div className="mt-1.5 h-1 w-full rounded-full bg-muted/50 overflow-hidden">
+                      <div className={`h-full ${c.bar} transition-all duration-500`} style={{ width: `${s.pct}%` }} />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
       {/* Charts - matching Status Distribution / Category Trend card style */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 sm:gap-3">
         {/* Category Breakdown */}
