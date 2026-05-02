@@ -155,29 +155,30 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
 
   const selectedMonthLabel = monthOptions.find((o) => o.value === selectedMonth)?.label || selectedMonth;
 
+  // SYNC: Incident Category & related drill-downs are scoped to the
+  // selectedMonth pool (monthTickets) so KPI Total/Ritel/Feeder always
+  // equal the sum of bars shown in the Incident Category chart.
   const categoryFilteredTickets = useMemo(() => {
     const today = new Date();
-    if (categoryFilter === "all") return tickets;
+    if (categoryFilter === "all") return monthTickets;
     if (categoryFilter === "custom") {
-      return tickets.filter((t) => toLocalDateStr(new Date(t.createdISO)) === categoryCustomDate);
+      return monthTickets.filter((t) => toLocalDateStr(new Date(t.createdISO)) === categoryCustomDate);
     }
     if (categoryFilter === "today") {
       const todayStr = toLocalDateStr(today);
-      return tickets.filter((t) => toLocalDateStr(new Date(t.createdISO)) === todayStr);
+      return monthTickets.filter((t) => toLocalDateStr(new Date(t.createdISO)) === todayStr);
     }
     const days = Number(categoryFilter);
     const start = new Date(today);
     start.setDate(start.getDate() - days + 1);
     start.setHours(0, 0, 0, 0);
-    return tickets.filter((t) => new Date(t.createdISO) >= start);
-  }, [tickets, categoryFilter, categoryCustomDate]);
+    return monthTickets.filter((t) => new Date(t.createdISO) >= start);
+  }, [monthTickets, categoryFilter, categoryCustomDate]);
 
   const categoryData = useMemo(() => {
-    // Use cloud-persisted historical data if available
-    if (getCategoryDataFromHistory) {
-      return getCategoryDataFromHistory(categoryFilter, categoryCustomDate);
-    }
-    // Fallback to live tickets
+    // Always derive from monthTickets so the chart reconciles with KPI cards
+    // (Total / Ritel / Feeder) for the selected month. Cloud-persisted history
+    // covers any-period totals and would not match the month-scoped KPIs.
     const map = new Map<string, number>();
     categoryFilteredTickets.forEach((t) => {
       map.set(t.constraint, (map.get(t.constraint) || 0) + 1);
@@ -185,7 +186,7 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
     return Array.from(map.entries())
       .map(([name, value]) => ({ name, value }))
       .sort((a, b) => b.value - a.value);
-  }, [categoryFilteredTickets, getCategoryDataFromHistory, categoryFilter, categoryCustomDate]);
+  }, [categoryFilteredTickets]);
 
   const dailyTrend = useMemo(() => {
     const today = new Date();
