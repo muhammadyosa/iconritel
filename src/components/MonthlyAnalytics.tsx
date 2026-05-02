@@ -93,14 +93,14 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
 
   const monthOptions = useMemo(() => {
     const options: { value: string; label: string }[] = [
-      { value: "all", label: "🌐 Semua Bulan" },
-      { value: "current", label: "📍 Saat Ini (Bulan Berjalan)" },
+      { value: "all", label: "🌐 All Months" },
+      { value: "current", label: "📍 Current Month" },
     ];
     const now = new Date();
     for (let i = 0; i < 6; i++) {
       const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
       const value = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
-      const label = d.toLocaleDateString("id-ID", { month: "long", year: "numeric" });
+      const label = d.toLocaleDateString("en-US", { month: "long", year: "numeric" });
       options.push({ value, label });
     }
     return options;
@@ -172,6 +172,32 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
 
   const selectedMonthLabel = monthOptions.find((o) => o.value === selectedMonth)?.label || selectedMonth;
 
+  // Active date range hint for the month selector — makes "All Months" and
+  // "Current Month" modes explicit by showing the exact date span used by
+  // every KPI, chart, and drilldown below.
+  const selectedRangeHint = useMemo(() => {
+    const fmt = (d: Date) => d.toLocaleDateString("en-US", { day: "2-digit", month: "short", year: "numeric" });
+    const now = new Date();
+    if (selectedMonth === "all") {
+      if (tickets.length === 0) return { label: "No data available", days: 0, mode: "all" as const };
+      const dates = tickets.map((t) => new Date(t.createdISO).getTime());
+      const min = new Date(Math.min(...dates));
+      const max = new Date(Math.max(...dates));
+      const days = Math.floor((max.getTime() - min.getTime()) / 86400000) + 1;
+      return { label: `${fmt(min)} – ${fmt(max)}`, days, mode: "all" as const };
+    }
+    if (selectedMonth === "current") {
+      const start = new Date(now.getFullYear(), now.getMonth(), 1);
+      const days = now.getDate();
+      return { label: `${fmt(start)} – ${fmt(now)}`, days, mode: "current" as const };
+    }
+    const [y, m] = selectedMonth.split("-").map(Number);
+    const start = new Date(y, (m || 1) - 1, 1);
+    const end = new Date(y, m || 1, 0);
+    const days = end.getDate();
+    return { label: `${fmt(start)} – ${fmt(end)}`, days, mode: "month" as const };
+  }, [selectedMonth, tickets]);
+
   // SYNC: Incident Category & related drill-downs are scoped to the
   // selectedMonth pool (monthTickets) so KPI Total/Ritel/Feeder always
   // equal the sum of bars shown in the Incident Category chart.
@@ -213,7 +239,7 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
 
     const buildDay = (date: Date) => {
       const isoDate = toLocalDateStr(date);
-      const displayDay = date.toLocaleDateString("id-ID", { day: "2-digit", month: "short" });
+      const displayDay = date.toLocaleDateString("en-US", { day: "2-digit", month: "short" });
       const dayTickets = monthTickets.filter((t) => toLocalDateStr(new Date(t.createdISO)) === isoDate);
       const resolvedDay = dayTickets.filter((t) => t.status === "Resolved");
       const slaOk = resolvedDay.filter(isSlaOkResolved).length;
@@ -275,19 +301,19 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
   // Human-readable date range for the Category & Trend filters — shown as a
   // small hint so users know exactly which days the chart covers.
   const formatRangeHint = useCallback((data: Array<{ isoDate: string }>) => {
-    if (data.length === 0) return "Tidak ada data dalam rentang ini";
+    if (data.length === 0) return "No data in this range";
     const first = parseLocalDateStr(data[0].isoDate);
     const last = parseLocalDateStr(data[data.length - 1].isoDate);
-    const fmt = (d: Date) => d.toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "2-digit" });
+    const fmt = (d: Date) => d.toLocaleDateString("en-US", { day: "2-digit", month: "short", year: "2-digit" });
     if (data.length === 1) return `📅 ${fmt(first)}`;
-    return `📅 ${fmt(first)} – ${fmt(last)} (${data.length} hari)`;
+    return `📅 ${fmt(first)} – ${fmt(last)} (${data.length} day${data.length>1?"s":""})`;
   }, []);
 
   // Compute the date range used by the Category chart for the hint label
   const categoryRangeHint = useMemo(() => {
     const today = new Date();
     if (categoryFilter === "all") {
-      if (monthTickets.length === 0) return "Tidak ada data";
+      if (monthTickets.length === 0) return "No data";
       const dates = monthTickets.map((t) => new Date(t.createdISO).getTime());
       const min = new Date(Math.min(...dates));
       const max = new Date(Math.max(...dates));
@@ -295,16 +321,16 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
       return `📅 ${fmt(min)} – ${fmt(max)}`;
     }
     if (categoryFilter === "custom") {
-      return `📅 ${parseLocalDateStr(categoryCustomDate).toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "2-digit" })}`;
+      return `📅 ${parseLocalDateStr(categoryCustomDate).toLocaleDateString("en-US", { day: "2-digit", month: "short", year: "2-digit" })}`;
     }
     if (categoryFilter === "today") {
-      return `📅 ${today.toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "2-digit" })}`;
+      return `📅 ${today.toLocaleDateString("en-US", { day: "2-digit", month: "short", year: "2-digit" })}`;
     }
     const days = Number(categoryFilter);
     const start = new Date(today);
     start.setDate(start.getDate() - days + 1);
     const fmt = (d: Date) => d.toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "2-digit" });
-    return `📅 ${fmt(start)} – ${fmt(today)} (${days} hari)`;
+    return `📅 ${fmt(start)} – ${fmt(today)} (${days} day${days>1?"s":""})`;
   }, [categoryFilter, categoryCustomDate, monthTickets]);
 
   // Status Distribution per selectedMonth — counts each ticket.status bucket
@@ -336,7 +362,7 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
       setDrillSelectedTicket(null);
       setDrillSource(null);
       setDrillTickets(filtered);
-      const filterLabel = categoryFilter === "all" ? "Semua Data" : categoryFilter === "custom" ? categoryCustomDate : categoryFilter === "today" ? "Hari ini" : `${categoryFilter} Hari`;
+      const filterLabel = categoryFilter === "all" ? "All Data" : categoryFilter === "custom" ? categoryCustomDate : categoryFilter === "today" ? "Today" : `${categoryFilter} Days`;
       setDrillTitle(`📊 ${constraint} — ${filtered.length} incident (${filterLabel})`);
       setDrillOpen(true);
     }
@@ -400,7 +426,7 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
       const kpiItems = [
         { label: "Total Incident", value: String(kpis.total), sub: `R:${kpis.ritel} | F:${kpis.feeder}`, color: [30, 64, 144] as const },
         { label: "Resolved", value: String(kpis.resolved), sub: `${kpis.resolutionRate}%`, color: [39, 174, 96] as const },
-        { label: "Avg Resolusi", value: kpis.avgResolutionLabel, sub: kpis.resolved > 0 ? `n=${kpis.resolved}` : "n/a", color: [243, 156, 18] as const },
+        { label: "Avg Resolution", value: kpis.avgResolutionLabel, sub: kpis.resolved > 0 ? `n=${kpis.resolved}` : "n/a", color: [243, 156, 18] as const },
         { label: "SLA Rate", value: kpis.slaRateLabel, sub: kpis.resolved > 0 ? `${kpis.slaCompliant}/${kpis.resolved} OK` : "n/a", color: (kpis.resolved === 0 ? [140, 140, 140] : kpis.slaRate >= 80 ? [39, 174, 96] : [231, 76, 60]) as readonly [number, number, number] },
       ];
 
@@ -588,15 +614,15 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
         title: `🗃️ Total Incident — ${selectedMonthLabel}`,
         emoji: "🗃️",
         tone: "primary" as const,
-        summary: `Total ${total} incident tercatat (${kpis.ritel} Ritel, ${kpis.feeder} Feeder).`,
+        summary: `${total} total incidents recorded (${kpis.ritel} Ritel, ${kpis.feeder} Feeder).`,
         metrics: [
           { label: "Total", value: total, tone: "primary" as const },
           { label: "🏠 Ritel", value: kpis.ritel, tone: "primary" as const },
           { label: "🏬 Feeder", value: kpis.feeder, tone: "primary" as const },
           { label: "✅ Resolved", value: resolved.length, tone: "success" as const },
-          { label: "⏳ Belum", value: unresolved.length, tone: "warning" as const },
+          { label: "⏳ Unresolved", value: unresolved.length, tone: "warning" as const },
         ],
-        breakdownTitle: "Distribusi Status & Kategori",
+        breakdownTitle: "Status & Category Distribution",
         statusBreakdown: Array.from(byStatus.entries()).sort((a, b) => b[1] - a[1]),
         categoryBreakdown: Array.from(byCategory.entries()).sort((a, b) => b[1] - a[1]).slice(0, 8),
         basePool: monthTickets,
@@ -609,14 +635,14 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
       const feederRes = resolved.filter((t) => FEEDER_CONSTRAINTS_SET.has(t.constraint)).length;
       const byResolver = new Map<string, number>();
       resolved.forEach((t) => {
-        const name = t.resolvedByName || "Tidak diketahui";
+        const name = t.resolvedByName || "Unknown";
         byResolver.set(name, (byResolver.get(name) || 0) + 1);
       });
       return {
         title: `✅ Resolved Incident — ${selectedMonthLabel}`,
         emoji: "✅",
         tone: "success" as const,
-        summary: `${resolved.length} dari ${total} incident telah diselesaikan (${rate}%).`,
+        summary: `${resolved.length} of ${total} incidents resolved (${rate}%).`,
         metrics: [
           { label: "Resolved", value: resolved.length, tone: "success" as const },
           { label: "Resolution Rate", value: `${rate}%`, tone: "success" as const },
@@ -645,21 +671,21 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
       const fastest = [...durations].sort((a, b) => a.hours - b.hours).slice(0, 5);
       const avgPool = durations.map((d) => d.ticket);
       return {
-        title: `⏱️ Rata-rata Waktu Resolusi — ${selectedMonthLabel}`,
+        title: `⏱️ Average Resolution Time — ${selectedMonthLabel}`,
         emoji: "⏱️",
         tone: "warning" as const,
-        summary: `Rata-rata waktu resolusi: ${kpis.avgResolutionHours} jam dari ${resolved.length} incident yang diselesaikan.`,
+        summary: `Average resolution time: ${kpis.avgResolutionHours} hours across ${resolved.length} resolved incidents.`,
         metrics: [
-          { label: "Avg Waktu", value: `${kpis.avgResolutionHours}h`, tone: "warning" as const },
-          { label: "⚡ ≤ 4 jam", value: fast, tone: "success" as const },
-          { label: "🕐 4–24 jam", value: medium, tone: "primary" as const },
-          { label: "🐢 > 24 jam", value: slow, tone: "destructive" as const },
+          { label: "Avg Time", value: `${kpis.avgResolutionHours}h`, tone: "warning" as const },
+          { label: "⚡ ≤ 4h", value: fast, tone: "success" as const },
+          { label: "🕐 4–24h", value: medium, tone: "primary" as const },
+          { label: "🐢 > 24h", value: slow, tone: "destructive" as const },
           { label: "Sample", value: durations.length, tone: "default" as const },
         ],
-        breakdownTitle: "🐢 Resolusi Terlama (Top 5)",
+        breakdownTitle: "🐢 Slowest Resolutions (Top 5)",
         statusBreakdown: longest.map((d) => [`${d.ticket.id} — ${d.ticket.constraint}`, `${d.hours.toFixed(1)}h`] as [string, string | number]),
         categoryBreakdown: fastest.map((d) => [`${d.ticket.id} — ${d.ticket.constraint}`, `${d.hours.toFixed(1)}h`] as [string, string | number]),
-        breakdownTitle2: "⚡ Resolusi Tercepat (Top 5)",
+        breakdownTitle2: "⚡ Fastest Resolutions (Top 5)",
         basePool: avgPool,
         tickets: applyKpiFilters(avgPool, kpiCategories),
       };
@@ -675,7 +701,7 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
       // For each team: total resolved, SLA OK count, breach count, and rate %.
       const teamMap = new Map<string, { resolved: number; ok: number; breach: number }>();
       resolved.forEach((t) => {
-        const team = (t.serpo || "TANPA TIM").trim() || "TANPA TIM";
+        const team = (t.serpo || "NO TEAM").trim() || "NO TEAM";
         const cur = teamMap.get(team) || { resolved: 0, ok: 0, breach: 0 };
         cur.resolved += 1;
         if (isSlaOkResolved(t)) cur.ok += 1;
@@ -697,16 +723,16 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
         emoji: "📈",
         tone: (resolved.length === 0 ? "primary" : slaPct >= 80 ? "success" : "destructive") as "success" | "destructive" | "primary",
         summary: resolved.length > 0
-          ? `${slaOk.length} dari ${resolved.length} incident yang sudah resolved memenuhi SLA (≤ 24 jam). Tingkat kepatuhan: ${slaPct}%.`
-          : `Belum ada incident resolved bulan ini, sehingga SLA Rate belum dapat dihitung.`,
+          ? `${slaOk.length} of ${resolved.length} resolved incidents met SLA (≤ 24h). Compliance rate: ${slaPct}%.`
+          : `No resolved incidents in this period — SLA Rate cannot be calculated yet.`,
         metrics: [
           { label: "SLA Rate", value: slaPctLabel, tone: (resolved.length === 0 ? "default" : slaPct >= 80 ? "success" : "destructive") as "success" | "destructive" | "default" },
           { label: "✅ SLA OK", value: slaOk.length, tone: "success" as const },
           { label: "❌ Breach", value: slaBreached.length, tone: "destructive" as const },
-          { label: "⏳ Belum selesai", value: unresolved.length, tone: "warning" as const },
+          { label: "⏳ Unresolved", value: unresolved.length, tone: "warning" as const },
           { label: "Total", value: total, tone: "primary" as const },
         ],
-        breakdownTitle: "Kategori dengan SLA Breach Terbanyak",
+        breakdownTitle: "Categories with Most SLA Breaches",
         statusBreakdown: Array.from(breachByCat.entries()).sort((a, b) => b[1] - a[1]).slice(0, 8),
         categoryBreakdown: [],
         teamSlaBreakdown,
@@ -855,6 +881,47 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
         </div>
       </div>
 
+      {/* Active range indicator — clarifies the date span used by every KPI,
+          chart, and drill-down below. Highlighted differently for the
+          dynamic "All Months" and "Current Month" modes. */}
+      <div
+        className={`flex flex-wrap items-center justify-between gap-2 rounded-md border px-2.5 py-1.5 text-[10px] sm:text-[11px] ${
+          selectedRangeHint.mode === "all"
+            ? "border-primary/30 bg-primary/5 text-primary"
+            : selectedRangeHint.mode === "current"
+            ? "border-success/30 bg-success/5 text-success"
+            : "border-border/40 bg-muted/30 text-foreground/80"
+        }`}
+      >
+        <div className="flex items-center gap-1.5 min-w-0">
+          <span className="shrink-0">
+            {selectedRangeHint.mode === "all" ? "🌐" : selectedRangeHint.mode === "current" ? "📍" : "🗓️"}
+          </span>
+          <span className="font-semibold truncate">{selectedMonthLabel}</span>
+          <span className="text-muted-foreground/80 shrink-0">·</span>
+          <span className="tabular-nums truncate">{selectedRangeHint.label}</span>
+        </div>
+        <div className="flex items-center gap-1.5 shrink-0 text-muted-foreground">
+          {selectedRangeHint.mode === "all" && (
+            <span className="rounded-full border border-primary/30 bg-primary/10 px-1.5 py-0.5 text-[9px] font-medium text-primary">
+              Full history
+            </span>
+          )}
+          {selectedRangeHint.mode === "current" && (
+            <span className="rounded-full border border-success/30 bg-success/10 px-1.5 py-0.5 text-[9px] font-medium text-success">
+              Live · month-to-date
+            </span>
+          )}
+          <span className="tabular-nums">
+            {selectedRangeHint.days} day{selectedRangeHint.days === 1 ? "" : "s"}
+          </span>
+          <span className="text-muted-foreground/60">·</span>
+          <span className="tabular-nums">
+            {kpis.total} incident{kpis.total === 1 ? "" : "s"}
+          </span>
+        </div>
+      </div>
+
       {/* KPI Summary - compact cards with glow effect matching Dashboard KPI */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
         {([
@@ -864,28 +931,28 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
             sub: `🏠 ${kpis.ritel} • 🏬 ${kpis.feeder}`,
             bgClass: "bg-primary/8 hover:bg-primary/15", borderClass: "border-primary/30 hover:border-primary/50",
             valueClass: "text-primary", glowClass: "hover:shadow-[0_0_15px_-4px_hsl(var(--primary)/0.3)]",
-            tooltip: "Total incident bulan ini (Ritel + Feeder). Klik untuk detail.",
+            tooltip: "Total incidents for this period (Ritel + Feeder). Click for details.",
           },
           {
             type: "resolved" as const,
             emoji: "✅", title: "Resolved", value: kpis.resolved,
-            sub: kpis.total > 0 ? `${kpis.resolutionRate}% selesai` : "Belum ada data",
+            sub: kpis.total > 0 ? `${kpis.resolutionRate}% resolved` : "No data yet",
             bgClass: "bg-success/8 hover:bg-success/15", borderClass: "border-success/30 hover:border-success/50",
             valueClass: "text-success", glowClass: "hover:shadow-[0_0_15px_-4px_hsl(var(--success)/0.3)]",
-            tooltip: "Incident dengan status Resolved. Klik untuk detail.",
+            tooltip: "Incidents with Resolved status. Click for details.",
           },
           {
             type: "avg" as const,
-            emoji: "⏱️", title: "Avg Resolusi", value: kpis.avgResolutionLabel,
-            sub: kpis.resolved > 0 ? `dari ${kpis.resolved} resolved` : "Belum ada resolved",
+            emoji: "⏱️", title: "Avg Resolution", value: kpis.avgResolutionLabel,
+            sub: kpis.resolved > 0 ? `of ${kpis.resolved} resolved` : "No resolved yet",
             bgClass: "bg-warning/8 hover:bg-warning/15", borderClass: "border-warning/30 hover:border-warning/50",
             valueClass: "text-warning", glowClass: "hover:shadow-[0_0_15px_-4px_hsl(var(--warning)/0.3)]",
-            tooltip: "Rata-rata waktu penyelesaian incident. Klik untuk detail.",
+            tooltip: "Average incident resolution time. Click for details.",
           },
           {
             type: "sla" as const,
             emoji: "📈", title: "SLA Rate", value: kpis.slaRateLabel,
-            sub: kpis.resolved > 0 ? `${kpis.slaCompliant}/${kpis.resolved} ≤ 24h` : "Belum ada resolved",
+            sub: kpis.resolved > 0 ? `${kpis.slaCompliant}/${kpis.resolved} ≤ 24h` : "No resolved yet",
             bgClass: kpis.resolved === 0
               ? "bg-muted/30 hover:bg-muted/50"
               : kpis.slaRate >= 80 ? "bg-success/8 hover:bg-success/15" : "bg-destructive/8 hover:bg-destructive/15",
@@ -898,7 +965,7 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
             glowClass: kpis.resolved === 0
               ? ""
               : kpis.slaRate >= 80 ? "hover:shadow-[0_0_15px_-4px_hsl(var(--success)/0.3)]" : "hover:shadow-[0_0_15px_-4px_hsl(var(--destructive)/0.3)]",
-            tooltip: "Tingkat kepatuhan SLA (≤24 jam) di antara incident yang sudah resolved. Klik untuk detail.",
+            tooltip: "SLA compliance rate (≤24h) among resolved incidents. Click for details.",
           },
         ]).map((card, i) => (
           <button
@@ -927,13 +994,13 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
               Status Distribution
             </CardTitle>
             <span className="text-[9px] sm:text-[10px] text-muted-foreground truncate">
-              {selectedMonthLabel} • {kpis.total} incident
+              {selectedMonthLabel} • {kpis.total} incident{kpis.total===1?"":"s"}
             </span>
           </div>
         </CardHeader>
         <CardContent className="p-2 sm:p-3">
           {kpis.total === 0 ? (
-            <p className="text-xs text-muted-foreground text-center py-4">Tidak ada data</p>
+            <p className="text-xs text-muted-foreground text-center py-4">No data</p>
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
               {statusDistribution.map((s) => {
@@ -981,11 +1048,11 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="today">Hari ini</SelectItem>
-                    <SelectItem value="all">Semua Data</SelectItem>
-                    <SelectItem value="7">7 Hari</SelectItem>
-                    <SelectItem value="14">14 Hari</SelectItem>
-                    <SelectItem value="30">30 Hari</SelectItem>
+                    <SelectItem value="today">Today</SelectItem>
+                    <SelectItem value="all">All Data</SelectItem>
+                    <SelectItem value="7">7 Days</SelectItem>
+                    <SelectItem value="14">14 Days</SelectItem>
+                    <SelectItem value="30">30 Days</SelectItem>
                     <SelectItem value="custom">Custom</SelectItem>
                   </SelectContent>
                 </Select>
@@ -1002,11 +1069,11 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
           </CardHeader>
           <CardContent className="p-2 sm:p-3">
             {categoryData.length === 0 ? (
-              <p className="text-xs text-muted-foreground text-center py-8">Tidak ada data</p>
+              <p className="text-xs text-muted-foreground text-center py-8">No data</p>
             ) : (
               <>
                 <ChartContainer
-                  config={{ value: { label: "Jumlah" } }}
+                  config={{ value: { label: "Count" } }}
                   className="h-[180px] xs:h-[190px] sm:h-[210px] md:h-[240px] w-full transition-all duration-300"
                 >
                   <BarChart
@@ -1029,7 +1096,7 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
                 </ChartContainer>
                 <div className="flex items-center justify-between gap-2 mt-1 text-[9px] sm:text-[10px] text-muted-foreground">
                   <span className="font-medium text-primary/80 truncate">{categoryRangeHint}</span>
-                  <span>Klik bar untuk detail</span>
+                  <span>Click a bar for details</span>
                 </div>
               </>
             )}
@@ -1050,10 +1117,10 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">Semua Data</SelectItem>
-                    <SelectItem value="7">7 Hari</SelectItem>
-                    <SelectItem value="14">14 Hari</SelectItem>
-                    <SelectItem value="30">30 Hari</SelectItem>
+                    <SelectItem value="all">All Data</SelectItem>
+                    <SelectItem value="7">7 Days</SelectItem>
+                    <SelectItem value="14">14 Days</SelectItem>
+                    <SelectItem value="30">30 Days</SelectItem>
                     <SelectItem value="custom">Custom</SelectItem>
                   </SelectContent>
                 </Select>
@@ -1070,7 +1137,7 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
           </CardHeader>
           <CardContent className="p-2 sm:p-3">
             {dailyTrend.length === 0 ? (
-              <p className="text-xs text-muted-foreground text-center py-8">Tidak ada data</p>
+              <p className="text-xs text-muted-foreground text-center py-8">No data</p>
             ) : (
               <>
                 <ChartContainer config={trendConfig} className="h-[180px] xs:h-[190px] sm:h-[210px] md:h-[240px] w-full transition-all duration-300">
@@ -1101,7 +1168,7 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
                 </div>
                 <div className="flex items-center justify-between gap-2 mt-0.5 text-[9px] sm:text-[10px] text-muted-foreground">
                   <span className="font-medium text-primary/80 truncate">{formatRangeHint(dailyTrend)}</span>
-                  <span>Klik titik untuk detail</span>
+                  <span>Click a point for details</span>
                 </div>
               </>
             )}
@@ -1116,9 +1183,9 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
             {drillSelectedTicket ? (
               <DialogTitle className="flex items-center gap-2 text-sm">
                 <Button variant="default" size="sm" className="rounded-full h-7 px-3 text-xs" onClick={() => setDrillSelectedTicket(null)}>
-                  <ArrowLeft className="h-3 w-3 mr-1" /> Kembali
+                  <ArrowLeft className="h-3 w-3 mr-1" /> Back
                 </Button>
-                <span className="truncate">Detail Incident</span>
+                <span className="truncate">Incident Detail</span>
               </DialogTitle>
             ) : (
               <DialogTitle className="text-sm sm:text-base flex items-center gap-2">
@@ -1153,15 +1220,15 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
                   </div>
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs">
                     {[
-                      { label: "ID Incident", value: drillSelectedTicket.id },
+                      { label: "Incident ID", value: drillSelectedTicket.id },
                       { label: "Service ID", value: drillSelectedTicket.serviceId },
                       { label: "Customer", value: drillSelectedTicket.customerName },
                       { label: "Hostname", value: drillSelectedTicket.hostname },
                       { label: "SERPO", value: drillSelectedTicket.serpo },
                       { label: "ID FAT", value: drillSelectedTicket.fatId },
                       { label: "SN ONT", value: drillSelectedTicket.snOnt },
-                      { label: "Dibuat", value: drillSelectedTicket.createdAt },
-                      { label: "Oleh", value: drillSelectedTicket.createdByName || "-" },
+                      { label: "Created", value: drillSelectedTicket.createdAt },
+                      { label: "By", value: drillSelectedTicket.createdByName || "-" },
                     ].map((item) => (
                       <div key={item.label} className="bg-muted/40 rounded p-1.5">
                         <p className="text-[10px] text-muted-foreground">{item.label}</p>
@@ -1184,7 +1251,7 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
                   className="space-y-1.5"
                 >
                   {effectiveDrillTickets.length === 0 ? (
-                    <p className="text-sm text-muted-foreground text-center py-8">Tidak ada incident</p>
+                    <p className="text-sm text-muted-foreground text-center py-8">No incidents</p>
                   ) : (
                     effectiveDrillTickets.map((ticket) => (
                       <div
@@ -1204,7 +1271,7 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
                         <div className="text-right shrink-0 ml-2">
                           <p className="text-[10px] font-mono text-muted-foreground">{ticket.id}</p>
                           <p className="text-[9px] text-muted-foreground">
-                            {new Date(ticket.createdISO).toLocaleString("id-ID", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}
+                            {new Date(ticket.createdISO).toLocaleString("en-US", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}
                           </p>
                         </div>
                       </div>
@@ -1216,7 +1283,7 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
           </div>
 
           <div className="flex justify-end pt-2 border-t mt-2 flex-shrink-0">
-            <Button variant="outline" size="sm" onClick={() => setDrillOpen(false)}>Tutup</Button>
+            <Button variant="outline" size="sm" onClick={() => setDrillOpen(false)}>Close</Button>
           </div>
         </DialogContent>
       </Dialog>
@@ -1269,7 +1336,7 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
                 <div className="rounded-lg border border-border/40 bg-muted/20 p-2.5 space-y-2">
                   <div className="flex items-center justify-between gap-2">
                     <h4 className="text-[10px] sm:text-xs font-semibold text-foreground flex items-center gap-1.5">
-                      🔎 Filter Incident
+                      🔎 Filter Incidents
                     </h4>
                     {(kpiSegment !== "all" || kpiStatus !== "all" || kpiSla !== "all" || kpiCategories.size > 0) && (
                       <Button
@@ -1294,7 +1361,7 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
                     <p className="text-[9px] uppercase tracking-wider text-muted-foreground">Segment</p>
                     <div className="flex flex-wrap gap-1">
                       {([
-                        { v: "all", label: "Semua", emoji: "🌐" },
+                        { v: "all", label: "All", emoji: "🌐" },
                         { v: "ritel", label: "Ritel", emoji: "🏠" },
                         { v: "feeder", label: "Feeder", emoji: "🏬" },
                       ] as const).map((opt) => (
@@ -1320,9 +1387,9 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
                       <p className="text-[9px] uppercase tracking-wider text-muted-foreground">Status</p>
                       <div className="flex flex-wrap gap-1">
                         {([
-                          { v: "all", label: "Semua", cls: "bg-primary text-primary-foreground border-primary" },
+                          { v: "all", label: "All", cls: "bg-primary text-primary-foreground border-primary" },
                           { v: "resolved", label: "✅ Resolved", cls: "bg-success text-success-foreground border-success" },
-                          { v: "unresolved", label: "⏳ Belum", cls: "bg-warning text-warning-foreground border-warning" },
+                          { v: "unresolved", label: "⏳ Unresolved", cls: "bg-warning text-warning-foreground border-warning" },
                         ] as const).map((opt) => (
                           <button
                             key={opt.v}
@@ -1346,7 +1413,7 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
                     <p className="text-[9px] uppercase tracking-wider text-muted-foreground">SLA</p>
                     <div className="flex flex-wrap gap-1">
                       {([
-                        { v: "all", label: "Semua", cls: "bg-primary text-primary-foreground border-primary" },
+                        { v: "all", label: "All", cls: "bg-primary text-primary-foreground border-primary" },
                         { v: "ontime", label: "✅ On Time", cls: "bg-success text-success-foreground border-success" },
                         { v: "breached", label: "⛔ Breached", cls: "bg-destructive text-destructive-foreground border-destructive" },
                       ] as const).map((opt) => (
@@ -1365,7 +1432,7 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
                       ))}
                     </div>
                     <p className="text-[9px] text-muted-foreground/70">
-                      Threshold 24 jam · Breached mencakup resolved &gt; 24 jam dan unresolved yang sudah lewat batas.
+                      24-hour threshold · Breached includes resolved &gt; 24h and overdue unresolved incidents.
                     </p>
                   </div>
 
@@ -1373,8 +1440,8 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
                   {kpiAvailableCategories.length > 0 && (
                     <div className="space-y-1">
                       <p className="text-[9px] uppercase tracking-wider text-muted-foreground flex items-center justify-between">
-                        <span>Kategori Kendala {kpiCategories.size > 0 && `(${kpiCategories.size} dipilih)`}</span>
-                        <span className="text-muted-foreground/60 normal-case">Klik untuk pilih multi</span>
+                        <span>Constraint Category {kpiCategories.size > 0 && `(${kpiCategories.size} selected)`}</span>
+                        <span className="text-muted-foreground/60 normal-case">Click to multi-select</span>
                       </p>
                       <div className="flex flex-wrap gap-1 max-h-24 overflow-auto">
                         {kpiAvailableCategories.map((cat) => {
@@ -1399,9 +1466,9 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
                   )}
 
                   <div className="flex items-center justify-between gap-2 pt-1 border-t border-border/40">
-                    <span className="text-[10px] text-muted-foreground">Hasil filter</span>
+                    <span className="text-[10px] text-muted-foreground">Filtered result</span>
                     <span className="text-[11px] font-bold text-primary tabular-nums">
-                      {kpiDetail.tickets.length} incident
+                      {kpiDetail.tickets.length} incident{kpiDetail.tickets.length===1?"":"s"}
                     </span>
                   </div>
                 </div>
@@ -1439,7 +1506,7 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
                 {/* Top category breakdown for total */}
                 {kpiDetailType === "total" && kpiDetail.categoryBreakdown.length > 0 && (
                   <div className="space-y-1.5">
-                    <h4 className="text-[10px] sm:text-xs font-semibold text-foreground">Top Kategori Kendala</h4>
+                    <h4 className="text-[10px] sm:text-xs font-semibold text-foreground">Top Constraint Categories</h4>
                     <ul className="space-y-1 text-[10px] sm:text-xs">
                       {kpiDetail.categoryBreakdown.map(([label, value], i) => (
                         <li key={i} className="flex items-center justify-between gap-2 px-2 py-1 rounded border border-border/30 bg-muted/10">
@@ -1473,14 +1540,14 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
                   return (
                   <div className="space-y-1.5">
                     <h4 className="text-[10px] sm:text-xs font-semibold text-foreground flex items-center gap-1.5">
-                      👥 SLA Rate per Tim (≤ 24 jam)
-                      <span className="text-[9px] font-normal text-muted-foreground">basis: resolved</span>
+                      👥 SLA Rate per Team (≤ 24h)
+                      <span className="text-[9px] font-normal text-muted-foreground">based on resolved</span>
                     </h4>
                     {/* Search & Sort Controls */}
                     <div className="flex flex-col sm:flex-row gap-1.5">
                       <Input
                         type="search"
-                        placeholder="🔍 Cari tim…"
+                        placeholder="🔍 Search team…"
                         value={teamSlaSearch}
                         onChange={(e) => setTeamSlaSearch(e.target.value)}
                         className="h-7 text-[10px] sm:text-xs flex-1"
@@ -1490,18 +1557,18 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="rate-asc" className="text-xs">📉 Rate terendah</SelectItem>
-                          <SelectItem value="rate-desc" className="text-xs">📈 Rate tertinggi</SelectItem>
-                          <SelectItem value="breach-desc" className="text-xs">❌ Breach terbanyak</SelectItem>
-                          <SelectItem value="ok-desc" className="text-xs">✅ OK terbanyak</SelectItem>
-                          <SelectItem value="resolved-desc" className="text-xs">🗃️ Resolved terbanyak</SelectItem>
-                          <SelectItem value="team-asc" className="text-xs">🔤 Nama (A→Z)</SelectItem>
+                          <SelectItem value="rate-asc" className="text-xs">📉 Lowest rate</SelectItem>
+                          <SelectItem value="rate-desc" className="text-xs">📈 Highest rate</SelectItem>
+                          <SelectItem value="breach-desc" className="text-xs">❌ Most breaches</SelectItem>
+                          <SelectItem value="ok-desc" className="text-xs">✅ Most OK</SelectItem>
+                          <SelectItem value="resolved-desc" className="text-xs">🗃️ Most resolved</SelectItem>
+                          <SelectItem value="team-asc" className="text-xs">🔤 Name (A→Z)</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
                     <div className="flex items-center justify-between text-[9px] text-muted-foreground tabular-nums">
-                      <span>Menampilkan {sorted.length} dari {allRows.length} tim</span>
-                      {q && sorted.length === 0 && <span className="text-warning">tidak ada hasil</span>}
+                      <span>Showing {sorted.length} of {allRows.length} teams</span>
+                      {q && sorted.length === 0 && <span className="text-warning">no results</span>}
                     </div>
                     <ul className="space-y-1 text-[10px] sm:text-xs max-h-56 overflow-auto pr-1">
                       {sorted.map((row) => {
@@ -1543,7 +1610,7 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
                       })}
                     </ul>
                     <p className="text-[9px] text-muted-foreground/70">
-                      Tim diambil dari field SERPO. Persentase = SLA OK / Resolved per tim.
+                      Teams derived from SERPO field. Percentage = SLA OK / Resolved per team.
                     </p>
                   </div>
                   );
@@ -1558,9 +1625,9 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
                   onClick={openTicketsFromKpi}
                   disabled={!kpiDetail.tickets || kpiDetail.tickets.length === 0}
                 >
-                  Lihat {kpiDetail.tickets.length} Incident
+                  View {kpiDetail.tickets.length} Incident{kpiDetail.tickets.length===1?"":"s"}
                 </Button>
-                <Button variant="outline" size="sm" onClick={() => setKpiDetailOpen(false)}>Tutup</Button>
+                <Button variant="outline" size="sm" onClick={() => setKpiDetailOpen(false)}>Close</Button>
               </div>
             </>
           )}
