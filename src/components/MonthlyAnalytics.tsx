@@ -92,7 +92,10 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
 
 
   const monthOptions = useMemo(() => {
-    const options: { value: string; label: string }[] = [];
+    const options: { value: string; label: string }[] = [
+      { value: "all", label: "🌐 Semua Bulan" },
+      { value: "current", label: "📍 Saat Ini (Bulan Berjalan)" },
+    ];
     const now = new Date();
     for (let i = 0; i < 6; i++) {
       const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
@@ -103,13 +106,27 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
     return options;
   }, []);
 
+  // Resolve the active month range. "all" => entire dataset; "current" => current
+  // calendar month; otherwise YYYY-MM.
+  const monthRange = useMemo(() => {
+    const now = new Date();
+    if (selectedMonth === "all") {
+      return { mode: "all" as const, year: 0, monthIdx: 0 };
+    }
+    if (selectedMonth === "current") {
+      return { mode: "month" as const, year: now.getFullYear(), monthIdx: now.getMonth() };
+    }
+    const [y, m] = selectedMonth.split("-").map(Number);
+    return { mode: "month" as const, year: y, monthIdx: (m || 1) - 1 };
+  }, [selectedMonth]);
+
   const monthTickets = useMemo(() => {
-    const [year, month] = selectedMonth.split("-").map(Number);
+    if (monthRange.mode === "all") return tickets;
     return tickets.filter((t) => {
       const d = new Date(t.createdISO);
-      return d.getFullYear() === year && d.getMonth() + 1 === month;
+      return d.getFullYear() === monthRange.year && d.getMonth() === monthRange.monthIdx;
     });
-  }, [tickets, selectedMonth]);
+  }, [tickets, monthRange]);
 
   const kpis = useMemo(() => {
     const resolved = monthTickets.filter((t) => t.status === "Resolved" && t.resolvedAt);
