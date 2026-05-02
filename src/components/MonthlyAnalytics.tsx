@@ -1137,7 +1137,7 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
           </CardHeader>
           <CardContent className="p-2 sm:p-3">
             {dailyTrend.length === 0 ? (
-              <p className="text-xs text-muted-foreground text-center py-8">Tidak ada data</p>
+              <p className="text-xs text-muted-foreground text-center py-8">No data</p>
             ) : (
               <>
                 <ChartContainer config={trendConfig} className="h-[180px] xs:h-[190px] sm:h-[210px] md:h-[240px] w-full transition-all duration-300">
