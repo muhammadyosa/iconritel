@@ -208,16 +208,8 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
   const dailyTrend = useMemo(() => {
     // SYNC: Daily Trend is derived from monthTickets (selectedMonth pool) so
     // the sum of "total" across all bars equals the Total Incident KPI for the
-    // same month. Cloud history is intentionally bypassed here to keep parity
-    // with the month-scoped Category chart and Ritel/Feeder counts.
-    const [year, month] = selectedMonth.split("-").map(Number);
-    const monthIdx = month - 1;
+    // same scope.
     const today = new Date();
-    const isCurrentMonth = today.getFullYear() === year && today.getMonth() === monthIdx;
-    const lastDayOfMonth = new Date(year, month, 0).getDate();
-    // Anchor end-day inside the selected month so old months don't show empty future days.
-    const anchorDay = isCurrentMonth ? today.getDate() : lastDayOfMonth;
-    const anchor = new Date(year, monthIdx, anchorDay);
 
     const buildDay = (date: Date) => {
       const isoDate = toLocalDateStr(date);
@@ -228,16 +220,46 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
       return { day: displayDay, isoDate, dayNum: date.getDate(), total: dayTickets.length, resolved: resolvedDay.length, slaOk };
     };
 
+    // === ALL MONTHS mode: bucket by full date across the whole dataset ===
+    if (monthRange.mode === "all") {
+      if (monthTickets.length === 0) return [];
+      const dates = monthTickets.map((t) => new Date(t.createdISO).getTime());
+      const minDate = new Date(Math.min(...dates));
+      const maxDate = new Date(Math.max(...dates));
+      minDate.setHours(0, 0, 0, 0);
+      maxDate.setHours(0, 0, 0, 0);
+
+      if (trendFilter === "custom") {
+        const customD = parseLocalDateStr(trendCustomDate);
+        return [buildDay(customD)];
+      }
+
+      const totalSpan = Math.floor((maxDate.getTime() - minDate.getTime()) / 86400000) + 1;
+      const days = trendFilter === "all" ? totalSpan : Math.min(Number(trendFilter), totalSpan);
+      const data: { day: string; isoDate: string; dayNum: number; total: number; resolved: number; slaOk: number }[] = [];
+      for (let i = days - 1; i >= 0; i--) {
+        const date = new Date(maxDate);
+        date.setDate(maxDate.getDate() - i);
+        data.push(buildDay(date));
+      }
+      return data;
+    }
+
+    // === Single-month mode ===
+    const { year, monthIdx } = monthRange;
+    const isCurrentMonth = today.getFullYear() === year && today.getMonth() === monthIdx;
+    const lastDayOfMonth = new Date(year, monthIdx + 1, 0).getDate();
+    const anchorDay = isCurrentMonth ? today.getDate() : lastDayOfMonth;
+
     if (trendFilter === "custom") {
       const customD = parseLocalDateStr(trendCustomDate);
-      // Only return data if the custom date falls inside the selected month.
       if (customD.getFullYear() !== year || customD.getMonth() !== monthIdx) return [];
       return [buildDay(customD)];
     }
 
     let days: number;
     if (trendFilter === "all") {
-      days = anchorDay; // entire selected month up to anchor
+      days = anchorDay;
     } else {
       days = Math.min(Number(trendFilter), anchorDay);
     }
@@ -248,7 +270,57 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
       data.push(buildDay(date));
     }
     return data;
-  }, [monthTickets, trendFilter, trendCustomDate, selectedMonth]);
+  }, [monthTickets, trendFilter, trendCustomDate, monthRange]);
+
+  // Human-readable date range for the Category & Trend filters — shown as a
+  // small hint so users know exactly which days the chart covers.
+  const formatRangeHint = useCallback((data: Array<{ isoDate: string }>) => {
+    if (data.length === 0) return "Tidak ada data dalam rentang ini";
+    const first = parseLocalDateStr(data[0].isoDate);
+    const last = parseLocalDateStr(data[data.length - 1].isoDate);
+    const fmt = (d: Date) => d.toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "2-digit" });
+    if (data.length === 1) return `📅 ${fmt(first)}`;
+    return `📅 ${fmt(first)} – ${fmt(last)} (${data.length} hari)`;
+  }, []);
+
+  // Compute the date range used by the Category chart for the hint label
+  const categoryRangeHint = useMemo(() => {
+    const today = new Date();
+    if (categoryFilter === "all") {
+      if (monthTickets.length === 0) return "Tidak ada data";
+      const dates = monthTickets.map((t) => new Date(t.createdISO).getTime());
+      const min = new Date(Math.min(...dates));
+      const max = new Date(Math.max(...dates));
+      const fmt = (d: Date) => d.toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "2-digit" });
+      return `📅 ${fmt(min)} – ${fmt(max)}`;
+    }
+    if (categoryFilter === "custom") {
+      return `📅 ${parseLocalDateStr(categoryCustomDate).toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "2-digit" })}`;
+    }
+    if (categoryFilter === "today") {
+      return `📅 ${today.toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "2-digit" })}`;
+    }
+    const days = Number(categoryFilter);
+    const start = new Date(today);
+    start.setDate(start.getDate() - days + 1);
+    const fmt = (d: Date) => d.toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "2-digit" });
+    return `📅 ${fmt(start)} – ${fmt(today)} (${days} hari)`;
+  }, [categoryFilter, categoryCustomDate, monthTickets]);
+
+  // Status Distribution per selectedMonth — counts each ticket.status bucket
+  const statusDistribution = useMemo(() => {
+    const counts = { "On Progress": 0, Critical: 0, Resolved: 0, Pending: 0 } as Record<string, number>;
+    monthTickets.forEach((t) => {
+      counts[t.status] = (counts[t.status] || 0) + 1;
+    });
+    const total = monthTickets.length;
+    return [
+      { key: "Resolved" as const, label: "Selesai", emoji: "✅", value: counts.Resolved, tone: "success" },
+      { key: "On Progress" as const, label: "Progres", emoji: "🛠️", value: counts["On Progress"], tone: "warning" },
+      { key: "Critical" as const, label: "Kritis", emoji: "🔥", value: counts.Critical, tone: "destructive" },
+      { key: "Pending" as const, label: "Tertunda", emoji: "⏸️", value: counts.Pending, tone: "muted" },
+    ].map((s) => ({ ...s, pct: total > 0 ? Math.round((s.value / total) * 100) : 0 }));
+  }, [monthTickets]);
 
   const trendConfig: ChartConfig = {
     total: { label: "Total", color: "hsl(var(--primary))" },
