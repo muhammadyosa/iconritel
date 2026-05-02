@@ -92,7 +92,10 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
 
 
   const monthOptions = useMemo(() => {
-    const options: { value: string; label: string }[] = [];
+    const options: { value: string; label: string }[] = [
+      { value: "all", label: "🌐 Semua Bulan" },
+      { value: "current", label: "📍 Saat Ini (Bulan Berjalan)" },
+    ];
     const now = new Date();
     for (let i = 0; i < 6; i++) {
       const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
@@ -103,13 +106,27 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
     return options;
   }, []);
 
+  // Resolve the active month range. "all" => entire dataset; "current" => current
+  // calendar month; otherwise YYYY-MM.
+  const monthRange = useMemo(() => {
+    const now = new Date();
+    if (selectedMonth === "all") {
+      return { mode: "all" as const, year: 0, monthIdx: 0 };
+    }
+    if (selectedMonth === "current") {
+      return { mode: "month" as const, year: now.getFullYear(), monthIdx: now.getMonth() };
+    }
+    const [y, m] = selectedMonth.split("-").map(Number);
+    return { mode: "month" as const, year: y, monthIdx: (m || 1) - 1 };
+  }, [selectedMonth]);
+
   const monthTickets = useMemo(() => {
-    const [year, month] = selectedMonth.split("-").map(Number);
+    if (monthRange.mode === "all") return tickets;
     return tickets.filter((t) => {
       const d = new Date(t.createdISO);
-      return d.getFullYear() === year && d.getMonth() + 1 === month;
+      return d.getFullYear() === monthRange.year && d.getMonth() === monthRange.monthIdx;
     });
-  }, [tickets, selectedMonth]);
+  }, [tickets, monthRange]);
 
   const kpis = useMemo(() => {
     const resolved = monthTickets.filter((t) => t.status === "Resolved" && t.resolvedAt);
@@ -191,16 +208,8 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
   const dailyTrend = useMemo(() => {
     // SYNC: Daily Trend is derived from monthTickets (selectedMonth pool) so
     // the sum of "total" across all bars equals the Total Incident KPI for the
-    // same month. Cloud history is intentionally bypassed here to keep parity
-    // with the month-scoped Category chart and Ritel/Feeder counts.
-    const [year, month] = selectedMonth.split("-").map(Number);
-    const monthIdx = month - 1;
+    // same scope.
     const today = new Date();
-    const isCurrentMonth = today.getFullYear() === year && today.getMonth() === monthIdx;
-    const lastDayOfMonth = new Date(year, month, 0).getDate();
-    // Anchor end-day inside the selected month so old months don't show empty future days.
-    const anchorDay = isCurrentMonth ? today.getDate() : lastDayOfMonth;
-    const anchor = new Date(year, monthIdx, anchorDay);
 
     const buildDay = (date: Date) => {
       const isoDate = toLocalDateStr(date);
@@ -211,16 +220,46 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
       return { day: displayDay, isoDate, dayNum: date.getDate(), total: dayTickets.length, resolved: resolvedDay.length, slaOk };
     };
 
+    // === ALL MONTHS mode: bucket by full date across the whole dataset ===
+    if (monthRange.mode === "all") {
+      if (monthTickets.length === 0) return [];
+      const dates = monthTickets.map((t) => new Date(t.createdISO).getTime());
+      const minDate = new Date(Math.min(...dates));
+      const maxDate = new Date(Math.max(...dates));
+      minDate.setHours(0, 0, 0, 0);
+      maxDate.setHours(0, 0, 0, 0);
+
+      if (trendFilter === "custom") {
+        const customD = parseLocalDateStr(trendCustomDate);
+        return [buildDay(customD)];
+      }
+
+      const totalSpan = Math.floor((maxDate.getTime() - minDate.getTime()) / 86400000) + 1;
+      const days = trendFilter === "all" ? totalSpan : Math.min(Number(trendFilter), totalSpan);
+      const data: { day: string; isoDate: string; dayNum: number; total: number; resolved: number; slaOk: number }[] = [];
+      for (let i = days - 1; i >= 0; i--) {
+        const date = new Date(maxDate);
+        date.setDate(maxDate.getDate() - i);
+        data.push(buildDay(date));
+      }
+      return data;
+    }
+
+    // === Single-month mode ===
+    const { year, monthIdx } = monthRange;
+    const isCurrentMonth = today.getFullYear() === year && today.getMonth() === monthIdx;
+    const lastDayOfMonth = new Date(year, monthIdx + 1, 0).getDate();
+    const anchorDay = isCurrentMonth ? today.getDate() : lastDayOfMonth;
+
     if (trendFilter === "custom") {
       const customD = parseLocalDateStr(trendCustomDate);
-      // Only return data if the custom date falls inside the selected month.
       if (customD.getFullYear() !== year || customD.getMonth() !== monthIdx) return [];
       return [buildDay(customD)];
     }
 
     let days: number;
     if (trendFilter === "all") {
-      days = anchorDay; // entire selected month up to anchor
+      days = anchorDay;
     } else {
       days = Math.min(Number(trendFilter), anchorDay);
     }
@@ -231,7 +270,57 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
       data.push(buildDay(date));
     }
     return data;
-  }, [monthTickets, trendFilter, trendCustomDate, selectedMonth]);
+  }, [monthTickets, trendFilter, trendCustomDate, monthRange]);
+
+  // Human-readable date range for the Category & Trend filters — shown as a
+  // small hint so users know exactly which days the chart covers.
+  const formatRangeHint = useCallback((data: Array<{ isoDate: string }>) => {
+    if (data.length === 0) return "Tidak ada data dalam rentang ini";
+    const first = parseLocalDateStr(data[0].isoDate);
+    const last = parseLocalDateStr(data[data.length - 1].isoDate);
+    const fmt = (d: Date) => d.toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "2-digit" });
+    if (data.length === 1) return `📅 ${fmt(first)}`;
+    return `📅 ${fmt(first)} – ${fmt(last)} (${data.length} hari)`;
+  }, []);
+
+  // Compute the date range used by the Category chart for the hint label
+  const categoryRangeHint = useMemo(() => {
+    const today = new Date();
+    if (categoryFilter === "all") {
+      if (monthTickets.length === 0) return "Tidak ada data";
+      const dates = monthTickets.map((t) => new Date(t.createdISO).getTime());
+      const min = new Date(Math.min(...dates));
+      const max = new Date(Math.max(...dates));
+      const fmt = (d: Date) => d.toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "2-digit" });
+      return `📅 ${fmt(min)} – ${fmt(max)}`;
+    }
+    if (categoryFilter === "custom") {
+      return `📅 ${parseLocalDateStr(categoryCustomDate).toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "2-digit" })}`;
+    }
+    if (categoryFilter === "today") {
+      return `📅 ${today.toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "2-digit" })}`;
+    }
+    const days = Number(categoryFilter);
+    const start = new Date(today);
+    start.setDate(start.getDate() - days + 1);
+    const fmt = (d: Date) => d.toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "2-digit" });
+    return `📅 ${fmt(start)} – ${fmt(today)} (${days} hari)`;
+  }, [categoryFilter, categoryCustomDate, monthTickets]);
+
+  // Status Distribution per selectedMonth — counts each ticket.status bucket
+  const statusDistribution = useMemo(() => {
+    const counts = { "On Progress": 0, Critical: 0, Resolved: 0, Pending: 0 } as Record<string, number>;
+    monthTickets.forEach((t) => {
+      counts[t.status] = (counts[t.status] || 0) + 1;
+    });
+    const total = monthTickets.length;
+    return [
+      { key: "Resolved" as const, label: "Selesai", emoji: "✅", value: counts.Resolved, tone: "success" },
+      { key: "On Progress" as const, label: "Progres", emoji: "🛠️", value: counts["On Progress"], tone: "warning" },
+      { key: "Critical" as const, label: "Kritis", emoji: "🔥", value: counts.Critical, tone: "destructive" },
+      { key: "Pending" as const, label: "Tertunda", emoji: "⏸️", value: counts.Pending, tone: "muted" },
+    ].map((s) => ({ ...s, pct: total > 0 ? Math.round((s.value / total) * 100) : 0 }));
+  }, [monthTickets]);
 
   const trendConfig: ChartConfig = {
     total: { label: "Total", color: "hsl(var(--primary))" },
@@ -829,6 +918,53 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
         ))}
       </div>
 
+      {/* Status Distribution — counts per status for the active scope (month / current / all) */}
+      <Card className="overflow-hidden border">
+        <CardHeader className="py-2 px-3 sm:px-4 border-b bg-muted/20">
+          <div className="flex items-center justify-between gap-2">
+            <CardTitle className="flex items-center gap-1.5 text-xs sm:text-sm">
+              <CheckCircle className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary" />
+              Status Distribution
+            </CardTitle>
+            <span className="text-[9px] sm:text-[10px] text-muted-foreground truncate">
+              {selectedMonthLabel} • {kpis.total} incident
+            </span>
+          </div>
+        </CardHeader>
+        <CardContent className="p-2 sm:p-3">
+          {kpis.total === 0 ? (
+            <p className="text-xs text-muted-foreground text-center py-4">Tidak ada data</p>
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              {statusDistribution.map((s) => {
+                const toneMap: Record<string, { bg: string; text: string; bar: string; border: string }> = {
+                  success: { bg: "bg-success/8", text: "text-success", bar: "bg-success", border: "border-success/30" },
+                  warning: { bg: "bg-warning/8", text: "text-warning", bar: "bg-warning", border: "border-warning/30" },
+                  destructive: { bg: "bg-destructive/8", text: "text-destructive", bar: "bg-destructive", border: "border-destructive/30" },
+                  muted: { bg: "bg-muted/30", text: "text-muted-foreground", bar: "bg-muted-foreground/50", border: "border-muted-foreground/20" },
+                };
+                const c = toneMap[s.tone];
+                return (
+                  <div key={s.key} className={`rounded-lg border p-2 ${c.bg} ${c.border}`}>
+                    <div className="flex items-center justify-between gap-1 mb-1">
+                      <span className="flex items-center gap-1 text-[10px] font-medium text-muted-foreground truncate">
+                        <span>{s.emoji}</span>
+                        <span className="truncate">{s.label}</span>
+                      </span>
+                      <span className={`text-[9px] tabular-nums ${c.text}`}>{s.pct}%</span>
+                    </div>
+                    <p className={`text-xl sm:text-2xl font-bold tabular-nums leading-none ${c.text}`}>{s.value}</p>
+                    <div className="mt-1.5 h-1 w-full rounded-full bg-muted/50 overflow-hidden">
+                      <div className={`h-full ${c.bar} transition-all duration-500`} style={{ width: `${s.pct}%` }} />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
       {/* Charts - matching Status Distribution / Category Trend card style */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 sm:gap-3">
         {/* Category Breakdown */}
@@ -891,9 +1027,10 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
                     </Bar>
                   </BarChart>
                 </ChartContainer>
-                <p className="text-[9px] sm:text-[10px] text-muted-foreground text-center mt-1">
-                  Klik bar untuk detail
-                </p>
+                <div className="flex items-center justify-between gap-2 mt-1 text-[9px] sm:text-[10px] text-muted-foreground">
+                  <span className="font-medium text-primary/80 truncate">{categoryRangeHint}</span>
+                  <span>Klik bar untuk detail</span>
+                </div>
               </>
             )}
           </CardContent>
@@ -962,9 +1099,10 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
                     <span className="w-2.5 h-0.5 rounded inline-block border-dashed border-t" style={{ borderColor: "hsl(200, 80%, 50%)" }} /> SLA OK
                   </span>
                 </div>
-                <p className="text-[9px] sm:text-[10px] text-muted-foreground text-center mt-0.5">
-                  Klik titik untuk detail
-                </p>
+                <div className="flex items-center justify-between gap-2 mt-0.5 text-[9px] sm:text-[10px] text-muted-foreground">
+                  <span className="font-medium text-primary/80 truncate">{formatRangeHint(dailyTrend)}</span>
+                  <span>Klik titik untuk detail</span>
+                </div>
               </>
             )}
           </CardContent>
