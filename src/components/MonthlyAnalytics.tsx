@@ -256,7 +256,7 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
   const handleTrendDotClick = (data: any) => {
     if (data?.activePayload?.[0]?.payload?.isoDate) {
       const { isoDate, day } = data.activePayload[0].payload;
-      const filtered = tickets.filter((t) => {
+      const filtered = monthTickets.filter((t) => {
         const tDate = toLocalDateStr(new Date(t.createdISO));
         return tDate === isoDate;
       });
