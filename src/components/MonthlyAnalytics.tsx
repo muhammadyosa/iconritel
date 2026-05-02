@@ -315,10 +315,10 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
     });
     const total = monthTickets.length;
     return [
-      { key: "Resolved" as const, label: "Selesai", emoji: "✅", value: counts.Resolved, tone: "success" },
-      { key: "On Progress" as const, label: "Progres", emoji: "🛠️", value: counts["On Progress"], tone: "warning" },
-      { key: "Critical" as const, label: "Kritis", emoji: "🔥", value: counts.Critical, tone: "destructive" },
-      { key: "Pending" as const, label: "Tertunda", emoji: "⏸️", value: counts.Pending, tone: "muted" },
+      { key: "Resolved" as const, label: "Resolved", emoji: "✅", value: counts.Resolved, tone: "success" },
+      { key: "On Progress" as const, label: "On Progress", emoji: "🛠️", value: counts["On Progress"], tone: "warning" },
+      { key: "Critical" as const, label: "Critical", emoji: "🔥", value: counts.Critical, tone: "destructive" },
+      { key: "Pending" as const, label: "Pending", emoji: "⏸️", value: counts.Pending, tone: "muted" },
     ].map((s) => ({ ...s, pct: total > 0 ? Math.round((s.value / total) * 100) : 0 }));
   }, [monthTickets]);
 
