@@ -1052,9 +1052,10 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
                     <span className="w-2.5 h-0.5 rounded inline-block border-dashed border-t" style={{ borderColor: "hsl(200, 80%, 50%)" }} /> SLA OK
                   </span>
                 </div>
-                <p className="text-[9px] sm:text-[10px] text-muted-foreground text-center mt-0.5">
-                  Klik titik untuk detail
-                </p>
+                <div className="flex items-center justify-between gap-2 mt-0.5 text-[9px] sm:text-[10px] text-muted-foreground">
+                  <span className="font-medium text-primary/80 truncate">{formatRangeHint(dailyTrend)}</span>
+                  <span>Klik titik untuk detail</span>
+                </div>
               </>
             )}
           </CardContent>
