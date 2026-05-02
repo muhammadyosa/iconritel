@@ -172,6 +172,32 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
 
   const selectedMonthLabel = monthOptions.find((o) => o.value === selectedMonth)?.label || selectedMonth;
 
+  // Active date range hint for the month selector — makes "All Months" and
+  // "Current Month" modes explicit by showing the exact date span used by
+  // every KPI, chart, and drilldown below.
+  const selectedRangeHint = useMemo(() => {
+    const fmt = (d: Date) => d.toLocaleDateString("en-US", { day: "2-digit", month: "short", year: "numeric" });
+    const now = new Date();
+    if (selectedMonth === "all") {
+      if (tickets.length === 0) return { label: "No data available", days: 0, mode: "all" as const };
+      const dates = tickets.map((t) => new Date(t.createdISO).getTime());
+      const min = new Date(Math.min(...dates));
+      const max = new Date(Math.max(...dates));
+      const days = Math.floor((max.getTime() - min.getTime()) / 86400000) + 1;
+      return { label: `${fmt(min)} – ${fmt(max)}`, days, mode: "all" as const };
+    }
+    if (selectedMonth === "current") {
+      const start = new Date(now.getFullYear(), now.getMonth(), 1);
+      const days = now.getDate();
+      return { label: `${fmt(start)} – ${fmt(now)}`, days, mode: "current" as const };
+    }
+    const [y, m] = selectedMonth.split("-").map(Number);
+    const start = new Date(y, (m || 1) - 1, 1);
+    const end = new Date(y, m || 1, 0);
+    const days = end.getDate();
+    return { label: `${fmt(start)} – ${fmt(end)}`, days, mode: "month" as const };
+  }, [selectedMonth, tickets]);
+
   // SYNC: Incident Category & related drill-downs are scoped to the
   // selectedMonth pool (monthTickets) so KPI Total/Ritel/Feeder always
   // equal the sum of bars shown in the Incident Category chart.
