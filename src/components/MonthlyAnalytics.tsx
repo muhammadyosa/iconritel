@@ -189,64 +189,49 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
   }, [categoryFilteredTickets]);
 
   const dailyTrend = useMemo(() => {
+    // SYNC: Daily Trend is derived from monthTickets (selectedMonth pool) so
+    // the sum of "total" across all bars equals the Total Incident KPI for the
+    // same month. Cloud history is intentionally bypassed here to keep parity
+    // with the month-scoped Category chart and Ritel/Feeder counts.
+    const [year, month] = selectedMonth.split("-").map(Number);
+    const monthIdx = month - 1;
     const today = new Date();
-    
-    // Use cloud-persisted historical data if available
-    if (getTrendChartData) {
-      if (trendFilter === "custom") {
-        const customD = parseLocalDateStr(trendCustomDate);
-        return getTrendChartData(1).length > 0
-          ? [getTrendChartData(Math.max(1, Math.ceil((today.getTime() - customD.getTime()) / (1000 * 60 * 60 * 24)) + 1))
-              .find(d => d.isoDate === trendCustomDate) || {
-                day: customD.toLocaleDateString('id-ID', { day: '2-digit', month: 'short' }),
-                isoDate: trendCustomDate, dayNum: customD.getDate(),
-                total: 0, resolved: 0, slaOk: 0,
-              }]
-          : [];
-      }
-      if (trendFilter === "all") {
-        // Use max available history (30 days)
-        return getTrendChartData(30).filter(d => d.total > 0 || true);
-      }
-      const days = Number(trendFilter);
-      return getTrendChartData(days);
+    const isCurrentMonth = today.getFullYear() === year && today.getMonth() === monthIdx;
+    const lastDayOfMonth = new Date(year, month, 0).getDate();
+    // Anchor end-day inside the selected month so old months don't show empty future days.
+    const anchorDay = isCurrentMonth ? today.getDate() : lastDayOfMonth;
+    const anchor = new Date(year, monthIdx, anchorDay);
+
+    const buildDay = (date: Date) => {
+      const isoDate = toLocalDateStr(date);
+      const displayDay = date.toLocaleDateString("id-ID", { day: "2-digit", month: "short" });
+      const dayTickets = monthTickets.filter((t) => toLocalDateStr(new Date(t.createdISO)) === isoDate);
+      const resolvedDay = dayTickets.filter((t) => t.status === "Resolved");
+      const slaOk = resolvedDay.filter(isSlaOkResolved).length;
+      return { day: displayDay, isoDate, dayNum: date.getDate(), total: dayTickets.length, resolved: resolvedDay.length, slaOk };
+    };
+
+    if (trendFilter === "custom") {
+      const customD = parseLocalDateStr(trendCustomDate);
+      // Only return data if the custom date falls inside the selected month.
+      if (customD.getFullYear() !== year || customD.getMonth() !== monthIdx) return [];
+      return [buildDay(customD)];
     }
 
-    // Fallback to live tickets (LOCAL date for WIB accuracy)
-    const data: { day: string; isoDate: string; dayNum: number; total: number; resolved: number; slaOk: number }[] = [];
-    
     let days: number;
     if (trendFilter === "all") {
-      const earliest = tickets.reduce((min, t) => {
-        const d = new Date(t.createdISO);
-        return d < min ? d : min;
-      }, today);
-      days = Math.max(1, Math.ceil((today.getTime() - earliest.getTime()) / (1000 * 60 * 60 * 24)) + 1);
-    } else if (trendFilter === "custom") {
-      const customD = parseLocalDateStr(trendCustomDate);
-      const isoDate = trendCustomDate;
-      const displayDay = customD.toLocaleDateString('id-ID', { day: '2-digit', month: 'short' });
-      const dayTickets = tickets.filter((t) => toLocalDateStr(new Date(t.createdISO)) === isoDate);
-      const resolvedDay = dayTickets.filter((t) => t.status === "Resolved");
-      const slaOk = resolvedDay.filter(isSlaOkResolved).length;
-      return [{ day: displayDay, isoDate, dayNum: customD.getDate(), total: dayTickets.length, resolved: resolvedDay.length, slaOk }];
+      days = anchorDay; // entire selected month up to anchor
     } else {
-      days = Number(trendFilter);
+      days = Math.min(Number(trendFilter), anchorDay);
     }
 
+    const data: { day: string; isoDate: string; dayNum: number; total: number; resolved: number; slaOk: number }[] = [];
     for (let i = days - 1; i >= 0; i--) {
-      const date = new Date(today);
-      date.setDate(date.getDate() - i);
-      const isoDate = toLocalDateStr(date);
-      const displayDay = date.toLocaleDateString('id-ID', { day: '2-digit', month: 'short' });
-      
-      const dayTickets = tickets.filter((t) => toLocalDateStr(new Date(t.createdISO)) === isoDate);
-      const resolvedDay = dayTickets.filter((t) => t.status === "Resolved");
-      const slaOk = resolvedDay.filter(isSlaOkResolved).length;
-      data.push({ day: displayDay, isoDate, dayNum: date.getDate(), total: dayTickets.length, resolved: resolvedDay.length, slaOk });
+      const date = new Date(year, monthIdx, anchorDay - i);
+      data.push(buildDay(date));
     }
     return data;
-  }, [tickets, trendFilter, trendCustomDate, getTrendChartData]);
+  }, [monthTickets, trendFilter, trendCustomDate, selectedMonth]);
 
   const trendConfig: ChartConfig = {
     total: { label: "Total", color: "hsl(var(--primary))" },
