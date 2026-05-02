@@ -881,6 +881,47 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
         </div>
       </div>
 
+      {/* Active range indicator — clarifies the date span used by every KPI,
+          chart, and drill-down below. Highlighted differently for the
+          dynamic "All Months" and "Current Month" modes. */}
+      <div
+        className={`flex flex-wrap items-center justify-between gap-2 rounded-md border px-2.5 py-1.5 text-[10px] sm:text-[11px] ${
+          selectedRangeHint.mode === "all"
+            ? "border-primary/30 bg-primary/5 text-primary"
+            : selectedRangeHint.mode === "current"
+            ? "border-success/30 bg-success/5 text-success"
+            : "border-border/40 bg-muted/30 text-foreground/80"
+        }`}
+      >
+        <div className="flex items-center gap-1.5 min-w-0">
+          <span className="shrink-0">
+            {selectedRangeHint.mode === "all" ? "🌐" : selectedRangeHint.mode === "current" ? "📍" : "🗓️"}
+          </span>
+          <span className="font-semibold truncate">{selectedMonthLabel}</span>
+          <span className="text-muted-foreground/80 shrink-0">·</span>
+          <span className="tabular-nums truncate">{selectedRangeHint.label}</span>
+        </div>
+        <div className="flex items-center gap-1.5 shrink-0 text-muted-foreground">
+          {selectedRangeHint.mode === "all" && (
+            <span className="rounded-full border border-primary/30 bg-primary/10 px-1.5 py-0.5 text-[9px] font-medium text-primary">
+              Full history
+            </span>
+          )}
+          {selectedRangeHint.mode === "current" && (
+            <span className="rounded-full border border-success/30 bg-success/10 px-1.5 py-0.5 text-[9px] font-medium text-success">
+              Live · month-to-date
+            </span>
+          )}
+          <span className="tabular-nums">
+            {selectedRangeHint.days} day{selectedRangeHint.days === 1 ? "" : "s"}
+          </span>
+          <span className="text-muted-foreground/60">·</span>
+          <span className="tabular-nums">
+            {kpis.total} incident{kpis.total === 1 ? "" : "s"}
+          </span>
+        </div>
+      </div>
+
       {/* KPI Summary - compact cards with glow effect matching Dashboard KPI */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
         {([
