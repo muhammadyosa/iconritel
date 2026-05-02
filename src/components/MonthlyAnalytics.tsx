@@ -1117,10 +1117,10 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">Semua Data</SelectItem>
-                    <SelectItem value="7">7 Hari</SelectItem>
-                    <SelectItem value="14">14 Hari</SelectItem>
-                    <SelectItem value="30">30 Hari</SelectItem>
+                    <SelectItem value="all">All Data</SelectItem>
+                    <SelectItem value="7">7 Days</SelectItem>
+                    <SelectItem value="14">14 Days</SelectItem>
+                    <SelectItem value="30">30 Days</SelectItem>
                     <SelectItem value="custom">Custom</SelectItem>
                   </SelectContent>
                 </Select>
