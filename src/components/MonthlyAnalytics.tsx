@@ -980,9 +980,10 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
                     </Bar>
                   </BarChart>
                 </ChartContainer>
-                <p className="text-[9px] sm:text-[10px] text-muted-foreground text-center mt-1">
-                  Klik bar untuk detail
-                </p>
+                <div className="flex items-center justify-between gap-2 mt-1 text-[9px] sm:text-[10px] text-muted-foreground">
+                  <span className="font-medium text-primary/80 truncate">{categoryRangeHint}</span>
+                  <span>Klik bar untuk detail</span>
+                </div>
               </>
             )}
           </CardContent>
