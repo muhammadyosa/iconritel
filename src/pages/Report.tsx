@@ -258,11 +258,13 @@ const Report = () => {
       if (hmMatch) {
         return parseInt(hmMatch[1]) * 60 + parseInt(hmMatch[2]);
       }
-      // Handle text-based durations like "2d 5h 30m", "7 jam", "45 menit"
+      // Handle text-based durations like "2d 5h 30m", "7 jam", "45 menit",
+      // "5 HARI 3 JAM 20 MENIT". Use word boundaries so "H" in "HARI" is not
+      // mistaken for an hour marker.
       let total = 0;
-      const dayMatch = dur.match(/(\d+)\s*(?:d|day|hari)/i);
-      const hourMatch = dur.match(/(\d+)\s*(?:h|jam|hour)/i);
-      const minMatch = dur.match(/(\d+)\s*(?:m|min|menit)/i);
+      const dayMatch = dur.match(/(\d+)\s*(?:hari|days?|d)\b/i);
+      const hourMatch = dur.match(/(\d+)\s*(?:jam|hours?|h)\b/i);
+      const minMatch = dur.match(/(\d+)\s*(?:menit|mins?|minutes?|m)\b/i);
       if (dayMatch) total += parseInt(dayMatch[1]) * 1440;
       if (hourMatch) total += parseInt(hourMatch[1]) * 60;
       if (minMatch) total += parseInt(minMatch[1]);
