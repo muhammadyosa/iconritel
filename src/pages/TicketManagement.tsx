@@ -129,16 +129,26 @@ export default function TicketManagement() {
   const [autoSerpoTypeOverride, setAutoSerpoTypeOverride] = useState<"RITEL" | "FEEDER">("RITEL");
   const [manualSerpoTypeOverride, setManualSerpoTypeOverride] = useState<"RITEL" | "FEEDER">("RITEL");
 
+  // Auto-sync the team type toggle to the chosen constraint's category
+  useEffect(() => {
+    if (formData.constraint) {
+      setAutoSerpoTypeOverride(FEEDER_CONSTRAINTS_SET.has(formData.constraint) ? "FEEDER" : "RITEL");
+    }
+  }, [formData.constraint]);
+  useEffect(() => {
+    if (manualFormData.constraint) {
+      setManualSerpoTypeOverride(FEEDER_CONSTRAINTS_SET.has(manualFormData.constraint) ? "FEEDER" : "RITEL");
+    }
+  }, [manualFormData.constraint]);
+
   // Compute serpo options for auto form based on hostname + constraint
   // If RITEL constraint has no matching RITEL mitra, fallback to FEEDER mitra
   const autoSerpoOptions = useMemo(() => {
     if (!selectedRecord) return [];
     if (!autoConstraintManualEdit && !formData.constraint) return [];
     const hostname = String(selectedRecord.hostname || "").trim().toUpperCase();
-    // If constraint typed manually (custom), use the user-selected team type
-    const isFeeder = autoConstraintManualEdit
-      ? autoSerpoTypeOverride === "FEEDER"
-      : FEEDER_CONSTRAINTS_SET.has(formData.constraint);
+    // Team type follows the toggle override (always user-controllable)
+    const isFeeder = autoSerpoTypeOverride === "FEEDER";
     const targetType = isFeeder ? "FEEDER" : "RITEL";
     
     const otherType = isFeeder ? "RITEL" : "FEEDER";
@@ -173,9 +183,7 @@ export default function TicketManagement() {
   const manualSerpoOptions = useMemo(() => {
     if (!manualConstraintManualEdit && !manualFormData.constraint) return [];
     const hostname = manualFormData.hostname.trim().toUpperCase();
-    const isFeeder = manualConstraintManualEdit
-      ? manualSerpoTypeOverride === "FEEDER"
-      : FEEDER_CONSTRAINTS_SET.has(manualFormData.constraint);
+    const isFeeder = manualSerpoTypeOverride === "FEEDER";
     const targetType = isFeeder ? "FEEDER" : "RITEL";
     const otherType = isFeeder ? "RITEL" : "FEEDER";
 
@@ -519,7 +527,7 @@ export default function TicketManagement() {
               <div className="flex items-center justify-between mb-1 gap-2 flex-wrap">
                 <Label>Serpo / Tim</Label>
                 <div className="flex items-center gap-1">
-                  {autoConstraintManualEdit && !autoSerpoManualEdit && (
+                  {!autoSerpoManualEdit && (
                     <div className="flex items-center rounded-md border border-input overflow-hidden">
                       <button
                         type="button"
@@ -945,7 +953,7 @@ export default function TicketManagement() {
                           <div className="flex items-center justify-between mb-1 gap-2 flex-wrap">
                             <Label>Serpo / Tim *</Label>
                             <div className="flex items-center gap-1">
-                              {manualConstraintManualEdit && !manualSerpoManualEdit && (
+                              {!manualSerpoManualEdit && (
                                 <div className="flex items-center rounded-md border border-input overflow-hidden">
                                   <button
                                     type="button"
