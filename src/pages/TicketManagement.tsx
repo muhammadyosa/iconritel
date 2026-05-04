@@ -986,14 +986,22 @@ export default function TicketManagement() {
                                 <div className="flex items-center rounded-md border border-input overflow-hidden">
                                   <button
                                     type="button"
-                                    onClick={() => { setManualSerpoTypeOverride("RITEL"); setManualFormData({ ...manualFormData, serpo: "" }); }}
+                                    onClick={() => {
+                                      setManualSerpoTypeOverride("RITEL");
+                                      const opts = computeSerpoOptionsFor("RITEL", manualFormData.hostname);
+                                      setManualFormData({ ...manualFormData, serpo: opts[0] || "" });
+                                    }}
                                     className={`px-2 py-0.5 text-[10px] font-semibold transition-colors ${manualSerpoTypeOverride === "RITEL" ? "bg-primary text-primary-foreground" : "bg-background text-muted-foreground hover:bg-muted"}`}
                                   >
                                     RITEL
                                   </button>
                                   <button
                                     type="button"
-                                    onClick={() => { setManualSerpoTypeOverride("FEEDER"); setManualFormData({ ...manualFormData, serpo: "" }); }}
+                                    onClick={() => {
+                                      setManualSerpoTypeOverride("FEEDER");
+                                      const opts = computeSerpoOptionsFor("FEEDER", manualFormData.hostname);
+                                      setManualFormData({ ...manualFormData, serpo: opts[0] || "" });
+                                    }}
                                     className={`px-2 py-0.5 text-[10px] font-semibold transition-colors ${manualSerpoTypeOverride === "FEEDER" ? "bg-primary text-primary-foreground" : "bg-background text-muted-foreground hover:bg-muted"}`}
                                   >
                                     FEEDER
