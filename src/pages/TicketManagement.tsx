@@ -141,32 +141,32 @@ export default function TicketManagement() {
       : FEEDER_CONSTRAINTS_SET.has(formData.constraint);
     const targetType = isFeeder ? "FEEDER" : "RITEL";
     
-    // Find mitra matching hostname and serpoType
-    const matched = regionalTeamData.filter(r => 
+    const otherType = isFeeder ? "RITEL" : "FEEDER";
+
+    // Find mitra matching hostname and primary serpoType
+    const matched = regionalTeamData.filter(r =>
       r.serpoType.toUpperCase() === targetType &&
       r.hostnames.some(h => h.trim().toUpperCase() === hostname)
     );
-    
     if (matched.length > 0) {
       return [...new Set(matched.map(r => r.mitraName))];
     }
-    
-    // Fallback for RITEL: try FEEDER mitra with same hostname
-    if (!isFeeder) {
-      const feederMatched = regionalTeamData.filter(r =>
-        r.serpoType.toUpperCase() === "FEEDER" &&
-        r.hostnames.some(h => h.trim().toUpperCase() === hostname)
-      );
-      if (feederMatched.length > 0) {
-        return [...new Set(feederMatched.map(r => r.mitraName))];
-      }
-      // Fallback: all mitra (RITEL + FEEDER)
-      return [...new Set(regionalTeamData.map(r => r.mitraName))];
+
+    // Fallback (bidirectional): try the other team type with same hostname
+    const otherMatched = regionalTeamData.filter(r =>
+      r.serpoType.toUpperCase() === otherType &&
+      r.hostnames.some(h => h.trim().toUpperCase() === hostname)
+    );
+    if (otherMatched.length > 0) {
+      return [...new Set(otherMatched.map(r => r.mitraName))];
     }
-    
-    // Fallback: show all mitra for this serpoType
+
+    // Final fallback: all mitra for primary type, or all mitra if empty
     const fallback = regionalTeamData.filter(r => r.serpoType.toUpperCase() === targetType);
-    return [...new Set(fallback.map(r => r.mitraName))];
+    if (fallback.length > 0) {
+      return [...new Set(fallback.map(r => r.mitraName))];
+    }
+    return [...new Set(regionalTeamData.map(r => r.mitraName))];
   }, [selectedRecord, formData.constraint, regionalTeamData, autoConstraintManualEdit, autoSerpoTypeOverride]);
 
   // Compute serpo options for manual form
@@ -177,7 +177,8 @@ export default function TicketManagement() {
       ? manualSerpoTypeOverride === "FEEDER"
       : FEEDER_CONSTRAINTS_SET.has(manualFormData.constraint);
     const targetType = isFeeder ? "FEEDER" : "RITEL";
-    
+    const otherType = isFeeder ? "RITEL" : "FEEDER";
+
     if (hostname) {
       const matched = regionalTeamData.filter(r =>
         r.serpoType.toUpperCase() === targetType &&
@@ -186,22 +187,26 @@ export default function TicketManagement() {
       if (matched.length > 0) {
         return [...new Set(matched.map(r => r.mitraName))];
       }
-      // Fallback for RITEL: try FEEDER mitra with same hostname
-      if (!isFeeder) {
-        const feederMatched = regionalTeamData.filter(r =>
-          r.serpoType.toUpperCase() === "FEEDER" &&
-          r.hostnames.some(h => h.trim().toUpperCase() === hostname)
-        );
-        if (feederMatched.length > 0) {
-          return [...new Set(feederMatched.map(r => r.mitraName))];
-        }
-        return [...new Set(regionalTeamData.map(r => r.mitraName))];
+      // Bidirectional fallback: try other team type with same hostname
+      const otherMatched = regionalTeamData.filter(r =>
+        r.serpoType.toUpperCase() === otherType &&
+        r.hostnames.some(h => h.trim().toUpperCase() === hostname)
+      );
+      if (otherMatched.length > 0) {
+        return [...new Set(otherMatched.map(r => r.mitraName))];
       }
     }
-    
-    // Fallback: all mitra for this type
+
+    // Fallback: all mitra for primary type, then other type, then all
     const fallback = regionalTeamData.filter(r => r.serpoType.toUpperCase() === targetType);
-    return [...new Set(fallback.map(r => r.mitraName))];
+    if (fallback.length > 0) {
+      return [...new Set(fallback.map(r => r.mitraName))];
+    }
+    const otherFallback = regionalTeamData.filter(r => r.serpoType.toUpperCase() === otherType);
+    if (otherFallback.length > 0) {
+      return [...new Set(otherFallback.map(r => r.mitraName))];
+    }
+    return [...new Set(regionalTeamData.map(r => r.mitraName))];
   }, [manualFormData.constraint, manualFormData.hostname, regionalTeamData, manualConstraintManualEdit, manualSerpoTypeOverride]);
   // Build mitraName → region map for resolving ticket region
   const mitraToRegion = useMemo(() => {
