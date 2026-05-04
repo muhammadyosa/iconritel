@@ -48,6 +48,7 @@ import { HighlightText } from "@/components/HighlightText";
 import { TicketDetailDialog } from "@/components/TicketDetailDialog";
 import { DurationCell } from "@/components/DurationCell";
 import { RegionBadge } from "@/components/RegionBadge";
+import { SerpoCombobox } from "@/components/SerpoCombobox";
 import { OverSLATab } from "@/components/OverSLATab";
 import { toast } from "sonner";
 import { useActivityLog } from "@/hooks/useActivityLog";
@@ -587,20 +588,11 @@ export default function TicketManagement() {
                 </div>
               </div>
               {autoSerpoManualEdit ? (
-                <>
-                  <Input
-                    value={formData.serpo}
-                    onChange={(e) => setFormData({ ...formData, serpo: e.target.value })}
-                    placeholder="Ketik / cari nama Serpo / Tim"
-                    list="auto-serpo-suggestions"
-                    autoComplete="off"
-                  />
-                  <datalist id="auto-serpo-suggestions">
-                    {[...new Set(regionalTeamData.map(r => r.mitraName))].sort().map((name) => (
-                      <option key={name} value={name} />
-                    ))}
-                  </datalist>
-                </>
+                <SerpoCombobox
+                  value={formData.serpo}
+                  onChange={(v) => setFormData({ ...formData, serpo: v })}
+                  options={regionalTeamData.map(r => r.mitraName)}
+                />
               ) : autoSerpoOptions.length > 0 ? (
                 <Select
                   value={formData.serpo}
@@ -1030,20 +1022,11 @@ export default function TicketManagement() {
                             </div>
                           </div>
                           {manualSerpoManualEdit ? (
-                            <>
-                              <Input
-                                value={manualFormData.serpo}
-                                onChange={(e) => setManualFormData({ ...manualFormData, serpo: e.target.value })}
-                                placeholder="Ketik / cari nama Serpo / Tim"
-                                list="manual-serpo-suggestions"
-                                autoComplete="off"
-                              />
-                              <datalist id="manual-serpo-suggestions">
-                                {[...new Set(regionalTeamData.map(r => r.mitraName))].sort().map((name) => (
-                                  <option key={name} value={name} />
-                                ))}
-                              </datalist>
-                            </>
+                            <SerpoCombobox
+                              value={manualFormData.serpo}
+                              onChange={(v) => setManualFormData({ ...manualFormData, serpo: v })}
+                              options={regionalTeamData.map(r => r.mitraName)}
+                            />
                           ) : manualSerpoOptions.length > 0 ? (
                             <Select
                               value={manualFormData.serpo}
