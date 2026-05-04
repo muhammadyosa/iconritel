@@ -135,11 +135,8 @@ export default function TicketManagement() {
     if (!selectedRecord) return [];
     if (!autoConstraintManualEdit && !formData.constraint) return [];
     const hostname = String(selectedRecord.hostname || "").trim().toUpperCase();
-    // If constraint typed manually (custom), use the user-selected team type
-    const isFeeder = autoConstraintManualEdit
-      ? autoSerpoTypeOverride === "FEEDER"
-      : FEEDER_CONSTRAINTS_SET.has(formData.constraint);
-    const targetType = isFeeder ? "FEEDER" : "RITEL";
+    // Team type follows the toggle override (always user-controllable)
+    const isFeeder = autoSerpoTypeOverride === "FEEDER";
     
     const otherType = isFeeder ? "RITEL" : "FEEDER";
 
