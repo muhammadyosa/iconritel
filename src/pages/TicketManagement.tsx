@@ -129,6 +129,18 @@ export default function TicketManagement() {
   const [autoSerpoTypeOverride, setAutoSerpoTypeOverride] = useState<"RITEL" | "FEEDER">("RITEL");
   const [manualSerpoTypeOverride, setManualSerpoTypeOverride] = useState<"RITEL" | "FEEDER">("RITEL");
 
+  // Auto-sync the team type toggle to the chosen constraint's category
+  useEffect(() => {
+    if (formData.constraint) {
+      setAutoSerpoTypeOverride(FEEDER_CONSTRAINTS_SET.has(formData.constraint) ? "FEEDER" : "RITEL");
+    }
+  }, [formData.constraint]);
+  useEffect(() => {
+    if (manualFormData.constraint) {
+      setManualSerpoTypeOverride(FEEDER_CONSTRAINTS_SET.has(manualFormData.constraint) ? "FEEDER" : "RITEL");
+    }
+  }, [manualFormData.constraint]);
+
   // Compute serpo options for auto form based on hostname + constraint
   // If RITEL constraint has no matching RITEL mitra, fallback to FEEDER mitra
   const autoSerpoOptions = useMemo(() => {
