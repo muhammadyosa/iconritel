@@ -141,6 +141,27 @@ export default function TicketManagement() {
     }
   }, [manualFormData.constraint]);
 
+  // Shared helper: compute serpo options for a given team type + hostname (bidirectional fallback)
+  const computeSerpoOptionsFor = (type: "RITEL" | "FEEDER", hostname: string): string[] => {
+    const h = hostname.trim().toUpperCase();
+    const otherType = type === "FEEDER" ? "RITEL" : "FEEDER";
+    if (h) {
+      const matched = regionalTeamData.filter(r =>
+        r.serpoType.toUpperCase() === type && r.hostnames.some(x => x.trim().toUpperCase() === h)
+      );
+      if (matched.length > 0) return [...new Set(matched.map(r => r.mitraName))];
+      const otherMatched = regionalTeamData.filter(r =>
+        r.serpoType.toUpperCase() === otherType && r.hostnames.some(x => x.trim().toUpperCase() === h)
+      );
+      if (otherMatched.length > 0) return [...new Set(otherMatched.map(r => r.mitraName))];
+    }
+    const fallback = regionalTeamData.filter(r => r.serpoType.toUpperCase() === type);
+    if (fallback.length > 0) return [...new Set(fallback.map(r => r.mitraName))];
+    const otherFallback = regionalTeamData.filter(r => r.serpoType.toUpperCase() === otherType);
+    if (otherFallback.length > 0) return [...new Set(otherFallback.map(r => r.mitraName))];
+    return [...new Set(regionalTeamData.map(r => r.mitraName))];
+  };
+
   // Compute serpo options for auto form based on hostname + constraint
   // If RITEL constraint has no matching RITEL mitra, fallback to FEEDER mitra
   const autoSerpoOptions = useMemo(() => {
