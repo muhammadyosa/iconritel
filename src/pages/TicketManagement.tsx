@@ -48,6 +48,7 @@ import { HighlightText } from "@/components/HighlightText";
 import { TicketDetailDialog } from "@/components/TicketDetailDialog";
 import { DurationCell } from "@/components/DurationCell";
 import { RegionBadge } from "@/components/RegionBadge";
+import { SerpoCombobox } from "@/components/SerpoCombobox";
 import { OverSLATab } from "@/components/OverSLATab";
 import { toast } from "sonner";
 import { useActivityLog } from "@/hooks/useActivityLog";
