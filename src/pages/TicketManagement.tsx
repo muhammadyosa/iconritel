@@ -587,11 +587,20 @@ export default function TicketManagement() {
                 </div>
               </div>
               {autoSerpoManualEdit ? (
-                <Input
-                  value={formData.serpo}
-                  onChange={(e) => setFormData({ ...formData, serpo: e.target.value })}
-                  placeholder="Ketik nama Serpo / Tim manual"
-                />
+                <>
+                  <Input
+                    value={formData.serpo}
+                    onChange={(e) => setFormData({ ...formData, serpo: e.target.value })}
+                    placeholder="Ketik / cari nama Serpo / Tim"
+                    list="auto-serpo-suggestions"
+                    autoComplete="off"
+                  />
+                  <datalist id="auto-serpo-suggestions">
+                    {[...new Set(regionalTeamData.map(r => r.mitraName))].sort().map((name) => (
+                      <option key={name} value={name} />
+                    ))}
+                  </datalist>
+                </>
               ) : autoSerpoOptions.length > 0 ? (
                 <Select
                   value={formData.serpo}
