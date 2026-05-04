@@ -142,6 +142,25 @@ export default function TicketManagement() {
     }
   }, [manualFormData.constraint]);
 
+  // Auto-update serpo when hostname changes (only when NOT in manual edit mode,
+  // so we never overwrite a value the user typed/picked manually).
+  useEffect(() => {
+    if (autoSerpoManualEdit) return;
+    if (!selectedRecord) return;
+    const opts = computeSerpoOptionsFor(autoSerpoTypeOverride, String(selectedRecord.hostname || ""));
+    const next = opts[0] || "";
+    setFormData((prev) => (prev.serpo === next ? prev : { ...prev, serpo: next }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedRecord?.hostname, autoSerpoTypeOverride, autoSerpoManualEdit, regionalTeamData]);
+
+  useEffect(() => {
+    if (manualSerpoManualEdit) return;
+    const opts = computeSerpoOptionsFor(manualSerpoTypeOverride, manualFormData.hostname);
+    const next = opts[0] || "";
+    setManualFormData((prev) => (prev.serpo === next ? prev : { ...prev, serpo: next }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [manualFormData.hostname, manualSerpoTypeOverride, manualSerpoManualEdit, regionalTeamData]);
+
   // Shared helper: compute serpo options for a given team type + hostname (bidirectional fallback)
   const computeSerpoOptionsFor = (type: "RITEL" | "FEEDER", hostname: string): string[] => {
     const h = hostname.trim().toUpperCase();
