@@ -43,12 +43,9 @@ export default function Login() {
 
   useEffect(() => {
     if (!isLoading && user) {
-      // If user explicitly logged out, don't auto-redirect
-      const explicitLogout = sessionStorage.getItem('explicit_logout');
-      if (explicitLogout) {
-        sessionStorage.removeItem('explicit_logout');
-        return;
-      }
+      // Catatan: explicit_logout flag dikelola sepenuhnya oleh AuthContext.
+      // Bila user di sini sudah ter-set, berarti sesi valid → langsung redirect
+      // agar tidak terjebak di /login (looping setelah login berhasil).
       // Redirect ke halaman tujuan awal jika valid, fallback aman ke "/"
       let target = "/";
       try {
