@@ -552,14 +552,22 @@ export default function TicketManagement() {
                     <div className="flex items-center rounded-md border border-input overflow-hidden">
                       <button
                         type="button"
-                        onClick={() => { setAutoSerpoTypeOverride("RITEL"); setFormData({ ...formData, serpo: "" }); }}
+                        onClick={() => {
+                          setAutoSerpoTypeOverride("RITEL");
+                          const opts = computeSerpoOptionsFor("RITEL", String(selectedRecord?.hostname || ""));
+                          setFormData({ ...formData, serpo: opts[0] || "" });
+                        }}
                         className={`px-2 py-0.5 text-[10px] font-semibold transition-colors ${autoSerpoTypeOverride === "RITEL" ? "bg-primary text-primary-foreground" : "bg-background text-muted-foreground hover:bg-muted"}`}
                       >
                         RITEL
                       </button>
                       <button
                         type="button"
-                        onClick={() => { setAutoSerpoTypeOverride("FEEDER"); setFormData({ ...formData, serpo: "" }); }}
+                        onClick={() => {
+                          setAutoSerpoTypeOverride("FEEDER");
+                          const opts = computeSerpoOptionsFor("FEEDER", String(selectedRecord?.hostname || ""));
+                          setFormData({ ...formData, serpo: opts[0] || "" });
+                        }}
                         className={`px-2 py-0.5 text-[10px] font-semibold transition-colors ${autoSerpoTypeOverride === "FEEDER" ? "bg-primary text-primary-foreground" : "bg-background text-muted-foreground hover:bg-muted"}`}
                       >
                         FEEDER
