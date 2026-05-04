@@ -141,6 +141,27 @@ export default function TicketManagement() {
     }
   }, [manualFormData.constraint]);
 
+  // Shared helper: compute serpo options for a given team type + hostname (bidirectional fallback)
+  const computeSerpoOptionsFor = (type: "RITEL" | "FEEDER", hostname: string): string[] => {
+    const h = hostname.trim().toUpperCase();
+    const otherType = type === "FEEDER" ? "RITEL" : "FEEDER";
+    if (h) {
+      const matched = regionalTeamData.filter(r =>
+        r.serpoType.toUpperCase() === type && r.hostnames.some(x => x.trim().toUpperCase() === h)
+      );
+      if (matched.length > 0) return [...new Set(matched.map(r => r.mitraName))];
+      const otherMatched = regionalTeamData.filter(r =>
+        r.serpoType.toUpperCase() === otherType && r.hostnames.some(x => x.trim().toUpperCase() === h)
+      );
+      if (otherMatched.length > 0) return [...new Set(otherMatched.map(r => r.mitraName))];
+    }
+    const fallback = regionalTeamData.filter(r => r.serpoType.toUpperCase() === type);
+    if (fallback.length > 0) return [...new Set(fallback.map(r => r.mitraName))];
+    const otherFallback = regionalTeamData.filter(r => r.serpoType.toUpperCase() === otherType);
+    if (otherFallback.length > 0) return [...new Set(otherFallback.map(r => r.mitraName))];
+    return [...new Set(regionalTeamData.map(r => r.mitraName))];
+  };
+
   // Compute serpo options for auto form based on hostname + constraint
   // If RITEL constraint has no matching RITEL mitra, fallback to FEEDER mitra
   const autoSerpoOptions = useMemo(() => {
@@ -531,14 +552,22 @@ export default function TicketManagement() {
                     <div className="flex items-center rounded-md border border-input overflow-hidden">
                       <button
                         type="button"
-                        onClick={() => { setAutoSerpoTypeOverride("RITEL"); setFormData({ ...formData, serpo: "" }); }}
+                        onClick={() => {
+                          setAutoSerpoTypeOverride("RITEL");
+                          const opts = computeSerpoOptionsFor("RITEL", String(selectedRecord?.hostname || ""));
+                          setFormData({ ...formData, serpo: opts[0] || "" });
+                        }}
                         className={`px-2 py-0.5 text-[10px] font-semibold transition-colors ${autoSerpoTypeOverride === "RITEL" ? "bg-primary text-primary-foreground" : "bg-background text-muted-foreground hover:bg-muted"}`}
                       >
                         RITEL
                       </button>
                       <button
                         type="button"
-                        onClick={() => { setAutoSerpoTypeOverride("FEEDER"); setFormData({ ...formData, serpo: "" }); }}
+                        onClick={() => {
+                          setAutoSerpoTypeOverride("FEEDER");
+                          const opts = computeSerpoOptionsFor("FEEDER", String(selectedRecord?.hostname || ""));
+                          setFormData({ ...formData, serpo: opts[0] || "" });
+                        }}
                         className={`px-2 py-0.5 text-[10px] font-semibold transition-colors ${autoSerpoTypeOverride === "FEEDER" ? "bg-primary text-primary-foreground" : "bg-background text-muted-foreground hover:bg-muted"}`}
                       >
                         FEEDER
@@ -957,14 +986,22 @@ export default function TicketManagement() {
                                 <div className="flex items-center rounded-md border border-input overflow-hidden">
                                   <button
                                     type="button"
-                                    onClick={() => { setManualSerpoTypeOverride("RITEL"); setManualFormData({ ...manualFormData, serpo: "" }); }}
+                                    onClick={() => {
+                                      setManualSerpoTypeOverride("RITEL");
+                                      const opts = computeSerpoOptionsFor("RITEL", manualFormData.hostname);
+                                      setManualFormData({ ...manualFormData, serpo: opts[0] || "" });
+                                    }}
                                     className={`px-2 py-0.5 text-[10px] font-semibold transition-colors ${manualSerpoTypeOverride === "RITEL" ? "bg-primary text-primary-foreground" : "bg-background text-muted-foreground hover:bg-muted"}`}
                                   >
                                     RITEL
                                   </button>
                                   <button
                                     type="button"
-                                    onClick={() => { setManualSerpoTypeOverride("FEEDER"); setManualFormData({ ...manualFormData, serpo: "" }); }}
+                                    onClick={() => {
+                                      setManualSerpoTypeOverride("FEEDER");
+                                      const opts = computeSerpoOptionsFor("FEEDER", manualFormData.hostname);
+                                      setManualFormData({ ...manualFormData, serpo: opts[0] || "" });
+                                    }}
                                     className={`px-2 py-0.5 text-[10px] font-semibold transition-colors ${manualSerpoTypeOverride === "FEEDER" ? "bg-primary text-primary-foreground" : "bg-background text-muted-foreground hover:bg-muted"}`}
                                   >
                                     FEEDER
