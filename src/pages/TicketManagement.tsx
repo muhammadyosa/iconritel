@@ -171,9 +171,7 @@ export default function TicketManagement() {
   const manualSerpoOptions = useMemo(() => {
     if (!manualConstraintManualEdit && !manualFormData.constraint) return [];
     const hostname = manualFormData.hostname.trim().toUpperCase();
-    const isFeeder = manualConstraintManualEdit
-      ? manualSerpoTypeOverride === "FEEDER"
-      : FEEDER_CONSTRAINTS_SET.has(manualFormData.constraint);
+    const isFeeder = manualSerpoTypeOverride === "FEEDER";
     const targetType = isFeeder ? "FEEDER" : "RITEL";
     const otherType = isFeeder ? "RITEL" : "FEEDER";
 
