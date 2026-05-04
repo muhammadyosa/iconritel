@@ -527,7 +527,7 @@ export default function TicketManagement() {
               <div className="flex items-center justify-between mb-1 gap-2 flex-wrap">
                 <Label>Serpo / Tim</Label>
                 <div className="flex items-center gap-1">
-                  {autoConstraintManualEdit && !autoSerpoManualEdit && (
+                  {!autoSerpoManualEdit && (
                     <div className="flex items-center rounded-md border border-input overflow-hidden">
                       <button
                         type="button"
