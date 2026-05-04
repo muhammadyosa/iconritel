@@ -137,6 +137,7 @@ export default function TicketManagement() {
     const hostname = String(selectedRecord.hostname || "").trim().toUpperCase();
     // Team type follows the toggle override (always user-controllable)
     const isFeeder = autoSerpoTypeOverride === "FEEDER";
+    const targetType = isFeeder ? "FEEDER" : "RITEL";
     
     const otherType = isFeeder ? "RITEL" : "FEEDER";
 
