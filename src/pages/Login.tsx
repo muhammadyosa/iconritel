@@ -12,6 +12,7 @@ import plnIconPlusLogo from "@/assets/pln-icon-plus-new.png";
 import iconnetLogo from "@/assets/iconnet-logo-new.png";
 import indonesiaMap from "@/assets/indonesia-map.png";
 import { SAFE_PROTECTED_PATHS } from "@/components/ProtectedRoute";
+import { supabase } from "@/integrations/supabase/client";
 
 const EXPLICIT_LOGOUT_KEY = "explicit_logout";
 const OAUTH_LOGIN_IN_PROGRESS_KEY = "oauth_login_in_progress";
@@ -121,7 +122,15 @@ export default function Login() {
         return;
       }
 
-      navigate("/", { replace: true });
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        try { sessionStorage.removeItem(OAUTH_LOGIN_IN_PROGRESS_KEY); } catch { /* ignore */ }
+        return;
+      }
+
+      try { sessionStorage.removeItem(OAUTH_LOGIN_IN_PROGRESS_KEY); } catch { /* ignore */ }
+      toast.error("Sesi login belum siap. Silakan coba lagi.");
+      setIsSigningIn(false);
     } catch (error) {
       console.error("Sign in error:", error);
       try { sessionStorage.removeItem(OAUTH_LOGIN_IN_PROGRESS_KEY); } catch { /* ignore */ }
