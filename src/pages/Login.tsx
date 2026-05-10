@@ -17,6 +17,29 @@ import { supabase } from "@/integrations/supabase/client";
 const EXPLICIT_LOGOUT_KEY = "explicit_logout";
 const OAUTH_LOGIN_IN_PROGRESS_KEY = "oauth_login_in_progress";
 
+const consumeSafeRedirectTarget = () => {
+  let target = "/";
+  try {
+    const legacy = sessionStorage.getItem("intended_path");
+    if (legacy) {
+      try { localStorage.setItem("intended_path", legacy); } catch { /* ignore */ }
+      sessionStorage.removeItem("intended_path");
+    }
+
+    const intended = localStorage.getItem("intended_path");
+    if (intended) {
+      const pathOnly = intended.split("?")[0];
+      if (pathOnly && pathOnly !== "/login" && pathOnly !== "/pending-approval" && SAFE_PROTECTED_PATHS.has(pathOnly)) {
+        target = intended;
+      }
+      localStorage.removeItem("intended_path");
+    }
+  } catch {
+    /* ignore */
+  }
+  return target;
+};
+
 export default function Login() {
   const navigate = useNavigate();
   const { user, isLoading } = useAuth();
@@ -51,33 +74,7 @@ export default function Login() {
       // Bila user di sini sudah ter-set, berarti sesi valid → langsung redirect
       // agar tidak terjebak di /login (looping setelah login berhasil).
       // Redirect ke halaman tujuan awal jika valid, fallback aman ke "/"
-      let target = "/";
-      try {
-        // Migrasi dari sessionStorage lama (bila ada) ke localStorage agar
-        // intended_path tetap ada walau user me-refresh halaman login.
-        const legacy = sessionStorage.getItem("intended_path");
-        if (legacy) {
-          try { localStorage.setItem("intended_path", legacy); } catch { /* ignore */ }
-          sessionStorage.removeItem("intended_path");
-        }
-        const intended = localStorage.getItem("intended_path");
-        if (intended) {
-          const pathOnly = intended.split("?")[0];
-          if (
-            pathOnly &&
-            pathOnly !== "/login" &&
-            pathOnly !== "/pending-approval" &&
-            SAFE_PROTECTED_PATHS.has(pathOnly)
-          ) {
-            target = intended;
-          }
-          // Selalu konsumsi flag agar tidak loop di sesi berikutnya
-          localStorage.removeItem("intended_path");
-        }
-      } catch {
-        /* ignore */
-      }
-      navigate(target, { replace: true });
+      navigate(consumeSafeRedirectTarget(), { replace: true });
     }
   }, [user, isLoading, navigate]);
 
