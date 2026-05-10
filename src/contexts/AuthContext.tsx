@@ -21,6 +21,24 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+const EXPLICIT_LOGOUT_KEY = "explicit_logout";
+const OAUTH_LOGIN_IN_PROGRESS_KEY = "oauth_login_in_progress";
+
+const purgeAuthStorage = () => {
+  const purge = (storage: Storage) => {
+    const keys: string[] = [];
+    for (let i = 0; i < storage.length; i++) {
+      const k = storage.key(i);
+      if (!k) continue;
+      if (k.startsWith("sb-") || k.includes("supabase.auth") || k.includes("supabase")) keys.push(k);
+    }
+    keys.forEach((k) => storage.removeItem(k));
+  };
+
+  purge(localStorage);
+  purge(sessionStorage);
+};
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
@@ -69,26 +87,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // leftover Supabase session from storage on the next app boot.
   const consumeExplicitLogout = useCallback(async (): Promise<boolean> => {
     let flagged = false;
+    let oauthInProgress = false;
     try {
-      flagged = sessionStorage.getItem('explicit_logout') === 'true';
+      flagged = sessionStorage.getItem(EXPLICIT_LOGOUT_KEY) === "true";
+      oauthInProgress = sessionStorage.getItem(OAUTH_LOGIN_IN_PROGRESS_KEY) === "true";
     } catch {
       flagged = false;
     }
     if (!flagged) return false;
 
+    if (oauthInProgress) {
+      try { sessionStorage.removeItem(EXPLICIT_LOGOUT_KEY); } catch { /* ignore */ }
+      return false;
+    }
+
     // Purge any cached Supabase auth tokens so getSession() cannot revive them.
     try {
-      const purge = (storage: Storage) => {
-        const keys: string[] = [];
-        for (let i = 0; i < storage.length; i++) {
-          const k = storage.key(i);
-          if (!k) continue;
-          if (k.startsWith('sb-') || k.includes('supabase.auth')) keys.push(k);
-        }
-        keys.forEach((k) => storage.removeItem(k));
-      };
-      purge(localStorage);
-      purge(sessionStorage);
+      purgeAuthStorage();
     } catch {
       // ignore storage access errors
     }
@@ -100,13 +115,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // ignore — we're already in a logged-out intent
     }
 
-    // Re-set the flag (purge above wiped sessionStorage) so subsequent
-    // SIGNED_IN events from a fresh login flow can clear it explicitly.
-    try {
-      sessionStorage.setItem('explicit_logout', 'true');
-    } catch {
-      // ignore
-    }
     return true;
   }, []);
 
@@ -115,15 +123,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+      (event, session) => {
         // Guard: if user explicitly logged out, ignore any rehydrated session
         // until a real SIGNED_IN event arrives from a fresh login.
-        const loggedOut = (() => {
-          try { return sessionStorage.getItem('explicit_logout') === 'true'; }
-          catch { return false; }
+        const { loggedOut, oauthInProgress } = (() => {
+          try {
+            return {
+              loggedOut: sessionStorage.getItem(EXPLICIT_LOGOUT_KEY) === "true",
+              oauthInProgress: sessionStorage.getItem(OAUTH_LOGIN_IN_PROGRESS_KEY) === "true",
+            };
+          }
+          catch { return { loggedOut: false, oauthInProgress: false }; }
         })();
 
-        if (loggedOut && event !== 'SIGNED_IN') {
+        if (loggedOut && !oauthInProgress && event !== 'SIGNED_IN') {
           setSession(null);
           setUser(null);
           setProfile(null);
@@ -134,7 +147,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         // A genuine new login clears the explicit-logout flag.
         if (event === 'SIGNED_IN') {
-          try { sessionStorage.removeItem('explicit_logout'); } catch { /* ignore */ }
+          try {
+            sessionStorage.removeItem(EXPLICIT_LOGOUT_KEY);
+            sessionStorage.removeItem(OAUTH_LOGIN_IN_PROGRESS_KEY);
+          } catch { /* ignore */ }
         }
 
         setSession(session);
@@ -211,7 +227,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signOut = async () => {
     // Tandai logout eksplisit SEBELUM apa pun, agar listener onAuthStateChange
     // yang ter-trigger oleh signOut tidak sempat me-rehidrasi state.
-    try { sessionStorage.setItem('explicit_logout', 'true'); } catch { /* ignore */ }
+    try {
+      sessionStorage.removeItem(OAUTH_LOGIN_IN_PROGRESS_KEY);
+      sessionStorage.setItem(EXPLICIT_LOGOUT_KEY, "true");
+    } catch { /* ignore */ }
 
     // Clear state first to prevent flicker
     setUser(null);
@@ -229,26 +248,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       try { await supabase.auth.signOut({ scope: 'local' }); } catch { /* ignore */ }
     }
 
+    try { await supabase.auth.signOut({ scope: 'local' }); } catch { /* ignore */ }
+
     // Hard-clear semua cached Supabase auth tokens dari storage browser.
     try {
-      const purge = (storage: Storage) => {
-        const keys: string[] = [];
-        for (let i = 0; i < storage.length; i++) {
-          const k = storage.key(i);
-          if (!k) continue;
-          if (k.startsWith('sb-') || k.includes('supabase.auth') || k.includes('supabase')) keys.push(k);
-        }
-        keys.forEach((k) => storage.removeItem(k));
-      };
-      purge(localStorage);
-      purge(sessionStorage);
+      purgeAuthStorage();
     } catch {
       // ignore storage access errors
     }
 
     // Re-set flag (purge di atas mungkin menghapusnya juga) agar boot berikutnya
     // tahu bahwa ini logout eksplisit.
-    try { sessionStorage.setItem('explicit_logout', 'true'); } catch { /* ignore */ }
+    try { sessionStorage.setItem(EXPLICIT_LOGOUT_KEY, "true"); } catch { /* ignore */ }
   };
 
   return (
