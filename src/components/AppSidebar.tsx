@@ -27,6 +27,7 @@ const menuItems = [
   { title: "List UPE", path: "/upe", emoji: "🔗" },
   { title: "List BNG", path: "/bng", emoji: "🛰" },
   { title: "List Configure", path: "/notes", emoji: "📖" },
+  { title: "List Auto Config", path: "/auto-config", emoji: "💻" },
   { title: "Report", path: "/report", emoji: "📝" },
   { title: "Settings", path: "/settings", emoji: "🛠" },
 ] as const;
