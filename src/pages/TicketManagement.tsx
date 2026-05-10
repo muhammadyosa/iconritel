@@ -715,7 +715,8 @@ export default function TicketManagement() {
                     String(selectedRecord.fat || ""),
                     String(selectedRecord.hostname || ""),
                     String(selectedRecord.sn || ""),
-                    formData.portText || undefined
+                    formData.portText || undefined,
+                    autoSerpoTypeOverride === "FEEDER"
                   )}
                 </p>
               </div>
