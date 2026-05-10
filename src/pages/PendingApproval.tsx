@@ -188,7 +188,7 @@ export default function PendingApproval() {
                 variant="ghost"
                 onClick={async () => {
                   await signOut();
-                  window.location.href = "/login";
+                  window.location.replace("/login");
                 }}
                 className="w-full h-10 rounded-xl text-slate-500 hover:text-slate-300 hover:bg-slate-800/40 active:scale-[0.97] transition-all touch-manipulation"
               >
