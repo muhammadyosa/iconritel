@@ -125,6 +125,7 @@ export default function Login() {
       const { data: { session } } = await supabase.auth.getSession();
       if (session?.user) {
         try { sessionStorage.removeItem(OAUTH_LOGIN_IN_PROGRESS_KEY); } catch { /* ignore */ }
+        navigate("/", { replace: true });
         return;
       }
 
