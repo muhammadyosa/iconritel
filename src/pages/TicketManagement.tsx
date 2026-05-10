@@ -487,7 +487,8 @@ export default function TicketManagement() {
     }
 
     const now = new Date();
-    const category = FEEDER_CONSTRAINTS_SET.has(manualFormData.constraint) ? "FEEDER" : "RITEL";
+    const isManualFeederOverride = manualSerpoTypeOverride === "FEEDER";
+    const category = (FEEDER_CONSTRAINTS_SET.has(manualFormData.constraint) || isManualFeederOverride) ? "FEEDER" : "RITEL";
     
     const ticketResult = generateTicketFormat(
       manualFormData.constraint,
@@ -496,7 +497,8 @@ export default function TicketManagement() {
       manualFormData.fatId.trim(),
       manualFormData.hostname.trim(),
       manualFormData.snOnt.trim(),
-      manualFormData.portText || undefined
+      manualFormData.portText || undefined,
+      isManualFeederOverride
     );
     
     const ticket: Ticket = {
@@ -1170,7 +1172,8 @@ export default function TicketManagement() {
                               manualFormData.fatId.trim(),
                               manualFormData.hostname.trim(),
                               manualFormData.snOnt.trim(),
-                              manualFormData.portText || undefined
+                              manualFormData.portText || undefined,
+                              manualSerpoTypeOverride === "FEEDER"
                             )}
                           </p>
                         </div>

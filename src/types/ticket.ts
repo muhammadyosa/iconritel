@@ -70,8 +70,19 @@ export function generateTicketFormat(
   fatId: string,
   hostname: string,
   snOnt: string,
-  portText?: string
+  portText?: string,
+  forceFeeder?: boolean
 ): string {
+  // Manual FEEDER override: when user picks FEEDER tim with a custom (manual) constraint
+  // that is not in the predefined FEEDER_CONSTRAINTS list, build PROACTIVE NOC RETAIL format.
+  if (
+    forceFeeder &&
+    constraint &&
+    !FEEDER_CONSTRAINTS_SET.has(constraint)
+  ) {
+    return `[PROACTIVE NOC RETAIL] ${constraint.toUpperCase()} - ${hostname} - ${serpo}`;
+  }
+
   // FEEDER Format
   if (constraint === "FAT BAD RX") {
     return `[PROACTIVE NOC RETAIL] FAT BAD RX - ${fatId} - UNDER - ${hostname} - ${serpo}`;
