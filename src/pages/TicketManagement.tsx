@@ -1172,7 +1172,8 @@ export default function TicketManagement() {
                               manualFormData.fatId.trim(),
                               manualFormData.hostname.trim(),
                               manualFormData.snOnt.trim(),
-                              manualFormData.portText || undefined
+                              manualFormData.portText || undefined,
+                              manualSerpoTypeOverride === "FEEDER"
                             )}
                           </p>
                         </div>
