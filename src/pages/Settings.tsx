@@ -259,6 +259,32 @@ export default function Settings() {
     }
   };
 
+  // Ambil info upload Regional Team terbaru dari server (terlihat oleh semua user)
+  const loadLastRegionalUploadFromServer = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("master_data_uploads")
+        .select("uploaded_by_name, created_at, total_records, file_name, summary")
+        .filter("summary->>kind", "eq", "regional_team")
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (error) throw error;
+      if (data) {
+        const meta = {
+          uploaded_by_name: data.uploaded_by_name,
+          created_at: data.created_at,
+          total_records: data.total_records,
+          file_name: data.file_name,
+        };
+        setLastRegionalUpload(meta);
+        try { localStorage.setItem(LOCAL_REGIONAL_UPLOAD_KEY, JSON.stringify(meta)); } catch {}
+      }
+    } catch (error) {
+      if (import.meta.env.DEV) console.error("Error loading regional upload from server:", error);
+    }
+  };
+
   useEffect(() => {
     loadDataCounts();
     loadLastUpload();
