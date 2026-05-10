@@ -288,6 +288,7 @@ export default function Settings() {
   useEffect(() => {
     loadDataCounts();
     loadLastUpload();
+    loadLastRegionalUploadFromServer();
   }, []);
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
