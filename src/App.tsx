@@ -72,6 +72,7 @@ const pageComponents: Record<string, React.LazyExoticComponent<React.ComponentTy
   "/upe": UPEList,
   "/bng": BNGList,
   "/notes": ListNote,
+  "/auto-config": AutoConfig,
   "/report": Report,
   "/settings": Settings,
 };
