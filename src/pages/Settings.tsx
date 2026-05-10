@@ -980,7 +980,8 @@ export default function Settings() {
                             🕵️ Update by Admin
                           </Badge>
                           <span className="text-muted-foreground">
-                            {new Date(lastRegionalUpload.created_at).toLocaleString("id-ID", { dateStyle: "medium", timeStyle: "short" })} WIB
+                            <span className="font-medium text-foreground">Terakhir diupload:</span>{" "}
+                            {new Date(lastRegionalUpload.created_at).toLocaleString("id-ID", { dateStyle: "long", timeStyle: "short", timeZone: "Asia/Jakarta" }).replace(/\./g, ":").replace(/(\d{4}) (\d{2}):(\d{2})/, "$1, $2.$3")} WIB
                           </span>
                         </div>
                         <div className="text-muted-foreground truncate" title={lastRegionalUpload.file_name}>
