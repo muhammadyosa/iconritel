@@ -403,6 +403,19 @@ export default function Settings() {
           };
           localStorage.setItem(LOCAL_REGIONAL_UPLOAD_KEY, JSON.stringify(regMeta));
           setLastRegionalUpload(regMeta);
+
+          // Sinkronkan ke server agar info "Terakhir diupload" terlihat oleh semua user
+          try {
+            await supabase.from("master_data_uploads").insert({
+              uploaded_by_user_id: user?.id ?? null,
+              uploaded_by_name: regMeta.uploaded_by_name,
+              file_name: regMeta.file_name,
+              total_records: regMeta.total_records,
+              summary: { kind: "regional_team" },
+            });
+          } catch (syncErr) {
+            if (import.meta.env.DEV) console.error("Failed to sync regional upload meta:", syncErr);
+          }
         }
       } catch (logErr) {
         if (import.meta.env.DEV) console.error("Failed to record local upload metadata:", logErr);
