@@ -259,9 +259,36 @@ export default function Settings() {
     }
   };
 
+  // Ambil info upload Regional Team terbaru dari server (terlihat oleh semua user)
+  const loadLastRegionalUploadFromServer = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("master_data_uploads")
+        .select("uploaded_by_name, created_at, total_records, file_name, summary")
+        .filter("summary->>kind", "eq", "regional_team")
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (error) throw error;
+      if (data) {
+        const meta = {
+          uploaded_by_name: data.uploaded_by_name,
+          created_at: data.created_at,
+          total_records: data.total_records,
+          file_name: data.file_name,
+        };
+        setLastRegionalUpload(meta);
+        try { localStorage.setItem(LOCAL_REGIONAL_UPLOAD_KEY, JSON.stringify(meta)); } catch {}
+      }
+    } catch (error) {
+      if (import.meta.env.DEV) console.error("Error loading regional upload from server:", error);
+    }
+  };
+
   useEffect(() => {
     loadDataCounts();
     loadLastUpload();
+    loadLastRegionalUploadFromServer();
   }, []);
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -376,6 +403,19 @@ export default function Settings() {
           };
           localStorage.setItem(LOCAL_REGIONAL_UPLOAD_KEY, JSON.stringify(regMeta));
           setLastRegionalUpload(regMeta);
+
+          // Sinkronkan ke server agar info "Terakhir diupload" terlihat oleh semua user
+          try {
+            await supabase.from("master_data_uploads").insert({
+              uploaded_by_user_id: user?.id ?? null,
+              uploaded_by_name: regMeta.uploaded_by_name,
+              file_name: regMeta.file_name,
+              total_records: regMeta.total_records,
+              summary: { kind: "regional_team" },
+            });
+          } catch (syncErr) {
+            if (import.meta.env.DEV) console.error("Failed to sync regional upload meta:", syncErr);
+          }
         }
       } catch (logErr) {
         if (import.meta.env.DEV) console.error("Failed to record local upload metadata:", logErr);
@@ -940,7 +980,8 @@ export default function Settings() {
                             🕵️ Update by Admin
                           </Badge>
                           <span className="text-muted-foreground">
-                            {new Date(lastRegionalUpload.created_at).toLocaleString("id-ID", { dateStyle: "medium", timeStyle: "short" })} WIB
+                            <span className="font-medium text-foreground">Terakhir diupload:</span>{" "}
+                            {new Intl.DateTimeFormat("id-ID", { day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit", hour12: false, timeZone: "Asia/Jakarta" }).format(new Date(lastRegionalUpload.created_at))} WIB
                           </span>
                         </div>
                         <div className="text-muted-foreground truncate" title={lastRegionalUpload.file_name}>
