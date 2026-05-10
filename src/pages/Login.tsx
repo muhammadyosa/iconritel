@@ -80,6 +80,24 @@ export default function Login() {
   const handleGoogleSignIn = async () => {
     if (isSigningIn) return;
     setIsSigningIn(true);
+    // PENTING: hapus flag explicit_logout sebelum memulai OAuth baru.
+    // Tanpa ini, setelah redirect kembali dari Google, AuthContext akan
+    // mem-purge token yang baru saja di-set → user terlempar balik ke /login (loop).
+    try {
+      sessionStorage.removeItem("explicit_logout");
+      // Sapu juga sisa token Supabase lama agar tidak bentrok dengan sesi baru
+      const purge = (storage: Storage) => {
+        const keys: string[] = [];
+        for (let i = 0; i < storage.length; i++) {
+          const k = storage.key(i);
+          if (!k) continue;
+          if (k.startsWith("sb-") || k.includes("supabase.auth")) keys.push(k);
+        }
+        keys.forEach((k) => storage.removeItem(k));
+      };
+      purge(localStorage);
+      purge(sessionStorage);
+    } catch { /* ignore */ }
     try {
       const result = await lovable.auth.signInWithOAuth("google", {
         redirect_uri: window.location.origin,
