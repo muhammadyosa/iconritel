@@ -249,7 +249,7 @@ export default function RaisecomPPPoEGenerator() {
             {hasilDynamic || "Klik Gass untuk generate config..."}
           </pre>
 
-          <CopyButton text={`${FIXED_HASIL}\n\n${hasilDynamic}`} />
+          <CopyButton text={hasilDynamic} />
         </CardContent>
       </Card>
 
