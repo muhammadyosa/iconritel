@@ -217,7 +217,7 @@ export default function AutoConfig() {
         </TabsList>
         {TABS.map((tab) => (
           <TabsContent key={tab.value} value={tab.value} className="mt-3">
-            <ConfigSection tabKey={tab.value} />
+            {tab.value === "auto-huawei" ? <HuaweiPPPoEGenerator /> : <ConfigSection tabKey={tab.value} />}
           </TabsContent>
         ))}
       </Tabs>
