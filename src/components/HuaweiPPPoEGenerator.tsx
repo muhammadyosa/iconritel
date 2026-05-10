@@ -21,18 +21,26 @@ interface FormState {
   gemport: string;
 }
 
+function todayPassword() {
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}${m}${day}`;
+}
+
 const DEFAULTS: FormState = {
   sid: "",
   nama: "",
   f: "0",
-  s: "1",
-  p: "2",
-  id: "25",
+  s: "",
+  p: "",
+  id: "",
   sn: "",
-  password: "",
-  vlan: "2941",
-  lineProfile: "ICONNET.AUTOPROV",
-  serviceProfile: "ICONNET.AUTOPROV",
+  password: todayPassword(),
+  vlan: "",
+  lineProfile: "",
+  serviceProfile: "",
   gemport: "1",
 };
 
