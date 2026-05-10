@@ -209,25 +209,34 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [fetchProfile, updateLastOnline, consumeExplicitLogout]);
 
   const signOut = async () => {
+    // Tandai logout eksplisit SEBELUM apa pun, agar listener onAuthStateChange
+    // yang ter-trigger oleh signOut tidak sempat me-rehidrasi state.
+    try { sessionStorage.setItem('explicit_logout', 'true'); } catch { /* ignore */ }
+
     // Clear state first to prevent flicker
     setUser(null);
     setSession(null);
     setProfile(null);
-    // Sign out with global scope to invalidate all sessions on the server
+    userIdRef.current = null;
+
+    // Coba global sign-out (invalidate sesi di server). Bila gagal (mis. token
+    // sudah kadaluarsa / offline), tetap lanjutkan dengan local sign-out agar
+    // tidak menggantung dan token lokal tetap dibersihkan.
     try {
       await supabase.auth.signOut({ scope: 'global' });
     } catch (e) {
-      if (import.meta.env.DEV) console.error("signOut error:", e);
+      if (import.meta.env.DEV) console.error("global signOut error:", e);
+      try { await supabase.auth.signOut({ scope: 'local' }); } catch { /* ignore */ }
     }
-    // Hard-clear any cached Supabase auth tokens from browser storage so the
-    // next visit cannot silently re-hydrate a session.
+
+    // Hard-clear semua cached Supabase auth tokens dari storage browser.
     try {
       const purge = (storage: Storage) => {
         const keys: string[] = [];
         for (let i = 0; i < storage.length; i++) {
           const k = storage.key(i);
           if (!k) continue;
-          if (k.startsWith('sb-') || k.includes('supabase.auth')) keys.push(k);
+          if (k.startsWith('sb-') || k.includes('supabase.auth') || k.includes('supabase')) keys.push(k);
         }
         keys.forEach((k) => storage.removeItem(k));
       };
@@ -236,8 +245,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } catch {
       // ignore storage access errors
     }
-    // Mark that user explicitly logged out to prevent auto-login redirect
-    sessionStorage.setItem('explicit_logout', 'true');
+
+    // Re-set flag (purge di atas mungkin menghapusnya juga) agar boot berikutnya
+    // tahu bahwa ini logout eksplisit.
+    try { sessionStorage.setItem('explicit_logout', 'true'); } catch { /* ignore */ }
   };
 
   return (
