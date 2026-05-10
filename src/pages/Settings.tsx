@@ -981,7 +981,7 @@ export default function Settings() {
                           </Badge>
                           <span className="text-muted-foreground">
                             <span className="font-medium text-foreground">Terakhir diupload:</span>{" "}
-                            {new Date(lastRegionalUpload.created_at).toLocaleString("id-ID", { dateStyle: "long", timeStyle: "short", timeZone: "Asia/Jakarta" }).replace(/\./g, ":").replace(/(\d{4}) (\d{2}):(\d{2})/, "$1, $2.$3")} WIB
+                            {new Intl.DateTimeFormat("id-ID", { day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit", hour12: false, timeZone: "Asia/Jakarta" }).format(new Date(lastRegionalUpload.created_at))} WIB
                           </span>
                         </div>
                         <div className="text-muted-foreground truncate" title={lastRegionalUpload.file_name}>
