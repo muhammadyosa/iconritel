@@ -227,7 +227,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signOut = async () => {
     // Tandai logout eksplisit SEBELUM apa pun, agar listener onAuthStateChange
     // yang ter-trigger oleh signOut tidak sempat me-rehidrasi state.
-    try { sessionStorage.setItem('explicit_logout', 'true'); } catch { /* ignore */ }
+    try {
+      sessionStorage.removeItem(OAUTH_LOGIN_IN_PROGRESS_KEY);
+      sessionStorage.setItem(EXPLICIT_LOGOUT_KEY, "true");
+    } catch { /* ignore */ }
 
     // Clear state first to prevent flicker
     setUser(null);
@@ -245,26 +248,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       try { await supabase.auth.signOut({ scope: 'local' }); } catch { /* ignore */ }
     }
 
+    try { await supabase.auth.signOut({ scope: 'local' }); } catch { /* ignore */ }
+
     // Hard-clear semua cached Supabase auth tokens dari storage browser.
     try {
-      const purge = (storage: Storage) => {
-        const keys: string[] = [];
-        for (let i = 0; i < storage.length; i++) {
-          const k = storage.key(i);
-          if (!k) continue;
-          if (k.startsWith('sb-') || k.includes('supabase.auth') || k.includes('supabase')) keys.push(k);
-        }
-        keys.forEach((k) => storage.removeItem(k));
-      };
-      purge(localStorage);
-      purge(sessionStorage);
+      purgeAuthStorage();
     } catch {
       // ignore storage access errors
     }
 
     // Re-set flag (purge di atas mungkin menghapusnya juga) agar boot berikutnya
     // tahu bahwa ini logout eksplisit.
-    try { sessionStorage.setItem('explicit_logout', 'true'); } catch { /* ignore */ }
+    try { sessionStorage.setItem(EXPLICIT_LOGOUT_KEY, "true"); } catch { /* ignore */ }
   };
 
   return (
