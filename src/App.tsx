@@ -35,6 +35,7 @@ const UPEList = React.lazy(() => import("./pages/UPEList"));
 const BNGList = React.lazy(() => import("./pages/BNGList"));
 const AKVList = React.lazy(() => import("./pages/AKVList"));
 const ListNote = React.lazy(() => import("./pages/ListNote"));
+const AutoConfig = React.lazy(() => import("./pages/AutoConfig"));
 const Report = React.lazy(() => import("./pages/Report"));
 const Settings = React.lazy(() => import("./pages/Settings"));
 const Install = React.lazy(() => import("./pages/Install"));
@@ -71,6 +72,7 @@ const pageComponents: Record<string, React.LazyExoticComponent<React.ComponentTy
   "/upe": UPEList,
   "/bng": BNGList,
   "/notes": ListNote,
+  "/auto-config": AutoConfig,
   "/report": Report,
   "/settings": Settings,
 };

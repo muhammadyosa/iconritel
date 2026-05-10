@@ -27,12 +27,13 @@ const menuItems = [
   { title: "List UPE", path: "/upe", emoji: "🔗" },
   { title: "List BNG", path: "/bng", emoji: "🛰" },
   { title: "List Configure", path: "/notes", emoji: "📖" },
+  { title: "List Auto Config", path: "/auto-config", emoji: "💻" },
   { title: "Report", path: "/report", emoji: "📝" },
   { title: "Settings", path: "/settings", emoji: "🛠" },
 ] as const;
 
 const INTERN_PATHS = new Set(["/", "/tickets", "/teams"]);
-const ADMIN_NOC_ONLY_PATHS = new Set(["/notes"]);
+const ADMIN_NOC_ONLY_PATHS = new Set(["/notes", "/auto-config"]);
 
 function usePendingUserCount() {
   const { isAdmin } = useUserRole();
