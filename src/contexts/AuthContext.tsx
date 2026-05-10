@@ -123,7 +123,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+      (event, session) => {
         // Guard: if user explicitly logged out, ignore any rehydrated session
         // until a real SIGNED_IN event arrives from a fresh login.
         const { loggedOut, oauthInProgress } = (() => {
