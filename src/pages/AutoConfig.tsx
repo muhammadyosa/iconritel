@@ -9,6 +9,7 @@ import { NotesSkeleton } from "@/components/PageSkeleton";
 import { useCloudNotes } from "@/hooks/useCloudNotes";
 import { useUserRole } from "@/hooks/useUserRole";
 import { toast } from "sonner";
+import HuaweiPPPoEGenerator from "@/components/HuaweiPPPoEGenerator";
 
 const TABS = [
   { value: "auto-huawei", label: "📟 Huawei" },
@@ -216,7 +217,7 @@ export default function AutoConfig() {
         </TabsList>
         {TABS.map((tab) => (
           <TabsContent key={tab.value} value={tab.value} className="mt-3">
-            <ConfigSection tabKey={tab.value} />
+            {tab.value === "auto-huawei" ? <HuaweiPPPoEGenerator /> : <ConfigSection tabKey={tab.value} />}
           </TabsContent>
         ))}
       </Tabs>
