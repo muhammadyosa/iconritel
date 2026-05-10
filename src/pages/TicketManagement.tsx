@@ -396,8 +396,9 @@ export default function TicketManagement() {
 
     const now = new Date();
     
-    // Determine category based on constraint
-    const category = FEEDER_CONSTRAINTS_SET.has(formData.constraint) ? "FEEDER" : "RITEL";
+    // Determine category based on constraint (manual FEEDER override included)
+    const isAutoFeederOverride = autoSerpoTypeOverride === "FEEDER";
+    const category = (FEEDER_CONSTRAINTS_SET.has(formData.constraint) || isAutoFeederOverride) ? "FEEDER" : "RITEL";
     
     // Auto-generate ticket format
     const ticketResult = generateTicketFormat(
@@ -407,7 +408,8 @@ export default function TicketManagement() {
       String(selectedRecord.fat || ""),
       String(selectedRecord.hostname || ""),
       String(selectedRecord.sn || ""),
-      formData.portText || undefined
+      formData.portText || undefined,
+      isAutoFeederOverride
     );
     
     const ticket: Ticket = {
