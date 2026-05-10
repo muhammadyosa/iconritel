@@ -47,10 +47,16 @@ export function UserMenu() {
     try {
       await signOut();
       toast.success("Berhasil keluar");
-      navigate("/login", { replace: true });
+      // Hard redirect agar SEMUA state aplikasi (React Query cache, context,
+      // listener Supabase) ter-reset total — penting saat user akan login
+      // dengan akun lain agar tidak membawa sisa sesi sebelumnya.
+      window.location.replace("/login");
     } catch (error) {
       console.error("Sign out error:", error);
       toast.error("Gagal keluar");
+      // Tetap paksa kembali ke login meski signOut error, supaya tidak
+      // terjebak di halaman dengan sesi setengah-jadi.
+      window.location.replace("/login");
     }
   };
 
