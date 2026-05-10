@@ -13,6 +13,9 @@ import iconnetLogo from "@/assets/iconnet-logo-new.png";
 import indonesiaMap from "@/assets/indonesia-map.png";
 import { SAFE_PROTECTED_PATHS } from "@/components/ProtectedRoute";
 
+const EXPLICIT_LOGOUT_KEY = "explicit_logout";
+const OAUTH_LOGIN_IN_PROGRESS_KEY = "oauth_login_in_progress";
+
 export default function Login() {
   const navigate = useNavigate();
   const { user, isLoading } = useAuth();
@@ -84,7 +87,7 @@ export default function Login() {
     // Tanpa ini, setelah redirect kembali dari Google, AuthContext akan
     // mem-purge token yang baru saja di-set → user terlempar balik ke /login (loop).
     try {
-      sessionStorage.removeItem("explicit_logout");
+      sessionStorage.removeItem(EXPLICIT_LOGOUT_KEY);
       // Sapu juga sisa token Supabase lama agar tidak bentrok dengan sesi baru
       const purge = (storage: Storage) => {
         const keys: string[] = [];
@@ -97,6 +100,7 @@ export default function Login() {
       };
       purge(localStorage);
       purge(sessionStorage);
+      sessionStorage.setItem(OAUTH_LOGIN_IN_PROGRESS_KEY, "true");
     } catch { /* ignore */ }
     try {
       const result = await lovable.auth.signInWithOAuth("google", {
