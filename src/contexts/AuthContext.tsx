@@ -133,7 +133,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               oauthInProgress: sessionStorage.getItem(OAUTH_LOGIN_IN_PROGRESS_KEY) === "true",
             };
           }
-          catch { return false; }
+          catch { return { loggedOut: false, oauthInProgress: false }; }
         })();
 
         if (loggedOut && !oauthInProgress && event !== 'SIGNED_IN') {
