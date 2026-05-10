@@ -204,7 +204,7 @@ export default function AutoConfig() {
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="text-lg sm:text-xl font-bold">💻 List Auto Config</h1>
+        <h1 className="text-lg sm:text-xl font-bold">💻 List Config</h1>
         <p className="text-xs sm:text-sm text-muted-foreground">Kumpulan auto config perangkat berdasarkan kategori</p>
       </div>
 
