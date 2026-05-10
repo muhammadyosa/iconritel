@@ -126,12 +126,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       async (event, session) => {
         // Guard: if user explicitly logged out, ignore any rehydrated session
         // until a real SIGNED_IN event arrives from a fresh login.
-        const loggedOut = (() => {
-          try { return sessionStorage.getItem('explicit_logout') === 'true'; }
+        const { loggedOut, oauthInProgress } = (() => {
+          try {
+            return {
+              loggedOut: sessionStorage.getItem(EXPLICIT_LOGOUT_KEY) === "true",
+              oauthInProgress: sessionStorage.getItem(OAUTH_LOGIN_IN_PROGRESS_KEY) === "true",
+            };
+          }
           catch { return false; }
         })();
 
-        if (loggedOut && event !== 'SIGNED_IN') {
+        if (loggedOut && !oauthInProgress && event !== 'SIGNED_IN') {
           setSession(null);
           setUser(null);
           setProfile(null);
@@ -142,7 +147,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         // A genuine new login clears the explicit-logout flag.
         if (event === 'SIGNED_IN') {
-          try { sessionStorage.removeItem('explicit_logout'); } catch { /* ignore */ }
+          try {
+            sessionStorage.removeItem(EXPLICIT_LOGOUT_KEY);
+            sessionStorage.removeItem(OAUTH_LOGIN_IN_PROGRESS_KEY);
+          } catch { /* ignore */ }
         }
 
         setSession(session);
