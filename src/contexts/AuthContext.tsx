@@ -81,6 +81,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Store user id in ref to avoid re-subscribing
   const userIdRef = React.useRef<string | null>(null);
+  const authInitializedRef = React.useRef(false);
 
   // Helper: detect & honor an explicit-logout flag from the previous session.
   // If the user explicitly signed out, we MUST NOT silently re-hydrate any
@@ -124,6 +125,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
+        if (cancelled) return;
+
+        // Supabase can emit an INITIAL_SESSION event before getSession() has
+        // finished restoring tokens from storage. Do not treat that early null
+        // as a real logout, otherwise ProtectedRoute redirects to /login.
+        if (!authInitializedRef.current && event === 'INITIAL_SESSION') {
+          return;
+        }
+
         // Guard: if user explicitly logged out, ignore any rehydrated session
         // until a real SIGNED_IN event arrives from a fresh login.
         const { loggedOut, oauthInProgress } = (() => {
@@ -137,6 +147,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         })();
 
         if (loggedOut && !oauthInProgress && event !== 'SIGNED_IN') {
+          authInitializedRef.current = true;
           setSession(null);
           setUser(null);
           setProfile(null);
@@ -177,6 +188,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
 
         setIsLoading(false);
+        authInitializedRef.current = true;
       }
     );
 
@@ -187,6 +199,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (wasLoggedOut) {
         // Stay signed out. Do not call getSession() — nothing to rehydrate.
+        authInitializedRef.current = true;
         setSession(null);
         setUser(null);
         setProfile(null);
@@ -198,6 +211,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const { data: { session } } = await supabase.auth.getSession();
       if (cancelled) return;
 
+      authInitializedRef.current = true;
       setSession(session);
       setUser(session?.user ?? null);
 
