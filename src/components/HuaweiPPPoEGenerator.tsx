@@ -140,14 +140,14 @@ export default function HuaweiPPPoEGenerator() {
                 value={form.sid}
                 onChange={(e) => update("sid", e.target.value)}
                 className="h-8 text-xs"
-                placeholder="141001920968"
+                placeholder="SID"
               />
               <span className="text-xs">-</span>
               <Input
                 value={form.nama}
                 onChange={(e) => update("nama", e.target.value.toUpperCase())}
                 className="h-8 text-xs"
-                placeholder="NANANG DWI CAHYONO"
+                placeholder="Customer Name"
               />
             </div>
           </div>
@@ -155,10 +155,10 @@ export default function HuaweiPPPoEGenerator() {
           <div className="space-y-1">
             <Label className="text-xs">F/S/P/ID :</Label>
             <div className="grid grid-cols-4 gap-1">
-              <Input value={form.f} onChange={(e) => update("f", e.target.value)} className="h-8 text-xs text-center" />
-              <Input value={form.s} onChange={(e) => update("s", e.target.value)} className="h-8 text-xs text-center" />
-              <Input value={form.p} onChange={(e) => update("p", e.target.value)} className="h-8 text-xs text-center" />
-              <Input value={form.id} onChange={(e) => update("id", e.target.value)} className="h-8 text-xs text-center" />
+              <Input value={form.f} onChange={(e) => update("f", e.target.value)} className="h-8 text-xs text-center" placeholder="0" />
+              <Input value={form.s} onChange={(e) => update("s", e.target.value)} className="h-8 text-xs text-center" placeholder="Slot" />
+              <Input value={form.p} onChange={(e) => update("p", e.target.value)} className="h-8 text-xs text-center" placeholder="Port" />
+              <Input value={form.id} onChange={(e) => update("id", e.target.value)} className="h-8 text-xs text-center" placeholder="ID" />
             </div>
           </div>
 
@@ -169,20 +169,25 @@ export default function HuaweiPPPoEGenerator() {
                 value={form.sn}
                 onChange={(e) => update("sn", e.target.value.toUpperCase())}
                 className="h-8 text-xs"
-                placeholder="48575443D0844AAC"
+                placeholder="SN"
               />
               <Input
                 value={form.password}
                 onChange={(e) => update("password", e.target.value)}
                 className="h-8 text-xs"
-                placeholder="20260510"
+                placeholder={todayPassword()}
               />
             </div>
           </div>
 
           <div className="space-y-1">
             <Label className="text-xs">VLAN :</Label>
-            <Input value={form.vlan} onChange={(e) => update("vlan", e.target.value)} className="h-8 text-xs" />
+            <Input
+              value={form.vlan}
+              onChange={(e) => update("vlan", e.target.value)}
+              className="h-8 text-xs"
+              placeholder="VLAN ID"
+            />
           </div>
 
           <div className="space-y-1">
@@ -191,6 +196,7 @@ export default function HuaweiPPPoEGenerator() {
               value={form.lineProfile}
               onChange={(e) => update("lineProfile", e.target.value)}
               className="h-8 text-xs"
+              placeholder="lineprofile-name"
             />
           </div>
 
@@ -200,12 +206,13 @@ export default function HuaweiPPPoEGenerator() {
               value={form.serviceProfile}
               onChange={(e) => update("serviceProfile", e.target.value)}
               className="h-8 text-xs"
+              placeholder="srvprofile-name"
             />
           </div>
 
           <div className="space-y-1">
             <Label className="text-xs">Gemport :</Label>
-            <Input value={form.gemport} onChange={(e) => update("gemport", e.target.value)} className="h-8 text-xs" />
+            <Input value={form.gemport} onChange={(e) => update("gemport", e.target.value)} className="h-8 text-xs" placeholder="1" />
           </div>
 
           <Button onClick={gass} className="w-full h-9 gap-1.5 font-semibold">
