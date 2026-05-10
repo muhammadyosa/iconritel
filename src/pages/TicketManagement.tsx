@@ -685,8 +685,8 @@ export default function TicketManagement() {
               )}
             </div>
             
-            {/* Show PORT text input only for PORT DOWN constraint */}
-            {formData.constraint === "PORT DOWN" && (
+            {/* Show PORT text input for PORT DOWN and PORT BAD RX constraints */}
+            {(formData.constraint === "PORT DOWN" || formData.constraint === "PORT BAD RX") && (
               <div>
                 <Label>Port Info (Optional)</Label>
                 <Input
@@ -1146,7 +1146,7 @@ export default function TicketManagement() {
                         )}
                       </div>
                       
-                      {manualFormData.constraint === "PORT DOWN" && (
+                      {(manualFormData.constraint === "PORT DOWN" || manualFormData.constraint === "PORT BAD RX") && (
                         <div>
                           <Label>Port Info (Optional)</Label>
                           <Input
