@@ -95,7 +95,7 @@ function NonTabRoutes() {
 // Renders all open tabs, keeping them mounted but hiding inactive ones
 function TabbedContent() {
   const location = useLocation();
-  const { openTabs, activeTransition } = useOpenTabs();
+  const { activeTransition } = useOpenTabs();
   const currentPath = location.pathname;
   
   const isTabPath = currentPath in pathMap;
@@ -104,31 +104,20 @@ function TabbedContent() {
     return <NonTabRoutes />;
   }
 
+  const PageComponent = pageComponents[currentPath];
+  if (!PageComponent) return <NonTabRoutes />;
+
   return (
-    <>
-      {openTabs.map((tab) => {
-        const PageComponent = pageComponents[tab.path];
-        if (!PageComponent) return null;
-        const isActive = currentPath === tab.path;
-        const isTransitioning = activeTransition === tab.path;
-        return (
-          <div
-            key={tab.path}
-            style={{ display: isActive ? "block" : "none" }}
-            className={cn(
-              "h-full",
-              isActive && isTransitioning && "animate-fade-in"
-            )}
-          >
-            <Suspense fallback={<PageLoader />}>
-              <ProtectedRoute>
-                <PageComponent />
-              </ProtectedRoute>
-            </Suspense>
-          </div>
-        );
-      })}
-    </>
+    <div
+      key={currentPath}
+      className={cn("h-full", activeTransition === currentPath && "animate-fade-in")}
+    >
+      <Suspense fallback={<PageLoader />}>
+        <ProtectedRoute>
+          <PageComponent />
+        </ProtectedRoute>
+      </Suspense>
+    </div>
   );
 }
 function TicketNotificationProvider({ children }: { children: React.ReactNode }) {

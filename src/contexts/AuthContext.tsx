@@ -121,84 +121,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     let cancelled = false;
+    let subscription: { unsubscribe: () => void } | null = null;
 
-    // Set up auth state listener FIRST
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        if (cancelled) return;
-
-        // Supabase can emit an INITIAL_SESSION event before getSession() has
-        // finished restoring tokens from storage. Do not treat that early null
-        // as a real logout, otherwise ProtectedRoute redirects to /login.
-        if (!authInitializedRef.current && event === 'INITIAL_SESSION') {
-          return;
-        }
-
-        // Guard: if user explicitly logged out, ignore any rehydrated session
-        // until a real SIGNED_IN event arrives from a fresh login.
-        const { loggedOut, oauthInProgress } = (() => {
-          try {
-            return {
-              loggedOut: sessionStorage.getItem(EXPLICIT_LOGOUT_KEY) === "true",
-              oauthInProgress: sessionStorage.getItem(OAUTH_LOGIN_IN_PROGRESS_KEY) === "true",
-            };
-          }
-          catch { return { loggedOut: false, oauthInProgress: false }; }
-        })();
-
-        if (loggedOut && !oauthInProgress && event !== 'SIGNED_IN') {
-          authInitializedRef.current = true;
-          setSession(null);
-          setUser(null);
-          setProfile(null);
-          userIdRef.current = null;
-          setIsLoading(false);
-          return;
-        }
-
-        // A genuine new login clears the explicit-logout flag.
-        if (event === 'SIGNED_IN') {
-          try {
-            sessionStorage.removeItem(EXPLICIT_LOGOUT_KEY);
-            sessionStorage.removeItem(OAUTH_LOGIN_IN_PROGRESS_KEY);
-          } catch { /* ignore */ }
-        }
-
-        setSession(session);
-        setUser(session?.user ?? null);
-
-        if (session?.user) {
-          userIdRef.current = session.user.id;
-          // Use setTimeout to avoid potential deadlocks with Supabase client
-          setTimeout(() => {
-            fetchProfile(session.user.id);
-            updateLastOnline(session.user.id);
-            // Log login activity
-            if (event === 'SIGNED_IN') {
-              supabase.from("user_activity_logs").insert({
-                user_id: session.user.id,
-                action: "login",
-                detail: null,
-              } as never).then(() => {});
-            }
-          }, 0);
-        } else {
-          userIdRef.current = null;
-          setProfile(null);
-        }
-
-        setIsLoading(false);
-        authInitializedRef.current = true;
+    const readAuthFlags = () => {
+      try {
+        return {
+          loggedOut: sessionStorage.getItem(EXPLICIT_LOGOUT_KEY) === "true",
+          oauthInProgress: sessionStorage.getItem(OAUTH_LOGIN_IN_PROGRESS_KEY) === "true",
+        };
+      } catch {
+        return { loggedOut: false, oauthInProgress: false };
       }
-    );
+    };
 
-    // THEN initialize: honor explicit-logout BEFORE touching getSession().
-    (async () => {
-      const wasLoggedOut = await consumeExplicitLogout();
+    const applySession = (event: string, nextSession: Session | null) => {
       if (cancelled) return;
+      const { loggedOut, oauthInProgress } = readAuthFlags();
 
-      if (wasLoggedOut) {
-        // Stay signed out. Do not call getSession() — nothing to rehydrate.
+      if (loggedOut && !oauthInProgress && event !== "SIGNED_IN") {
         authInitializedRef.current = true;
         setSession(null);
         setUser(null);
@@ -208,32 +148,64 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return;
       }
 
-      const { data: { session } } = await supabase.auth.getSession();
-      if (cancelled) return;
+      if (event === "SIGNED_IN" || nextSession?.user) {
+        try {
+          sessionStorage.removeItem(EXPLICIT_LOGOUT_KEY);
+          sessionStorage.removeItem(OAUTH_LOGIN_IN_PROGRESS_KEY);
+        } catch { /* ignore */ }
+      }
+
+      setSession(nextSession);
+      setUser(nextSession?.user ?? null);
+
+      if (nextSession?.user) {
+        userIdRef.current = nextSession.user.id;
+        setTimeout(() => {
+          fetchProfile(nextSession.user.id);
+          updateLastOnline(nextSession.user.id);
+          if (event === "SIGNED_IN") {
+            supabase.from("user_activity_logs").insert({
+              user_id: nextSession.user.id,
+              action: "login",
+              detail: null,
+            } as never).then(() => {});
+          }
+        }, 0);
+      } else {
+        userIdRef.current = null;
+        setProfile(null);
+      }
 
       authInitializedRef.current = true;
-      setSession(session);
-      setUser(session?.user ?? null);
+      setIsLoading(false);
+    };
 
-      if (session?.user) {
-        userIdRef.current = session.user.id;
-        fetchProfile(session.user.id);
-        updateLastOnline(session.user.id);
+    (async () => {
+      const wasLoggedOut = await consumeExplicitLogout();
+      if (cancelled) return;
+
+      if (wasLoggedOut) {
+        applySession("SIGNED_OUT", null);
+      } else {
+        const { data: { session } } = await supabase.auth.getSession();
+        applySession("INITIAL_SESSION", session);
       }
 
-      setIsLoading(false);
+      if (cancelled) return;
+      const { data } = supabase.auth.onAuthStateChange((event, session) => {
+        if (event === "INITIAL_SESSION") return;
+        applySession(event, session);
+      });
+      subscription = data.subscription;
     })();
 
-    // Update last_online periodically (every 5 minutes)
     const intervalId = setInterval(() => {
-      if (userIdRef.current) {
-        updateLastOnline(userIdRef.current);
-      }
+      if (userIdRef.current) updateLastOnline(userIdRef.current);
     }, 5 * 60 * 1000);
 
     return () => {
       cancelled = true;
-      subscription.unsubscribe();
+      subscription?.unsubscribe();
       clearInterval(intervalId);
     };
   }, [fetchProfile, updateLastOnline, consumeExplicitLogout]);
