@@ -115,6 +115,7 @@ export default function Login() {
 
       if (result.error) {
         console.error("OAuth error:", result.error);
+        try { sessionStorage.removeItem(OAUTH_LOGIN_IN_PROGRESS_KEY); } catch { /* ignore */ }
         toast.error("Gagal masuk dengan Google. Silakan coba lagi.");
         setIsSigningIn(false);
         return;
@@ -123,6 +124,7 @@ export default function Login() {
       navigate("/", { replace: true });
     } catch (error) {
       console.error("Sign in error:", error);
+      try { sessionStorage.removeItem(OAUTH_LOGIN_IN_PROGRESS_KEY); } catch { /* ignore */ }
       toast.error("Terjadi kesalahan saat masuk.");
       setIsSigningIn(false);
     }
