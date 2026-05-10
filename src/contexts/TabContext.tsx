@@ -22,6 +22,7 @@ export const pathMap: Record<string, OpenTab> = {
   "/upe": { title: "Data UPE", path: "/upe", emoji: "🔗" },
   "/bng": { title: "Data BNG", path: "/bng", emoji: "🛰" },
   "/notes": { title: "List Configure", path: "/notes", emoji: "📖" },
+  "/auto-config": { title: "List Auto Config", path: "/auto-config", emoji: "💻" },
   "/report": { title: "Report", path: "/report", emoji: "📝" },
   "/settings": { title: "Settings", path: "/settings", emoji: "🛠" },
 };
