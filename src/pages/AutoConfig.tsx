@@ -9,6 +9,7 @@ import { NotesSkeleton } from "@/components/PageSkeleton";
 import { useCloudNotes } from "@/hooks/useCloudNotes";
 import { useUserRole } from "@/hooks/useUserRole";
 import { toast } from "sonner";
+import HuaweiPPPoEGenerator from "@/components/HuaweiPPPoEGenerator";
 
 const TABS = [
   { value: "auto-huawei", label: "📟 Huawei" },
