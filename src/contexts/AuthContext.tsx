@@ -21,6 +21,24 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+const EXPLICIT_LOGOUT_KEY = "explicit_logout";
+const OAUTH_LOGIN_IN_PROGRESS_KEY = "oauth_login_in_progress";
+
+const purgeAuthStorage = () => {
+  const purge = (storage: Storage) => {
+    const keys: string[] = [];
+    for (let i = 0; i < storage.length; i++) {
+      const k = storage.key(i);
+      if (!k) continue;
+      if (k.startsWith("sb-") || k.includes("supabase.auth") || k.includes("supabase")) keys.push(k);
+    }
+    keys.forEach((k) => storage.removeItem(k));
+  };
+
+  purge(localStorage);
+  purge(sessionStorage);
+};
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
@@ -69,26 +87,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // leftover Supabase session from storage on the next app boot.
   const consumeExplicitLogout = useCallback(async (): Promise<boolean> => {
     let flagged = false;
+    let oauthInProgress = false;
     try {
-      flagged = sessionStorage.getItem('explicit_logout') === 'true';
+      flagged = sessionStorage.getItem(EXPLICIT_LOGOUT_KEY) === "true";
+      oauthInProgress = sessionStorage.getItem(OAUTH_LOGIN_IN_PROGRESS_KEY) === "true";
     } catch {
       flagged = false;
     }
     if (!flagged) return false;
 
+    if (oauthInProgress) {
+      try { sessionStorage.removeItem(EXPLICIT_LOGOUT_KEY); } catch { /* ignore */ }
+      return false;
+    }
+
     // Purge any cached Supabase auth tokens so getSession() cannot revive them.
     try {
-      const purge = (storage: Storage) => {
-        const keys: string[] = [];
-        for (let i = 0; i < storage.length; i++) {
-          const k = storage.key(i);
-          if (!k) continue;
-          if (k.startsWith('sb-') || k.includes('supabase.auth')) keys.push(k);
-        }
-        keys.forEach((k) => storage.removeItem(k));
-      };
-      purge(localStorage);
-      purge(sessionStorage);
+      purgeAuthStorage();
     } catch {
       // ignore storage access errors
     }
@@ -100,13 +115,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // ignore — we're already in a logged-out intent
     }
 
-    // Re-set the flag (purge above wiped sessionStorage) so subsequent
-    // SIGNED_IN events from a fresh login flow can clear it explicitly.
-    try {
-      sessionStorage.setItem('explicit_logout', 'true');
-    } catch {
-      // ignore
-    }
     return true;
   }, []);
 
