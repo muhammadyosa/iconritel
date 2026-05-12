@@ -24,6 +24,7 @@ import { StatusBadge } from "@/components/StatusBadge";
 import { useCloudTickets } from "@/hooks/useCloudTickets";
 import { useTicketHistory } from "@/hooks/useTicketHistory";
 import { FEEDER_CONSTRAINTS_SET } from "@/types/ticket";
+import { toLocalDateStr } from "@/lib/dateUtils";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   ChartContainer,
@@ -394,11 +395,29 @@ export default function Teams() {
     return t;
   }, [rankingUserStats]);
 
+  // Total Incident & Resolved diambil dari Daily Incident History (persistent)
+  // agar jumlah perbulan tetap akurat meskipun incident sudah dihapus / auto-cleanup.
+  const nocHistoryTotals = useMemo(() => {
+    let records = history.records;
+    if (dateRange?.from) {
+      const fromStr = toLocalDateStr(startOfDay(dateRange.from));
+      const toStr = toLocalDateStr(dateRange.to ? endOfDay(dateRange.to) : endOfDay(dateRange.from));
+      records = records.filter(r => r.date >= fromStr && r.date <= toStr);
+    }
+    return records.reduce(
+      (acc, r) => ({ total: acc.total + (r.total || 0), resolved: acc.resolved + (r.resolved || 0) }),
+      { total: 0, resolved: 0 }
+    );
+  }, [history.records, dateRange]);
+
   const nocTotals = useMemo(() => {
     const t = { total: 0, resolved: 0, pending: 0, critical: 0 };
-    userStats.forEach(u => { t.total += u.total; t.resolved += u.resolved; t.pending += u.pending; t.critical += u.critical; });
+    userStats.forEach(u => { t.pending += u.pending; t.critical += u.critical; });
+    // Override total & resolved dengan data history (Daily Incident History)
+    t.total = Math.max(nocHistoryTotals.total, userStats.reduce((s, u) => s + u.total, 0));
+    t.resolved = Math.max(nocHistoryTotals.resolved, userStats.reduce((s, u) => s + u.resolved, 0));
     return t;
-  }, [userStats]);
+  }, [userStats, nocHistoryTotals]);
 
   // NOC constraint breakdown
   const nocConstraintStats = useMemo(() => {
