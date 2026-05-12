@@ -222,6 +222,8 @@ export default function AutoConfig() {
               <HuaweiPPPoEGenerator />
             ) : tab.value === "auto-raisecom" ? (
               <RaisecomPPPoEGenerator />
+            ) : tab.value === "auto-upe" ? (
+              <UPESections />
             ) : (
               <ConfigSection tabKey={tab.value} />
             )}
