@@ -350,6 +350,10 @@ export default function Teams() {
           onProgress: s.onProgress,
           pending: s.pending,
           critical: s.critical,
+          histCreated: s.histCreated,
+          histResolved: s.histResolved,
+          liveTotal: s.liveTotal,
+          liveResolved: s.liveResolved,
         };
       })
       .filter(u => u.total > 0 || u.resolved > 0 || u.pending > 0 || u.critical > 0 || u.onProgress > 0)
@@ -1890,6 +1894,104 @@ export default function Teams() {
                         </Table>
                       </ScrollArea>
                     </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Rekonsiliasi Live vs History per-User */}
+              <Card className="shadow-card overflow-hidden">
+                <CardHeader className="py-2.5 px-3 sm:px-4 border-b bg-accent/5">
+                  <CardTitle className="flex items-center justify-between text-xs sm:text-sm">
+                    <div className="flex items-center gap-2">
+                      <Badge className="bg-primary/10 text-primary text-[9px] sm:text-[10px] px-1.5 sm:px-2">CHECK</Badge>
+                      <span>Rekonsiliasi Live vs History</span>
+                      <Badge variant="secondary" className="text-[8px] sm:text-[9px]">{rankingUserStats.length} user</Badge>
+                    </div>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="h-6 text-[10px] px-2"
+                      onClick={() => {
+                        const headers = ["Nama User", "Hist Created", "Live Total", "Final Total", "Delta Created", "Hist Resolved", "Live Resolved", "Final Resolved", "Delta Resolved", "Status"];
+                        const rows = rankingUserStats.map(u => {
+                          const dC = u.histCreated - u.liveTotal;
+                          const dR = u.histResolved - u.liveResolved;
+                          const status = dC === 0 && dR === 0 ? "MATCH" : (dC > 0 || dR > 0 ? "HISTORY>LIVE (auto-deleted)" : "LIVE>HISTORY (belum sync)");
+                          return [u.name, u.histCreated, u.liveTotal, u.total, dC, u.histResolved, u.liveResolved, u.resolved, dR, status];
+                        });
+                        const csv = [headers, ...rows].map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(",")).join("\n");
+                        const blob = new Blob([`\uFEFF${csv}`], { type: "text/csv;charset=utf-8;" });
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement("a");
+                        a.href = url;
+                        a.download = `rekonsiliasi-user-noc-${toLocalDateStr(new Date())}.csv`;
+                        a.click();
+                        URL.revokeObjectURL(url);
+                      }}
+                    >
+                      Export CSV
+                    </Button>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-0">
+                  <div className="overflow-x-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
+                    <div className="min-w-[640px]">
+                      <ScrollArea className={rankingUserStats.length > 8 ? "h-[380px]" : ""}>
+                        <Table>
+                          <TableHeader className="sticky top-0 z-10 bg-background">
+                            <TableRow className="bg-muted/30">
+                              <TableHead className="text-[9px] sm:text-[10px]">Nama User</TableHead>
+                              <TableHead className="text-[9px] sm:text-[10px] text-center" title="Total Created dari Daily Incident History">Hist C</TableHead>
+                              <TableHead className="text-[9px] sm:text-[10px] text-center" title="Total dari List Incident (live)">Live C</TableHead>
+                              <TableHead className="text-[9px] sm:text-[10px] text-center font-bold" title="Nilai final = max(Hist, Live)">Final</TableHead>
+                              <TableHead className="text-[9px] sm:text-[10px] text-center" title="Selisih Hist - Live">Δ</TableHead>
+                              <TableHead className="text-[9px] sm:text-[10px] text-center text-success" title="Resolved dari History">Hist R</TableHead>
+                              <TableHead className="text-[9px] sm:text-[10px] text-center text-success" title="Resolved dari Live">Live R</TableHead>
+                              <TableHead className="text-[9px] sm:text-[10px] text-center font-bold text-success" title="Resolved final">Final</TableHead>
+                              <TableHead className="text-[9px] sm:text-[10px] text-center" title="Selisih Hist R - Live R">Δ</TableHead>
+                              <TableHead className="text-[9px] sm:text-[10px] text-center">Status</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {rankingUserStats.length === 0 ? (
+                              <TableRow>
+                                <TableCell colSpan={10} className="text-center text-xs text-muted-foreground py-6">Tidak ada data</TableCell>
+                              </TableRow>
+                            ) : rankingUserStats.map((u) => {
+                              const dC = u.histCreated - u.liveTotal;
+                              const dR = u.histResolved - u.liveResolved;
+                              const match = dC === 0 && dR === 0;
+                              return (
+                                <TableRow key={u.userKey} className="hover:bg-accent/5">
+                                  <TableCell className="py-1.5 text-[10px] sm:text-xs font-semibold truncate max-w-[140px]">{u.name}</TableCell>
+                                  <TableCell className="text-center text-[10px] sm:text-xs py-1.5">{u.histCreated}</TableCell>
+                                  <TableCell className="text-center text-[10px] sm:text-xs py-1.5">{u.liveTotal}</TableCell>
+                                  <TableCell className="text-center text-[10px] sm:text-xs font-bold py-1.5">{u.total}</TableCell>
+                                  <TableCell className={cn("text-center text-[10px] sm:text-xs py-1.5 font-medium", dC === 0 ? "text-muted-foreground" : dC > 0 ? "text-warning" : "text-destructive")}>{dC > 0 ? `+${dC}` : dC}</TableCell>
+                                  <TableCell className="text-center text-[10px] sm:text-xs text-success py-1.5">{u.histResolved}</TableCell>
+                                  <TableCell className="text-center text-[10px] sm:text-xs text-success py-1.5">{u.liveResolved}</TableCell>
+                                  <TableCell className="text-center text-[10px] sm:text-xs font-bold text-success py-1.5">{u.resolved}</TableCell>
+                                  <TableCell className={cn("text-center text-[10px] sm:text-xs py-1.5 font-medium", dR === 0 ? "text-muted-foreground" : dR > 0 ? "text-warning" : "text-destructive")}>{dR > 0 ? `+${dR}` : dR}</TableCell>
+                                  <TableCell className="text-center py-1.5">
+                                    {match ? (
+                                      <Badge variant="outline" className="text-[8px] sm:text-[9px] border-success text-success">✓ MATCH</Badge>
+                                    ) : (dC > 0 || dR > 0) ? (
+                                      <Badge variant="outline" className="text-[8px] sm:text-[9px] border-warning text-warning" title="History > Live: ada incident sudah auto-deleted tapi tetap dihitung">AUTO-DEL</Badge>
+                                    ) : (
+                                      <Badge variant="outline" className="text-[8px] sm:text-[9px] border-destructive text-destructive" title="Live > History: history belum tersinkron">DESYNC</Badge>
+                                    )}
+                                  </TableCell>
+                                </TableRow>
+                              );
+                            })}
+                          </TableBody>
+                        </Table>
+                      </ScrollArea>
+                    </div>
+                  </div>
+                  <div className="px-3 py-2 border-t bg-muted/20 text-[9px] sm:text-[10px] text-muted-foreground space-y-0.5">
+                    <div><strong>Hist C/R</strong> = 📊 Daily Incident History · <strong>Live C/R</strong> = 📋 List Incident · <strong>Final</strong> = max(Hist, Live) dipakai Ranking</div>
+                    <div><strong>Δ &gt; 0</strong> = incident auto-deleted tetap dihitung · <strong>Δ &lt; 0</strong> = live belum tersinkron ke history</div>
                   </div>
                 </CardContent>
               </Card>
