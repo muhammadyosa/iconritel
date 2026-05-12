@@ -11,6 +11,7 @@ import { useUserRole } from "@/hooks/useUserRole";
 import { toast } from "sonner";
 import HuaweiPPPoEGenerator from "@/components/HuaweiPPPoEGenerator";
 import RaisecomPPPoEGenerator from "@/components/RaisecomPPPoEGenerator";
+import CiscoASRDocs from "@/components/CiscoASRDocs";
 
 const TABS = [
   { value: "auto-huawei", label: "📟 Huawei" },
