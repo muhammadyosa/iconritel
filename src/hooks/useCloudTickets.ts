@@ -499,17 +499,7 @@ export function useCloudTickets() {
     }
   }, [tickets, upsertUserHistory]);
 
-  // Decrement Ranking User NOC counters for a manually-deleted ticket
-  const decrementHistoryForTicket = useCallback(async (t: Ticket | undefined) => {
-    if (!t || !t.createdByName) return;
-    await upsertUserHistory(t.createdByName, t.createdByUserId, t.createdISO, "total_created", -1);
-    if (t.status === "Resolved") {
-      await upsertUserHistory(t.createdByName, t.createdByUserId, t.createdISO, "total_resolved", -1);
-    }
-  }, [upsertUserHistory]);
-
   const deleteTicket = useCallback(async (id: string) => {
-    const target = tickets.find((t) => t.id === id);
     try {
       const { error } = await (supabase
         .from("tickets")
@@ -517,8 +507,6 @@ export function useCloudTickets() {
         .eq("ticket_id" as never, id) as unknown as Promise<{ error: Error | null }>);
 
       if (error) throw error;
-      // Manual delete -> exclude from Ranking User NOC
-      decrementHistoryForTicket(target);
       // Realtime will handle updating the list
     } catch (error) {
       if (import.meta.env.DEV) {
@@ -527,10 +515,9 @@ export function useCloudTickets() {
       toast.error("Gagal menghapus incident");
       throw error;
     }
-  }, [tickets, decrementHistoryForTicket]);
+  }, []);
 
   const bulkDeleteTickets = useCallback(async (ids: string[]) => {
-    const targets = tickets.filter((t) => ids.includes(t.id));
     const batchSize = 50;
     for (let i = 0; i < ids.length; i += batchSize) {
       const batch = ids.slice(i, i + batchSize);
@@ -540,9 +527,7 @@ export function useCloudTickets() {
         .in("ticket_id" as never, batch as never) as unknown as Promise<{ error: Error | null }>);
       if (error) throw error;
     }
-    // Manual delete -> exclude from Ranking User NOC
-    await Promise.all(targets.map((t) => decrementHistoryForTicket(t)));
-  }, [tickets, decrementHistoryForTicket]);
+  }, []);
 
   return {
     tickets,
