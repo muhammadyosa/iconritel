@@ -34,7 +34,7 @@ export default function BNGHuaweiDocs() {
       {/* Cek IP & Status User */}
       <Card className="bg-muted/30">
         <CardHeader className="py-2.5">
-          <CardTitle className="text-center text-base font-bold tracking-wide text-white">
+          <CardTitle className="text-center text-base font-bold tracking-wide text-foreground">
             Cek IP &amp; Status User
           </CardTitle>
         </CardHeader>
@@ -179,7 +179,7 @@ HUAWEI-BNG-01>`}</Code>
       {/* Cek Failed Reason */}
       <Card className="bg-muted/30">
         <CardHeader className="py-2.5">
-          <CardTitle className="text-center text-base font-bold tracking-wide text-white">
+          <CardTitle className="text-center text-base font-bold tracking-wide text-foreground">
             Cek Failed Reason
           </CardTitle>
         </CardHeader>
@@ -250,7 +250,7 @@ HUAWEI-BNG-01>`}</Code>
       {/* Cek Kapasitas User Dalam 1 VLAN */}
       <Card className="bg-muted/30">
         <CardHeader className="py-2.5">
-          <CardTitle className="text-center text-base font-bold tracking-wide text-white">
+          <CardTitle className="text-center text-base font-bold tracking-wide text-foreground">
             Cek Kapasitas User Dalam 1 VLAN
           </CardTitle>
         </CardHeader>
