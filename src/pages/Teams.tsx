@@ -304,40 +304,44 @@ export default function Teams() {
     // Total & Resolved diambil dari Daily Incident History (persistent), agar
     // incident yang sudah di-auto-delete tetap terhitung. Status aktif
     // (On Progress / Pending / Critical) diambil dari live List Incident.
-    const stats: Record<string, { name: string; total: number; onProgress: number; pending: number; critical: number }> = {};
+    const stats: Record<string, { name: string; histCreated: number; histResolved: number; onProgress: number; pending: number; critical: number; liveTotal: number; liveResolved: number }> = {};
 
     const getUserKey = (userId?: string | null, userName?: string | null) => userId || userName?.trim().toLowerCase() || "unknown";
     const getDisplayName = (userName?: string | null) => userName?.trim() || "Unknown";
     const ensure = (key: string, name: string) => {
       if (!stats[key]) {
-        stats[key] = { name, total: 0, onProgress: 0, pending: 0, critical: 0 };
+        stats[key] = { name, histCreated: 0, histResolved: 0, onProgress: 0, pending: 0, critical: 0, liveTotal: 0, liveResolved: 0 };
       } else if (name && name !== "Unknown") {
         stats[key].name = name;
       }
       return stats[key];
     };
 
-    // 1) Total dari Daily Incident History (persistent)
+    // 1) Akumulasi dari Daily Incident History (persistent — termasuk auto-deleted)
     rankingHistoryData.forEach((rec) => {
       const key = getUserKey(rec.user_id, rec.user_name);
       const s = ensure(key, getDisplayName(rec.user_name));
-      s.total += rec.total_created || 0;
+      s.histCreated += rec.total_created || 0;
+      s.histResolved += rec.total_resolved || 0;
     });
 
-    // 2) Status aktif dari live List Incident
+    // 2) Live List Incident — total + status aktif + resolved aktif
     rankingLiveTickets.forEach((ticket) => {
       const key = getUserKey(ticket.createdByUserId, ticket.createdByName);
       const s = ensure(key, getDisplayName(ticket.createdByName));
-      if (ticket.status === "Critical") s.critical += 1;
+      s.liveTotal += 1;
+      if (ticket.status === "Resolved") s.liveResolved += 1;
+      else if (ticket.status === "Critical") s.critical += 1;
       else if (ticket.status === "Pending") s.pending += 1;
       else if (ticket.status === "On Progress") s.onProgress += 1;
     });
 
     return Object.entries(stats)
       .map(([userKey, s]) => {
-        const activeCount = s.onProgress + s.pending + s.critical;
-        const total = Math.max(s.total, activeCount);
-        const resolved = Math.max(total - activeCount, 0);
+        // Total: ambil yang lebih besar antara history & live (history menyertakan auto-deleted; live menyertakan baru yang belum tercatat)
+        const total = Math.max(s.histCreated, s.liveTotal);
+        // Resolved: ambil yang lebih besar antara history & live, dibatasi total
+        const resolved = Math.min(Math.max(s.histResolved, s.liveResolved), total);
         return {
           userKey,
           name: s.name,
@@ -349,7 +353,7 @@ export default function Teams() {
         };
       })
       .filter(u => u.total > 0 || u.resolved > 0 || u.pending > 0 || u.critical > 0 || u.onProgress > 0)
-      .sort((a, b) => b.total - a.total);
+      .sort((a, b) => b.total - a.total || b.resolved - a.resolved);
   }, [rankingHistoryData, rankingLiveTickets]);
 
   // Track previous ranking for rank change indicators
