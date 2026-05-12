@@ -502,12 +502,19 @@ export function useCloudTickets() {
 
   const deleteTicket = useCallback(async (id: string) => {
     try {
+      const ticket = tickets.find((t) => t.id === id);
       const { error } = await (supabase
         .from("tickets")
         .delete()
         .eq("ticket_id" as never, id) as unknown as Promise<{ error: Error | null }>);
 
       if (error) throw error;
+      if (ticket?.createdByName) {
+        await upsertUserHistory(ticket.createdByName, ticket.createdByUserId, ticket.createdISO, "total_created", -1);
+        if (ticket.status === "Resolved") {
+          await upsertUserHistory(ticket.createdByName, ticket.createdByUserId, ticket.createdISO, "total_resolved", -1);
+        }
+      }
       // Realtime will handle updating the list
     } catch (error) {
       if (import.meta.env.DEV) {
@@ -516,9 +523,10 @@ export function useCloudTickets() {
       toast.error("Gagal menghapus incident");
       throw error;
     }
-  }, []);
+  }, [tickets, upsertUserHistory]);
 
   const bulkDeleteTickets = useCallback(async (ids: string[]) => {
+    const targetTickets = tickets.filter((ticket) => ids.includes(ticket.id));
     const batchSize = 50;
     for (let i = 0; i < ids.length; i += batchSize) {
       const batch = ids.slice(i, i + batchSize);
@@ -528,7 +536,14 @@ export function useCloudTickets() {
         .in("ticket_id" as never, batch as never) as unknown as Promise<{ error: Error | null }>);
       if (error) throw error;
     }
-  }, []);
+    await Promise.all(targetTickets.map(async (ticket) => {
+      if (!ticket.createdByName) return;
+      await upsertUserHistory(ticket.createdByName, ticket.createdByUserId, ticket.createdISO, "total_created", -1);
+      if (ticket.status === "Resolved") {
+        await upsertUserHistory(ticket.createdByName, ticket.createdByUserId, ticket.createdISO, "total_resolved", -1);
+      }
+    }));
+  }, [tickets, upsertUserHistory]);
 
   return {
     tickets,
