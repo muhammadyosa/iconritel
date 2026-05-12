@@ -20,18 +20,29 @@ import { toLocalDateStr } from "@/lib/dateUtils";
 import { supabase } from "@/integrations/supabase/client";
 import { useDebouncedCallback } from "@/hooks/useDebouncedCallback";
 import { useCloudTickets } from "@/hooks/useCloudTickets";
+import type { Ticket } from "@/types/ticket";
+
+const RECON_HISTORY_PAGE_SIZE = 1000;
+
+interface ReconHistoryRecord {
+  user_id: string | null;
+  user_name: string;
+  date: string;
+  total_created: number;
+  total_resolved: number;
+}
 
 export function ReconciliationReport() {
   const { tickets } = useCloudTickets();
 
   const [reconRange, setReconRange] = useState<DateRange | undefined>(() => {
     const now = new Date();
-    return { from: now, to: now };
+    return { from: new Date(now.getFullYear(), now.getMonth(), 1), to: now };
   });
   const [reconStartHour, setReconStartHour] = useState<number>(0);
   const [reconEndHour, setReconEndHour] = useState<number>(23);
   const [reconUserDetail, setReconUserDetail] = useState<{ key: string; name: string } | null>(null);
-  const [reconHistoryData, setReconHistoryData] = useState<any[]>([]);
+  const [reconHistoryData, setReconHistoryData] = useState<ReconHistoryRecord[]>([]);
 
   const reconWindow = useMemo(() => {
     const fromDate = reconRange?.from || new Date();
@@ -46,12 +57,21 @@ export function ReconciliationReport() {
   }, [reconRange, reconStartHour, reconEndHour]);
 
   const fetchReconHistory = useCallback(async () => {
-    const res = await supabase
-      .from("daily_user_ticket_history")
-      .select("user_id, user_name, date, total_created, total_resolved")
-      .gte("date", reconWindow.cutoff)
-      .lte("date", reconWindow.cutoffEnd);
-    if (res.data) setReconHistoryData(res.data);
+    const rows: ReconHistoryRecord[] = [];
+    for (let from = 0; ; from += RECON_HISTORY_PAGE_SIZE) {
+      const to = from + RECON_HISTORY_PAGE_SIZE - 1;
+      const res = await supabase
+        .from("daily_user_ticket_history")
+        .select("user_id, user_name, date, total_created, total_resolved")
+        .gte("date", reconWindow.cutoff)
+        .lte("date", reconWindow.cutoffEnd)
+        .range(from, to);
+      if (res.error) break;
+      const batch = res.data || [];
+      rows.push(...batch);
+      if (batch.length < RECON_HISTORY_PAGE_SIZE) break;
+    }
+    setReconHistoryData(rows);
   }, [reconWindow.cutoff, reconWindow.cutoffEnd]);
 
   const { debounced: debouncedFetchRecon } = useDebouncedCallback(fetchReconHistory, 400);
@@ -86,7 +106,14 @@ export function ReconciliationReport() {
 
   const reconStats = useMemo(() => {
     const stats: Record<string, { name: string; histCreated: number; histResolved: number; liveCreated: number; liveResolved: number }> = {};
-    const getKey = (id?: string | null, name?: string | null) => id || name?.trim().toLowerCase() || "unknown";
+    const nameToKey = new Map<string, string>();
+    const getKey = (id?: string | null, name?: string | null) => {
+      const nameKey = name?.trim().toLowerCase() || "";
+      if (nameKey && nameToKey.has(nameKey)) return nameToKey.get(nameKey)!;
+      const key = id || nameKey || "unknown";
+      if (nameKey) nameToKey.set(nameKey, key);
+      return key;
+    };
     const ensure = (key: string, name: string) => {
       if (!stats[key]) stats[key] = { name: name || "Unknown", histCreated: 0, histResolved: 0, liveCreated: 0, liveResolved: 0 };
       else if (name && name !== "Unknown") stats[key].name = name;
@@ -184,6 +211,7 @@ export function ReconciliationReport() {
               </Select>
             </div>
             <Button size="sm" variant="ghost" className="h-6 text-[10px] px-2" onClick={() => { const now = new Date(); setReconRange({ from: now, to: now }); setReconStartHour(0); setReconEndHour(23); }}>Hari Ini</Button>
+            <Button size="sm" variant="ghost" className="h-6 text-[10px] px-2" onClick={() => { const now = new Date(); setReconRange({ from: new Date(now.getFullYear(), now.getMonth(), 1), to: now }); setReconStartHour(0); setReconEndHour(23); }}>Bulan Ini</Button>
             <Button size="sm" variant="ghost" className="h-6 text-[10px] px-2" onClick={() => { const now = new Date(); setReconRange({ from: subDays(now, 6), to: now }); setReconStartHour(0); setReconEndHour(23); }}>7 Hari</Button>
           </div>
         </CardHeader>
@@ -288,7 +316,7 @@ export function ReconciliationReport() {
                           <TableRow key={t.id}>
                             <TableCell className="text-[10px] font-mono">{t.serviceId || t.id.slice(0, 8)}</TableCell>
                             <TableCell className="text-[10px] truncate max-w-[180px]">{t.customerName || t.hostname || "-"}</TableCell>
-                            <TableCell className="text-[10px]"><StatusBadge status={t.status as any} /></TableCell>
+                            <TableCell className="text-[10px]"><StatusBadge status={t.status as Ticket["status"]} /></TableCell>
                             <TableCell className="text-[10px] text-muted-foreground">{format(new Date(t.createdISO), "dd/MM HH:mm")}</TableCell>
                           </TableRow>
                         ))}
