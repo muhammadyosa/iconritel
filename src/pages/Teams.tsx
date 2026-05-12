@@ -300,64 +300,52 @@ export default function Teams() {
   }, [fetchRankingData, debouncedFetchRanking]);
 
   const rankingUserStats = useMemo(() => {
-    const stats: Record<string, { name: string; total: number; resolved: number; onProgress: number; pending: number; critical: number }> = {};
-    const liveStatusByCreator: Record<string, { total: number; onProgress: number; pending: number; critical: number }> = {};
+    const stats: Record<string, { name: string; total: number; resolved: number; onProgress: number; pending: number; critical: number; histCreated: number; histResolved: number }> = {};
+    const liveStatusByCreator: Record<string, { total: number; resolved: number; onProgress: number; pending: number; critical: number }> = {};
 
     const getUserKey = (userId?: string | null, userName?: string | null) => userId || userName?.trim().toLowerCase() || "unknown";
     const getDisplayName = (userName?: string | null) => userName?.trim() || "Unknown";
 
+    const ensure = (key: string, name: string) => {
+      if (!stats[key]) {
+        stats[key] = { name, total: 0, resolved: 0, onProgress: 0, pending: 0, critical: 0, histCreated: 0, histResolved: 0 };
+      }
+      return stats[key];
+    };
+
     rankingHistoryData.forEach((rec) => {
       const key = getUserKey(rec.user_id, rec.user_name);
-      if (!stats[key]) {
-        stats[key] = {
-          name: getDisplayName(rec.user_name),
-          total: 0,
-          resolved: 0,
-          onProgress: 0,
-          pending: 0,
-          critical: 0,
-        };
-      }
-
-      stats[key].name = getDisplayName(rec.user_name) || stats[key].name;
-      stats[key].total += rec.total_created || 0;
+      const s = ensure(key, getDisplayName(rec.user_name));
+      s.name = getDisplayName(rec.user_name) || s.name;
+      s.histCreated += rec.total_created || 0;
+      s.histResolved += rec.total_resolved || 0;
     });
 
     rankingLiveTickets.forEach((ticket) => {
       const key = getUserKey(ticket.createdByUserId, ticket.createdByName);
-      if (!stats[key]) {
-        stats[key] = {
-          name: getDisplayName(ticket.createdByName),
-          total: 0,
-          resolved: 0,
-          onProgress: 0,
-          pending: 0,
-          critical: 0,
-        };
-      }
-
-      stats[key].name = getDisplayName(ticket.createdByName) || stats[key].name;
+      const s = ensure(key, getDisplayName(ticket.createdByName));
+      s.name = getDisplayName(ticket.createdByName) || s.name;
 
       if (!liveStatusByCreator[key]) {
-        liveStatusByCreator[key] = { total: 0, onProgress: 0, pending: 0, critical: 0 };
+        liveStatusByCreator[key] = { total: 0, resolved: 0, onProgress: 0, pending: 0, critical: 0 };
       }
-
-      liveStatusByCreator[key].total += 1;
-      if (ticket.status === "Critical") liveStatusByCreator[key].critical += 1;
-      else if (ticket.status === "Pending") liveStatusByCreator[key].pending += 1;
-      else if (ticket.status === "On Progress") liveStatusByCreator[key].onProgress += 1;
+      const live = liveStatusByCreator[key];
+      live.total += 1;
+      if (ticket.status === "Critical") live.critical += 1;
+      else if (ticket.status === "Pending") live.pending += 1;
+      else if (ticket.status === "On Progress") live.onProgress += 1;
+      else if (ticket.status === "Resolved") live.resolved += 1;
     });
 
-    Object.entries(liveStatusByCreator).forEach(([key, live]) => {
-      stats[key].total = Math.max(stats[key].total, live.total);
-      stats[key].onProgress = live.onProgress;
-      stats[key].pending = live.pending;
-      stats[key].critical = live.critical;
-    });
-
-    Object.values(stats).forEach((stat) => {
-      const activeCount = stat.onProgress + stat.pending + stat.critical;
-      stat.resolved = Math.max(stat.total - activeCount, 0);
+    Object.entries(stats).forEach(([key, s]) => {
+      const live = liveStatusByCreator[key] || { total: 0, resolved: 0, onProgress: 0, pending: 0, critical: 0 };
+      s.onProgress = live.onProgress;
+      s.pending = live.pending;
+      s.critical = live.critical;
+      // Resolved: max of history-resolved and currently-live resolved (history may be decremented when tickets are deleted)
+      s.resolved = Math.max(s.histResolved, live.resolved);
+      // Total must always equal resolved + active (kept 100% in sync)
+      s.total = s.resolved + s.onProgress + s.pending + s.critical;
     });
 
     return Object.entries(stats)
