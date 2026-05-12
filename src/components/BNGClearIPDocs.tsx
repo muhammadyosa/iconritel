@@ -38,7 +38,7 @@ export default function BNGClearIPDocs() {
       {/* BNG Huawei NE8K */}
       <Card className="bg-muted/30">
         <CardHeader className="py-2.5">
-          <CardTitle className="text-center text-base font-bold tracking-wide text-destructive">
+          <CardTitle className="text-center text-base font-bold tracking-wide text-white">
             BNG Huawei NE8K
           </CardTitle>
         </CardHeader>
@@ -75,7 +75,7 @@ HUAWEI-BNG-01>`}</Code>
       {/* BNG Juniper MX104 & MX204 */}
       <Card className="bg-muted/30">
         <CardHeader className="py-2.5">
-          <CardTitle className="text-center text-base font-bold tracking-wide text-destructive">
+          <CardTitle className="text-center text-base font-bold tracking-wide text-white">
             BNG Juniper MX104 &amp; MX204
           </CardTitle>
         </CardHeader>
