@@ -37,6 +37,7 @@ const AKVList = React.lazy(() => import("./pages/AKVList"));
 const ListNote = React.lazy(() => import("./pages/ListNote"));
 const AutoConfig = React.lazy(() => import("./pages/AutoConfig"));
 const Report = React.lazy(() => import("./pages/Report"));
+const AuditHistory = React.lazy(() => import("./pages/AuditHistory"));
 const Settings = React.lazy(() => import("./pages/Settings"));
 const Install = React.lazy(() => import("./pages/Install"));
 const Login = React.lazy(() => import("./pages/Login"));
@@ -74,6 +75,7 @@ const pageComponents: Record<string, React.LazyExoticComponent<React.ComponentTy
   "/notes": ListNote,
   "/auto-config": AutoConfig,
   "/report": Report,
+  "/audit-history": AuditHistory,
   "/settings": Settings,
 };
 
