@@ -104,6 +104,14 @@ const PIE_COLORS = [
 
 const RANKING_HISTORY_PAGE_SIZE = 1000;
 
+interface RankingHistoryRecord {
+  user_id: string | null;
+  user_name: string;
+  date: string;
+  total_created: number;
+  total_resolved: number;
+}
+
 export default function Teams() {
   const { tickets, isLoading } = useCloudTickets();
   const { history } = useTicketHistory(tickets);
