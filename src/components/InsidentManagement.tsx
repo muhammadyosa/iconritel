@@ -112,16 +112,8 @@ export function InsidentManagement() {
         return;
       }
 
-      // Delete in batches
-      const batchSize = 50;
-      for (let i = 0; i < idsToDelete.length; i += batchSize) {
-        const batch = idsToDelete.slice(i, i + batchSize);
-        const { error } = await supabase
-          .from("tickets")
-          .delete()
-          .in("ticket_id" as never, batch as never);
-        if (error) throw error;
-      }
+      // Manual delete -> decrement Ranking User NOC counters
+      await bulkDeleteTickets(idsToDelete);
 
       toast.success(`${idsToDelete.length} insident berhasil dihapus`);
       logActivity("bulk_delete_tickets", `${idsToDelete.length} incident dihapus`);
