@@ -350,6 +350,10 @@ export default function Teams() {
           onProgress: s.onProgress,
           pending: s.pending,
           critical: s.critical,
+          histCreated: s.histCreated,
+          histResolved: s.histResolved,
+          liveTotal: s.liveTotal,
+          liveResolved: s.liveResolved,
         };
       })
       .filter(u => u.total > 0 || u.resolved > 0 || u.pending > 0 || u.critical > 0 || u.onProgress > 0)
