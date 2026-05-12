@@ -304,7 +304,7 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
       data.push(buildDay(date));
     }
     return data;
-  }, [monthTickets, trendFilter, trendCustomDate, monthRange]);
+  }, [monthTickets, trendFilter, trendCustomDate, monthRange, getTrendChartData]);
 
   // Human-readable date range for the Category & Trend filters — shown as a
   // small hint so users know exactly which days the chart covers.
