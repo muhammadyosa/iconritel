@@ -19,6 +19,7 @@ import SearchInterkoneksiDocs from "@/components/SearchInterkoneksiDocs";
 import BNGHuaweiDocs from "@/components/BNGHuaweiDocs";
 import BNGJuniperDocs from "@/components/BNGJuniperDocs";
 import BNGPingDocs from "@/components/BNGPingDocs";
+import BNGClearIPDocs from "@/components/BNGClearIPDocs";
 
 const TABS = [
   { value: "auto-huawei", label: "📟 Huawei" },
@@ -272,6 +273,8 @@ function BNGSections() {
             <BNGJuniperDocs />
           ) : s.value === "bng-ping-user" ? (
             <BNGPingDocs />
+          ) : s.value === "bng-clear-ip-user" ? (
+            <BNGClearIPDocs />
           ) : (
             <ConfigSection tabKey={s.value} />
           )}
