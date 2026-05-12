@@ -15,6 +15,7 @@ import CiscoASRDocs from "@/components/CiscoASRDocs";
 import HuaweiNE8KDocs from "@/components/HuaweiNE8KDocs";
 import JuniperMXDocs from "@/components/JuniperMXDocs";
 import TelnetOLTDocs from "@/components/TelnetOLTDocs";
+import SearchInterkoneksiDocs from "@/components/SearchInterkoneksiDocs";
 
 const TABS = [
   { value: "auto-huawei", label: "📟 Huawei" },
@@ -232,6 +233,8 @@ function UPESections() {
             <JuniperMXDocs />
           ) : s.value === "upe-telnet-olt" ? (
             <TelnetOLTDocs />
+          ) : s.value === "upe-search-interkoneksi-dcn" ? (
+            <SearchInterkoneksiDocs />
           ) : (
             <ConfigSection tabKey={s.value} />
           )}
