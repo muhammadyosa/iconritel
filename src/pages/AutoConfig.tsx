@@ -270,6 +270,8 @@ function BNGSections() {
             <BNGHuaweiDocs />
           ) : s.value === "bng-cek-user-vlan-juniper" ? (
             <BNGJuniperDocs />
+          ) : s.value === "bng-ping-user" ? (
+            <BNGPingDocs />
           ) : (
             <ConfigSection tabKey={s.value} />
           )}
