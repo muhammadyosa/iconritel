@@ -244,6 +244,32 @@ function UPESections() {
   );
 }
 
+const BNG_SECTIONS = [
+  { value: "bng-cek-user-vlan-huawei", label: "Cek User & VLAN Huawei NE8K" },
+  { value: "bng-cek-user-vlan-juniper", label: "Cek User & VLAN Juniper MX204" },
+  { value: "bng-ping-user", label: "PING User Dari BNG" },
+  { value: "bng-clear-ip-user", label: "Clear IP User" },
+];
+
+function BNGSections() {
+  return (
+    <Tabs defaultValue={BNG_SECTIONS[0].value} className="w-full">
+      <TabsList className="w-full grid grid-cols-2 sm:grid-cols-4 h-auto gap-0.5">
+        {BNG_SECTIONS.map((s) => (
+          <TabsTrigger key={s.value} value={s.value} className="text-[10px] sm:text-xs whitespace-normal py-1.5 leading-tight">
+            {s.label}
+          </TabsTrigger>
+        ))}
+      </TabsList>
+      {BNG_SECTIONS.map((s) => (
+        <TabsContent key={s.value} value={s.value} className="mt-3">
+          <ConfigSection tabKey={s.value} />
+        </TabsContent>
+      ))}
+    </Tabs>
+  );
+}
+
 export default function AutoConfig() {
   return (
     <div className="space-y-4">
@@ -268,6 +294,8 @@ export default function AutoConfig() {
               <RaisecomPPPoEGenerator />
             ) : tab.value === "auto-upe" ? (
               <UPESections />
+            ) : tab.value === "auto-bng" ? (
+              <BNGSections />
             ) : (
               <ConfigSection tabKey={tab.value} />
             )}
