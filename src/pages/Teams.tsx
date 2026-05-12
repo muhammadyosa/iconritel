@@ -2168,8 +2168,8 @@ export default function Teams() {
                                   <TableRow><TableCell colSpan={4} className="text-center text-xs text-muted-foreground py-6">Tidak ada incident live created di window ini</TableCell></TableRow>
                                 ) : liveCreated.map(t => (
                                   <TableRow key={t.id}>
-                                    <TableCell className="text-[10px] font-mono">{(t as any).ticketId || t.id.slice(0, 8)}</TableCell>
-                                    <TableCell className="text-[10px] truncate max-w-[180px]">{(t as any).customerName || (t as any).hostname || "-"}</TableCell>
+                                    <TableCell className="text-[10px] font-mono">{t.serviceId || t.id.slice(0, 8)}</TableCell>
+                                    <TableCell className="text-[10px] truncate max-w-[180px]">{t.customerName || t.hostname || "-"}</TableCell>
                                     <TableCell className="text-[10px]"><StatusBadge status={t.status as any} /></TableCell>
                                     <TableCell className="text-[10px] text-muted-foreground">{format(new Date(t.createdISO), "dd/MM HH:mm")}</TableCell>
                                   </TableRow>
