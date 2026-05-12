@@ -20,8 +20,17 @@ import { toLocalDateStr } from "@/lib/dateUtils";
 import { supabase } from "@/integrations/supabase/client";
 import { useDebouncedCallback } from "@/hooks/useDebouncedCallback";
 import { useCloudTickets } from "@/hooks/useCloudTickets";
+import type { Ticket } from "@/types/ticket";
 
 const RECON_HISTORY_PAGE_SIZE = 1000;
+
+interface ReconHistoryRecord {
+  user_id: string | null;
+  user_name: string;
+  date: string;
+  total_created: number;
+  total_resolved: number;
+}
 
 export function ReconciliationReport() {
   const { tickets } = useCloudTickets();
@@ -33,7 +42,7 @@ export function ReconciliationReport() {
   const [reconStartHour, setReconStartHour] = useState<number>(0);
   const [reconEndHour, setReconEndHour] = useState<number>(23);
   const [reconUserDetail, setReconUserDetail] = useState<{ key: string; name: string } | null>(null);
-  const [reconHistoryData, setReconHistoryData] = useState<any[]>([]);
+  const [reconHistoryData, setReconHistoryData] = useState<ReconHistoryRecord[]>([]);
 
   const reconWindow = useMemo(() => {
     const fromDate = reconRange?.from || new Date();
@@ -48,7 +57,7 @@ export function ReconciliationReport() {
   }, [reconRange, reconStartHour, reconEndHour]);
 
   const fetchReconHistory = useCallback(async () => {
-    const rows: any[] = [];
+    const rows: ReconHistoryRecord[] = [];
     for (let from = 0; ; from += RECON_HISTORY_PAGE_SIZE) {
       const to = from + RECON_HISTORY_PAGE_SIZE - 1;
       const res = await supabase
@@ -307,7 +316,7 @@ export function ReconciliationReport() {
                           <TableRow key={t.id}>
                             <TableCell className="text-[10px] font-mono">{t.serviceId || t.id.slice(0, 8)}</TableCell>
                             <TableCell className="text-[10px] truncate max-w-[180px]">{t.customerName || t.hostname || "-"}</TableCell>
-                            <TableCell className="text-[10px]"><StatusBadge status={t.status as any} /></TableCell>
+                            <TableCell className="text-[10px]"><StatusBadge status={t.status as Ticket["status"]} /></TableCell>
                             <TableCell className="text-[10px] text-muted-foreground">{format(new Date(t.createdISO), "dd/MM HH:mm")}</TableCell>
                           </TableRow>
                         ))}
