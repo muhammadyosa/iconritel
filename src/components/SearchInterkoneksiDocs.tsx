@@ -197,14 +197,14 @@ JKT-GANDUL.DCN-R3845-UPE-03#`}</Code>
           <p className="font-semibold mt-2">
             3. Telnet dan cek hasil IP UPE yang berwarna <span className="text-emerald-500">hijau</span> yang di temukan sebelumnya
           </p>
-          <Code>{`[tegar.dwi@ terminal ~]# t 192.168.1.1
+          <Code>{`[permadi.nugraha@ terminal ~]# t 192.168.1.1
 Trying 192.168.1.1...
 Connected to 192.168.1.1.
 Escape character is '^]'.
 
 Warning: Telnet is not a secure protocol, and it is recommended to use Stelnet.
 
-Username:tegar.dwi
+Username:permadi.nugraha
 Password:
 
 Info: The max number of VTY users is 21,
