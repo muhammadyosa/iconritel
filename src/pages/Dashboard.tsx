@@ -632,18 +632,20 @@ export default function Dashboard() {
                     d.setDate(d.getDate() - i);
                     const isoDate = toLocalDateStr(d);
                     const displayDate = d.toLocaleDateString("id-ID", { day: "2-digit", month: "short" });
-                    const live = rowFor(isoDate, displayDate);
+                     const live = rowFor(isoDate, displayDate);
                     const hist = historyMap.get(isoDate);
-                    if (live.total === 0 && hist && hist.total > 0) {
+                    if (hist) {
+                      // Per-metric max so resolved tickets cleaned up after 8h
+                      // don't make older days appear empty / undercounted.
                       out.push({
                         date: displayDate,
                         isoDate,
-                        ritel: hist.ritel,
-                        feeder: hist.feeder,
-                        total: hist.total,
-                        created: hist.created,
-                        inProgress: hist.inProgress,
-                        resolved: hist.resolved,
+                        ritel: Math.max(live.ritel, hist.ritel || 0),
+                        feeder: Math.max(live.feeder, hist.feeder || 0),
+                        total: Math.max(live.total, hist.total || 0),
+                        created: Math.max(live.created, hist.created || 0),
+                        inProgress: Math.max(live.inProgress, hist.inProgress || 0),
+                        resolved: Math.max(live.resolved, hist.resolved || 0),
                       });
                     } else {
                       out.push(live);
