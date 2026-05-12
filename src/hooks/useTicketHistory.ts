@@ -4,6 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { toLocalDateStr } from "@/lib/dateUtils";
 import { isSlaOkResolved } from "@/lib/sla";
 
+const HISTORY_FETCH_PAGE_SIZE = 1000;
+
 export interface DailyTicketRecord {
   date: string;
   ritel: number;
@@ -28,6 +30,44 @@ export interface TicketHistory {
   lastUpdated: string;
 }
 
+async function fetchAllDailyTicketHistory(cutoff: string) {
+  const rows: Array<{ date: string; ritel: number; feeder: number; total: number; created: number; in_progress: number; resolved: number; sla_ok: number | null }> = [];
+  for (let from = 0; ; from += HISTORY_FETCH_PAGE_SIZE) {
+    const to = from + HISTORY_FETCH_PAGE_SIZE - 1;
+    const { data, error } = await supabase
+      .from("daily_ticket_history")
+      .select("date, ritel, feeder, total, created, in_progress, resolved, sla_ok")
+      .gte("date", cutoff)
+      .order("date", { ascending: true })
+      .range(from, to);
+
+    if (error) throw error;
+    const batch = data || [];
+    rows.push(...batch);
+    if (batch.length < HISTORY_FETCH_PAGE_SIZE) break;
+  }
+  return rows;
+}
+
+async function fetchAllDailyCategoryHistory(cutoff: string) {
+  const rows: Array<{ date: string; constraint_type: string; count: number }> = [];
+  for (let from = 0; ; from += HISTORY_FETCH_PAGE_SIZE) {
+    const to = from + HISTORY_FETCH_PAGE_SIZE - 1;
+    const { data, error } = await supabase
+      .from("daily_category_history")
+      .select("date, constraint_type, count")
+      .gte("date", cutoff)
+      .order("date", { ascending: true })
+      .range(from, to);
+
+    if (error) throw error;
+    const batch = data || [];
+    rows.push(...batch);
+    if (batch.length < HISTORY_FETCH_PAGE_SIZE) break;
+  }
+  return rows;
+}
+
 export function useTicketHistory(tickets: Ticket[]) {
   const [history, setHistory] = useState<TicketHistory>({ records: [], categoryRecords: [], lastUpdated: "" });
   const isSyncing = useRef(false);
@@ -41,20 +81,12 @@ export function useTicketHistory(tickets: Ticket[]) {
         thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
         const cutoff = toLocalDateStr(thirtyDaysAgo);
 
-        const [histRes, catRes] = await Promise.all([
-          supabase
-            .from("daily_ticket_history")
-            .select("date, ritel, feeder, total, created, in_progress, resolved, sla_ok")
-            .gte("date", cutoff)
-            .order("date", { ascending: true }),
-          supabase
-            .from("daily_category_history")
-            .select("date, constraint_type, count")
-            .gte("date", cutoff)
-            .order("date", { ascending: true }),
+        const [histRows, catRows] = await Promise.all([
+          fetchAllDailyTicketHistory(cutoff),
+          fetchAllDailyCategoryHistory(cutoff),
         ]);
 
-        const records: DailyTicketRecord[] = (histRes.data || []).map((r) => ({
+        const records: DailyTicketRecord[] = histRows.map((r) => ({
           date: r.date,
           ritel: r.ritel,
           feeder: r.feeder,
@@ -66,7 +98,7 @@ export function useTicketHistory(tickets: Ticket[]) {
           ticketIds: [],
         }));
 
-        const categoryRecords: DailyCategoryRecord[] = (catRes.data || []).map((r) => ({
+        const categoryRecords: DailyCategoryRecord[] = catRows.map((r) => ({
           date: r.date,
           constraint_type: r.constraint_type,
           count: r.count,
