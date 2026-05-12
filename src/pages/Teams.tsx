@@ -259,7 +259,7 @@ export default function Teams() {
   }, [filteredTickets]);
 
   // === Ranking User NOC with custom date range filter (uses persistent history table) ===
-  const [rankingHistoryData, setRankingHistoryData] = useState<any[]>([]);
+  const [rankingHistoryData, setRankingHistoryData] = useState<RankingHistoryRecord[]>([]);
 
   const rankingRange = useMemo(() => {
     const fromDate = rankingCustomRange?.from || subDays(new Date(), 7);
@@ -284,7 +284,7 @@ export default function Teams() {
   }, [tickets, rankingRange]);
 
   const fetchRankingData = useCallback(async () => {
-    const rows: any[] = [];
+    const rows: RankingHistoryRecord[] = [];
     for (let from = 0; ; from += RANKING_HISTORY_PAGE_SIZE) {
       const to = from + RANKING_HISTORY_PAGE_SIZE - 1;
       const historyRes = await supabase
