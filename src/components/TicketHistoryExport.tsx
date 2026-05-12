@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -48,11 +48,7 @@ export function TicketHistoryExport() {
     return cutoff;
   }, [days]);
 
-  useEffect(() => {
-    fetchHistory();
-  }, [days]);
-
-  const fetchHistory = async () => {
+  const fetchHistory = useCallback(async () => {
     setLoading(true);
     try {
       const cutoffStr = toLocalDateStr(cutoffDate);
@@ -78,7 +74,11 @@ export function TicketHistoryExport() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [cutoffDate]);
+
+  useEffect(() => {
+    fetchHistory();
+  }, [fetchHistory]);
 
   const formatDate = (dateStr: string) => {
     return parseLocalDateStr(dateStr).toLocaleDateString("id-ID", {
