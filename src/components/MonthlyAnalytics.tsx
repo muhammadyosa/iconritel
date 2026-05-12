@@ -232,18 +232,26 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
   }, [categoryFilteredTickets]);
 
   const dailyTrend = useMemo(() => {
-    // SYNC: Daily Trend is derived from monthTickets (selectedMonth pool) so
-    // the sum of "total" across all bars equals the Total Incident KPI for the
-    // same scope.
+    // SYNC: Daily Trend is derived from monthTickets (selectedMonth pool) AND
+    // merged with cloud history so previously stored counts survive the 8-hour
+    // resolved-cleanup. History wins per-metric only when its value is greater
+    // than the live count for the same day (i.e. live data was cleaned up).
     const today = new Date();
+    // Pull a wide history window (90 days) for merging.
+    const histRows = getTrendChartData ? getTrendChartData(90) : [];
+    const histMap = new Map(histRows.map((r) => [r.isoDate, r]));
 
     const buildDay = (date: Date) => {
       const isoDate = toLocalDateStr(date);
       const displayDay = date.toLocaleDateString("en-US", { day: "2-digit", month: "short" });
       const dayTickets = monthTickets.filter((t) => toLocalDateStr(new Date(t.createdISO)) === isoDate);
       const resolvedDay = dayTickets.filter((t) => t.status === "Resolved");
-      const slaOk = resolvedDay.filter(isSlaOkResolved).length;
-      return { day: displayDay, isoDate, dayNum: date.getDate(), total: dayTickets.length, resolved: resolvedDay.length, slaOk };
+      const liveSlaOk = resolvedDay.filter(isSlaOkResolved).length;
+      const hist = histMap.get(isoDate);
+      const total = Math.max(dayTickets.length, hist?.total ?? 0);
+      const resolved = Math.max(resolvedDay.length, hist?.resolved ?? 0);
+      const slaOk = Math.max(liveSlaOk, hist?.slaOk ?? 0);
+      return { day: displayDay, isoDate, dayNum: date.getDate(), total, resolved, slaOk };
     };
 
     // === ALL MONTHS mode: bucket by full date across the whole dataset ===
@@ -296,7 +304,7 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
       data.push(buildDay(date));
     }
     return data;
-  }, [monthTickets, trendFilter, trendCustomDate, monthRange]);
+  }, [monthTickets, trendFilter, trendCustomDate, monthRange, getTrendChartData]);
 
   // Human-readable date range for the Category & Trend filters — shown as a
   // small hint so users know exactly which days the chart covers.
