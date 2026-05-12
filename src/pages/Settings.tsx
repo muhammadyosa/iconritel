@@ -31,6 +31,7 @@ import { UserManagement } from "@/components/UserManagement";
 import { InsidentManagement } from "@/components/InsidentManagement";
 import { ReportManagement } from "@/components/ReportManagement";
 import { TicketHistoryExport } from "@/components/TicketHistoryExport";
+import { ReconciliationReport } from "@/components/ReconciliationReport";
 import { TeamNOCManagement } from "@/components/TeamNOCManagement";
 
 const UPE_STORE_NAME = "upe_data";
@@ -1064,6 +1065,7 @@ export default function Settings() {
         {/* Ticket History Export Tab */}
         <TabsContent value="history" className="space-y-6">
           <TicketHistoryExport />
+          <ReconciliationReport />
         </TabsContent>
 
         {/* Team NOC Management Tab - Admin Only */}
