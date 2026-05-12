@@ -95,31 +95,59 @@ function NonTabRoutes() {
 }
 
 // Renders all open tabs, keeping them mounted but hiding inactive ones
+// to preserve in-progress form state, scroll position, and component state
+// when switching between tabs.
 function TabbedContent() {
   const location = useLocation();
-  const { activeTransition } = useOpenTabs();
+  const { openTabs, activeTransition } = useOpenTabs();
   const currentPath = location.pathname;
-  
-  const isTabPath = currentPath in pathMap;
+
+  const isTabPath = currentPath in pageComponents;
+
+  // Track every tab path that has ever been visited in this session so we
+  // keep it mounted even after the user navigates away.
+  const mountedPathsRef = React.useRef<Set<string>>(new Set());
+  if (isTabPath) mountedPathsRef.current.add(currentPath);
+  // Also keep all currently open tabs mounted.
+  openTabs.forEach((t) => {
+    if (pageComponents[t.path]) mountedPathsRef.current.add(t.path);
+  });
+
+  // Drop tabs that have been closed (no longer in openTabs) AND are not the
+  // current path, so closing a tab actually resets its state next time.
+  const openPathSet = new Set(openTabs.map((t) => t.path));
+  const pathsToRender = Array.from(mountedPathsRef.current).filter(
+    (p) => openPathSet.has(p) || p === currentPath
+  );
+  mountedPathsRef.current = new Set(pathsToRender);
 
   if (!isTabPath) {
     return <NonTabRoutes />;
   }
 
-  const PageComponent = pageComponents[currentPath];
-  if (!PageComponent) return <NonTabRoutes />;
-
   return (
-    <div
-      key={currentPath}
-      className={cn("h-full", activeTransition === currentPath && "animate-fade-in")}
-    >
+    <ProtectedRoute>
       <Suspense fallback={<PageLoader />}>
-        <ProtectedRoute>
-          <PageComponent />
-        </ProtectedRoute>
+        {pathsToRender.map((path) => {
+          const PageComponent = pageComponents[path];
+          if (!PageComponent) return null;
+          const isActive = path === currentPath;
+          return (
+            <div
+              key={path}
+              style={{ display: isActive ? undefined : "none" }}
+              className={cn(
+                "h-full",
+                isActive && activeTransition === path && "animate-fade-in"
+              )}
+              aria-hidden={!isActive}
+            >
+              <PageComponent />
+            </div>
+          );
+        })}
       </Suspense>
-    </div>
+    </ProtectedRoute>
   );
 }
 function TicketNotificationProvider({ children }: { children: React.ReactNode }) {
