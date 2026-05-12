@@ -301,68 +301,58 @@ export default function Teams() {
   }, [fetchRankingData, debouncedFetchRanking]);
 
   const rankingUserStats = useMemo(() => {
-    const stats: Record<string, { name: string; total: number; resolved: number; onProgress: number; pending: number; critical: number }> = {};
-    const liveStatusByCreator: Record<string, { total: number; onProgress: number; pending: number; critical: number }> = {};
+    // Sumber utama: List Incident (live tickets) — sama dengan halaman 📋 List Incident.
+    // Validasi & supplement dengan Daily Incident History agar incident yang sudah
+    // di-auto-delete (mis. Resolved >8 jam) tetap dihitung dalam Ranking User NOC.
+    const stats: Record<string, { name: string; liveTotal: number; liveResolved: number; histTotal: number; histResolved: number; onProgress: number; pending: number; critical: number }> = {};
 
     const getUserKey = (userId?: string | null, userName?: string | null) => userId || userName?.trim().toLowerCase() || "unknown";
     const getDisplayName = (userName?: string | null) => userName?.trim() || "Unknown";
-
-    rankingHistoryData.forEach((rec) => {
-      const key = getUserKey(rec.user_id, rec.user_name);
+    const ensure = (key: string, name: string) => {
       if (!stats[key]) {
-        stats[key] = {
-          name: getDisplayName(rec.user_name),
-          total: 0,
-          resolved: 0,
-          onProgress: 0,
-          pending: 0,
-          critical: 0,
-        };
+        stats[key] = { name, liveTotal: 0, liveResolved: 0, histTotal: 0, histResolved: 0, onProgress: 0, pending: 0, critical: 0 };
+      } else if (name && name !== "Unknown") {
+        stats[key].name = name;
       }
+      return stats[key];
+    };
 
-      stats[key].name = getDisplayName(rec.user_name) || stats[key].name;
-      stats[key].total += rec.total_created || 0;
-    });
-
+    // 1) Live tickets dari List Incident (sumber utama)
     rankingLiveTickets.forEach((ticket) => {
       const key = getUserKey(ticket.createdByUserId, ticket.createdByName);
-      if (!stats[key]) {
-        stats[key] = {
-          name: getDisplayName(ticket.createdByName),
-          total: 0,
-          resolved: 0,
-          onProgress: 0,
-          pending: 0,
-          critical: 0,
-        };
-      }
-
-      stats[key].name = getDisplayName(ticket.createdByName) || stats[key].name;
-
-      if (!liveStatusByCreator[key]) {
-        liveStatusByCreator[key] = { total: 0, onProgress: 0, pending: 0, critical: 0 };
-      }
-
-      liveStatusByCreator[key].total += 1;
-      if (ticket.status === "Critical") liveStatusByCreator[key].critical += 1;
-      else if (ticket.status === "Pending") liveStatusByCreator[key].pending += 1;
-      else if (ticket.status === "On Progress") liveStatusByCreator[key].onProgress += 1;
+      const s = ensure(key, getDisplayName(ticket.createdByName));
+      s.liveTotal += 1;
+      if (ticket.status === "Resolved") s.liveResolved += 1;
+      else if (ticket.status === "Critical") s.critical += 1;
+      else if (ticket.status === "Pending") s.pending += 1;
+      else if (ticket.status === "On Progress") s.onProgress += 1;
     });
 
-    Object.entries(liveStatusByCreator).forEach(([key, live]) => {
-      stats[key].total = Math.max(stats[key].total, live.total);
-      stats[key].onProgress = live.onProgress;
-      stats[key].pending = live.pending;
-      stats[key].critical = live.critical;
-    });
-
-    Object.values(stats).forEach((stat) => {
-      const activeCount = stat.onProgress + stat.pending + stat.critical;
-      stat.resolved = Math.max(stat.total - activeCount, 0);
+    // 2) Daily Incident History (validasi + auto-deleted yang masih perlu dihitung)
+    rankingHistoryData.forEach((rec) => {
+      const key = getUserKey(rec.user_id, rec.user_name);
+      const s = ensure(key, getDisplayName(rec.user_name));
+      s.histTotal += rec.total_created || 0;
+      s.histResolved += rec.total_resolved || 0;
     });
 
     return Object.entries(stats)
-      .map(([userKey, s]) => ({ userKey, ...s }))
+      .map(([userKey, s]) => {
+        // Validasi: ambil nilai terbesar antara live & history.
+        // History menjamin auto-deleted tetap terhitung; live menjamin yang baru
+        // dibuat (belum sempat ter-snapshot ke history) juga muncul.
+        const total = Math.max(s.liveTotal, s.histTotal);
+        const resolved = Math.min(Math.max(s.liveResolved, s.histResolved), total);
+        return {
+          userKey,
+          name: s.name,
+          total,
+          resolved,
+          onProgress: s.onProgress,
+          pending: s.pending,
+          critical: s.critical,
+        };
+      })
       .filter(u => u.total > 0 || u.resolved > 0 || u.pending > 0 || u.critical > 0 || u.onProgress > 0)
       .sort((a, b) => b.total - a.total);
   }, [rankingHistoryData, rankingLiveTickets]);
