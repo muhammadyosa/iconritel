@@ -1064,6 +1064,7 @@ export default function Settings() {
         {/* Ticket History Export Tab */}
         <TabsContent value="history" className="space-y-6">
           <TicketHistoryExport />
+          <ReconciliationReport />
         </TabsContent>
 
         {/* Team NOC Management Tab - Admin Only */}
