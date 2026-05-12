@@ -28,7 +28,7 @@ export function ReconciliationReport() {
 
   const [reconRange, setReconRange] = useState<DateRange | undefined>(() => {
     const now = new Date();
-    return { from: now, to: now };
+    return { from: new Date(now.getFullYear(), now.getMonth(), 1), to: now };
   });
   const [reconStartHour, setReconStartHour] = useState<number>(0);
   const [reconEndHour, setReconEndHour] = useState<number>(23);
@@ -195,6 +195,7 @@ export function ReconciliationReport() {
               </Select>
             </div>
             <Button size="sm" variant="ghost" className="h-6 text-[10px] px-2" onClick={() => { const now = new Date(); setReconRange({ from: now, to: now }); setReconStartHour(0); setReconEndHour(23); }}>Hari Ini</Button>
+            <Button size="sm" variant="ghost" className="h-6 text-[10px] px-2" onClick={() => { const now = new Date(); setReconRange({ from: new Date(now.getFullYear(), now.getMonth(), 1), to: now }); setReconStartHour(0); setReconEndHour(23); }}>Bulan Ini</Button>
             <Button size="sm" variant="ghost" className="h-6 text-[10px] px-2" onClick={() => { const now = new Date(); setReconRange({ from: subDays(now, 6), to: now }); setReconStartHour(0); setReconEndHour(23); }}>7 Hari</Button>
           </div>
         </CardHeader>
