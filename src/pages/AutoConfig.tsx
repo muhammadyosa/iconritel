@@ -200,6 +200,33 @@ function ConfigSection({ tabKey }: { tabKey: string }) {
   );
 }
 
+const UPE_SECTIONS = [
+  { value: "upe-cisco-asr", label: "Pengecekan UPE Cisco ASR" },
+  { value: "upe-huawei-ne8k", label: "Pengecekan UPE Huawei NE8K" },
+  { value: "upe-juniper-mx", label: "Pengecekan UPE Juniper MX" },
+  { value: "upe-telnet-olt", label: "Telnet OLT Dari UPE" },
+  { value: "upe-search-interkoneksi-dcn", label: "Search Interkoneksi UPE Via DCN" },
+];
+
+function UPESections() {
+  return (
+    <Tabs defaultValue={UPE_SECTIONS[0].value} className="w-full">
+      <TabsList className="w-full grid grid-cols-2 sm:grid-cols-5 h-auto gap-0.5">
+        {UPE_SECTIONS.map((s) => (
+          <TabsTrigger key={s.value} value={s.value} className="text-[10px] sm:text-xs whitespace-normal py-1.5 leading-tight">
+            {s.label}
+          </TabsTrigger>
+        ))}
+      </TabsList>
+      {UPE_SECTIONS.map((s) => (
+        <TabsContent key={s.value} value={s.value} className="mt-3">
+          <ConfigSection tabKey={s.value} />
+        </TabsContent>
+      ))}
+    </Tabs>
+  );
+}
+
 export default function AutoConfig() {
   return (
     <div className="space-y-4">
@@ -222,6 +249,8 @@ export default function AutoConfig() {
               <HuaweiPPPoEGenerator />
             ) : tab.value === "auto-raisecom" ? (
               <RaisecomPPPoEGenerator />
+            ) : tab.value === "auto-upe" ? (
+              <UPESections />
             ) : (
               <ConfigSection tabKey={tab.value} />
             )}
