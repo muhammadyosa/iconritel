@@ -450,6 +450,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      recompute_daily_history: {
+        Args: { end_date: string; start_date: string }
+        Returns: Json
+      }
     }
     Enums: {
       app_role: "admin" | "noc" | "reviewer" | "intern"
