@@ -16,6 +16,7 @@ import HuaweiNE8KDocs from "@/components/HuaweiNE8KDocs";
 import JuniperMXDocs from "@/components/JuniperMXDocs";
 import TelnetOLTDocs from "@/components/TelnetOLTDocs";
 import SearchInterkoneksiDocs from "@/components/SearchInterkoneksiDocs";
+import BNGHuaweiDocs from "@/components/BNGHuaweiDocs";
 
 const TABS = [
   { value: "auto-huawei", label: "📟 Huawei" },
@@ -263,7 +264,11 @@ function BNGSections() {
       </TabsList>
       {BNG_SECTIONS.map((s) => (
         <TabsContent key={s.value} value={s.value} className="mt-3">
-          <ConfigSection tabKey={s.value} />
+          {s.value === "bng-cek-user-vlan-huawei" ? (
+            <BNGHuaweiDocs />
+          ) : (
+            <ConfigSection tabKey={s.value} />
+          )}
         </TabsContent>
       ))}
     </Tabs>
