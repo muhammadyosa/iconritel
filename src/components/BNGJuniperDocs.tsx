@@ -34,7 +34,7 @@ export default function BNGJuniperDocs() {
       {/* Cek IP User */}
       <Card className="bg-muted/30">
         <CardHeader className="py-2.5">
-          <CardTitle className="text-center text-base font-bold tracking-wide text-destructive">
+          <CardTitle className="text-center text-base font-bold tracking-wide text-white">
             Cek IP User
           </CardTitle>
         </CardHeader>
@@ -136,7 +136,7 @@ permadi.nugraha@JUNIPER-MX204.BNG-01>`}</Code>
       {/* Cek Kapasitas VLAN - List Domain */}
       <Card className="bg-muted/30">
         <CardHeader className="py-2.5">
-          <CardTitle className="text-center text-base font-bold tracking-wide text-destructive">
+          <CardTitle className="text-center text-base font-bold tracking-wide text-white">
             Cek Kapasitas VLAN
           </CardTitle>
         </CardHeader>
@@ -205,7 +205,7 @@ permadi.nugraha@JUNIPER-MX204.BNG-01>`}</Code>
       {/* Cek Kapasitas VLAN - Address Pool Detail */}
       <Card className="bg-muted/30">
         <CardHeader className="py-2.5">
-          <CardTitle className="text-center text-base font-bold tracking-wide text-destructive">
+          <CardTitle className="text-center text-base font-bold tracking-wide text-white">
             Cek Kapasitas VLAN
           </CardTitle>
         </CardHeader>

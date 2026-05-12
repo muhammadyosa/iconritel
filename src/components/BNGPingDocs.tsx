@@ -38,7 +38,7 @@ export default function BNGPingDocs() {
       {/* BNG Huawei NE8K */}
       <Card className="bg-muted/30">
         <CardHeader className="py-2.5">
-          <CardTitle className="text-center text-base font-bold tracking-wide text-destructive">
+          <CardTitle className="text-center text-base font-bold tracking-wide text-white">
             BNG Huawei NE8K
           </CardTitle>
         </CardHeader>
@@ -178,7 +178,7 @@ HUAWEI-BNG-01>`}</Code>
       {/* BNG Juniper MX204 */}
       <Card className="bg-muted/30">
         <CardHeader className="py-2.5">
-          <CardTitle className="text-center text-base font-bold tracking-wide text-destructive">
+          <CardTitle className="text-center text-base font-bold tracking-wide text-white">
             BNG Juniper MX204
           </CardTitle>
         </CardHeader>
@@ -293,7 +293,7 @@ permadi.nugraha@JUNIPER-MX204.BNG-01>`}</Code>
       {/* BNG Juniper MX104 */}
       <Card className="bg-muted/30">
         <CardHeader className="py-2.5">
-          <CardTitle className="text-center text-base font-bold tracking-wide text-destructive">
+          <CardTitle className="text-center text-base font-bold tracking-wide text-white">
             BNG Juniper MX104
           </CardTitle>
         </CardHeader>

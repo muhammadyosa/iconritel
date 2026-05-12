@@ -38,7 +38,7 @@ export default function HuaweiNE8KDocs() {
       {/* Cek VSI + VPLS */}
       <Card className="bg-muted/30">
         <CardHeader className="py-2.5">
-          <CardTitle className="text-center text-base font-bold tracking-wide text-destructive">
+          <CardTitle className="text-center text-base font-bold tracking-wide text-white">
             Cek VSI + VPLS
           </CardTitle>
         </CardHeader>
@@ -125,7 +125,7 @@ HUAWEI-UPE-01>`}</Code>
       {/* Cek EVC pada Interface */}
       <Card className="bg-muted/30">
         <CardHeader className="py-2.5">
-          <CardTitle className="text-center text-base font-bold tracking-wide text-destructive">
+          <CardTitle className="text-center text-base font-bold tracking-wide text-white">
             Cek EVC pada Interface
           </CardTitle>
         </CardHeader>
@@ -185,7 +185,7 @@ HUAWEI-UPE-01>`}</Code>
       {/* Cek Mac ONT di UPE */}
       <Card className="bg-muted/30">
         <CardHeader className="py-2.5">
-          <CardTitle className="text-center text-base font-bold tracking-wide text-destructive">
+          <CardTitle className="text-center text-base font-bold tracking-wide text-white">
             Cek Mac ONT di UPE
           </CardTitle>
         </CardHeader>
