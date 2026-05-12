@@ -264,7 +264,11 @@ function BNGSections() {
       </TabsList>
       {BNG_SECTIONS.map((s) => (
         <TabsContent key={s.value} value={s.value} className="mt-3">
-          <ConfigSection tabKey={s.value} />
+          {s.value === "bng-cek-user-vlan-huawei" ? (
+            <BNGHuaweiDocs />
+          ) : (
+            <ConfigSection tabKey={s.value} />
+          )}
         </TabsContent>
       ))}
     </Tabs>
