@@ -1774,7 +1774,7 @@ export default function Teams() {
                       });
 
                       const chartData = dateKeys.map(dk => {
-                        const entry: any = { date: format(parseLocalDateStr(dk), "dd/MM") };
+                        const entry: Record<string, string | number> = { date: format(parseLocalDateStr(dk), "dd/MM") };
                         activeUsers.forEach(u => { entry[u.name] = finalDailyMap[dk][u.name] || 0; });
                         return entry;
                       });
