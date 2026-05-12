@@ -6,6 +6,7 @@ import { logTicketStatusChange } from "@/hooks/useTicketStatusHistory";
 import { toLocalDateStr } from "@/lib/dateUtils";
 
 const SLA_THRESHOLD_MS = 8 * 60 * 60 * 1000; // 8 hours
+const TICKET_FETCH_PAGE_SIZE = 1000;
 
 interface DbTicket {
   id: string;
@@ -37,6 +38,24 @@ interface ProfileData {
   user_id: string;
   display_name: string | null;
   email: string;
+}
+
+async function fetchAllTicketRows(): Promise<DbTicket[]> {
+  const rows: DbTicket[] = [];
+  for (let from = 0; ; from += TICKET_FETCH_PAGE_SIZE) {
+    const to = from + TICKET_FETCH_PAGE_SIZE - 1;
+    const { data, error } = await supabase
+      .from("tickets")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .range(from, to);
+
+    if (error) throw error;
+    const batch = (data || []) as DbTicket[];
+    rows.push(...batch);
+    if (batch.length < TICKET_FETCH_PAGE_SIZE) break;
+  }
+  return rows;
 }
 
 // Type for inserting tickets (excludes auto-generated id)
@@ -187,19 +206,14 @@ export function useCloudTickets() {
       cleanupResolvedTickets();
 
       // Fetch profiles and tickets in parallel
-      const [currentProfilesMap, ticketRes] = await Promise.all([
+      const [currentProfilesMap, ticketRows] = await Promise.all([
         fetchProfiles(),
-        supabase
-          .from("tickets")
-          .select("*")
-          .order("created_at", { ascending: false }),
+        fetchAllTicketRows(),
       ]);
 
-      if (ticketRes.error) throw ticketRes.error;
-
       const now = new Date().getTime();
-      const processedTickets = (ticketRes.data || []).map((db) => {
-        const ticket = dbToTicket(db as DbTicket, currentProfilesMap);
+      const processedTickets = ticketRows.map((db) => {
+        const ticket = dbToTicket(db, currentProfilesMap);
         if (ticket.status !== "Resolved" && ticket.status !== "Critical" && ticket.status !== "Pending") {
           const ticketAge = now - new Date(ticket.createdISO).getTime();
           if (ticketAge >= SLA_THRESHOLD_MS) {
