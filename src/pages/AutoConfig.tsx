@@ -14,6 +14,7 @@ import RaisecomPPPoEGenerator from "@/components/RaisecomPPPoEGenerator";
 import CiscoASRDocs from "@/components/CiscoASRDocs";
 import HuaweiNE8KDocs from "@/components/HuaweiNE8KDocs";
 import JuniperMXDocs from "@/components/JuniperMXDocs";
+import TelnetOLTDocs from "@/components/TelnetOLTDocs";
 
 const TABS = [
   { value: "auto-huawei", label: "📟 Huawei" },
@@ -229,6 +230,8 @@ function UPESections() {
             <HuaweiNE8KDocs />
           ) : s.value === "upe-juniper-mx" ? (
             <JuniperMXDocs />
+          ) : s.value === "upe-telnet-olt" ? (
+            <TelnetOLTDocs />
           ) : (
             <ConfigSection tabKey={s.value} />
           )}
