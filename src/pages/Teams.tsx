@@ -271,7 +271,7 @@ export default function Teams() {
   }, [tickets, rankingRange]);
 
   const fetchRankingData = useCallback(async () => {
-    let historyQuery = supabase
+    const historyQuery = supabase
       .from("daily_user_ticket_history")
       .select("user_id, user_name, date, total_created, total_resolved")
       .gte("date", rankingRange.cutoff)
@@ -1722,7 +1722,9 @@ export default function Teams() {
                           if (dk === todayKey && finalDailyMap[dk]) {
                             finalDailyMap[dk][creator] = (finalDailyMap[dk][creator] || 0) + 1;
                           }
-                        } catch {}
+                        } catch {
+                          return;
+                        }
                       });
 
                       const chartData = dateKeys.map(dk => {
