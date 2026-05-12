@@ -11,6 +11,7 @@ import { useUserRole } from "@/hooks/useUserRole";
 import { toast } from "sonner";
 import HuaweiPPPoEGenerator from "@/components/HuaweiPPPoEGenerator";
 import RaisecomPPPoEGenerator from "@/components/RaisecomPPPoEGenerator";
+import CiscoASRDocs from "@/components/CiscoASRDocs";
 
 const TABS = [
   { value: "auto-huawei", label: "📟 Huawei" },
@@ -220,7 +221,7 @@ function UPESections() {
       </TabsList>
       {UPE_SECTIONS.map((s) => (
         <TabsContent key={s.value} value={s.value} className="mt-3">
-          <ConfigSection tabKey={s.value} />
+          {s.value === "upe-cisco-asr" ? <CiscoASRDocs /> : <ConfigSection tabKey={s.value} />}
         </TabsContent>
       ))}
     </Tabs>
