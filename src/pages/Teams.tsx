@@ -459,7 +459,7 @@ export default function Teams() {
       dateMap[rec.date][rec.constraint_type] = Math.max(dateMap[rec.date][rec.constraint_type] || 0, rec.count);
     });
 
-    const today = new Date().toISOString().split('T')[0];
+    const today = toLocalDateStr(new Date());
     const todayLive: Record<string, number> = {};
     filteredTickets.forEach((ticket) => {
       const date = ticket.createdISO?.split("T")[0];
@@ -493,7 +493,7 @@ export default function Teams() {
   const ritelCategoryTrend = useMemo(() => {
     const dateMap: Record<string, Record<string, number>> = {};
     const categories = new Set<string>();
-    const today = new Date().toISOString().split('T')[0];
+    const today = toLocalDateStr(new Date());
 
     history.categoryRecords.forEach((rec) => {
       if (FEEDER_CONSTRAINTS_SET.has(rec.constraint_type)) return;
@@ -532,7 +532,7 @@ export default function Teams() {
   const feederCategoryTrend = useMemo(() => {
     const dateMap: Record<string, Record<string, number>> = {};
     const categories = new Set<string>();
-    const today = new Date().toISOString().split('T')[0];
+    const today = toLocalDateStr(new Date());
 
     history.categoryRecords.forEach((rec) => {
       if (!FEEDER_CONSTRAINTS_SET.has(rec.constraint_type)) return;
