@@ -273,6 +273,8 @@ function BNGSections() {
             <BNGJuniperDocs />
           ) : s.value === "bng-ping-user" ? (
             <BNGPingDocs />
+          ) : s.value === "bng-clear-ip-user" ? (
+            <BNGClearIPDocs />
           ) : (
             <ConfigSection tabKey={s.value} />
           )}
