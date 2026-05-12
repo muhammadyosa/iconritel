@@ -301,48 +301,43 @@ export default function Teams() {
   }, [fetchRankingData, debouncedFetchRanking]);
 
   const rankingUserStats = useMemo(() => {
-    // Sumber utama: List Incident (live tickets) — sama dengan halaman 📋 List Incident.
-    // Validasi & supplement dengan Daily Incident History agar incident yang sudah
-    // di-auto-delete (mis. Resolved >8 jam) tetap dihitung dalam Ranking User NOC.
-    const stats: Record<string, { name: string; liveTotal: number; liveResolved: number; histTotal: number; histResolved: number; onProgress: number; pending: number; critical: number }> = {};
+    // Total & Resolved diambil dari Daily Incident History (persistent), agar
+    // incident yang sudah di-auto-delete tetap terhitung. Status aktif
+    // (On Progress / Pending / Critical) diambil dari live List Incident.
+    const stats: Record<string, { name: string; total: number; onProgress: number; pending: number; critical: number }> = {};
 
     const getUserKey = (userId?: string | null, userName?: string | null) => userId || userName?.trim().toLowerCase() || "unknown";
     const getDisplayName = (userName?: string | null) => userName?.trim() || "Unknown";
     const ensure = (key: string, name: string) => {
       if (!stats[key]) {
-        stats[key] = { name, liveTotal: 0, liveResolved: 0, histTotal: 0, histResolved: 0, onProgress: 0, pending: 0, critical: 0 };
+        stats[key] = { name, total: 0, onProgress: 0, pending: 0, critical: 0 };
       } else if (name && name !== "Unknown") {
         stats[key].name = name;
       }
       return stats[key];
     };
 
-    // 1) Live tickets dari List Incident (sumber utama)
+    // 1) Total dari Daily Incident History (persistent)
+    rankingHistoryData.forEach((rec) => {
+      const key = getUserKey(rec.user_id, rec.user_name);
+      const s = ensure(key, getDisplayName(rec.user_name));
+      s.total += rec.total_created || 0;
+    });
+
+    // 2) Status aktif dari live List Incident
     rankingLiveTickets.forEach((ticket) => {
       const key = getUserKey(ticket.createdByUserId, ticket.createdByName);
       const s = ensure(key, getDisplayName(ticket.createdByName));
-      s.liveTotal += 1;
-      if (ticket.status === "Resolved") s.liveResolved += 1;
-      else if (ticket.status === "Critical") s.critical += 1;
+      if (ticket.status === "Critical") s.critical += 1;
       else if (ticket.status === "Pending") s.pending += 1;
       else if (ticket.status === "On Progress") s.onProgress += 1;
     });
 
-    // 2) Daily Incident History (validasi + auto-deleted yang masih perlu dihitung)
-    rankingHistoryData.forEach((rec) => {
-      const key = getUserKey(rec.user_id, rec.user_name);
-      const s = ensure(key, getDisplayName(rec.user_name));
-      s.histTotal += rec.total_created || 0;
-      s.histResolved += rec.total_resolved || 0;
-    });
-
     return Object.entries(stats)
       .map(([userKey, s]) => {
-        // Validasi: ambil nilai terbesar antara live & history.
-        // History menjamin auto-deleted tetap terhitung; live menjamin yang baru
-        // dibuat (belum sempat ter-snapshot ke history) juga muncul.
-        const total = Math.max(s.liveTotal, s.histTotal);
-        const resolved = Math.min(Math.max(s.liveResolved, s.histResolved), total);
+        const activeCount = s.onProgress + s.pending + s.critical;
+        const total = Math.max(s.total, activeCount);
+        const resolved = Math.max(total - activeCount, 0);
         return {
           userKey,
           name: s.name,
