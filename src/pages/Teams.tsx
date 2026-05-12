@@ -24,6 +24,7 @@ import { StatusBadge } from "@/components/StatusBadge";
 import { useCloudTickets } from "@/hooks/useCloudTickets";
 import { useTicketHistory } from "@/hooks/useTicketHistory";
 import { FEEDER_CONSTRAINTS_SET } from "@/types/ticket";
+import { toLocalDateStr } from "@/lib/dateUtils";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   ChartContainer,
