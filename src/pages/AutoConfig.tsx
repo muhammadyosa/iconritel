@@ -17,6 +17,7 @@ import JuniperMXDocs from "@/components/JuniperMXDocs";
 import TelnetOLTDocs from "@/components/TelnetOLTDocs";
 import SearchInterkoneksiDocs from "@/components/SearchInterkoneksiDocs";
 import BNGHuaweiDocs from "@/components/BNGHuaweiDocs";
+import BNGJuniperDocs from "@/components/BNGJuniperDocs";
 
 const TABS = [
   { value: "auto-huawei", label: "📟 Huawei" },
