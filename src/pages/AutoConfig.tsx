@@ -222,7 +222,13 @@ function UPESections() {
       </TabsList>
       {UPE_SECTIONS.map((s) => (
         <TabsContent key={s.value} value={s.value} className="mt-3">
-          {s.value === "upe-cisco-asr" ? <CiscoASRDocs /> : <ConfigSection tabKey={s.value} />}
+          {s.value === "upe-cisco-asr" ? (
+            <CiscoASRDocs />
+          ) : s.value === "upe-huawei-ne8k" ? (
+            <HuaweiNE8KDocs />
+          ) : (
+            <ConfigSection tabKey={s.value} />
+          )}
         </TabsContent>
       ))}
     </Tabs>
