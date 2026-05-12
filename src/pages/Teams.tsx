@@ -102,6 +102,8 @@ const PIE_COLORS = [
   "hsl(var(--muted-foreground))",
 ];
 
+const RANKING_HISTORY_PAGE_SIZE = 1000;
+
 export default function Teams() {
   const { tickets, isLoading } = useCloudTickets();
   const { history } = useTicketHistory(tickets);
@@ -274,15 +276,21 @@ export default function Teams() {
   }, [tickets, rankingRange]);
 
   const fetchRankingData = useCallback(async () => {
-    const historyQuery = supabase
-      .from("daily_user_ticket_history")
-      .select("user_id, user_name, date, total_created, total_resolved")
-      .gte("date", rankingRange.cutoff)
-      .lte("date", rankingRange.cutoffEnd);
+    const rows: any[] = [];
+    for (let from = 0; ; from += RANKING_HISTORY_PAGE_SIZE) {
+      const to = from + RANKING_HISTORY_PAGE_SIZE - 1;
+      const historyRes = await supabase
+        .from("daily_user_ticket_history")
+        .select("user_id, user_name, date, total_created, total_resolved")
+        .gte("date", rankingRange.cutoff)
+        .lte("date", rankingRange.cutoffEnd)
+        .range(from, to);
 
-    const historyRes = await historyQuery;
-    
-    if (historyRes.data) setRankingHistoryData(historyRes.data);
+      if (!historyRes.data || historyRes.error) break;
+      rows.push(...historyRes.data);
+      if (historyRes.data.length < RANKING_HISTORY_PAGE_SIZE) break;
+    }
+    setRankingHistoryData(rows);
   }, [rankingRange]);
 
   const { debounced: debouncedFetchRanking } = useDebouncedCallback(fetchRankingData, 400);
