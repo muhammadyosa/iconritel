@@ -97,7 +97,14 @@ export function ReconciliationReport() {
 
   const reconStats = useMemo(() => {
     const stats: Record<string, { name: string; histCreated: number; histResolved: number; liveCreated: number; liveResolved: number }> = {};
-    const getKey = (id?: string | null, name?: string | null) => id || name?.trim().toLowerCase() || "unknown";
+    const nameToKey = new Map<string, string>();
+    const getKey = (id?: string | null, name?: string | null) => {
+      const nameKey = name?.trim().toLowerCase() || "";
+      if (nameKey && nameToKey.has(nameKey)) return nameToKey.get(nameKey)!;
+      const key = id || nameKey || "unknown";
+      if (nameKey) nameToKey.set(nameKey, key);
+      return key;
+    };
     const ensure = (key: string, name: string) => {
       if (!stats[key]) stats[key] = { name: name || "Unknown", histCreated: 0, histResolved: 0, liveCreated: 0, liveResolved: 0 };
       else if (name && name !== "Unknown") stats[key].name = name;
