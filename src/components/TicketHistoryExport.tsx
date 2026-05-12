@@ -8,6 +8,9 @@ import { FileDown, Download, FileSpreadsheet, FileText } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useCloudTickets } from "@/hooks/useCloudTickets";
+import { FEEDER_CONSTRAINTS_SET } from "@/types/ticket";
+import { parseLocalDateStr, toLocalDateStr } from "@/lib/dateUtils";
 
 
 interface HistoryRecord {
@@ -18,9 +21,22 @@ interface HistoryRecord {
   created: number;
   in_progress: number;
   resolved: number;
+  live_ritel?: number;
+  live_feeder?: number;
+  live_total?: number;
+  live_in_progress?: number;
+  live_resolved?: number;
+  final_ritel?: number;
+  final_feeder?: number;
+  final_total?: number;
+  final_in_progress?: number;
+  final_resolved?: number;
 }
 
+const HISTORY_PAGE_SIZE = 1000;
+
 export function TicketHistoryExport() {
+  const { tickets } = useCloudTickets();
   const [records, setRecords] = useState<HistoryRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [days, setDays] = useState("30");
@@ -34,16 +50,23 @@ export function TicketHistoryExport() {
     try {
       const cutoff = new Date();
       cutoff.setDate(cutoff.getDate() - parseInt(days));
-      const cutoffStr = cutoff.toISOString().split("T")[0];
+      const cutoffStr = toLocalDateStr(cutoff);
+      const allRows: HistoryRecord[] = [];
+      for (let from = 0; ; from += HISTORY_PAGE_SIZE) {
+        const to = from + HISTORY_PAGE_SIZE - 1;
+        const { data, error } = await supabase
+          .from("daily_ticket_history")
+          .select("date, ritel, feeder, total, created, in_progress, resolved")
+          .gte("date", cutoffStr)
+          .order("date", { ascending: false })
+          .range(from, to);
 
-      const { data, error } = await supabase
-        .from("daily_ticket_history")
-        .select("date, ritel, feeder, total, created, in_progress, resolved")
-        .gte("date", cutoffStr)
-        .order("date", { ascending: false });
-
-      if (error) throw error;
-      setRecords(data || []);
+        if (error) throw error;
+        const batch = data || [];
+        allRows.push(...batch);
+        if (batch.length < HISTORY_PAGE_SIZE) break;
+      }
+      setRecords(allRows);
     } catch (err) {
       if (import.meta.env.DEV) console.error("Error fetching history:", err);
       toast.error("Gagal memuat data historis incident");
