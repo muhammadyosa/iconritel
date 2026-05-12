@@ -255,8 +255,8 @@ export default function Teams() {
     return {
       fromDate,
       toDate,
-      cutoff: format(startOfDay(fromDate), "yyyy-MM-dd"),
-      cutoffEnd: format(endOfDay(toDate), "yyyy-MM-dd"),
+      cutoff: toLocalDateStr(startOfDay(fromDate)),
+      cutoffEnd: toLocalDateStr(endOfDay(toDate)),
     };
   }, [rankingCustomRange]);
 
@@ -1699,7 +1699,7 @@ export default function Teams() {
                         dateKeys.push(format(subDays(today, d), "yyyy-MM-dd"));
                       }
                       const activeUsers = rankingUserStats.filter(u => u.total > 0).slice(0, 8);
-                      const todayKey = format(new Date(), "yyyy-MM-dd");
+                       const todayKey = toLocalDateStr(new Date());
                       const finalDailyMap: Record<string, Record<string, number>> = {};
                       dateKeys.forEach(dk => {
                         finalDailyMap[dk] = {};
@@ -1718,7 +1718,7 @@ export default function Teams() {
                         const creator = t.createdByName || "Unknown";
                         if (!activeUsers.find(u => u.name === creator)) return;
                         try {
-                          const dk = format(startOfDay(new Date(t.createdISO)), "yyyy-MM-dd");
+                          const dk = toLocalDateStr(new Date(t.createdISO));
                           if (dk === todayKey && finalDailyMap[dk]) {
                             finalDailyMap[dk][creator] = (finalDailyMap[dk][creator] || 0) + 1;
                           }
