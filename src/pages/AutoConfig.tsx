@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import HuaweiPPPoEGenerator from "@/components/HuaweiPPPoEGenerator";
 import RaisecomPPPoEGenerator from "@/components/RaisecomPPPoEGenerator";
 import CiscoASRDocs from "@/components/CiscoASRDocs";
+import HuaweiNE8KDocs from "@/components/HuaweiNE8KDocs";
 
 const TABS = [
   { value: "auto-huawei", label: "📟 Huawei" },
