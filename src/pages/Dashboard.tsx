@@ -568,6 +568,7 @@ export default function Dashboard() {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="today">Hari ini</SelectItem>
+                      <SelectItem value="month">Bulan Ini</SelectItem>
                       <SelectItem value="all">Semua Data</SelectItem>
                       <SelectItem value="7">7 Hari</SelectItem>
                       <SelectItem value="14">14 Hari</SelectItem>
