@@ -2189,9 +2189,9 @@ export default function Teams() {
                                   <TableRow><TableCell colSpan={4} className="text-center text-xs text-muted-foreground py-6">Tidak ada incident live resolved di window ini</TableCell></TableRow>
                                 ) : liveResolved.map(t => (
                                   <TableRow key={t.id}>
-                                    <TableCell className="text-[10px] font-mono">{(t as any).ticketId || t.id.slice(0, 8)}</TableCell>
-                                    <TableCell className="text-[10px] truncate max-w-[180px]">{(t as any).customerName || (t as any).hostname || "-"}</TableCell>
-                                    <TableCell className="text-[10px]">{(t as any).resolvedByName || t.createdByName || "-"}</TableCell>
+                                    <TableCell className="text-[10px] font-mono">{t.serviceId || t.id.slice(0, 8)}</TableCell>
+                                    <TableCell className="text-[10px] truncate max-w-[180px]">{t.customerName || t.hostname || "-"}</TableCell>
+                                    <TableCell className="text-[10px]">{t.resolvedByName || t.createdByName || "-"}</TableCell>
                                     <TableCell className="text-[10px] text-muted-foreground">{t.resolvedAt ? format(new Date(t.resolvedAt), "dd/MM HH:mm") : "-"}</TableCell>
                                   </TableRow>
                                 ))}
