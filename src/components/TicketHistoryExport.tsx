@@ -198,6 +198,7 @@ export function TicketHistoryExport() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="month">Bulan Ini</SelectItem>
                   <SelectItem value="7">7 Hari</SelectItem>
                   <SelectItem value="14">14 Hari</SelectItem>
                   <SelectItem value="30">30 Hari</SelectItem>
@@ -205,7 +206,7 @@ export function TicketHistoryExport() {
               </Select>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm" disabled={records.length === 0}>
+                  <Button variant="outline" size="sm" disabled={displayRecords.length === 0}>
                     <FileDown className="h-4 w-4 mr-1" />
                     Export
                   </Button>
@@ -244,7 +245,7 @@ export function TicketHistoryExport() {
           {/* Table */}
           {loading ? (
             <div className="text-center py-8 text-muted-foreground text-sm">Memuat data...</div>
-          ) : records.length === 0 ? (
+          ) : displayRecords.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground text-sm">
               Belum ada data historis incident
             </div>
@@ -257,32 +258,40 @@ export function TicketHistoryExport() {
                     <TableHead className="text-xs text-center">Ritel</TableHead>
                     <TableHead className="text-xs text-center">Feeder</TableHead>
                     <TableHead className="text-xs text-center">Total</TableHead>
+                    <TableHead className="text-xs text-center">Hist/Live</TableHead>
                     <TableHead className="text-xs text-center">On Progress</TableHead>
                     <TableHead className="text-xs text-center">Resolved</TableHead>
+                    <TableHead className="text-xs text-center">Status</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {records.map((r) => (
+                  {displayRecords.map((r) => {
+                    const hasDelta = (r.total || 0) !== (r.live_total || 0) || (r.resolved || 0) !== (r.live_resolved || 0);
+                    return (
                     <TableRow key={r.date}>
                       <TableCell className="text-xs font-medium">{formatDate(r.date)}</TableCell>
                       <TableCell className="text-xs text-center">
-                        <Badge variant="secondary" className="text-[10px]">{r.ritel}</Badge>
+                        <Badge variant="secondary" className="text-[10px]">{r.final_ritel}</Badge>
                       </TableCell>
                       <TableCell className="text-xs text-center">
-                        <Badge variant="destructive" className="text-[10px]">{r.feeder}</Badge>
+                        <Badge variant="destructive" className="text-[10px]">{r.final_feeder}</Badge>
                       </TableCell>
-                      <TableCell className="text-xs text-center font-semibold">{r.total}</TableCell>
-                      <TableCell className="text-xs text-center">{r.in_progress}</TableCell>
-                      <TableCell className="text-xs text-center">{r.resolved}</TableCell>
+                      <TableCell className="text-xs text-center font-semibold">{r.final_total}</TableCell>
+                      <TableCell className="text-[10px] text-center text-muted-foreground">{r.total}/{r.live_total || 0}</TableCell>
+                      <TableCell className="text-xs text-center">{r.final_in_progress}</TableCell>
+                      <TableCell className="text-xs text-center">{r.final_resolved}</TableCell>
+                      <TableCell className="text-xs text-center">
+                        <Badge variant="outline" className={hasDelta ? "text-[10px] border-warning text-warning" : "text-[10px] border-success text-success"}>{hasDelta ? "CEK" : "MATCH"}</Badge>
+                      </TableCell>
                     </TableRow>
-                  ))}
+                  );})}
                 </TableBody>
               </Table>
             </div>
           )}
 
           <p className="text-[10px] text-muted-foreground mt-3">
-            {records.length} data ditemukan • Terakhir {days} hari
+            {displayRecords.length} data ditemukan • {days === "month" ? "Bulan ini" : `Terakhir ${days} hari`} • angka utama memakai nilai tertinggi Hist/Live tanpa mengubah database
           </p>
         </CardContent>
       </Card>
