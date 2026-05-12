@@ -3,7 +3,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { Ticket } from "@/types/ticket";
 import { toast } from "sonner";
 import { logTicketStatusChange } from "@/hooks/useTicketStatusHistory";
-import { useMetricsReconciliation } from "@/hooks/useMetricsReconciliation";
 
 const SLA_THRESHOLD_MS = 8 * 60 * 60 * 1000; // 8 hours
 
@@ -545,11 +544,6 @@ export function useCloudTickets() {
     await Promise.all(targets.map((t) => decrementHistoryForTicket(t)));
   }, [tickets, decrementHistoryForTicket]);
 
-  // Automatic reconciliation: keeps history tables 100% synchronized with the
-  // live `tickets` source of truth (corrects drift from manual deletes,
-  // concurrent writes, conflicts, or auto-cleanup).
-  const { reconcileNow } = useMetricsReconciliation(tickets, isLoading);
-
   return {
     tickets,
     isLoading,
@@ -558,6 +552,5 @@ export function useCloudTickets() {
     deleteTicket,
     bulkDeleteTickets,
     refetch: fetchTickets,
-    reconcileMetrics: reconcileNow,
   };
 }
