@@ -309,7 +309,14 @@ export default function Teams() {
     // (On Progress / Pending / Critical) diambil dari live List Incident.
     const stats: Record<string, { name: string; histCreated: number; histResolved: number; onProgress: number; pending: number; critical: number; liveTotal: number; liveResolved: number }> = {};
 
-    const getUserKey = (userId?: string | null, userName?: string | null) => userId || userName?.trim().toLowerCase() || "unknown";
+    const nameToKey = new Map<string, string>();
+    const getUserKey = (userId?: string | null, userName?: string | null) => {
+      const nameKey = userName?.trim().toLowerCase() || "";
+      if (nameKey && nameToKey.has(nameKey)) return nameToKey.get(nameKey)!;
+      const key = userId || nameKey || "unknown";
+      if (nameKey) nameToKey.set(nameKey, key);
+      return key;
+    };
     const getDisplayName = (userName?: string | null) => userName?.trim() || "Unknown";
     const ensure = (key: string, name: string) => {
       if (!stats[key]) {
