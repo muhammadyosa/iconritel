@@ -78,7 +78,7 @@ export default function Dashboard() {
   const [showOltList, setShowOltList] = useState(false);
   const [selectedConstraint, setSelectedConstraint] = useState<string>("all");
   const [inlineSelectedTicket, setInlineSelectedTicket] = useState<Ticket | null>(null);
-  const [trendFilter, setTrendFilter] = useState<string>("7");
+  const [trendFilter, setTrendFilter] = useState<string>("month");
   const [trendCustomDate, setTrendCustomDate] = useState<string>(() => toLocalDateStr(new Date()));
   const [previousDialogState, setPreviousDialogState] = useState<{
     title: string;
