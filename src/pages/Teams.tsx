@@ -345,14 +345,17 @@ export default function Teams() {
         const total = Math.max(s.histCreated, s.liveTotal);
         // Resolved: ambil yang lebih besar antara history & live, dibatasi total
         const resolved = Math.min(Math.max(s.histResolved, s.liveResolved), total);
+        const activeTotal = Math.max(total - resolved, 0);
+        const liveActive = s.onProgress + s.pending + s.critical;
+        const scale = liveActive > 0 && activeTotal !== liveActive ? activeTotal / liveActive : 1;
         return {
           userKey,
           name: s.name,
           total,
           resolved,
-          onProgress: s.onProgress,
-          pending: s.pending,
-          critical: s.critical,
+          onProgress: Math.round(s.onProgress * scale),
+          pending: Math.round(s.pending * scale),
+          critical: Math.max(activeTotal - Math.round(s.onProgress * scale) - Math.round(s.pending * scale), 0),
           histCreated: s.histCreated,
           histResolved: s.histResolved,
           liveTotal: s.liveTotal,
@@ -1719,7 +1722,7 @@ export default function Teams() {
                         activeUsers.forEach(u => { finalDailyMap[dk][u.name] = 0; });
                       });
 
-                      rankingHistoryData.forEach(rec => {
+                       rankingHistoryData.forEach(rec => {
                         const dk = rec.date;
                         const name = rec.user_name;
                         if (finalDailyMap[dk] && activeUsers.find(u => u.name === name)) {
@@ -1727,21 +1730,29 @@ export default function Teams() {
                         }
                       });
 
+                      const liveDailyMap: Record<string, Record<string, number>> = {};
                       rankingLiveTickets.forEach(t => {
                         const creator = t.createdByName || "Unknown";
                         if (!activeUsers.find(u => u.name === creator)) return;
                         try {
                           const dk = toLocalDateStr(new Date(t.createdISO));
-                          if (dk === todayKey && finalDailyMap[dk]) {
-                            finalDailyMap[dk][creator] = (finalDailyMap[dk][creator] || 0) + 1;
+                          if (finalDailyMap[dk]) {
+                            if (!liveDailyMap[dk]) liveDailyMap[dk] = {};
+                            liveDailyMap[dk][creator] = (liveDailyMap[dk][creator] || 0) + 1;
                           }
                         } catch {
                           return;
                         }
                       });
 
+                      Object.entries(liveDailyMap).forEach(([dk, users]) => {
+                        Object.entries(users).forEach(([creator, count]) => {
+                          finalDailyMap[dk][creator] = Math.max(finalDailyMap[dk][creator] || 0, count);
+                        });
+                      });
+
                       const chartData = dateKeys.map(dk => {
-                        const entry: any = { date: format(new Date(dk), "dd/MM") };
+                        const entry: any = { date: format(parseLocalDateStr(dk), "dd/MM") };
                         activeUsers.forEach(u => { entry[u.name] = finalDailyMap[dk][u.name] || 0; });
                         return entry;
                       });
