@@ -13,6 +13,7 @@ import HuaweiPPPoEGenerator from "@/components/HuaweiPPPoEGenerator";
 import RaisecomPPPoEGenerator from "@/components/RaisecomPPPoEGenerator";
 import CiscoASRDocs from "@/components/CiscoASRDocs";
 import HuaweiNE8KDocs from "@/components/HuaweiNE8KDocs";
+import JuniperMXDocs from "@/components/JuniperMXDocs";
 
 const TABS = [
   { value: "auto-huawei", label: "📟 Huawei" },
@@ -226,6 +227,8 @@ function UPESections() {
             <CiscoASRDocs />
           ) : s.value === "upe-huawei-ne8k" ? (
             <HuaweiNE8KDocs />
+          ) : s.value === "upe-juniper-mx" ? (
+            <JuniperMXDocs />
           ) : (
             <ConfigSection tabKey={s.value} />
           )}
