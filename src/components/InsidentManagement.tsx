@@ -36,7 +36,7 @@ function getTimeRemaining(resolvedAt: string): string {
 }
 
 export function InsidentManagement() {
-  const { tickets, isLoading, refetch, addTicket } = useCloudTickets();
+  const { tickets, isLoading, refetch, addTicket, bulkDeleteTickets } = useCloudTickets();
   const { logActivity } = useActivityLog();
   const [statusFilter, setStatusFilter] = useState<string>("All");
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
