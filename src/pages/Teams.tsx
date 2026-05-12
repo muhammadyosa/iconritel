@@ -24,7 +24,7 @@ import { StatusBadge } from "@/components/StatusBadge";
 import { useCloudTickets } from "@/hooks/useCloudTickets";
 import { useTicketHistory } from "@/hooks/useTicketHistory";
 import { FEEDER_CONSTRAINTS_SET } from "@/types/ticket";
-import { toLocalDateStr } from "@/lib/dateUtils";
+import { parseLocalDateStr, toLocalDateStr } from "@/lib/dateUtils";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   ChartContainer,
@@ -119,7 +119,10 @@ export default function Teams() {
   const [expandedDrillTeam, setExpandedDrillTeam] = useState<string | null>(null);
   const [userDrillSheet, setUserDrillSheet] = useState<{ users: { name: string; tickets: any[] }[] } | null>(null);
   const [expandedDrillUser, setExpandedDrillUser] = useState<string | null>(null);
-  const [rankingCustomRange, setRankingCustomRange] = useState<DateRange | undefined>({ from: subDays(new Date(), 7), to: new Date() });
+  const [rankingCustomRange, setRankingCustomRange] = useState<DateRange | undefined>(() => {
+    const now = new Date();
+    return { from: new Date(now.getFullYear(), now.getMonth(), 1), to: now };
+  });
   // trendFilter is now unified with periodPreset
 
   // Handle period preset change
