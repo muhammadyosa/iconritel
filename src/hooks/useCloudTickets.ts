@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Ticket } from "@/types/ticket";
 import { toast } from "sonner";
 import { logTicketStatusChange } from "@/hooks/useTicketStatusHistory";
+import { toLocalDateStr } from "@/lib/dateUtils";
 
 const SLA_THRESHOLD_MS = 8 * 60 * 60 * 1000; // 8 hours
 
@@ -315,7 +316,7 @@ export function useCloudTickets() {
   // Helper: upsert daily_user_ticket_history
   const upsertUserHistory = useCallback(async (userName: string, userId: string | undefined, dateStr: string, field: "total_created" | "total_resolved", increment: number) => {
     try {
-      const date = dateStr.split("T")[0];
+      const date = toLocalDateStr(new Date(dateStr));
       // Try to get existing record
       const { data: existing } = await supabase
         .from("daily_user_ticket_history")
