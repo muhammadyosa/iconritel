@@ -662,6 +662,12 @@ export default function Dashboard() {
                   const [yy, mm, dd] = trendCustomDate.split("-").map(Number);
                   const customD = new Date(yy, (mm || 1) - 1, dd || 1);
                   chartData = [rowFor(trendCustomDate, customD.toLocaleDateString("id-ID", { day: "2-digit", month: "short" }))];
+                } else if (trendFilter === "month") {
+                  // From day 1 of current month up to today (always up to date).
+                  const today = new Date();
+                  today.setHours(0, 0, 0, 0);
+                  const days = today.getDate();
+                  chartData = buildRange(days);
                 } else if (trendFilter === "all") {
                   // Find earliest local-date among live tickets, fall back to 30 days.
                   const today = new Date();
