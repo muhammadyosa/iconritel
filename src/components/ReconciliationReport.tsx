@@ -21,6 +21,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useDebouncedCallback } from "@/hooks/useDebouncedCallback";
 import { useCloudTickets } from "@/hooks/useCloudTickets";
 
+const RECON_HISTORY_PAGE_SIZE = 1000;
+
 export function ReconciliationReport() {
   const { tickets } = useCloudTickets();
 
@@ -46,12 +48,21 @@ export function ReconciliationReport() {
   }, [reconRange, reconStartHour, reconEndHour]);
 
   const fetchReconHistory = useCallback(async () => {
-    const res = await supabase
-      .from("daily_user_ticket_history")
-      .select("user_id, user_name, date, total_created, total_resolved")
-      .gte("date", reconWindow.cutoff)
-      .lte("date", reconWindow.cutoffEnd);
-    if (res.data) setReconHistoryData(res.data);
+    const rows: any[] = [];
+    for (let from = 0; ; from += RECON_HISTORY_PAGE_SIZE) {
+      const to = from + RECON_HISTORY_PAGE_SIZE - 1;
+      const res = await supabase
+        .from("daily_user_ticket_history")
+        .select("user_id, user_name, date, total_created, total_resolved")
+        .gte("date", reconWindow.cutoff)
+        .lte("date", reconWindow.cutoffEnd)
+        .range(from, to);
+      if (res.error) break;
+      const batch = res.data || [];
+      rows.push(...batch);
+      if (batch.length < RECON_HISTORY_PAGE_SIZE) break;
+    }
+    setReconHistoryData(rows);
   }, [reconWindow.cutoff, reconWindow.cutoffEnd]);
 
   const { debounced: debouncedFetchRecon } = useDebouncedCallback(fetchReconHistory, 400);
