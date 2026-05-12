@@ -78,7 +78,7 @@ export default function Dashboard() {
   const [showOltList, setShowOltList] = useState(false);
   const [selectedConstraint, setSelectedConstraint] = useState<string>("all");
   const [inlineSelectedTicket, setInlineSelectedTicket] = useState<Ticket | null>(null);
-  const [trendFilter, setTrendFilter] = useState<string>("7");
+  const [trendFilter, setTrendFilter] = useState<string>("month");
   const [trendCustomDate, setTrendCustomDate] = useState<string>(() => toLocalDateStr(new Date()));
   const [previousDialogState, setPreviousDialogState] = useState<{
     title: string;
@@ -568,6 +568,7 @@ export default function Dashboard() {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="today">Hari ini</SelectItem>
+                      <SelectItem value="month">Bulan Ini</SelectItem>
                       <SelectItem value="all">Semua Data</SelectItem>
                       <SelectItem value="7">7 Hari</SelectItem>
                       <SelectItem value="14">14 Hari</SelectItem>
@@ -661,6 +662,12 @@ export default function Dashboard() {
                   const [yy, mm, dd] = trendCustomDate.split("-").map(Number);
                   const customD = new Date(yy, (mm || 1) - 1, dd || 1);
                   chartData = [rowFor(trendCustomDate, customD.toLocaleDateString("id-ID", { day: "2-digit", month: "short" }))];
+                } else if (trendFilter === "month") {
+                  // From day 1 of current month up to today (always up to date).
+                  const today = new Date();
+                  today.setHours(0, 0, 0, 0);
+                  const days = today.getDate();
+                  chartData = buildRange(days);
                 } else if (trendFilter === "all") {
                   // Find earliest local-date among live tickets, fall back to 30 days.
                   const today = new Date();
