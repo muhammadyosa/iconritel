@@ -610,7 +610,13 @@ export default function TicketManagement() {
                   </Button>
                 </div>
               </div>
-              {autoSerpoManualEdit ? (
+              {!formData.constraint ? (
+                <Input
+                  value=""
+                  disabled
+                  placeholder="Pilih constraint terlebih dahulu"
+                />
+              ) : autoSerpoManualEdit ? (
                 <SerpoCombobox
                   value={formData.serpo}
                   onChange={(v) => setFormData({ ...formData, serpo: v })}
@@ -634,7 +640,7 @@ export default function TicketManagement() {
                 <Input
                   value={formData.serpo}
                   onChange={(e) => setFormData({ ...formData, serpo: e.target.value })}
-                  placeholder="Pilih constraint terlebih dahulu"
+                  placeholder="Masukkan Serpo / Tim"
                 />
               )}
             </div>
