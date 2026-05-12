@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Ticket } from "@/types/ticket";
 import { toast } from "sonner";
 import { logTicketStatusChange } from "@/hooks/useTicketStatusHistory";
+import { useMetricsReconciliation } from "@/hooks/useMetricsReconciliation";
 
 const SLA_THRESHOLD_MS = 8 * 60 * 60 * 1000; // 8 hours
 
