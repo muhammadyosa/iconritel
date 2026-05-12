@@ -545,6 +545,11 @@ export function useCloudTickets() {
     await Promise.all(targets.map((t) => decrementHistoryForTicket(t)));
   }, [tickets, decrementHistoryForTicket]);
 
+  // Automatic reconciliation: keeps history tables 100% synchronized with the
+  // live `tickets` source of truth (corrects drift from manual deletes,
+  // concurrent writes, conflicts, or auto-cleanup).
+  const { reconcileNow } = useMetricsReconciliation(tickets, isLoading);
+
   return {
     tickets,
     isLoading,
@@ -553,5 +558,6 @@ export function useCloudTickets() {
     deleteTicket,
     bulkDeleteTickets,
     refetch: fetchTickets,
+    reconcileMetrics: reconcileNow,
   };
 }
