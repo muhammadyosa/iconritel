@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -39,7 +39,14 @@ export function TicketHistoryExport() {
   const { tickets } = useCloudTickets();
   const [records, setRecords] = useState<HistoryRecord[]>([]);
   const [loading, setLoading] = useState(true);
-  const [days, setDays] = useState("30");
+  const [days, setDays] = useState("month");
+
+  const cutoffDate = useMemo(() => {
+    const cutoff = new Date();
+    if (days === "month") return new Date(cutoff.getFullYear(), cutoff.getMonth(), 1);
+    cutoff.setDate(cutoff.getDate() - parseInt(days));
+    return cutoff;
+  }, [days]);
 
   useEffect(() => {
     fetchHistory();
@@ -48,9 +55,7 @@ export function TicketHistoryExport() {
   const fetchHistory = async () => {
     setLoading(true);
     try {
-      const cutoff = new Date();
-      cutoff.setDate(cutoff.getDate() - parseInt(days));
-      const cutoffStr = toLocalDateStr(cutoff);
+      const cutoffStr = toLocalDateStr(cutoffDate);
       const allRows: HistoryRecord[] = [];
       for (let from = 0; ; from += HISTORY_PAGE_SIZE) {
         const to = from + HISTORY_PAGE_SIZE - 1;
@@ -84,15 +89,65 @@ export function TicketHistoryExport() {
     });
   };
 
+  const displayRecords = useMemo(() => {
+    const cutoffStr = toLocalDateStr(cutoffDate);
+    const map = new Map<string, HistoryRecord>();
+
+    records.forEach((r) => {
+      map.set(r.date, {
+        ...r,
+        live_ritel: 0,
+        live_feeder: 0,
+        live_total: 0,
+        live_in_progress: 0,
+        live_resolved: 0,
+      });
+    });
+
+    tickets.forEach((ticket) => {
+      const date = toLocalDateStr(new Date(ticket.createdISO));
+      if (date < cutoffStr) return;
+      const rec = map.get(date) || { date, ritel: 0, feeder: 0, total: 0, created: 0, in_progress: 0, resolved: 0, live_ritel: 0, live_feeder: 0, live_total: 0, live_in_progress: 0, live_resolved: 0 };
+      const isFeeder = FEEDER_CONSTRAINTS_SET.has(ticket.constraint);
+      rec.live_total = (rec.live_total || 0) + 1;
+      if (isFeeder) rec.live_feeder = (rec.live_feeder || 0) + 1;
+      else rec.live_ritel = (rec.live_ritel || 0) + 1;
+      if (ticket.status === "Resolved") rec.live_resolved = (rec.live_resolved || 0) + 1;
+      else rec.live_in_progress = (rec.live_in_progress || 0) + 1;
+      map.set(date, rec);
+    });
+
+    return Array.from(map.values())
+      .map((r) => ({
+        ...r,
+        final_ritel: Math.max(r.ritel || 0, r.live_ritel || 0),
+        final_feeder: Math.max(r.feeder || 0, r.live_feeder || 0),
+        final_total: Math.max(r.total || 0, r.live_total || 0),
+        final_in_progress: Math.max(r.in_progress || 0, r.live_in_progress || 0),
+        final_resolved: Math.max(r.resolved || 0, r.live_resolved || 0),
+      }))
+      .sort((a, b) => b.date.localeCompare(a.date));
+  }, [records, tickets, cutoffDate]);
+
   const buildExportData = () =>
-    records.map((r) => ({
+    displayRecords.map((r) => ({
       Tanggal: formatDate(r.date),
       "Tanggal (ISO)": r.date,
-      Ritel: r.ritel,
-      Feeder: r.feeder,
-      Total: r.total,
-      "On Progress": r.in_progress,
-      Resolved: r.resolved,
+      "Hist Ritel": r.ritel,
+      "Live Ritel": r.live_ritel || 0,
+      "Final Ritel": r.final_ritel || 0,
+      "Hist Feeder": r.feeder,
+      "Live Feeder": r.live_feeder || 0,
+      "Final Feeder": r.final_feeder || 0,
+      "Hist Total": r.total,
+      "Live Total": r.live_total || 0,
+      "Final Total": r.final_total || 0,
+      "Hist On Progress": r.in_progress,
+      "Live On Progress": r.live_in_progress || 0,
+      "Final On Progress": r.final_in_progress || 0,
+      "Hist Resolved": r.resolved,
+      "Live Resolved": r.live_resolved || 0,
+      "Final Resolved": r.final_resolved || 0,
     }));
 
   const handleExportExcel = async () => {
