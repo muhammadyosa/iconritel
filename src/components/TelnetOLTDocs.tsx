@@ -147,7 +147,7 @@ HUAWEI-OLT-01>`}</Code>
           <SectionTitle>Sample Telnet Dari UPE Juniper</SectionTitle>
 
           <p className="font-semibold mt-2">1. Cek list routing instance</p>
-          <Code>{`tegar.dwi@JUNIPER-UPE-01> show route instance
+          <Code>{`permadi.nugraha@JUNIPER-UPE-01> show route instance
 Instance                Type
         Primary RIB                     Active/holddown/hidden
 master                  forwarding
@@ -157,7 +157,7 @@ WAN-NMS-RETAIL          vrf
           <p className="font-semibold mt-2">
             2. Telnet menggunakan VRF yang dipakai, sample di sini kita telnet IP <b>172.10.1.1</b> menggunakan VRF <b>WAN-NMS-RETAIL</b>
           </p>
-          <Code>{`tegar.dwi@JUNIPER-UPE-01> telnet routing-instance WAN-NMS-RETAIL 172.10.1.1
+          <Code>{`permadi.nugraha@JUNIPER-UPE-01> telnet routing-instance WAN-NMS-RETAIL 172.10.1.1
 Trying 172.10.1.1...
 Connected to 172.10.1.1.
 Escape character is '^]'.
