@@ -81,7 +81,7 @@ export function TicketHistoryExport() {
   };
 
   const formatDate = (dateStr: string) => {
-    return new Date(dateStr).toLocaleDateString("id-ID", {
+    return parseLocalDateStr(dateStr).toLocaleDateString("id-ID", {
       weekday: "short",
       day: "2-digit",
       month: "short",
@@ -151,7 +151,7 @@ export function TicketHistoryExport() {
     }));
 
   const handleExportExcel = async () => {
-    if (records.length === 0) return toast.error("Tidak ada data untuk di-export");
+    if (displayRecords.length === 0) return toast.error("Tidak ada data untuk di-export");
     const XLSX = await import("xlsx");
     const ws = XLSX.utils.json_to_sheet(buildExportData());
     const wb = XLSX.utils.book_new();
@@ -161,7 +161,7 @@ export function TicketHistoryExport() {
   };
 
   const handleExportCSV = async () => {
-    if (records.length === 0) return toast.error("Tidak ada data untuk di-export");
+    if (displayRecords.length === 0) return toast.error("Tidak ada data untuk di-export");
     const XLSX = await import("xlsx");
     const ws = XLSX.utils.json_to_sheet(buildExportData());
     const csv = XLSX.utils.sheet_to_csv(ws);
@@ -175,9 +175,9 @@ export function TicketHistoryExport() {
     toast.success("File CSV berhasil diunduh");
   };
 
-  const totalRitel = records.reduce((s, r) => s + r.ritel, 0);
-  const totalFeeder = records.reduce((s, r) => s + r.feeder, 0);
-  const totalAll = records.reduce((s, r) => s + r.total, 0);
+  const totalRitel = displayRecords.reduce((s, r) => s + (r.final_ritel || 0), 0);
+  const totalFeeder = displayRecords.reduce((s, r) => s + (r.final_feeder || 0), 0);
+  const totalAll = displayRecords.reduce((s, r) => s + (r.final_total || 0), 0);
 
   return (
     <div className="space-y-6">
