@@ -36,7 +36,7 @@ function getTimeRemaining(resolvedAt: string): string {
 }
 
 export function InsidentManagement() {
-  const { tickets, isLoading, refetch, addTicket, bulkDeleteTickets } = useCloudTickets();
+  const { tickets, isLoading, refetch, addTicket } = useCloudTickets();
   const { logActivity } = useActivityLog();
   const [statusFilter, setStatusFilter] = useState<string>("All");
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -112,8 +112,16 @@ export function InsidentManagement() {
         return;
       }
 
-      // Manual delete -> decrement Ranking User NOC counters
-      await bulkDeleteTickets(idsToDelete);
+      // Delete in batches
+      const batchSize = 50;
+      for (let i = 0; i < idsToDelete.length; i += batchSize) {
+        const batch = idsToDelete.slice(i, i + batchSize);
+        const { error } = await supabase
+          .from("tickets")
+          .delete()
+          .in("ticket_id" as never, batch as never);
+        if (error) throw error;
+      }
 
       toast.success(`${idsToDelete.length} insident berhasil dihapus`);
       logActivity("bulk_delete_tickets", `${idsToDelete.length} incident dihapus`);

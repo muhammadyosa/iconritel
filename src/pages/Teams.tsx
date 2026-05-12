@@ -24,7 +24,6 @@ import { StatusBadge } from "@/components/StatusBadge";
 import { useCloudTickets } from "@/hooks/useCloudTickets";
 import { useTicketHistory } from "@/hooks/useTicketHistory";
 import { FEEDER_CONSTRAINTS_SET } from "@/types/ticket";
-import { parseLocalDateStr, toLocalDateStr } from "@/lib/dateUtils";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   ChartContainer,
@@ -102,16 +101,6 @@ const PIE_COLORS = [
   "hsl(var(--muted-foreground))",
 ];
 
-const RANKING_HISTORY_PAGE_SIZE = 1000;
-
-interface RankingHistoryRecord {
-  user_id: string | null;
-  user_name: string;
-  date: string;
-  total_created: number;
-  total_resolved: number;
-}
-
 export default function Teams() {
   const { tickets, isLoading } = useCloudTickets();
   const { history } = useTicketHistory(tickets);
@@ -129,10 +118,7 @@ export default function Teams() {
   const [expandedDrillTeam, setExpandedDrillTeam] = useState<string | null>(null);
   const [userDrillSheet, setUserDrillSheet] = useState<{ users: { name: string; tickets: any[] }[] } | null>(null);
   const [expandedDrillUser, setExpandedDrillUser] = useState<string | null>(null);
-  const [rankingCustomRange, setRankingCustomRange] = useState<DateRange | undefined>(() => {
-    const now = new Date();
-    return { from: new Date(now.getFullYear(), now.getMonth(), 1), to: now };
-  });
+  const [rankingCustomRange, setRankingCustomRange] = useState<DateRange | undefined>({ from: subDays(new Date(), 7), to: new Date() });
   // trendFilter is now unified with periodPreset
 
   // Handle period preset change
@@ -259,7 +245,7 @@ export default function Teams() {
   }, [filteredTickets]);
 
   // === Ranking User NOC with custom date range filter (uses persistent history table) ===
-  const [rankingHistoryData, setRankingHistoryData] = useState<RankingHistoryRecord[]>([]);
+  const [rankingHistoryData, setRankingHistoryData] = useState<any[]>([]);
 
   const rankingRange = useMemo(() => {
     const fromDate = rankingCustomRange?.from || subDays(new Date(), 7);
@@ -268,8 +254,8 @@ export default function Teams() {
     return {
       fromDate,
       toDate,
-      cutoff: toLocalDateStr(startOfDay(fromDate)),
-      cutoffEnd: toLocalDateStr(endOfDay(toDate)),
+      cutoff: format(startOfDay(fromDate), "yyyy-MM-dd"),
+      cutoffEnd: format(endOfDay(toDate), "yyyy-MM-dd"),
     };
   }, [rankingCustomRange]);
 
@@ -284,21 +270,15 @@ export default function Teams() {
   }, [tickets, rankingRange]);
 
   const fetchRankingData = useCallback(async () => {
-    const rows: RankingHistoryRecord[] = [];
-    for (let from = 0; ; from += RANKING_HISTORY_PAGE_SIZE) {
-      const to = from + RANKING_HISTORY_PAGE_SIZE - 1;
-      const historyRes = await supabase
-        .from("daily_user_ticket_history")
-        .select("user_id, user_name, date, total_created, total_resolved")
-        .gte("date", rankingRange.cutoff)
-        .lte("date", rankingRange.cutoffEnd)
-        .range(from, to);
+    let historyQuery = supabase
+      .from("daily_user_ticket_history")
+      .select("user_id, user_name, date, total_created, total_resolved")
+      .gte("date", rankingRange.cutoff)
+      .lte("date", rankingRange.cutoffEnd);
 
-      if (!historyRes.data || historyRes.error) break;
-      rows.push(...historyRes.data);
-      if (historyRes.data.length < RANKING_HISTORY_PAGE_SIZE) break;
-    }
-    setRankingHistoryData(rows);
+    const historyRes = await historyQuery;
+    
+    if (historyRes.data) setRankingHistoryData(historyRes.data);
   }, [rankingRange]);
 
   const { debounced: debouncedFetchRanking } = useDebouncedCallback(fetchRankingData, 400);
@@ -320,76 +300,71 @@ export default function Teams() {
   }, [fetchRankingData, debouncedFetchRanking]);
 
   const rankingUserStats = useMemo(() => {
-    // Total & Resolved diambil dari Daily Incident History (persistent), agar
-    // incident yang sudah di-auto-delete tetap terhitung. Status aktif
-    // (On Progress / Pending / Critical) diambil dari live List Incident.
-    const stats: Record<string, { name: string; histCreated: number; histResolved: number; onProgress: number; pending: number; critical: number; liveTotal: number; liveResolved: number }> = {};
+    const stats: Record<string, { name: string; total: number; resolved: number; onProgress: number; pending: number; critical: number }> = {};
+    const liveStatusByCreator: Record<string, { total: number; onProgress: number; pending: number; critical: number }> = {};
 
-    const nameToKey = new Map<string, string>();
-    const getUserKey = (userId?: string | null, userName?: string | null) => {
-      const nameKey = userName?.trim().toLowerCase() || "";
-      if (nameKey && nameToKey.has(nameKey)) return nameToKey.get(nameKey)!;
-      const key = userId || nameKey || "unknown";
-      if (nameKey) nameToKey.set(nameKey, key);
-      return key;
-    };
+    const getUserKey = (userId?: string | null, userName?: string | null) => userId || userName?.trim().toLowerCase() || "unknown";
     const getDisplayName = (userName?: string | null) => userName?.trim() || "Unknown";
-    const ensure = (key: string, name: string) => {
-      if (!stats[key]) {
-        stats[key] = { name, histCreated: 0, histResolved: 0, onProgress: 0, pending: 0, critical: 0, liveTotal: 0, liveResolved: 0 };
-      } else if (name && name !== "Unknown") {
-        stats[key].name = name;
-      }
-      return stats[key];
-    };
 
-    // 1) Akumulasi dari Daily Incident History (persistent — termasuk auto-deleted)
     rankingHistoryData.forEach((rec) => {
       const key = getUserKey(rec.user_id, rec.user_name);
-      const s = ensure(key, getDisplayName(rec.user_name));
-      s.histCreated += rec.total_created || 0;
-      s.histResolved += rec.total_resolved || 0;
+      if (!stats[key]) {
+        stats[key] = {
+          name: getDisplayName(rec.user_name),
+          total: 0,
+          resolved: 0,
+          onProgress: 0,
+          pending: 0,
+          critical: 0,
+        };
+      }
+
+      stats[key].name = getDisplayName(rec.user_name) || stats[key].name;
+      stats[key].total += rec.total_created || 0;
     });
 
-    // 2) Live List Incident — total + status aktif + resolved aktif
     rankingLiveTickets.forEach((ticket) => {
       const key = getUserKey(ticket.createdByUserId, ticket.createdByName);
-      const s = ensure(key, getDisplayName(ticket.createdByName));
-      s.liveTotal += 1;
-      if (ticket.status === "Resolved") s.liveResolved += 1;
-      else if (ticket.status === "Critical") s.critical += 1;
-      else if (ticket.status === "Pending") s.pending += 1;
-      else if (ticket.status === "On Progress") s.onProgress += 1;
+      if (!stats[key]) {
+        stats[key] = {
+          name: getDisplayName(ticket.createdByName),
+          total: 0,
+          resolved: 0,
+          onProgress: 0,
+          pending: 0,
+          critical: 0,
+        };
+      }
+
+      stats[key].name = getDisplayName(ticket.createdByName) || stats[key].name;
+
+      if (!liveStatusByCreator[key]) {
+        liveStatusByCreator[key] = { total: 0, onProgress: 0, pending: 0, critical: 0 };
+      }
+
+      liveStatusByCreator[key].total += 1;
+      if (ticket.status === "Critical") liveStatusByCreator[key].critical += 1;
+      else if (ticket.status === "Pending") liveStatusByCreator[key].pending += 1;
+      else if (ticket.status === "On Progress") liveStatusByCreator[key].onProgress += 1;
+    });
+
+    Object.entries(liveStatusByCreator).forEach(([key, live]) => {
+      stats[key].total = Math.max(stats[key].total, live.total);
+      stats[key].onProgress = live.onProgress;
+      stats[key].pending = live.pending;
+      stats[key].critical = live.critical;
+    });
+
+    Object.values(stats).forEach((stat) => {
+      const activeCount = stat.onProgress + stat.pending + stat.critical;
+      stat.resolved = Math.max(stat.total - activeCount, 0);
     });
 
     return Object.entries(stats)
-      .map(([userKey, s]) => {
-        // Total: ambil yang lebih besar antara history & live (history menyertakan auto-deleted; live menyertakan baru yang belum tercatat)
-        const total = Math.max(s.histCreated, s.liveTotal);
-        // Resolved: ambil yang lebih besar antara history & live, dibatasi total
-        const resolved = Math.min(Math.max(s.histResolved, s.liveResolved), total);
-        const activeTotal = Math.max(total - resolved, 0);
-        const liveActive = s.onProgress + s.pending + s.critical;
-        const scale = liveActive > 0 && activeTotal !== liveActive ? activeTotal / liveActive : 1;
-        return {
-          userKey,
-          name: s.name,
-          total,
-          resolved,
-          onProgress: Math.round(s.onProgress * scale),
-          pending: Math.round(s.pending * scale),
-          critical: Math.max(activeTotal - Math.round(s.onProgress * scale) - Math.round(s.pending * scale), 0),
-          histCreated: s.histCreated,
-          histResolved: s.histResolved,
-          liveTotal: s.liveTotal,
-          liveResolved: s.liveResolved,
-        };
-      })
+      .map(([userKey, s]) => ({ userKey, ...s }))
       .filter(u => u.total > 0 || u.resolved > 0 || u.pending > 0 || u.critical > 0 || u.onProgress > 0)
-      .sort((a, b) => b.total - a.total || b.resolved - a.resolved);
+      .sort((a, b) => b.total - a.total);
   }, [rankingHistoryData, rankingLiveTickets]);
-
-
 
   // Track previous ranking for rank change indicators
   const prevRankingRef = useRef<Record<string, number>>({});
@@ -421,12 +396,7 @@ export default function Teams() {
 
   const nocTotals = useMemo(() => {
     const t = { total: 0, resolved: 0, pending: 0, critical: 0 };
-    userStats.forEach(u => {
-      t.total += u.total;
-      t.resolved += u.resolved;
-      t.pending += u.pending;
-      t.critical += u.critical;
-    });
+    userStats.forEach(u => { t.total += u.total; t.resolved += u.resolved; t.pending += u.pending; t.critical += u.critical; });
     return t;
   }, [userStats]);
 
@@ -482,7 +452,7 @@ export default function Teams() {
       dateMap[rec.date][rec.constraint_type] = Math.max(dateMap[rec.date][rec.constraint_type] || 0, rec.count);
     });
 
-    const today = toLocalDateStr(new Date());
+    const today = new Date().toISOString().split('T')[0];
     const todayLive: Record<string, number> = {};
     filteredTickets.forEach((ticket) => {
       const date = ticket.createdISO?.split("T")[0];
@@ -516,7 +486,7 @@ export default function Teams() {
   const ritelCategoryTrend = useMemo(() => {
     const dateMap: Record<string, Record<string, number>> = {};
     const categories = new Set<string>();
-    const today = toLocalDateStr(new Date());
+    const today = new Date().toISOString().split('T')[0];
 
     history.categoryRecords.forEach((rec) => {
       if (FEEDER_CONSTRAINTS_SET.has(rec.constraint_type)) return;
@@ -555,7 +525,7 @@ export default function Teams() {
   const feederCategoryTrend = useMemo(() => {
     const dateMap: Record<string, Record<string, number>> = {};
     const categories = new Set<string>();
-    const today = toLocalDateStr(new Date());
+    const today = new Date().toISOString().split('T')[0];
 
     history.categoryRecords.forEach((rec) => {
       if (!FEEDER_CONSTRAINTS_SET.has(rec.constraint_type)) return;
@@ -1738,13 +1708,14 @@ export default function Teams() {
                         dateKeys.push(format(subDays(today, d), "yyyy-MM-dd"));
                       }
                       const activeUsers = rankingUserStats.filter(u => u.total > 0).slice(0, 8);
+                      const todayKey = format(new Date(), "yyyy-MM-dd");
                       const finalDailyMap: Record<string, Record<string, number>> = {};
                       dateKeys.forEach(dk => {
                         finalDailyMap[dk] = {};
                         activeUsers.forEach(u => { finalDailyMap[dk][u.name] = 0; });
                       });
 
-                       rankingHistoryData.forEach(rec => {
+                      rankingHistoryData.forEach(rec => {
                         const dk = rec.date;
                         const name = rec.user_name;
                         if (finalDailyMap[dk] && activeUsers.find(u => u.name === name)) {
@@ -1752,29 +1723,19 @@ export default function Teams() {
                         }
                       });
 
-                      const liveDailyMap: Record<string, Record<string, number>> = {};
                       rankingLiveTickets.forEach(t => {
                         const creator = t.createdByName || "Unknown";
                         if (!activeUsers.find(u => u.name === creator)) return;
                         try {
-                          const dk = toLocalDateStr(new Date(t.createdISO));
-                          if (finalDailyMap[dk]) {
-                            if (!liveDailyMap[dk]) liveDailyMap[dk] = {};
-                            liveDailyMap[dk][creator] = (liveDailyMap[dk][creator] || 0) + 1;
+                          const dk = format(startOfDay(new Date(t.createdISO)), "yyyy-MM-dd");
+                          if (dk === todayKey && finalDailyMap[dk]) {
+                            finalDailyMap[dk][creator] = (finalDailyMap[dk][creator] || 0) + 1;
                           }
-                        } catch {
-                          return;
-                        }
-                      });
-
-                      Object.entries(liveDailyMap).forEach(([dk, users]) => {
-                        Object.entries(users).forEach(([creator, count]) => {
-                          finalDailyMap[dk][creator] = Math.max(finalDailyMap[dk][creator] || 0, count);
-                        });
+                        } catch {}
                       });
 
                       const chartData = dateKeys.map(dk => {
-                        const entry: Record<string, string | number> = { date: format(parseLocalDateStr(dk), "dd/MM") };
+                        const entry: any = { date: format(new Date(dk), "dd/MM") };
                         activeUsers.forEach(u => { entry[u.name] = finalDailyMap[dk][u.name] || 0; });
                         return entry;
                       });
@@ -1935,8 +1896,6 @@ export default function Teams() {
                   </div>
                 </CardContent>
               </Card>
-
-
               </div>
               </div>
 

@@ -3,10 +3,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Ticket } from "@/types/ticket";
 import { toast } from "sonner";
 import { logTicketStatusChange } from "@/hooks/useTicketStatusHistory";
-import { toLocalDateStr } from "@/lib/dateUtils";
 
 const SLA_THRESHOLD_MS = 8 * 60 * 60 * 1000; // 8 hours
-const TICKET_FETCH_PAGE_SIZE = 1000;
 
 interface DbTicket {
   id: string;
@@ -38,24 +36,6 @@ interface ProfileData {
   user_id: string;
   display_name: string | null;
   email: string;
-}
-
-async function fetchAllTicketRows(): Promise<DbTicket[]> {
-  const rows: DbTicket[] = [];
-  for (let from = 0; ; from += TICKET_FETCH_PAGE_SIZE) {
-    const to = from + TICKET_FETCH_PAGE_SIZE - 1;
-    const { data, error } = await supabase
-      .from("tickets")
-      .select("*")
-      .order("created_at", { ascending: false })
-      .range(from, to);
-
-    if (error) throw error;
-    const batch = (data || []) as DbTicket[];
-    rows.push(...batch);
-    if (batch.length < TICKET_FETCH_PAGE_SIZE) break;
-  }
-  return rows;
 }
 
 // Type for inserting tickets (excludes auto-generated id)
@@ -206,14 +186,19 @@ export function useCloudTickets() {
       cleanupResolvedTickets();
 
       // Fetch profiles and tickets in parallel
-      const [currentProfilesMap, ticketRows] = await Promise.all([
+      const [currentProfilesMap, ticketRes] = await Promise.all([
         fetchProfiles(),
-        fetchAllTicketRows(),
+        supabase
+          .from("tickets")
+          .select("*")
+          .order("created_at", { ascending: false }),
       ]);
 
+      if (ticketRes.error) throw ticketRes.error;
+
       const now = new Date().getTime();
-      const processedTickets = ticketRows.map((db) => {
-        const ticket = dbToTicket(db, currentProfilesMap);
+      const processedTickets = (ticketRes.data || []).map((db) => {
+        const ticket = dbToTicket(db as DbTicket, currentProfilesMap);
         if (ticket.status !== "Resolved" && ticket.status !== "Critical" && ticket.status !== "Pending") {
           const ticketAge = now - new Date(ticket.createdISO).getTime();
           if (ticketAge >= SLA_THRESHOLD_MS) {
@@ -330,7 +315,7 @@ export function useCloudTickets() {
   // Helper: upsert daily_user_ticket_history
   const upsertUserHistory = useCallback(async (userName: string, userId: string | undefined, dateStr: string, field: "total_created" | "total_resolved", increment: number) => {
     try {
-      const date = toLocalDateStr(new Date(dateStr));
+      const date = dateStr.split("T")[0];
       // Try to get existing record
       const { data: existing } = await supabase
         .from("daily_user_ticket_history")
@@ -516,19 +501,12 @@ export function useCloudTickets() {
 
   const deleteTicket = useCallback(async (id: string) => {
     try {
-      const ticket = tickets.find((t) => t.id === id);
       const { error } = await (supabase
         .from("tickets")
         .delete()
         .eq("ticket_id" as never, id) as unknown as Promise<{ error: Error | null }>);
 
       if (error) throw error;
-      if (ticket?.createdByName) {
-        await upsertUserHistory(ticket.createdByName, ticket.createdByUserId, ticket.createdISO, "total_created", -1);
-        if (ticket.status === "Resolved") {
-          await upsertUserHistory(ticket.createdByName, ticket.createdByUserId, ticket.createdISO, "total_resolved", -1);
-        }
-      }
       // Realtime will handle updating the list
     } catch (error) {
       if (import.meta.env.DEV) {
@@ -537,27 +515,7 @@ export function useCloudTickets() {
       toast.error("Gagal menghapus incident");
       throw error;
     }
-  }, [tickets, upsertUserHistory]);
-
-  const bulkDeleteTickets = useCallback(async (ids: string[]) => {
-    const targetTickets = tickets.filter((ticket) => ids.includes(ticket.id));
-    const batchSize = 50;
-    for (let i = 0; i < ids.length; i += batchSize) {
-      const batch = ids.slice(i, i + batchSize);
-      const { error } = await (supabase
-        .from("tickets")
-        .delete()
-        .in("ticket_id" as never, batch as never) as unknown as Promise<{ error: Error | null }>);
-      if (error) throw error;
-    }
-    await Promise.all(targetTickets.map(async (ticket) => {
-      if (!ticket.createdByName) return;
-      await upsertUserHistory(ticket.createdByName, ticket.createdByUserId, ticket.createdISO, "total_created", -1);
-      if (ticket.status === "Resolved") {
-        await upsertUserHistory(ticket.createdByName, ticket.createdByUserId, ticket.createdISO, "total_resolved", -1);
-      }
-    }));
-  }, [tickets, upsertUserHistory]);
+  }, []);
 
   return {
     tickets,
@@ -565,7 +523,6 @@ export function useCloudTickets() {
     addTicket,
     updateTicket,
     deleteTicket,
-    bulkDeleteTickets,
     refetch: fetchTickets,
   };
 }
