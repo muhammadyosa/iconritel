@@ -267,6 +267,8 @@ function BNGSections() {
         <TabsContent key={s.value} value={s.value} className="mt-3">
           {s.value === "bng-cek-user-vlan-huawei" ? (
             <BNGHuaweiDocs />
+          ) : s.value === "bng-cek-user-vlan-juniper" ? (
+            <BNGJuniperDocs />
           ) : (
             <ConfigSection tabKey={s.value} />
           )}
