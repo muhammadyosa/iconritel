@@ -29,13 +29,11 @@ const menuItems = [
   { title: "List Config", path: "/auto-config", emoji: "💻" },
   { title: "List Note NOC", path: "/notes", emoji: "📖" },
   { title: "Report", path: "/report", emoji: "📝" },
-  { title: "Audit History", path: "/audit-history", emoji: "🧾" },
   { title: "Settings", path: "/settings", emoji: "🛠" },
 ] as const;
 
 const INTERN_PATHS = new Set(["/", "/tickets", "/teams"]);
 const ADMIN_NOC_ONLY_PATHS = new Set(["/notes", "/auto-config"]);
-const ADMIN_ONLY_PATHS = new Set(["/audit-history"]);
 
 function usePendingUserCount() {
   const { isAdmin } = useUserRole();
@@ -148,7 +146,6 @@ export function AppSidebar() {
     return menuItems.filter((item) => {
       if (isIntern && !INTERN_PATHS.has(item.path)) return false;
       if (ADMIN_NOC_ONLY_PATHS.has(item.path) && !isAdmin && !isNOC) return false;
-      if (ADMIN_ONLY_PATHS.has(item.path) && !isAdmin) return false;
       return true;
     });
   }, [isIntern, isAdmin, isNOC]);

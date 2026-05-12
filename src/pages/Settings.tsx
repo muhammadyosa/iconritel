@@ -32,6 +32,7 @@ import { InsidentManagement } from "@/components/InsidentManagement";
 import { ReportManagement } from "@/components/ReportManagement";
 import { TicketHistoryExport } from "@/components/TicketHistoryExport";
 import { TeamNOCManagement } from "@/components/TeamNOCManagement";
+import AuditHistory from "@/pages/AuditHistory";
 
 const UPE_STORE_NAME = "upe_data";
 const BNG_STORE_NAME = "bng_data";
@@ -523,6 +524,11 @@ export default function Settings() {
             {isAdmin && (
               <TabsTrigger value="users" className="text-[11px] sm:text-sm px-2.5 sm:px-3 py-1.5 sm:py-2 whitespace-nowrap">
                 💻 Users
+              </TabsTrigger>
+            )}
+            {isAdmin && (
+              <TabsTrigger value="audit" className="text-[11px] sm:text-sm px-2.5 sm:px-3 py-1.5 sm:py-2 whitespace-nowrap">
+                🧾 Audit History
               </TabsTrigger>
             )}
             <TabsTrigger value="info" className="text-[11px] sm:text-sm px-2.5 sm:px-3 py-1.5 sm:py-2 whitespace-nowrap">
@@ -1070,6 +1076,13 @@ export default function Settings() {
         {isAdmin && (
           <TabsContent value="team-noc" className="space-y-6">
             <TeamNOCManagement />
+          </TabsContent>
+        )}
+
+        {/* Audit History Tab - Admin Only */}
+        {isAdmin && (
+          <TabsContent value="audit" className="space-y-6">
+            <AuditHistory />
           </TabsContent>
         )}
       </Tabs>
