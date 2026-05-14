@@ -38,7 +38,7 @@ const UPE_STORE_NAME = "upe_data";
 const BNG_STORE_NAME = "bng_data";
 
 // Tanggal terakhir file bawaan List_Team_Region.xlsx diperbarui (WIB)
-const BUNDLED_REGIONAL_LAST_UPDATE = "2026-05-14T00:00:00+07:00";
+const BUNDLED_REGIONAL_LAST_UPDATE = "2026-05-15T00:00:00+07:00";
 
 // Save UPE data to IndexedDB
 async function saveUPEData(data: any[]): Promise<void> {
@@ -968,6 +968,10 @@ export default function Settings() {
                   <div className="flex items-center justify-between mb-2">
                     <h4 className="font-medium flex items-center gap-2">
                       {dataCounts.regionalTeam > 0 ? "♻️" : "⚠️"} 🗺 List Team Region
+                      <Badge className="text-[9px] px-1.5 py-0 bg-emerald-500 hover:bg-emerald-500 text-white border-0 gap-1 animate-pulse">
+                        <span className="inline-block w-1.5 h-1.5 rounded-full bg-white" />
+                        LIVE
+                      </Badge>
                     </h4>
                     <Badge variant={dataCounts.regionalTeam > 0 ? "default" : "secondary"} className={dataCounts.regionalTeam > 0 ? "bg-teal-500" : ""}>
                       {dataCounts.regionalTeam.toLocaleString()} data
