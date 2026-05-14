@@ -38,7 +38,7 @@ const UPE_STORE_NAME = "upe_data";
 const BNG_STORE_NAME = "bng_data";
 
 // Tanggal terakhir file bawaan List_Team_Region.xlsx diperbarui (WIB)
-const BUNDLED_REGIONAL_LAST_UPDATE = "2026-05-14T00:00:00+07:00";
+const BUNDLED_REGIONAL_LAST_UPDATE = "2026-05-15T00:00:00+07:00";
 
 // Save UPE data to IndexedDB
 async function saveUPEData(data: any[]): Promise<void> {
