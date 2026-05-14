@@ -46,6 +46,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
+import { toLocalDateStr } from "@/lib/dateUtils";
 import {
   Select,
   SelectContent,
@@ -1698,40 +1699,61 @@ export default function Teams() {
                   </CardHeader>
                   <CardContent className="p-2 sm:p-4">
                     {(() => {
-                      const fromDate = rankingCustomRange?.from || subDays(new Date(), 7);
-                      const toDate = rankingCustomRange?.to || fromDate;
+                      const fromDate = startOfDay(rankingCustomRange?.from || subDays(new Date(), 7));
+                      const toDate = startOfDay(rankingCustomRange?.to || fromDate);
                       const diffMs = toDate.getTime() - fromDate.getTime();
                       const days = Math.max(Math.ceil(diffMs / (1000 * 60 * 60 * 24)), 0);
-                      const today = startOfDay(toDate);
                       const dateKeys: string[] = [];
-                      for (let d = days; d >= 0; d--) {
-                        dateKeys.push(format(subDays(today, d), "yyyy-MM-dd"));
+                      for (let d = 0; d <= days; d++) {
+                        const dt = new Date(fromDate);
+                        dt.setDate(dt.getDate() + d);
+                        dateKeys.push(toLocalDateStr(dt));
                       }
                       const activeUsers = rankingUserStats.filter(u => u.total > 0).slice(0, 8);
-                      const todayKey = format(new Date(), "yyyy-MM-dd");
-                      const finalDailyMap: Record<string, Record<string, number>> = {};
+                      const activeNameSet = new Set(activeUsers.map(u => u.name));
+
+                      // Live counts per (date, user) using WIB local date — covers ALL days in range
+                      const liveDailyMap: Record<string, Record<string, number>> = {};
                       dateKeys.forEach(dk => {
-                        finalDailyMap[dk] = {};
-                        activeUsers.forEach(u => { finalDailyMap[dk][u.name] = 0; });
+                        liveDailyMap[dk] = {};
+                        activeUsers.forEach(u => { liveDailyMap[dk][u.name] = 0; });
+                      });
+                      rankingLiveTickets.forEach(t => {
+                        const creator = t.createdByName || "Unknown";
+                        if (!activeNameSet.has(creator)) return;
+                        try {
+                          const dk = toLocalDateStr(new Date(t.createdISO));
+                          if (liveDailyMap[dk]) {
+                            liveDailyMap[dk][creator] = (liveDailyMap[dk][creator] || 0) + 1;
+                          }
+                        } catch {}
                       });
 
+                      // History counts per (date, user) — fallback if live data was cleaned up
+                      const histDailyMap: Record<string, Record<string, number>> = {};
+                      dateKeys.forEach(dk => {
+                        histDailyMap[dk] = {};
+                        activeUsers.forEach(u => { histDailyMap[dk][u.name] = 0; });
+                      });
                       rankingHistoryData.forEach(rec => {
                         const dk = rec.date;
                         const name = rec.user_name;
-                        if (finalDailyMap[dk] && activeUsers.find(u => u.name === name)) {
-                          finalDailyMap[dk][name] += rec.total_created || 0;
+                        if (histDailyMap[dk] && activeNameSet.has(name)) {
+                          histDailyMap[dk][name] += rec.total_created || 0;
                         }
                       });
 
-                      rankingLiveTickets.forEach(t => {
-                        const creator = t.createdByName || "Unknown";
-                        if (!activeUsers.find(u => u.name === creator)) return;
-                        try {
-                          const dk = format(startOfDay(new Date(t.createdISO)), "yyyy-MM-dd");
-                          if (dk === todayKey && finalDailyMap[dk]) {
-                            finalDailyMap[dk][creator] = (finalDailyMap[dk][creator] || 0) + 1;
-                          }
-                        } catch {}
+                      // Final = max(live, history) per (date, user) so the chart matches
+                      // both the live List Incident and the persistent Daily Incident History.
+                      const finalDailyMap: Record<string, Record<string, number>> = {};
+                      dateKeys.forEach(dk => {
+                        finalDailyMap[dk] = {};
+                        activeUsers.forEach(u => {
+                          finalDailyMap[dk][u.name] = Math.max(
+                            liveDailyMap[dk][u.name] || 0,
+                            histDailyMap[dk][u.name] || 0
+                          );
+                        });
                       });
 
                       const chartData = dateKeys.map(dk => {
