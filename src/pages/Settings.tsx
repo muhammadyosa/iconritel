@@ -978,7 +978,17 @@ export default function Settings() {
                     <li>✅ Nama Tim</li>
                   </ul>
                   {/* Info update khusus — hanya 🕵️ Admin yang dapat update bagian ini */}
-                  <div className="mt-3 pt-3 border-t border-border/60">
+                  <div className="mt-3 pt-3 border-t border-border/60 space-y-2">
+                    {/* Info file bawaan (bundled) */}
+                    <div className="flex items-center gap-1.5 flex-wrap text-[11px]">
+                      <Badge variant="outline" className="text-[10px] px-1.5 py-0 border-teal-500/40 text-teal-600 dark:text-teal-400 bg-teal-500/10">
+                        📦 Data Bawaan
+                      </Badge>
+                      <span className="text-muted-foreground">
+                        <span className="font-medium text-foreground">Terakhir diperbarui:</span>{" "}
+                        {new Intl.DateTimeFormat("id-ID", { day: "numeric", month: "long", year: "numeric", timeZone: "Asia/Jakarta" }).format(new Date(BUNDLED_REGIONAL_LAST_UPDATE))} WIB
+                      </span>
+                    </div>
                     {lastRegionalUpload ? (
                       <div className="flex flex-col gap-1 text-[11px]">
                         <div className="flex items-center gap-1.5 flex-wrap">
