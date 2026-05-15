@@ -49,6 +49,7 @@ import { TicketDetailDialog } from "@/components/TicketDetailDialog";
 import { DurationCell } from "@/components/DurationCell";
 import { RegionBadge } from "@/components/RegionBadge";
 import { SerpoCombobox } from "@/components/SerpoCombobox";
+import { ExcelRecordCombobox } from "@/components/ExcelRecordCombobox";
 import { OverSLATab } from "@/components/OverSLATab";
 import { toast } from "sonner";
 import { useActivityLog } from "@/hooks/useActivityLog";
@@ -1090,18 +1091,38 @@ export default function TicketManagement() {
                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                         <div>
                           <Label>Hostname OLT</Label>
-                          <Input
+                          <ExcelRecordCombobox
                             value={manualFormData.hostname}
-                            onChange={(e) => setManualFormData({ ...manualFormData, hostname: e.target.value })}
-                            placeholder="Hostname OLT"
+                            onChange={(v) => setManualFormData((p) => ({ ...p, hostname: v }))}
+                            onPick={(r) => setManualFormData((p) => ({
+                              ...p,
+                              hostname: String(r.hostname ?? ""),
+                              fatId: p.fatId || String(r.fat ?? ""),
+                              snOnt: p.snOnt || String(r.sn ?? ""),
+                              customerName: p.customerName || String(r.customer ?? ""),
+                              serviceId: p.serviceId || String(r.service ?? ""),
+                            }))}
+                            records={excelData}
+                            field="hostname"
+                            placeholder="Cari Hostname OLT dari Preview Data User"
                           />
                         </div>
                         <div>
                           <Label>ID FAT</Label>
-                          <Input
+                          <ExcelRecordCombobox
                             value={manualFormData.fatId}
-                            onChange={(e) => setManualFormData({ ...manualFormData, fatId: e.target.value })}
-                            placeholder="ID FAT"
+                            onChange={(v) => setManualFormData((p) => ({ ...p, fatId: v }))}
+                            onPick={(r) => setManualFormData((p) => ({
+                              ...p,
+                              fatId: String(r.fat ?? ""),
+                              hostname: p.hostname || String(r.hostname ?? ""),
+                              snOnt: p.snOnt || String(r.sn ?? ""),
+                              customerName: p.customerName || String(r.customer ?? ""),
+                              serviceId: p.serviceId || String(r.service ?? ""),
+                            }))}
+                            records={excelData}
+                            field="fat"
+                            placeholder="Cari ID FAT dari Preview Data User"
                           />
                         </div>
                       </div>
