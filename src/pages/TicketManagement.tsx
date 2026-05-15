@@ -61,6 +61,16 @@ import { Link } from "react-router-dom";
 export default function TicketManagement() {
   // Local Excel data from IndexedDB
   const { excelData, isLoadingExcel } = useTickets();
+
+  // FAT data from IndexedDB — used as accurate source for Hostname OLT & ID FAT search
+  const [fatData, setFatData] = useState<FAT[]>([]);
+  useEffect(() => {
+    loadFATData().then(setFatData).catch((e) => console.error("Load FAT failed", e));
+  }, []);
+  const fatRecords = useMemo<ExcelRecord[]>(
+    () => fatData.map((f) => ({ hostname: f.hostname, fat: f.fatId, customer: f.provinsi })),
+    [fatData],
+  );
   
   // Cloud tickets from Supabase (shared across all users)
   const { 
