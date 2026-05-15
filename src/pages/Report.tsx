@@ -827,7 +827,9 @@ function PendingTicketsList({ pendingTickets, isLoading, updateTicket, deleteTic
 
   // Load regional team data (same source as Regional Office)
   useEffect(() => {
-    loadDefaultRegionalTeamData().then(setRegionalData).catch(() => {});
+    const reload = () => loadDefaultRegionalTeamData().then(setRegionalData).catch(() => {});
+    reload();
+    return subscribeRegionalTeamUpdates(reload);
   }, []);
 
   const teamRegions = useMemo(() => buildTeamRegions(regionalData), [regionalData]);
