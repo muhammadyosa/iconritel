@@ -1093,15 +1093,8 @@ export default function TicketManagement() {
                           <Label>Hostname OLT</Label>
                           <ExcelRecordCombobox
                             value={manualFormData.hostname}
-                            onChange={(v) => setManualFormData((p) => ({ ...p, hostname: v, customerName: "", serviceId: "", fatId: "" }))}
-                            onPick={(r) => setManualFormData((p) => ({
-                              ...p,
-                              hostname: String(r.hostname ?? ""),
-                              fatId: p.fatId || String(r.fat ?? ""),
-                              snOnt: p.snOnt || String(r.sn ?? ""),
-                              customerName: p.customerName || String(r.customer ?? ""),
-                              serviceId: p.serviceId || String(r.service ?? ""),
-                            }))}
+                            onChange={(v) => setManualFormData((p) => ({ ...p, hostname: v }))}
+                            onPick={(r) => setManualFormData((p) => ({ ...p, hostname: String(r.hostname ?? "") }))}
                             records={excelData}
                             field="hostname"
                             placeholder="Cari Hostname OLT dari Preview Data User"
@@ -1111,15 +1104,8 @@ export default function TicketManagement() {
                           <Label>ID FAT</Label>
                           <ExcelRecordCombobox
                             value={manualFormData.fatId}
-                            onChange={(v) => setManualFormData((p) => ({ ...p, fatId: v, customerName: "", serviceId: "" }))}
-                            onPick={(r) => setManualFormData((p) => ({
-                              ...p,
-                              fatId: String(r.fat ?? ""),
-                              hostname: p.hostname || String(r.hostname ?? ""),
-                              snOnt: p.snOnt || String(r.sn ?? ""),
-                              customerName: p.customerName || String(r.customer ?? ""),
-                              serviceId: p.serviceId || String(r.service ?? ""),
-                            }))}
+                            onChange={(v) => setManualFormData((p) => ({ ...p, fatId: v }))}
+                            onPick={(r) => setManualFormData((p) => ({ ...p, fatId: String(r.fat ?? "") }))}
                             records={excelData}
                             field="fat"
                             placeholder="Cari ID FAT dari Preview Data User"
