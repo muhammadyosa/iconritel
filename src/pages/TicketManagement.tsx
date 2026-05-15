@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { RegionalTeamRecord } from "@/types/regionalTeam";
-import { loadDefaultRegionalTeamData } from "@/lib/defaultRegionalData";
+import { loadDefaultRegionalTeamData, subscribeRegionalTeamUpdates } from "@/lib/defaultRegionalData";
 import { TablePageSkeleton } from "@/components/PageSkeleton";
 import { Download, Plus, Search, Trash2, Edit, Info, FileEdit, RefreshCw, Loader2, FileDown, Pencil, Copy, CopyCheck, X } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -79,7 +79,9 @@ export default function TicketManagement() {
   // Regional team data for Serpo/Tim suggestions
   const [regionalTeamData, setRegionalTeamData] = useState<RegionalTeamRecord[]>([]);
   useEffect(() => {
-    loadDefaultRegionalTeamData().then(setRegionalTeamData);
+    const reload = () => loadDefaultRegionalTeamData().then(setRegionalTeamData);
+    reload();
+    return subscribeRegionalTeamUpdates(reload);
   }, []);
 
   const [searchFilters, setSearchFilters] = useState({

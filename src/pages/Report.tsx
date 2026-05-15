@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { useCloudTickets } from "@/hooks/useCloudTickets";
-import { loadDefaultRegionalTeamData } from "@/lib/defaultRegionalData";
+import { loadDefaultRegionalTeamData, subscribeRegionalTeamUpdates } from "@/lib/defaultRegionalData";
 import { RegionalTeamRecord } from "@/types/regionalTeam";
 import { useRealtimeDate } from "@/hooks/useRealtimeDate";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -119,7 +119,9 @@ const Report = () => {
   // Regional data for Reporting Gangguan
   const [reportRegionalData, setReportRegionalData] = useState<RegionalTeamRecord[]>([]);
   useEffect(() => {
-    loadDefaultRegionalTeamData().then(setReportRegionalData).catch(() => {});
+    const reload = () => loadDefaultRegionalTeamData().then(setReportRegionalData).catch(() => {});
+    reload();
+    return subscribeRegionalTeamUpdates(reload);
   }, []);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -825,7 +827,9 @@ function PendingTicketsList({ pendingTickets, isLoading, updateTicket, deleteTic
 
   // Load regional team data (same source as Regional Office)
   useEffect(() => {
-    loadDefaultRegionalTeamData().then(setRegionalData).catch(() => {});
+    const reload = () => loadDefaultRegionalTeamData().then(setRegionalData).catch(() => {});
+    reload();
+    return subscribeRegionalTeamUpdates(reload);
   }, []);
 
   const teamRegions = useMemo(() => buildTeamRegions(regionalData), [regionalData]);

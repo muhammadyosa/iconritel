@@ -20,7 +20,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { motion, AnimatePresence } from "framer-motion";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip, Cell, LineChart, Line, PieChart, Pie, Cell as RechartsCell } from "recharts";
-import { loadDefaultRegionalTeamData } from "@/lib/defaultRegionalData";
+import { loadDefaultRegionalTeamData, subscribeRegionalTeamUpdates } from "@/lib/defaultRegionalData";
 import { NOCStatistikIncident } from "@/components/NOCStatistikIncident";
 import { DashboardTierOverSLA } from "@/components/DashboardTierOverSLA";
 import { SectionInfoDialog, buildInsight, type InfoSection, type InfoMetric } from "@/components/SectionInfoDialog";
@@ -151,9 +151,11 @@ export default function Dashboard() {
     });
   }, []);
 
-  // Load Regional Team data
+  // Load Regional Team data (and refresh whenever admin uploads a new file)
   useEffect(() => {
-    loadDefaultRegionalTeamData().then(setTeamData).catch(() => {});
+    const reload = () => loadDefaultRegionalTeamData().then(setTeamData).catch(() => {});
+    reload();
+    return subscribeRegionalTeamUpdates(reload);
   }, []);
 
   // Hostname to Region mapping
