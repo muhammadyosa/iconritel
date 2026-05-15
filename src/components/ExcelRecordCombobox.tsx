@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useMemo } from "react";
 import { Input } from "@/components/ui/input";
-import { Search } from "lucide-react";
+import { Search, AlertCircle, CheckCircle2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ExcelRecord } from "@/types/ticket";
 
@@ -15,11 +15,22 @@ interface Props {
   placeholder?: string;
 }
 
-/**
- * Searchable combobox over Preview Data User (excelData).
- * Searches across customer / service / hostname / fat / sn so user can find
- * a record by any field, then pick to auto-fill the manual incident form.
- */
+// Format validation per field
+const FORMAT: Record<Props["field"], { regex: RegExp; label: string }> = {
+  hostname: {
+    // Hostname OLT: letters, digits, dot, dash, underscore, slash, colon. Min 3 chars.
+    regex: /^[A-Za-z0-9._:\-/]{3,}$/,
+    label: "Hostname OLT hanya boleh huruf, angka, dan . _ - / : (min 3 karakter)",
+  },
+  fat: {
+    // ID FAT: letters, digits, dot, dash, underscore, slash. Min 3 chars.
+    regex: /^[A-Za-z0-9._\-/]{3,}$/,
+    label: "ID FAT hanya boleh huruf, angka, dan . _ - / (min 3 karakter)",
+  },
+};
+
+const DEBOUNCE_MS = 180;
+
 export function ExcelRecordCombobox({
   value,
   onChange,
@@ -30,38 +41,81 @@ export function ExcelRecordCombobox({
 }: Props) {
   const [open, setOpen] = useState(false);
   const [activeIdx, setActiveIdx] = useState(0);
+  const [query, setQuery] = useState(value); // debounced query used for filtering
+  const [touched, setTouched] = useState(false);
   const wrapRef = useRef<HTMLDivElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
 
-  const filtered = useMemo(() => {
-    const q = value.trim().toLowerCase();
-    // Deduplicate by the target field so user gets meaningful unique suggestions
+  // ----- Debounce input -> query -----
+  useEffect(() => {
+    const t = setTimeout(() => setQuery(value), DEBOUNCE_MS);
+    return () => clearTimeout(t);
+  }, [value]);
+
+  // ----- Pre-index records once per records change (heavy work cached) -----
+  const index = useMemo(() => {
     const seen = new Set<string>();
-    const out: ExcelRecord[] = [];
+    const items: { rec: ExcelRecord; key: string; haystack: string }[] = [];
     for (const r of records) {
       const key = String(r[field] ?? "").trim();
       if (!key) continue;
       const k = key.toLowerCase();
       if (seen.has(k)) continue;
-      if (q) {
-        const haystack = [
-          r.customer,
-          r.service,
-          r.hostname,
-          r.fat,
-          r.sn,
-        ]
-          .map((x) => String(x ?? "").toLowerCase())
-          .join(" | ");
-        if (!haystack.includes(q)) continue;
-      }
       seen.add(k);
-      out.push(r);
+      const haystack = [r.customer, r.service, r.hostname, r.fat, r.sn]
+        .map((x) => String(x ?? "").toLowerCase())
+        .join(" | ");
+      items.push({ rec: r, key: k, haystack });
+    }
+    return items;
+  }, [records, field]);
+
+  // ----- LRU-ish cache of filtered results per query -----
+  const cacheRef = useRef<Map<string, ExcelRecord[]>>(new Map());
+  useEffect(() => {
+    // invalidate cache whenever the underlying index changes
+    cacheRef.current.clear();
+  }, [index]);
+
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    const cache = cacheRef.current;
+    if (cache.has(q)) return cache.get(q)!;
+    const out: ExcelRecord[] = [];
+    for (const it of index) {
+      if (q && !it.haystack.includes(q)) continue;
+      out.push(it.rec);
       if (out.length >= 50) break;
     }
+    // bound cache size
+    if (cache.size > 64) {
+      const firstKey = cache.keys().next().value;
+      if (firstKey !== undefined) cache.delete(firstKey);
+    }
+    cache.set(q, out);
     return out;
-  }, [value, records, field]);
+  }, [query, index]);
 
+  // ----- Validation: format + must exist in Preview Data User -----
+  const trimmed = value.trim();
+  const formatOk = trimmed === "" ? true : FORMAT[field].regex.test(trimmed);
+  const matchedRecord = useMemo(() => {
+    if (!trimmed) return null;
+    const t = trimmed.toLowerCase();
+    return index.find((it) => it.key === t)?.rec ?? null;
+  }, [trimmed, index]);
+  const existsInData = !!matchedRecord;
+
+  let errorMsg: string | null = null;
+  if (touched && trimmed) {
+    if (!formatOk) errorMsg = FORMAT[field].label;
+    else if (!existsInData)
+      errorMsg = `Tidak ditemukan di Preview Data User. Pilih ${
+        field === "hostname" ? "Hostname OLT" : "ID FAT"
+      } dari daftar.`;
+  }
+
+  // ----- Outside click closes dropdown -----
   useEffect(() => {
     const onDocClick = (e: MouseEvent) => {
       if (!wrapRef.current?.contains(e.target as Node)) setOpen(false);
@@ -72,7 +126,7 @@ export function ExcelRecordCombobox({
 
   useEffect(() => {
     setActiveIdx(0);
-  }, [value, open]);
+  }, [query, open]);
 
   useEffect(() => {
     if (!open || !listRef.current) return;
@@ -85,6 +139,7 @@ export function ExcelRecordCombobox({
     onChange(v);
     onPick?.(rec);
     setOpen(false);
+    setTouched(true);
   };
 
   const onKey = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -105,6 +160,8 @@ export function ExcelRecordCombobox({
     }
   };
 
+  const showValid = touched && trimmed && formatOk && existsInData;
+
   return (
     <div ref={wrapRef} className="relative">
       <div className="relative">
@@ -116,12 +173,25 @@ export function ExcelRecordCombobox({
             setOpen(true);
           }}
           onFocus={() => setOpen(true)}
+          onBlur={() => setTouched(true)}
           onKeyDown={onKey}
           placeholder={placeholder}
-          className="pl-8"
+          className={cn(
+            "pl-8 pr-8",
+            errorMsg && "border-destructive focus-visible:ring-destructive",
+            showValid && "border-emerald-500/60 focus-visible:ring-emerald-500/40",
+          )}
           autoComplete="off"
+          aria-invalid={!!errorMsg}
         />
+        {errorMsg && (
+          <AlertCircle className="absolute right-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-destructive pointer-events-none" />
+        )}
+        {showValid && (
+          <CheckCircle2 className="absolute right-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-emerald-500 pointer-events-none" />
+        )}
       </div>
+
       {open && filtered.length > 0 && (
         <div
           ref={listRef}
@@ -129,6 +199,7 @@ export function ExcelRecordCombobox({
         >
           <div className="px-2 py-1 text-[10px] uppercase tracking-wide text-muted-foreground border-b border-border/60">
             {filtered.length} hasil dari Preview Data User
+            {value !== query && <span className="ml-1 opacity-60">(mengetik…)</span>}
           </div>
           {filtered.map((r, i) => {
             const isActive = i === activeIdx;
@@ -164,10 +235,20 @@ export function ExcelRecordCombobox({
           })}
         </div>
       )}
-      {open && filtered.length === 0 && value.trim() && (
-        <div className="absolute z-50 mt-1 w-full rounded-md border border-border bg-popover px-3 py-2 text-xs text-muted-foreground shadow-lg">
-          Tidak ada data cocok di Preview Data User. Tekan Enter untuk pakai "{value.trim()}".
+
+      {open && filtered.length === 0 && query.trim() && (
+        <div className="absolute z-50 mt-1 w-full rounded-md border border-destructive/50 bg-popover px-3 py-2 text-xs text-destructive shadow-lg flex items-start gap-2">
+          <AlertCircle className="h-3.5 w-3.5 mt-0.5 shrink-0" />
+          <span>
+            Tidak ada data cocok di Preview Data User untuk "{query.trim()}".
+          </span>
         </div>
+      )}
+
+      {errorMsg && (
+        <p className="mt-1 text-[11px] text-destructive flex items-center gap-1">
+          <AlertCircle className="h-3 w-3" /> {errorMsg}
+        </p>
       )}
     </div>
   );
