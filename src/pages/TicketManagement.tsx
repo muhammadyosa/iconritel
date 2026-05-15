@@ -1,6 +1,8 @@
 import { useState, useEffect, useMemo } from "react";
 import { RegionalTeamRecord } from "@/types/regionalTeam";
 import { loadDefaultRegionalTeamData, subscribeRegionalTeamUpdates } from "@/lib/defaultRegionalData";
+import { loadFATData } from "@/lib/indexedDB";
+import { FAT } from "@/types/fat";
 import { TablePageSkeleton } from "@/components/PageSkeleton";
 import { Download, Plus, Search, Trash2, Edit, Info, FileEdit, RefreshCw, Loader2, FileDown, Pencil, Copy, CopyCheck, X } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -59,6 +61,16 @@ import { Link } from "react-router-dom";
 export default function TicketManagement() {
   // Local Excel data from IndexedDB
   const { excelData, isLoadingExcel } = useTickets();
+
+  // FAT data from IndexedDB — used as accurate source for Hostname OLT & ID FAT search
+  const [fatData, setFatData] = useState<FAT[]>([]);
+  useEffect(() => {
+    loadFATData().then(setFatData).catch((e) => console.error("Load FAT failed", e));
+  }, []);
+  const fatRecords = useMemo<ExcelRecord[]>(
+    () => fatData.map((f) => ({ hostname: f.hostname, fat: f.fatId, customer: f.provinsi })),
+    [fatData],
+  );
   
   // Cloud tickets from Supabase (shared across all users)
   const { 
@@ -1095,9 +1107,9 @@ export default function TicketManagement() {
                             value={manualFormData.hostname}
                             onChange={(v) => setManualFormData((p) => ({ ...p, hostname: v }))}
                             onPick={(r) => setManualFormData((p) => ({ ...p, hostname: String(r.hostname ?? "") }))}
-                            records={excelData}
+                            records={fatRecords}
                             field="hostname"
-                            placeholder="Cari Hostname OLT dari Preview Data User"
+                            placeholder="Cari Hostname OLT dari Data FAT"
                           />
                         </div>
                         <div>
@@ -1110,9 +1122,9 @@ export default function TicketManagement() {
                               fatId: String(r.fat ?? ""),
                               hostname: r.hostname ? String(r.hostname) : p.hostname,
                             }))}
-                            records={excelData}
+                            records={fatRecords}
                             field="fat"
-                            placeholder="Cari ID FAT dari Preview Data User"
+                            placeholder="Cari ID FAT dari Data FAT"
                           />
                         </div>
                       </div>
