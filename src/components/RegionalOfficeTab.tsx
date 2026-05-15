@@ -73,9 +73,14 @@ export default function RegionalOfficeTab({ tickets }: RegionalOfficeTabProps) {
   const [selectedHostname, setSelectedHostname] = useState<{ name: string; incidents: Ticket[] } | null>(null);
 
   useEffect(() => {
-    loadDefaultRegionalTeamData()
-      .then((data) => { setTeamData(data); setIsLoading(false); })
-      .catch(() => setIsLoading(false));
+    const reload = () => {
+      setIsLoading(true);
+      loadDefaultRegionalTeamData()
+        .then((data) => { setTeamData(data); setIsLoading(false); })
+        .catch(() => setIsLoading(false));
+    };
+    reload();
+    return subscribeRegionalTeamUpdates(reload);
   }, []);
 
   const regionalData = useMemo(() => {
