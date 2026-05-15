@@ -119,7 +119,9 @@ const Report = () => {
   // Regional data for Reporting Gangguan
   const [reportRegionalData, setReportRegionalData] = useState<RegionalTeamRecord[]>([]);
   useEffect(() => {
-    loadDefaultRegionalTeamData().then(setReportRegionalData).catch(() => {});
+    const reload = () => loadDefaultRegionalTeamData().then(setReportRegionalData).catch(() => {});
+    reload();
+    return subscribeRegionalTeamUpdates(reload);
   }, []);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
