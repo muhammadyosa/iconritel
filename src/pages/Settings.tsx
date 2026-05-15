@@ -368,6 +368,7 @@ export default function Settings() {
 
       if (result.regionalTeamRecords.length > 0) {
         await saveRegionalTeamData(result.regionalTeamRecords);
+        emitRegionalTeamUpdated();
         setImportProgress(97);
       }
 
