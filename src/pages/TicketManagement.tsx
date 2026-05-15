@@ -1105,7 +1105,11 @@ export default function TicketManagement() {
                           <ExcelRecordCombobox
                             value={manualFormData.fatId}
                             onChange={(v) => setManualFormData((p) => ({ ...p, fatId: v }))}
-                            onPick={(r) => setManualFormData((p) => ({ ...p, fatId: String(r.fat ?? "") }))}
+                            onPick={(r) => setManualFormData((p) => ({
+                              ...p,
+                              fatId: String(r.fat ?? ""),
+                              hostname: r.hostname ? String(r.hostname) : p.hostname,
+                            }))}
                             records={excelData}
                             field="fat"
                             placeholder="Cari ID FAT dari Preview Data User"
