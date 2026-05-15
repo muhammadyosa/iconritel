@@ -79,7 +79,9 @@ export default function TicketManagement() {
   // Regional team data for Serpo/Tim suggestions
   const [regionalTeamData, setRegionalTeamData] = useState<RegionalTeamRecord[]>([]);
   useEffect(() => {
-    loadDefaultRegionalTeamData().then(setRegionalTeamData);
+    const reload = () => loadDefaultRegionalTeamData().then(setRegionalTeamData);
+    reload();
+    return subscribeRegionalTeamUpdates(reload);
   }, []);
 
   const [searchFilters, setSearchFilters] = useState({
