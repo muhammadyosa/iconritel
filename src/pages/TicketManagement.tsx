@@ -1093,7 +1093,7 @@ export default function TicketManagement() {
                           <Label>Hostname OLT</Label>
                           <ExcelRecordCombobox
                             value={manualFormData.hostname}
-                            onChange={(v) => setManualFormData((p) => ({ ...p, hostname: v }))}
+                            onChange={(v) => setManualFormData((p) => ({ ...p, hostname: v, customerName: "", serviceId: "", fatId: "" }))}
                             onPick={(r) => setManualFormData((p) => ({
                               ...p,
                               hostname: String(r.hostname ?? ""),
@@ -1111,7 +1111,7 @@ export default function TicketManagement() {
                           <Label>ID FAT</Label>
                           <ExcelRecordCombobox
                             value={manualFormData.fatId}
-                            onChange={(v) => setManualFormData((p) => ({ ...p, fatId: v }))}
+                            onChange={(v) => setManualFormData((p) => ({ ...p, fatId: v, customerName: "", serviceId: "" }))}
                             onPick={(r) => setManualFormData((p) => ({
                               ...p,
                               fatId: String(r.fat ?? ""),
