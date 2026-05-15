@@ -157,6 +157,11 @@ export default function TicketManagement() {
 
   useEffect(() => {
     if (manualSerpoManualEdit) return;
+    // Keep Serpo/Tim empty until user provides a hostname — do not auto-fill on mount
+    if (!manualFormData.hostname.trim()) {
+      setManualFormData((prev) => (prev.serpo === "" ? prev : { ...prev, serpo: "" }));
+      return;
+    }
     const opts = computeSerpoOptionsFor(manualSerpoTypeOverride, manualFormData.hostname);
     const next = opts[0] || "";
     setManualFormData((prev) => (prev.serpo === next ? prev : { ...prev, serpo: next }));
