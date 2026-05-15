@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Info, Search, Server, AlertTriangle, CheckCircle, Users, MapPin, TrendingUp, ChevronRight, Layers, Shield, Zap, Activity } from "lucide-react";
 import { Link } from "react-router-dom";
-import { loadDefaultRegionalTeamData } from "@/lib/defaultRegionalData";
+import { loadDefaultRegionalTeamData, subscribeRegionalTeamUpdates } from "@/lib/defaultRegionalData";
 import { RegionalTeamRecord } from "@/types/regionalTeam";
 import { Ticket } from "@/types/ticket";
 import { cn } from "@/lib/utils";
