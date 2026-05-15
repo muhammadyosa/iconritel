@@ -49,6 +49,7 @@ import { TicketDetailDialog } from "@/components/TicketDetailDialog";
 import { DurationCell } from "@/components/DurationCell";
 import { RegionBadge } from "@/components/RegionBadge";
 import { SerpoCombobox } from "@/components/SerpoCombobox";
+import { ExcelRecordCombobox } from "@/components/ExcelRecordCombobox";
 import { OverSLATab } from "@/components/OverSLATab";
 import { toast } from "sonner";
 import { useActivityLog } from "@/hooks/useActivityLog";
