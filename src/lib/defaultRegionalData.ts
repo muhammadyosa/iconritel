@@ -138,13 +138,32 @@ async function processRegionalTeamSheet(sheet: any): Promise<RegionalTeamRecord[
  * Only loads if IndexedDB has no existing data.
  * Returns the data (either from IndexedDB or freshly parsed).
  */
+const ADMIN_UPLOAD_KEY = "iconnet_last_regional_team_upload";
+
+/**
+ * Load regional team data.
+ * Priority:
+ *   1. If admin has uploaded a custom file (localStorage marker present) → use IndexedDB.
+ *   2. Otherwise → fetch latest bundled file (cache-busted) and refresh IndexedDB.
+ *   3. Fallback to whatever is in IndexedDB if fetch fails.
+ */
 export async function loadDefaultRegionalTeamData(): Promise<RegionalTeamRecord[]> {
   try {
+    // If admin uploaded a custom regional file, prefer IndexedDB (do not overwrite with bundle)
+    let hasAdminUpload = false;
+    try {
+      hasAdminUpload = !!localStorage.getItem(ADMIN_UPLOAD_KEY);
+    } catch {}
+
+    if (hasAdminUpload) {
+      const existing = await loadRegionalTeamData();
+      if (existing.length > 0) return existing;
+    }
+
     // Cache-bust to always pick up latest file
     const response = await fetch(`/data/List_Team_Region.xlsx?v=${Date.now()}`, { cache: "no-cache" });
     if (!response.ok) {
-      const existing = await loadRegionalTeamData();
-      return existing;
+      return await loadRegionalTeamData();
     }
 
     const arrayBuffer = await response.arrayBuffer();
@@ -160,16 +179,46 @@ export async function loadDefaultRegionalTeamData(): Promise<RegionalTeamRecord[
       allRecords.push(...records);
     }
 
-    // Clear old data and save fresh records
     if (allRecords.length > 0) {
       await saveRegionalTeamData(allRecords);
+      return allRecords;
     }
 
-    return allRecords;
+    return await loadRegionalTeamData();
   } catch (error) {
     if (import.meta.env.DEV) {
       console.error("Error loading default regional team data:", error);
     }
-    return [];
+    try {
+      return await loadRegionalTeamData();
+    } catch {
+      return [];
+    }
   }
+}
+
+/**
+ * Broadcast that regional team data changed (e.g. after an admin upload).
+ * All consumers subscribed via `subscribeRegionalTeamUpdates` will reload.
+ */
+export const REGIONAL_TEAM_UPDATED_EVENT = "regional-team-updated";
+
+export function emitRegionalTeamUpdated() {
+  try {
+    window.dispatchEvent(new CustomEvent(REGIONAL_TEAM_UPDATED_EVENT));
+  } catch {}
+}
+
+export function subscribeRegionalTeamUpdates(handler: () => void): () => void {
+  const listener = () => handler();
+  window.addEventListener(REGIONAL_TEAM_UPDATED_EVENT, listener);
+  // Also listen across tabs via storage event
+  const storageListener = (e: StorageEvent) => {
+    if (e.key === ADMIN_UPLOAD_KEY) handler();
+  };
+  window.addEventListener("storage", storageListener);
+  return () => {
+    window.removeEventListener(REGIONAL_TEAM_UPDATED_EVENT, listener);
+    window.removeEventListener("storage", storageListener);
+  };
 }
