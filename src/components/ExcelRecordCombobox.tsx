@@ -192,6 +192,45 @@ export function ExcelRecordCombobox({
         )}
       </div>
 
+      {open && filtered.length > 0 && (
+        <div
+          ref={listRef}
+          className="absolute z-50 mt-1 w-full max-h-64 overflow-auto rounded-md border bg-popover text-popover-foreground shadow-md"
+        >
+          {filtered.map((r, idx) => {
+            const primary = String(r[field] ?? "");
+            const secondary = field === "hostname"
+              ? [r.fat, r.customer].filter(Boolean).join(" • ")
+              : [r.hostname, r.customer].filter(Boolean).join(" • ");
+            return (
+              <div
+                key={`${primary}-${idx}`}
+                data-idx={idx}
+                onMouseDown={(e) => {
+                  e.preventDefault();
+                  select(r);
+                }}
+                onMouseEnter={() => setActiveIdx(idx)}
+                className={cn(
+                  "px-2.5 py-1.5 text-xs cursor-pointer flex flex-col gap-0.5",
+                  idx === activeIdx ? "bg-accent text-accent-foreground" : "hover:bg-accent/60",
+                )}
+              >
+                <span className="font-medium truncate">{primary}</span>
+                {secondary && (
+                  <span className="text-[10px] text-muted-foreground truncate">{secondary}</span>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
+      {open && filtered.length === 0 && query.trim() && (
+        <div className="absolute z-50 mt-1 w-full rounded-md border bg-popover text-popover-foreground shadow-md px-2.5 py-2 text-xs text-muted-foreground">
+          Tidak ada hasil di Preview Data User.
+        </div>
+      )}
+
       {errorMsg && (
         <p className="mt-1 text-[11px] text-destructive flex items-center gap-1">
           <AlertCircle className="h-3 w-3" /> {errorMsg}
