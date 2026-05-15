@@ -151,9 +151,11 @@ export default function Dashboard() {
     });
   }, []);
 
-  // Load Regional Team data
+  // Load Regional Team data (and refresh whenever admin uploads a new file)
   useEffect(() => {
-    loadDefaultRegionalTeamData().then(setTeamData).catch(() => {});
+    const reload = () => loadDefaultRegionalTeamData().then(setTeamData).catch(() => {});
+    reload();
+    return subscribeRegionalTeamUpdates(reload);
   }, []);
 
   // Hostname to Region mapping
