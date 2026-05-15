@@ -1,6 +1,8 @@
 import { useState, useEffect, useMemo } from "react";
 import { RegionalTeamRecord } from "@/types/regionalTeam";
 import { loadDefaultRegionalTeamData, subscribeRegionalTeamUpdates } from "@/lib/defaultRegionalData";
+import { loadFATData } from "@/lib/indexedDB";
+import { FAT } from "@/types/fat";
 import { TablePageSkeleton } from "@/components/PageSkeleton";
 import { Download, Plus, Search, Trash2, Edit, Info, FileEdit, RefreshCw, Loader2, FileDown, Pencil, Copy, CopyCheck, X } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
