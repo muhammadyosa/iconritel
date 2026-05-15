@@ -192,59 +192,6 @@ export function ExcelRecordCombobox({
         )}
       </div>
 
-      {open && filtered.length > 0 && (
-        <div
-          ref={listRef}
-          className="absolute z-50 mt-1 w-full max-h-64 overflow-y-auto rounded-md border border-border bg-popover text-popover-foreground shadow-lg"
-        >
-          <div className="px-2 py-1 text-[10px] uppercase tracking-wide text-muted-foreground border-b border-border/60">
-            {filtered.length} hasil dari Preview Data User
-            {value !== query && <span className="ml-1 opacity-60">(mengetik…)</span>}
-          </div>
-          {filtered.map((r, i) => {
-            const isActive = i === activeIdx;
-            const primary = String(r[field] ?? "");
-            return (
-              <button
-                key={`${primary}-${i}`}
-                type="button"
-                data-idx={i}
-                onMouseEnter={() => setActiveIdx(i)}
-                onMouseDown={(e) => {
-                  e.preventDefault();
-                  select(r);
-                }}
-                className={cn(
-                  "w-full text-left px-2.5 py-1.5 text-xs flex flex-col gap-0.5 transition-colors border-b border-border/30 last:border-b-0",
-                  isActive ? "bg-accent text-accent-foreground" : "hover:bg-accent/60",
-                )}
-              >
-                <span className="font-semibold truncate">{primary || "—"}</span>
-                <span className="text-[10px] text-muted-foreground truncate">
-                  {r.customer ? `👤 ${r.customer}` : ""}
-                  {r.service ? `  •  🆔 ${r.service}` : ""}
-                </span>
-                <span className="text-[10px] text-muted-foreground truncate">
-                  {field === "hostname"
-                    ? r.fat ? `🛠️ FAT ${r.fat}` : ""
-                    : r.hostname ? `🖥️ ${r.hostname}` : ""}
-                  {r.sn ? `  •  SN ${r.sn}` : ""}
-                </span>
-              </button>
-            );
-          })}
-        </div>
-      )}
-
-      {open && filtered.length === 0 && query.trim() && (
-        <div className="absolute z-50 mt-1 w-full rounded-md border border-destructive/50 bg-popover px-3 py-2 text-xs text-destructive shadow-lg flex items-start gap-2">
-          <AlertCircle className="h-3.5 w-3.5 mt-0.5 shrink-0" />
-          <span>
-            Tidak ada data cocok di Preview Data User untuk "{query.trim()}".
-          </span>
-        </div>
-      )}
-
       {errorMsg && (
         <p className="mt-1 text-[11px] text-destructive flex items-center gap-1">
           <AlertCircle className="h-3 w-3" /> {errorMsg}
