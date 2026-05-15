@@ -1107,9 +1107,9 @@ export default function TicketManagement() {
                             value={manualFormData.hostname}
                             onChange={(v) => setManualFormData((p) => ({ ...p, hostname: v }))}
                             onPick={(r) => setManualFormData((p) => ({ ...p, hostname: String(r.hostname ?? "") }))}
-                            records={excelData}
+                            records={fatRecords}
                             field="hostname"
-                            placeholder="Cari Hostname OLT dari Preview Data User"
+                            placeholder="Cari Hostname OLT dari Data FAT"
                           />
                         </div>
                         <div>
@@ -1122,9 +1122,9 @@ export default function TicketManagement() {
                               fatId: String(r.fat ?? ""),
                               hostname: r.hostname ? String(r.hostname) : p.hostname,
                             }))}
-                            records={excelData}
+                            records={fatRecords}
                             field="fat"
-                            placeholder="Cari ID FAT dari Preview Data User"
+                            placeholder="Cari ID FAT dari Data FAT"
                           />
                         </div>
                       </div>
