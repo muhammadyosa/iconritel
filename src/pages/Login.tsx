@@ -180,7 +180,7 @@ export default function Login() {
       {/* Particle Background */}
       <ParticleBackground />
 
-      {/* Top Left - PLN Icon Plus Logo */}
+      {/* Top Left - Danantara Logo */}
       <motion.div 
         className="absolute top-4 left-4 sm:top-6 sm:left-6 z-20"
         initial={{ opacity: 0, x: -20 }}
@@ -188,15 +188,15 @@ export default function Login() {
         transition={{ duration: 0.6, delay: 0.2 }}
       >
         <img 
-          src={plnIconPlusLogo} 
-          alt="PLN Icon Plus" 
+          src={danantaraLight} 
+          alt="Danantara" 
           className="h-8 sm:h-10 w-auto object-contain drop-shadow-[0_0_10px_rgba(56,189,248,0.3)]" 
         />
       </motion.div>
 
-      {/* Top Right - ICONNET Logo */}
+      {/* Top Right - ICONNET + PLN Icon Plus Logos */}
       <motion.div 
-        className="absolute top-4 right-4 sm:top-6 sm:right-6 z-20"
+        className="absolute top-4 right-4 sm:top-6 sm:right-6 z-20 flex items-center gap-3"
         initial={{ opacity: 0, x: 20 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.6, delay: 0.2 }}
@@ -204,6 +204,11 @@ export default function Login() {
         <img 
           src={iconnetLogo} 
           alt="ICONNET" 
+          className="h-8 sm:h-10 w-auto object-contain drop-shadow-[0_0_10px_rgba(56,189,248,0.3)]" 
+        />
+        <img 
+          src={plnIconPlusLogo} 
+          alt="PLN Icon Plus" 
           className="h-8 sm:h-10 w-auto object-contain drop-shadow-[0_0_10px_rgba(56,189,248,0.3)]" 
         />
       </motion.div>
