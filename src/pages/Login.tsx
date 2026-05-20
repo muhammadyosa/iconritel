@@ -9,7 +9,7 @@ import { motion, useMotionValue, useTransform, useSpring } from "framer-motion";
 import { ParticleBackground } from "@/components/ParticleBackground";
 import iconnetMascot from "@/assets/iconnet-mascot.png";
 import plnIconPlusLogo from "@/assets/pln-icon-plus-new.png";
-import iconnetLogo from "@/assets/iconnet-logo-new.png";
+
 import danantaraDark from "@/assets/danantara-dark.svg";
 import indonesiaMap from "@/assets/indonesia-map.png";
 import { SAFE_PROTECTED_PATHS } from "@/components/ProtectedRoute";
