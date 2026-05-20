@@ -180,33 +180,34 @@ export default function Login() {
       {/* Particle Background */}
       <ParticleBackground />
 
-      {/* Top Left - Danantara Logo */}
-      <motion.div 
-        className="absolute top-6 left-6 sm:top-8 sm:left-8 z-20"
-        initial={{ opacity: 0, x: -20 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.6, delay: 0.2 }}
-      >
-        <img
-          src={danantaraDark}
-          alt="Danantara"
-          className="h-10 sm:h-12 w-auto object-contain drop-shadow-[0_0_10px_rgba(56,189,248,0.3)]"
-        />
-      </motion.div>
+      {/* Corner Logos Container - keeps PLN & Danantara balanced across breakpoints */}
+      <div className="pointer-events-none absolute inset-x-0 top-0 z-20 flex items-center justify-between px-4 pt-4 sm:px-6 sm:pt-6 md:px-8 md:pt-8">
+        <motion.div
+          className="pointer-events-auto flex items-center"
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+        >
+          <img
+            src={danantaraDark}
+            alt="Danantara"
+            className="h-10 sm:h-12 md:h-14 w-auto object-contain drop-shadow-[0_0_10px_rgba(56,189,248,0.3)]"
+          />
+        </motion.div>
 
-      {/* Top Right - PLN Icon Plus Logo */}
-      <motion.div
-        className="absolute top-6 right-6 sm:top-8 sm:right-8 z-20 flex items-center"
-        initial={{ opacity: 0, x: 20 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.6, delay: 0.2 }}
-      >
-        <img
-          src={plnIconPlusLogo}
-          alt="PLN Icon Plus"
-          className="h-10 sm:h-12 w-auto object-contain drop-shadow-[0_0_10px_rgba(56,189,248,0.3)]"
-        />
-      </motion.div>
+        <motion.div
+          className="pointer-events-auto flex items-center"
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+        >
+          <img
+            src={plnIconPlusLogo}
+            alt="PLN Icon Plus"
+            className="h-10 sm:h-12 md:h-14 w-auto object-contain drop-shadow-[0_0_10px_rgba(56,189,248,0.3)]"
+          />
+        </motion.div>
+      </div>
 
       {/* Radial glow behind card */}
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none" style={{ zIndex: 2 }}>
@@ -251,7 +252,7 @@ export default function Login() {
           <img
             src={iconnetMascot}
             alt="ICONNET Mascot"
-            className="relative h-16 sm:h-20 w-auto object-contain drop-shadow-[0_0_25px_rgba(56,189,248,0.5)] transition-all duration-300 group-hover:drop-shadow-[0_0_35px_rgba(56,189,248,0.7)]"
+            className="relative h-10 sm:h-12 md:h-14 w-auto object-contain drop-shadow-[0_0_25px_rgba(56,189,248,0.5)] transition-all duration-300 group-hover:drop-shadow-[0_0_35px_rgba(56,189,248,0.7)]"
           />
         </motion.div>
 
