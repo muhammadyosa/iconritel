@@ -182,7 +182,7 @@ export default function Login() {
 
       {/* Top Left - Danantara Logo */}
       <motion.div 
-        className="absolute top-4 left-4 sm:top-6 sm:left-6 z-20"
+        className="absolute top-6 left-6 sm:top-8 sm:left-8 z-20"
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.6, delay: 0.2 }}
@@ -190,13 +190,13 @@ export default function Login() {
         <img
           src={danantaraDark}
           alt="Danantara"
-          className="h-8 sm:h-10 w-auto object-contain drop-shadow-[0_0_10px_rgba(56,189,248,0.3)]"
+          className="h-10 sm:h-12 w-auto object-contain drop-shadow-[0_0_10px_rgba(56,189,248,0.3)]"
         />
       </motion.div>
 
       {/* Top Right - PLN Icon Plus Logo */}
       <motion.div
-        className="absolute top-4 right-4 sm:top-6 sm:right-6 z-20 flex items-center"
+        className="absolute top-6 right-6 sm:top-8 sm:right-8 z-20 flex items-center"
         initial={{ opacity: 0, x: 20 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.6, delay: 0.2 }}
@@ -204,7 +204,7 @@ export default function Login() {
         <img
           src={plnIconPlusLogo}
           alt="PLN Icon Plus"
-          className="h-8 sm:h-10 w-auto object-contain drop-shadow-[0_0_10px_rgba(56,189,248,0.3)]"
+          className="h-10 sm:h-12 w-auto object-contain drop-shadow-[0_0_10px_rgba(56,189,248,0.3)]"
         />
       </motion.div>
 
@@ -216,7 +216,7 @@ export default function Login() {
       {/* Content with Parallax */}
       <motion.div
         ref={cardRef}
-        className="relative z-10 flex flex-col items-center gap-4"
+        className="relative z-10 flex flex-col items-center gap-6"
         initial={{ opacity: 0, y: 30, scale: 0.95 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
@@ -229,33 +229,31 @@ export default function Login() {
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
       >
-        {/* ICONNET Mascot + Logo */}
-        <div className="flex items-center gap-4">
-          <motion.div
-            className="relative group cursor-pointer"
-            style={{ transform: "translateZ(40px)" }}
-            initial={{ opacity: 0, y: -20, scale: 0.9 }}
-            animate={{
-              opacity: 1,
-              y: [0, -8, 0],
-              scale: 1,
-            }}
-            transition={{
-              opacity: { duration: 0.7, delay: 0.3 },
-              scale: { duration: 0.7, delay: 0.3 },
-              y: { duration: 3, repeat: Infinity, ease: "easeInOut", delay: 1 },
-            }}
-            whileHover={{ scale: 1.1, rotate: [0, -2, 2, 0] }}
-            whileTap={{ scale: 0.95 }}
-          >
-            <div className="absolute -inset-4 bg-gradient-to-r from-cyan-500/30 via-teal-500/30 to-blue-500/30 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-            <img
-              src={iconnetMascot}
-              alt="ICONNET Mascot"
-              className="relative h-20 sm:h-24 w-auto object-contain drop-shadow-[0_0_25px_rgba(56,189,248,0.5)] transition-all duration-300 group-hover:drop-shadow-[0_0_35px_rgba(56,189,248,0.7)]"
-            />
-          </motion.div>
-        </div>
+        {/* ICONNET Mascot */}
+        <motion.div
+          className="relative group cursor-pointer"
+          style={{ transform: "translateZ(40px)" }}
+          initial={{ opacity: 0, y: -20, scale: 0.9 }}
+          animate={{
+            opacity: 1,
+            y: [0, -8, 0],
+            scale: 1,
+          }}
+          transition={{
+            opacity: { duration: 0.7, delay: 0.3 },
+            scale: { duration: 0.7, delay: 0.3 },
+            y: { duration: 3, repeat: Infinity, ease: "easeInOut", delay: 1 },
+          }}
+          whileHover={{ scale: 1.1, rotate: [0, -2, 2, 0] }}
+          whileTap={{ scale: 0.95 }}
+        >
+          <div className="absolute -inset-4 bg-gradient-to-r from-cyan-500/30 via-teal-500/30 to-blue-500/30 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+          <img
+            src={iconnetMascot}
+            alt="ICONNET Mascot"
+            className="relative h-16 sm:h-20 w-auto object-contain drop-shadow-[0_0_25px_rgba(56,189,248,0.5)] transition-all duration-300 group-hover:drop-shadow-[0_0_35px_rgba(56,189,248,0.7)]"
+          />
+        </motion.div>
 
         {/* NOC RITEL Title */}
         <motion.div 
