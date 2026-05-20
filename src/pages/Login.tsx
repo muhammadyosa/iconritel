@@ -10,6 +10,7 @@ import { ParticleBackground } from "@/components/ParticleBackground";
 import iconnetMascot from "@/assets/iconnet-mascot.png";
 import plnIconPlusLogo from "@/assets/pln-icon-plus-new.png";
 import iconnetLogo from "@/assets/iconnet-logo-new.png";
+import danantaraLight from "@/assets/danantara-light.png";
 import indonesiaMap from "@/assets/indonesia-map.png";
 import { SAFE_PROTECTED_PATHS } from "@/components/ProtectedRoute";
 import { supabase } from "@/integrations/supabase/client";
