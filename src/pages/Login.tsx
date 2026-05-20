@@ -255,14 +255,6 @@ export default function Login() {
               className="relative h-20 sm:h-24 w-auto object-contain drop-shadow-[0_0_25px_rgba(56,189,248,0.5)] transition-all duration-300 group-hover:drop-shadow-[0_0_35px_rgba(56,189,248,0.7)]"
             />
           </motion.div>
-          <motion.img
-            src={iconnetLogo}
-            alt="ICONNET"
-            className="h-8 sm:h-10 w-auto object-contain drop-shadow-[0_0_15px_rgba(56,189,248,0.4)]"
-            initial={{ opacity: 0, x: 10 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, delay: 0.5 }}
-          />
         </div>
 
         {/* NOC RITEL Title */}
