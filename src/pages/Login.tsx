@@ -180,7 +180,7 @@ export default function Login() {
       {/* Particle Background */}
       <ParticleBackground />
 
-      {/* Corner Logos Container - keeps PLN & Danantara balanced across breakpoints */}
+      {/* Corner Logos Container */}
       <div className="pointer-events-none absolute inset-x-0 top-0 z-20 flex items-center justify-between px-4 pt-4 sm:px-6 sm:pt-6 md:px-8 md:pt-8">
         <motion.div
           className="pointer-events-auto flex items-center"
@@ -191,7 +191,7 @@ export default function Login() {
           <img
             src={danantaraDark}
             alt="Danantara"
-            className="h-7 sm:h-8 md:h-10 w-auto object-contain drop-shadow-[0_0_10px_rgba(56,189,248,0.3)]"
+            className="h-8 sm:h-9 md:h-10 w-auto object-contain drop-shadow-[0_0_10px_rgba(56,189,248,0.3)]"
           />
         </motion.div>
 
@@ -204,7 +204,7 @@ export default function Login() {
           <img
             src={plnIconPlusLogo}
             alt="PLN Icon Plus"
-            className="h-7 sm:h-8 md:h-10 w-auto object-contain drop-shadow-[0_0_10px_rgba(56,189,248,0.3)]"
+            className="h-8 sm:h-9 md:h-10 w-auto object-contain drop-shadow-[0_0_10px_rgba(56,189,248,0.3)]"
           />
         </motion.div>
       </div>
@@ -252,7 +252,7 @@ export default function Login() {
           <img
             src={iconnetMascot}
             alt="ICONNET Mascot"
-            className="relative h-16 sm:h-20 md:h-24 w-auto object-contain drop-shadow-[0_0_25px_rgba(56,189,248,0.5)] transition-all duration-300 group-hover:drop-shadow-[0_0_35px_rgba(56,189,248,0.7)]"
+            className="relative h-12 sm:h-14 md:h-16 w-auto object-contain drop-shadow-[0_0_25px_rgba(56,189,248,0.5)] transition-all duration-300 group-hover:drop-shadow-[0_0_35px_rgba(56,189,248,0.7)]"
           />
         </motion.div>
 
