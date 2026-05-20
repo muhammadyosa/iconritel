@@ -191,7 +191,7 @@ export default function Login() {
           <img
             src={danantaraDark}
             alt="Danantara"
-            className="h-10 sm:h-12 md:h-14 w-auto object-contain drop-shadow-[0_0_10px_rgba(56,189,248,0.3)]"
+            className="h-7 sm:h-8 md:h-10 w-auto object-contain drop-shadow-[0_0_10px_rgba(56,189,248,0.3)]"
           />
         </motion.div>
 
@@ -204,7 +204,7 @@ export default function Login() {
           <img
             src={plnIconPlusLogo}
             alt="PLN Icon Plus"
-            className="h-10 sm:h-12 md:h-14 w-auto object-contain drop-shadow-[0_0_10px_rgba(56,189,248,0.3)]"
+            className="h-7 sm:h-8 md:h-10 w-auto object-contain drop-shadow-[0_0_10px_rgba(56,189,248,0.3)]"
           />
         </motion.div>
       </div>
@@ -252,7 +252,7 @@ export default function Login() {
           <img
             src={iconnetMascot}
             alt="ICONNET Mascot"
-            className="relative h-10 sm:h-12 md:h-14 w-auto object-contain drop-shadow-[0_0_25px_rgba(56,189,248,0.5)] transition-all duration-300 group-hover:drop-shadow-[0_0_35px_rgba(56,189,248,0.7)]"
+            className="relative h-16 sm:h-20 md:h-24 w-auto object-contain drop-shadow-[0_0_25px_rgba(56,189,248,0.5)] transition-all duration-300 group-hover:drop-shadow-[0_0_35px_rgba(56,189,248,0.7)]"
           />
         </motion.div>
 
