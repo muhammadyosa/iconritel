@@ -22,6 +22,8 @@ import { TopNavTabs } from "@/components/TopNavTabs";
 import { TabProvider, useOpenTabs, pathMap } from "@/contexts/TabContext";
 import { NetworkStatus } from "@/components/NetworkStatus";
 import plnIconPlusLogo from "@/assets/pln-icon-plus.png";
+import danantaraLight from "@/assets/danantara-light.png";
+import danantaraDark from "@/assets/danantara-dark.svg";
 import React, { Suspense } from "react";
 import { Loader2 } from "lucide-react";
 
@@ -191,10 +193,21 @@ function AppLayout() {
                 {/* Spacer for mobile hamburger button */}
                 <div className="w-8 md:hidden flex-shrink-0" />
                 <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
-                  <img 
-                    src={plnIconPlusLogo} 
-                    alt="PLN Icon Plus" 
-                    className="h-6 xs:h-7 sm:h-8 md:h-9 w-auto flex-shrink-0 object-contain" 
+                  <img
+                    src={danantaraLight}
+                    alt="Danantara Indonesia"
+                    className="h-5 xs:h-6 sm:h-7 md:h-8 w-auto flex-shrink-0 object-contain block dark:hidden"
+                  />
+                  <img
+                    src={danantaraDark}
+                    alt="Danantara Indonesia"
+                    className="h-5 xs:h-6 sm:h-7 md:h-8 w-auto flex-shrink-0 object-contain hidden dark:block"
+                  />
+                  <div className="h-5 sm:h-6 w-px bg-border/70 flex-shrink-0" />
+                  <img
+                    src={plnIconPlusLogo}
+                    alt="PLN Icon Plus"
+                    className="h-6 xs:h-7 sm:h-8 md:h-9 w-auto flex-shrink-0 object-contain"
                   />
                   <span className="font-semibold text-xs xs:text-sm sm:text-base md:text-lg truncate hidden xs:inline bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
                     NOC RITEL
