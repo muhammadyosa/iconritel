@@ -111,7 +111,7 @@ export function generateTicketFormat(
   }
   
   if (constraint === "CABLE PROBLEM (FEEDER)") {
-    return `[PROACTIVE NOC RETAIL] CABLE PROBLEM UNDER - ${serpo}`;
+    return `[PROACTIVE NOC RETAIL] CABLE PROBLEM (FEEDER) - ${hostname} - ${serpo}`;
   }
   
   // INTERMITTENT - lowercase in format
