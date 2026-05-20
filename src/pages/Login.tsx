@@ -10,7 +10,7 @@ import { ParticleBackground } from "@/components/ParticleBackground";
 import iconnetMascot from "@/assets/iconnet-mascot.png";
 import plnIconPlusLogo from "@/assets/pln-icon-plus-new.png";
 import iconnetLogo from "@/assets/iconnet-logo-new.png";
-import danantaraLight from "@/assets/danantara-light.png";
+import danantaraDark from "@/assets/danantara-dark.svg";
 import indonesiaMap from "@/assets/indonesia-map.png";
 import { SAFE_PROTECTED_PATHS } from "@/components/ProtectedRoute";
 import { supabase } from "@/integrations/supabase/client";
@@ -187,10 +187,10 @@ export default function Login() {
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.6, delay: 0.2 }}
       >
-        <img 
-          src={danantaraLight} 
-          alt="Danantara" 
-          className="h-8 sm:h-10 w-auto object-contain drop-shadow-[0_0_10px_rgba(56,189,248,0.3)]" 
+        <img
+          src={danantaraDark}
+          alt="Danantara"
+          className="h-8 sm:h-10 w-auto object-contain drop-shadow-[0_0_10px_rgba(56,189,248,0.3)]"
         />
       </motion.div>
 
