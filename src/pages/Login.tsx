@@ -191,7 +191,7 @@ export default function Login() {
           <img
             src={danantaraDark}
             alt="Danantara"
-            className="h-10 sm:h-12 md:h-14 w-auto object-contain drop-shadow-[0_0_10px_rgba(56,189,248,0.3)]"
+            className="h-7 sm:h-8 md:h-10 w-auto object-contain drop-shadow-[0_0_10px_rgba(56,189,248,0.3)]"
           />
         </motion.div>
 
@@ -204,7 +204,7 @@ export default function Login() {
           <img
             src={plnIconPlusLogo}
             alt="PLN Icon Plus"
-            className="h-10 sm:h-12 md:h-14 w-auto object-contain drop-shadow-[0_0_10px_rgba(56,189,248,0.3)]"
+            className="h-7 sm:h-8 md:h-10 w-auto object-contain drop-shadow-[0_0_10px_rgba(56,189,248,0.3)]"
           />
         </motion.div>
       </div>
