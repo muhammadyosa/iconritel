@@ -144,6 +144,8 @@ export default function Settings() {
   const [regionalFile, setRegionalFile] = useState<File | null>(null);
   const [isImportingRegional, setIsImportingRegional] = useState(false);
   const [regionalProgress, setRegionalProgress] = useState(0);
+  const [showDeleteRegionalDialog, setShowDeleteRegionalDialog] = useState(false);
+  const [isDeletingRegional, setIsDeletingRegional] = useState(false);
   const [dataCounts, setDataCounts] = useState<DataCounts>({
     user: 0,
     olt: 0,
