@@ -25,6 +25,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/hooks/use-toast";
 import { FileText, Download, ClipboardList, Trash2, RefreshCw, Loader2, CalendarIcon, Search } from "lucide-react";
+import { toLocalDateStr } from "@/lib/dateUtils";
 import { format, parse } from "date-fns";
 import { id as idLocale } from "date-fns/locale";
 import { cn } from "@/lib/utils";
@@ -126,6 +127,40 @@ const Report = () => {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Track if user manually edited PORT DOWN / FAT LOSS — when untouched,
+  // auto-fill from List Incident (constraint === PORT DOWN / FAT LOSS) for the selected date.
+  const [portDownTouched, setPortDownTouched] = useState(false);
+  const [fatLossTouched, setFatLossTouched] = useState(false);
+
+  const buildSummaryFromTickets = (tickets: Ticket[], constraintName: string, dateStr: string) => {
+    return tickets
+      .filter(
+        (t) =>
+          (t.constraint || "").toUpperCase() === constraintName &&
+          toLocalDateStr(new Date(t.createdISO)) === dateStr
+      )
+      .sort((a, b) => new Date(a.createdISO).getTime() - new Date(b.createdISO).getTime())
+      .map((t) => t.ticketResult || `${t.hostname} - ${t.serpo}`)
+      .join("\n");
+  };
+
+  // Auto-fill PORT DOWN and FAT LOSS from incidents whenever date or tickets change
+  // (only when the user hasn't manually edited the field).
+  useEffect(() => {
+    setShiftReport((prev) => {
+      const next = { ...prev };
+      if (!portDownTouched) {
+        next.portDown = buildSummaryFromTickets(allCloudTickets, "PORT DOWN", prev.date);
+      }
+      if (!fatLossTouched) {
+        next.fatLoss = buildSummaryFromTickets(allCloudTickets, "FAT LOSS", prev.date);
+      }
+      return next;
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allCloudTickets, shiftReport.date, portDownTouched, fatLossTouched]);
+
+
   // State for SLA Report
   const [slaInput, setSlaInput] = useState("");
   const [slaResult, setSlaResult] = useState("");
@@ -181,6 +216,8 @@ const Report = () => {
         issues: "",
         notes: "",
       });
+      setPortDownTouched(false);
+      setFatLossTouched(false);
     }
   };
 
@@ -524,14 +561,29 @@ Dibuat: ${new Date(r.createdAt).toLocaleString("id-ID")}
                     </Label>
                     <Textarea
                       id="portDown"
-                      placeholder="Laporan port yang mengalami down..."
+                      placeholder="Otomatis terisi dari List Incident (constraint PORT DOWN)..."
                       rows={2}
                       className="text-sm resize-none bg-background/80"
                       value={shiftReport.portDown}
-                      onChange={(e) =>
-                        setShiftReport({ ...shiftReport, portDown: e.target.value })
-                      }
+                      onChange={(e) => {
+                        setPortDownTouched(true);
+                        setShiftReport({ ...shiftReport, portDown: e.target.value });
+                      }}
                     />
+                    {!portDownTouched && (
+                      <p className="text-[10px] text-muted-foreground">
+                        🔄 Auto-fill dari 📋 List Incident — edit untuk override
+                      </p>
+                    )}
+                    {portDownTouched && (
+                      <button
+                        type="button"
+                        onClick={() => setPortDownTouched(false)}
+                        className="text-[10px] text-primary hover:underline"
+                      >
+                        ↺ Reset & auto-fill dari List Incident
+                      </button>
+                    )}
                   </div>
 
                   <div className="space-y-1.5 rounded-lg border border-primary/20 bg-primary/5 p-2.5 sm:p-3">
@@ -540,15 +592,31 @@ Dibuat: ${new Date(r.createdAt).toLocaleString("id-ID")}
                     </Label>
                     <Textarea
                       id="fatLoss"
-                      placeholder="Laporan FAT loss..."
+                      placeholder="Otomatis terisi dari List Incident (constraint FAT LOSS)..."
                       rows={2}
                       className="text-sm resize-none bg-background/80"
                       value={shiftReport.fatLoss}
-                      onChange={(e) =>
-                        setShiftReport({ ...shiftReport, fatLoss: e.target.value })
-                      }
+                      onChange={(e) => {
+                        setFatLossTouched(true);
+                        setShiftReport({ ...shiftReport, fatLoss: e.target.value });
+                      }}
                     />
+                    {!fatLossTouched && (
+                      <p className="text-[10px] text-muted-foreground">
+                        🔄 Auto-fill dari 📋 List Incident — edit untuk override
+                      </p>
+                    )}
+                    {fatLossTouched && (
+                      <button
+                        type="button"
+                        onClick={() => setFatLossTouched(false)}
+                        className="text-[10px] text-primary hover:underline"
+                      >
+                        ↺ Reset & auto-fill dari List Incident
+                      </button>
+                    )}
                   </div>
+
                 </div>
               </div>
 
