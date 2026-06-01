@@ -216,6 +216,8 @@ const Report = () => {
         issues: "",
         notes: "",
       });
+      setPortDownTouched(false);
+      setFatLossTouched(false);
     }
   };
 
