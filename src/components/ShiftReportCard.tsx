@@ -195,7 +195,7 @@ function EditReportForm({
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="portDown" className="text-xs">🔌 PORT DOWN</Label>
+        <Label htmlFor="portDown" className="text-xs">🔌 PORT</Label>
         <Textarea
           id="portDown"
           value={formData.portDown}
@@ -206,7 +206,7 @@ function EditReportForm({
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="fatLoss" className="text-xs">⛓️‍💥 FAT LOSS</Label>
+        <Label htmlFor="fatLoss" className="text-xs">⛓️‍💥 FAT</Label>
         <Textarea
           id="fatLoss"
           value={formData.fatLoss}
@@ -468,12 +468,12 @@ export function ShiftReportCard({ report, index, total, compact = false, onEdit 
                 )}
                 {report.portDown && (
                   <span className="text-[9px] px-1.5 py-0.5 bg-warning/10 text-warning rounded font-medium flex items-center gap-1">
-                    🔌 PORT DOWN
+                    🔌 PORT
                   </span>
                 )}
                 {report.fatLoss && (
                   <span className="text-[9px] px-1.5 py-0.5 bg-primary/10 text-primary rounded font-medium flex items-center gap-1">
-                    ⛓️‍💥 FAT LOSS
+                    ⛓️‍💥 FAT
                   </span>
                 )}
                 {report.issues && (
@@ -563,32 +563,26 @@ function ReportDetailContent({ report, index, total }: { report: ShiftReport; in
       <div className="p-4 pt-3 space-y-2.5">
         {/* Content sections with collapsible */}
         <div className="space-y-2">
-          {report.oltDown && (
-            <IncidentSection
-              emoji="📟"
-              label="OLT DOWN"
-              content={report.oltDown}
-              bgClass="bg-destructive/5 border-destructive/20"
-            />
-          )}
+          <IncidentSection
+            emoji="📟"
+            label="OLT DOWN"
+            content={report.oltDown || "-"}
+            bgClass="bg-destructive/5 border-destructive/20"
+          />
           
-          {report.portDown && (
-            <IncidentSection
-              emoji="🔌"
-              label="PORT DOWN"
-              content={report.portDown}
-              bgClass="bg-warning/5 border-warning/20"
-            />
-          )}
+          <IncidentSection
+            emoji="🔌"
+            label="PORT"
+            content={report.portDown || "-"}
+            bgClass="bg-warning/5 border-warning/20"
+          />
           
-          {report.fatLoss && (
-            <IncidentSection
-              emoji="⛓️‍💥"
-              label="FAT LOSS"
-              content={report.fatLoss}
-              bgClass="bg-primary/5 border-primary/20"
-            />
-          )}
+          <IncidentSection
+            emoji="⛓️‍💥"
+            label="FAT"
+            content={report.fatLoss || "-"}
+            bgClass="bg-primary/5 border-primary/20"
+          />
 
           {report.issues && (
             <IncidentSection
