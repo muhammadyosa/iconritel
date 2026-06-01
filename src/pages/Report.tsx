@@ -127,6 +127,40 @@ const Report = () => {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Track if user manually edited PORT DOWN / FAT LOSS — when untouched,
+  // auto-fill from List Incident (constraint === PORT DOWN / FAT LOSS) for the selected date.
+  const [portDownTouched, setPortDownTouched] = useState(false);
+  const [fatLossTouched, setFatLossTouched] = useState(false);
+
+  const buildSummaryFromTickets = (tickets: Ticket[], constraintName: string, dateStr: string) => {
+    return tickets
+      .filter(
+        (t) =>
+          (t.constraint || "").toUpperCase() === constraintName &&
+          toLocalDateStr(new Date(t.createdISO)) === dateStr
+      )
+      .sort((a, b) => new Date(a.createdISO).getTime() - new Date(b.createdISO).getTime())
+      .map((t) => t.ticketResult || `${t.hostname} - ${t.serpo}`)
+      .join("\n");
+  };
+
+  // Auto-fill PORT DOWN and FAT LOSS from incidents whenever date or tickets change
+  // (only when the user hasn't manually edited the field).
+  useEffect(() => {
+    setShiftReport((prev) => {
+      const next = { ...prev };
+      if (!portDownTouched) {
+        next.portDown = buildSummaryFromTickets(allCloudTickets, "PORT DOWN", prev.date);
+      }
+      if (!fatLossTouched) {
+        next.fatLoss = buildSummaryFromTickets(allCloudTickets, "FAT LOSS", prev.date);
+      }
+      return next;
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allCloudTickets, shiftReport.date, portDownTouched, fatLossTouched]);
+
+
   // State for SLA Report
   const [slaInput, setSlaInput] = useState("");
   const [slaResult, setSlaResult] = useState("");
