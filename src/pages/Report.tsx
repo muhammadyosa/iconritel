@@ -559,14 +559,29 @@ Dibuat: ${new Date(r.createdAt).toLocaleString("id-ID")}
                     </Label>
                     <Textarea
                       id="portDown"
-                      placeholder="Laporan port yang mengalami down..."
+                      placeholder="Otomatis terisi dari List Incident (constraint PORT DOWN)..."
                       rows={2}
                       className="text-sm resize-none bg-background/80"
                       value={shiftReport.portDown}
-                      onChange={(e) =>
-                        setShiftReport({ ...shiftReport, portDown: e.target.value })
-                      }
+                      onChange={(e) => {
+                        setPortDownTouched(true);
+                        setShiftReport({ ...shiftReport, portDown: e.target.value });
+                      }}
                     />
+                    {!portDownTouched && (
+                      <p className="text-[10px] text-muted-foreground">
+                        🔄 Auto-fill dari 📋 List Incident — edit untuk override
+                      </p>
+                    )}
+                    {portDownTouched && (
+                      <button
+                        type="button"
+                        onClick={() => setPortDownTouched(false)}
+                        className="text-[10px] text-primary hover:underline"
+                      >
+                        ↺ Reset & auto-fill dari List Incident
+                      </button>
+                    )}
                   </div>
 
                   <div className="space-y-1.5 rounded-lg border border-primary/20 bg-primary/5 p-2.5 sm:p-3">
@@ -575,15 +590,31 @@ Dibuat: ${new Date(r.createdAt).toLocaleString("id-ID")}
                     </Label>
                     <Textarea
                       id="fatLoss"
-                      placeholder="Laporan FAT loss..."
+                      placeholder="Otomatis terisi dari List Incident (constraint FAT LOSS)..."
                       rows={2}
                       className="text-sm resize-none bg-background/80"
                       value={shiftReport.fatLoss}
-                      onChange={(e) =>
-                        setShiftReport({ ...shiftReport, fatLoss: e.target.value })
-                      }
+                      onChange={(e) => {
+                        setFatLossTouched(true);
+                        setShiftReport({ ...shiftReport, fatLoss: e.target.value });
+                      }}
                     />
+                    {!fatLossTouched && (
+                      <p className="text-[10px] text-muted-foreground">
+                        🔄 Auto-fill dari 📋 List Incident — edit untuk override
+                      </p>
+                    )}
+                    {fatLossTouched && (
+                      <button
+                        type="button"
+                        onClick={() => setFatLossTouched(false)}
+                        className="text-[10px] text-primary hover:underline"
+                      >
+                        ↺ Reset & auto-fill dari List Incident
+                      </button>
+                    )}
                   </div>
+
                 </div>
               </div>
 
