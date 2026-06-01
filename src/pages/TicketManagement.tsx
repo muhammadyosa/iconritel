@@ -875,10 +875,9 @@ export default function TicketManagement() {
                       toast.error("Tidak ada data untuk disalin");
                       return;
                     }
-                    const header = ["Service ID", "SN ONT", "Customer"].join("\t");
                     const body = rows.map((r) => r.join("\t")).join("\n");
                     try {
-                      await navigator.clipboard.writeText(header + "\n" + body);
+                      await navigator.clipboard.writeText(body);
                       toast.success(`${rows.length} baris data disalin (Service ID, SN ONT, Customer)`);
                     } catch {
                       toast.error("Gagal menyalin data");
