@@ -504,6 +504,29 @@ export default function Settings() {
     }
   };
 
+  // Hapus master data 🗺 List Team Region (admin-only)
+  const handleDeleteRegional = async () => {
+    if (!isAdmin) {
+      toast.error("Hanya 🕵️ Admin yang dapat menghapus data 🗺 List Team Region");
+      return;
+    }
+    setIsDeletingRegional(true);
+    try {
+      await clearRegionalTeamData();
+      try { localStorage.removeItem(LOCAL_REGIONAL_UPLOAD_KEY); } catch {}
+      setLastRegionalUpload(null);
+      emitRegionalTeamUpdated();
+      await loadDataCounts();
+      toast.success("🗺 List Team Region berhasil dihapus");
+    } catch (error) {
+      toast.error("Gagal menghapus 🗺 List Team Region");
+      if (import.meta.env.DEV) console.error("Error deleting regional team:", error);
+    } finally {
+      setIsDeletingRegional(false);
+      setShowDeleteRegionalDialog(false);
+    }
+  };
+
   const getTypeLabel = (type: string | null) => {
     switch (type) {
       case "user":
