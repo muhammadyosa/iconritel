@@ -132,33 +132,91 @@ const Report = () => {
   const [portDownTouched, setPortDownTouched] = useState(false);
   const [fatLossTouched, setFatLossTouched] = useState(false);
 
-  const buildSummaryFromTickets = (tickets: Ticket[], constraintName: string, dateStr: string) => {
-    return tickets
-      .filter(
-        (t) =>
-          (t.constraint || "").toUpperCase() === constraintName &&
-          toLocalDateStr(new Date(t.createdISO)) === dateStr
-      )
-      .sort((a, b) => new Date(a.createdISO).getTime() - new Date(b.createdISO).getTime())
-      .map((t) => t.ticketResult || `${t.hostname} - ${t.serpo}`)
-      .join("\n");
+  // Resolve region from ticket.serpo using regional team data (mitraName → region)
+  const resolveRegion = (serpo: string, regional: RegionalTeamRecord[]): string => {
+    if (!serpo) return "TANPA REGION";
+    const s = serpo.toUpperCase().trim();
+    for (const r of regional) {
+      if (r.mitraName.toUpperCase().trim() === s) return r.region.toUpperCase();
+    }
+    for (const r of regional) {
+      const m = r.mitraName.toUpperCase().trim();
+      if (s.includes(m) || m.includes(s)) return r.region.toUpperCase();
+    }
+    return "TANPA REGION";
+  };
+
+  const buildSummaryFromTickets = (
+    tickets: Ticket[],
+    constraintNames: string[],
+    dateStr: string,
+    regional: RegionalTeamRecord[]
+  ) => {
+    const set = new Set(constraintNames.map((c) => c.toUpperCase()));
+    const matched = tickets.filter(
+      (t) =>
+        set.has((t.constraint || "").toUpperCase()) &&
+        toLocalDateStr(new Date(t.createdISO)) === dateStr
+    );
+    if (matched.length === 0) return "";
+
+    // Group by region
+    const groups = new Map<string, Ticket[]>();
+    for (const t of matched) {
+      const region = resolveRegion(t.serpo, regional);
+      if (!groups.has(region)) groups.set(region, []);
+      groups.get(region)!.push(t);
+    }
+
+    const sortedRegions = Array.from(groups.keys()).sort((a, b) => {
+      if (a === "TANPA REGION") return 1;
+      if (b === "TANPA REGION") return -1;
+      return a.localeCompare(b);
+    });
+
+    const formatTicket = (t: Ticket) => {
+      const body = t.ticketResult || `${t.hostname} - ${t.serpo}`;
+      return `Insident ${t.id}\n${body}`;
+    };
+
+    return sortedRegions
+      .map((region) => {
+        const list = groups
+          .get(region)!
+          .sort((a, b) => new Date(a.createdISO).getTime() - new Date(b.createdISO).getTime())
+          .map(formatTicket)
+          .join("\n\n");
+        return `== ${region} ==\n${list}`;
+      })
+      .join("\n\n");
   };
 
   // Auto-fill PORT DOWN and FAT LOSS from incidents whenever date or tickets change
-  // (only when the user hasn't manually edited the field).
+  // (only when the user hasn't manually edited the field). Groups by region and
+  // includes BAD RX variants (FAT BAD RX with FAT LOSS, PORT BAD RX with PORT DOWN).
   useEffect(() => {
     setShiftReport((prev) => {
       const next = { ...prev };
       if (!portDownTouched) {
-        next.portDown = buildSummaryFromTickets(allCloudTickets, "PORT DOWN", prev.date);
+        next.portDown = buildSummaryFromTickets(
+          allCloudTickets,
+          ["PORT DOWN", "PORT BAD RX"],
+          prev.date,
+          reportRegionalData
+        );
       }
       if (!fatLossTouched) {
-        next.fatLoss = buildSummaryFromTickets(allCloudTickets, "FAT LOSS", prev.date);
+        next.fatLoss = buildSummaryFromTickets(
+          allCloudTickets,
+          ["FAT LOSS", "FAT BAD RX"],
+          prev.date,
+          reportRegionalData
+        );
       }
       return next;
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [allCloudTickets, shiftReport.date, portDownTouched, fatLossTouched]);
+  }, [allCloudTickets, shiftReport.date, portDownTouched, fatLossTouched, reportRegionalData]);
 
 
   // State for SLA Report
