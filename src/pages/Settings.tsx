@@ -140,6 +140,10 @@ export default function Settings() {
   const [showDeleteAllDialog, setShowDeleteAllDialog] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [importProgress, setImportProgress] = useState(0);
+  // State khusus untuk upload 🗺 List Team Region (admin-only)
+  const [regionalFile, setRegionalFile] = useState<File | null>(null);
+  const [isImportingRegional, setIsImportingRegional] = useState(false);
+  const [regionalProgress, setRegionalProgress] = useState(0);
   const [dataCounts, setDataCounts] = useState<DataCounts>({
     user: 0,
     olt: 0,
