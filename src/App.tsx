@@ -209,9 +209,6 @@ function AppLayout() {
                     alt="PLN Icon Plus"
                     className="h-6 xs:h-7 sm:h-8 md:h-9 w-auto flex-shrink-0 object-contain"
                   />
-                  <span className="font-semibold text-xs xs:text-sm sm:text-base md:text-lg truncate hidden xs:inline bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-                    NOC RITEL
-                  </span>
                 </div>
               </div>
               <UserMenu />
