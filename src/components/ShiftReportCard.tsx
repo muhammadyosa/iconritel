@@ -51,14 +51,19 @@ const getShiftEmoji = (shift: string) => {
   }
 };
 
+const hasReportContent = (value?: string) => {
+  const normalized = (value || "").trim();
+  return normalized.length > 0 && normalized !== "-";
+};
+
 // Helper function to count incidents
 const countIncidents = (report: ShiftReport) => {
   let count = 0;
-  if (report.oltDown) count++;
-  if (report.portDown) count++;
-  if (report.fatLoss) count++;
-  if (report.issues) count++;
-  if (report.notes) count++;
+  if (hasReportContent(report.oltDown)) count++;
+  if (hasReportContent(report.portDown)) count++;
+  if (hasReportContent(report.fatLoss)) count++;
+  if (hasReportContent(report.issues)) count++;
+  if (hasReportContent(report.notes)) count++;
   return count;
 };
 
@@ -461,27 +466,27 @@ export function ShiftReportCard({ report, index, total, compact = false, onEdit 
           <div className="p-3">
             {incidentCount > 0 ? (
               <div className="flex flex-wrap gap-1.5">
-                {report.oltDown && (
+                {hasReportContent(report.oltDown) && (
                   <span className="text-[9px] px-1.5 py-0.5 bg-destructive/10 text-destructive rounded font-medium flex items-center gap-1">
                     📟 OLT DOWN
                   </span>
                 )}
-                {report.portDown && (
+                {hasReportContent(report.portDown) && (
                   <span className="text-[9px] px-1.5 py-0.5 bg-warning/10 text-warning rounded font-medium flex items-center gap-1">
                     🔌 PORT
                   </span>
                 )}
-                {report.fatLoss && (
+                {hasReportContent(report.fatLoss) && (
                   <span className="text-[9px] px-1.5 py-0.5 bg-primary/10 text-primary rounded font-medium flex items-center gap-1">
                     ⛓️‍💥 FAT
                   </span>
                 )}
-                {report.issues && (
+                {hasReportContent(report.issues) && (
                   <span className="text-[9px] px-1.5 py-0.5 bg-warning/10 text-warning rounded font-medium flex items-center gap-1">
                     ⚠️ MASALAH
                   </span>
                 )}
-                {report.notes && (
+                {hasReportContent(report.notes) && (
                   <span className="text-[9px] px-1.5 py-0.5 bg-muted text-muted-foreground rounded font-medium flex items-center gap-1">
                     📝 CATATAN
                   </span>
@@ -558,52 +563,64 @@ export function ShiftReportCard({ report, index, total, compact = false, onEdit 
 
 // Detail content component
 function ReportDetailContent({ report, index, total }: { report: ShiftReport; index: number; total: number }) {
+  const hasOltDown = hasReportContent(report.oltDown);
+  const hasPort = hasReportContent(report.portDown);
+  const hasFat = hasReportContent(report.fatLoss);
+  const hasIssues = hasReportContent(report.issues);
+  const hasNotes = hasReportContent(report.notes);
+
   return (
     <ScrollArea className="max-h-[70vh]">
       <div className="p-4 pt-3 space-y-2.5">
         {/* Content sections with collapsible */}
         <div className="space-y-2">
-          <IncidentSection
-            emoji="📟"
-            label="OLT DOWN"
-            content={report.oltDown || "-"}
-            bgClass="bg-destructive/5 border-destructive/20"
-          />
+          {hasOltDown && (
+            <IncidentSection
+              emoji="📟"
+              label="OLT DOWN"
+              content={report.oltDown!.trim()}
+              bgClass="bg-destructive/5 border-destructive/20"
+            />
+          )}
           
-          <IncidentSection
-            emoji="🔌"
-            label="PORT"
-            content={report.portDown || "-"}
-            bgClass="bg-warning/5 border-warning/20"
-          />
+          {hasPort && (
+            <IncidentSection
+              emoji="🔌"
+              label="PORT"
+              content={report.portDown!.trim()}
+              bgClass="bg-warning/5 border-warning/20"
+            />
+          )}
           
-          <IncidentSection
-            emoji="⛓️‍💥"
-            label="FAT"
-            content={report.fatLoss || "-"}
-            bgClass="bg-primary/5 border-primary/20"
-          />
+          {hasFat && (
+            <IncidentSection
+              emoji="⛓️‍💥"
+              label="FAT"
+              content={report.fatLoss!.trim()}
+              bgClass="bg-primary/5 border-primary/20"
+            />
+          )}
 
-          {report.issues && (
+          {hasIssues && (
             <IncidentSection
               emoji="⚠️"
               label="PERMASALAHAN"
-              content={report.issues}
+              content={report.issues!.trim()}
               bgClass="bg-warning/5 border-warning/20"
             />
           )}
 
-          {report.notes && (
+          {hasNotes && (
             <IncidentSection
               emoji="📝"
               label="CATATAN"
-              content={report.notes}
+              content={report.notes!.trim()}
               bgClass="bg-muted/60 border-border"
             />
           )}
 
           {/* Empty state */}
-          {!report.oltDown && !report.portDown && !report.fatLoss && !report.issues && !report.notes && (
+          {!hasOltDown && !hasPort && !hasFat && !hasIssues && !hasNotes && (
             <div className="text-center py-8 text-muted-foreground">
               <span className="text-3xl mb-2 block">✨</span>
               <p className="text-sm">Tidak ada laporan insiden</p>
