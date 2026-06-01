@@ -861,8 +861,34 @@ export default function TicketManagement() {
             </Card>
           ) : filteredData.length > 0 ? (
             <Card className="shadow-sm border">
-              <CardHeader className="py-1.5 sm:py-2 px-2 sm:px-3 border-b bg-muted/30">
+              <CardHeader className="py-1.5 sm:py-2 px-2 sm:px-3 border-b bg-muted/30 flex flex-row items-center justify-between gap-2">
                 <CardTitle className="text-xs sm:text-sm">📊 Preview Data ({filteredData.length})</CardTitle>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="h-6 sm:h-7 px-2 text-[9px] sm:text-[10px] gap-1"
+                  onClick={async () => {
+                    const rows = filteredData
+                      .map((r) => [String(r.service || "").trim(), String(r.sn || "").trim(), String(r.customer || "").trim()])
+                      .filter((r) => r.some(Boolean));
+                    if (rows.length === 0) {
+                      toast.error("Tidak ada data untuk disalin");
+                      return;
+                    }
+                    const header = ["Service ID", "SN ONT", "Customer"].join("\t");
+                    const body = rows.map((r) => r.join("\t")).join("\n");
+                    try {
+                      await navigator.clipboard.writeText(header + "\n" + body);
+                      toast.success(`${rows.length} baris data disalin (Service ID, SN ONT, Customer)`);
+                    } catch {
+                      toast.error("Gagal menyalin data");
+                    }
+                  }}
+                  title="Salin Service ID, SN ONT, dan Customer dari hasil pencarian"
+                >
+                  <Copy className="h-3 w-3" />
+                  <span>Copy Data</span>
+                </Button>
               </CardHeader>
               <CardContent className="p-1.5 sm:p-2">
                 <div className="rounded-md border overflow-x-auto overflow-y-auto max-h-[40vh] xs:max-h-[45vh] sm:max-h-[50vh] md:max-h-[55vh] lg:max-h-[60vh]">
