@@ -442,6 +442,66 @@ export default function Settings() {
     }
   };
 
+  // Upload terpisah untuk 🗺 List Team Region — hanya Admin
+  const handleRegionalUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = e.target.files?.[0];
+    e.target.value = "";
+    if (!selectedFile) return;
+    if (!isAdmin) {
+      toast.error("Hanya 🕵️ Admin yang dapat upload 🗺 List Team Region");
+      return;
+    }
+    setRegionalFile(selectedFile);
+    setIsImportingRegional(true);
+    setRegionalProgress(10);
+    try {
+      const result = await importMultiSheetExcel(selectedFile);
+      setRegionalProgress(50);
+      if (result.regionalTeamRecords.length === 0) {
+        toast.error("Tidak ditemukan sheet 🗺 List Team Region pada file ini");
+        return;
+      }
+      await saveRegionalTeamData(result.regionalTeamRecords);
+      setRegionalProgress(75);
+      emitRegionalTeamUpdated();
+
+      const uploaderName = profile?.display_name || user?.email?.split("@")[0] || "Unknown";
+      const nowIso = new Date().toISOString();
+      const regMeta = {
+        uploaded_by_name: `🕵️ Admin · ${uploaderName}`,
+        created_at: nowIso,
+        total_records: result.regionalTeamRecords.length,
+        file_name: selectedFile.name,
+      };
+      try {
+        localStorage.setItem(LOCAL_REGIONAL_UPLOAD_KEY, JSON.stringify(regMeta));
+        setLastRegionalUpload(regMeta);
+        await supabase.from("master_data_uploads").insert({
+          uploaded_by_user_id: user?.id ?? null,
+          uploaded_by_name: regMeta.uploaded_by_name,
+          file_name: regMeta.file_name,
+          total_records: regMeta.total_records,
+          summary: { kind: "regional_team" },
+        });
+      } catch (err) {
+        if (import.meta.env.DEV) console.error("Failed to sync regional upload meta:", err);
+      }
+
+      setRegionalProgress(100);
+      await loadDataCounts();
+      toast.success(`Berhasil update 🗺 List Team Region: ${result.regionalTeamRecords.length.toLocaleString()} data`);
+    } catch (error) {
+      toast.error("Gagal upload 🗺 List Team Region");
+      if (import.meta.env.DEV) console.error("Error uploading regional team:", error);
+    } finally {
+      setIsImportingRegional(false);
+      setTimeout(() => {
+        setRegionalProgress(0);
+        setRegionalFile(null);
+      }, 1200);
+    }
+  };
+
   const getTypeLabel = (type: string | null) => {
     switch (type) {
       case "user":
