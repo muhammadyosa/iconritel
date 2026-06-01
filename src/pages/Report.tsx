@@ -25,7 +25,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/hooks/use-toast";
 import { FileText, Download, ClipboardList, Trash2, RefreshCw, Loader2, CalendarIcon, Search } from "lucide-react";
-import { toLocalDateStr } from "@/lib/dateUtils";
+import { parseLocalDateStr, toLocalDateStr } from "@/lib/dateUtils";
 import { format, parse } from "date-fns";
 import { id as idLocale } from "date-fns/locale";
 import { cn } from "@/lib/utils";
@@ -153,10 +153,16 @@ const Report = () => {
     regional: RegionalTeamRecord[]
   ) => {
     const set = new Set(constraintNames.map((c) => c.toUpperCase()));
+    const selectedEnd = parseLocalDateStr(dateStr);
+    selectedEnd.setHours(23, 59, 59, 999);
     const matched = tickets.filter(
-      (t) =>
-        set.has((t.constraint || "").toUpperCase()) &&
-        toLocalDateStr(new Date(t.createdISO)) === dateStr
+      (t) => {
+        if (!set.has((t.constraint || "").toUpperCase())) return false;
+        const created = new Date(t.createdISO);
+        const isSameReportDate = toLocalDateStr(created) === dateStr;
+        const isActiveCarryOver = t.status !== "Resolved" && created.getTime() <= selectedEnd.getTime();
+        return isSameReportDate || isActiveCarryOver;
+      }
     );
     if (matched.length === 0) return "";
 
