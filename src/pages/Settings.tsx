@@ -795,6 +795,20 @@ export default function Settings() {
                       <Progress value={regionalProgress} className="h-2" />
                     </div>
                   )}
+                  <div className="pt-4 border-t">
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={() => setShowDeleteRegionalDialog(true)}
+                      disabled={isImportingRegional || isDeletingRegional || dataCounts.regionalTeam === 0}
+                    >
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Delete Data List 🗺 List Team Region
+                    </Button>
+                    <p className="text-xs text-muted-foreground mt-2">
+                      Menghapus master data 🗺 List Team Region dari aplikasi. Tindakan ini hanya dapat dilakukan oleh 🕵️ Admin.
+                    </p>
+                  </div>
                 </div>
               ) : (
                 <div className="flex items-start gap-2 rounded-md border border-border bg-muted/40 p-3">
