@@ -242,7 +242,21 @@ const Report = () => {
       return;
     }
 
-    if (!shiftReport.oltDown && !shiftReport.portDown && !shiftReport.fatLoss) {
+    const cleanReportField = (value: string) => {
+      const trimmed = value.trim();
+      return trimmed === "-" ? "" : trimmed;
+    };
+
+    const normalizedShiftReport = {
+      ...shiftReport,
+      oltDown: cleanReportField(shiftReport.oltDown),
+      portDown: cleanReportField(shiftReport.portDown),
+      fatLoss: cleanReportField(shiftReport.fatLoss),
+      issues: cleanReportField(shiftReport.issues),
+      notes: cleanReportField(shiftReport.notes),
+    };
+
+    if (!normalizedShiftReport.oltDown && !normalizedShiftReport.portDown && !normalizedShiftReport.fatLoss) {
       toast({
         title: "Data tidak lengkap",
         description: "Mohon lengkapi minimal satu ringkasan shift.",
@@ -255,14 +269,14 @@ const Report = () => {
     
     // Save to cloud database
     const reportInput: ShiftReportInput = {
-      date: shiftReport.date,
-      shift: shiftReport.shift,
-      officer: shiftReport.officer,
-      oltDown: shiftReport.oltDown,
-      portDown: shiftReport.portDown,
-      fatLoss: shiftReport.fatLoss,
-      issues: shiftReport.issues,
-      notes: shiftReport.notes,
+      date: normalizedShiftReport.date,
+      shift: normalizedShiftReport.shift,
+      officer: normalizedShiftReport.officer,
+      oltDown: normalizedShiftReport.oltDown,
+      portDown: normalizedShiftReport.portDown,
+      fatLoss: normalizedShiftReport.fatLoss,
+      issues: normalizedShiftReport.issues,
+      notes: normalizedShiftReport.notes,
     };
     
     const success = await addReport(reportInput);
