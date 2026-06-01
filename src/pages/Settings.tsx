@@ -140,6 +140,10 @@ export default function Settings() {
   const [showDeleteAllDialog, setShowDeleteAllDialog] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [importProgress, setImportProgress] = useState(0);
+  // State khusus untuk upload 🗺 List Team Region (admin-only)
+  const [regionalFile, setRegionalFile] = useState<File | null>(null);
+  const [isImportingRegional, setIsImportingRegional] = useState(false);
+  const [regionalProgress, setRegionalProgress] = useState(0);
   const [dataCounts, setDataCounts] = useState<DataCounts>({
     user: 0,
     olt: 0,
@@ -438,6 +442,66 @@ export default function Settings() {
     }
   };
 
+  // Upload terpisah untuk 🗺 List Team Region — hanya Admin
+  const handleRegionalUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = e.target.files?.[0];
+    e.target.value = "";
+    if (!selectedFile) return;
+    if (!isAdmin) {
+      toast.error("Hanya 🕵️ Admin yang dapat upload 🗺 List Team Region");
+      return;
+    }
+    setRegionalFile(selectedFile);
+    setIsImportingRegional(true);
+    setRegionalProgress(10);
+    try {
+      const result = await importMultiSheetExcel(selectedFile);
+      setRegionalProgress(50);
+      if (result.regionalTeamRecords.length === 0) {
+        toast.error("Tidak ditemukan sheet 🗺 List Team Region pada file ini");
+        return;
+      }
+      await saveRegionalTeamData(result.regionalTeamRecords);
+      setRegionalProgress(75);
+      emitRegionalTeamUpdated();
+
+      const uploaderName = profile?.display_name || user?.email?.split("@")[0] || "Unknown";
+      const nowIso = new Date().toISOString();
+      const regMeta = {
+        uploaded_by_name: `🕵️ Admin · ${uploaderName}`,
+        created_at: nowIso,
+        total_records: result.regionalTeamRecords.length,
+        file_name: selectedFile.name,
+      };
+      try {
+        localStorage.setItem(LOCAL_REGIONAL_UPLOAD_KEY, JSON.stringify(regMeta));
+        setLastRegionalUpload(regMeta);
+        await supabase.from("master_data_uploads").insert({
+          uploaded_by_user_id: user?.id ?? null,
+          uploaded_by_name: regMeta.uploaded_by_name,
+          file_name: regMeta.file_name,
+          total_records: regMeta.total_records,
+          summary: { kind: "regional_team" },
+        });
+      } catch (err) {
+        if (import.meta.env.DEV) console.error("Failed to sync regional upload meta:", err);
+      }
+
+      setRegionalProgress(100);
+      await loadDataCounts();
+      toast.success(`Berhasil update 🗺 List Team Region: ${result.regionalTeamRecords.length.toLocaleString()} data`);
+    } catch (error) {
+      toast.error("Gagal upload 🗺 List Team Region");
+      if (import.meta.env.DEV) console.error("Error uploading regional team:", error);
+    } finally {
+      setIsImportingRegional(false);
+      setTimeout(() => {
+        setRegionalProgress(0);
+        setRegionalFile(null);
+      }, 1200);
+    }
+  };
+
   const getTypeLabel = (type: string | null) => {
     switch (type) {
       case "user":
@@ -652,6 +716,96 @@ export default function Settings() {
               </div>
             </CardContent>
           </Card>
+
+          {/* 🗺 List Team Region — Upload terpisah, Admin only */}
+          <Card className="border-teal-500/40">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                🗺 Upload List Team Region
+                <Badge className="text-[9px] px-1.5 py-0 bg-emerald-500 hover:bg-emerald-500 text-white border-0 gap-1 animate-pulse">
+                  <span className="inline-block w-1.5 h-1.5 rounded-full bg-white" />
+                  LIVE
+                </Badge>
+                <Badge variant="outline" className="text-[10px] border-amber-500/40 text-amber-600 dark:text-amber-400 bg-amber-500/10">
+                  🕵️ Admin Only
+                </Badge>
+              </CardTitle>
+              <CardDescription>
+                Upload terpisah untuk master data 🗺 List Team Region (Region → SERPO → Mitra → OLT). Data akan diperbarui secara up-to-date dan terlihat oleh semua user.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {isAdmin ? (
+                <div className="flex flex-col gap-4">
+                  {lastRegionalUpload && (
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 rounded-md border border-teal-500/30 bg-teal-500/5 p-3 text-xs">
+                      <div className="flex items-center gap-1.5">
+                        <Clock className="h-3.5 w-3.5 text-muted-foreground" />
+                        <span className="text-muted-foreground">Terakhir diupdate:</span>
+                        <span className="font-medium text-foreground">
+                          {new Date(lastRegionalUpload.created_at).toLocaleString("id-ID", { dateStyle: "medium", timeStyle: "short" })} WIB
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <UserIcon className="h-3.5 w-3.5 text-muted-foreground" />
+                        <span className="font-medium text-foreground">{lastRegionalUpload.uploaded_by_name}</span>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <FileSpreadsheet className="h-3.5 w-3.5 text-muted-foreground" />
+                        <span className="font-medium text-foreground truncate max-w-[220px]" title={lastRegionalUpload.file_name}>{lastRegionalUpload.file_name}</span>
+                        <span className="text-muted-foreground">({lastRegionalUpload.total_records.toLocaleString()} data)</span>
+                      </div>
+                    </div>
+                  )}
+                  <div className="flex items-center gap-4 flex-wrap">
+                    <input
+                      type="file"
+                      accept=".xlsx,.xls"
+                      onChange={handleRegionalUpload}
+                      className="hidden"
+                      id="regional-upload"
+                      disabled={isImportingRegional}
+                    />
+                    <label htmlFor="regional-upload">
+                      <Button variant="outline" asChild disabled={isImportingRegional} className="border-teal-500/50 hover:bg-teal-500/10">
+                        <span className="cursor-pointer">
+                          <FileUp className="h-4 w-4 mr-2" />
+                          {isImportingRegional ? "Mengupload..." : "Upload List Team Region"}
+                        </span>
+                      </Button>
+                    </label>
+                    {regionalFile && (
+                      <div className="flex items-center gap-2 text-sm">
+                        <FileSpreadsheet className="h-4 w-4 text-teal-500" />
+                        <span className="font-medium truncate max-w-[220px]">{regionalFile.name}</span>
+                      </div>
+                    )}
+                    <Badge variant={dataCounts.regionalTeam > 0 ? "default" : "secondary"} className={dataCounts.regionalTeam > 0 ? "bg-teal-500" : ""}>
+                      {dataCounts.regionalTeam.toLocaleString()} data tersimpan
+                    </Badge>
+                  </div>
+                  {isImportingRegional && (
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between text-sm">
+                        <span>Mengupdate 🗺 List Team Region...</span>
+                        <span>{regionalProgress}%</span>
+                      </div>
+                      <Progress value={regionalProgress} className="h-2" />
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="flex items-start gap-2 rounded-md border border-border bg-muted/40 p-3">
+                  <AlertCircle className="h-4 w-4 mt-0.5 text-muted-foreground shrink-0" />
+                  <p className="text-xs text-muted-foreground">
+                    Hanya 🕵️ <strong>Admin</strong> yang dapat upload / memperbarui master data 🗺 List Team Region.
+                  </p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+
 
           {/* Sheet Analysis Card */}
           {sheets.length > 0 && !importResult && (
