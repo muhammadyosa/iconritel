@@ -444,10 +444,10 @@ RINGKASAN SHIFT:
 LAPORAN OLT DOWN:
 ${r.oltDown || "-"}
 
-LAPORAN PORT DOWN:
+LAPORAN PORT:
 ${r.portDown || "-"}
 
-LAPORAN FAT LOSS:
+LAPORAN FAT:
 ${r.fatLoss || "-"}
 
 KENDALA/MASALAH:
@@ -615,11 +615,11 @@ Dibuat: ${new Date(r.createdAt).toLocaleString("id-ID")}
 
                   <div className="space-y-1.5 rounded-lg border border-yellow-500/20 bg-yellow-500/5 p-2.5 sm:p-3">
                     <Label htmlFor="portDown" className="text-xs font-medium flex items-center gap-1.5">
-                      <span className="inline-flex items-center justify-center rounded bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 text-[10px] font-semibold px-1.5 py-0.5">PORT DOWN</span>
+                      <span className="inline-flex items-center justify-center rounded bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 text-[10px] font-semibold px-1.5 py-0.5">PORT</span>
                     </Label>
                     <Textarea
                       id="portDown"
-                      placeholder="Otomatis terisi dari List Incident (constraint PORT DOWN)..."
+                      placeholder="Otomatis terisi dari List Incident (constraint PORT DOWN / PORT BAD RX)..."
                       rows={2}
                       className="text-sm resize-none bg-background/80"
                       value={shiftReport.portDown}
@@ -646,11 +646,11 @@ Dibuat: ${new Date(r.createdAt).toLocaleString("id-ID")}
 
                   <div className="space-y-1.5 rounded-lg border border-primary/20 bg-primary/5 p-2.5 sm:p-3">
                     <Label htmlFor="fatLoss" className="text-xs font-medium flex items-center gap-1.5">
-                      <span className="inline-flex items-center justify-center rounded bg-primary/10 text-primary text-[10px] font-semibold px-1.5 py-0.5">FAT LOSS</span>
+                      <span className="inline-flex items-center justify-center rounded bg-primary/10 text-primary text-[10px] font-semibold px-1.5 py-0.5">FAT</span>
                     </Label>
                     <Textarea
                       id="fatLoss"
-                      placeholder="Otomatis terisi dari List Incident (constraint FAT LOSS)..."
+                      placeholder="Otomatis terisi dari List Incident (constraint FAT LOSS / FAT BAD RX)..."
                       rows={2}
                       className="text-sm resize-none bg-background/80"
                       value={shiftReport.fatLoss}
