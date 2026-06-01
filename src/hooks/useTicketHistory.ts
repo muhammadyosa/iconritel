@@ -37,9 +37,10 @@ export function useTicketHistory(tickets: Ticket[]) {
   useEffect(() => {
     const loadCloudHistory = async () => {
       try {
-        const thirtyDaysAgo = new Date();
-        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-        const cutoff = toLocalDateStr(thirtyDaysAgo);
+        // Pull 90 days so monthly/daily filters covering past months remain accurate
+        const ninetyDaysAgo = new Date();
+        ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
+        const cutoff = toLocalDateStr(ninetyDaysAgo);
 
         const [histRes, catRes] = await Promise.all([
           supabase

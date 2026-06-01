@@ -287,17 +287,21 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
 
     if (trendFilter === "custom") {
       const customD = parseLocalDateStr(trendCustomDate);
-      if (customD.getFullYear() !== year || customD.getMonth() !== monthIdx) return [];
       return [buildDay(customD)];
     }
 
-    let days: number;
+    // "all" => the whole selected month (day 1 → today for current, day 1 → last day otherwise)
     if (trendFilter === "all") {
-      days = anchorDay;
-    } else {
-      days = Math.min(Number(trendFilter), anchorDay);
+      const data: { day: string; isoDate: string; dayNum: number; total: number; resolved: number; slaOk: number }[] = [];
+      for (let d = 1; d <= anchorDay; d++) {
+        data.push(buildDay(new Date(year, monthIdx, d)));
+      }
+      return data;
     }
 
+    // 7/14/30: show last N calendar days ending at the month anchor.
+    // Do NOT clamp to within-month: that caused current-month day 1 to render a single point.
+    const days = Number(trendFilter);
     const data: { day: string; isoDate: string; dayNum: number; total: number; resolved: number; slaOk: number }[] = [];
     for (let i = days - 1; i >= 0; i--) {
       const date = new Date(year, monthIdx, anchorDay - i);
@@ -1125,10 +1129,10 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All Data</SelectItem>
-                    <SelectItem value="7">7 Days</SelectItem>
-                    <SelectItem value="14">14 Days</SelectItem>
-                    <SelectItem value="30">30 Days</SelectItem>
+                    <SelectItem value="all">Bulan Penuh</SelectItem>
+                    <SelectItem value="7">7 Hari</SelectItem>
+                    <SelectItem value="14">14 Hari</SelectItem>
+                    <SelectItem value="30">30 Hari</SelectItem>
                     <SelectItem value="custom">Custom</SelectItem>
                   </SelectContent>
                 </Select>
