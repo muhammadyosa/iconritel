@@ -1319,6 +1319,33 @@ export default function Settings() {
         </DialogContent>
       </Dialog>
 
+      {/* Confirm Delete Regional Team Dialog */}
+      <Dialog open={showDeleteRegionalDialog} onOpenChange={setShowDeleteRegionalDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-destructive">
+              <Trash2 className="h-5 w-5" />
+              Delete 🗺 List Team Region
+            </DialogTitle>
+            <DialogDescription className="space-y-2">
+              <p>Apakah Anda yakin ingin menghapus master data 🗺 <strong>List Team Region</strong>?</p>
+              <p className="text-sm text-muted-foreground">Saat ini tersimpan <strong>{dataCounts.regionalTeam.toLocaleString()}</strong> data.</p>
+              <p className="font-medium text-destructive">Tindakan ini tidak dapat dibatalkan!</p>
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowDeleteRegionalDialog(false)} disabled={isDeletingRegional}>
+              Batal
+            </Button>
+            <Button variant="destructive" onClick={handleDeleteRegional} disabled={isDeletingRegional}>
+              <Trash2 className="h-4 w-4 mr-2" />
+              {isDeletingRegional ? "Menghapus..." : "Ya, Hapus Data"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+
       {/* Confirm Delete All Dialog */}
       <Dialog open={showDeleteAllDialog} onOpenChange={setShowDeleteAllDialog}>
         <DialogContent>
