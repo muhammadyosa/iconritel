@@ -393,13 +393,17 @@ function processRegionalTeamSheet(sheet: any, XLSX: any): RegionalTeamRecord[] {
     
     // Detect "Nama Tim" row - assign team members and flush
     if (cell0.toUpperCase() === "NAMA TIM") {
+      // Flush any pending mitra batch FIRST so we have records to attach team members to
+      if (collectingHostnames) flushMitra();
       // Assign team members to the last batch of mitra
-      const startIdx = records.length - mitraNames.filter(n => n && n.trim() && n !== currentRegion).length;
+      const batchSize = mitraNames.filter(n => n && n.trim() && n !== currentRegion).length;
+      const startIdx = records.length - batchSize;
       let mitraIdx = 0;
       for (let c = 1; c < row.length; c++) {
         const member = String(row[c] || "").trim();
-        if (startIdx + mitraIdx < records.length) {
-          records[startIdx + mitraIdx].teamMember = member;
+        const targetIdx = startIdx + mitraIdx;
+        if (member && targetIdx >= 0 && targetIdx < records.length) {
+          records[targetIdx].teamMember = member;
         }
         mitraIdx++;
       }

@@ -25,7 +25,7 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { importMultiSheetExcel, getExcelSheets, ImportResult } from "@/lib/multiSheetImport";
-import { saveExcelData, saveOLTData, saveFATData, openDB, clearListData, saveFDTData, saveAKVData, loadExcelData, loadOLTData, loadFATData, loadFDTData, loadAKVData, saveRegionalTeamData, loadRegionalTeamData } from "@/lib/indexedDB";
+import { saveExcelData, saveOLTData, saveFATData, openDB, clearListData, saveFDTData, saveAKVData, loadExcelData, loadOLTData, loadFATData, loadFDTData, loadAKVData, saveRegionalTeamData, loadRegionalTeamData, clearRegionalTeamData } from "@/lib/indexedDB";
 import { emitRegionalTeamUpdated } from "@/lib/defaultRegionalData";
 import { useUserRole } from "@/hooks/useUserRole";
 import { UserManagement } from "@/components/UserManagement";
@@ -144,6 +144,8 @@ export default function Settings() {
   const [regionalFile, setRegionalFile] = useState<File | null>(null);
   const [isImportingRegional, setIsImportingRegional] = useState(false);
   const [regionalProgress, setRegionalProgress] = useState(0);
+  const [showDeleteRegionalDialog, setShowDeleteRegionalDialog] = useState(false);
+  const [isDeletingRegional, setIsDeletingRegional] = useState(false);
   const [dataCounts, setDataCounts] = useState<DataCounts>({
     user: 0,
     olt: 0,
@@ -502,6 +504,29 @@ export default function Settings() {
     }
   };
 
+  // Hapus master data 🗺 List Team Region (admin-only)
+  const handleDeleteRegional = async () => {
+    if (!isAdmin) {
+      toast.error("Hanya 🕵️ Admin yang dapat menghapus data 🗺 List Team Region");
+      return;
+    }
+    setIsDeletingRegional(true);
+    try {
+      await clearRegionalTeamData();
+      try { localStorage.removeItem(LOCAL_REGIONAL_UPLOAD_KEY); } catch {}
+      setLastRegionalUpload(null);
+      emitRegionalTeamUpdated();
+      await loadDataCounts();
+      toast.success("🗺 List Team Region berhasil dihapus");
+    } catch (error) {
+      toast.error("Gagal menghapus 🗺 List Team Region");
+      if (import.meta.env.DEV) console.error("Error deleting regional team:", error);
+    } finally {
+      setIsDeletingRegional(false);
+      setShowDeleteRegionalDialog(false);
+    }
+  };
+
   const getTypeLabel = (type: string | null) => {
     switch (type) {
       case "user":
@@ -793,6 +818,20 @@ export default function Settings() {
                       <Progress value={regionalProgress} className="h-2" />
                     </div>
                   )}
+                  <div className="pt-4 border-t">
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={() => setShowDeleteRegionalDialog(true)}
+                      disabled={isImportingRegional || isDeletingRegional || dataCounts.regionalTeam === 0}
+                    >
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Delete Data List 🗺 List Team Region
+                    </Button>
+                    <p className="text-xs text-muted-foreground mt-2">
+                      Menghapus master data 🗺 List Team Region dari aplikasi. Tindakan ini hanya dapat dilakukan oleh 🕵️ Admin.
+                    </p>
+                  </div>
                 </div>
               ) : (
                 <div className="flex items-start gap-2 rounded-md border border-border bg-muted/40 p-3">
@@ -1279,6 +1318,33 @@ export default function Settings() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Confirm Delete Regional Team Dialog */}
+      <Dialog open={showDeleteRegionalDialog} onOpenChange={setShowDeleteRegionalDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-destructive">
+              <Trash2 className="h-5 w-5" />
+              Delete 🗺 List Team Region
+            </DialogTitle>
+            <DialogDescription className="space-y-2">
+              <p>Apakah Anda yakin ingin menghapus master data 🗺 <strong>List Team Region</strong>?</p>
+              <p className="text-sm text-muted-foreground">Saat ini tersimpan <strong>{dataCounts.regionalTeam.toLocaleString()}</strong> data.</p>
+              <p className="font-medium text-destructive">Tindakan ini tidak dapat dibatalkan!</p>
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowDeleteRegionalDialog(false)} disabled={isDeletingRegional}>
+              Batal
+            </Button>
+            <Button variant="destructive" onClick={handleDeleteRegional} disabled={isDeletingRegional}>
+              <Trash2 className="h-4 w-4 mr-2" />
+              {isDeletingRegional ? "Menghapus..." : "Ya, Hapus Data"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
 
       {/* Confirm Delete All Dialog */}
       <Dialog open={showDeleteAllDialog} onOpenChange={setShowDeleteAllDialog}>
