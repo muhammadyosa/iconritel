@@ -1259,7 +1259,7 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
               </div>
             </div>
           </CardHeader>
-          <CardContent className="p-2 sm:p-3">
+          <CardContent className="p-2 sm:p-3 flex-1 overflow-y-auto min-h-0">
             {dailyTrend.length === 0 ? (
               <p className="text-xs text-muted-foreground text-center py-4">No data</p>
             ) : (
