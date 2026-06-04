@@ -950,13 +950,6 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
         </div>
       </div>
 
-      {/* KPI Summary - compact cards with glow effect matching Dashboard KPI */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-        {([
-          {
-            type: "total" as const,
-            emoji: "🗃️", title: "Total Incident", value: kpis.total,
-            sub: `🏠 ${kpis.ritel} • 🏬 ${kpis.feeder}`,
       {/* KPI Summary */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3">
         {([
