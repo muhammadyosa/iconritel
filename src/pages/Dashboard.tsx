@@ -576,6 +576,7 @@ export default function Dashboard() {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.3 }}
+          className="h-full"
         >
           <Card className="overflow-hidden border h-full">
             <CardHeader className="py-2.5 px-3 sm:px-4 border-b bg-muted/20">
