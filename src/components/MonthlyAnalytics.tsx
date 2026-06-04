@@ -1277,11 +1277,13 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
         </Card>
 
         {/* Daily Trend */}
-        <Card className="overflow-hidden border">
-          <CardHeader className="py-2 px-3 sm:px-4 border-b bg-muted/20">
+        <Card className="overflow-hidden border-border/60 shadow-card hover:shadow-elevated transition-all duration-300 rounded-xl">
+          <CardHeader className="py-2.5 px-3 sm:px-4 border-b bg-gradient-to-r from-warning/10 via-warning/5 to-transparent">
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <CardTitle className="flex items-center gap-1.5 text-xs sm:text-sm">
-                <TrendingUp className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary" />
+              <CardTitle className="flex items-center gap-1.5 text-xs sm:text-sm font-semibold">
+                <div className="flex h-6 w-6 items-center justify-center rounded-md bg-warning/15 text-warning">
+                  <TrendingUp className="h-3.5 w-3.5" />
+                </div>
                 Daily Trends & SLA Compliance
               </CardTitle>
               <div className="flex items-center gap-3">
