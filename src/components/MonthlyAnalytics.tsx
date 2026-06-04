@@ -1091,24 +1091,7 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
               <p className="text-xs text-muted-foreground text-center py-8">No data</p>
             ) : (() => {
               const total = categoryData.reduce((s, d) => s + d.value, 0) || 1;
-              // Show up to top 6 in the arc; full list in legend
-              const arcItems = categoryData.slice(0, 6);
-              const cx = 100, cy = 100;
-              const maxR = 78, minR = 24;
-              const step = arcItems.length > 1 ? (maxR - minR) / (arcItems.length - 1) : 0;
-              const stroke = Math.max(6, Math.min(10, Math.floor(step * 0.65) || 10));
-              const arcPath = (r: number, pct: number) => {
-                const clamped = Math.max(0, Math.min(1, pct));
-                const angle = Math.PI * clamped;
-                const x1 = cx - r;
-                const y1 = cy;
-                const x2 = cx - r * Math.cos(angle);
-                const y2 = cy - r * Math.sin(angle);
-                const large = clamped > 0.5 ? 1 : 0;
-                return `M ${x1} ${y1} A ${r} ${r} 0 ${large} 1 ${x2} ${y2}`;
-              };
-              const fullArc = (r: number) =>
-                `M ${cx - r} ${cy} A ${r} ${r} 0 1 1 ${cx + r} ${cy}`;
+              const maxValue = Math.max(...categoryData.map((d) => d.value), 1);
               const openCategory = (name: string) => {
                 const filtered = categoryFilteredTickets.filter((t) => t.constraint === name);
                 setDrillSelectedTicket(null);
@@ -1120,71 +1103,62 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
               };
               const colorFor = (name: string, i: number) =>
                 CATEGORY_COLORS[name] || FALLBACK_COLORS[i % FALLBACK_COLORS.length];
+              const top = categoryData[0];
+              const topPct = Math.round((top.value / total) * 100);
               return (
                 <div className="flex flex-col gap-3">
-                  <div className="w-full flex items-center justify-center">
-                    <svg viewBox="-12 -14 224 130" className="w-full max-w-[300px] h-auto overflow-visible">
-                      {arcItems.map((d, i) => {
-                        const r = maxR - i * step;
-                        return (
-                          <path
-                            key={`bg-${d.name}`}
-                            d={fullArc(r)}
-                            fill="none"
-                            stroke="hsl(var(--muted))"
-                            strokeOpacity={0.35}
-                            strokeWidth={stroke}
-                            strokeLinecap="round"
-                          />
-                        );
-                      })}
-                      {arcItems.map((d, i) => {
-                        const r = maxR - i * step;
-                        const pct = d.value / total;
-                        if (pct <= 0) return null;
-                        return (
-                          <path
-                            key={`fg-${d.name}`}
-                            d={arcPath(r, pct)}
-                            fill="none"
-                            stroke={colorFor(d.name, i)}
-                            strokeWidth={stroke}
-                            strokeLinecap="round"
-                            className="cursor-pointer transition-opacity hover:opacity-80"
-                            onClick={() => openCategory(d.name)}
-                          >
-                            <title>{`${d.name}: ${d.value} (${Math.round(pct * 100)}%)`}</title>
-                          </path>
-                        );
-                      })}
-                    </svg>
+                  {/* Summary header */}
+                  <div className="flex items-center justify-between gap-2 px-2 py-2 rounded-md bg-muted/30 border border-border/50">
+                    <div className="flex flex-col min-w-0">
+                      <span className="text-[10px] uppercase tracking-wide text-muted-foreground">Top Category</span>
+                      <span className="text-xs sm:text-sm font-semibold truncate flex items-center gap-1.5">
+                        <span
+                          className="w-2 h-2 rounded-full shrink-0"
+                          style={{ backgroundColor: colorFor(top.name, 0) }}
+                        />
+                        {top.name}
+                      </span>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-base sm:text-lg font-bold tabular-nums leading-none">{top.value.toLocaleString("id-ID")}</div>
+                      <div className="text-[10px] text-muted-foreground mt-0.5">{topPct}% of {total.toLocaleString("id-ID")}</div>
+                    </div>
                   </div>
 
-                  <div className="space-y-1.5 max-h-[220px] overflow-y-auto pr-1">
+                  {/* Horizontal bar list */}
+                  <div className="space-y-1.5 max-h-[320px] overflow-y-auto pr-1">
                     {categoryData.map((d, i) => {
-                      const pct = Math.round((d.value / total) * 100);
+                      const pct = (d.value / total) * 100;
+                      const barWidth = (d.value / maxValue) * 100;
+                      const color = colorFor(d.name, i);
                       return (
                         <button
                           key={d.name}
                           onClick={() => openCategory(d.name)}
-                          className="w-full flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-muted/40 transition-colors text-left"
+                          className="w-full group flex flex-col gap-1 px-2 py-1.5 rounded-md hover:bg-muted/40 transition-colors text-left"
                         >
-                          <span
-                            className="w-2.5 h-2.5 rounded-full shrink-0"
-                            style={{ backgroundColor: colorFor(d.name, i) }}
-                          />
-                          <span className="text-[11px] sm:text-xs font-medium flex items-center gap-1 min-w-0">
-                            <span className="truncate">{d.name}</span>
-                            <span className="text-muted-foreground shrink-0">({pct}%)</span>
-                          </span>
-                          <span className="ml-auto text-xs sm:text-sm font-bold tabular-nums">
-                            {d.value.toLocaleString("id-ID")}
-                          </span>
+                          <div className="flex items-center gap-2 min-w-0">
+                            <span
+                              className="w-2.5 h-2.5 rounded-full shrink-0"
+                              style={{ backgroundColor: color }}
+                            />
+                            <span className="text-[11px] sm:text-xs font-medium truncate flex-1">{d.name}</span>
+                            <span className="text-[10px] text-muted-foreground tabular-nums shrink-0">{pct.toFixed(1)}%</span>
+                            <span className="text-xs sm:text-sm font-bold tabular-nums shrink-0 min-w-[2.5rem] text-right">
+                              {d.value.toLocaleString("id-ID")}
+                            </span>
+                          </div>
+                          <div className="h-1.5 w-full rounded-full bg-muted/40 overflow-hidden">
+                            <div
+                              className="h-full rounded-full transition-all duration-500 group-hover:opacity-80"
+                              style={{ width: `${barWidth}%`, backgroundColor: color }}
+                            />
+                          </div>
                         </button>
                       );
                     })}
                   </div>
-                  <div className="flex items-center justify-between gap-2 text-[9px] sm:text-[10px] text-muted-foreground">
+                  <div className="flex items-center justify-between gap-2 text-[9px] sm:text-[10px] text-muted-foreground border-t pt-2">
                     <span className="font-medium text-primary/80 truncate">{categoryRangeHint}</span>
                     <span>Klik baris untuk detail</span>
                   </div>
