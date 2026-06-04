@@ -250,17 +250,31 @@ export default function RegionalOfficeTab({ tickets }: RegionalOfficeTabProps) {
                 <BarChart
                   data={regionalData.filter(r => r.totalIncidents > 0).slice(0, 10)}
                   margin={{ top: 5, right: 10, left: -10, bottom: 30 }}
-                  barCategoryGap="15%"
-                  barGap={2}
+                  barCategoryGap="20%"
+                  barGap={4}
                 >
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} opacity={0.15} />
-                  <XAxis type="category" dataKey="region" tick={{ fontSize: 8 }} interval={0} height={50} angle={-35} textAnchor="end" />
-                  <YAxis type="number" tick={{ fontSize: 9 }} width={35} />
-                  <ChartTooltip content={<ChartTooltipContent />} />
-                  <Legend wrapperStyle={{ fontSize: 10 }} />
-                  <Bar dataKey="critical" fill="hsl(var(--destructive))" name="Critical" radius={[4, 4, 0, 0]} />
-                  <Bar dataKey="pending" fill="hsl(var(--warning))" name="Pending" radius={[4, 4, 0, 0]} />
-                  <Bar dataKey="resolved" fill="hsl(var(--success))" name="Resolved" radius={[4, 4, 0, 0]} />
+                  <defs>
+                    <linearGradient id="rgnCritical" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="hsl(var(--destructive))" stopOpacity={0.95} />
+                      <stop offset="100%" stopColor="hsl(var(--destructive))" stopOpacity={0.55} />
+                    </linearGradient>
+                    <linearGradient id="rgnPending" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="hsl(var(--warning))" stopOpacity={0.95} />
+                      <stop offset="100%" stopColor="hsl(var(--warning))" stopOpacity={0.55} />
+                    </linearGradient>
+                    <linearGradient id="rgnResolved" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="hsl(var(--success))" stopOpacity={0.95} />
+                      <stop offset="100%" stopColor="hsl(var(--success))" stopOpacity={0.55} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 4" vertical={false} opacity={0.2} />
+                  <XAxis type="category" dataKey="region" tick={{ fontSize: 8 }} interval={0} height={50} angle={-35} textAnchor="end" tickLine={false} axisLine={false} />
+                  <YAxis type="number" tick={{ fontSize: 9 }} width={35} tickLine={false} axisLine={false} />
+                  <ChartTooltip content={<ChartTooltipContent className="rounded-xl shadow-lg" />} />
+                  <Legend wrapperStyle={{ fontSize: 10 }} iconType="circle" />
+                  <Bar dataKey="critical" fill="url(#rgnCritical)" name="Critical" radius={[8, 8, 0, 0]} barSize={14} />
+                  <Bar dataKey="pending" fill="url(#rgnPending)" name="Pending" radius={[8, 8, 0, 0]} barSize={14} />
+                  <Bar dataKey="resolved" fill="url(#rgnResolved)" name="Resolved" radius={[8, 8, 0, 0]} barSize={14} />
                 </BarChart>
               </ChartContainer>
 
@@ -334,10 +348,10 @@ export default function RegionalOfficeTab({ tickets }: RegionalOfficeTabProps) {
                     <ChartContainer config={pieConfig} className="h-[200px] xs:h-[230px] sm:h-[260px] w-full max-w-[340px]">
                       <PieChart>
                         <ChartTooltip content={<ChartTooltipContent nameKey="name" />} />
-                        <Pie data={pieData} cx="50%" cy="50%" innerRadius={45} outerRadius={80} paddingAngle={3}
+                        <Pie data={pieData} cx="50%" cy="50%" innerRadius={55} outerRadius={88} paddingAngle={4}
                           dataKey="value" nameKey="name" label={renderCustomLabel}
-                          labelLine={{ stroke: "hsl(var(--muted-foreground))", strokeWidth: 1 }}
-                          strokeWidth={2} stroke="hsl(var(--background))">
+                          labelLine={false}
+                          strokeWidth={2} stroke="hsl(var(--background))" cornerRadius={6}>
                           {pieData.map((_, index) => (
                             <RechartsCell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
                           ))}

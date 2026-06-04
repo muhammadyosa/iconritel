@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/StatusBadge";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip, LineChart, Line, Cell } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip, LineChart, Line, Cell, Area, AreaChart, ComposedChart, PieChart, Pie, LabelList } from "recharts";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Ticket, FEEDER_CONSTRAINTS_SET } from "@/types/ticket";
 import { TrendingUp, Clock, CheckCircle, BarChart3, ArrowLeft, FileDown } from "lucide-react";
@@ -1004,6 +1004,61 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
         ))}
       </div>
 
+      {/* Monthly Performance Chart — composed bar (total) + line (resolved) */}
+      {dailyTrend.length > 0 && (
+        <Card className="overflow-hidden border">
+          <CardHeader className="py-2 px-3 sm:px-4 border-b bg-muted/20">
+            <div className="flex items-center justify-between gap-2">
+              <CardTitle className="flex items-center gap-1.5 text-xs sm:text-sm">
+                <TrendingUp className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary" />
+                Monthly Performance Trend
+              </CardTitle>
+              <span className="text-[9px] sm:text-[10px] text-muted-foreground truncate">
+                {selectedMonthLabel} • {dailyTrend.length} hari
+              </span>
+            </div>
+          </CardHeader>
+          <CardContent className="p-2 sm:p-3">
+            <ChartContainer
+              config={{
+                total: { label: "Total Incident", color: "hsl(217, 91%, 60%)" },
+                resolved: { label: "Resolved", color: "hsl(142, 71%, 45%)" },
+              }}
+              className="h-[200px] xs:h-[220px] sm:h-[240px] w-full"
+              style={{ aspectRatio: "auto" }}
+            >
+              <ComposedChart data={dailyTrend} margin={{ top: 16, right: 16, left: 0, bottom: 4 }}>
+                <defs>
+                  <linearGradient id="barTotalGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="var(--color-total)" stopOpacity={0.95} />
+                    <stop offset="100%" stopColor="var(--color-total)" stopOpacity={0.55} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 4" vertical={false} stroke="hsl(var(--border))" strokeOpacity={0.5} />
+                <XAxis
+                  dataKey="day"
+                  tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }}
+                  tickLine={false}
+                  axisLine={false}
+                  interval={dailyTrend.length > 14 ? 3 : dailyTrend.length > 7 ? 1 : 0}
+                />
+                <YAxis tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} width={28} tickLine={false} axisLine={false} />
+                <ChartTooltip content={<ChartTooltipContent indicator="dot" className="rounded-xl shadow-lg" />} />
+                <Bar dataKey="total" fill="url(#barTotalGrad)" radius={[8, 8, 4, 4]} barSize={18} />
+                <Line
+                  type="monotone"
+                  dataKey="resolved"
+                  stroke="var(--color-resolved)"
+                  strokeWidth={2.5}
+                  dot={{ r: 3, fill: "var(--color-resolved)", strokeWidth: 0 }}
+                  activeDot={{ r: 5, strokeWidth: 2, stroke: "hsl(var(--background))" }}
+                />
+              </ComposedChart>
+            </ChartContainer>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Status Distribution — counts per status for the active scope (month / current / all) */}
       <Card className="overflow-hidden border">
         <CardHeader className="py-2 px-3 sm:px-4 border-b bg-muted/20">
@@ -1020,34 +1075,76 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
         <CardContent className="p-2 sm:p-3">
           {kpis.total === 0 ? (
             <p className="text-xs text-muted-foreground text-center py-4">No data</p>
-          ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-              {statusDistribution.map((s) => {
-                const toneMap: Record<string, { bg: string; text: string; bar: string; border: string }> = {
-                  success: { bg: "bg-success/8", text: "text-success", bar: "bg-success", border: "border-success/30" },
-                  warning: { bg: "bg-warning/8", text: "text-warning", bar: "bg-warning", border: "border-warning/30" },
-                  destructive: { bg: "bg-destructive/8", text: "text-destructive", bar: "bg-destructive", border: "border-destructive/30" },
-                  muted: { bg: "bg-muted/30", text: "text-muted-foreground", bar: "bg-muted-foreground/50", border: "border-muted-foreground/20" },
-                };
-                const c = toneMap[s.tone];
-                return (
-                  <div key={s.key} className={`rounded-lg border p-2 ${c.bg} ${c.border}`}>
-                    <div className="flex items-center justify-between gap-1 mb-1">
-                      <span className="flex items-center gap-1 text-[10px] font-medium text-muted-foreground truncate">
-                        <span>{s.emoji}</span>
-                        <span className="truncate">{s.label}</span>
-                      </span>
-                      <span className={`text-[9px] tabular-nums ${c.text}`}>{s.pct}%</span>
-                    </div>
-                    <p className={`text-xl sm:text-2xl font-bold tabular-nums leading-none ${c.text}`}>{s.value}</p>
-                    <div className="mt-1.5 h-1 w-full rounded-full bg-muted/50 overflow-hidden">
-                      <div className={`h-full ${c.bar} transition-all duration-500`} style={{ width: `${s.pct}%` }} />
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
+          ) : (() => {
+            const toneColorMap: Record<string, string> = {
+              success: "hsl(var(--success))",
+              warning: "hsl(var(--warning))",
+              destructive: "hsl(var(--destructive))",
+              muted: "hsl(var(--muted-foreground))",
+            };
+            const pieData = statusDistribution
+              .filter((s) => s.value > 0)
+              .map((s) => ({ name: s.label, value: s.value, fill: toneColorMap[s.tone] }));
+            return (
+              <div className="grid grid-cols-1 sm:grid-cols-5 gap-3 items-center">
+                {/* Donut chart */}
+                <div className="sm:col-span-2 flex items-center justify-center">
+                  <ChartContainer
+                    config={{ value: { label: "Incident" } }}
+                    className="w-full max-w-[220px]"
+                    style={{ height: 200, aspectRatio: "auto" }}
+                  >
+                    <PieChart>
+                      <ChartTooltip content={<ChartTooltipContent indicator="dot" nameKey="name" className="rounded-xl shadow-lg" />} />
+                      <Pie
+                        data={pieData}
+                        dataKey="value"
+                        nameKey="name"
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={50}
+                        outerRadius={82}
+                        paddingAngle={3}
+                        strokeWidth={2}
+                        stroke="hsl(var(--background))"
+                      >
+                        {pieData.map((d) => (
+                          <Cell key={d.name} fill={d.fill} />
+                        ))}
+                      </Pie>
+                    </PieChart>
+                  </ChartContainer>
+                </div>
+                {/* Status cards */}
+                <div className="sm:col-span-3 grid grid-cols-2 gap-2">
+                  {statusDistribution.map((s) => {
+                    const toneMap: Record<string, { bg: string; text: string; bar: string; border: string }> = {
+                      success: { bg: "bg-success/8", text: "text-success", bar: "bg-success", border: "border-success/30" },
+                      warning: { bg: "bg-warning/8", text: "text-warning", bar: "bg-warning", border: "border-warning/30" },
+                      destructive: { bg: "bg-destructive/8", text: "text-destructive", bar: "bg-destructive", border: "border-destructive/30" },
+                      muted: { bg: "bg-muted/30", text: "text-muted-foreground", bar: "bg-muted-foreground/50", border: "border-muted-foreground/20" },
+                    };
+                    const c = toneMap[s.tone];
+                    return (
+                      <div key={s.key} className={`rounded-lg border p-2 ${c.bg} ${c.border}`}>
+                        <div className="flex items-center justify-between gap-1 mb-1">
+                          <span className="flex items-center gap-1 text-[10px] font-medium text-muted-foreground truncate">
+                            <span>{s.emoji}</span>
+                            <span className="truncate">{s.label}</span>
+                          </span>
+                          <span className={`text-[9px] tabular-nums ${c.text}`}>{s.pct}%</span>
+                        </div>
+                        <p className={`text-lg sm:text-xl font-bold tabular-nums leading-none ${c.text}`}>{s.value}</p>
+                        <div className="mt-1.5 h-1 w-full rounded-full bg-muted/50 overflow-hidden">
+                          <div className={`h-full ${c.bar} transition-all duration-500`} style={{ width: `${s.pct}%` }} />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })()}
         </CardContent>
       </Card>
 
@@ -1091,7 +1188,6 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
               <p className="text-xs text-muted-foreground text-center py-8">No data</p>
             ) : (() => {
               const total = categoryData.reduce((s, d) => s + d.value, 0) || 1;
-              const maxValue = Math.max(...categoryData.map((d) => d.value), 1);
               const openCategory = (name: string) => {
                 const filtered = categoryFilteredTickets.filter((t) => t.constraint === name);
                 setDrillSelectedTicket(null);
@@ -1103,104 +1199,60 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
               };
               const colorFor = (name: string, i: number) =>
                 CATEGORY_COLORS[name] || FALLBACK_COLORS[i % FALLBACK_COLORS.length];
-              const top = categoryData[0];
-              const topPct = Math.round((top.value / total) * 100);
-              // Rose / radial chart geometry
-              const cx = 150;
-              const cy = 150;
-              const innerR = 38;
-              const maxR = 130;
-              const n = categoryData.length;
-              const sliceAngle = (Math.PI * 2) / Math.max(n, 1);
-              const gap = n > 1 ? Math.min(0.04, sliceAngle * 0.08) : 0;
-              const polar = (a: number, r: number) => [cx + Math.cos(a) * r, cy + Math.sin(a) * r];
-              const slicePath = (i: number, r: number) => {
-                const a0 = -Math.PI / 2 + i * sliceAngle + gap / 2;
-                const a1 = -Math.PI / 2 + (i + 1) * sliceAngle - gap / 2;
-                const [x0o, y0o] = polar(a0, r);
-                const [x1o, y1o] = polar(a1, r);
-                const [x1i, y1i] = polar(a1, innerR);
-                const [x0i, y0i] = polar(a0, innerR);
-                const large = a1 - a0 > Math.PI ? 1 : 0;
-                return `M ${x0o} ${y0o} A ${r} ${r} 0 ${large} 1 ${x1o} ${y1o} L ${x1i} ${y1i} A ${innerR} ${innerR} 0 ${large} 0 ${x0i} ${y0i} Z`;
-              };
+              const chartData = categoryData.map((d, i) => ({
+                name: d.name,
+                value: d.value,
+                pct: Math.round((d.value / total) * 100),
+                fill: colorFor(d.name, i),
+              }));
+              const chartHeight = Math.max(180, Math.min(420, chartData.length * 34 + 20));
               return (
                 <div className="flex flex-col gap-3">
-                  {/* Radial rose chart */}
-                  <div className="flex items-center justify-center">
-                    <svg viewBox="0 0 300 300" className="w-full max-w-[320px] h-auto overflow-visible">
-                      <defs>
-                        <filter id="cat-shadow" x="-20%" y="-20%" width="140%" height="140%">
-                          <feDropShadow dx="0" dy="2" stdDeviation="3" floodOpacity="0.15" />
-                        </filter>
-                      </defs>
-                      {/* background ring */}
-                      <circle cx={cx} cy={cy} r={maxR} fill="hsl(var(--muted))" opacity="0.15" />
-                      {categoryData.map((d, i) => {
-                        const r = innerR + ((d.value / maxValue) * (maxR - innerR));
-                        const pct = Math.round((d.value / total) * 100);
-                        const color = colorFor(d.name, i);
-                        const midA = -Math.PI / 2 + (i + 0.5) * sliceAngle;
-                        const labelR = Math.max(innerR + 18, r * 0.65);
-                        const [lx, ly] = polar(midA, labelR);
-                        return (
-                          <g key={d.name} className="cursor-pointer group" onClick={() => openCategory(d.name)}>
-                            <path
-                              d={slicePath(i, r)}
-                              fill={color}
-                              filter="url(#cat-shadow)"
-                              className="transition-opacity group-hover:opacity-80"
-                            >
-                              <title>{`${d.name}: ${d.value.toLocaleString("id-ID")} (${pct}%)`}</title>
-                            </path>
-                            {pct >= 4 && (
-                              <text
-                                x={lx}
-                                y={ly}
-                                textAnchor="middle"
-                                dominantBaseline="central"
-                                className="fill-white font-bold pointer-events-none"
-                                style={{ fontSize: 11 }}
-                              >
-                                {pct}%
-                              </text>
-                            )}
-                          </g>
-                        );
-                      })}
-                      {/* center disc */}
-                      <circle cx={cx} cy={cy} r={innerR - 2} fill="hsl(var(--background))" filter="url(#cat-shadow)" />
-                      <circle cx={cx} cy={cy} r={innerR - 8} fill="none" stroke="hsl(var(--primary))" strokeWidth="2" opacity="0.6" />
-                      <foreignObject x={cx - 16} y={cy - 16} width="32" height="32" className="pointer-events-none">
-                        <div className="w-full h-full flex items-center justify-center">
-                          <BarChart3 className="h-5 w-5 text-primary" />
-                        </div>
-                      </foreignObject>
-                    </svg>
-                  </div>
-
-                  {/* Legend */}
-                  <div className="grid grid-cols-2 gap-1.5 max-h-[180px] overflow-y-auto pr-1">
-                    {categoryData.map((d, i) => {
-                      const pct = ((d.value / total) * 100).toFixed(1);
-                      const color = colorFor(d.name, i);
-                      return (
-                        <button
-                          key={d.name}
-                          onClick={() => openCategory(d.name)}
-                          className="flex items-center gap-1.5 px-1.5 py-1 rounded-md hover:bg-muted/40 transition-colors text-left min-w-0"
-                        >
-                          <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: color }} />
-                          <span className="text-[10px] sm:text-[11px] font-medium truncate flex-1">{d.name}</span>
-                          <span className="text-[9px] sm:text-[10px] text-muted-foreground tabular-nums shrink-0">{pct}%</span>
-                          <span className="text-[10px] sm:text-xs font-bold tabular-nums shrink-0">{d.value.toLocaleString("id-ID")}</span>
-                        </button>
-                      );
-                    })}
-                  </div>
+                  <ChartContainer
+                    config={{ value: { label: "Incident", color: "hsl(var(--primary))" } }}
+                    className="w-full"
+                    style={{ height: chartHeight, aspectRatio: "auto" }}
+                  >
+                    <BarChart
+                      data={chartData}
+                      layout="vertical"
+                      margin={{ top: 4, right: 36, left: 4, bottom: 4 }}
+                      barCategoryGap={6}
+                      onClick={(e: any) => {
+                        const name = e?.activePayload?.[0]?.payload?.name;
+                        if (name) openCategory(name);
+                      }}
+                    >
+                      <CartesianGrid horizontal={false} strokeDasharray="3 4" stroke="hsl(var(--border))" strokeOpacity={0.4} />
+                      <XAxis type="number" hide />
+                      <YAxis
+                        type="category"
+                        dataKey="name"
+                        width={130}
+                        tick={{ fontSize: 10, fill: "hsl(var(--foreground))" }}
+                        tickLine={false}
+                        axisLine={false}
+                      />
+                      <ChartTooltip
+                        cursor={{ fill: "hsl(var(--muted))", fillOpacity: 0.3 }}
+                        content={<ChartTooltipContent indicator="dot" className="rounded-xl shadow-lg" />}
+                      />
+                      <Bar dataKey="value" radius={[10, 10, 10, 10]} barSize={18} className="cursor-pointer">
+                        {chartData.map((d, i) => (
+                          <Cell key={d.name} fill={d.fill} />
+                        ))}
+                        <LabelList
+                          dataKey="pct"
+                          position="right"
+                          formatter={(v: number) => `${v}%`}
+                          style={{ fontSize: 10, fill: "hsl(var(--muted-foreground))", fontWeight: 600 }}
+                        />
+                      </Bar>
+                    </BarChart>
+                  </ChartContainer>
                   <div className="flex items-center justify-between gap-2 text-[9px] sm:text-[10px] text-muted-foreground border-t pt-2">
                     <span className="font-medium text-primary/80 truncate">{categoryRangeHint}</span>
-                    <span>Klik slice untuk detail</span>
+                    <span>Klik bar untuk detail</span>
                   </div>
                 </div>
               );
@@ -1265,11 +1317,25 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
             ) : (
               <>
                 <ChartContainer config={trendConfig} className="h-[200px] xs:h-[220px] sm:h-[260px] md:h-[300px] w-full transition-all duration-300">
-                  <LineChart
+                  <AreaChart
                     data={dailyTrend}
                     margin={{ top: 20, right: 20, left: 5, bottom: 5 }}
                     onClick={handleTrendDotClick}
                   >
+                    <defs>
+                      <linearGradient id="fillTotal" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="var(--color-total)" stopOpacity={0.45} />
+                        <stop offset="100%" stopColor="var(--color-total)" stopOpacity={0.02} />
+                      </linearGradient>
+                      <linearGradient id="fillResolved" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="var(--color-resolved)" stopOpacity={0.45} />
+                        <stop offset="100%" stopColor="var(--color-resolved)" stopOpacity={0.02} />
+                      </linearGradient>
+                      <linearGradient id="fillSlaOk" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="var(--color-slaOk)" stopOpacity={0.45} />
+                        <stop offset="100%" stopColor="var(--color-slaOk)" stopOpacity={0.02} />
+                      </linearGradient>
+                    </defs>
                     <CartesianGrid strokeDasharray="4 6" vertical={false} stroke="hsl(var(--border))" strokeOpacity={0.5} />
                     <XAxis
                       dataKey="day"
@@ -1290,36 +1356,36 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
                       content={<ChartTooltipContent indicator="dot" className="rounded-xl shadow-lg" />}
                     />
                     {trendSeries.total && (
-                      <Line
+                      <Area
                         type="monotone"
                         dataKey="total"
                         stroke="var(--color-total)"
-                        strokeWidth={3}
-                        dot={false}
-                        activeDot={{ r: 6, strokeWidth: 3, stroke: "hsl(var(--background))", fill: "var(--color-total)", cursor: "pointer" }}
+                        strokeWidth={2.5}
+                        fill="url(#fillTotal)"
+                        activeDot={{ r: 5, strokeWidth: 2, stroke: "hsl(var(--background))", fill: "var(--color-total)", cursor: "pointer" }}
                       />
                     )}
                     {trendSeries.resolved && (
-                      <Line
+                      <Area
                         type="monotone"
                         dataKey="resolved"
                         stroke="var(--color-resolved)"
-                        strokeWidth={3}
-                        dot={false}
-                        activeDot={{ r: 6, strokeWidth: 3, stroke: "hsl(var(--background))", fill: "var(--color-resolved)", cursor: "pointer" }}
+                        strokeWidth={2.5}
+                        fill="url(#fillResolved)"
+                        activeDot={{ r: 5, strokeWidth: 2, stroke: "hsl(var(--background))", fill: "var(--color-resolved)", cursor: "pointer" }}
                       />
                     )}
                     {trendSeries.slaOk && (
-                      <Line
+                      <Area
                         type="monotone"
                         dataKey="slaOk"
                         stroke="var(--color-slaOk)"
-                        strokeWidth={3}
-                        dot={false}
-                        activeDot={{ r: 6, strokeWidth: 3, stroke: "hsl(var(--background))", fill: "var(--color-slaOk)", cursor: "pointer" }}
+                        strokeWidth={2.5}
+                        fill="url(#fillSlaOk)"
+                        activeDot={{ r: 5, strokeWidth: 2, stroke: "hsl(var(--background))", fill: "var(--color-slaOk)", cursor: "pointer" }}
                       />
                     )}
-                  </LineChart>
+                  </AreaChart>
                 </ChartContainer>
                 <div className="flex items-center justify-between gap-2 mt-1 text-[9px] sm:text-[10px] text-muted-foreground">
                   <span className="font-medium text-primary/80 truncate">{formatRangeHint(dailyTrend)}</span>
