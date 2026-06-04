@@ -1094,9 +1094,9 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
               // Show up to top 6 in the arc; full list in legend
               const arcItems = categoryData.slice(0, 6);
               const cx = 100, cy = 100;
-              const maxR = 82, minR = 22;
+              const maxR = 78, minR = 24;
               const step = arcItems.length > 1 ? (maxR - minR) / (arcItems.length - 1) : 0;
-              const stroke = Math.max(6, Math.min(11, Math.floor(step * 0.7) || 11));
+              const stroke = Math.max(6, Math.min(10, Math.floor(step * 0.65) || 10));
               const arcPath = (r: number, pct: number) => {
                 const clamped = Math.max(0, Math.min(1, pct));
                 const angle = Math.PI * clamped;
