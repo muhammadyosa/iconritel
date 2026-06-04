@@ -458,7 +458,7 @@ export default function Dashboard() {
                 Status Distribution
               </CardTitle>
             </CardHeader>
-            <CardContent className="p-3 sm:p-4">
+            <CardContent className="p-2 sm:p-2.5">
               {(() => {
                 const statusData = [
                   { emoji: "⚙️", label: "Progres", value: tickets.filter((t) => t.status === "On Progress").length, color: "hsl(217, 91%, 60%)", status: "On Progress" as const },
@@ -496,10 +496,10 @@ export default function Dashboard() {
                   `M ${cx - r} ${cy} A ${r} ${r} 0 1 1 ${cx + r} ${cy}`;
 
                 return (
-                  <div className="flex flex-col gap-3">
+                  <div className="flex flex-col gap-2">
                     {/* Arc visual */}
                     <div className="w-full flex items-center justify-center">
-                      <svg viewBox="0 0 200 110" className="w-full max-w-[260px] h-auto">
+                      <svg viewBox="0 0 200 110" className="w-full max-w-[200px] h-auto">
                         {statusData.map((d, i) => (
                           <g key={`bg-${d.label}`}>
                             <path
@@ -534,32 +534,32 @@ export default function Dashboard() {
                     </div>
 
                     {/* Legend list — label (pct) ............ value */}
-                    <div className="space-y-1.5">
+                    <div className="space-y-0.5">
                       {statusData.map((d) => {
                         const pct = Math.round((d.value / total) * 100);
                         return (
                           <button
                             key={d.label}
                             onClick={() => openStatus(d.status)}
-                            className="w-full flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-muted/40 transition-colors text-left"
+                            className="w-full flex items-center gap-2 px-1.5 py-1 rounded-md hover:bg-muted/40 transition-colors text-left"
                           >
                             <span
-                              className="w-2.5 h-2.5 rounded-full shrink-0"
+                              className="w-2 h-2 rounded-full shrink-0"
                               style={{ backgroundColor: d.color }}
                             />
-                            <span className="text-[11px] sm:text-xs font-medium flex items-center gap-1">
+                            <span className="text-[10px] sm:text-[11px] font-medium flex items-center gap-1">
                               <span>{d.emoji}</span>
                               <span>{d.label}</span>
                               <span className="text-muted-foreground">({pct}%)</span>
                             </span>
-                            <span className="ml-auto text-xs sm:text-sm font-bold tabular-nums">
+                            <span className="ml-auto text-[11px] sm:text-xs font-bold tabular-nums">
                               {d.value.toLocaleString("id-ID")}
                             </span>
                           </button>
                         );
                       })}
                     </div>
-                    <p className="text-[9px] sm:text-[10px] text-muted-foreground text-center">
+                    <p className="text-[9px] text-muted-foreground text-center">
                       Klik baris untuk detail
                     </p>
                   </div>
@@ -746,7 +746,7 @@ export default function Dashboard() {
                 };
 
                 return (
-                  <ChartContainer config={chartConfig} className="h-[220px] sm:h-[260px] md:h-[300px] w-full transition-all duration-300">
+                  <ChartContainer config={chartConfig} className="h-[180px] sm:h-[210px] md:h-[230px] w-full transition-all duration-300">
                     <AreaChart data={chartData} margin={{ top: 10, right: 15, left: 5, bottom: 5 }}>
                       <defs>
                         <linearGradient id="grad-ritel" x1="0" y1="0" x2="0" y2="1">
