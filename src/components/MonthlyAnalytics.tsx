@@ -1052,9 +1052,9 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
       </Card>
 
       {/* Charts - matching Status Distribution / Category Trend card style */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-2 sm:gap-3 items-stretch">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 sm:gap-3">
         {/* Category Breakdown */}
-        <Card className="overflow-hidden border flex flex-col max-h-[480px]">
+        <Card className="overflow-hidden border">
           <CardHeader className="py-2 px-3 sm:px-4 border-b bg-muted/20">
              <div className="flex items-center justify-between gap-2">
               <CardTitle className="flex items-center gap-1.5 text-xs sm:text-sm">
@@ -1086,7 +1086,7 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
               </div>
             </div>
           </CardHeader>
-          <CardContent className="p-2 sm:p-3 flex-1 overflow-y-auto min-h-0">
+          <CardContent className="p-2 sm:p-3">
             {categoryData.length === 0 ? (
               <p className="text-xs text-muted-foreground text-center py-8">No data</p>
             ) : (() => {
@@ -1209,7 +1209,7 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
         </Card>
 
         {/* Daily Trend */}
-        <Card className="overflow-hidden border flex flex-col max-h-[480px]">
+        <Card className="overflow-hidden border">
           <CardHeader className="py-2 px-3 sm:px-4 border-b bg-muted/20">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <CardTitle className="flex items-center gap-1.5 text-xs sm:text-sm">
@@ -1259,7 +1259,7 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
               </div>
             </div>
           </CardHeader>
-          <CardContent className="p-2 sm:p-3 flex-1 overflow-y-auto min-h-0">
+          <CardContent className="p-2 sm:p-3">
             {dailyTrend.length === 0 ? (
               <p className="text-xs text-muted-foreground text-center py-4">No data</p>
             ) : (
