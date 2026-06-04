@@ -444,130 +444,175 @@ export default function Dashboard() {
 
       {/* Charts Section */}
       <div className="grid gap-2 sm:gap-3 grid-cols-1 lg:grid-cols-2 w-full">
-        {/* Status Distribution Bar Chart */}
+        {/* Status Distribution — Arc Gauge (Current Statistic style) */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.2 }}
+          className="lg:col-span-1"
         >
-          <Card className="overflow-hidden border">
+          <Card className="overflow-hidden border h-full">
             <CardHeader className="py-2 px-3 sm:px-4 border-b bg-muted/20">
               <CardTitle className="flex items-center gap-1.5 text-xs sm:text-sm">
                 <BarChart3 className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary" />
                 Status Distribution
               </CardTitle>
             </CardHeader>
-            <CardContent className="p-2 sm:p-3">
+            <CardContent className="p-3 sm:p-4">
               {(() => {
                 const statusData = [
-                  { emoji: "⚙️", label: "Progres", value: tickets.filter((t) => t.status === "On Progress").length, fill: "hsl(217, 91%, 60%)", status: "On Progress" },
-                  { emoji: "🚨", label: "Critical", value: tickets.filter((t) => t.status === "Critical").length, fill: "hsl(0, 84%, 60%)", status: "Critical" },
-                  { emoji: "✅", label: "Resolved", value: tickets.filter((t) => t.status === "Resolved").length, fill: "hsl(142, 71%, 45%)", status: "Resolved" },
-                  { emoji: "⏳", label: "Pending", value: tickets.filter((t) => t.status === "Pending").length, fill: "hsl(38, 92%, 50%)", status: "Pending" },
+                  { emoji: "⚙️", label: "Progres", value: tickets.filter((t) => t.status === "On Progress").length, color: "hsl(217, 91%, 60%)", status: "On Progress" as const },
+                  { emoji: "🚨", label: "Critical", value: tickets.filter((t) => t.status === "Critical").length, color: "hsl(0, 84%, 60%)", status: "Critical" as const },
+                  { emoji: "✅", label: "Resolved", value: tickets.filter((t) => t.status === "Resolved").length, color: "hsl(142, 71%, 45%)", status: "Resolved" as const },
+                  { emoji: "⏳", label: "Pending", value: tickets.filter((t) => t.status === "Pending").length, color: "hsl(38, 92%, 50%)", status: "Pending" as const },
                 ];
-
-                const chartConfig: ChartConfig = {
-                  value: { label: "Jumlah" },
+                const total = statusData.reduce((s, d) => s + d.value, 0) || 1;
+                const openStatus = (status: string) => {
+                  setSelectedStatus(selectedStatus === status ? null : status);
+                  const filtered = tickets.filter((t) => t.status === status);
+                  setPreviousDialogState(null);
+                  setShowOltList(false);
+                  setFilterDialogTickets(filtered);
+                  setFilterDialogTitle(`⚙️ Incident dengan Status: ${status}`);
+                  setFilterDialogOpen(true);
                 };
 
-                // Custom Y-axis tick with emoji above label
-                const CustomYAxisTick = ({ x, y, payload }: any) => {
-                  const item = statusData.find((d) => d.label === payload.value);
-                  return (
-                    <g transform={`translate(${x},${y})`}>
-                      <text
-                        x={-8}
-                        y={-8}
-                        textAnchor="end"
-                        fontSize={14}
-                        className="select-none"
-                      >
-                        {item?.emoji}
-                      </text>
-                      <text
-                        x={-8}
-                        y={6}
-                        textAnchor="end"
-                        fontSize={9}
-                        fill="hsl(var(--muted-foreground))"
-                      >
-                        {payload.value}
-                      </text>
-                    </g>
-                  );
+                // Build concentric semi-circular arcs
+                // viewBox 200x110, center (100, 100), radii spaced for 4 rings
+                const cx = 100, cy = 100;
+                const radii = [82, 66, 50, 34];
+                const stroke = 11;
+                const arcPath = (r: number, pct: number) => {
+                  const clamped = Math.max(0, Math.min(1, pct));
+                  const angle = Math.PI * clamped; // 0..PI
+                  const x1 = cx - r;
+                  const y1 = cy;
+                  const x2 = cx - r * Math.cos(angle);
+                  const y2 = cy - r * Math.sin(angle);
+                  const large = clamped > 0.5 ? 1 : 0;
+                  return `M ${x1} ${y1} A ${r} ${r} 0 ${large} 1 ${x2} ${y2}`;
                 };
+                const fullArc = (r: number) =>
+                  `M ${cx - r} ${cy} A ${r} ${r} 0 1 1 ${cx + r} ${cy}`;
 
                 return (
-                  <ChartContainer config={chartConfig} className="h-[180px] xs:h-[190px] sm:h-[210px] md:h-[240px] w-full transition-all duration-300">
-                    <BarChart
-                      data={statusData}
-                      layout="vertical"
-                      margin={{ top: 8, right: 15, left: 5, bottom: 8 }}
-                      barCategoryGap="25%"
-                      onClick={(data) => {
-                        if (data?.activePayload?.[0]?.payload?.status) {
-                          const status = data.activePayload[0].payload.status;
-                          setSelectedStatus(selectedStatus === status ? null : status);
-                          const filtered = tickets.filter((t) => t.status === status);
-                          setPreviousDialogState(null);
-                          setShowOltList(false);
-                          setFilterDialogTickets(filtered);
-                          setFilterDialogTitle(`⚙️ Incident dengan Status: ${status}`);
-                          setFilterDialogOpen(true);
-                        }
-                      }}
-                    >
-                      <CartesianGrid strokeDasharray="3 3" className="stroke-muted" horizontal={false} />
-                      <XAxis 
-                        type="number"
-                        tick={{ fontSize: 8, fill: "hsl(var(--muted-foreground))" }}
-                        tickLine={false}
-                        axisLine={false}
-                      />
-                      <YAxis 
-                        type="category"
-                        dataKey="label" 
-                        tick={<CustomYAxisTick />}
-                        width={75}
-                        tickLine={false}
-                        axisLine={false}
-                      />
-                      <ChartTooltip
-                        content={<ChartTooltipContent />}
-                        cursor={{ fill: "hsl(var(--muted))", opacity: 0.3 }}
-                      />
-                      <Bar dataKey="value" radius={[0, 4, 4, 0]} cursor="pointer" maxBarSize={28}>
-                        {statusData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={entry.fill} />
+                  <div className="flex flex-col gap-3">
+                    {/* Arc visual */}
+                    <div className="w-full flex items-center justify-center">
+                      <svg viewBox="0 0 200 110" className="w-full max-w-[260px] h-auto">
+                        {statusData.map((d, i) => (
+                          <g key={`bg-${d.label}`}>
+                            <path
+                              d={fullArc(radii[i])}
+                              fill="none"
+                              stroke="hsl(var(--muted))"
+                              strokeOpacity={0.35}
+                              strokeWidth={stroke}
+                              strokeLinecap="round"
+                            />
+                          </g>
                         ))}
-                      </Bar>
-                    </BarChart>
-                  </ChartContainer>
+                        {statusData.map((d, i) => {
+                          const pct = d.value / total;
+                          if (pct <= 0) return null;
+                          return (
+                            <path
+                              key={`fg-${d.label}`}
+                              d={arcPath(radii[i], pct)}
+                              fill="none"
+                              stroke={d.color}
+                              strokeWidth={stroke}
+                              strokeLinecap="round"
+                              className="cursor-pointer transition-opacity hover:opacity-80"
+                              onClick={() => openStatus(d.status)}
+                            >
+                              <title>{`${d.label}: ${d.value} (${Math.round(pct * 100)}%)`}</title>
+                            </path>
+                          );
+                        })}
+                      </svg>
+                    </div>
+
+                    {/* Legend list — label (pct) ............ value */}
+                    <div className="space-y-1.5">
+                      {statusData.map((d) => {
+                        const pct = Math.round((d.value / total) * 100);
+                        return (
+                          <button
+                            key={d.label}
+                            onClick={() => openStatus(d.status)}
+                            className="w-full flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-muted/40 transition-colors text-left"
+                          >
+                            <span
+                              className="w-2.5 h-2.5 rounded-full shrink-0"
+                              style={{ backgroundColor: d.color }}
+                            />
+                            <span className="text-[11px] sm:text-xs font-medium flex items-center gap-1">
+                              <span>{d.emoji}</span>
+                              <span>{d.label}</span>
+                              <span className="text-muted-foreground">({pct}%)</span>
+                            </span>
+                            <span className="ml-auto text-xs sm:text-sm font-bold tabular-nums">
+                              {d.value.toLocaleString("id-ID")}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                    <p className="text-[9px] sm:text-[10px] text-muted-foreground text-center">
+                      Klik baris untuk detail
+                    </p>
+                  </div>
                 );
               })()}
-              <p className="text-[9px] sm:text-[10px] text-muted-foreground text-center mt-1">
-                Klik bar untuk detail
-              </p>
             </CardContent>
           </Card>
         </motion.div>
 
-        {/* Category Distribution Line Chart - Daily Trend with History */}
+        {/* Category Trend — Market Overview style (Area chart + series toggles) */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.3 }}
         >
-          <Card className="overflow-hidden border">
-            <CardHeader className="py-2 px-3 sm:px-4 border-b bg-muted/20">
-              <div className="flex items-center justify-between gap-2">
-                <CardTitle className="flex items-center gap-2 text-xs sm:text-sm">
-                  <TrendingUp className="h-4 w-4 text-accent" />
-                  Category Trend
-                </CardTitle>
-                <div className="flex items-center gap-1.5">
+          <Card className="overflow-hidden border h-full">
+            <CardHeader className="py-2.5 px-3 sm:px-4 border-b bg-muted/20">
+              <div className="flex items-center justify-between gap-2 flex-wrap">
+                <div className="flex flex-col">
+                  <CardTitle className="flex items-center gap-2 text-xs sm:text-sm">
+                    <TrendingUp className="h-4 w-4 text-accent" />
+                    Category Trend
+                  </CardTitle>
+                  <span className="text-[10px] text-muted-foreground mt-0.5">
+                    Tren harian RITEL, FEEDER & Insident
+                  </span>
+                </div>
+                <div className="flex items-center gap-3 flex-wrap">
+                  {/* Series toggles */}
+                  <div className="flex items-center gap-2 sm:gap-3">
+                    {[
+                      { key: "ritel" as const, label: "🏠 RITEL", color: "hsl(217, 91%, 60%)" },
+                      { key: "feeder" as const, label: "🏬 FEEDER", color: "hsl(38, 92%, 50%)" },
+                      { key: "created" as const, label: "📥 Insident", color: "hsl(262, 83%, 58%)" },
+                    ].map((s) => (
+                      <label key={s.key} className="flex items-center gap-1.5 cursor-pointer select-none">
+                        <Checkbox
+                          checked={trendSeries[s.key]}
+                          onCheckedChange={(v) =>
+                            setTrendSeries((prev) => ({ ...prev, [s.key]: !!v }))
+                          }
+                          className="h-3.5 w-3.5"
+                          style={{
+                            borderColor: trendSeries[s.key] ? s.color : undefined,
+                            backgroundColor: trendSeries[s.key] ? s.color : undefined,
+                          }}
+                        />
+                        <span className="text-[10px] sm:text-[11px] font-medium">{s.label}</span>
+                      </label>
+                    ))}
+                  </div>
                   <Select value={trendFilter} onValueChange={setTrendFilter}>
-                    <SelectTrigger className="w-[100px] sm:w-[120px] h-7 text-[10px] sm:text-xs">
+                    <SelectTrigger className="w-[110px] sm:w-[130px] h-7 text-[10px] sm:text-xs rounded-full">
                       <SelectValue placeholder="Rentang" />
                     </SelectTrigger>
                     <SelectContent>
@@ -593,37 +638,23 @@ export default function Dashboard() {
             </CardHeader>
             <CardContent className="p-2 sm:p-3">
               {(() => {
-                // ---- Local-date helpers (WIB / browser local) ----
-                // Avoid toISOString() because it converts to UTC and shifts the calendar day.
-                const toLocalDateStr = (d: Date) => {
+                const toLocalDateStrInner = (d: Date) => {
                   const y = d.getFullYear();
                   const m = String(d.getMonth() + 1).padStart(2, "0");
                   const day = String(d.getDate()).padStart(2, "0");
                   return `${y}-${m}-${day}`;
                 };
-                const ticketLocalDate = (t: Ticket) => toLocalDateStr(new Date(t.createdISO));
+                const ticketLocalDate = (t: Ticket) => toLocalDateStrInner(new Date(t.createdISO));
 
-                // Build a chart row from a flat list of tickets for one local-date.
                 const rowFor = (isoDate: string, displayDate: string) => {
                   const dayTickets = tickets.filter((t) => ticketLocalDate(t) === isoDate);
                   const ritel = dayTickets.filter((t) => !FEEDER_CONSTRAINTS_SET.has(t.constraint)).length;
                   const feeder = dayTickets.filter((t) => FEEDER_CONSTRAINTS_SET.has(t.constraint)).length;
                   const inProgress = dayTickets.filter((t) => t.status === "On Progress" || t.status === "Critical" || t.status === "Pending").length;
                   const resolved = dayTickets.filter((t) => t.status === "Resolved").length;
-                  return {
-                    date: displayDate,
-                    isoDate,
-                    ritel, feeder,
-                    total: dayTickets.length,
-                    created: dayTickets.length,
-                    inProgress,
-                    resolved,
-                  };
+                  return { date: displayDate, isoDate, ritel, feeder, total: dayTickets.length, created: dayTickets.length, inProgress, resolved };
                 };
 
-                // Build N consecutive local-days ending today. Merge live ticket counts
-                // with cloud history (history wins only when live data is empty for that day,
-                // so previously stored counts survive the 8-hour resolved cleanup).
                 const buildRange = (days: number) => {
                   const todayLocal = new Date();
                   todayLocal.setHours(0, 0, 0, 0);
@@ -634,13 +665,11 @@ export default function Dashboard() {
                   for (let i = days - 1; i >= 0; i--) {
                     const d = new Date(todayLocal);
                     d.setDate(d.getDate() - i);
-                    const isoDate = toLocalDateStr(d);
+                    const isoDate = toLocalDateStrInner(d);
                     const displayDate = d.toLocaleDateString("id-ID", { day: "2-digit", month: "short" });
-                     const live = rowFor(isoDate, displayDate);
+                    const live = rowFor(isoDate, displayDate);
                     const hist = historyMap.get(isoDate);
                     if (hist) {
-                      // Per-metric max so resolved tickets cleaned up after 8h
-                      // don't make older days appear empty / undercounted.
                       out.push({
                         date: displayDate,
                         isoDate,
@@ -662,20 +691,17 @@ export default function Dashboard() {
 
                 if (trendFilter === "today") {
                   const today = new Date();
-                  chartData = [rowFor(toLocalDateStr(today), today.toLocaleDateString("id-ID", { day: "2-digit", month: "short" }))];
+                  chartData = [rowFor(toLocalDateStrInner(today), today.toLocaleDateString("id-ID", { day: "2-digit", month: "short" }))];
                 } else if (trendFilter === "custom") {
-                  // trendCustomDate is already a YYYY-MM-DD string from <input type="date">.
                   const [yy, mm, dd] = trendCustomDate.split("-").map(Number);
                   const customD = new Date(yy, (mm || 1) - 1, dd || 1);
                   chartData = [rowFor(trendCustomDate, customD.toLocaleDateString("id-ID", { day: "2-digit", month: "short" }))];
                 } else if (trendFilter === "month") {
-                  // From day 1 of current month up to today (always up to date).
                   const today = new Date();
                   today.setHours(0, 0, 0, 0);
                   const days = today.getDate();
                   chartData = buildRange(days);
                 } else if (trendFilter === "all") {
-                  // Find earliest local-date among live tickets, fall back to 30 days.
                   const today = new Date();
                   today.setHours(0, 0, 0, 0);
                   let earliest = today;
@@ -687,7 +713,6 @@ export default function Dashboard() {
                   const days = Math.max(1, Math.round((today.getTime() - earliest.getTime()) / (24 * 60 * 60 * 1000)) + 1);
                   chartData = buildRange(Math.min(days, 90));
                 } else {
-                  // 7, 14, 30 days
                   const days = Number(trendFilter) || 7;
                   chartData = buildRange(days);
                 }
@@ -697,7 +722,7 @@ export default function Dashboard() {
                 const chartConfig: ChartConfig = {
                   ritel: { label: "🏠 RITEL", color: "hsl(217, 91%, 60%)" },
                   feeder: { label: "🏬 FEEDER", color: "hsl(38, 92%, 50%)" },
-                  created: { label: "📥Insident", color: "hsl(262, 83%, 58%)" },
+                  created: { label: "📥 Insident", color: "hsl(262, 83%, 58%)" },
                 };
 
                 const handleDotClick = (category: "RITEL" | "FEEDER", isoDate: string, displayDate: string) => {
@@ -716,114 +741,107 @@ export default function Dashboard() {
                   setShowOltList(false);
                   setInlineSelectedTicket(null);
                   setFilterDialogTickets(filtered);
-                  setFilterDialogTitle(`📥Insident - ${displayDate}`);
+                  setFilterDialogTitle(`📥 Insident - ${displayDate}`);
                   setFilterDialogOpen(true);
                 };
 
                 return (
-                  <ChartContainer config={chartConfig} className="h-[200px] sm:h-[220px] md:h-[260px] w-full transition-all duration-300">
-                    <LineChart
-                      data={chartData}
-                      margin={{ top: 5, right: 15, left: 5, bottom: 5 }}
-                    >
-                      <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                      <XAxis 
+                  <ChartContainer config={chartConfig} className="h-[220px] sm:h-[260px] md:h-[300px] w-full transition-all duration-300">
+                    <AreaChart data={chartData} margin={{ top: 10, right: 15, left: 5, bottom: 5 }}>
+                      <defs>
+                        <linearGradient id="grad-ritel" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="hsl(217, 91%, 60%)" stopOpacity={0.35} />
+                          <stop offset="100%" stopColor="hsl(217, 91%, 60%)" stopOpacity={0} />
+                        </linearGradient>
+                        <linearGradient id="grad-feeder" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="hsl(38, 92%, 50%)" stopOpacity={0.35} />
+                          <stop offset="100%" stopColor="hsl(38, 92%, 50%)" stopOpacity={0} />
+                        </linearGradient>
+                        <linearGradient id="grad-created" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="hsl(262, 83%, 58%)" stopOpacity={0.3} />
+                          <stop offset="100%" stopColor="hsl(262, 83%, 58%)" stopOpacity={0} />
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" className="stroke-muted" vertical={false} />
+                      <XAxis
                         dataKey="date"
-                        tick={{ fontSize: 8, fill: "hsl(var(--muted-foreground))" }}
+                        tick={{ fontSize: 9, fill: "hsl(var(--muted-foreground))" }}
                         tickLine={false}
                         axisLine={false}
                         interval={numDays > 14 ? 3 : numDays > 7 ? 1 : 0}
                       />
-                      <YAxis 
+                      <YAxis
                         tick={{ fontSize: 9, fill: "hsl(var(--muted-foreground))" }}
                         tickLine={false}
                         axisLine={false}
                         allowDecimals={false}
-                        width={25}
+                        width={28}
                       />
-                      <ChartTooltip
-                        content={<ChartTooltipContent />}
-                      />
-                      <Line 
-                        type="monotone" 
-                        dataKey="ritel" 
-                        stroke="hsl(217, 91%, 60%)" 
-                        strokeWidth={2}
-                        dot={{ fill: "hsl(217, 91%, 60%)", strokeWidth: 1, r: numDays > 14 ? 2 : 3, cursor: "pointer" }}
-                        activeDot={{ 
-                          r: 6, 
-                          strokeWidth: 2, 
-                          cursor: "pointer",
-                          onClick: (_, payload: any) => {
-                            if (payload?.payload) {
-                              handleDotClick("RITEL", payload.payload.isoDate, payload.payload.date);
-                            }
-                          }
-                        }}
-                        name="🏠 RITEL"
-                      />
-                      <Line 
-                        type="monotone" 
-                        dataKey="feeder" 
-                        stroke="hsl(38, 92%, 50%)" 
-                        strokeWidth={2}
-                        dot={{ fill: "hsl(38, 92%, 50%)", strokeWidth: 1, r: numDays > 14 ? 2 : 3, cursor: "pointer" }}
-                        activeDot={{ 
-                          r: 6, 
-                          strokeWidth: 2, 
-                          cursor: "pointer",
-                          onClick: (_, payload: any) => {
-                            if (payload?.payload) {
-                              handleDotClick("FEEDER", payload.payload.isoDate, payload.payload.date);
-                            }
-                          }
-                        }}
-                        name="🏬 FEEDER"
-                      />
-                      <Line 
-                        type="monotone" 
-                        dataKey="created" 
-                        stroke="hsl(262, 83%, 58%)" 
-                        strokeWidth={2}
-                        strokeDasharray="5 5"
-                        dot={{ fill: "hsl(262, 83%, 58%)", strokeWidth: 1, r: numDays > 14 ? 2 : 3, cursor: "pointer" }}
-                        activeDot={{ 
-                          r: 6, 
-                          strokeWidth: 2, 
-                          cursor: "pointer",
-                          onClick: (_, payload: any) => {
-                            if (payload?.payload) {
-                              handleStatusDotClick(payload.payload.isoDate, payload.payload.date);
-                            }
-                          }
-                        }}
-                        name="📥Insident"
-                      />
-                    </LineChart>
+                      <ChartTooltip content={<ChartTooltipContent />} />
+                      {trendSeries.ritel && (
+                        <Area
+                          type="monotone"
+                          dataKey="ritel"
+                          stroke="hsl(217, 91%, 60%)"
+                          strokeWidth={2.5}
+                          fill="url(#grad-ritel)"
+                          dot={false}
+                          activeDot={{
+                            r: 6, strokeWidth: 2, cursor: "pointer",
+                            onClick: (_: any, payload: any) => {
+                              if (payload?.payload) handleDotClick("RITEL", payload.payload.isoDate, payload.payload.date);
+                            },
+                          }}
+                          name="🏠 RITEL"
+                        />
+                      )}
+                      {trendSeries.feeder && (
+                        <Area
+                          type="monotone"
+                          dataKey="feeder"
+                          stroke="hsl(38, 92%, 50%)"
+                          strokeWidth={2.5}
+                          fill="url(#grad-feeder)"
+                          dot={false}
+                          activeDot={{
+                            r: 6, strokeWidth: 2, cursor: "pointer",
+                            onClick: (_: any, payload: any) => {
+                              if (payload?.payload) handleDotClick("FEEDER", payload.payload.isoDate, payload.payload.date);
+                            },
+                          }}
+                          name="🏬 FEEDER"
+                        />
+                      )}
+                      {trendSeries.created && (
+                        <Area
+                          type="monotone"
+                          dataKey="created"
+                          stroke="hsl(262, 83%, 58%)"
+                          strokeWidth={2}
+                          strokeDasharray="5 5"
+                          fill="url(#grad-created)"
+                          dot={false}
+                          activeDot={{
+                            r: 6, strokeWidth: 2, cursor: "pointer",
+                            onClick: (_: any, payload: any) => {
+                              if (payload?.payload) handleStatusDotClick(payload.payload.isoDate, payload.payload.date);
+                            },
+                          }}
+                          name="📥 Insident"
+                        />
+                      )}
+                    </AreaChart>
                   </ChartContainer>
                 );
               })()}
-              <div className="flex flex-wrap items-center justify-center gap-3 mt-1.5">
-                <div className="flex items-center gap-1.5 text-[10px]">
-                  <div className="w-2 h-2 rounded-full bg-accent" />
-                  <span className="text-muted-foreground">🏠 RITEL</span>
-                </div>
-                <div className="flex items-center gap-1.5 text-[10px]">
-                  <div className="w-2 h-2 rounded-full bg-warning" />
-                  <span className="text-muted-foreground">🏬 FEEDER</span>
-                </div>
-                <div className="flex items-center gap-1.5 text-[10px]">
-                  <div className="w-2 h-2 rounded-full" style={{ background: "hsl(262, 83%, 58%)" }} />
-                  <span className="text-muted-foreground">📥Insident</span>
-                </div>
-              </div>
               <p className="text-[10px] text-muted-foreground text-center mt-1">
-                Klik titik untuk detail
+                Klik titik untuk detail • Centang seri untuk menampilkan/menyembunyikan
               </p>
             </CardContent>
           </Card>
         </motion.div>
       </div>
+
 
       {/* Monthly Analytics Section */}
       <motion.div
