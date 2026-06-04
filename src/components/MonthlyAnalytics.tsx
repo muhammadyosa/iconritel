@@ -866,7 +866,7 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
 
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-2">
       {/* Header - matches Status Distribution / Category Trend style */}
       <div className="flex items-center justify-between gap-2">
         <h3 className="flex items-center gap-1.5 text-xs sm:text-sm font-semibold">
