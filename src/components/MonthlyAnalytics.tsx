@@ -1198,7 +1198,7 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
                       );
                     })}
                   </div>
-                  <div className="flex items-center justify-between gap-2 text-[9px] sm:text-[10px] text-muted-foreground border-t pt-2">
+                  <div className="flex items-center justify-between gap-2 text-[9px] sm:text-[10px] text-muted-foreground border-t pt-1.5">
                     <span className="font-medium text-primary/80 truncate">{categoryRangeHint}</span>
                     <span>Klik slice untuk detail</span>
                   </div>
