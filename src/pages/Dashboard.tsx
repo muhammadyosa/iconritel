@@ -616,41 +616,9 @@ export default function Dashboard() {
                         value: periodCounts[d.status as keyof typeof periodCounts],
                       }));
                       const totalReal = periodData.reduce((s, d) => s + d.value, 0);
-                      const periodOptions: { key: typeof statusAnalysisPeriod; label: string }[] = [
-                        { key: "today", label: "Hari Ini" },
-                        { key: "week", label: "Minggu Ini" },
-                        { key: "month", label: "Bulan Ini" },
-                        { key: "all", label: "Semua" },
-                      ];
-
-                      const filterBar = (
-                        <div className="flex items-center justify-between gap-2 px-1">
-                          <span className="text-[10px] font-semibold flex items-center gap-1">
-                            <span>📊</span>
-                            <span>Analisa</span>
-                          </span>
-                          <div className="flex items-center gap-0.5 bg-muted/40 rounded-md p-0.5">
-                            {periodOptions.map((opt) => (
-                              <button
-                                key={opt.key}
-                                onClick={() => setStatusAnalysisPeriod(opt.key)}
-                                className={`text-[9px] px-1.5 py-0.5 rounded transition-colors ${
-                                  statusAnalysisPeriod === opt.key
-                                    ? "bg-primary text-primary-foreground font-semibold"
-                                    : "text-muted-foreground hover:text-foreground"
-                                }`}
-                              >
-                                {opt.label}
-                              </button>
-                            ))}
-                          </div>
-                        </div>
-                      );
-
                       if (totalReal === 0) {
                         return (
                           <div className="mt-2 pt-2 border-t border-border/50 space-y-1.5">
-                            {filterBar}
                             <p className="text-[10px] text-muted-foreground text-center py-1">
                               Belum ada incident pada periode ini
                             </p>
