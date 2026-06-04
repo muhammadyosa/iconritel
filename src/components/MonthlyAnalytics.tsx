@@ -1180,7 +1180,7 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
                   </div>
 
                   {/* Legend */}
-                  <div className="grid grid-cols-2 gap-1.5 max-h-[180px] overflow-y-auto pr-1">
+                  <div className="grid grid-cols-2 gap-1 max-h-[150px] overflow-y-auto pr-1">
                     {categoryData.map((d, i) => {
                       const pct = ((d.value / total) * 100).toFixed(1);
                       const color = colorFor(d.name, i);
