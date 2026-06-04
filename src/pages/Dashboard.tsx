@@ -497,10 +497,10 @@ export default function Dashboard() {
 
                 return (
                   <div className="flex flex-col gap-2 flex-1 justify-center">
-                    <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-3">
+                    <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 flex-1">
                       {/* Arc visual */}
-                      <div className="flex items-center justify-center shrink-0">
-                        <svg viewBox="0 0 200 110" className="w-full max-w-[160px] sm:max-w-[170px] h-auto">
+                      <div className="flex items-center justify-center shrink-0 flex-1 sm:flex-none">
+                        <svg viewBox="0 0 200 110" className="w-full max-w-[240px] sm:max-w-[260px] h-auto">
                           {statusData.map((d, i) => (
                             <g key={`bg-${d.label}`}>
                               <path
