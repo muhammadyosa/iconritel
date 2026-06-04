@@ -563,19 +563,84 @@ export default function Dashboard() {
                       </div>
                     </div>
                     {(() => {
-                      const totalReal = statusData.reduce((s, d) => s + d.value, 0);
+                      // Filter tickets by selected period for the analysis section
+                      const now = new Date();
+                      const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+                      const startOfWeek = startOfDay - ((now.getDay() + 6) % 7) * 86400000; // Monday
+                      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
+                      const periodStart =
+                        statusAnalysisPeriod === "today"
+                          ? startOfDay
+                          : statusAnalysisPeriod === "week"
+                          ? startOfWeek
+                          : statusAnalysisPeriod === "month"
+                          ? startOfMonth
+                          : 0;
+                      const periodTickets =
+                        statusAnalysisPeriod === "all"
+                          ? tickets
+                          : tickets.filter((t) => {
+                              const ts = t.createdISO ? new Date(t.createdISO).getTime() : NaN;
+                              return !isNaN(ts) && ts >= periodStart;
+                            });
+                      const periodCounts = {
+                        "On Progress": periodTickets.filter((t) => t.status === "On Progress").length,
+                        Critical: periodTickets.filter((t) => t.status === "Critical").length,
+                        Resolved: periodTickets.filter((t) => t.status === "Resolved").length,
+                        Pending: periodTickets.filter((t) => t.status === "Pending").length,
+                      };
+                      const periodData = statusData.map((d) => ({
+                        ...d,
+                        value: periodCounts[d.status as keyof typeof periodCounts],
+                      }));
+                      const totalReal = periodData.reduce((s, d) => s + d.value, 0);
+                      const periodOptions: { key: typeof statusAnalysisPeriod; label: string }[] = [
+                        { key: "today", label: "Hari Ini" },
+                        { key: "week", label: "Minggu Ini" },
+                        { key: "month", label: "Bulan Ini" },
+                        { key: "all", label: "Semua" },
+                      ];
+
+                      const filterBar = (
+                        <div className="flex items-center justify-between gap-2 px-1">
+                          <span className="text-[10px] font-semibold flex items-center gap-1">
+                            <span>📊</span>
+                            <span>Analisa</span>
+                          </span>
+                          <div className="flex items-center gap-0.5 bg-muted/40 rounded-md p-0.5">
+                            {periodOptions.map((opt) => (
+                              <button
+                                key={opt.key}
+                                onClick={() => setStatusAnalysisPeriod(opt.key)}
+                                className={`text-[9px] px-1.5 py-0.5 rounded transition-colors ${
+                                  statusAnalysisPeriod === opt.key
+                                    ? "bg-primary text-primary-foreground font-semibold"
+                                    : "text-muted-foreground hover:text-foreground"
+                                }`}
+                              >
+                                {opt.label}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      );
+
                       if (totalReal === 0) {
                         return (
-                          <p className="text-[9px] text-muted-foreground text-center mt-0.5">
-                            Belum ada data incident
-                          </p>
+                          <div className="mt-2 pt-2 border-t border-border/50 space-y-1.5">
+                            {filterBar}
+                            <p className="text-[10px] text-muted-foreground text-center py-1">
+                              Belum ada incident pada periode ini
+                            </p>
+                          </div>
                         );
                       }
-                      const sorted = [...statusData].sort((a, b) => b.value - a.value);
+
+                      const sorted = [...periodData].sort((a, b) => b.value - a.value);
                       const top = sorted[0];
                       const topPct = Math.round((top.value / totalReal) * 100);
-                      const resolved = statusData.find((d) => d.status === "Resolved")!;
-                      const critical = statusData.find((d) => d.status === "Critical")!;
+                      const resolved = periodData.find((d) => d.status === "Resolved")!;
+                      const critical = periodData.find((d) => d.status === "Critical")!;
                       const resolvedPct = Math.round((resolved.value / totalReal) * 100);
                       const criticalPct = Math.round((critical.value / totalReal) * 100);
                       const health =
@@ -584,13 +649,11 @@ export default function Dashboard() {
                           : resolvedPct >= 60
                           ? { label: "Sehat", color: "text-success", emoji: "✅" }
                           : { label: "Perlu Perhatian", color: "text-warning", emoji: "⚠️" };
+
                       return (
-                        <div className="mt-2 pt-2 border-t border-border/50 space-y-1">
-                          <div className="flex items-center justify-between gap-2 px-1">
-                            <span className="text-[10px] font-semibold flex items-center gap-1">
-                              <span>📊</span>
-                              <span>Analisa</span>
-                            </span>
+                        <div className="mt-2 pt-2 border-t border-border/50 space-y-1.5">
+                          {filterBar}
+                          <div className="flex items-center justify-end px-1">
                             <span className={`text-[10px] font-bold ${health.color} flex items-center gap-1`}>
                               <span>{health.emoji}</span>
                               <span>{health.label}</span>
