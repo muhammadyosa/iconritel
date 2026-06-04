@@ -451,7 +451,7 @@ export default function Dashboard() {
           transition={{ duration: 0.4, delay: 0.2 }}
           className="lg:col-span-1"
         >
-          <Card className="overflow-hidden border h-full">
+          <Card className="overflow-hidden border">
             <CardHeader className="py-2 px-3 sm:px-4 border-b bg-muted/20">
               <CardTitle className="flex items-center gap-1.5 text-xs sm:text-sm">
                 <BarChart3 className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary" />
@@ -500,7 +500,7 @@ export default function Dashboard() {
                     <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-3">
                       {/* Arc visual */}
                       <div className="flex items-center justify-center shrink-0">
-                        <svg viewBox="0 0 200 110" className="w-full max-w-[200px] h-auto">
+                        <svg viewBox="0 0 200 110" className="w-full max-w-[160px] sm:max-w-[170px] h-auto">
                           {statusData.map((d, i) => (
                             <g key={`bg-${d.label}`}>
                               <path
