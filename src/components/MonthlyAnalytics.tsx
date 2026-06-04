@@ -1067,14 +1067,18 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
               className="h-[200px] xs:h-[230px] sm:h-[260px] md:h-[280px] lg:h-[300px] w-full"
               style={{ aspectRatio: "auto" }}
             >
-              <ComposedChart data={dailyTrend} margin={{ top: 16, right: 16, left: 0, bottom: 4 }}>
+              <LineChart data={dailyTrend} margin={{ top: 20, right: 20, left: 0, bottom: 4 }}>
                 <defs>
-                  <linearGradient id="barTotalGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="var(--color-total)" stopOpacity={0.95} />
-                    <stop offset="100%" stopColor="var(--color-total)" stopOpacity={0.55} />
+                  <linearGradient id="lineTotalGrad" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0%" stopColor="hsl(25 95% 60%)" />
+                    <stop offset="100%" stopColor="hsl(15 90% 65%)" />
+                  </linearGradient>
+                  <linearGradient id="lineResolvedGrad" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0%" stopColor="hsl(215 30% 35%)" />
+                    <stop offset="100%" stopColor="hsl(215 25% 50%)" />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 4" vertical={false} stroke="hsl(var(--border))" strokeOpacity={0.5} />
+                <CartesianGrid strokeDasharray="3 6" vertical={false} stroke="hsl(var(--border))" strokeOpacity={0.4} />
                 <XAxis
                   dataKey="day"
                   tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }}
@@ -1084,16 +1088,23 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
                 />
                 <YAxis tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} width={28} tickLine={false} axisLine={false} />
                 <ChartTooltip content={<ChartTooltipContent indicator="dot" className="rounded-xl shadow-lg" />} />
-                <Bar dataKey="total" fill="url(#barTotalGrad)" radius={[8, 8, 4, 4]} barSize={18} />
+                <Line
+                  type="monotone"
+                  dataKey="total"
+                  stroke="url(#lineTotalGrad)"
+                  strokeWidth={3}
+                  dot={false}
+                  activeDot={{ r: 6, strokeWidth: 3, stroke: "hsl(var(--background))", fill: "hsl(25 95% 60%)" }}
+                />
                 <Line
                   type="monotone"
                   dataKey="resolved"
-                  stroke="var(--color-resolved)"
-                  strokeWidth={2.5}
-                  dot={{ r: 3, fill: "var(--color-resolved)", strokeWidth: 0 }}
-                  activeDot={{ r: 5, strokeWidth: 2, stroke: "hsl(var(--background))" }}
+                  stroke="url(#lineResolvedGrad)"
+                  strokeWidth={3}
+                  dot={false}
+                  activeDot={{ r: 6, strokeWidth: 3, stroke: "hsl(var(--background))", fill: "hsl(215 30% 35%)" }}
                 />
-              </ComposedChart>
+              </LineChart>
             </ChartContainer>
           </CardContent>
         </Card>
