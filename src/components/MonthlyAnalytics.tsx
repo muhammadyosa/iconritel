@@ -1334,7 +1334,7 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
               <p className="text-xs text-muted-foreground text-center py-8">No data</p>
             ) : (
               <>
-                <ChartContainer config={trendConfig} className="h-[200px] xs:h-[220px] sm:h-[260px] md:h-[300px] w-full transition-all duration-300">
+                <ChartContainer config={trendConfig} className="h-[220px] xs:h-[250px] sm:h-[280px] md:h-[320px] lg:h-[340px] w-full transition-all duration-300">
                   <AreaChart
                     data={dailyTrend}
                     margin={{ top: 20, right: 20, left: 5, bottom: 5 }}
