@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/StatusBadge";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip, LineChart, Line, Cell } from "recharts";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Ticket, FEEDER_CONSTRAINTS_SET } from "@/types/ticket";
 import { TrendingUp, Clock, CheckCircle, BarChart3, ArrowLeft, FileDown } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -361,10 +362,16 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
   }, [monthTickets]);
 
   const trendConfig: ChartConfig = {
-    total: { label: "Total", color: "hsl(var(--primary))" },
-    resolved: { label: "Resolved", color: "hsl(142, 71%, 45%)" },
-    slaOk: { label: "SLA OK", color: "hsl(200, 80%, 50%)" },
+    total: { label: "Total", color: "hsl(217, 91%, 60%)" },
+    resolved: { label: "Resolved", color: "hsl(25, 95%, 55%)" },
+    slaOk: { label: "SLA OK", color: "hsl(142, 71%, 45%)" },
   };
+
+  const [trendSeries, setTrendSeries] = useState<{ total: boolean; resolved: boolean; slaOk: boolean }>({
+    total: true,
+    resolved: true,
+    slaOk: false,
+  });
 
   // Drill-down handlers
   const handleCategoryClick = (data: any) => {
@@ -1190,14 +1197,33 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
         {/* Daily Trend */}
         <Card className="overflow-hidden border">
           <CardHeader className="py-2 px-3 sm:px-4 border-b bg-muted/20">
-            <div className="flex items-center justify-between gap-2">
+            <div className="flex flex-wrap items-center justify-between gap-2">
               <CardTitle className="flex items-center gap-1.5 text-xs sm:text-sm">
                 <TrendingUp className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary" />
                 Daily Trends & SLA Compliance
               </CardTitle>
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-3">
+                {(["total", "resolved", "slaOk"] as const).map((k) => (
+                  <label key={k} className="flex items-center gap-1.5 cursor-pointer select-none">
+                    <Checkbox
+                      checked={trendSeries[k]}
+                      onCheckedChange={(v) => setTrendSeries((s) => ({ ...s, [k]: !!v }))}
+                      className="h-3.5 w-3.5"
+                      style={{
+                        borderColor: trendConfig[k].color as string,
+                        backgroundColor: trendSeries[k] ? (trendConfig[k].color as string) : "transparent",
+                      }}
+                    />
+                    <span
+                      className="text-[10px] sm:text-xs font-medium"
+                      style={{ color: trendConfig[k].color as string }}
+                    >
+                      {trendConfig[k].label}
+                    </span>
+                  </label>
+                ))}
                 <Select value={trendFilter} onValueChange={setTrendFilter}>
-                  <SelectTrigger className="w-[100px] sm:w-[120px] h-7 text-[10px] sm:text-xs">
+                  <SelectTrigger className="w-[100px] sm:w-[120px] h-7 text-[10px] sm:text-xs rounded-full">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -1219,38 +1245,69 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
               </div>
             </div>
           </CardHeader>
-          <CardContent className="p-2 sm:p-3">
+          <CardContent className="p-2 sm:p-4">
             {dailyTrend.length === 0 ? (
               <p className="text-xs text-muted-foreground text-center py-8">No data</p>
             ) : (
               <>
-                <ChartContainer config={trendConfig} className="h-[180px] xs:h-[190px] sm:h-[210px] md:h-[240px] w-full transition-all duration-300">
+                <ChartContainer config={trendConfig} className="h-[200px] xs:h-[220px] sm:h-[260px] md:h-[300px] w-full transition-all duration-300">
                   <LineChart
                     data={dailyTrend}
-                    margin={{ top: 5, right: 15, left: 5, bottom: 5 }}
+                    margin={{ top: 20, right: 20, left: 5, bottom: 5 }}
                     onClick={handleTrendDotClick}
                   >
-                    <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                    <XAxis dataKey="day" tick={{ fontSize: 8, fill: "hsl(var(--muted-foreground))" }} tickLine={false} axisLine={false} interval={dailyTrend.length > 14 ? 3 : dailyTrend.length > 7 ? 1 : 0} />
-                    <YAxis tick={{ fontSize: 9, fill: "hsl(var(--muted-foreground))" }} width={25} tickLine={false} axisLine={false} />
-                    <ChartTooltip content={<ChartTooltipContent />} />
-                    <Line type="monotone" dataKey="total" stroke="var(--color-total)" strokeWidth={2} dot={{ r: 2, cursor: "pointer" }} activeDot={{ r: 5, cursor: "pointer" }} />
-                    <Line type="monotone" dataKey="resolved" stroke="var(--color-resolved)" strokeWidth={2} dot={{ r: 2, cursor: "pointer" }} activeDot={{ r: 5, cursor: "pointer" }} />
-                    <Line type="monotone" dataKey="slaOk" stroke="var(--color-slaOk)" strokeWidth={2} dot={false} strokeDasharray="4 2" />
+                    <CartesianGrid strokeDasharray="4 6" vertical={false} stroke="hsl(var(--border))" strokeOpacity={0.5} />
+                    <XAxis
+                      dataKey="day"
+                      tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }}
+                      tickLine={false}
+                      axisLine={false}
+                      interval={dailyTrend.length > 14 ? 3 : dailyTrend.length > 7 ? 1 : 0}
+                      dy={6}
+                    />
+                    <YAxis
+                      tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }}
+                      width={32}
+                      tickLine={false}
+                      axisLine={false}
+                    />
+                    <ChartTooltip
+                      cursor={{ stroke: "hsl(var(--muted-foreground))", strokeDasharray: "3 3", strokeOpacity: 0.4 }}
+                      content={<ChartTooltipContent indicator="dot" className="rounded-xl shadow-lg" />}
+                    />
+                    {trendSeries.total && (
+                      <Line
+                        type="monotone"
+                        dataKey="total"
+                        stroke="var(--color-total)"
+                        strokeWidth={3}
+                        dot={false}
+                        activeDot={{ r: 6, strokeWidth: 3, stroke: "hsl(var(--background))", fill: "var(--color-total)", cursor: "pointer" }}
+                      />
+                    )}
+                    {trendSeries.resolved && (
+                      <Line
+                        type="monotone"
+                        dataKey="resolved"
+                        stroke="var(--color-resolved)"
+                        strokeWidth={3}
+                        dot={false}
+                        activeDot={{ r: 6, strokeWidth: 3, stroke: "hsl(var(--background))", fill: "var(--color-resolved)", cursor: "pointer" }}
+                      />
+                    )}
+                    {trendSeries.slaOk && (
+                      <Line
+                        type="monotone"
+                        dataKey="slaOk"
+                        stroke="var(--color-slaOk)"
+                        strokeWidth={3}
+                        dot={false}
+                        activeDot={{ r: 6, strokeWidth: 3, stroke: "hsl(var(--background))", fill: "var(--color-slaOk)", cursor: "pointer" }}
+                      />
+                    )}
                   </LineChart>
                 </ChartContainer>
-                <div className="flex items-center justify-center gap-3 mt-1">
-                  <span className="flex items-center gap-1 text-[9px] text-muted-foreground">
-                    <span className="w-2.5 h-0.5 rounded bg-primary inline-block" /> Total
-                  </span>
-                  <span className="flex items-center gap-1 text-[9px] text-muted-foreground">
-                    <span className="w-2.5 h-0.5 rounded inline-block" style={{ background: "hsl(142, 71%, 45%)" }} /> Resolved
-                  </span>
-                  <span className="flex items-center gap-1 text-[9px] text-muted-foreground">
-                    <span className="w-2.5 h-0.5 rounded inline-block border-dashed border-t" style={{ borderColor: "hsl(200, 80%, 50%)" }} /> SLA OK
-                  </span>
-                </div>
-                <div className="flex items-center justify-between gap-2 mt-0.5 text-[9px] sm:text-[10px] text-muted-foreground">
+                <div className="flex items-center justify-between gap-2 mt-1 text-[9px] sm:text-[10px] text-muted-foreground">
                   <span className="font-medium text-primary/80 truncate">{formatRangeHint(dailyTrend)}</span>
                   <span>Click a point for details</span>
                 </div>
@@ -1259,6 +1316,7 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
           </CardContent>
         </Card>
       </div>
+
 
       {/* Drill-down Dialog */}
       <Dialog open={drillOpen} onOpenChange={(open) => { setDrillOpen(open); if (!open) setDrillSelectedTicket(null); }}>
