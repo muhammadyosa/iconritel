@@ -1125,9 +1125,9 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
               const yMax = niceMax(maxValue);
               const ticks = 4;
               return (
-                <div className="flex flex-col lg:flex-row gap-3 items-stretch">
+                <div className="flex flex-col gap-3">
                   {/* Chart */}
-                  <div className="flex-1 min-w-0">
+                  <div className="w-full">
                     <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-auto" preserveAspectRatio="xMidYMid meet">
                       {/* Y grid + labels */}
                       {Array.from({ length: ticks + 1 }).map((_, i) => {
@@ -1159,8 +1159,8 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
                       })}
                     </svg>
                   </div>
-                  {/* Legend right */}
-                  <div className="lg:w-[150px] shrink-0 flex lg:flex-col flex-wrap gap-1.5 lg:gap-2 lg:border-l lg:pl-3 max-h-[240px] overflow-y-auto">
+                  {/* Legend below — neat responsive grid */}
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-1.5 border-t pt-2">
                     {categoryData.map((d, i) => {
                       const pct = ((d.value / total) * 100).toFixed(1);
                       const color = colorFor(d.name, i);
@@ -1168,12 +1168,12 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
                         <button
                           key={d.name}
                           onClick={() => openCategory(d.name)}
-                          className="flex items-center gap-2 px-1.5 py-1 rounded-md hover:bg-muted/40 transition-colors text-left min-w-0 w-full"
+                          className="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-muted/40 transition-colors text-left min-w-0 w-full border border-border/40"
                         >
-                          <span className="w-2.5 h-2.5 rounded-sm shrink-0" style={{ backgroundColor: color }} />
+                          <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: color }} />
                           <span className="text-[10px] sm:text-[11px] font-medium truncate flex-1">{d.name}</span>
                           <span className="text-[10px] sm:text-[11px] font-bold tabular-nums shrink-0">{d.value}</span>
-                          <span className="text-[9px] text-muted-foreground tabular-nums shrink-0 hidden lg:inline">{pct}%</span>
+                          <span className="text-[9px] text-muted-foreground tabular-nums shrink-0">{pct}%</span>
                         </button>
                       );
                     })}
