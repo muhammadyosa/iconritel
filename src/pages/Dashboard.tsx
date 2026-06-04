@@ -449,9 +449,9 @@ export default function Dashboard() {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.2 }}
-          className="lg:col-span-1"
+          className="lg:col-span-1 h-full"
         >
-          <Card className="overflow-hidden border">
+          <Card className="overflow-hidden border h-full flex flex-col">
             <CardHeader className="py-2 px-3 sm:px-4 border-b bg-muted/20">
               <CardTitle className="flex items-center gap-1.5 text-xs sm:text-sm">
                 <BarChart3 className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary" />
