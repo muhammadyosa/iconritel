@@ -362,10 +362,16 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
   }, [monthTickets]);
 
   const trendConfig: ChartConfig = {
-    total: { label: "Total", color: "hsl(var(--primary))" },
-    resolved: { label: "Resolved", color: "hsl(142, 71%, 45%)" },
-    slaOk: { label: "SLA OK", color: "hsl(200, 80%, 50%)" },
+    total: { label: "Total", color: "hsl(217, 91%, 60%)" },
+    resolved: { label: "Resolved", color: "hsl(25, 95%, 55%)" },
+    slaOk: { label: "SLA OK", color: "hsl(142, 71%, 45%)" },
   };
+
+  const [trendSeries, setTrendSeries] = useState<{ total: boolean; resolved: boolean; slaOk: boolean }>({
+    total: true,
+    resolved: true,
+    slaOk: false,
+  });
 
   // Drill-down handlers
   const handleCategoryClick = (data: any) => {
