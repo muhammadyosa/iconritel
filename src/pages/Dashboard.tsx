@@ -454,10 +454,32 @@ export default function Dashboard() {
         >
           <Card className="overflow-hidden border h-full flex flex-col">
             <CardHeader className="py-2 px-3 sm:px-4 border-b bg-muted/20">
-              <CardTitle className="flex items-center gap-1.5 text-xs sm:text-sm">
-                <BarChart3 className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary" />
-                Status Distribution
-              </CardTitle>
+              <div className="flex items-center justify-between w-full">
+                <CardTitle className="flex items-center gap-1.5 text-xs sm:text-sm">
+                  <BarChart3 className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary" />
+                  Status Distribution
+                </CardTitle>
+                <div className="flex items-center gap-0.5 bg-muted/40 rounded-md p-0.5">
+                  {[
+                    { key: "today" as const, label: "Hari Ini" },
+                    { key: "week" as const, label: "Minggu Ini" },
+                    { key: "month" as const, label: "Bulan Ini" },
+                    { key: "all" as const, label: "Semua" },
+                  ].map((opt) => (
+                    <button
+                      key={opt.key}
+                      onClick={() => setStatusAnalysisPeriod(opt.key)}
+                      className={`text-[9px] px-1.5 py-0.5 rounded transition-colors ${
+                        statusAnalysisPeriod === opt.key
+                          ? "bg-primary text-primary-foreground font-semibold"
+                          : "text-muted-foreground hover:text-foreground"
+                      }`}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
             </CardHeader>
             <CardContent className="p-2 sm:p-2.5">
               {(() => {
