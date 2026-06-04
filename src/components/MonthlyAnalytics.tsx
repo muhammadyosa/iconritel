@@ -1296,54 +1296,44 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
                 pct: Math.round((d.value / total) * 100),
                 fill: colorFor(d.name, i),
               }));
-              const chartHeight = Math.max(180, Math.min(420, chartData.length * 34 + 20));
+              const maxVal = Math.max(...chartData.map((d) => d.value), 1);
               return (
-                <div className="flex flex-col gap-3">
-                  <ChartContainer
-                    config={{ value: { label: "Incident", color: "hsl(var(--primary))" } }}
-                    className="w-full"
-                    style={{ height: chartHeight, aspectRatio: "auto" }}
-                  >
-                    <BarChart
-                      data={chartData}
-                      layout="vertical"
-                      margin={{ top: 4, right: 36, left: 4, bottom: 4 }}
-                      barCategoryGap={6}
-                      onClick={(e: any) => {
-                        const name = e?.activePayload?.[0]?.payload?.name;
-                        if (name) openCategory(name);
-                      }}
-                    >
-                      <CartesianGrid horizontal={false} strokeDasharray="3 4" stroke="hsl(var(--border))" strokeOpacity={0.4} />
-                      <XAxis type="number" hide />
-                      <YAxis
-                        type="category"
-                        dataKey="name"
-                        width={130}
-                        tick={{ fontSize: 10, fill: "hsl(var(--foreground))" }}
-                        tickLine={false}
-                        axisLine={false}
-                      />
-                      <ChartTooltip
-                        cursor={{ fill: "hsl(var(--muted))", fillOpacity: 0.3 }}
-                        content={<ChartTooltipContent indicator="dot" className="rounded-xl shadow-lg" />}
-                      />
-                      <Bar dataKey="value" radius={[10, 10, 10, 10]} barSize={18} className="cursor-pointer">
-                        {chartData.map((d, i) => (
-                          <Cell key={d.name} fill={d.fill} />
-                        ))}
-                        <LabelList
-                          dataKey="pct"
-                          position="right"
-                          formatter={(v: number) => `${v}%`}
-                          style={{ fontSize: 10, fill: "hsl(var(--muted-foreground))", fontWeight: 600 }}
-                        />
-                      </Bar>
-                    </BarChart>
-                  </ChartContainer>
+                <div className="flex flex-col gap-2.5">
+                  <div className="space-y-2.5 max-h-[420px] overflow-y-auto pr-1">
+                    {chartData.map((d) => {
+                      const widthPct = Math.max(2, (d.value / maxVal) * 100);
+                      return (
+                        <button
+                          key={d.name}
+                          type="button"
+                          onClick={() => openCategory(d.name)}
+                          className="group w-full text-left rounded-lg p-1.5 sm:p-2 hover:bg-muted/40 transition-colors cursor-pointer"
+                        >
+                          <div className="flex items-center justify-between gap-2 mb-1">
+                            <span className="text-[11px] sm:text-xs font-medium text-foreground truncate flex items-center gap-1.5">
+                              <span className="inline-block h-2 w-2 rounded-full" style={{ backgroundColor: d.fill }} />
+                              {d.name}
+                            </span>
+                            <span className="text-[10px] sm:text-xs tabular-nums font-semibold text-muted-foreground shrink-0">
+                              {d.value} <span className="text-muted-foreground/60">· {d.pct}%</span>
+                            </span>
+                          </div>
+                          <div className="h-2 w-full rounded-full bg-muted/40 overflow-hidden">
+                            <div
+                              className="h-full rounded-full transition-all duration-700 group-hover:brightness-110"
+                              style={{
+                                width: `${widthPct}%`,
+                                background: `linear-gradient(90deg, ${d.fill} 0%, ${d.fill}99 100%)`,
+                              }}
+                            />
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
                   <div className="flex items-center justify-between gap-2 text-[9px] sm:text-[10px] text-muted-foreground border-t pt-2">
                     <span className="font-medium text-primary/80 truncate">{categoryRangeHint}</span>
-                    <span>Klik bar untuk detail</span>
+                    <span>Klik baris untuk detail</span>
                   </div>
                 </div>
               );
