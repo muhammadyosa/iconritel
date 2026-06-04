@@ -957,24 +957,31 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
             type: "total" as const,
             emoji: "🗃️", title: "Total Incident", value: kpis.total,
             sub: `🏠 ${kpis.ritel} • 🏬 ${kpis.feeder}`,
-            bgClass: "bg-primary/8 hover:bg-primary/15", borderClass: "border-primary/30 hover:border-primary/50",
-            valueClass: "text-primary", glowClass: "hover:shadow-[0_0_15px_-4px_hsl(var(--primary)/0.3)]",
+      {/* KPI Summary */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3">
+        {([
+          {
+            type: "total" as const,
+            emoji: "🗃️", title: "Total Incident", value: kpis.total,
+            sub: `🏠 ${kpis.ritel} • 🏬 ${kpis.feeder}`,
+            bgClass: "bg-gradient-to-br from-primary/10 to-primary/5 hover:from-primary/20 hover:to-primary/10", borderClass: "border-primary/30 hover:border-primary/60",
+            valueClass: "text-primary", glowClass: "hover:shadow-[0_8px_24px_-8px_hsl(var(--primary)/0.45)]",
             tooltip: "Total incidents for this period (Ritel + Feeder). Click for details.",
           },
           {
             type: "resolved" as const,
             emoji: "✅", title: "Resolved", value: kpis.resolved,
             sub: kpis.total > 0 ? `${kpis.resolutionRate}% resolved` : "No data yet",
-            bgClass: "bg-success/8 hover:bg-success/15", borderClass: "border-success/30 hover:border-success/50",
-            valueClass: "text-success", glowClass: "hover:shadow-[0_0_15px_-4px_hsl(var(--success)/0.3)]",
+            bgClass: "bg-gradient-to-br from-success/10 to-success/5 hover:from-success/20 hover:to-success/10", borderClass: "border-success/30 hover:border-success/60",
+            valueClass: "text-success", glowClass: "hover:shadow-[0_8px_24px_-8px_hsl(var(--success)/0.45)]",
             tooltip: "Incidents with Resolved status. Click for details.",
           },
           {
             type: "avg" as const,
             emoji: "⏱️", title: "Avg Resolution", value: kpis.avgResolutionLabel,
             sub: kpis.resolved > 0 ? `of ${kpis.resolved} resolved` : "No resolved yet",
-            bgClass: "bg-warning/8 hover:bg-warning/15", borderClass: "border-warning/30 hover:border-warning/50",
-            valueClass: "text-warning", glowClass: "hover:shadow-[0_0_15px_-4px_hsl(var(--warning)/0.3)]",
+            bgClass: "bg-gradient-to-br from-warning/10 to-warning/5 hover:from-warning/20 hover:to-warning/10", borderClass: "border-warning/30 hover:border-warning/60",
+            valueClass: "text-warning", glowClass: "hover:shadow-[0_8px_24px_-8px_hsl(var(--warning)/0.45)]",
             tooltip: "Average incident resolution time. Click for details.",
           },
           {
@@ -982,17 +989,17 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
             emoji: "📈", title: "SLA Rate", value: kpis.slaRateLabel,
             sub: kpis.resolved > 0 ? `${kpis.slaCompliant}/${kpis.resolved} ≤ 24h` : "No resolved yet",
             bgClass: kpis.resolved === 0
-              ? "bg-muted/30 hover:bg-muted/50"
-              : kpis.slaRate >= 80 ? "bg-success/8 hover:bg-success/15" : "bg-destructive/8 hover:bg-destructive/15",
+              ? "bg-gradient-to-br from-muted/40 to-muted/20 hover:from-muted/50 hover:to-muted/30"
+              : kpis.slaRate >= 80 ? "bg-gradient-to-br from-success/10 to-success/5 hover:from-success/20 hover:to-success/10" : "bg-gradient-to-br from-destructive/10 to-destructive/5 hover:from-destructive/20 hover:to-destructive/10",
             borderClass: kpis.resolved === 0
               ? "border-muted-foreground/20 hover:border-muted-foreground/40"
-              : kpis.slaRate >= 80 ? "border-success/30 hover:border-success/50" : "border-destructive/30 hover:border-destructive/50",
+              : kpis.slaRate >= 80 ? "border-success/30 hover:border-success/60" : "border-destructive/30 hover:border-destructive/60",
             valueClass: kpis.resolved === 0
               ? "text-muted-foreground"
               : kpis.slaRate >= 80 ? "text-success" : "text-destructive",
             glowClass: kpis.resolved === 0
               ? ""
-              : kpis.slaRate >= 80 ? "hover:shadow-[0_0_15px_-4px_hsl(var(--success)/0.3)]" : "hover:shadow-[0_0_15px_-4px_hsl(var(--destructive)/0.3)]",
+              : kpis.slaRate >= 80 ? "hover:shadow-[0_8px_24px_-8px_hsl(var(--success)/0.45)]" : "hover:shadow-[0_8px_24px_-8px_hsl(var(--destructive)/0.45)]",
             tooltip: "SLA compliance rate (≤24h) among resolved incidents. Click for details.",
           },
         ]).map((card, i) => (
@@ -1000,15 +1007,15 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
             key={i}
             type="button"
             onClick={() => openKpiDetail(card.type)}
-            className={`text-left rounded-lg border p-2 sm:p-2.5 transition-all duration-300 cursor-pointer active:scale-[0.97] ${card.bgClass} ${card.borderClass} ${card.glowClass}`}
+            className={`group text-left rounded-xl border p-2.5 sm:p-3 transition-all duration-300 cursor-pointer active:scale-[0.97] hover:-translate-y-0.5 ${card.bgClass} ${card.borderClass} ${card.glowClass}`}
             title={card.tooltip}
           >
-            <div className="flex items-center gap-1.5 mb-1">
-              <span className="text-sm sm:text-base">{card.emoji}</span>
-              <p className="text-[9px] sm:text-[10px] text-muted-foreground font-medium truncate">{card.title}</p>
+            <div className="flex items-center gap-1.5 mb-1.5">
+              <span className="text-base sm:text-lg transition-transform group-hover:scale-110">{card.emoji}</span>
+              <p className="text-[10px] sm:text-[11px] text-muted-foreground font-medium truncate">{card.title}</p>
             </div>
-            <p className={`text-xl sm:text-2xl font-bold tabular-nums text-center leading-tight ${card.valueClass}`}>{card.value}</p>
-            <p className="text-[9px] sm:text-[10px] text-muted-foreground/80 text-center mt-0.5 truncate">{card.sub}</p>
+            <p className={`text-xl sm:text-2xl md:text-3xl font-bold tabular-nums leading-tight ${card.valueClass}`}>{card.value}</p>
+            <p className="text-[9px] sm:text-[10px] text-muted-foreground/80 mt-0.5 truncate">{card.sub}</p>
           </button>
         ))}
       </div>
