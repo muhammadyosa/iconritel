@@ -1071,14 +1071,16 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
       )}
 
       {/* Status Distribution — counts per status for the active scope (month / current / all) */}
-      <Card className="overflow-hidden border">
-        <CardHeader className="py-2 px-3 sm:px-4 border-b bg-muted/20">
+      <Card className="overflow-hidden border-border/60 shadow-card hover:shadow-elevated transition-all duration-300 rounded-xl">
+        <CardHeader className="py-2.5 px-3 sm:px-4 border-b bg-gradient-to-r from-success/10 via-success/5 to-transparent">
           <div className="flex items-center justify-between gap-2">
-            <CardTitle className="flex items-center gap-1.5 text-xs sm:text-sm">
-              <CheckCircle className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary" />
+            <CardTitle className="flex items-center gap-1.5 text-xs sm:text-sm font-semibold">
+              <div className="flex h-6 w-6 items-center justify-center rounded-md bg-success/15 text-success">
+                <CheckCircle className="h-3.5 w-3.5" />
+              </div>
               Status Distribution
             </CardTitle>
-            <span className="text-[9px] sm:text-[10px] text-muted-foreground truncate">
+            <span className="text-[9px] sm:text-[10px] text-muted-foreground truncate font-medium px-2 py-0.5 rounded-full bg-muted/40">
               {selectedMonthLabel} • {kpis.total} incident{kpis.total===1?"":"s"}
             </span>
           </div>
