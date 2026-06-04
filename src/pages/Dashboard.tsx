@@ -497,67 +497,69 @@ export default function Dashboard() {
 
                 return (
                   <div className="flex flex-col gap-2">
-                    {/* Arc visual */}
-                    <div className="w-full flex items-center justify-center">
-                      <svg viewBox="0 0 200 110" className="w-full max-w-[200px] h-auto">
-                        {statusData.map((d, i) => (
-                          <g key={`bg-${d.label}`}>
-                            <path
-                              d={fullArc(radii[i])}
-                              fill="none"
-                              stroke="hsl(var(--muted))"
-                              strokeOpacity={0.35}
-                              strokeWidth={stroke}
-                              strokeLinecap="round"
-                            />
-                          </g>
-                        ))}
-                        {statusData.map((d, i) => {
-                          const pct = d.value / total;
-                          if (pct <= 0) return null;
+                    <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-3">
+                      {/* Arc visual */}
+                      <div className="flex items-center justify-center shrink-0">
+                        <svg viewBox="0 0 200 110" className="w-full max-w-[200px] h-auto">
+                          {statusData.map((d, i) => (
+                            <g key={`bg-${d.label}`}>
+                              <path
+                                d={fullArc(radii[i])}
+                                fill="none"
+                                stroke="hsl(var(--muted))"
+                                strokeOpacity={0.35}
+                                strokeWidth={stroke}
+                                strokeLinecap="round"
+                              />
+                            </g>
+                          ))}
+                          {statusData.map((d, i) => {
+                            const pct = d.value / total;
+                            if (pct <= 0) return null;
+                            return (
+                              <path
+                                key={`fg-${d.label}`}
+                                d={arcPath(radii[i], pct)}
+                                fill="none"
+                                stroke={d.color}
+                                strokeWidth={stroke}
+                                strokeLinecap="round"
+                                className="cursor-pointer transition-opacity hover:opacity-80"
+                                onClick={() => openStatus(d.status)}
+                              >
+                                <title>{`${d.label}: ${d.value} (${Math.round(pct * 100)}%)`}</title>
+                              </path>
+                            );
+                          })}
+                        </svg>
+                      </div>
+
+                      {/* Legend list — to the right of arc */}
+                      <div className="flex-1 w-full space-y-0.5">
+                        {statusData.map((d) => {
+                          const pct = Math.round((d.value / total) * 100);
                           return (
-                            <path
-                              key={`fg-${d.label}`}
-                              d={arcPath(radii[i], pct)}
-                              fill="none"
-                              stroke={d.color}
-                              strokeWidth={stroke}
-                              strokeLinecap="round"
-                              className="cursor-pointer transition-opacity hover:opacity-80"
+                            <button
+                              key={d.label}
                               onClick={() => openStatus(d.status)}
+                              className="w-full flex items-center gap-2 px-1.5 py-1 rounded-md hover:bg-muted/40 transition-colors text-left"
                             >
-                              <title>{`${d.label}: ${d.value} (${Math.round(pct * 100)}%)`}</title>
-                            </path>
+                              <span
+                                className="w-2 h-2 rounded-full shrink-0"
+                                style={{ backgroundColor: d.color }}
+                              />
+                              <span className="text-[10px] sm:text-[11px] font-medium flex items-center gap-1">
+                                <span>{d.emoji}</span>
+                                <span>{d.label}</span>
+                                <span className="text-muted-foreground">({pct}%)</span>
+                              </span>
+                              <span className="ml-auto text-[11px] sm:text-xs font-bold tabular-nums">
+                                {d.value.toLocaleString("id-ID")}
+                              </span>
+                            </button>
                           );
                         })}
-                      </svg>
-                    </div>
-
-                    {/* Legend list — label (pct) ............ value */}
-                    <div className="space-y-0.5">
-                      {statusData.map((d) => {
-                        const pct = Math.round((d.value / total) * 100);
-                        return (
-                          <button
-                            key={d.label}
-                            onClick={() => openStatus(d.status)}
-                            className="w-full flex items-center gap-2 px-1.5 py-1 rounded-md hover:bg-muted/40 transition-colors text-left"
-                          >
-                            <span
-                              className="w-2 h-2 rounded-full shrink-0"
-                              style={{ backgroundColor: d.color }}
-                            />
-                            <span className="text-[10px] sm:text-[11px] font-medium flex items-center gap-1">
-                              <span>{d.emoji}</span>
-                              <span>{d.label}</span>
-                              <span className="text-muted-foreground">({pct}%)</span>
-                            </span>
-                            <span className="ml-auto text-[11px] sm:text-xs font-bold tabular-nums">
-                              {d.value.toLocaleString("id-ID")}
-                            </span>
-                          </button>
-                        );
-                      })}
+                      </div>
                     </div>
                     <p className="text-[9px] text-muted-foreground text-center">
                       Klik baris untuk detail
