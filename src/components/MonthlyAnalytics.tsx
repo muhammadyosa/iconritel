@@ -1091,7 +1091,6 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
               <p className="text-xs text-muted-foreground text-center py-8">No data</p>
             ) : (() => {
               const total = categoryData.reduce((s, d) => s + d.value, 0) || 1;
-              const maxValue = Math.max(...categoryData.map((d) => d.value), 1);
               const openCategory = (name: string) => {
                 const filtered = categoryFilteredTickets.filter((t) => t.constraint === name);
                 setDrillSelectedTicket(null);
@@ -1103,104 +1102,60 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
               };
               const colorFor = (name: string, i: number) =>
                 CATEGORY_COLORS[name] || FALLBACK_COLORS[i % FALLBACK_COLORS.length];
-              const top = categoryData[0];
-              const topPct = Math.round((top.value / total) * 100);
-              // Rose / radial chart geometry
-              const cx = 150;
-              const cy = 150;
-              const innerR = 38;
-              const maxR = 130;
-              const n = categoryData.length;
-              const sliceAngle = (Math.PI * 2) / Math.max(n, 1);
-              const gap = n > 1 ? Math.min(0.04, sliceAngle * 0.08) : 0;
-              const polar = (a: number, r: number) => [cx + Math.cos(a) * r, cy + Math.sin(a) * r];
-              const slicePath = (i: number, r: number) => {
-                const a0 = -Math.PI / 2 + i * sliceAngle + gap / 2;
-                const a1 = -Math.PI / 2 + (i + 1) * sliceAngle - gap / 2;
-                const [x0o, y0o] = polar(a0, r);
-                const [x1o, y1o] = polar(a1, r);
-                const [x1i, y1i] = polar(a1, innerR);
-                const [x0i, y0i] = polar(a0, innerR);
-                const large = a1 - a0 > Math.PI ? 1 : 0;
-                return `M ${x0o} ${y0o} A ${r} ${r} 0 ${large} 1 ${x1o} ${y1o} L ${x1i} ${y1i} A ${innerR} ${innerR} 0 ${large} 0 ${x0i} ${y0i} Z`;
-              };
+              const chartData = categoryData.map((d, i) => ({
+                name: d.name,
+                value: d.value,
+                pct: Math.round((d.value / total) * 100),
+                fill: colorFor(d.name, i),
+              }));
+              const chartHeight = Math.max(180, Math.min(420, chartData.length * 34 + 20));
               return (
                 <div className="flex flex-col gap-3">
-                  {/* Radial rose chart */}
-                  <div className="flex items-center justify-center">
-                    <svg viewBox="0 0 300 300" className="w-full max-w-[320px] h-auto overflow-visible">
-                      <defs>
-                        <filter id="cat-shadow" x="-20%" y="-20%" width="140%" height="140%">
-                          <feDropShadow dx="0" dy="2" stdDeviation="3" floodOpacity="0.15" />
-                        </filter>
-                      </defs>
-                      {/* background ring */}
-                      <circle cx={cx} cy={cy} r={maxR} fill="hsl(var(--muted))" opacity="0.15" />
-                      {categoryData.map((d, i) => {
-                        const r = innerR + ((d.value / maxValue) * (maxR - innerR));
-                        const pct = Math.round((d.value / total) * 100);
-                        const color = colorFor(d.name, i);
-                        const midA = -Math.PI / 2 + (i + 0.5) * sliceAngle;
-                        const labelR = Math.max(innerR + 18, r * 0.65);
-                        const [lx, ly] = polar(midA, labelR);
-                        return (
-                          <g key={d.name} className="cursor-pointer group" onClick={() => openCategory(d.name)}>
-                            <path
-                              d={slicePath(i, r)}
-                              fill={color}
-                              filter="url(#cat-shadow)"
-                              className="transition-opacity group-hover:opacity-80"
-                            >
-                              <title>{`${d.name}: ${d.value.toLocaleString("id-ID")} (${pct}%)`}</title>
-                            </path>
-                            {pct >= 4 && (
-                              <text
-                                x={lx}
-                                y={ly}
-                                textAnchor="middle"
-                                dominantBaseline="central"
-                                className="fill-white font-bold pointer-events-none"
-                                style={{ fontSize: 11 }}
-                              >
-                                {pct}%
-                              </text>
-                            )}
-                          </g>
-                        );
-                      })}
-                      {/* center disc */}
-                      <circle cx={cx} cy={cy} r={innerR - 2} fill="hsl(var(--background))" filter="url(#cat-shadow)" />
-                      <circle cx={cx} cy={cy} r={innerR - 8} fill="none" stroke="hsl(var(--primary))" strokeWidth="2" opacity="0.6" />
-                      <foreignObject x={cx - 16} y={cy - 16} width="32" height="32" className="pointer-events-none">
-                        <div className="w-full h-full flex items-center justify-center">
-                          <BarChart3 className="h-5 w-5 text-primary" />
-                        </div>
-                      </foreignObject>
-                    </svg>
-                  </div>
-
-                  {/* Legend */}
-                  <div className="grid grid-cols-2 gap-1.5 max-h-[180px] overflow-y-auto pr-1">
-                    {categoryData.map((d, i) => {
-                      const pct = ((d.value / total) * 100).toFixed(1);
-                      const color = colorFor(d.name, i);
-                      return (
-                        <button
-                          key={d.name}
-                          onClick={() => openCategory(d.name)}
-                          className="flex items-center gap-1.5 px-1.5 py-1 rounded-md hover:bg-muted/40 transition-colors text-left min-w-0"
-                        >
-                          <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: color }} />
-                          <span className="text-[10px] sm:text-[11px] font-medium truncate flex-1">{d.name}</span>
-                          <span className="text-[9px] sm:text-[10px] text-muted-foreground tabular-nums shrink-0">{pct}%</span>
-                          <span className="text-[10px] sm:text-xs font-bold tabular-nums shrink-0">{d.value.toLocaleString("id-ID")}</span>
-                        </button>
-                      );
-                    })}
-                  </div>
+                  <ChartContainer
+                    config={{ value: { label: "Incident", color: "hsl(var(--primary))" } }}
+                    className="w-full"
+                    style={{ height: chartHeight, aspectRatio: "auto" }}
+                  >
+                    <BarChart
+                      data={chartData}
+                      layout="vertical"
+                      margin={{ top: 4, right: 36, left: 4, bottom: 4 }}
+                      barCategoryGap={6}
+                      onClick={(e: any) => {
+                        const name = e?.activePayload?.[0]?.payload?.name;
+                        if (name) openCategory(name);
+                      }}
+                    >
+                      <CartesianGrid horizontal={false} strokeDasharray="3 4" stroke="hsl(var(--border))" strokeOpacity={0.4} />
+                      <XAxis type="number" hide />
+                      <YAxis
+                        type="category"
+                        dataKey="name"
+                        width={130}
+                        tick={{ fontSize: 10, fill: "hsl(var(--foreground))" }}
+                        tickLine={false}
+                        axisLine={false}
+                      />
+                      <ChartTooltip
+                        cursor={{ fill: "hsl(var(--muted))", fillOpacity: 0.3 }}
+                        content={<ChartTooltipContent indicator="dot" className="rounded-xl shadow-lg" />}
+                      />
+                      <Bar dataKey="value" radius={[10, 10, 10, 10]} barSize={18} className="cursor-pointer">
+                        {chartData.map((d, i) => (
+                          <Cell key={d.name} fill={d.fill} />
+                        ))}
+                        <LabelList
+                          dataKey="pct"
+                          position="right"
+                          formatter={(v: number) => `${v}%`}
+                          style={{ fontSize: 10, fill: "hsl(var(--muted-foreground))", fontWeight: 600 }}
+                        />
+                      </Bar>
+                    </BarChart>
+                  </ChartContainer>
                   <div className="flex items-center justify-between gap-2 text-[9px] sm:text-[10px] text-muted-foreground border-t pt-2">
                     <span className="font-medium text-primary/80 truncate">{categoryRangeHint}</span>
-                    <span>Klik slice untuk detail</span>
+                    <span>Klik bar untuk detail</span>
                   </div>
                 </div>
               );
