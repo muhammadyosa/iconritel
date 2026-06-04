@@ -1015,14 +1015,16 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
 
       {/* Monthly Performance Chart — composed bar (total) + line (resolved) */}
       {dailyTrend.length > 0 && (
-        <Card className="overflow-hidden border">
-          <CardHeader className="py-2 px-3 sm:px-4 border-b bg-muted/20">
+        <Card className="overflow-hidden border-border/60 shadow-card hover:shadow-elevated transition-all duration-300 rounded-xl">
+          <CardHeader className="py-2.5 px-3 sm:px-4 border-b bg-gradient-to-r from-primary/10 via-primary/5 to-transparent">
             <div className="flex items-center justify-between gap-2">
-              <CardTitle className="flex items-center gap-1.5 text-xs sm:text-sm">
-                <TrendingUp className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary" />
+              <CardTitle className="flex items-center gap-1.5 text-xs sm:text-sm font-semibold">
+                <div className="flex h-6 w-6 items-center justify-center rounded-md bg-primary/15 text-primary">
+                  <TrendingUp className="h-3.5 w-3.5" />
+                </div>
                 Monthly Performance Trend
               </CardTitle>
-              <span className="text-[9px] sm:text-[10px] text-muted-foreground truncate">
+              <span className="text-[9px] sm:text-[10px] text-muted-foreground truncate font-medium px-2 py-0.5 rounded-full bg-muted/40">
                 {selectedMonthLabel} • {dailyTrend.length} hari
               </span>
             </div>
