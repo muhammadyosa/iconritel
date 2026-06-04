@@ -496,7 +496,7 @@ export default function Dashboard() {
                   `M ${cx - r} ${cy} A ${r} ${r} 0 1 1 ${cx + r} ${cy}`;
 
                 return (
-                  <div className="flex flex-col gap-2">
+                  <div className="flex flex-col gap-2 flex-1 justify-center">
                     <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-3">
                       {/* Arc visual */}
                       <div className="flex items-center justify-center shrink-0">
