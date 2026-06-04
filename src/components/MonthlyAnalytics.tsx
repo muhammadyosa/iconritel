@@ -866,37 +866,46 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
 
 
   return (
-    <div className="space-y-3">
-      {/* Header - matches Status Distribution / Category Trend style */}
-      <div className="flex items-center justify-between gap-2">
-        <h3 className="flex items-center gap-1.5 text-xs sm:text-sm font-semibold">
-          <BarChart3 className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary" />
-          Monthly Performance Analysis
-        </h3>
-        <div className="flex items-center gap-1.5">
-          <Button
-            variant="outline"
-            size="sm"
-            className="h-7 text-[10px] sm:text-xs px-2 sm:px-3"
-            onClick={handleExportPDF}
-            disabled={monthTickets.length === 0}
-          >
-            <FileDown className="h-3 w-3 sm:h-3.5 sm:w-3.5 mr-1" />
-            <span className="hidden sm:inline">Export PDF</span>
-            <span className="sm:hidden">PDF</span>
-          </Button>
-          <Select value={selectedMonth} onValueChange={setSelectedMonth}>
-            <SelectTrigger className="w-[120px] sm:w-[170px] h-7 text-[10px] sm:text-xs">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {monthOptions.map((opt) => (
-                <SelectItem key={opt.value} value={opt.value} className="text-xs">
-                  {opt.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+    <div className="space-y-3 sm:space-y-4">
+      {/* Header — gradient hero band */}
+      <div className="relative overflow-hidden rounded-xl border border-primary/20 bg-gradient-to-r from-primary/10 via-accent/5 to-transparent p-3 sm:p-4">
+        <div className="absolute -top-8 -right-8 h-32 w-32 rounded-full bg-primary/10 blur-3xl pointer-events-none" />
+        <div className="relative flex flex-wrap items-center justify-between gap-2">
+          <div className="flex items-center gap-2 min-w-0">
+            <div className="flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-accent text-primary-foreground shadow-md shrink-0">
+              <BarChart3 className="h-4 w-4 sm:h-5 sm:w-5" />
+            </div>
+            <div className="min-w-0">
+              <h3 className="text-sm sm:text-base font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent truncate">
+                Monthly Performance Analysis
+              </h3>
+              <p className="text-[10px] sm:text-xs text-muted-foreground truncate">Insight performa & SLA bulanan</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-1.5 shrink-0">
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-8 text-[10px] sm:text-xs px-2 sm:px-3 rounded-full border-primary/30 hover:bg-primary/10"
+              onClick={handleExportPDF}
+              disabled={monthTickets.length === 0}
+            >
+              <FileDown className="h-3 w-3 sm:h-3.5 sm:w-3.5 sm:mr-1" />
+              <span className="hidden sm:inline">Export PDF</span>
+            </Button>
+            <Select value={selectedMonth} onValueChange={setSelectedMonth}>
+              <SelectTrigger className="w-[130px] sm:w-[170px] h-8 text-[10px] sm:text-xs rounded-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {monthOptions.map((opt) => (
+                  <SelectItem key={opt.value} value={opt.value} className="text-xs">
+                    {opt.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
       </div>
 
@@ -941,31 +950,31 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
         </div>
       </div>
 
-      {/* KPI Summary - compact cards with glow effect matching Dashboard KPI */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+      {/* KPI Summary */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3">
         {([
           {
             type: "total" as const,
             emoji: "🗃️", title: "Total Incident", value: kpis.total,
             sub: `🏠 ${kpis.ritel} • 🏬 ${kpis.feeder}`,
-            bgClass: "bg-primary/8 hover:bg-primary/15", borderClass: "border-primary/30 hover:border-primary/50",
-            valueClass: "text-primary", glowClass: "hover:shadow-[0_0_15px_-4px_hsl(var(--primary)/0.3)]",
+            bgClass: "bg-gradient-to-br from-primary/10 to-primary/5 hover:from-primary/20 hover:to-primary/10", borderClass: "border-primary/30 hover:border-primary/60",
+            valueClass: "text-primary", glowClass: "hover:shadow-[0_8px_24px_-8px_hsl(var(--primary)/0.45)]",
             tooltip: "Total incidents for this period (Ritel + Feeder). Click for details.",
           },
           {
             type: "resolved" as const,
             emoji: "✅", title: "Resolved", value: kpis.resolved,
             sub: kpis.total > 0 ? `${kpis.resolutionRate}% resolved` : "No data yet",
-            bgClass: "bg-success/8 hover:bg-success/15", borderClass: "border-success/30 hover:border-success/50",
-            valueClass: "text-success", glowClass: "hover:shadow-[0_0_15px_-4px_hsl(var(--success)/0.3)]",
+            bgClass: "bg-gradient-to-br from-success/10 to-success/5 hover:from-success/20 hover:to-success/10", borderClass: "border-success/30 hover:border-success/60",
+            valueClass: "text-success", glowClass: "hover:shadow-[0_8px_24px_-8px_hsl(var(--success)/0.45)]",
             tooltip: "Incidents with Resolved status. Click for details.",
           },
           {
             type: "avg" as const,
             emoji: "⏱️", title: "Avg Resolution", value: kpis.avgResolutionLabel,
             sub: kpis.resolved > 0 ? `of ${kpis.resolved} resolved` : "No resolved yet",
-            bgClass: "bg-warning/8 hover:bg-warning/15", borderClass: "border-warning/30 hover:border-warning/50",
-            valueClass: "text-warning", glowClass: "hover:shadow-[0_0_15px_-4px_hsl(var(--warning)/0.3)]",
+            bgClass: "bg-gradient-to-br from-warning/10 to-warning/5 hover:from-warning/20 hover:to-warning/10", borderClass: "border-warning/30 hover:border-warning/60",
+            valueClass: "text-warning", glowClass: "hover:shadow-[0_8px_24px_-8px_hsl(var(--warning)/0.45)]",
             tooltip: "Average incident resolution time. Click for details.",
           },
           {
@@ -973,17 +982,17 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
             emoji: "📈", title: "SLA Rate", value: kpis.slaRateLabel,
             sub: kpis.resolved > 0 ? `${kpis.slaCompliant}/${kpis.resolved} ≤ 24h` : "No resolved yet",
             bgClass: kpis.resolved === 0
-              ? "bg-muted/30 hover:bg-muted/50"
-              : kpis.slaRate >= 80 ? "bg-success/8 hover:bg-success/15" : "bg-destructive/8 hover:bg-destructive/15",
+              ? "bg-gradient-to-br from-muted/40 to-muted/20 hover:from-muted/50 hover:to-muted/30"
+              : kpis.slaRate >= 80 ? "bg-gradient-to-br from-success/10 to-success/5 hover:from-success/20 hover:to-success/10" : "bg-gradient-to-br from-destructive/10 to-destructive/5 hover:from-destructive/20 hover:to-destructive/10",
             borderClass: kpis.resolved === 0
               ? "border-muted-foreground/20 hover:border-muted-foreground/40"
-              : kpis.slaRate >= 80 ? "border-success/30 hover:border-success/50" : "border-destructive/30 hover:border-destructive/50",
+              : kpis.slaRate >= 80 ? "border-success/30 hover:border-success/60" : "border-destructive/30 hover:border-destructive/60",
             valueClass: kpis.resolved === 0
               ? "text-muted-foreground"
               : kpis.slaRate >= 80 ? "text-success" : "text-destructive",
             glowClass: kpis.resolved === 0
               ? ""
-              : kpis.slaRate >= 80 ? "hover:shadow-[0_0_15px_-4px_hsl(var(--success)/0.3)]" : "hover:shadow-[0_0_15px_-4px_hsl(var(--destructive)/0.3)]",
+              : kpis.slaRate >= 80 ? "hover:shadow-[0_8px_24px_-8px_hsl(var(--success)/0.45)]" : "hover:shadow-[0_8px_24px_-8px_hsl(var(--destructive)/0.45)]",
             tooltip: "SLA compliance rate (≤24h) among resolved incidents. Click for details.",
           },
         ]).map((card, i) => (
@@ -991,29 +1000,31 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
             key={i}
             type="button"
             onClick={() => openKpiDetail(card.type)}
-            className={`text-left rounded-lg border p-2 sm:p-2.5 transition-all duration-300 cursor-pointer active:scale-[0.97] ${card.bgClass} ${card.borderClass} ${card.glowClass}`}
+            className={`group text-left rounded-xl border p-2.5 sm:p-3 transition-all duration-300 cursor-pointer active:scale-[0.97] hover:-translate-y-0.5 ${card.bgClass} ${card.borderClass} ${card.glowClass}`}
             title={card.tooltip}
           >
-            <div className="flex items-center gap-1.5 mb-1">
-              <span className="text-sm sm:text-base">{card.emoji}</span>
-              <p className="text-[9px] sm:text-[10px] text-muted-foreground font-medium truncate">{card.title}</p>
+            <div className="flex items-center gap-1.5 mb-1.5">
+              <span className="text-base sm:text-lg transition-transform group-hover:scale-110">{card.emoji}</span>
+              <p className="text-[10px] sm:text-[11px] text-muted-foreground font-medium truncate">{card.title}</p>
             </div>
-            <p className={`text-xl sm:text-2xl font-bold tabular-nums text-center leading-tight ${card.valueClass}`}>{card.value}</p>
-            <p className="text-[9px] sm:text-[10px] text-muted-foreground/80 text-center mt-0.5 truncate">{card.sub}</p>
+            <p className={`text-xl sm:text-2xl md:text-3xl font-bold tabular-nums leading-tight ${card.valueClass}`}>{card.value}</p>
+            <p className="text-[9px] sm:text-[10px] text-muted-foreground/80 mt-0.5 truncate">{card.sub}</p>
           </button>
         ))}
       </div>
 
       {/* Monthly Performance Chart — composed bar (total) + line (resolved) */}
       {dailyTrend.length > 0 && (
-        <Card className="overflow-hidden border">
-          <CardHeader className="py-2 px-3 sm:px-4 border-b bg-muted/20">
+        <Card className="overflow-hidden border-border/60 shadow-card hover:shadow-elevated transition-all duration-300 rounded-xl">
+          <CardHeader className="py-2.5 px-3 sm:px-4 border-b bg-gradient-to-r from-primary/10 via-primary/5 to-transparent">
             <div className="flex items-center justify-between gap-2">
-              <CardTitle className="flex items-center gap-1.5 text-xs sm:text-sm">
-                <TrendingUp className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary" />
+              <CardTitle className="flex items-center gap-1.5 text-xs sm:text-sm font-semibold">
+                <div className="flex h-6 w-6 items-center justify-center rounded-md bg-primary/15 text-primary">
+                  <TrendingUp className="h-3.5 w-3.5" />
+                </div>
                 Monthly Performance Trend
               </CardTitle>
-              <span className="text-[9px] sm:text-[10px] text-muted-foreground truncate">
+              <span className="text-[9px] sm:text-[10px] text-muted-foreground truncate font-medium px-2 py-0.5 rounded-full bg-muted/40">
                 {selectedMonthLabel} • {dailyTrend.length} hari
               </span>
             </div>
@@ -1024,7 +1035,7 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
                 total: { label: "Total Incident", color: "hsl(217, 91%, 60%)" },
                 resolved: { label: "Resolved", color: "hsl(142, 71%, 45%)" },
               }}
-              className="h-[200px] xs:h-[220px] sm:h-[240px] w-full"
+              className="h-[200px] xs:h-[230px] sm:h-[260px] md:h-[280px] lg:h-[300px] w-full"
               style={{ aspectRatio: "auto" }}
             >
               <ComposedChart data={dailyTrend} margin={{ top: 16, right: 16, left: 0, bottom: 4 }}>
@@ -1060,14 +1071,16 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
       )}
 
       {/* Status Distribution — counts per status for the active scope (month / current / all) */}
-      <Card className="overflow-hidden border">
-        <CardHeader className="py-2 px-3 sm:px-4 border-b bg-muted/20">
+      <Card className="overflow-hidden border-border/60 shadow-card hover:shadow-elevated transition-all duration-300 rounded-xl">
+        <CardHeader className="py-2.5 px-3 sm:px-4 border-b bg-gradient-to-r from-success/10 via-success/5 to-transparent">
           <div className="flex items-center justify-between gap-2">
-            <CardTitle className="flex items-center gap-1.5 text-xs sm:text-sm">
-              <CheckCircle className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary" />
+            <CardTitle className="flex items-center gap-1.5 text-xs sm:text-sm font-semibold">
+              <div className="flex h-6 w-6 items-center justify-center rounded-md bg-success/15 text-success">
+                <CheckCircle className="h-3.5 w-3.5" />
+              </div>
               Status Distribution
             </CardTitle>
-            <span className="text-[9px] sm:text-[10px] text-muted-foreground truncate">
+            <span className="text-[9px] sm:text-[10px] text-muted-foreground truncate font-medium px-2 py-0.5 rounded-full bg-muted/40">
               {selectedMonthLabel} • {kpis.total} incident{kpis.total===1?"":"s"}
             </span>
           </div>
@@ -1086,13 +1099,13 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
               .filter((s) => s.value > 0)
               .map((s) => ({ name: s.label, value: s.value, fill: toneColorMap[s.tone] }));
             return (
-              <div className="grid grid-cols-1 sm:grid-cols-5 gap-3 items-center">
+              <div className="grid grid-cols-1 md:grid-cols-5 gap-3 sm:gap-4 items-center">
                 {/* Donut chart */}
-                <div className="sm:col-span-2 flex items-center justify-center">
+                <div className="md:col-span-2 flex items-center justify-center">
                   <ChartContainer
                     config={{ value: { label: "Incident" } }}
-                    className="w-full max-w-[220px]"
-                    style={{ height: 200, aspectRatio: "auto" }}
+                    className="w-full max-w-[260px]"
+                    style={{ height: 220, aspectRatio: "auto" }}
                   >
                     <PieChart>
                       <ChartTooltip content={<ChartTooltipContent indicator="dot" nameKey="name" className="rounded-xl shadow-lg" />} />
@@ -1102,9 +1115,10 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
                         nameKey="name"
                         cx="50%"
                         cy="50%"
-                        innerRadius={50}
-                        outerRadius={82}
+                        innerRadius={55}
+                        outerRadius={92}
                         paddingAngle={3}
+                        cornerRadius={6}
                         strokeWidth={2}
                         stroke="hsl(var(--background))"
                       >
@@ -1116,27 +1130,27 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
                   </ChartContainer>
                 </div>
                 {/* Status cards */}
-                <div className="sm:col-span-3 grid grid-cols-2 gap-2">
+                <div className="md:col-span-3 grid grid-cols-2 gap-2 sm:gap-2.5">
                   {statusDistribution.map((s) => {
                     const toneMap: Record<string, { bg: string; text: string; bar: string; border: string }> = {
-                      success: { bg: "bg-success/8", text: "text-success", bar: "bg-success", border: "border-success/30" },
-                      warning: { bg: "bg-warning/8", text: "text-warning", bar: "bg-warning", border: "border-warning/30" },
-                      destructive: { bg: "bg-destructive/8", text: "text-destructive", bar: "bg-destructive", border: "border-destructive/30" },
-                      muted: { bg: "bg-muted/30", text: "text-muted-foreground", bar: "bg-muted-foreground/50", border: "border-muted-foreground/20" },
+                      success: { bg: "bg-gradient-to-br from-success/10 to-success/5", text: "text-success", bar: "bg-success", border: "border-success/30" },
+                      warning: { bg: "bg-gradient-to-br from-warning/10 to-warning/5", text: "text-warning", bar: "bg-warning", border: "border-warning/30" },
+                      destructive: { bg: "bg-gradient-to-br from-destructive/10 to-destructive/5", text: "text-destructive", bar: "bg-destructive", border: "border-destructive/30" },
+                      muted: { bg: "bg-gradient-to-br from-muted/40 to-muted/20", text: "text-muted-foreground", bar: "bg-muted-foreground/50", border: "border-muted-foreground/20" },
                     };
                     const c = toneMap[s.tone];
                     return (
-                      <div key={s.key} className={`rounded-lg border p-2 ${c.bg} ${c.border}`}>
+                      <div key={s.key} className={`rounded-xl border p-2 sm:p-2.5 transition-all duration-300 hover:scale-[1.02] ${c.bg} ${c.border}`}>
                         <div className="flex items-center justify-between gap-1 mb-1">
-                          <span className="flex items-center gap-1 text-[10px] font-medium text-muted-foreground truncate">
+                          <span className="flex items-center gap-1 text-[10px] sm:text-[11px] font-medium text-muted-foreground truncate">
                             <span>{s.emoji}</span>
                             <span className="truncate">{s.label}</span>
                           </span>
-                          <span className={`text-[9px] tabular-nums ${c.text}`}>{s.pct}%</span>
+                          <span className={`text-[9px] sm:text-[10px] tabular-nums font-semibold ${c.text}`}>{s.pct}%</span>
                         </div>
-                        <p className={`text-lg sm:text-xl font-bold tabular-nums leading-none ${c.text}`}>{s.value}</p>
-                        <div className="mt-1.5 h-1 w-full rounded-full bg-muted/50 overflow-hidden">
-                          <div className={`h-full ${c.bar} transition-all duration-500`} style={{ width: `${s.pct}%` }} />
+                        <p className={`text-lg sm:text-xl md:text-2xl font-bold tabular-nums leading-none ${c.text}`}>{s.value}</p>
+                        <div className="mt-1.5 h-1.5 w-full rounded-full bg-muted/50 overflow-hidden">
+                          <div className={`h-full ${c.bar} transition-all duration-700 rounded-full`} style={{ width: `${s.pct}%` }} />
                         </div>
                       </div>
                     );
@@ -1148,14 +1162,16 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
         </CardContent>
       </Card>
 
-      {/* Charts - matching Status Distribution / Category Trend card style */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 sm:gap-3">
+      {/* Charts grid */}
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-3 sm:gap-4">
         {/* Category Breakdown */}
-        <Card className="overflow-hidden border">
-          <CardHeader className="py-2 px-3 sm:px-4 border-b bg-muted/20">
-             <div className="flex items-center justify-between gap-2">
-              <CardTitle className="flex items-center gap-1.5 text-xs sm:text-sm">
-                <BarChart3 className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary" />
+        <Card className="overflow-hidden border-border/60 shadow-card hover:shadow-elevated transition-all duration-300 rounded-xl">
+          <CardHeader className="py-2.5 px-3 sm:px-4 border-b bg-gradient-to-r from-accent/10 via-accent/5 to-transparent">
+             <div className="flex flex-wrap items-center justify-between gap-2">
+              <CardTitle className="flex items-center gap-1.5 text-xs sm:text-sm font-semibold">
+                <div className="flex h-6 w-6 items-center justify-center rounded-md bg-accent/15 text-accent">
+                  <BarChart3 className="h-3.5 w-3.5" />
+                </div>
                 Incident Category
               </CardTitle>
               <div className="flex items-center gap-1.5">
@@ -1261,11 +1277,13 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
         </Card>
 
         {/* Daily Trend */}
-        <Card className="overflow-hidden border">
-          <CardHeader className="py-2 px-3 sm:px-4 border-b bg-muted/20">
+        <Card className="overflow-hidden border-border/60 shadow-card hover:shadow-elevated transition-all duration-300 rounded-xl">
+          <CardHeader className="py-2.5 px-3 sm:px-4 border-b bg-gradient-to-r from-warning/10 via-warning/5 to-transparent">
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <CardTitle className="flex items-center gap-1.5 text-xs sm:text-sm">
-                <TrendingUp className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary" />
+              <CardTitle className="flex items-center gap-1.5 text-xs sm:text-sm font-semibold">
+                <div className="flex h-6 w-6 items-center justify-center rounded-md bg-warning/15 text-warning">
+                  <TrendingUp className="h-3.5 w-3.5" />
+                </div>
                 Daily Trends & SLA Compliance
               </CardTitle>
               <div className="flex items-center gap-3">
@@ -1316,7 +1334,7 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
               <p className="text-xs text-muted-foreground text-center py-8">No data</p>
             ) : (
               <>
-                <ChartContainer config={trendConfig} className="h-[200px] xs:h-[220px] sm:h-[260px] md:h-[300px] w-full transition-all duration-300">
+                <ChartContainer config={trendConfig} className="h-[220px] xs:h-[250px] sm:h-[280px] md:h-[320px] lg:h-[340px] w-full transition-all duration-300">
                   <AreaChart
                     data={dailyTrend}
                     margin={{ top: 20, right: 20, left: 5, bottom: 5 }}
