@@ -1017,105 +1017,37 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
             </span>
           </div>
         </CardHeader>
-        <CardContent className="p-3 sm:p-4">
+        <CardContent className="p-2 sm:p-3">
           {kpis.total === 0 ? (
             <p className="text-xs text-muted-foreground text-center py-4">No data</p>
-          ) : (() => {
-            const toneColor: Record<string, string> = {
-              success: "hsl(var(--success))",
-              warning: "hsl(var(--warning))",
-              destructive: "hsl(var(--destructive))",
-              muted: "hsl(var(--muted-foreground))",
-            };
-            const toneText: Record<string, string> = {
-              success: "text-success",
-              warning: "text-warning",
-              destructive: "text-destructive",
-              muted: "text-muted-foreground",
-            };
-            const maxValue = Math.max(...statusDistribution.map((s) => s.value), 1);
-            const cx = 150, cy = 150, innerR = 38, maxR = 130;
-            const n = statusDistribution.length;
-            const sliceAngle = (Math.PI * 2) / Math.max(n, 1);
-            const gap = n > 1 ? Math.min(0.04, sliceAngle * 0.08) : 0;
-            const polar = (a: number, r: number) => [cx + Math.cos(a) * r, cy + Math.sin(a) * r];
-            const slicePath = (i: number, r: number) => {
-              const a0 = -Math.PI / 2 + i * sliceAngle + gap / 2;
-              const a1 = -Math.PI / 2 + (i + 1) * sliceAngle - gap / 2;
-              const [x0o, y0o] = polar(a0, r);
-              const [x1o, y1o] = polar(a1, r);
-              const [x1i, y1i] = polar(a1, innerR);
-              const [x0i, y0i] = polar(a0, innerR);
-              const large = a1 - a0 > Math.PI ? 1 : 0;
-              return `M ${x0o} ${y0o} A ${r} ${r} 0 ${large} 1 ${x1o} ${y1o} L ${x1i} ${y1i} A ${innerR} ${innerR} 0 ${large} 0 ${x0i} ${y0i} Z`;
-            };
-            return (
-              <div className="flex flex-col gap-3">
-                <div className="flex items-center justify-center">
-                  <svg viewBox="0 0 300 300" className="w-full max-w-[320px] h-auto overflow-visible">
-                    <defs>
-                      <filter id="status-shadow" x="-20%" y="-20%" width="140%" height="140%">
-                        <feDropShadow dx="0" dy="2" stdDeviation="3" floodOpacity="0.15" />
-                      </filter>
-                    </defs>
-                    <circle cx={cx} cy={cy} r={maxR} fill="hsl(var(--muted))" opacity="0.15" />
-                    {statusDistribution.map((s, i) => {
-                      const r = innerR + ((s.value / maxValue) * (maxR - innerR));
-                      const color = toneColor[s.tone];
-                      const midA = -Math.PI / 2 + (i + 0.5) * sliceAngle;
-                      const labelR = Math.max(innerR + 18, r * 0.65);
-                      const [lx, ly] = polar(midA, labelR);
-                      return (
-                        <g key={s.key} className="group">
-                          <path
-                            d={slicePath(i, r)}
-                            fill={color}
-                            filter="url(#status-shadow)"
-                            className="transition-opacity group-hover:opacity-80"
-                          >
-                            <title>{`${s.label}: ${s.value} (${s.pct}%)`}</title>
-                          </path>
-                          {s.pct >= 4 && (
-                            <text
-                              x={lx}
-                              y={ly}
-                              textAnchor="middle"
-                              dominantBaseline="central"
-                              className="fill-white font-bold pointer-events-none"
-                              style={{ fontSize: 11 }}
-                            >
-                              {s.pct}%
-                            </text>
-                          )}
-                        </g>
-                      );
-                    })}
-                    <circle cx={cx} cy={cy} r={innerR - 2} fill="hsl(var(--background))" filter="url(#status-shadow)" />
-                    <circle cx={cx} cy={cy} r={innerR - 8} fill="none" stroke="hsl(var(--primary))" strokeWidth="2" opacity="0.6" />
-                    <foreignObject x={cx - 16} y={cy - 16} width="32" height="32" className="pointer-events-none">
-                      <div className="w-full h-full flex items-center justify-center">
-                        <CheckCircle className="h-5 w-5 text-primary" />
-                      </div>
-                    </foreignObject>
-                  </svg>
-                </div>
-
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
-                  {statusDistribution.map((s) => (
-                    <div key={s.key} className="flex items-center gap-1.5 px-1.5 py-1 rounded-md bg-muted/30 border border-border/40 min-w-0">
-                      <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: toneColor[s.tone] }} />
-                      <span className="text-[10px] sm:text-[11px] font-medium truncate flex-1 flex items-center gap-1">
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              {statusDistribution.map((s) => {
+                const toneMap: Record<string, { bg: string; text: string; bar: string; border: string }> = {
+                  success: { bg: "bg-success/8", text: "text-success", bar: "bg-success", border: "border-success/30" },
+                  warning: { bg: "bg-warning/8", text: "text-warning", bar: "bg-warning", border: "border-warning/30" },
+                  destructive: { bg: "bg-destructive/8", text: "text-destructive", bar: "bg-destructive", border: "border-destructive/30" },
+                  muted: { bg: "bg-muted/30", text: "text-muted-foreground", bar: "bg-muted-foreground/50", border: "border-muted-foreground/20" },
+                };
+                const c = toneMap[s.tone];
+                return (
+                  <div key={s.key} className={`rounded-lg border p-2 ${c.bg} ${c.border}`}>
+                    <div className="flex items-center justify-between gap-1 mb-1">
+                      <span className="flex items-center gap-1 text-[10px] font-medium text-muted-foreground truncate">
                         <span>{s.emoji}</span>
                         <span className="truncate">{s.label}</span>
                       </span>
-                      <span className={`text-xs font-bold tabular-nums shrink-0 ${toneText[s.tone]}`}>{s.value}</span>
-                      <span className="text-[9px] text-muted-foreground tabular-nums shrink-0">{s.pct}%</span>
+                      <span className={`text-[9px] tabular-nums ${c.text}`}>{s.pct}%</span>
                     </div>
-                  ))}
-                </div>
-              </div>
-            );
-          })()}
+                    <p className={`text-xl sm:text-2xl font-bold tabular-nums leading-none ${c.text}`}>{s.value}</p>
+                    <div className="mt-1.5 h-1 w-full rounded-full bg-muted/50 overflow-hidden">
+                      <div className={`h-full ${c.bar} transition-all duration-500`} style={{ width: `${s.pct}%` }} />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </CardContent>
       </Card>
 
