@@ -1017,11 +1017,11 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
             </span>
           </div>
         </CardHeader>
-        <CardContent className="p-2 sm:p-3">
+        <CardContent className="p-2">
           {kpis.total === 0 ? (
-            <p className="text-xs text-muted-foreground text-center py-4">No data</p>
+            <p className="text-xs text-muted-foreground text-center py-3">No data</p>
           ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
               {statusDistribution.map((s) => {
                 const toneMap: Record<string, { bg: string; text: string; bar: string; border: string }> = {
                   success: { bg: "bg-success/8", text: "text-success", bar: "bg-success", border: "border-success/30" },
@@ -1031,16 +1031,16 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
                 };
                 const c = toneMap[s.tone];
                 return (
-                  <div key={s.key} className={`rounded-lg border p-2 ${c.bg} ${c.border}`}>
-                    <div className="flex items-center justify-between gap-1 mb-1">
+                  <div key={s.key} className={`rounded-lg border p-1.5 ${c.bg} ${c.border}`}>
+                    <div className="flex items-center justify-between gap-1 mb-0.5">
                       <span className="flex items-center gap-1 text-[10px] font-medium text-muted-foreground truncate">
                         <span>{s.emoji}</span>
                         <span className="truncate">{s.label}</span>
                       </span>
                       <span className={`text-[9px] tabular-nums ${c.text}`}>{s.pct}%</span>
                     </div>
-                    <p className={`text-xl sm:text-2xl font-bold tabular-nums leading-none ${c.text}`}>{s.value}</p>
-                    <div className="mt-1.5 h-1 w-full rounded-full bg-muted/50 overflow-hidden">
+                    <p className={`text-lg sm:text-xl font-bold tabular-nums leading-none ${c.text}`}>{s.value}</p>
+                    <div className="mt-1 h-1 w-full rounded-full bg-muted/50 overflow-hidden">
                       <div className={`h-full ${c.bar} transition-all duration-500`} style={{ width: `${s.pct}%` }} />
                     </div>
                   </div>
