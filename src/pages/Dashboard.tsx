@@ -579,7 +579,7 @@ export default function Dashboard() {
           className="h-full"
         >
           <Card className="overflow-hidden border h-full">
-            <CardHeader className="py-2.5 px-3 sm:px-4 border-b bg-muted/20">
+            <CardHeader className="py-2 px-3 sm:px-4 border-b bg-muted/20">
               <div className="flex items-center justify-between gap-2 flex-wrap">
                 <div className="flex flex-col">
                   <CardTitle className="flex items-center gap-2 text-xs sm:text-sm">
