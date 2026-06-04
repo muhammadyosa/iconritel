@@ -311,6 +311,39 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
     return data;
   }, [monthTickets, trendFilter, trendCustomDate, monthRange, getTrendChartData]);
 
+  // Brief analysis summary for the Daily Trends chart
+  const trendAnalysis = useMemo(() => {
+    if (dailyTrend.length === 0) return null;
+    const totalIncidents = dailyTrend.reduce((s, d) => s + d.total, 0);
+    const totalResolved = dailyTrend.reduce((s, d) => s + d.resolved, 0);
+    const totalSlaOk = dailyTrend.reduce((s, d) => s + d.slaOk, 0);
+    const avgPerDay = totalIncidents / dailyTrend.length;
+    const peak = dailyTrend.reduce((max, d) => (d.total > max.total ? d : max), dailyTrend[0]);
+    const lowest = dailyTrend.reduce((min, d) => (d.total < min.total ? d : min), dailyTrend[0]);
+    const resolvedPct = totalIncidents > 0 ? Math.round((totalResolved / totalIncidents) * 100) : 0;
+    const slaPct = totalResolved > 0 ? Math.round((totalSlaOk / totalResolved) * 100) : 0;
+
+    // Compare first half vs second half trend
+    const mid = Math.floor(dailyTrend.length / 2);
+    const firstHalf = dailyTrend.slice(0, mid);
+    const secondHalf = dailyTrend.slice(mid);
+    const firstAvg = firstHalf.length > 0 ? firstHalf.reduce((s, d) => s + d.total, 0) / firstHalf.length : 0;
+    const secondAvg = secondHalf.length > 0 ? secondHalf.reduce((s, d) => s + d.total, 0) / secondHalf.length : 0;
+    const trendDir = secondAvg > firstAvg * 1.05 ? "naik" : secondAvg < firstAvg * 0.95 ? "turun" : "stabil";
+
+    return {
+      avgPerDay: Math.round(avgPerDay * 10) / 10,
+      peakDay: peak.day,
+      peakValue: peak.total,
+      lowestDay: lowest.day,
+      lowestValue: lowest.total,
+      resolvedPct,
+      slaPct,
+      trendDir,
+      days: dailyTrend.length,
+    };
+  }, [dailyTrend]);
+
   // Human-readable date range for the Category & Trend filters — shown as a
   // small hint so users know exactly which days the chart covers.
   const formatRangeHint = useCallback((data: Array<{ isoDate: string }>) => {
