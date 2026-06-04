@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/StatusBadge";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip, LineChart, Line, Cell } from "recharts";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Ticket, FEEDER_CONSTRAINTS_SET } from "@/types/ticket";
 import { TrendingUp, Clock, CheckCircle, BarChart3, ArrowLeft, FileDown } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
