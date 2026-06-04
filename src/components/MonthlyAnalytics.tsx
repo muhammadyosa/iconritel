@@ -866,37 +866,46 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
 
 
   return (
-    <div className="space-y-3">
-      {/* Header - matches Status Distribution / Category Trend style */}
-      <div className="flex items-center justify-between gap-2">
-        <h3 className="flex items-center gap-1.5 text-xs sm:text-sm font-semibold">
-          <BarChart3 className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary" />
-          Monthly Performance Analysis
-        </h3>
-        <div className="flex items-center gap-1.5">
-          <Button
-            variant="outline"
-            size="sm"
-            className="h-7 text-[10px] sm:text-xs px-2 sm:px-3"
-            onClick={handleExportPDF}
-            disabled={monthTickets.length === 0}
-          >
-            <FileDown className="h-3 w-3 sm:h-3.5 sm:w-3.5 mr-1" />
-            <span className="hidden sm:inline">Export PDF</span>
-            <span className="sm:hidden">PDF</span>
-          </Button>
-          <Select value={selectedMonth} onValueChange={setSelectedMonth}>
-            <SelectTrigger className="w-[120px] sm:w-[170px] h-7 text-[10px] sm:text-xs">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {monthOptions.map((opt) => (
-                <SelectItem key={opt.value} value={opt.value} className="text-xs">
-                  {opt.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+    <div className="space-y-3 sm:space-y-4">
+      {/* Header — gradient hero band */}
+      <div className="relative overflow-hidden rounded-xl border border-primary/20 bg-gradient-to-r from-primary/10 via-accent/5 to-transparent p-3 sm:p-4">
+        <div className="absolute -top-8 -right-8 h-32 w-32 rounded-full bg-primary/10 blur-3xl pointer-events-none" />
+        <div className="relative flex flex-wrap items-center justify-between gap-2">
+          <div className="flex items-center gap-2 min-w-0">
+            <div className="flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-accent text-primary-foreground shadow-md shrink-0">
+              <BarChart3 className="h-4 w-4 sm:h-5 sm:w-5" />
+            </div>
+            <div className="min-w-0">
+              <h3 className="text-sm sm:text-base font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent truncate">
+                Monthly Performance Analysis
+              </h3>
+              <p className="text-[10px] sm:text-xs text-muted-foreground truncate">Insight performa & SLA bulanan</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-1.5 shrink-0">
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-8 text-[10px] sm:text-xs px-2 sm:px-3 rounded-full border-primary/30 hover:bg-primary/10"
+              onClick={handleExportPDF}
+              disabled={monthTickets.length === 0}
+            >
+              <FileDown className="h-3 w-3 sm:h-3.5 sm:w-3.5 sm:mr-1" />
+              <span className="hidden sm:inline">Export PDF</span>
+            </Button>
+            <Select value={selectedMonth} onValueChange={setSelectedMonth}>
+              <SelectTrigger className="w-[130px] sm:w-[170px] h-8 text-[10px] sm:text-xs rounded-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {monthOptions.map((opt) => (
+                  <SelectItem key={opt.value} value={opt.value} className="text-xs">
+                    {opt.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
       </div>
 
