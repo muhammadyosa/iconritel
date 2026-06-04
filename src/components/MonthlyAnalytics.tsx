@@ -1400,26 +1400,22 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
             ) : (
               <>
                 <ChartContainer config={trendConfig} className="h-[220px] xs:h-[250px] sm:h-[280px] md:h-[320px] lg:h-[340px] w-full transition-all duration-300">
-                  <AreaChart
+                  <ComposedChart
                     data={dailyTrend}
                     margin={{ top: 20, right: 20, left: 5, bottom: 5 }}
                     onClick={handleTrendDotClick}
                   >
                     <defs>
-                      <linearGradient id="fillTotal" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="var(--color-total)" stopOpacity={0.45} />
-                        <stop offset="100%" stopColor="var(--color-total)" stopOpacity={0.02} />
+                      <linearGradient id="barTotalSoft" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="var(--color-total)" stopOpacity={0.85} />
+                        <stop offset="100%" stopColor="var(--color-total)" stopOpacity={0.15} />
                       </linearGradient>
-                      <linearGradient id="fillResolved" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="var(--color-resolved)" stopOpacity={0.45} />
-                        <stop offset="100%" stopColor="var(--color-resolved)" stopOpacity={0.02} />
-                      </linearGradient>
-                      <linearGradient id="fillSlaOk" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="var(--color-slaOk)" stopOpacity={0.45} />
-                        <stop offset="100%" stopColor="var(--color-slaOk)" stopOpacity={0.02} />
+                      <linearGradient id="barResolvedSoft" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="var(--color-resolved)" stopOpacity={0.75} />
+                        <stop offset="100%" stopColor="var(--color-resolved)" stopOpacity={0.1} />
                       </linearGradient>
                     </defs>
-                    <CartesianGrid strokeDasharray="4 6" vertical={false} stroke="hsl(var(--border))" strokeOpacity={0.5} />
+                    <CartesianGrid strokeDasharray="4 6" vertical={false} stroke="hsl(var(--border))" strokeOpacity={0.4} />
                     <XAxis
                       dataKey="day"
                       tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }}
@@ -1435,40 +1431,27 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
                       axisLine={false}
                     />
                     <ChartTooltip
-                      cursor={{ stroke: "hsl(var(--muted-foreground))", strokeDasharray: "3 3", strokeOpacity: 0.4 }}
+                      cursor={{ fill: "hsl(var(--muted))", fillOpacity: 0.2 }}
                       content={<ChartTooltipContent indicator="dot" className="rounded-xl shadow-lg" />}
                     />
                     {trendSeries.total && (
-                      <Area
-                        type="monotone"
-                        dataKey="total"
-                        stroke="var(--color-total)"
-                        strokeWidth={2.5}
-                        fill="url(#fillTotal)"
-                        activeDot={{ r: 5, strokeWidth: 2, stroke: "hsl(var(--background))", fill: "var(--color-total)", cursor: "pointer" }}
-                      />
+                      <Bar dataKey="total" fill="url(#barTotalSoft)" radius={[10, 10, 4, 4]} barSize={14} />
                     )}
                     {trendSeries.resolved && (
-                      <Area
-                        type="monotone"
-                        dataKey="resolved"
-                        stroke="var(--color-resolved)"
-                        strokeWidth={2.5}
-                        fill="url(#fillResolved)"
-                        activeDot={{ r: 5, strokeWidth: 2, stroke: "hsl(var(--background))", fill: "var(--color-resolved)", cursor: "pointer" }}
-                      />
+                      <Bar dataKey="resolved" fill="url(#barResolvedSoft)" radius={[10, 10, 4, 4]} barSize={14} />
                     )}
                     {trendSeries.slaOk && (
-                      <Area
+                      <Line
                         type="monotone"
                         dataKey="slaOk"
                         stroke="var(--color-slaOk)"
                         strokeWidth={2.5}
-                        fill="url(#fillSlaOk)"
-                        activeDot={{ r: 5, strokeWidth: 2, stroke: "hsl(var(--background))", fill: "var(--color-slaOk)", cursor: "pointer" }}
+                        strokeDasharray="5 5"
+                        dot={{ r: 3, fill: "var(--color-slaOk)", strokeWidth: 0 }}
+                        activeDot={{ r: 6, strokeWidth: 2, stroke: "hsl(var(--background))", fill: "var(--color-slaOk)", cursor: "pointer" }}
                       />
                     )}
-                  </AreaChart>
+                  </ComposedChart>
                 </ChartContainer>
                 <div className="flex items-center justify-between gap-2 mt-1 text-[9px] sm:text-[10px] text-muted-foreground">
                   <span className="font-medium text-primary/80 truncate">{formatRangeHint(dailyTrend)}</span>
