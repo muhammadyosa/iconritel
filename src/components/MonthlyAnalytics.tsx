@@ -1140,34 +1140,69 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
               .map((s) => ({ name: s.label, value: s.value, fill: toneColorMap[s.tone] }));
             return (
               <div className="grid grid-cols-1 md:grid-cols-5 gap-3 sm:gap-4 items-center">
-                {/* Donut chart */}
+                {/* Half-circle gauge (Resolution Rate) */}
                 <div className="md:col-span-2 flex items-center justify-center">
-                  <ChartContainer
-                    config={{ value: { label: "Incident" } }}
-                    className="w-full max-w-[260px]"
-                    style={{ height: 220, aspectRatio: "auto" }}
-                  >
-                    <PieChart>
-                      <ChartTooltip content={<ChartTooltipContent indicator="dot" nameKey="name" className="rounded-xl shadow-lg" />} />
-                      <Pie
-                        data={pieData}
-                        dataKey="value"
-                        nameKey="name"
-                        cx="50%"
-                        cy="50%"
-                        innerRadius={55}
-                        outerRadius={92}
-                        paddingAngle={3}
-                        cornerRadius={6}
-                        strokeWidth={2}
-                        stroke="hsl(var(--background))"
-                      >
-                        {pieData.map((d) => (
-                          <Cell key={d.name} fill={d.fill} />
-                        ))}
-                      </Pie>
-                    </PieChart>
-                  </ChartContainer>
+                  <div className="relative w-full max-w-[260px] aspect-[2/1.2]">
+                    <ChartContainer
+                      config={{ value: { label: "Incident" } }}
+                      className="w-full h-full"
+                      style={{ aspectRatio: "auto" }}
+                    >
+                      <PieChart>
+                        <ChartTooltip content={<ChartTooltipContent indicator="dot" nameKey="name" className="rounded-xl shadow-lg" />} />
+                        <defs>
+                          <linearGradient id="gaugeGrad" x1="0" y1="0" x2="1" y2="0">
+                            <stop offset="0%" stopColor="hsl(25 95% 60%)" />
+                            <stop offset="100%" stopColor="hsl(15 90% 70%)" />
+                          </linearGradient>
+                        </defs>
+                        {/* Background half ring */}
+                        <Pie
+                          data={[{ name: "bg", value: 1 }]}
+                          dataKey="value"
+                          cx="50%"
+                          cy="85%"
+                          startAngle={180}
+                          endAngle={0}
+                          innerRadius="75%"
+                          outerRadius="100%"
+                          fill="hsl(var(--muted))"
+                          stroke="none"
+                          isAnimationActive={false}
+                        />
+                        {/* Foreground arc based on resolutionRate */}
+                        <Pie
+                          data={[
+                            { name: "Resolved", value: Math.max(0, Math.min(100, kpis.resolutionRate)) },
+                            { name: "Remaining", value: Math.max(0, 100 - Math.min(100, kpis.resolutionRate)) },
+                          ]}
+                          dataKey="value"
+                          cx="50%"
+                          cy="85%"
+                          startAngle={180}
+                          endAngle={0}
+                          innerRadius="75%"
+                          outerRadius="100%"
+                          cornerRadius={12}
+                          stroke="none"
+                          paddingAngle={0}
+                        >
+                          <Cell fill="url(#gaugeGrad)" />
+                          <Cell fill="transparent" />
+                        </Pie>
+                      </PieChart>
+                    </ChartContainer>
+                    {/* Center label */}
+                    <div className="absolute inset-x-0 bottom-1 flex flex-col items-center pointer-events-none">
+                      <div className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-card border border-border/60 shadow-sm -mb-1">
+                        <ThumbsUp className="h-4 w-4 sm:h-5 sm:w-5 text-warning" />
+                      </div>
+                      <p className="mt-1 text-xl sm:text-2xl font-bold tabular-nums text-foreground">{kpis.resolutionRate}%</p>
+                      <p className="text-[9px] sm:text-[10px] text-muted-foreground">Resolution Rate</p>
+                    </div>
+                    <div className="absolute left-2 bottom-2 text-[9px] text-muted-foreground">0%</div>
+                    <div className="absolute right-2 bottom-2 text-[9px] text-muted-foreground">100%</div>
+                  </div>
                 </div>
                 {/* Status cards */}
                 <div className="md:col-span-3 grid grid-cols-2 gap-2 sm:gap-2.5">
