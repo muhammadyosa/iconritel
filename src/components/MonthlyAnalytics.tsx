@@ -1125,10 +1125,10 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
                 return `M ${x0o} ${y0o} A ${r} ${r} 0 ${large} 1 ${x1o} ${y1o} L ${x1i} ${y1i} A ${innerR} ${innerR} 0 ${large} 0 ${x0i} ${y0i} Z`;
               };
               return (
-                <div className="flex flex-col gap-3">
+                <div className="flex flex-col gap-2">
                   {/* Radial rose chart */}
                   <div className="flex items-center justify-center">
-                    <svg viewBox="0 0 300 300" className="w-full max-w-[320px] h-auto overflow-visible">
+                    <svg viewBox="0 0 300 300" className="w-full max-w-[240px] sm:max-w-[260px] h-auto overflow-visible">
                       <defs>
                         <filter id="cat-shadow" x="-20%" y="-20%" width="140%" height="140%">
                           <feDropShadow dx="0" dy="2" stdDeviation="3" floodOpacity="0.15" />
