@@ -450,6 +450,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_approved_user: { Args: { _user_id: string }; Returns: boolean }
       recompute_daily_history: {
         Args: { end_date: string; start_date: string }
         Returns: Json
