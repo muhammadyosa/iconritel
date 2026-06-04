@@ -561,9 +561,56 @@ export default function Dashboard() {
                         })}
                       </div>
                     </div>
-                    <p className="text-[9px] text-muted-foreground text-center mt-0.5">
-                      Klik baris untuk detail
-                    </p>
+                    {(() => {
+                      const totalReal = statusData.reduce((s, d) => s + d.value, 0);
+                      if (totalReal === 0) {
+                        return (
+                          <p className="text-[9px] text-muted-foreground text-center mt-0.5">
+                            Belum ada data incident
+                          </p>
+                        );
+                      }
+                      const sorted = [...statusData].sort((a, b) => b.value - a.value);
+                      const top = sorted[0];
+                      const topPct = Math.round((top.value / totalReal) * 100);
+                      const resolved = statusData.find((d) => d.status === "Resolved")!;
+                      const critical = statusData.find((d) => d.status === "Critical")!;
+                      const resolvedPct = Math.round((resolved.value / totalReal) * 100);
+                      const criticalPct = Math.round((critical.value / totalReal) * 100);
+                      const health =
+                        criticalPct >= 30
+                          ? { label: "Kritis", color: "text-destructive", emoji: "🚨" }
+                          : resolvedPct >= 60
+                          ? { label: "Sehat", color: "text-success", emoji: "✅" }
+                          : { label: "Perlu Perhatian", color: "text-warning", emoji: "⚠️" };
+                      return (
+                        <div className="mt-2 pt-2 border-t border-border/50 space-y-1">
+                          <div className="flex items-center justify-between gap-2 px-1">
+                            <span className="text-[10px] font-semibold flex items-center gap-1">
+                              <span>📊</span>
+                              <span>Analisa</span>
+                            </span>
+                            <span className={`text-[10px] font-bold ${health.color} flex items-center gap-1`}>
+                              <span>{health.emoji}</span>
+                              <span>{health.label}</span>
+                            </span>
+                          </div>
+                          <p className="text-[10px] leading-relaxed text-muted-foreground px-1">
+                            Status dominan{" "}
+                            <span className="font-semibold text-foreground">
+                              {top.emoji} {top.label}
+                            </span>{" "}
+                            ({topPct}%). Tingkat penyelesaian{" "}
+                            <span className="font-semibold text-success">{resolvedPct}%</span> dan kritis{" "}
+                            <span className="font-semibold text-destructive">{criticalPct}%</span> dari total{" "}
+                            <span className="font-semibold text-foreground">{totalReal.toLocaleString("id-ID")}</span> incident.
+                          </p>
+                          <p className="text-[9px] text-muted-foreground text-center pt-0.5">
+                            Klik baris untuk detail
+                          </p>
+                        </div>
+                      );
+                    })()}
                   </div>
                 );
               })()}
