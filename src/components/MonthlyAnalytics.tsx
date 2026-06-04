@@ -1334,6 +1334,26 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
                   <span className="font-medium text-primary/80 truncate">{formatRangeHint(dailyTrend)}</span>
                   <span>Click a point for details</span>
                 </div>
+                {trendAnalysis && (
+                  <div className="mt-2 p-2 rounded-lg bg-muted/30 border border-border/40">
+                    <p className="text-[10px] sm:text-xs text-muted-foreground leading-relaxed">
+                      <span className="font-semibold text-foreground">Analisa:</span>{" "}
+                      Dalam {trendAnalysis.days} hari terakhir, rata-rata{" "}
+                      <span className="font-semibold text-primary">{trendAnalysis.avgPerDay}</span>{" "}
+                      incident/hari. Peak terjadi pada{" "}
+                      <span className="font-semibold text-destructive">{trendAnalysis.peakDay}</span>{" "}
+                      ({trendAnalysis.peakValue} insiden). Lowest pada{" "}
+                      <span className="font-semibold text-success">{trendAnalysis.lowestDay}</span>{" "}
+                      ({trendAnalysis.lowestValue} insiden).{" "}
+                      {trendAnalysis.resolvedPct}% resolved,{" "}
+                      {trendAnalysis.slaPct}% memenuhi SLA. Trend{" "}
+                      <span className={`font-semibold ${trendAnalysis.trendDir === "naik" ? "text-destructive" : trendAnalysis.trendDir === "turun" ? "text-success" : "text-warning"}`}>
+                        {trendAnalysis.trendDir}
+                      </span>
+                      {" "}dibanding periode awal.
+                    </p>
+                  </div>
+                )}
               </>
             )}
           </CardContent>
