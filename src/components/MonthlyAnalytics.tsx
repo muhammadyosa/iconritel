@@ -1259,12 +1259,12 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
               </div>
             </div>
           </CardHeader>
-          <CardContent className="p-2 sm:p-4">
+          <CardContent className="p-2 sm:p-3">
             {dailyTrend.length === 0 ? (
-              <p className="text-xs text-muted-foreground text-center py-8">No data</p>
+              <p className="text-xs text-muted-foreground text-center py-4">No data</p>
             ) : (
               <>
-                <ChartContainer config={trendConfig} className="h-[200px] xs:h-[220px] sm:h-[260px] md:h-[300px] w-full transition-all duration-300">
+                <ChartContainer config={trendConfig} className="h-[180px] sm:h-[220px] md:h-[240px] w-full transition-all duration-300">
                   <LineChart
                     data={dailyTrend}
                     margin={{ top: 20, right: 20, left: 5, bottom: 5 }}
