@@ -1004,6 +1004,61 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
         ))}
       </div>
 
+      {/* Monthly Performance Chart — composed bar (total) + line (resolved) */}
+      {dailyTrend.length > 0 && (
+        <Card className="overflow-hidden border">
+          <CardHeader className="py-2 px-3 sm:px-4 border-b bg-muted/20">
+            <div className="flex items-center justify-between gap-2">
+              <CardTitle className="flex items-center gap-1.5 text-xs sm:text-sm">
+                <TrendingUp className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary" />
+                Monthly Performance Trend
+              </CardTitle>
+              <span className="text-[9px] sm:text-[10px] text-muted-foreground truncate">
+                {selectedMonthLabel} • {dailyTrend.length} hari
+              </span>
+            </div>
+          </CardHeader>
+          <CardContent className="p-2 sm:p-3">
+            <ChartContainer
+              config={{
+                total: { label: "Total Incident", color: "hsl(217, 91%, 60%)" },
+                resolved: { label: "Resolved", color: "hsl(142, 71%, 45%)" },
+              }}
+              className="h-[200px] xs:h-[220px] sm:h-[240px] w-full"
+              style={{ aspectRatio: "auto" }}
+            >
+              <ComposedChart data={dailyTrend} margin={{ top: 16, right: 16, left: 0, bottom: 4 }}>
+                <defs>
+                  <linearGradient id="barTotalGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="var(--color-total)" stopOpacity={0.95} />
+                    <stop offset="100%" stopColor="var(--color-total)" stopOpacity={0.55} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 4" vertical={false} stroke="hsl(var(--border))" strokeOpacity={0.5} />
+                <XAxis
+                  dataKey="day"
+                  tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }}
+                  tickLine={false}
+                  axisLine={false}
+                  interval={dailyTrend.length > 14 ? 3 : dailyTrend.length > 7 ? 1 : 0}
+                />
+                <YAxis tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} width={28} tickLine={false} axisLine={false} />
+                <ChartTooltip content={<ChartTooltipContent indicator="dot" className="rounded-xl shadow-lg" />} />
+                <Bar dataKey="total" fill="url(#barTotalGrad)" radius={[8, 8, 4, 4]} barSize={18} />
+                <Line
+                  type="monotone"
+                  dataKey="resolved"
+                  stroke="var(--color-resolved)"
+                  strokeWidth={2.5}
+                  dot={{ r: 3, fill: "var(--color-resolved)", strokeWidth: 0 }}
+                  activeDot={{ r: 5, strokeWidth: 2, stroke: "hsl(var(--background))" }}
+                />
+              </ComposedChart>
+            </ChartContainer>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Status Distribution — counts per status for the active scope (month / current / all) */}
       <Card className="overflow-hidden border">
         <CardHeader className="py-2 px-3 sm:px-4 border-b bg-muted/20">
