@@ -81,6 +81,7 @@ export default function Dashboard() {
   const [inlineSelectedTicket, setInlineSelectedTicket] = useState<Ticket | null>(null);
   const [trendFilter, setTrendFilter] = useState<string>("month");
   const [trendCustomDate, setTrendCustomDate] = useState<string>(() => toLocalDateStr(new Date()));
+  const [trendSeries, setTrendSeries] = useState<{ ritel: boolean; feeder: boolean; created: boolean }>({ ritel: true, feeder: true, created: false });
   const [previousDialogState, setPreviousDialogState] = useState<{
     title: string;
     tickets: Ticket[];
