@@ -449,9 +449,9 @@ export default function Dashboard() {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.2 }}
-          className="lg:col-span-1"
+          className="lg:col-span-1 h-full"
         >
-          <Card className="overflow-hidden border">
+          <Card className="overflow-hidden border h-full flex flex-col">
             <CardHeader className="py-2 px-3 sm:px-4 border-b bg-muted/20">
               <CardTitle className="flex items-center gap-1.5 text-xs sm:text-sm">
                 <BarChart3 className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary" />
@@ -496,7 +496,7 @@ export default function Dashboard() {
                   `M ${cx - r} ${cy} A ${r} ${r} 0 1 1 ${cx + r} ${cy}`;
 
                 return (
-                  <div className="flex flex-col gap-2">
+                  <div className="flex flex-col gap-2 flex-1 justify-center">
                     <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-3">
                       {/* Arc visual */}
                       <div className="flex items-center justify-center shrink-0">
@@ -576,6 +576,7 @@ export default function Dashboard() {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.3 }}
+          className="h-full"
         >
           <Card className="overflow-hidden border h-full">
             <CardHeader className="py-2.5 px-3 sm:px-4 border-b bg-muted/20">
