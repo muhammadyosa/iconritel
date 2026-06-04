@@ -496,11 +496,11 @@ export default function Dashboard() {
                   `M ${cx - r} ${cy} A ${r} ${r} 0 1 1 ${cx + r} ${cy}`;
 
                 return (
-                  <div className="flex flex-col gap-2 flex-1 justify-center">
-                    <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 flex-1">
+                  <div className="flex flex-col gap-1 flex-1 justify-center">
+                    <div className="flex flex-row items-center gap-2 sm:gap-3 flex-1">
                       {/* Arc visual */}
-                      <div className="flex items-center justify-center shrink-0 flex-1 sm:flex-none">
-                        <svg viewBox="0 0 200 110" className="w-full max-w-[240px] sm:max-w-[260px] h-auto">
+                      <div className="flex items-center justify-center shrink-0">
+                        <svg viewBox="0 0 200 110" className="w-full max-w-[180px] sm:max-w-[200px] h-auto">
                           {statusData.map((d, i) => (
                             <g key={`bg-${d.label}`}>
                               <path
@@ -542,7 +542,7 @@ export default function Dashboard() {
                             <button
                               key={d.label}
                               onClick={() => openStatus(d.status)}
-                              className="w-full flex items-center gap-2 px-1.5 py-1 rounded-md hover:bg-muted/40 transition-colors text-left"
+                              className="w-full flex items-center gap-2 px-1.5 py-0.5 rounded-md hover:bg-muted/40 transition-colors text-left"
                             >
                               <span
                                 className="w-2 h-2 rounded-full shrink-0"
@@ -561,7 +561,7 @@ export default function Dashboard() {
                         })}
                       </div>
                     </div>
-                    <p className="text-[9px] text-muted-foreground text-center">
+                    <p className="text-[9px] text-muted-foreground text-center mt-0.5">
                       Klik baris untuk detail
                     </p>
                   </div>
