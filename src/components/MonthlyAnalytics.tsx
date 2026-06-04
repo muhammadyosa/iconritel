@@ -866,7 +866,7 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
 
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-2">
       {/* Header - matches Status Distribution / Category Trend style */}
       <div className="flex items-center justify-between gap-2">
         <h3 className="flex items-center gap-1.5 text-xs sm:text-sm font-semibold">
@@ -991,14 +991,14 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
             key={i}
             type="button"
             onClick={() => openKpiDetail(card.type)}
-            className={`text-left rounded-lg border p-2 sm:p-2.5 transition-all duration-300 cursor-pointer active:scale-[0.97] ${card.bgClass} ${card.borderClass} ${card.glowClass}`}
+            className={`text-left rounded-lg border p-2 transition-all duration-300 cursor-pointer active:scale-[0.97] ${card.bgClass} ${card.borderClass} ${card.glowClass}`}
             title={card.tooltip}
           >
-            <div className="flex items-center gap-1.5 mb-1">
-              <span className="text-sm sm:text-base">{card.emoji}</span>
+            <div className="flex items-center gap-1.5 mb-0.5">
+              <span className="text-xs sm:text-sm">{card.emoji}</span>
               <p className="text-[9px] sm:text-[10px] text-muted-foreground font-medium truncate">{card.title}</p>
             </div>
-            <p className={`text-xl sm:text-2xl font-bold tabular-nums text-center leading-tight ${card.valueClass}`}>{card.value}</p>
+            <p className={`text-lg sm:text-xl font-bold tabular-nums text-center leading-tight ${card.valueClass}`}>{card.value}</p>
             <p className="text-[9px] sm:text-[10px] text-muted-foreground/80 text-center mt-0.5 truncate">{card.sub}</p>
           </button>
         ))}
@@ -1017,11 +1017,11 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
             </span>
           </div>
         </CardHeader>
-        <CardContent className="p-2 sm:p-3">
+        <CardContent className="p-2">
           {kpis.total === 0 ? (
-            <p className="text-xs text-muted-foreground text-center py-4">No data</p>
+            <p className="text-xs text-muted-foreground text-center py-3">No data</p>
           ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
               {statusDistribution.map((s) => {
                 const toneMap: Record<string, { bg: string; text: string; bar: string; border: string }> = {
                   success: { bg: "bg-success/8", text: "text-success", bar: "bg-success", border: "border-success/30" },
@@ -1031,16 +1031,16 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
                 };
                 const c = toneMap[s.tone];
                 return (
-                  <div key={s.key} className={`rounded-lg border p-2 ${c.bg} ${c.border}`}>
-                    <div className="flex items-center justify-between gap-1 mb-1">
+                  <div key={s.key} className={`rounded-lg border p-1.5 ${c.bg} ${c.border}`}>
+                    <div className="flex items-center justify-between gap-1 mb-0.5">
                       <span className="flex items-center gap-1 text-[10px] font-medium text-muted-foreground truncate">
                         <span>{s.emoji}</span>
                         <span className="truncate">{s.label}</span>
                       </span>
                       <span className={`text-[9px] tabular-nums ${c.text}`}>{s.pct}%</span>
                     </div>
-                    <p className={`text-xl sm:text-2xl font-bold tabular-nums leading-none ${c.text}`}>{s.value}</p>
-                    <div className="mt-1.5 h-1 w-full rounded-full bg-muted/50 overflow-hidden">
+                    <p className={`text-lg sm:text-xl font-bold tabular-nums leading-none ${c.text}`}>{s.value}</p>
+                    <div className="mt-1 h-1 w-full rounded-full bg-muted/50 overflow-hidden">
                       <div className={`h-full ${c.bar} transition-all duration-500`} style={{ width: `${s.pct}%` }} />
                     </div>
                   </div>
@@ -1086,7 +1086,7 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
               </div>
             </div>
           </CardHeader>
-          <CardContent className="p-3 sm:p-4">
+          <CardContent className="p-2 sm:p-3">
             {categoryData.length === 0 ? (
               <p className="text-xs text-muted-foreground text-center py-8">No data</p>
             ) : (() => {
@@ -1125,10 +1125,10 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
                 return `M ${x0o} ${y0o} A ${r} ${r} 0 ${large} 1 ${x1o} ${y1o} L ${x1i} ${y1i} A ${innerR} ${innerR} 0 ${large} 0 ${x0i} ${y0i} Z`;
               };
               return (
-                <div className="flex flex-col gap-3">
+                <div className="flex flex-col gap-2">
                   {/* Radial rose chart */}
                   <div className="flex items-center justify-center">
-                    <svg viewBox="0 0 300 300" className="w-full max-w-[320px] h-auto overflow-visible">
+                    <svg viewBox="0 0 300 300" className="w-full max-w-[240px] sm:max-w-[260px] h-auto overflow-visible">
                       <defs>
                         <filter id="cat-shadow" x="-20%" y="-20%" width="140%" height="140%">
                           <feDropShadow dx="0" dy="2" stdDeviation="3" floodOpacity="0.15" />
@@ -1180,7 +1180,7 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
                   </div>
 
                   {/* Legend */}
-                  <div className="grid grid-cols-2 gap-1.5 max-h-[180px] overflow-y-auto pr-1">
+                  <div className="grid grid-cols-2 gap-1 max-h-[150px] overflow-y-auto pr-1">
                     {categoryData.map((d, i) => {
                       const pct = ((d.value / total) * 100).toFixed(1);
                       const color = colorFor(d.name, i);
@@ -1198,7 +1198,7 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
                       );
                     })}
                   </div>
-                  <div className="flex items-center justify-between gap-2 text-[9px] sm:text-[10px] text-muted-foreground border-t pt-2">
+                  <div className="flex items-center justify-between gap-2 text-[9px] sm:text-[10px] text-muted-foreground border-t pt-1.5">
                     <span className="font-medium text-primary/80 truncate">{categoryRangeHint}</span>
                     <span>Klik slice untuk detail</span>
                   </div>
@@ -1259,12 +1259,12 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
               </div>
             </div>
           </CardHeader>
-          <CardContent className="p-2 sm:p-4">
+          <CardContent className="p-2 sm:p-3">
             {dailyTrend.length === 0 ? (
-              <p className="text-xs text-muted-foreground text-center py-8">No data</p>
+              <p className="text-xs text-muted-foreground text-center py-4">No data</p>
             ) : (
               <>
-                <ChartContainer config={trendConfig} className="h-[200px] xs:h-[220px] sm:h-[260px] md:h-[300px] w-full transition-all duration-300">
+                <ChartContainer config={trendConfig} className="h-[180px] sm:h-[220px] md:h-[240px] w-full transition-all duration-300">
                   <LineChart
                     data={dailyTrend}
                     margin={{ top: 20, right: 20, left: 5, bottom: 5 }}
