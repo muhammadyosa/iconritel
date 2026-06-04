@@ -1052,9 +1052,9 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
       </Card>
 
       {/* Charts - matching Status Distribution / Category Trend card style */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 sm:gap-3">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-2 sm:gap-3 items-stretch">
         {/* Category Breakdown */}
-        <Card className="overflow-hidden border">
+        <Card className="overflow-hidden border flex flex-col max-h-[480px]">
           <CardHeader className="py-2 px-3 sm:px-4 border-b bg-muted/20">
              <div className="flex items-center justify-between gap-2">
               <CardTitle className="flex items-center gap-1.5 text-xs sm:text-sm">
