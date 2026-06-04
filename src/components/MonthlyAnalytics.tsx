@@ -1086,7 +1086,7 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
               </div>
             </div>
           </CardHeader>
-          <CardContent className="p-3 sm:p-4">
+          <CardContent className="p-2 sm:p-3">
             {categoryData.length === 0 ? (
               <p className="text-xs text-muted-foreground text-center py-8">No data</p>
             ) : (() => {
