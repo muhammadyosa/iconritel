@@ -1123,7 +1123,7 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
               return (
                 <div className="flex flex-col gap-3">
                   <div className="w-full flex items-center justify-center">
-                    <svg viewBox="0 0 200 110" className="w-full max-w-[260px] h-auto">
+                    <svg viewBox="-12 -14 224 130" className="w-full max-w-[300px] h-auto overflow-visible">
                       {arcItems.map((d, i) => {
                         const r = maxR - i * step;
                         return (
