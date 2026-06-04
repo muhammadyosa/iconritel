@@ -1138,7 +1138,7 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
                 CATEGORY_COLORS[name] || FALLBACK_COLORS[i % FALLBACK_COLORS.length];
               // Clean grouped bar chart (inspired by reference)
               const W = 560;
-              const H = 240;
+              const H = 340;
               const padL = 36;
               const padR = 12;
               const padT = 16;
@@ -1273,7 +1273,7 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
               <p className="text-xs text-muted-foreground text-center py-4">No data</p>
             ) : (
               <>
-                <ChartContainer config={trendConfig} className="h-[180px] sm:h-[220px] md:h-[240px] w-full transition-all duration-300">
+                <ChartContainer config={trendConfig} className="h-[260px] sm:h-[300px] md:h-[340px] w-full transition-all duration-300">
                   <LineChart
                     data={dailyTrend}
                     margin={{ top: 20, right: 20, left: 5, bottom: 5 }}
