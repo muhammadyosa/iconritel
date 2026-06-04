@@ -1180,31 +1180,7 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
                   </div>
                 </div>
               );
-              // eslint-disable-next-line no-unreachable
-              // legend block removed below
-              // (kept hint)
-              ;
-              ;
-              ;
-              ;
-              ;
-              ;
-              ;
-              ;
-              ;
-              ;
-              ;
-              ;
-              ;
-              ;
-              ;
-              ;
-              ;
-              ;
-              ;
-              ;
-              ;
-              ;
+            })()}
           </CardContent>
         </Card>
 
