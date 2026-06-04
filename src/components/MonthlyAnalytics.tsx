@@ -1099,13 +1099,13 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
               .filter((s) => s.value > 0)
               .map((s) => ({ name: s.label, value: s.value, fill: toneColorMap[s.tone] }));
             return (
-              <div className="grid grid-cols-1 sm:grid-cols-5 gap-3 items-center">
+              <div className="grid grid-cols-1 md:grid-cols-5 gap-3 sm:gap-4 items-center">
                 {/* Donut chart */}
-                <div className="sm:col-span-2 flex items-center justify-center">
+                <div className="md:col-span-2 flex items-center justify-center">
                   <ChartContainer
                     config={{ value: { label: "Incident" } }}
-                    className="w-full max-w-[220px]"
-                    style={{ height: 200, aspectRatio: "auto" }}
+                    className="w-full max-w-[260px]"
+                    style={{ height: 220, aspectRatio: "auto" }}
                   >
                     <PieChart>
                       <ChartTooltip content={<ChartTooltipContent indicator="dot" nameKey="name" className="rounded-xl shadow-lg" />} />
@@ -1115,9 +1115,10 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
                         nameKey="name"
                         cx="50%"
                         cy="50%"
-                        innerRadius={50}
-                        outerRadius={82}
+                        innerRadius={55}
+                        outerRadius={92}
                         paddingAngle={3}
+                        cornerRadius={6}
                         strokeWidth={2}
                         stroke="hsl(var(--background))"
                       >
@@ -1129,27 +1130,27 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
                   </ChartContainer>
                 </div>
                 {/* Status cards */}
-                <div className="sm:col-span-3 grid grid-cols-2 gap-2">
+                <div className="md:col-span-3 grid grid-cols-2 gap-2 sm:gap-2.5">
                   {statusDistribution.map((s) => {
                     const toneMap: Record<string, { bg: string; text: string; bar: string; border: string }> = {
-                      success: { bg: "bg-success/8", text: "text-success", bar: "bg-success", border: "border-success/30" },
-                      warning: { bg: "bg-warning/8", text: "text-warning", bar: "bg-warning", border: "border-warning/30" },
-                      destructive: { bg: "bg-destructive/8", text: "text-destructive", bar: "bg-destructive", border: "border-destructive/30" },
-                      muted: { bg: "bg-muted/30", text: "text-muted-foreground", bar: "bg-muted-foreground/50", border: "border-muted-foreground/20" },
+                      success: { bg: "bg-gradient-to-br from-success/10 to-success/5", text: "text-success", bar: "bg-success", border: "border-success/30" },
+                      warning: { bg: "bg-gradient-to-br from-warning/10 to-warning/5", text: "text-warning", bar: "bg-warning", border: "border-warning/30" },
+                      destructive: { bg: "bg-gradient-to-br from-destructive/10 to-destructive/5", text: "text-destructive", bar: "bg-destructive", border: "border-destructive/30" },
+                      muted: { bg: "bg-gradient-to-br from-muted/40 to-muted/20", text: "text-muted-foreground", bar: "bg-muted-foreground/50", border: "border-muted-foreground/20" },
                     };
                     const c = toneMap[s.tone];
                     return (
-                      <div key={s.key} className={`rounded-lg border p-2 ${c.bg} ${c.border}`}>
+                      <div key={s.key} className={`rounded-xl border p-2 sm:p-2.5 transition-all duration-300 hover:scale-[1.02] ${c.bg} ${c.border}`}>
                         <div className="flex items-center justify-between gap-1 mb-1">
-                          <span className="flex items-center gap-1 text-[10px] font-medium text-muted-foreground truncate">
+                          <span className="flex items-center gap-1 text-[10px] sm:text-[11px] font-medium text-muted-foreground truncate">
                             <span>{s.emoji}</span>
                             <span className="truncate">{s.label}</span>
                           </span>
-                          <span className={`text-[9px] tabular-nums ${c.text}`}>{s.pct}%</span>
+                          <span className={`text-[9px] sm:text-[10px] tabular-nums font-semibold ${c.text}`}>{s.pct}%</span>
                         </div>
-                        <p className={`text-lg sm:text-xl font-bold tabular-nums leading-none ${c.text}`}>{s.value}</p>
-                        <div className="mt-1.5 h-1 w-full rounded-full bg-muted/50 overflow-hidden">
-                          <div className={`h-full ${c.bar} transition-all duration-500`} style={{ width: `${s.pct}%` }} />
+                        <p className={`text-lg sm:text-xl md:text-2xl font-bold tabular-nums leading-none ${c.text}`}>{s.value}</p>
+                        <div className="mt-1.5 h-1.5 w-full rounded-full bg-muted/50 overflow-hidden">
+                          <div className={`h-full ${c.bar} transition-all duration-700 rounded-full`} style={{ width: `${s.pct}%` }} />
                         </div>
                       </div>
                     );
