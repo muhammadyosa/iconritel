@@ -642,7 +642,6 @@ export default function Dashboard() {
 
                       return (
                         <div className="mt-2 pt-2 border-t border-border/50 space-y-1.5">
-                          {filterBar}
                           <div className="flex items-center justify-end px-1">
                             <span className={`text-[10px] font-bold ${health.color} flex items-center gap-1`}>
                               <span>{health.emoji}</span>
