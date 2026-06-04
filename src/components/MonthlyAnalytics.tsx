@@ -991,14 +991,14 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
             key={i}
             type="button"
             onClick={() => openKpiDetail(card.type)}
-            className={`text-left rounded-lg border p-2 sm:p-2.5 transition-all duration-300 cursor-pointer active:scale-[0.97] ${card.bgClass} ${card.borderClass} ${card.glowClass}`}
+            className={`text-left rounded-lg border p-2 transition-all duration-300 cursor-pointer active:scale-[0.97] ${card.bgClass} ${card.borderClass} ${card.glowClass}`}
             title={card.tooltip}
           >
-            <div className="flex items-center gap-1.5 mb-1">
-              <span className="text-sm sm:text-base">{card.emoji}</span>
+            <div className="flex items-center gap-1.5 mb-0.5">
+              <span className="text-xs sm:text-sm">{card.emoji}</span>
               <p className="text-[9px] sm:text-[10px] text-muted-foreground font-medium truncate">{card.title}</p>
             </div>
-            <p className={`text-xl sm:text-2xl font-bold tabular-nums text-center leading-tight ${card.valueClass}`}>{card.value}</p>
+            <p className={`text-lg sm:text-xl font-bold tabular-nums text-center leading-tight ${card.valueClass}`}>{card.value}</p>
             <p className="text-[9px] sm:text-[10px] text-muted-foreground/80 text-center mt-0.5 truncate">{card.sub}</p>
           </button>
         ))}
