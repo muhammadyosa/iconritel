@@ -348,10 +348,10 @@ export default function RegionalOfficeTab({ tickets }: RegionalOfficeTabProps) {
                     <ChartContainer config={pieConfig} className="h-[200px] xs:h-[230px] sm:h-[260px] w-full max-w-[340px]">
                       <PieChart>
                         <ChartTooltip content={<ChartTooltipContent nameKey="name" />} />
-                        <Pie data={pieData} cx="50%" cy="50%" innerRadius={45} outerRadius={80} paddingAngle={3}
+                        <Pie data={pieData} cx="50%" cy="50%" innerRadius={55} outerRadius={88} paddingAngle={4}
                           dataKey="value" nameKey="name" label={renderCustomLabel}
-                          labelLine={{ stroke: "hsl(var(--muted-foreground))", strokeWidth: 1 }}
-                          strokeWidth={2} stroke="hsl(var(--background))">
+                          labelLine={false}
+                          strokeWidth={2} stroke="hsl(var(--background))" cornerRadius={6}>
                           {pieData.map((_, index) => (
                             <RechartsCell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
                           ))}
