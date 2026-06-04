@@ -748,7 +748,7 @@ export default function Dashboard() {
                 };
 
                 return (
-                  <ChartContainer config={chartConfig} className="h-[180px] sm:h-[210px] md:h-[230px] w-full transition-all duration-300">
+                  <ChartContainer config={chartConfig} className="h-[260px] sm:h-[300px] md:h-[340px] w-full transition-all duration-300">
                     <AreaChart data={chartData} margin={{ top: 10, right: 15, left: 5, bottom: 5 }}>
                       <defs>
                         <linearGradient id="grad-ritel" x1="0" y1="0" x2="0" y2="1">
