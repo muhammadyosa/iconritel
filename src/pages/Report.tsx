@@ -157,10 +157,11 @@ const Report = () => {
     selectedEnd.setHours(23, 59, 59, 999);
     const matched = tickets.filter(
       (t) => {
+        if (t.status === "Resolved") return false;
         if (!set.has((t.constraint || "").toUpperCase())) return false;
         const created = new Date(t.createdISO);
         const isSameReportDate = toLocalDateStr(created) === dateStr;
-        const isActiveCarryOver = t.status !== "Resolved" && created.getTime() <= selectedEnd.getTime();
+        const isActiveCarryOver = created.getTime() <= selectedEnd.getTime();
         return isSameReportDate || isActiveCarryOver;
       }
     );
