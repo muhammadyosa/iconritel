@@ -1035,7 +1035,7 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
                 total: { label: "Total Incident", color: "hsl(217, 91%, 60%)" },
                 resolved: { label: "Resolved", color: "hsl(142, 71%, 45%)" },
               }}
-              className="h-[200px] xs:h-[220px] sm:h-[240px] w-full"
+              className="h-[200px] xs:h-[230px] sm:h-[260px] md:h-[280px] lg:h-[300px] w-full"
               style={{ aspectRatio: "auto" }}
             >
               <ComposedChart data={dailyTrend} margin={{ top: 16, right: 16, left: 0, bottom: 4 }}>
