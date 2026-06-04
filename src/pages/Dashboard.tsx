@@ -579,7 +579,7 @@ export default function Dashboard() {
           className="h-full"
         >
           <Card className="overflow-hidden border h-full">
-            <CardHeader className="py-2.5 px-3 sm:px-4 border-b bg-muted/20">
+            <CardHeader className="py-2 px-3 sm:px-4 border-b bg-muted/20">
               <div className="flex items-center justify-between gap-2 flex-wrap">
                 <div className="flex flex-col">
                   <CardTitle className="flex items-center gap-2 text-xs sm:text-sm">
@@ -749,7 +749,7 @@ export default function Dashboard() {
                 };
 
                 return (
-                  <ChartContainer config={chartConfig} className="h-[180px] sm:h-[210px] md:h-[230px] w-full transition-all duration-300">
+                  <ChartContainer config={chartConfig} className="h-[120px] sm:h-[140px] md:h-[160px] w-full transition-all duration-300">
                     <AreaChart data={chartData} margin={{ top: 10, right: 15, left: 5, bottom: 5 }}>
                       <defs>
                         <linearGradient id="grad-ritel" x1="0" y1="0" x2="0" y2="1">
