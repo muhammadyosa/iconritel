@@ -499,8 +499,8 @@ export default function Dashboard() {
                   <div className="flex flex-col gap-1 flex-1 justify-center">
                     <div className="flex flex-row items-center gap-2 sm:gap-3 flex-1">
                       {/* Arc visual */}
-                      <div className="flex items-center justify-center shrink-0">
-                        <svg viewBox="0 0 200 110" className="w-full max-w-[180px] sm:max-w-[200px] h-auto">
+                      <div className="flex items-center justify-center shrink-0 flex-1">
+                        <svg viewBox="0 0 200 110" className="w-full max-w-[260px] sm:max-w-[300px] h-auto">
                           {statusData.map((d, i) => (
                             <g key={`bg-${d.label}`}>
                               <path
@@ -534,27 +534,27 @@ export default function Dashboard() {
                         </svg>
                       </div>
 
-                      {/* Legend list — to the right of arc */}
-                      <div className="flex-1 w-full space-y-0.5">
+                      {/* Legend list — narrow, number on left */}
+                      <div className="shrink-0 w-[150px] sm:w-[170px] space-y-0.5">
                         {statusData.map((d) => {
                           const pct = Math.round((d.value / total) * 100);
                           return (
                             <button
                               key={d.label}
                               onClick={() => openStatus(d.status)}
-                              className="w-full flex items-center gap-2 px-1.5 py-0.5 rounded-md hover:bg-muted/40 transition-colors text-left"
+                              className="w-full flex items-center gap-1.5 px-1 py-0.5 rounded-md hover:bg-muted/40 transition-colors text-left"
                             >
+                              <span className="w-7 text-[11px] sm:text-xs font-bold tabular-nums text-right">
+                                {d.value.toLocaleString("id-ID")}
+                              </span>
                               <span
                                 className="w-2 h-2 rounded-full shrink-0"
                                 style={{ backgroundColor: d.color }}
                               />
-                              <span className="text-[10px] sm:text-[11px] font-medium flex items-center gap-1">
+                              <span className="text-[10px] sm:text-[11px] font-medium flex items-center gap-1 min-w-0">
                                 <span>{d.emoji}</span>
-                                <span>{d.label}</span>
+                                <span className="truncate">{d.label}</span>
                                 <span className="text-muted-foreground">({pct}%)</span>
-                              </span>
-                              <span className="ml-auto text-[11px] sm:text-xs font-bold tabular-nums">
-                                {d.value.toLocaleString("id-ID")}
                               </span>
                             </button>
                           );
