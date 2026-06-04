@@ -1079,39 +1079,111 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
               </div>
             </div>
           </CardHeader>
-          <CardContent className="p-2 sm:p-3">
+          <CardContent className="p-3 sm:p-4">
             {categoryData.length === 0 ? (
               <p className="text-xs text-muted-foreground text-center py-8">No data</p>
-            ) : (
-              <>
-                <ChartContainer
-                  config={{ value: { label: "Count" } }}
-                  className="h-[180px] xs:h-[190px] sm:h-[210px] md:h-[240px] w-full transition-all duration-300"
-                >
-                  <BarChart
-                    data={categoryData}
-                    layout="vertical"
-                    margin={{ top: 8, right: 15, left: 5, bottom: 8 }}
-                    barCategoryGap="20%"
-                    onClick={handleCategoryClick}
-                  >
-                    <CartesianGrid strokeDasharray="3 3" className="stroke-muted" horizontal={false} />
-                    <XAxis type="number" tick={{ fontSize: 8, fill: "hsl(var(--muted-foreground))" }} tickLine={false} axisLine={false} />
-                    <YAxis type="category" dataKey="name" tick={<CustomCategoryTick />} width={80} tickLine={false} axisLine={false} />
-                    <ChartTooltip content={<ChartTooltipContent />} cursor={{ fill: "hsl(var(--muted))", opacity: 0.3 }} />
-                    <Bar dataKey="value" radius={[0, 4, 4, 0]} cursor="pointer" maxBarSize={24}>
-                      {categoryData.map((entry, i) => (
-                        <Cell key={i} fill={CATEGORY_COLORS[entry.name] || FALLBACK_COLORS[i % FALLBACK_COLORS.length]} />
-                      ))}
-                    </Bar>
-                  </BarChart>
-                </ChartContainer>
-                <div className="flex items-center justify-between gap-2 mt-1 text-[9px] sm:text-[10px] text-muted-foreground">
-                  <span className="font-medium text-primary/80 truncate">{categoryRangeHint}</span>
-                  <span>Click a bar for details</span>
+            ) : (() => {
+              const total = categoryData.reduce((s, d) => s + d.value, 0) || 1;
+              // Show up to top 6 in the arc; full list in legend
+              const arcItems = categoryData.slice(0, 6);
+              const cx = 100, cy = 100;
+              const maxR = 82, minR = 22;
+              const step = arcItems.length > 1 ? (maxR - minR) / (arcItems.length - 1) : 0;
+              const stroke = Math.max(6, Math.min(11, Math.floor(step * 0.7) || 11));
+              const arcPath = (r: number, pct: number) => {
+                const clamped = Math.max(0, Math.min(1, pct));
+                const angle = Math.PI * clamped;
+                const x1 = cx - r;
+                const y1 = cy;
+                const x2 = cx - r * Math.cos(angle);
+                const y2 = cy - r * Math.sin(angle);
+                const large = clamped > 0.5 ? 1 : 0;
+                return `M ${x1} ${y1} A ${r} ${r} 0 ${large} 1 ${x2} ${y2}`;
+              };
+              const fullArc = (r: number) =>
+                `M ${cx - r} ${cy} A ${r} ${r} 0 1 1 ${cx + r} ${cy}`;
+              const openCategory = (name: string) => {
+                const filtered = categoryFilteredTickets.filter((t) => t.constraint === name);
+                setDrillSelectedTicket(null);
+                setDrillSource(null);
+                setDrillTickets(filtered);
+                const filterLabel = categoryFilter === "all" ? "All Data" : categoryFilter === "custom" ? categoryCustomDate : categoryFilter === "today" ? "Today" : `${categoryFilter} Days`;
+                setDrillTitle(`📊 ${name} — ${filtered.length} incident (${filterLabel})`);
+                setDrillOpen(true);
+              };
+              const colorFor = (name: string, i: number) =>
+                CATEGORY_COLORS[name] || FALLBACK_COLORS[i % FALLBACK_COLORS.length];
+              return (
+                <div className="flex flex-col gap-3">
+                  <div className="w-full flex items-center justify-center">
+                    <svg viewBox="0 0 200 110" className="w-full max-w-[260px] h-auto">
+                      {arcItems.map((d, i) => {
+                        const r = maxR - i * step;
+                        return (
+                          <path
+                            key={`bg-${d.name}`}
+                            d={fullArc(r)}
+                            fill="none"
+                            stroke="hsl(var(--muted))"
+                            strokeOpacity={0.35}
+                            strokeWidth={stroke}
+                            strokeLinecap="round"
+                          />
+                        );
+                      })}
+                      {arcItems.map((d, i) => {
+                        const r = maxR - i * step;
+                        const pct = d.value / total;
+                        if (pct <= 0) return null;
+                        return (
+                          <path
+                            key={`fg-${d.name}`}
+                            d={arcPath(r, pct)}
+                            fill="none"
+                            stroke={colorFor(d.name, i)}
+                            strokeWidth={stroke}
+                            strokeLinecap="round"
+                            className="cursor-pointer transition-opacity hover:opacity-80"
+                            onClick={() => openCategory(d.name)}
+                          >
+                            <title>{`${d.name}: ${d.value} (${Math.round(pct * 100)}%)`}</title>
+                          </path>
+                        );
+                      })}
+                    </svg>
+                  </div>
+
+                  <div className="space-y-1.5 max-h-[220px] overflow-y-auto pr-1">
+                    {categoryData.map((d, i) => {
+                      const pct = Math.round((d.value / total) * 100);
+                      return (
+                        <button
+                          key={d.name}
+                          onClick={() => openCategory(d.name)}
+                          className="w-full flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-muted/40 transition-colors text-left"
+                        >
+                          <span
+                            className="w-2.5 h-2.5 rounded-full shrink-0"
+                            style={{ backgroundColor: colorFor(d.name, i) }}
+                          />
+                          <span className="text-[11px] sm:text-xs font-medium flex items-center gap-1 min-w-0">
+                            <span className="truncate">{d.name}</span>
+                            <span className="text-muted-foreground shrink-0">({pct}%)</span>
+                          </span>
+                          <span className="ml-auto text-xs sm:text-sm font-bold tabular-nums">
+                            {d.value.toLocaleString("id-ID")}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <div className="flex items-center justify-between gap-2 text-[9px] sm:text-[10px] text-muted-foreground">
+                    <span className="font-medium text-primary/80 truncate">{categoryRangeHint}</span>
+                    <span>Klik baris untuk detail</span>
+                  </div>
                 </div>
-              </>
-            )}
+              );
+            })()}
           </CardContent>
         </Card>
 
