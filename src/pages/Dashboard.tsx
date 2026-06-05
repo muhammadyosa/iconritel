@@ -501,61 +501,73 @@ export default function Dashboard() {
                 };
 
                 // Build concentric semi-circular arcs
-                // viewBox 200x110, center (100, 100), radii spaced for 4 rings
-                const cx = 100, cy = 100;
-                const radii = [82, 66, 50, 34];
-                const stroke = 11;
-                const arcPath = (r: number, pct: number) => {
-                  const clamped = Math.max(0, Math.min(1, pct));
-                  const angle = Math.PI * clamped; // 0..PI
-                  const x1 = cx - r;
-                  const y1 = cy;
-                  const x2 = cx - r * Math.cos(angle);
-                  const y2 = cy - r * Math.sin(angle);
-                  const large = clamped > 0.5 ? 1 : 0;
-                  return `M ${x1} ${y1} A ${r} ${r} 0 ${large} 1 ${x2} ${y2}`;
-                };
-                const fullArc = (r: number) =>
-                  `M ${cx - r} ${cy} A ${r} ${r} 0 1 1 ${cx + r} ${cy}`;
+                 // viewBox padded to fit round stroke caps without clipping
+                 const cx = 110, cy = 110;
+                 const radii = [88, 72, 56, 40];
+                 const stroke = 10;
+                 const gap = 0.012; // small angular inset so caps don't touch baseline
+                 const arcPath = (r: number, pct: number) => {
+                   const clamped = Math.max(0, Math.min(1, pct));
+                   if (clamped <= 0) return "";
+                   const startA = Math.PI - gap;
+                   const endA = Math.PI - (Math.PI - gap * 2) * clamped - gap + gap; // simplified below
+                   const sweep = (Math.PI - gap * 2) * clamped;
+                   const a1 = Math.PI - gap;
+                   const a2 = a1 - sweep;
+                   const x1 = cx + r * Math.cos(a1);
+                   const y1 = cy - r * Math.sin(a1);
+                   const x2 = cx + r * Math.cos(a2);
+                   const y2 = cy - r * Math.sin(a2);
+                   const large = sweep > Math.PI ? 1 : 0;
+                   return `M ${x1} ${y1} A ${r} ${r} 0 ${large} 1 ${x2} ${y2}`;
+                 };
+                 const fullArc = (r: number) => {
+                   const a1 = Math.PI - gap;
+                   const a2 = gap;
+                   const x1 = cx + r * Math.cos(a1);
+                   const y1 = cy - r * Math.sin(a1);
+                   const x2 = cx + r * Math.cos(a2);
+                   const y2 = cy - r * Math.sin(a2);
+                   return `M ${x1} ${y1} A ${r} ${r} 0 1 1 ${x2} ${y2}`;
+                 };
 
-                return (
-                  <div className="flex flex-col gap-1 flex-1 justify-center">
-                    <div className="flex flex-row items-center gap-2 sm:gap-3 flex-1">
-                      {/* Arc visual */}
-                      <div className="flex items-center justify-center shrink-0 flex-1">
-                        <svg viewBox="0 0 200 110" className="w-full max-w-[260px] sm:max-w-[300px] h-auto">
-                          {statusData.map((d, i) => (
-                            <g key={`bg-${d.label}`}>
-                              <path
-                                d={fullArc(radii[i])}
-                                fill="none"
-                                stroke="hsl(var(--muted))"
-                                strokeOpacity={0.35}
-                                strokeWidth={stroke}
-                                strokeLinecap="round"
-                              />
-                            </g>
-                          ))}
-                          {statusData.map((d, i) => {
-                            const pct = d.value / total;
-                            if (pct <= 0) return null;
-                            return (
-                              <path
-                                key={`fg-${d.label}`}
-                                d={arcPath(radii[i], pct)}
-                                fill="none"
-                                stroke={d.color}
-                                strokeWidth={stroke}
-                                strokeLinecap="round"
-                                className="cursor-pointer transition-opacity hover:opacity-80"
-                                onClick={() => openStatus(d.status)}
-                              >
-                                <title>{`${d.label}: ${d.value} (${Math.round(pct * 100)}%)`}</title>
-                              </path>
-                            );
-                          })}
-                        </svg>
-                      </div>
+                 return (
+                   <div className="flex flex-col gap-1 flex-1 justify-center">
+                     <div className="flex flex-row items-center gap-2 sm:gap-3 flex-1">
+                       {/* Arc visual */}
+                       <div className="flex items-center justify-center shrink-0 flex-1">
+                         <svg viewBox="0 0 220 125" className="w-full max-w-[260px] sm:max-w-[300px] h-auto overflow-visible">
+                           {statusData.map((d, i) => (
+                             <path
+                               key={`bg-${d.label}`}
+                               d={fullArc(radii[i])}
+                               fill="none"
+                               stroke="hsl(var(--muted))"
+                               strokeOpacity={0.3}
+                               strokeWidth={stroke}
+                               strokeLinecap="round"
+                             />
+                           ))}
+                           {statusData.map((d, i) => {
+                             const pct = d.value / total;
+                             if (pct <= 0) return null;
+                             return (
+                               <path
+                                 key={`fg-${d.label}`}
+                                 d={arcPath(radii[i], pct)}
+                                 fill="none"
+                                 stroke={d.color}
+                                 strokeWidth={stroke}
+                                 strokeLinecap="round"
+                                 className="cursor-pointer transition-opacity hover:opacity-80"
+                                 onClick={() => openStatus(d.status)}
+                               >
+                                 <title>{`${d.label}: ${d.value} (${Math.round(pct * 100)}%)`}</title>
+                               </path>
+                             );
+                           })}
+                         </svg>
+                       </div>
 
                       {/* Legend list — narrow, number on left */}
                       <div className="shrink-0 w-[150px] sm:w-[170px] space-y-0.5">
