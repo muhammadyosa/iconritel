@@ -70,15 +70,31 @@ export default defineConfig(({ mode }) => ({
     }),
   ].filter(Boolean),
   build: {
+    target: "es2020",
+    cssCodeSplit: true,
+    chunkSizeWarningLimit: 1000,
     rollupOptions: {
       output: {
         manualChunks: {
+          "react-vendor": ["react", "react-dom", "react-router-dom"],
           recharts: ["recharts"],
           xlsx: ["xlsx"],
+          framer: ["framer-motion"],
+          supabase: ["@supabase/supabase-js"],
+          pdf: ["jspdf", "jspdf-autotable"],
+          "radix-ui": [
+            "@radix-ui/react-dialog",
+            "@radix-ui/react-dropdown-menu",
+            "@radix-ui/react-popover",
+            "@radix-ui/react-select",
+            "@radix-ui/react-tabs",
+            "@radix-ui/react-tooltip",
+          ],
         },
       },
     },
   },
+
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),

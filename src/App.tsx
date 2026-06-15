@@ -183,7 +183,7 @@ function AppLayout() {
   return (
     <SidebarProvider>
       <SwipeHandler />
-      <div className="flex min-h-screen w-full overflow-x-hidden">
+      <div className="flex min-h-dvh w-full overflow-x-hidden">
         <AppSidebar />
         <SidebarFloatingTrigger />
         <div className="flex-1 flex flex-col min-w-0">
@@ -196,21 +196,28 @@ function AppLayout() {
                   <img
                     src={danantaraLight}
                     alt="Danantara Indonesia"
+                    decoding="async"
+                    loading="eager"
                     className="h-5 xs:h-6 sm:h-7 md:h-8 w-auto flex-shrink-0 object-contain block dark:hidden"
                   />
                   <img
                     src={danantaraDark}
                     alt="Danantara Indonesia"
+                    decoding="async"
+                    loading="eager"
                     className="h-5 xs:h-6 sm:h-7 md:h-8 w-auto flex-shrink-0 object-contain hidden dark:block"
                   />
                   <div className="h-5 sm:h-6 w-px bg-border/70 flex-shrink-0" />
                   <img
                     src={plnIconPlusLogo}
                     alt="PLN Icon Plus"
+                    decoding="async"
+                    loading="eager"
                     className="h-6 xs:h-7 sm:h-8 md:h-9 w-auto flex-shrink-0 object-contain"
                   />
                 </div>
               </div>
+
               <UserMenu />
             </div>
           </header>
