@@ -1478,7 +1478,14 @@ export default function Dashboard() {
           </div>
 
       </motion.div>
+      </section>
 
+      {/* Section: Operasional Harian */}
+      <section className="space-y-2">
+        <div className="flex items-center gap-2 px-0.5">
+          <span className="text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-muted-foreground">🛠️ Operasional Harian</span>
+          <div className="flex-1 h-px bg-border/60" />
+        </div>
       {/* Report Shift + NOC Statistik + Recent Activity - 3 columns at bottom */}
       <div className="grid gap-3 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 w-full items-start">
         {/* Report Shift */}
