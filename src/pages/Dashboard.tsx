@@ -444,30 +444,14 @@ export default function Dashboard() {
           </motion.div>
         ))}
       </div>
+      </section>
 
-      {/* Today's Quick Stats Banner */}
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3, delay: 0.2 }}
-        className="flex flex-wrap items-center gap-2 sm:gap-4 px-3 py-2 rounded-lg bg-muted/40 border border-border/50"
-      >
-        <span className="text-[10px] sm:text-xs font-semibold text-muted-foreground">📅 Hari ini:</span>
-        <div className="flex items-center gap-1.5">
-          <span className="text-[10px] sm:text-xs text-primary font-bold">+{todayCreated}</span>
-          <span className="text-[9px] sm:text-[10px] text-muted-foreground">dibuat</span>
+      {/* Section: Tren & Distribusi */}
+      <section className="space-y-2">
+        <div className="flex items-center gap-2 px-0.5">
+          <span className="text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-muted-foreground">📈 Tren & Distribusi</span>
+          <div className="flex-1 h-px bg-border/60" />
         </div>
-        <div className="flex items-center gap-1.5">
-          <span className="text-[10px] sm:text-xs text-success font-bold">+{todayResolved}</span>
-          <span className="text-[9px] sm:text-[10px] text-muted-foreground">resolved</span>
-        </div>
-        <div className="flex items-center gap-1.5 ml-auto">
-          <span className="text-[10px] sm:text-xs font-bold text-foreground">{resolutionRate}%</span>
-          <span className="text-[9px] sm:text-[10px] text-muted-foreground">Resolution Rate</span>
-        </div>
-      </motion.div>
-
-      {/* Charts Section */}
       <div className="grid gap-2 sm:gap-3 grid-cols-1 lg:grid-cols-2 w-full">
         {/* Status Distribution — Arc Gauge (Current Statistic style) */}
         <motion.div
