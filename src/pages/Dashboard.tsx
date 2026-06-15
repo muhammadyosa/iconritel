@@ -964,18 +964,29 @@ export default function Dashboard() {
           </Card>
         </motion.div>
       </div>
+      </section>
 
+      {/* Section: Analitik Bulanan */}
+      <section className="space-y-2">
+        <div className="flex items-center gap-2 px-0.5">
+          <span className="text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-muted-foreground">🗓️ Analitik Bulanan</span>
+          <div className="flex-1 h-px bg-border/60" />
+        </div>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.3 }}
+        >
+          <MonthlyAnalytics tickets={tickets} getTrendChartData={getTrendChartData} getCategoryData={getCategoryData} />
+        </motion.div>
+      </section>
 
-      {/* Monthly Analytics Section */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, delay: 0.3 }}
-      >
-        <MonthlyAnalytics tickets={tickets} getTrendChartData={getTrendChartData} getCategoryData={getCategoryData} />
-      </motion.div>
-
-
+      {/* Section: Per Wilayah & Kategori */}
+      <section className="space-y-2">
+        <div className="flex items-center gap-2 px-0.5">
+          <span className="text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-muted-foreground">🗺️ Per Wilayah & Kategori</span>
+          <div className="flex-1 h-px bg-border/60" />
+        </div>
       {/* Proporsi + Tier + Ritel/Feeder + NOC Statistik */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
