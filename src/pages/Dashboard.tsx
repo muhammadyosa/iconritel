@@ -1732,6 +1732,9 @@ export default function Dashboard() {
             <RecentActivity />
         </motion.div>
       </div>
+      </section>
+
+
 
       {/* Ticket Detail Dialog */}
       <Dialog open={!!selectedTicket} onOpenChange={() => setSelectedTicket(null)}>
