@@ -317,7 +317,12 @@ export default function Dashboard() {
         </div>
       </motion.div>
 
-      {/* KPI Cards Section */}
+      {/* Section: Ringkasan KPI */}
+      <section className="space-y-2">
+        <div className="flex items-center gap-2 px-0.5">
+          <span className="text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-muted-foreground">📊 Ringkasan KPI</span>
+          <div className="flex-1 h-px bg-border/60" />
+        </div>
       <div className="grid gap-2 sm:gap-3 grid-cols-2 lg:grid-cols-4 w-full">
         {[
           { 
