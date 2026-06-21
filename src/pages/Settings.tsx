@@ -479,11 +479,13 @@ export default function Settings() {
         localStorage.setItem(LOCAL_REGIONAL_UPLOAD_KEY, JSON.stringify(regMeta));
         setLastRegionalUpload(regMeta);
         await supabase.from("master_data_uploads").insert({
-          uploaded_by_user_id: user?.id ?? null,
+          uploaded_by_user_id: user?.id ?? undefined,
           uploaded_by_name: regMeta.uploaded_by_name,
           file_name: regMeta.file_name,
           total_records: regMeta.total_records,
-          summary: { kind: "regional_team" },
+          // Embed parsed records so every other signed-in user can apply the
+          // update instantly via realtime — no file download or reload needed.
+          summary: { kind: "regional_team", records: result.regionalTeamRecords } as any,
         });
       } catch (err) {
         if (import.meta.env.DEV) console.error("Failed to sync regional upload meta:", err);
