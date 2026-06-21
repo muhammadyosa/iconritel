@@ -16,6 +16,7 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { UserMenu } from "@/components/UserMenu";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { useTicketNotifications } from "@/hooks/useTicketNotifications";
+import { useRegionalTeamSync } from "@/hooks/useRegionalTeamSync";
 import { ScrollToTop } from "@/components/ScrollToTop";
 import { useSwipeToOpenSidebar } from "@/hooks/useSwipeSidebar";
 import { TopNavTabs } from "@/components/TopNavTabs";
