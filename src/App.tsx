@@ -155,6 +155,7 @@ function TabbedContent() {
 }
 function TicketNotificationProvider({ children }: { children: React.ReactNode }) {
   useTicketNotifications();
+  useRegionalTeamSync();
   return <>{children}</>;
 }
 
