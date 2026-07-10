@@ -117,6 +117,24 @@ export function generateTicketFormat(
   if (constraint === "CABLE PROBLEM (FEEDER)") {
     return `[PROACTIVE NOC RETAIL] CABLE PROBLEM (FEEDER) - ${hostname} - ${serpo}`;
   }
+
+  if (constraint === "UPE DOWN") {
+    return `[PROACTIVE NOC RETAIL] UPE DOWN UNDER - ${hostname} - ${serpo}`;
+  }
+
+  if (constraint === "UPE BAD RX") {
+    return `[PROACTIVE NOC RETAIL] UPE BAD RX UNDER - ${hostname} - ${serpo}`;
+  }
+
+  if (constraint === "LINK DOWN") {
+    const hostnameB = portText || "[HOSTNAME UPE TUJUAN]";
+    return `[PROACTIVE NOC RETAIL] LINK DOWN UNDER - ${hostname} - TO - ${hostnameB} - ${serpo}`;
+  }
+
+  if (constraint === "LINK BAD RX") {
+    const hostnameB = portText || "[HOSTNAME UPE TUJUAN]";
+    return `[PROACTIVE NOC RETAIL] LINK BAD RX UNDER - ${hostname} - TO - ${hostnameB} - ${serpo}`;
+  }
   
   // INTERMITTENT - lowercase in format
   if (constraint === "INTERMITTENT") {
