@@ -715,14 +715,18 @@ export default function TicketManagement() {
               )}
             </div>
             
-            {/* Show PORT text input for PORT DOWN and PORT BAD RX constraints */}
-            {(formData.constraint === "PORT DOWN" || formData.constraint === "PORT BAD RX") && (
+            {/* Extra input: PORT info, or second UPE hostname for LINK constraints */}
+            {(formData.constraint === "PORT DOWN" || formData.constraint === "PORT BAD RX" || formData.constraint === "LINK DOWN" || formData.constraint === "LINK BAD RX") && (
               <div>
-                <Label>Port Info (Optional)</Label>
+                <Label>
+                  {formData.constraint.startsWith("LINK")
+                    ? "Hostname UPE Tujuan"
+                    : "Port Info (Optional)"}
+                </Label>
                 <Input
                   value={formData.portText}
                   onChange={(e) => setFormData({ ...formData, portText: e.target.value })}
-                  placeholder="Contoh: PORT-1/1/1"
+                  placeholder={formData.constraint.startsWith("LINK") ? "Contoh: UPE-JKT-02" : "Contoh: PORT-1/1/1"}
                 />
               </div>
             )}
@@ -1212,13 +1216,17 @@ export default function TicketManagement() {
                         )}
                       </div>
                       
-                      {(manualFormData.constraint === "PORT DOWN" || manualFormData.constraint === "PORT BAD RX") && (
+                      {(manualFormData.constraint === "PORT DOWN" || manualFormData.constraint === "PORT BAD RX" || manualFormData.constraint === "LINK DOWN" || manualFormData.constraint === "LINK BAD RX") && (
                         <div>
-                          <Label>Port Info (Optional)</Label>
+                          <Label>
+                            {manualFormData.constraint.startsWith("LINK")
+                              ? "Hostname UPE Tujuan"
+                              : "Port Info (Optional)"}
+                          </Label>
                           <Input
                             value={manualFormData.portText}
                             onChange={(e) => setManualFormData({ ...manualFormData, portText: e.target.value })}
-                            placeholder="Contoh: PORT-1/1/1"
+                            placeholder={manualFormData.constraint.startsWith("LINK") ? "Contoh: UPE-JKT-02" : "Contoh: PORT-1/1/1"}
                           />
                         </div>
                       )}
