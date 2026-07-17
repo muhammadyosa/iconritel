@@ -136,6 +136,11 @@ export function generateTicketFormat(
     const hostnameB = portText || "[HOSTNAME UPE TUJUAN]";
     return `[PROACTIVE NOC RETAIL] LINK BAD RX UNDER - ${hostname} - TO - ${hostnameB} - ${serpo}`;
   }
+
+  if (constraint === "INTERMITTENT UPE/OLT") {
+    const hostnameB = portText || "[HOSTNAME OLT/UPE TUJUAN]";
+    return `[PROACTIVE NOC RETAIL] INTERMITTENT UNDER - ${hostname} - TO - ${hostnameB} - ${serpo}`;
+  }
   
   // INTERMITTENT - lowercase in format
   if (constraint === "INTERMITTENT") {
