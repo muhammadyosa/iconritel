@@ -59,6 +59,7 @@ export const FEEDER_CONSTRAINTS = [
   "UPE BAD RX",
   "LINK DOWN",
   "LINK BAD RX",
+  "INTERMITTENT UPE/OLT",
   "CABLE PROBLEM (FEEDER)",
 ];
 
@@ -134,6 +135,11 @@ export function generateTicketFormat(
   if (constraint === "LINK BAD RX") {
     const hostnameB = portText || "[HOSTNAME UPE TUJUAN]";
     return `[PROACTIVE NOC RETAIL] LINK BAD RX UNDER - ${hostname} - TO - ${hostnameB} - ${serpo}`;
+  }
+
+  if (constraint === "INTERMITTENT UPE/OLT") {
+    const hostnameB = portText || "[HOSTNAME OLT/UPE TUJUAN]";
+    return `[PROACTIVE NOC RETAIL] INTERMITTENT UNDER - ${hostname} - TO - ${hostnameB} - ${serpo}`;
   }
   
   // INTERMITTENT - lowercase in format
