@@ -1330,6 +1330,20 @@ Contoh:
                 </SelectContent>
               </Select>
             </div>
+            <div className="w-full xs:w-32 sm:w-44">
+              <Label className="text-[9px] sm:text-[10px]">🌐 Region</Label>
+              <Select value={pendingRegionFilter} onValueChange={setPendingRegionFilter}>
+                <SelectTrigger className="h-6 sm:h-7 text-[9px] sm:text-[10px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Semua Region</SelectItem>
+                  {Object.keys(teamRegions).sort().map((region) => (
+                    <SelectItem key={region} value={region}>{region}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
             <div className="flex-1">
               <Label className="text-[9px] sm:text-[10px]">Pencarian</Label>
               <div className="relative">
@@ -1343,6 +1357,7 @@ Contoh:
               </div>
             </div>
           </div>
+
 
           {(() => {
             const q = pendingSearchQuery.toLowerCase();
