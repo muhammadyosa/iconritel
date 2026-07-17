@@ -967,6 +967,7 @@ function PendingTicketsList({ pendingTickets, isLoading, updateTicket, deleteTic
   const [detailOpen, setDetailOpen] = useState(false);
   const [pendingSearchField, setPendingSearchField] = useState("all");
   const [pendingSearchQuery, setPendingSearchQuery] = useState("");
+  const [pendingRegionFilter, setPendingRegionFilter] = useState<string>("all");
   const [regionalData, setRegionalData] = useState<RegionalTeamRecord[]>([]);
   
   // User role for permission-based UI
