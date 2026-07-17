@@ -1361,7 +1361,11 @@ Contoh:
 
           {(() => {
             const q = pendingSearchQuery.toLowerCase();
-            const filtered = q ? pendingTickets.filter((t) => {
+            const regionMitras = pendingRegionFilter !== "all" ? new Set((teamRegions[pendingRegionFilter] || []).map(m => m.toUpperCase())) : null;
+            const byRegion = regionMitras
+              ? pendingTickets.filter(t => regionMitras.has((t.serpo || "").toUpperCase()))
+              : pendingTickets;
+            const filtered = q ? byRegion.filter((t) => {
               switch (pendingSearchField) {
                 case "ticketId": return t.id.toLowerCase().includes(q);
                 case "category": return t.category.toLowerCase().includes(q);
@@ -1371,7 +1375,7 @@ Contoh:
                 case "serpo": return t.serpo.toLowerCase().includes(q);
                 default: return (t.id + t.customerName + t.serviceId + t.constraint + t.serpo + t.category + t.hostname).toLowerCase().includes(q);
               }
-            }) : pendingTickets;
+            }) : byRegion;
 
             return filtered.length === 0 ? (
             <div className="text-center py-6 text-muted-foreground">
