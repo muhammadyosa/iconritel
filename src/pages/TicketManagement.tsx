@@ -716,17 +716,19 @@ export default function TicketManagement() {
             </div>
             
             {/* Extra input: PORT info, or second UPE hostname for LINK constraints */}
-            {(formData.constraint === "PORT DOWN" || formData.constraint === "PORT BAD RX" || formData.constraint === "LINK DOWN" || formData.constraint === "LINK BAD RX") && (
+            {(formData.constraint === "PORT DOWN" || formData.constraint === "PORT BAD RX" || formData.constraint === "LINK DOWN" || formData.constraint === "LINK BAD RX" || formData.constraint === "INTERMITTENT UPE/OLT") && (
               <div>
                 <Label>
                   {formData.constraint.startsWith("LINK")
                     ? "Hostname UPE Tujuan"
+                    : formData.constraint === "INTERMITTENT UPE/OLT"
+                    ? "Hostname OLT/UPE Tujuan"
                     : "Port Info (Optional)"}
                 </Label>
                 <Input
                   value={formData.portText}
                   onChange={(e) => setFormData({ ...formData, portText: e.target.value })}
-                  placeholder={formData.constraint.startsWith("LINK") ? "Contoh: UPE-JKT-02" : "Contoh: PORT-1/1/1"}
+                  placeholder={formData.constraint.startsWith("LINK") ? "Contoh: UPE-JKT-02" : formData.constraint === "INTERMITTENT UPE/OLT" ? "Contoh: OLT/UPE-JKT-02" : "Contoh: PORT-1/1/1"}
                 />
               </div>
             )}
