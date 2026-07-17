@@ -1218,17 +1218,19 @@ export default function TicketManagement() {
                         )}
                       </div>
                       
-                      {(manualFormData.constraint === "PORT DOWN" || manualFormData.constraint === "PORT BAD RX" || manualFormData.constraint === "LINK DOWN" || manualFormData.constraint === "LINK BAD RX") && (
+                      {(manualFormData.constraint === "PORT DOWN" || manualFormData.constraint === "PORT BAD RX" || manualFormData.constraint === "LINK DOWN" || manualFormData.constraint === "LINK BAD RX" || manualFormData.constraint === "INTERMITTENT UPE/OLT") && (
                         <div>
                           <Label>
                             {manualFormData.constraint.startsWith("LINK")
                               ? "Hostname UPE Tujuan"
+                              : manualFormData.constraint === "INTERMITTENT UPE/OLT"
+                              ? "Hostname OLT/UPE Tujuan"
                               : "Port Info (Optional)"}
                           </Label>
                           <Input
                             value={manualFormData.portText}
                             onChange={(e) => setManualFormData({ ...manualFormData, portText: e.target.value })}
-                            placeholder={manualFormData.constraint.startsWith("LINK") ? "Contoh: UPE-JKT-02" : "Contoh: PORT-1/1/1"}
+                            placeholder={manualFormData.constraint.startsWith("LINK") ? "Contoh: UPE-JKT-02" : manualFormData.constraint === "INTERMITTENT UPE/OLT" ? "Contoh: OLT/UPE-JKT-02" : "Contoh: PORT-1/1/1"}
                           />
                         </div>
                       )}
