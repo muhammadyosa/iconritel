@@ -20,7 +20,9 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Loader2, RefreshCw, Shield, User, Users, Clock, ArrowUpDown, ArrowUp, ArrowDown, Pencil, Activity, CheckCircle2, XCircle, Search, Trash2 } from "lucide-react";
+import { Loader2, RefreshCw, Shield, User, Users, Clock, ArrowUpDown, ArrowUp, ArrowDown, Pencil, Activity, CheckCircle2, XCircle, Search, Trash2, ListChecks } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { ALL_MENUS, getDefaultPaths } from "@/lib/menuAccess";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { getActionLabel, useActivityLog } from "@/hooks/useActivityLog";
@@ -59,6 +61,11 @@ export function UserManagement() {
   const [searchQuery, setSearchQuery] = useState("");
   const [deletingUser, setDeletingUser] = useState<UserWithRole | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [accessUser, setAccessUser] = useState<UserWithRole | null>(null);
+  const [accessPaths, setAccessPaths] = useState<string[]>([]);
+  const [accessIsCustom, setAccessIsCustom] = useState(false);
+  const [isLoadingAccess, setIsLoadingAccess] = useState(false);
+  const [isSavingAccess, setIsSavingAccess] = useState(false);
   const { logActivity } = useActivityLog();
 
   const fetchUsers = async () => {
@@ -214,6 +221,75 @@ export function UserManagement() {
     setEditingUser(user);
     setEditDisplayName(user.display_name || "");
   };
+
+  // ===== Akses Menu (checklist per user) =====
+  const openAccessDialog = async (user: UserWithRole) => {
+    setAccessUser(user);
+    setIsLoadingAccess(true);
+    setAccessPaths(getDefaultPaths(user.role));
+    setAccessIsCustom(false);
+    const { data, error } = await supabase
+      .from("user_menu_access")
+      .select("path")
+      .eq("user_id", user.user_id);
+    if (!error && data && data.length > 0) {
+      setAccessPaths(data.map((r) => r.path));
+      setAccessIsCustom(true);
+    }
+    setIsLoadingAccess(false);
+  };
+
+  const toggleAccessPath = (path: string) => {
+    setAccessPaths((prev) =>
+      prev.includes(path) ? prev.filter((p) => p !== path) : [...prev, path]
+    );
+  };
+
+  const handleSaveAccess = async () => {
+    if (!accessUser) return;
+    setIsSavingAccess(true);
+    try {
+      const { error: delError } = await supabase
+        .from("user_menu_access")
+        .delete()
+        .eq("user_id", accessUser.user_id);
+      if (delError) throw delError;
+
+      if (accessPaths.length > 0) {
+        const { error: insError } = await supabase
+          .from("user_menu_access")
+          .insert(accessPaths.map((path) => ({ user_id: accessUser.user_id, path })));
+        if (insError) throw insError;
+      }
+
+      await logActivity("update_menu_access", `${accessUser.email}: ${accessPaths.length} menu`);
+      toast.success(`Akses menu ${accessUser.display_name || accessUser.email} diperbarui`);
+      setAccessUser(null);
+    } catch (error) {
+      toast.error("Gagal menyimpan akses menu");
+    } finally {
+      setIsSavingAccess(false);
+    }
+  };
+
+  const handleResetAccess = async () => {
+    if (!accessUser) return;
+    setIsSavingAccess(true);
+    try {
+      const { error } = await supabase
+        .from("user_menu_access")
+        .delete()
+        .eq("user_id", accessUser.user_id);
+      if (error) throw error;
+      toast.success("Akses dikembalikan ke default role");
+      setAccessUser(null);
+    } catch {
+      toast.error("Gagal mereset akses menu");
+    } finally {
+      setIsSavingAccess(false);
+    }
+  };
+
 
   const handleSaveDisplayName = async () => {
     if (!editingUser) return;
