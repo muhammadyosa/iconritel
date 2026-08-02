@@ -29,7 +29,7 @@ export const SAFE_PROTECTED_PATHS = new Set<string>([
 
 export function ProtectedRoute({ children }: ProtectedRouteProps) {
   const { user, profile, isLoading } = useAuth();
-  const { isIntern, isAdmin, isNOC, isLoading: isRoleLoading } = useUserRole();
+  const { allowedPaths, isLoading: isAccessLoading } = useMenuAccess();
   const location = useLocation();
 
   // Simpan tujuan awal saat user belum login, agar bisa di-redirect kembali setelah login.
@@ -75,14 +75,11 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
     return <Navigate to="/pending-approval" replace />;
   }
 
-  // Pembatasan berbasis role hanya diterapkan setelah role selesai dimuat,
-  // agar tidak terjadi redirect prematur. Sebelum role siap, izinkan render.
-  if (!isRoleLoading) {
-    if (isIntern && !INTERN_ALLOWED_PATHS.has(location.pathname)) {
-      return <Navigate to="/tickets" replace />;
-    }
-    if (ADMIN_NOC_ONLY_PATHS.has(location.pathname) && !isAdmin && !isNOC) {
-      return <Navigate to="/" replace />;
+  // Pembatasan menu diterapkan setelah data akses selesai dimuat,
+  // agar tidak terjadi redirect prematur.
+  if (!isAccessLoading && location.pathname !== "/install") {
+    if (!allowedPaths.includes(location.pathname)) {
+      return <Navigate to={allowedPaths[0] || "/tickets"} replace />;
     }
   }
 
