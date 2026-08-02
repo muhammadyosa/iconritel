@@ -844,7 +844,7 @@ export function UserManagement() {
                 <span className="mr-1">🧑‍🏫</span> Intern
               </Badge>
               <div className="flex flex-wrap gap-1">
-                {["🖥️ Dashboard","🎫 Incident","👥 Team","🗂️ AKV","🛠 Settings"].map(m => (
+                {["🖥️ Dashboard","🎫 Incident","👥 Team","🗂️ AKV","📝 Report","🛠 Settings"].map(m => (
                   <span key={m} className="text-[10px] bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 rounded px-1.5 py-0.5">{m}</span>
                 ))}
               </div>

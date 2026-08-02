@@ -8,7 +8,7 @@ interface ProtectedRouteProps {
   children: React.ReactNode;
 }
 
-const INTERN_ALLOWED_PATHS = new Set(["/", "/tickets", "/teams"]);
+const INTERN_ALLOWED_PATHS = new Set(["/", "/tickets", "/teams", "/report"]);
 const ADMIN_NOC_ONLY_PATHS = new Set(["/notes"]);
 
 // Daftar rute valid yang bisa dipakai sebagai intended_path.
