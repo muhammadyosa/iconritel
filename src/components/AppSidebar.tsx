@@ -32,7 +32,7 @@ const menuItems = [
   { title: "Settings", path: "/settings", emoji: "🛠" },
 ] as const;
 
-const INTERN_PATHS = new Set(["/", "/tickets", "/teams"]);
+const INTERN_PATHS = new Set(["/", "/tickets", "/teams", "/report"]);
 const ADMIN_NOC_ONLY_PATHS = new Set(["/notes", "/auto-config"]);
 
 function usePendingUserCount() {
