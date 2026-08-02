@@ -960,6 +960,98 @@ export function UserManagement() {
           </div>
         </div>
 
+        {/* Akses Menu Dialog */}
+        <Dialog open={!!accessUser} onOpenChange={(open) => !open && !isSavingAccess && setAccessUser(null)}>
+          <DialogContent className="sm:max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <ListChecks className="h-4 w-4" /> Akses Menu
+              </DialogTitle>
+              <DialogDescription>
+                Checklist menu yang boleh diakses {accessUser?.display_name || accessUser?.email}
+                {accessUser && (
+                  <span className="ml-1">
+                    (role: <span className="font-medium">{accessUser.role}</span>
+                    {accessIsCustom ? " · kustom" : " · default role"})
+                  </span>
+                )}
+              </DialogDescription>
+            </DialogHeader>
+
+            {isLoadingAccess ? (
+              <div className="py-8 flex justify-center">
+                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+              </div>
+            ) : (
+              <>
+                <div className="flex items-center gap-2 pt-1">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-7 text-xs"
+                    onClick={() => setAccessPaths(ALL_MENUS.map((m) => m.path))}
+                  >
+                    Pilih Semua
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-7 text-xs"
+                    onClick={() => setAccessPaths([])}
+                  >
+                    Kosongkan
+                  </Button>
+                  {accessUser && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-7 text-xs"
+                      onClick={() => setAccessPaths(getDefaultPaths(accessUser.role))}
+                    >
+                      Default Role
+                    </Button>
+                  )}
+                  <span className="ml-auto text-[11px] text-muted-foreground">
+                    {accessPaths.length}/{ALL_MENUS.length} menu
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 max-h-[45vh] overflow-y-auto py-2">
+                  {ALL_MENUS.map((menu) => (
+                    <label
+                      key={menu.path}
+                      className="flex items-center gap-2 rounded-md border p-2 cursor-pointer hover:bg-muted/50"
+                    >
+                      <Checkbox
+                        checked={accessPaths.includes(menu.path)}
+                        onCheckedChange={() => toggleAccessPath(menu.path)}
+                      />
+                      <span className="text-xs">
+                        {menu.emoji} {menu.title}
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              </>
+            )}
+
+            <DialogFooter className="gap-2">
+              {accessIsCustom && (
+                <Button variant="ghost" onClick={handleResetAccess} disabled={isSavingAccess} className="mr-auto">
+                  Reset ke Default
+                </Button>
+              )}
+              <Button variant="outline" onClick={() => setAccessUser(null)} disabled={isSavingAccess}>
+                Batal
+              </Button>
+              <Button onClick={handleSaveAccess} disabled={isSavingAccess || isLoadingAccess}>
+                {isSavingAccess && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                Simpan Akses
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
         {/* Edit Username Dialog */}
         <Dialog open={!!editingUser} onOpenChange={(open) => !open && setEditingUser(null)}>
           <DialogContent className="sm:max-w-md">
