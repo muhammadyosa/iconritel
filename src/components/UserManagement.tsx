@@ -545,6 +545,15 @@ export function UserManagement() {
                       >
                         <Pencil className="h-2.5 w-2.5" />
                       </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-5 w-5 flex-shrink-0 text-primary"
+                        onClick={() => openAccessDialog(user)}
+                        title="Atur akses menu"
+                      >
+                        <ListChecks className="h-3 w-3" />
+                      </Button>
                     </div>
                     <p className="text-xs text-muted-foreground truncate">{user.email}</p>
                   </div>
@@ -747,6 +756,15 @@ export function UserManagement() {
                             title="Edit username"
                           >
                             <Pencil className="h-2.5 w-2.5" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-5 w-5 flex-shrink-0 text-primary"
+                            onClick={() => openAccessDialog(user)}
+                            title="Atur akses menu"
+                          >
+                            <ListChecks className="h-3 w-3" />
                           </Button>
                         </div>
                         <p className="text-[11px] text-muted-foreground truncate">{user.email}</p>
