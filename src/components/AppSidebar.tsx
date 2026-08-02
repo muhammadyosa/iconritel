@@ -9,6 +9,7 @@ import { useTheme } from "next-themes";
 import { useEffect, useState, useMemo, useCallback, memo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useUserRole } from "@/hooks/useUserRole";
+import { useMenuAccess } from "@/hooks/useMenuAccess";
 import { useDebouncedCallback } from "@/hooks/useDebouncedCallback";
 import {
   Tooltip,
@@ -136,19 +137,18 @@ export function AppSidebar() {
   const { theme, setTheme } = useTheme();
   const collapsed = state === "collapsed";
   const { count: pendingCount, isAdmin } = usePendingUserCount();
-  const { isIntern, isNOC } = useUserRole();
+  
 
   const toggleTheme = useCallback(() => {
     setTheme(theme === "dark" ? "light" : "dark");
   }, [theme, setTheme]);
 
+  const { allowedPaths, isLoading: isAccessLoading } = useMenuAccess();
+
   const visibleMenuItems = useMemo(() => {
-    return menuItems.filter((item) => {
-      if (isIntern && !INTERN_PATHS.has(item.path)) return false;
-      if (ADMIN_NOC_ONLY_PATHS.has(item.path) && !isAdmin && !isNOC) return false;
-      return true;
-    });
-  }, [isIntern, isAdmin, isNOC]);
+    if (isAccessLoading) return menuItems.filter((item) => INTERN_PATHS.has(item.path));
+    return menuItems.filter((item) => allowedPaths.includes(item.path));
+  }, [allowedPaths, isAccessLoading]);
 
   return (
     <Sidebar

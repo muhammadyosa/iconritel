@@ -20,7 +20,9 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Loader2, RefreshCw, Shield, User, Users, Clock, ArrowUpDown, ArrowUp, ArrowDown, Pencil, Activity, CheckCircle2, XCircle, Search, Trash2 } from "lucide-react";
+import { Loader2, RefreshCw, Shield, User, Users, Clock, ArrowUpDown, ArrowUp, ArrowDown, Pencil, Activity, CheckCircle2, XCircle, Search, Trash2, ListChecks } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { ALL_MENUS, getDefaultPaths } from "@/lib/menuAccess";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { getActionLabel, useActivityLog } from "@/hooks/useActivityLog";
@@ -59,6 +61,11 @@ export function UserManagement() {
   const [searchQuery, setSearchQuery] = useState("");
   const [deletingUser, setDeletingUser] = useState<UserWithRole | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [accessUser, setAccessUser] = useState<UserWithRole | null>(null);
+  const [accessPaths, setAccessPaths] = useState<string[]>([]);
+  const [accessIsCustom, setAccessIsCustom] = useState(false);
+  const [isLoadingAccess, setIsLoadingAccess] = useState(false);
+  const [isSavingAccess, setIsSavingAccess] = useState(false);
   const { logActivity } = useActivityLog();
 
   const fetchUsers = async () => {
@@ -214,6 +221,75 @@ export function UserManagement() {
     setEditingUser(user);
     setEditDisplayName(user.display_name || "");
   };
+
+  // ===== Akses Menu (checklist per user) =====
+  const openAccessDialog = async (user: UserWithRole) => {
+    setAccessUser(user);
+    setIsLoadingAccess(true);
+    setAccessPaths(getDefaultPaths(user.role));
+    setAccessIsCustom(false);
+    const { data, error } = await supabase
+      .from("user_menu_access")
+      .select("path")
+      .eq("user_id", user.user_id);
+    if (!error && data && data.length > 0) {
+      setAccessPaths(data.map((r) => r.path));
+      setAccessIsCustom(true);
+    }
+    setIsLoadingAccess(false);
+  };
+
+  const toggleAccessPath = (path: string) => {
+    setAccessPaths((prev) =>
+      prev.includes(path) ? prev.filter((p) => p !== path) : [...prev, path]
+    );
+  };
+
+  const handleSaveAccess = async () => {
+    if (!accessUser) return;
+    setIsSavingAccess(true);
+    try {
+      const { error: delError } = await supabase
+        .from("user_menu_access")
+        .delete()
+        .eq("user_id", accessUser.user_id);
+      if (delError) throw delError;
+
+      if (accessPaths.length > 0) {
+        const { error: insError } = await supabase
+          .from("user_menu_access")
+          .insert(accessPaths.map((path) => ({ user_id: accessUser.user_id, path })));
+        if (insError) throw insError;
+      }
+
+      await logActivity("update_menu_access", `${accessUser.email}: ${accessPaths.length} menu`);
+      toast.success(`Akses menu ${accessUser.display_name || accessUser.email} diperbarui`);
+      setAccessUser(null);
+    } catch (error) {
+      toast.error("Gagal menyimpan akses menu");
+    } finally {
+      setIsSavingAccess(false);
+    }
+  };
+
+  const handleResetAccess = async () => {
+    if (!accessUser) return;
+    setIsSavingAccess(true);
+    try {
+      const { error } = await supabase
+        .from("user_menu_access")
+        .delete()
+        .eq("user_id", accessUser.user_id);
+      if (error) throw error;
+      toast.success("Akses dikembalikan ke default role");
+      setAccessUser(null);
+    } catch {
+      toast.error("Gagal mereset akses menu");
+    } finally {
+      setIsSavingAccess(false);
+    }
+  };
+
 
   const handleSaveDisplayName = async () => {
     if (!editingUser) return;
@@ -469,6 +545,15 @@ export function UserManagement() {
                       >
                         <Pencil className="h-2.5 w-2.5" />
                       </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-5 w-5 flex-shrink-0 text-primary"
+                        onClick={() => openAccessDialog(user)}
+                        title="Atur akses menu"
+                      >
+                        <ListChecks className="h-3 w-3" />
+                      </Button>
                     </div>
                     <p className="text-xs text-muted-foreground truncate">{user.email}</p>
                   </div>
@@ -672,6 +757,15 @@ export function UserManagement() {
                           >
                             <Pencil className="h-2.5 w-2.5" />
                           </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-5 w-5 flex-shrink-0 text-primary"
+                            onClick={() => openAccessDialog(user)}
+                            title="Atur akses menu"
+                          >
+                            <ListChecks className="h-3 w-3" />
+                          </Button>
                         </div>
                         <p className="text-[11px] text-muted-foreground truncate">{user.email}</p>
                         <div className="lg:hidden mt-0.5">
@@ -865,6 +959,98 @@ export function UserManagement() {
             </div>
           </div>
         </div>
+
+        {/* Akses Menu Dialog */}
+        <Dialog open={!!accessUser} onOpenChange={(open) => !open && !isSavingAccess && setAccessUser(null)}>
+          <DialogContent className="sm:max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <ListChecks className="h-4 w-4" /> Akses Menu
+              </DialogTitle>
+              <DialogDescription>
+                Checklist menu yang boleh diakses {accessUser?.display_name || accessUser?.email}
+                {accessUser && (
+                  <span className="ml-1">
+                    (role: <span className="font-medium">{accessUser.role}</span>
+                    {accessIsCustom ? " · kustom" : " · default role"})
+                  </span>
+                )}
+              </DialogDescription>
+            </DialogHeader>
+
+            {isLoadingAccess ? (
+              <div className="py-8 flex justify-center">
+                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+              </div>
+            ) : (
+              <>
+                <div className="flex items-center gap-2 pt-1">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-7 text-xs"
+                    onClick={() => setAccessPaths(ALL_MENUS.map((m) => m.path))}
+                  >
+                    Pilih Semua
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-7 text-xs"
+                    onClick={() => setAccessPaths([])}
+                  >
+                    Kosongkan
+                  </Button>
+                  {accessUser && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-7 text-xs"
+                      onClick={() => setAccessPaths(getDefaultPaths(accessUser.role))}
+                    >
+                      Default Role
+                    </Button>
+                  )}
+                  <span className="ml-auto text-[11px] text-muted-foreground">
+                    {accessPaths.length}/{ALL_MENUS.length} menu
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 max-h-[45vh] overflow-y-auto py-2">
+                  {ALL_MENUS.map((menu) => (
+                    <label
+                      key={menu.path}
+                      className="flex items-center gap-2 rounded-md border p-2 cursor-pointer hover:bg-muted/50"
+                    >
+                      <Checkbox
+                        checked={accessPaths.includes(menu.path)}
+                        onCheckedChange={() => toggleAccessPath(menu.path)}
+                      />
+                      <span className="text-xs">
+                        {menu.emoji} {menu.title}
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              </>
+            )}
+
+            <DialogFooter className="gap-2">
+              {accessIsCustom && (
+                <Button variant="ghost" onClick={handleResetAccess} disabled={isSavingAccess} className="mr-auto">
+                  Reset ke Default
+                </Button>
+              )}
+              <Button variant="outline" onClick={() => setAccessUser(null)} disabled={isSavingAccess}>
+                Batal
+              </Button>
+              <Button onClick={handleSaveAccess} disabled={isSavingAccess || isLoadingAccess}>
+                {isSavingAccess && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                Simpan Akses
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
         {/* Edit Username Dialog */}
         <Dialog open={!!editingUser} onOpenChange={(open) => !open && setEditingUser(null)}>
