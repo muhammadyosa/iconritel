@@ -1,15 +1,13 @@
 import { Navigate, useLocation } from "react-router-dom";
 import { useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { useUserRole } from "@/hooks/useUserRole";
+import { useMenuAccess } from "@/hooks/useMenuAccess";
 import { Loader2 } from "lucide-react";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
 }
 
-const INTERN_ALLOWED_PATHS = new Set(["/", "/tickets", "/teams", "/report"]);
-const ADMIN_NOC_ONLY_PATHS = new Set(["/notes"]);
 
 // Daftar rute valid yang bisa dipakai sebagai intended_path.
 // Harus selaras dengan pageComponents di App.tsx + halaman protected lain.

@@ -137,7 +137,7 @@ export function AppSidebar() {
   const { theme, setTheme } = useTheme();
   const collapsed = state === "collapsed";
   const { count: pendingCount, isAdmin } = usePendingUserCount();
-  const { isIntern, isNOC } = useUserRole();
+  
 
   const toggleTheme = useCallback(() => {
     setTheme(theme === "dark" ? "light" : "dark");
