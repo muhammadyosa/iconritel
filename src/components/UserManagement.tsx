@@ -277,7 +277,7 @@ export function UserManagement() {
       }
 
       await logActivity("update_menu_access", `${accessUser.email}: ${accessPaths.length} menu`);
-      toast.success(`Akses menu ${accessUser.display_name || accessUser.email} diperbarui`);
+      toast.success(`Role & akses menu ${accessUser.display_name || accessUser.email} diperbarui`);
       setAccessUser(null);
     } catch (error) {
       toast.error("Gagal menyimpan akses menu");
