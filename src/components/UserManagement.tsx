@@ -73,6 +73,7 @@ export function UserManagement() {
   const [accessUser, setAccessUser] = useState<UserWithRole | null>(null);
   const [accessPaths, setAccessPaths] = useState<string[]>([]);
   const [accessIsCustom, setAccessIsCustom] = useState(false);
+  const [accessRole, setAccessRole] = useState<AppRoleValue>("noc");
   const [isLoadingAccess, setIsLoadingAccess] = useState(false);
   const [isSavingAccess, setIsSavingAccess] = useState(false);
   const { logActivity } = useActivityLog();
