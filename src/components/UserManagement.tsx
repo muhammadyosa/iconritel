@@ -47,6 +47,15 @@ interface UserWithRole {
   lastAction?: UserActivity;
 }
 
+type AppRoleValue = "admin" | "noc" | "reviewer" | "intern";
+
+const ROLE_META: Record<AppRoleValue, { emoji: string; label: string }> = {
+  admin: { emoji: "🕵️", label: "Admin" },
+  noc: { emoji: "🧑‍💼", label: "NOC" },
+  reviewer: { emoji: "👨‍💻", label: "Reviewer" },
+  intern: { emoji: "🧑‍🏫", label: "Intern" },
+};
+
 export function UserManagement() {
   const { isAdmin } = useUserRole();
   const { user: currentAuthUser } = useAuth();
