@@ -260,6 +260,9 @@ export function UserManagement() {
     if (!accessUser) return;
     setIsSavingAccess(true);
     try {
+      if (accessRole !== accessUser.role) {
+        await handleRoleChange(accessUser.user_id, accessRole);
+      }
       const { error: delError } = await supabase
         .from("user_menu_access")
         .delete()
