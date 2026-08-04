@@ -590,43 +590,24 @@ export function UserManagement() {
 
                 {/* Controls: Role + Status + Joined */}
                 <div className="flex items-center gap-2 flex-wrap">
-                  <Select
-                    value={user.role}
-                    onValueChange={(value: "admin" | "noc" | "reviewer" | "intern") =>
-                      handleRoleChange(user.user_id, value)
-                    }
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-7 px-2 text-xs gap-1"
+                    onClick={() => openAccessDialog(user)}
                     disabled={updatingUserId === user.user_id}
+                    title="Atur role & akses menu"
                   >
-                    <SelectTrigger className="w-[100px] h-7 text-xs">
-                      {updatingUserId === user.user_id ? (
-                        <Loader2 className="h-3 w-3 animate-spin" />
-                      ) : (
-                        <SelectValue />
-                      )}
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="admin">
-                        <div className="flex items-center gap-1.5 text-xs">
-                          <span>🕵️</span> Admin
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="noc">
-                        <div className="flex items-center gap-1.5 text-xs">
-                          <span>🧑‍💼</span> NOC
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="reviewer">
-                        <div className="flex items-center gap-1.5 text-xs">
-                          <span>👨‍💻</span> Reviewer
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="intern">
-                        <div className="flex items-center gap-1.5 text-xs">
-                          <span>🧑‍🏫</span> Intern
-                        </div>
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
+                    {updatingUserId === user.user_id ? (
+                      <Loader2 className="h-3 w-3 animate-spin" />
+                    ) : (
+                      <>
+                        <span>{ROLE_META[user.role].emoji}</span>
+                        <span>{ROLE_META[user.role].label}</span>
+                        <ListChecks className="h-3 w-3 text-primary" />
+                      </>
+                    )}
+                  </Button>
 
                   <Button
                     variant="ghost"
