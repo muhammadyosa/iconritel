@@ -1040,7 +1040,7 @@ export function UserManagement() {
               </Button>
               <Button onClick={handleSaveAccess} disabled={isSavingAccess || isLoadingAccess}>
                 {isSavingAccess && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                Simpan Akses
+                Simpan Role & Akses
               </Button>
             </DialogFooter>
           </DialogContent>
