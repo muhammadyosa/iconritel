@@ -483,19 +483,32 @@ export default function Teams() {
     return { data, categories: catList, config };
   }, [filteredTickets, history.categoryRecords, filterRecordByTrendDate]);
 
-  // Category Trend derived directly from the incident list so numbers match 📋 List Incident
-  const buildCategoryTrend = useCallback((source: typeof filteredTickets) => {
+  // Category Trend for RITEL tickets - uses cloud history
+  const ritelCategoryTrend = useMemo(() => {
     const dateMap: Record<string, Record<string, number>> = {};
     const categories = new Set<string>();
+    const today = new Date().toISOString().split('T')[0];
 
-    source.forEach((ticket) => {
-      if (!ticket.createdISO) return;
-      const date = toLocalDateStr(new Date(ticket.createdISO));
-      const cat = ticket.constraint || "Lainnya";
-      categories.add(cat);
-      if (!dateMap[date]) dateMap[date] = {};
-      dateMap[date][cat] = (dateMap[date][cat] || 0) + 1;
+    history.categoryRecords.forEach((rec) => {
+      if (FEEDER_CONSTRAINTS_SET.has(rec.constraint_type)) return;
+      if (!filterRecordByTrendDate(rec.date)) return;
+      categories.add(rec.constraint_type);
+      if (!dateMap[rec.date]) dateMap[rec.date] = {};
+      dateMap[rec.date][rec.constraint_type] = Math.max(dateMap[rec.date][rec.constraint_type] || 0, rec.count);
     });
+
+    const todayLive: Record<string, number> = {};
+    filteredTickets.filter(t => t.category !== "FEEDER").forEach((ticket) => {
+      const date = ticket.createdISO?.split("T")[0];
+      if (date === today && filterRecordByTrendDate(today)) {
+        const cat = ticket.constraint || "Lainnya";
+        categories.add(cat);
+        todayLive[cat] = (todayLive[cat] || 0) + 1;
+      }
+    });
+    if (Object.keys(todayLive).length > 0) {
+      dateMap[today] = { ...(dateMap[today] || {}), ...todayLive };
+    }
 
     const sortedDates = Object.keys(dateMap).sort();
     const catList = Array.from(categories).sort();
@@ -507,18 +520,46 @@ export default function Teams() {
     const config: ChartConfig = {};
     catList.forEach((cat, i) => { config[cat] = { label: cat, color: NOC_CATEGORY_COLORS[i % NOC_CATEGORY_COLORS.length] }; });
     return { data, categories: catList, config };
-  }, []);
+  }, [filteredTickets, history.categoryRecords, filterRecordByTrendDate]);
 
-  const ritelCategoryTrend = useMemo(
-    () => buildCategoryTrend(filteredTickets.filter(t => t.category !== "FEEDER")),
-    [filteredTickets, buildCategoryTrend]
-  );
+  // Category Trend for FEEDER tickets - uses cloud history
+  const feederCategoryTrend = useMemo(() => {
+    const dateMap: Record<string, Record<string, number>> = {};
+    const categories = new Set<string>();
+    const today = new Date().toISOString().split('T')[0];
 
-  const feederCategoryTrend = useMemo(
-    () => buildCategoryTrend(filteredTickets.filter(t => t.category === "FEEDER")),
-    [filteredTickets, buildCategoryTrend]
-  );
+    history.categoryRecords.forEach((rec) => {
+      if (!FEEDER_CONSTRAINTS_SET.has(rec.constraint_type)) return;
+      if (!filterRecordByTrendDate(rec.date)) return;
+      categories.add(rec.constraint_type);
+      if (!dateMap[rec.date]) dateMap[rec.date] = {};
+      dateMap[rec.date][rec.constraint_type] = Math.max(dateMap[rec.date][rec.constraint_type] || 0, rec.count);
+    });
 
+    const todayLive: Record<string, number> = {};
+    filteredTickets.filter(t => t.category === "FEEDER").forEach((ticket) => {
+      const date = ticket.createdISO?.split("T")[0];
+      if (date === today && filterRecordByTrendDate(today)) {
+        const cat = ticket.constraint || "Lainnya";
+        categories.add(cat);
+        todayLive[cat] = (todayLive[cat] || 0) + 1;
+      }
+    });
+    if (Object.keys(todayLive).length > 0) {
+      dateMap[today] = { ...(dateMap[today] || {}), ...todayLive };
+    }
+
+    const sortedDates = Object.keys(dateMap).sort();
+    const catList = Array.from(categories).sort();
+    const data = sortedDates.map((date) => {
+      const entry: Record<string, any> = { date: format(new Date(date + "T00:00:00"), "dd MMM", { locale: localeId }) };
+      catList.forEach((cat) => { entry[cat] = dateMap[date][cat] || 0; });
+      return entry;
+    });
+    const config: ChartConfig = {};
+    catList.forEach((cat, i) => { config[cat] = { label: cat, color: NOC_CATEGORY_COLORS[i % NOC_CATEGORY_COLORS.length] }; });
+    return { data, categories: catList, config };
+  }, [filteredTickets, history.categoryRecords, filterRecordByTrendDate]);
   const dateFilter = (
     <div className="flex flex-wrap items-center gap-2 sm:gap-3">
       <Select value={periodPreset} onValueChange={handlePeriodChange}>
