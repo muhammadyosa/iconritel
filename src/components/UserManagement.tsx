@@ -232,10 +232,11 @@ export function UserManagement() {
     setEditDisplayName(user.display_name || "");
   };
 
-  // ===== Akses Menu (checklist per user) =====
+  // ===== Role & Akses Menu (per user) =====
   const openAccessDialog = async (user: UserWithRole) => {
     setAccessUser(user);
     setIsLoadingAccess(true);
+    setAccessRole(user.role);
     setAccessPaths(getDefaultPaths(user.role));
     setAccessIsCustom(false);
     const { data, error } = await supabase
