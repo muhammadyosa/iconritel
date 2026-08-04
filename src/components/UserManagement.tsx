@@ -937,21 +937,16 @@ export function UserManagement() {
           </div>
         </div>
 
-        {/* Akses Menu Dialog */}
+        {/* Role & Akses Menu Dialog */}
         <Dialog open={!!accessUser} onOpenChange={(open) => !open && !isSavingAccess && setAccessUser(null)}>
           <DialogContent className="sm:max-w-lg">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
-                <ListChecks className="h-4 w-4" /> Akses Menu
+                <ListChecks className="h-4 w-4" /> Role & Akses Menu
               </DialogTitle>
               <DialogDescription>
-                Checklist menu yang boleh diakses {accessUser?.display_name || accessUser?.email}
-                {accessUser && (
-                  <span className="ml-1">
-                    (role: <span className="font-medium">{accessUser.role}</span>
-                    {accessIsCustom ? " · kustom" : " · default role"})
-                  </span>
-                )}
+                Atur role dan checklist menu untuk {accessUser?.display_name || accessUser?.email}
+                <span className="ml-1">({accessIsCustom ? "akses kustom" : "akses default role"})</span>
               </DialogDescription>
             </DialogHeader>
 
@@ -961,7 +956,30 @@ export function UserManagement() {
               </div>
             ) : (
               <>
-                <div className="flex items-center gap-2 pt-1">
+                <div className="space-y-1.5">
+                  <p className="text-xs font-semibold text-muted-foreground">Role</p>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
+                    {(Object.keys(ROLE_META) as AppRoleValue[]).map((r) => (
+                      <button
+                        key={r}
+                        type="button"
+                        onClick={() => {
+                          setAccessRole(r);
+                          if (!accessIsCustom) setAccessPaths(getDefaultPaths(r));
+                        }}
+                        className={`flex items-center justify-center gap-1 rounded-md border p-2 text-xs transition-colors ${
+                          accessRole === r
+                            ? "border-primary bg-primary/10 text-primary font-semibold"
+                            : "hover:bg-muted/50"
+                        }`}
+                      >
+                        <span>{ROLE_META[r].emoji}</span> {ROLE_META[r].label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 pt-1 flex-wrap">
                   <Button
                     variant="outline"
                     size="sm"
@@ -978,20 +996,19 @@ export function UserManagement() {
                   >
                     Kosongkan
                   </Button>
-                  {accessUser && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="h-7 text-xs"
-                      onClick={() => setAccessPaths(getDefaultPaths(accessUser.role))}
-                    >
-                      Default Role
-                    </Button>
-                  )}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-7 text-xs"
+                    onClick={() => setAccessPaths(getDefaultPaths(accessRole))}
+                  >
+                    Default Role
+                  </Button>
                   <span className="ml-auto text-[11px] text-muted-foreground">
                     {accessPaths.length}/{ALL_MENUS.length} menu
                   </span>
                 </div>
+
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 max-h-[45vh] overflow-y-auto py-2">
                   {ALL_MENUS.map((menu) => (
