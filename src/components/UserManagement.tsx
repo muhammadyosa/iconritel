@@ -3,7 +3,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { useUserRole } from "@/hooks/useUserRole";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -47,6 +46,15 @@ interface UserWithRole {
   lastAction?: UserActivity;
 }
 
+type AppRoleValue = "admin" | "noc" | "reviewer" | "intern";
+
+const ROLE_META: Record<AppRoleValue, { emoji: string; label: string }> = {
+  admin: { emoji: "🕵️", label: "Admin" },
+  noc: { emoji: "🧑‍💼", label: "NOC" },
+  reviewer: { emoji: "👨‍💻", label: "Reviewer" },
+  intern: { emoji: "🧑‍🏫", label: "Intern" },
+};
+
 export function UserManagement() {
   const { isAdmin } = useUserRole();
   const { user: currentAuthUser } = useAuth();
@@ -64,6 +72,7 @@ export function UserManagement() {
   const [accessUser, setAccessUser] = useState<UserWithRole | null>(null);
   const [accessPaths, setAccessPaths] = useState<string[]>([]);
   const [accessIsCustom, setAccessIsCustom] = useState(false);
+  const [accessRole, setAccessRole] = useState<AppRoleValue>("noc");
   const [isLoadingAccess, setIsLoadingAccess] = useState(false);
   const [isSavingAccess, setIsSavingAccess] = useState(false);
   const { logActivity } = useActivityLog();
@@ -222,10 +231,11 @@ export function UserManagement() {
     setEditDisplayName(user.display_name || "");
   };
 
-  // ===== Akses Menu (checklist per user) =====
+  // ===== Role & Akses Menu (per user) =====
   const openAccessDialog = async (user: UserWithRole) => {
     setAccessUser(user);
     setIsLoadingAccess(true);
+    setAccessRole(user.role);
     setAccessPaths(getDefaultPaths(user.role));
     setAccessIsCustom(false);
     const { data, error } = await supabase
@@ -249,6 +259,9 @@ export function UserManagement() {
     if (!accessUser) return;
     setIsSavingAccess(true);
     try {
+      if (accessRole !== accessUser.role) {
+        await handleRoleChange(accessUser.user_id, accessRole);
+      }
       const { error: delError } = await supabase
         .from("user_menu_access")
         .delete()
@@ -263,7 +276,7 @@ export function UserManagement() {
       }
 
       await logActivity("update_menu_access", `${accessUser.email}: ${accessPaths.length} menu`);
-      toast.success(`Akses menu ${accessUser.display_name || accessUser.email} diperbarui`);
+      toast.success(`Role & akses menu ${accessUser.display_name || accessUser.email} diperbarui`);
       setAccessUser(null);
     } catch (error) {
       toast.error("Gagal menyimpan akses menu");
@@ -576,43 +589,24 @@ export function UserManagement() {
 
                 {/* Controls: Role + Status + Joined */}
                 <div className="flex items-center gap-2 flex-wrap">
-                  <Select
-                    value={user.role}
-                    onValueChange={(value: "admin" | "noc" | "reviewer" | "intern") =>
-                      handleRoleChange(user.user_id, value)
-                    }
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-7 px-2 text-xs gap-1"
+                    onClick={() => openAccessDialog(user)}
                     disabled={updatingUserId === user.user_id}
+                    title="Atur role & akses menu"
                   >
-                    <SelectTrigger className="w-[100px] h-7 text-xs">
-                      {updatingUserId === user.user_id ? (
-                        <Loader2 className="h-3 w-3 animate-spin" />
-                      ) : (
-                        <SelectValue />
-                      )}
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="admin">
-                        <div className="flex items-center gap-1.5 text-xs">
-                          <span>🕵️</span> Admin
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="noc">
-                        <div className="flex items-center gap-1.5 text-xs">
-                          <span>🧑‍💼</span> NOC
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="reviewer">
-                        <div className="flex items-center gap-1.5 text-xs">
-                          <span>👨‍💻</span> Reviewer
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="intern">
-                        <div className="flex items-center gap-1.5 text-xs">
-                          <span>🧑‍🏫</span> Intern
-                        </div>
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
+                    {updatingUserId === user.user_id ? (
+                      <Loader2 className="h-3 w-3 animate-spin" />
+                    ) : (
+                      <>
+                        <span>{ROLE_META[user.role].emoji}</span>
+                        <span>{ROLE_META[user.role].label}</span>
+                        <ListChecks className="h-3 w-3 text-primary" />
+                      </>
+                    )}
+                  </Button>
 
                   <Button
                     variant="ghost"
@@ -799,43 +793,25 @@ export function UserManagement() {
                       </Button>
                     </TableCell>
                     <TableCell className="p-2">
-                      <Select
-                        value={user.role}
-                        onValueChange={(value: "admin" | "noc" | "reviewer" | "intern") =>
-                          handleRoleChange(user.user_id, value)
-                        }
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-7 px-2 text-xs gap-1"
+                        onClick={() => openAccessDialog(user)}
                         disabled={updatingUserId === user.user_id}
+                        title="Atur role & akses menu"
                       >
-                        <SelectTrigger className="w-[90px] h-7 text-xs">
-                          {updatingUserId === user.user_id ? (
-                            <Loader2 className="h-3 w-3 animate-spin" />
-                          ) : (
-                            <SelectValue />
-                          )}
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="admin">
-                            <div className="flex items-center gap-1.5 text-xs">
-                              <span>🕵️</span> Admin
-                            </div>
-                          </SelectItem>
-                          <SelectItem value="noc">
-                            <div className="flex items-center gap-1.5 text-xs">
-                              <span>🧑‍💼</span> NOC
-                            </div>
-                          </SelectItem>
-                          <SelectItem value="reviewer">
-                            <div className="flex items-center gap-1.5 text-xs">
-                              <span>👨‍💻</span> Reviewer
-                            </div>
-                          </SelectItem>
-                          <SelectItem value="intern">
-                            <div className="flex items-center gap-1.5 text-xs">
-                              <span>🧑‍🏫</span> Intern
-                            </div>
-                          </SelectItem>
-                        </SelectContent>
-                      </Select>
+                        {updatingUserId === user.user_id ? (
+                          <Loader2 className="h-3 w-3 animate-spin" />
+                        ) : (
+                          <>
+                            <span>{ROLE_META[user.role].emoji}</span>
+                            <span>{ROLE_META[user.role].label}</span>
+                            <ListChecks className="h-3 w-3 text-primary" />
+                          </>
+                        )}
+                      </Button>
+
                     </TableCell>
                     <TableCell className="p-2 text-xs text-muted-foreground">
                       {user.last_online ? (
@@ -960,21 +936,16 @@ export function UserManagement() {
           </div>
         </div>
 
-        {/* Akses Menu Dialog */}
+        {/* Role & Akses Menu Dialog */}
         <Dialog open={!!accessUser} onOpenChange={(open) => !open && !isSavingAccess && setAccessUser(null)}>
           <DialogContent className="sm:max-w-lg">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
-                <ListChecks className="h-4 w-4" /> Akses Menu
+                <ListChecks className="h-4 w-4" /> Role & Akses Menu
               </DialogTitle>
               <DialogDescription>
-                Checklist menu yang boleh diakses {accessUser?.display_name || accessUser?.email}
-                {accessUser && (
-                  <span className="ml-1">
-                    (role: <span className="font-medium">{accessUser.role}</span>
-                    {accessIsCustom ? " · kustom" : " · default role"})
-                  </span>
-                )}
+                Atur role dan checklist menu untuk {accessUser?.display_name || accessUser?.email}
+                <span className="ml-1">({accessIsCustom ? "akses kustom" : "akses default role"})</span>
               </DialogDescription>
             </DialogHeader>
 
@@ -984,7 +955,30 @@ export function UserManagement() {
               </div>
             ) : (
               <>
-                <div className="flex items-center gap-2 pt-1">
+                <div className="space-y-1.5">
+                  <p className="text-xs font-semibold text-muted-foreground">Role</p>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
+                    {(Object.keys(ROLE_META) as AppRoleValue[]).map((r) => (
+                      <button
+                        key={r}
+                        type="button"
+                        onClick={() => {
+                          setAccessRole(r);
+                          if (!accessIsCustom) setAccessPaths(getDefaultPaths(r));
+                        }}
+                        className={`flex items-center justify-center gap-1 rounded-md border p-2 text-xs transition-colors ${
+                          accessRole === r
+                            ? "border-primary bg-primary/10 text-primary font-semibold"
+                            : "hover:bg-muted/50"
+                        }`}
+                      >
+                        <span>{ROLE_META[r].emoji}</span> {ROLE_META[r].label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 pt-1 flex-wrap">
                   <Button
                     variant="outline"
                     size="sm"
@@ -1001,20 +995,19 @@ export function UserManagement() {
                   >
                     Kosongkan
                   </Button>
-                  {accessUser && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="h-7 text-xs"
-                      onClick={() => setAccessPaths(getDefaultPaths(accessUser.role))}
-                    >
-                      Default Role
-                    </Button>
-                  )}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-7 text-xs"
+                    onClick={() => setAccessPaths(getDefaultPaths(accessRole))}
+                  >
+                    Default Role
+                  </Button>
                   <span className="ml-auto text-[11px] text-muted-foreground">
                     {accessPaths.length}/{ALL_MENUS.length} menu
                   </span>
                 </div>
+
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 max-h-[45vh] overflow-y-auto py-2">
                   {ALL_MENUS.map((menu) => (
@@ -1046,7 +1039,7 @@ export function UserManagement() {
               </Button>
               <Button onClick={handleSaveAccess} disabled={isSavingAccess || isLoadingAccess}>
                 {isSavingAccess && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                Simpan Akses
+                Simpan Role & Akses
               </Button>
             </DialogFooter>
           </DialogContent>
