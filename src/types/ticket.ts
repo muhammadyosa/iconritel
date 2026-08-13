@@ -18,6 +18,7 @@ export interface Ticket {
   resolvedByUserId?: string;
   resolvedByName?: string;
   pendingReason?: string;
+  contactUser?: string;
   pendingAt?: string;
   pendingByName?: string;
   pendingByUserId?: string;

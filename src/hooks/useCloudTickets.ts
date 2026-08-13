@@ -27,6 +27,7 @@ interface DbTicket {
   resolved_by_user_id: string | null;
   resolved_by_name: string | null;
   pending_reason?: string | null;
+  contact_user?: string | null;
   pending_at?: string | null;
   pending_by_name?: string | null;
   pending_by_user_id?: string | null;
@@ -98,6 +99,7 @@ function dbToTicket(db: DbTicket, profilesMap: Map<string, ProfileData>): Ticket
     resolvedByUserId: db.resolved_by_user_id || undefined,
     resolvedByName: resolvedByDisplayName,
     pendingReason: db.pending_reason || undefined,
+    contactUser: db.contact_user || undefined,
     pendingAt: db.pending_at || undefined,
     pendingByName: db.pending_by_name || undefined,
     pendingByUserId: db.pending_by_user_id || undefined,
@@ -425,6 +427,7 @@ export function useCloudTickets() {
       if (updates.category !== undefined) dbUpdates.category = updates.category;
       if (updates.ticketResult !== undefined) dbUpdates.ticket_result = updates.ticketResult;
       if (updates.pendingReason !== undefined) dbUpdates.pending_reason = updates.pendingReason || null;
+      if (updates.contactUser !== undefined) dbUpdates.contact_user = updates.contactUser || null;
       if (updates.pendingAt !== undefined) dbUpdates.pending_at = updates.pendingAt || null;
       if (updates.pendingByName !== undefined) dbUpdates.pending_by_name = updates.pendingByName || null;
       if (updates.pendingByUserId !== undefined) dbUpdates.pending_by_user_id = updates.pendingByUserId || null;
@@ -436,6 +439,7 @@ export function useCloudTickets() {
           dbUpdates.pending_at = null;
           dbUpdates.pending_by_name = null;
           dbUpdates.pending_by_user_id = null;
+          if (updates.contactUser === undefined) dbUpdates.contact_user = null;
         }
         if (updates.status === "Resolved") {
           dbUpdates.resolved_at = new Date().toISOString();

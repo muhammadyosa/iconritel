@@ -63,6 +63,7 @@ export function TicketDetailDialog({
   const [isEditing, setIsEditing] = useState(false);
   const [pendingDialogOpen, setPendingDialogOpen] = useState(false);
   const [pendingReasonInput, setPendingReasonInput] = useState("");
+  const [contactUserInput, setContactUserInput] = useState("");
   const [reasonOnlyMode, setReasonOnlyMode] = useState(false);
   const [editData, setEditData] = useState({
     ticketId: ticket.id,
@@ -330,6 +331,12 @@ export function TicketDetailDialog({
                   <span className="text-muted-foreground">Created:</span>
                   <p className="text-xs">{ticket.createdAt}</p>
                 </div>
+                {ticket.contactUser && (
+                  <div>
+                    <span className="text-muted-foreground">Contact User:</span>
+                    <p className="font-medium">{ticket.contactUser}</p>
+                  </div>
+                )}
                 {ticket.status === "Resolved" && ticket.resolvedByName && (
                   <div>
                     <span className="text-muted-foreground">Resolved by:</span>
@@ -357,6 +364,7 @@ export function TicketDetailDialog({
                         className="h-6 text-xs gap-1"
                         onClick={() => {
                           setPendingReasonInput(ticket.pendingReason || "");
+                          setContactUserInput(ticket.contactUser || "");
                           setReasonOnlyMode(true);
                           setPendingDialogOpen(true);
                         }}
@@ -371,6 +379,9 @@ export function TicketDetailDialog({
                       <p className="text-sm whitespace-pre-wrap break-words">{ticket.pendingReason}</p>
                     ) : (
                       <p className="text-sm italic text-muted-foreground">Belum ada alasan tercatat</p>
+                    )}
+                    {ticket.contactUser && (
+                      <p className="text-xs pt-1"><span className="text-muted-foreground">Contact User: </span><span className="font-medium">{ticket.contactUser}</span></p>
                     )}
                     {(ticket.pendingByName || ticket.pendingAt) && (
                       <p className="text-xs text-muted-foreground pt-1 border-t border-amber-500/20">
@@ -413,6 +424,7 @@ export function TicketDetailDialog({
                         if (value === ticket.status) return;
                         if (value === "Pending") {
                           setPendingReasonInput(ticket.pendingReason || "");
+                          setContactUserInput(ticket.contactUser || "");
                           setPendingDialogOpen(true);
                           return;
                         }
@@ -494,15 +506,26 @@ export function TicketDetailDialog({
                 : <>Berikan alasan kenapa insident <strong>{ticket.id}</strong> diset ke status Pending. Catatan ini akan terlihat oleh anggota tim lain di Detail Insident.</>}
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <Textarea
-            value={pendingReasonInput}
-            onChange={(e) => setPendingReasonInput(e.target.value)}
-            placeholder="Contoh: Menunggu konfirmasi pelanggan, perlu visit teknisi, dll."
-            rows={4}
-            autoFocus
-          />
+          <div className="space-y-3">
+            <Textarea
+              value={pendingReasonInput}
+              onChange={(e) => setPendingReasonInput(e.target.value)}
+              placeholder="Contoh: Menunggu konfirmasi pelanggan, perlu visit teknisi, dll."
+              rows={4}
+              autoFocus
+            />
+            <div>
+              <Label className="text-xs">Contact User (opsional)</Label>
+              <Input
+                value={contactUserInput}
+                onChange={(e) => setContactUserInput(e.target.value)}
+                placeholder="Contoh: 0812xxxxxxx a.n. Budi"
+                className="h-8 text-sm"
+              />
+            </div>
+          </div>
           <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => { setPendingReasonInput(""); setReasonOnlyMode(false); }}>Batal</AlertDialogCancel>
+            <AlertDialogCancel onClick={() => { setPendingReasonInput(""); setContactUserInput(""); setReasonOnlyMode(false); }}>Batal</AlertDialogCancel>
             <AlertDialogAction
               onClick={async (e) => {
                 const reason = pendingReasonInput.trim();
@@ -515,6 +538,7 @@ export function TicketDetailDialog({
                   if (reasonOnlyMode) {
                     await updateTicket(ticket.id, {
                       pendingReason: reason,
+                      contactUser: contactUserInput.trim() || undefined,
                       pendingAt: new Date().toISOString(),
                       pendingByName: currentUserName,
                       pendingByUserId: currentUserId,
@@ -526,12 +550,14 @@ export function TicketDetailDialog({
                   } else {
                     await applyStatusChange("Pending", {
                       pendingReason: reason,
+                      contactUser: contactUserInput.trim() || undefined,
                       pendingAt: new Date().toISOString(),
                       pendingByName: currentUserName,
                       pendingByUserId: currentUserId,
                     });
                   }
                   setPendingReasonInput("");
+                  setContactUserInput("");
                   setReasonOnlyMode(false);
                   setPendingDialogOpen(false);
                 } catch {

@@ -315,6 +315,7 @@ export type Database = {
         Row: {
           category: string
           constraint_type: string
+          contact_user: string | null
           created_at: string
           created_by_name: string | null
           created_by_user_id: string | null
@@ -340,6 +341,7 @@ export type Database = {
         Insert: {
           category: string
           constraint_type: string
+          contact_user?: string | null
           created_at?: string
           created_by_name?: string | null
           created_by_user_id?: string | null
@@ -365,6 +367,7 @@ export type Database = {
         Update: {
           category?: string
           constraint_type?: string
+          contact_user?: string | null
           created_at?: string
           created_by_name?: string | null
           created_by_user_id?: string | null
