@@ -27,6 +27,7 @@ interface DbTicket {
   resolved_by_user_id: string | null;
   resolved_by_name: string | null;
   pending_reason?: string | null;
+  contact_user?: string | null;
   pending_at?: string | null;
   pending_by_name?: string | null;
   pending_by_user_id?: string | null;
