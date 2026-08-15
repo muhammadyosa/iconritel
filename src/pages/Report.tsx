@@ -982,6 +982,105 @@ function PendingTicketsList({ pendingTickets, isLoading, updateTicket, deleteTic
 
   const teamRegions = useMemo(() => buildTeamRegions(regionalData), [regionalData]);
 
+  const filteredPending = useMemo(() => {
+    const q = pendingSearchQuery.toLowerCase();
+    const regionMitras = pendingRegionFilter !== "all"
+      ? new Set((teamRegions[pendingRegionFilter] || []).map((m) => m.toUpperCase()))
+      : null;
+    const byRegion = regionMitras
+      ? pendingTickets.filter((t) => regionMitras.has((t.serpo || "").toUpperCase()))
+      : pendingTickets;
+    if (!q) return byRegion;
+    return byRegion.filter((t) => {
+      switch (pendingSearchField) {
+        case "ticketId": return t.id.toLowerCase().includes(q);
+        case "category": return t.category.toLowerCase().includes(q);
+        case "customerType": return (t.customerName + " " + t.constraint).toLowerCase().includes(q);
+        case "serviceId": return t.serviceId.toLowerCase().includes(q);
+        case "constraint": return t.constraint.toLowerCase().includes(q);
+        case "serpo": return t.serpo.toLowerCase().includes(q);
+        default: return (t.id + t.customerName + t.serviceId + t.constraint + t.serpo + t.category + t.hostname).toLowerCase().includes(q);
+      }
+    });
+  }, [pendingTickets, pendingSearchQuery, pendingSearchField, pendingRegionFilter, teamRegions]);
+
+  const handleExportPendingPDF = async (period: "harian" | "mingguan" | "bulanan" | "semua") => {
+    setIsExportingPdf(true);
+    try {
+      const now = new Date();
+      const start = new Date(now);
+      if (period === "harian") start.setHours(0, 0, 0, 0);
+      else if (period === "mingguan") { start.setDate(start.getDate() - 6); start.setHours(0, 0, 0, 0); }
+      else if (period === "bulanan") { start.setDate(1); start.setHours(0, 0, 0, 0); }
+
+      const rows = (period === "semua"
+        ? filteredPending
+        : filteredPending.filter((t) => {
+            const d = new Date(t.createdISO || t.createdAt);
+            return !isNaN(d.getTime()) && d >= start && d <= now;
+          })
+      ).slice().sort((a, b) => (a.createdISO || "").localeCompare(b.createdISO || ""));
+
+      if (rows.length === 0) {
+        toast({ title: "Tidak ada data", description: `Tidak ada incident pending untuk periode ${period}.`, variant: "destructive" });
+        return;
+      }
+
+      const [{ default: jsPDF }, { default: autoTable }] = await Promise.all([
+        import("jspdf"),
+        import("jspdf-autotable"),
+      ]);
+
+      const doc = new jsPDF({ orientation: "landscape", unit: "pt", format: "a4" });
+      const periodLabel =
+        period === "harian" ? `Harian — ${format(now, "dd MMMM yyyy", { locale: idLocale })}`
+        : period === "mingguan" ? `Mingguan — ${format(start, "dd MMM yyyy", { locale: idLocale })} s/d ${format(now, "dd MMM yyyy", { locale: idLocale })}`
+        : period === "bulanan" ? `Bulanan — ${format(now, "MMMM yyyy", { locale: idLocale })}`
+        : "Semua Data";
+
+      doc.setFontSize(14);
+      doc.text("Laporan Incident Pending", 40, 40);
+      doc.setFontSize(9);
+      doc.text(`Periode: ${periodLabel}`, 40, 56);
+      doc.text(`Region: ${pendingRegionFilter === "all" ? "Semua Region" : pendingRegionFilter}`, 40, 68);
+      doc.text(`Total Incident Pending: ${rows.length}  |  Dicetak: ${format(now, "dd MMM yyyy HH:mm", { locale: idLocale })} WIB`, 40, 80);
+
+      autoTable(doc, {
+        startY: 92,
+        head: [["No", "Incident ID", "Kategori", "Constraint", "Customer/Hostname", "Service ID", "Serpo", "Contact User", "Alasan Pending", "Dibuat"]],
+        body: rows.map((t, i) => [
+          String(i + 1),
+          t.id,
+          t.category,
+          t.constraint,
+          t.category === "FEEDER" ? t.hostname : t.customerName,
+          t.serviceId,
+          t.serpo,
+          t.contactUser || "-",
+          t.pendingReason || "-",
+          t.createdAt,
+        ]),
+        styles: { fontSize: 7, cellPadding: 3, overflow: "linebreak" },
+        headStyles: { fillColor: [15, 118, 110], textColor: 255, fontSize: 7 },
+        columnStyles: {
+          0: { cellWidth: 24 },
+          1: { cellWidth: 70 },
+          2: { cellWidth: 48 },
+          8: { cellWidth: 140 },
+          9: { cellWidth: 80 },
+        },
+      });
+
+      doc.save(`Incident_Pending_${period}_${toLocalDateStr(now)}.pdf`);
+      toast({ title: "Export berhasil", description: `${rows.length} incident pending diexport ke PDF (${periodLabel}).` });
+    } catch (e) {
+      toast({ title: "Export gagal", description: "Tidak dapat membuat file PDF.", variant: "destructive" });
+    } finally {
+      setIsExportingPdf(false);
+    }
+  };
+
+
   const handleUpdateStatus = async (id: string, newStatus: Ticket["status"]) => {
     try {
       await updateTicket(id, { status: newStatus });
