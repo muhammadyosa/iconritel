@@ -8,13 +8,27 @@ if ("serviceWorker" in navigator) {
     window.location.reload();
   });
 
-  // Check for updates every 5 minutes (reduced from 60s to save CPU/battery on mobile)
-  setInterval(async () => {
-    const registration = await navigator.serviceWorker.getRegistration();
-    if (registration) {
-      await registration.update();
+  const checkUpdate = async () => {
+    try {
+      const registration = await navigator.serviceWorker.getRegistration();
+      if (registration) {
+        await registration.update();
+        // Activate a waiting worker right away (no manual cache clear needed)
+        registration.waiting?.postMessage({ type: "SKIP_WAITING" });
+      }
+    } catch {
+      /* offline or unsupported */
     }
-  }, 5 * 60 * 1000);
+  };
+
+  // Check on load, on tab focus, on reconnect, and every 60 seconds
+  checkUpdate();
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") checkUpdate();
+  });
+  window.addEventListener("online", checkUpdate);
+  setInterval(checkUpdate, 60 * 1000);
 }
+
 
 createRoot(document.getElementById("root")!).render(<App />);
