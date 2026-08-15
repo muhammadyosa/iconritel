@@ -969,6 +969,7 @@ function PendingTicketsList({ pendingTickets, isLoading, updateTicket, deleteTic
   const [pendingSearchQuery, setPendingSearchQuery] = useState("");
   const [pendingRegionFilter, setPendingRegionFilter] = useState<string>("all");
   const [regionalData, setRegionalData] = useState<RegionalTeamRecord[]>([]);
+  const [isExportingPdf, setIsExportingPdf] = useState(false);
   
   // User role for permission-based UI
   const { isAdmin, isReviewer } = useUserRole();
