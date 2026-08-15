@@ -1407,7 +1407,26 @@ Contoh:
                 {pendingTickets.length} incident pending — klik baris untuk detail
               </CardDescription>
             </div>
-            {isLoading && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
+            <div className="flex items-center gap-1.5">
+              {isLoading && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm" className="h-7 text-[10px] sm:text-xs" disabled={isExportingPdf}>
+                    {isExportingPdf ? <Loader2 className="h-3 w-3 mr-1 animate-spin" /> : <Download className="h-3 w-3 mr-1" />}
+                    Export PDF
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="bg-popover border shadow-lg z-50">
+                  <DropdownMenuLabel className="text-xs">📄 Periode Laporan</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem className="text-xs" onClick={() => handleExportPendingPDF("harian")}>📅 Harian (hari ini)</DropdownMenuItem>
+                  <DropdownMenuItem className="text-xs" onClick={() => handleExportPendingPDF("mingguan")}>🗓️ Mingguan (7 hari)</DropdownMenuItem>
+                  <DropdownMenuItem className="text-xs" onClick={() => handleExportPendingPDF("bulanan")}>📆 Bulanan (bulan ini)</DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem className="text-xs" onClick={() => handleExportPendingPDF("semua")}>🗂️ Semua Data Pending</DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
           </div>
         </CardHeader>
         <CardContent className="p-1.5 sm:p-2">
