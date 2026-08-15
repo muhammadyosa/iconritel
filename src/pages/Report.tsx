@@ -23,6 +23,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { toast } from "@/hooks/use-toast";
 import { FileText, Download, ClipboardList, Trash2, RefreshCw, Loader2, CalendarIcon, Search } from "lucide-react";
 import { parseLocalDateStr, toLocalDateStr } from "@/lib/dateUtils";
