@@ -306,13 +306,25 @@ export function useCloudTickets() {
       )
       .subscribe();
 
+    // Auto-refresh: refetch when tab regains focus or network returns
+    const onVisible = () => {
+      if (document.visibilityState === "visible") fetchTickets();
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    window.addEventListener("online", fetchTickets);
+    window.addEventListener("focus", fetchTickets);
+
     return () => {
       clearInterval(cleanupInterval);
       if (profileDebounceTimer) clearTimeout(profileDebounceTimer);
+      document.removeEventListener("visibilitychange", onVisible);
+      window.removeEventListener("online", fetchTickets);
+      window.removeEventListener("focus", fetchTickets);
       supabase.removeChannel(ticketsChannel);
       supabase.removeChannel(profilesChannel);
     };
   }, [fetchTickets, cleanupResolvedTickets, fetchProfiles]);
+
 
   // Helper: upsert daily_user_ticket_history
   const upsertUserHistory = useCallback(async (userName: string, userId: string | undefined, dateStr: string, field: "total_created" | "total_resolved", increment: number) => {
