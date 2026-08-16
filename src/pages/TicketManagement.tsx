@@ -779,6 +779,7 @@ export default function TicketManagement() {
         </div>
 
         <TabsContent value="preview-data" className="mt-2 sm:mt-3 space-y-2 sm:space-y-3">
+          <h2 className="sr-only">Preview Data Incident</h2>
           <Card className="shadow-sm border">
             <CardHeader className="py-2 px-2 sm:px-3 md:px-4 border-b bg-muted/30">
               <CardTitle className="flex items-center justify-between text-xs sm:text-sm">
@@ -999,6 +1000,7 @@ export default function TicketManagement() {
         </TabsContent>
 
         <TabsContent value="daftar-ticket" className="mt-2 sm:mt-3">
+          <h2 className="sr-only">Daftar Incident</h2>
           <Card className="shadow-sm border">
             <CardHeader className="py-1.5 sm:py-2 px-2 sm:px-3 border-b bg-muted/30 flex flex-row items-center justify-between gap-2">
               <div className="flex items-center gap-2 flex-wrap">
@@ -1537,6 +1539,7 @@ export default function TicketManagement() {
           </Card>
         </TabsContent>
         <TabsContent value="over-sla" className="mt-2 sm:mt-3">
+          <h2 className="sr-only">Incident Over SLA</h2>
           <OverSLATab tickets={tickets} getTicketRegion={getTicketRegion} onTicketClick={(t) => setSelectedTicketForDetail(t)} />
         </TabsContent>
 

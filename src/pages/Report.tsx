@@ -532,6 +532,7 @@ Dibuat: ${new Date(r.createdAt).toLocaleString("id-ID")}
         </div>
 
         <TabsContent value="shift" className="space-y-3 sm:space-y-4">
+          <h2 className="sr-only">Report Shift</h2>
           {/* Header Info Card */}
           <Card className="border-primary/20">
             <CardHeader className="pb-3 pt-4 px-3 sm:px-6">
@@ -755,6 +756,7 @@ Dibuat: ${new Date(r.createdAt).toLocaleString("id-ID")}
         </TabsContent>
 
         <TabsContent value="sla" className="space-y-4">
+          <h2 className="sr-only">SLA 7 Jam</h2>
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -870,6 +872,7 @@ UPDATE : `}
         </TabsContent>
 
         <TabsContent value="pending" className="space-y-4">
+          <h2 className="sr-only">Incident Pending</h2>
           <PendingTicketsList 
             pendingTickets={pendingCloudTickets}
             isLoading={isLoadingTickets}
@@ -879,10 +882,12 @@ UPDATE : `}
         </TabsContent>
 
         <TabsContent value="dashboard-iconnet" className="space-y-4">
+          <h2 className="sr-only">Dashboard Iconnet</h2>
           <DashboardIconnetTab />
         </TabsContent>
 
         <TabsContent value="reporting-gangguan" className="space-y-4">
+          <h2 className="sr-only">Reporting Gangguan</h2>
           <ReportingGangguanTab
             tickets={allCloudTickets}
             regionalTeamData={reportRegionalData}
