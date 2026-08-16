@@ -1013,6 +1013,39 @@ function PendingTicketsList({ pendingTickets, isLoading, updateTicket, deleteTic
     });
   }, [pendingTickets, pendingSearchQuery, pendingSearchField, pendingRegionFilter, teamRegions]);
 
+  const getCustomerType = (ticket: Ticket) => {
+    if (ticket.category !== "FEEDER") return ticket.customerName;
+    if (ticket.constraint === "OLT DOWN") return ticket.hostname;
+    if (ticket.constraint === "PORT DOWN") {
+      return ticket.ticketResult.match(/PORT - (.*?) - DOWN/)?.[1] || "PORT";
+    }
+    if (ticket.constraint === "FAT LOSS" || ticket.constraint === "FAT BAD RX") {
+      return ticket.fatId;
+    }
+    return ticket.constraint;
+  };
+
+  const copyToClipboard = (text: string, message: string) => {
+    if (!text) return;
+    navigator.clipboard.writeText(text).then(() => {
+      toast({ title: "Tersalin", description: message, variant: "default" });
+    }).catch(() => {
+      toast({ title: "Gagal menyalin", description: "Akses clipboard ditolak", variant: "destructive" });
+    });
+  };
+
+  const formatPendingRow = (ticket: Ticket) =>
+    `🎫 ${ticket.id}, 📦 ${ticket.category}, 👨‍💼 ${ticket.serviceId}, 👥 ${ticket.serpo}, 👤 ${getCustomerType(ticket)}`;
+
+  const handleCopyAllPending = () => {
+    if (filteredPending.length === 0) {
+      toast({ title: "Tidak ada data", description: "Tidak ada incident pending untuk disalin", variant: "destructive" });
+      return;
+    }
+    const text = filteredPending.map(formatPendingRow).join("\n");
+    copyToClipboard(text, `${filteredPending.length} incident pending disalin ke clipboard`);
+  };
+
   const handleExportPendingPDF = async (period: "harian" | "mingguan" | "bulanan" | "semua") => {
     setIsExportingPdf(true);
     try {
