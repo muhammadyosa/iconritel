@@ -1563,7 +1563,30 @@ Contoh:
                         setDetailOpen(true);
                       }}
                     >
-                      <TableCell className="px-1 sm:px-1.5 py-0.5 text-[9px] sm:text-[10px] font-medium">{ticket.id}</TableCell>
+                      <TableCell className="px-1 sm:px-1.5 py-0.5 text-[9px] sm:text-[10px] font-medium">
+                        <div className="flex items-center gap-1">
+                          <span
+                            className="cursor-pointer hover:text-primary hover:underline"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              copyToClipboard(ticket.id, `Incident ID ${ticket.id} disalin`);
+                            }}
+                            title="Klik untuk copy Incident ID"
+                          >
+                            {ticket.id}
+                          </span>
+                          <button
+                            className="text-muted-foreground hover:text-primary p-0.5 rounded focus:outline-none"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              copyToClipboard(ticket.id, `Incident ID ${ticket.id} disalin`);
+                            }}
+                            title="Copy Incident ID"
+                          >
+                            <Copy className="h-3 w-3" />
+                          </button>
+                        </div>
+                      </TableCell>
                       <TableCell className="px-1 sm:px-1.5 py-0.5">
                         <div>
                           <Badge
