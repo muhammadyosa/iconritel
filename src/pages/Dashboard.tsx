@@ -320,7 +320,7 @@ export default function Dashboard() {
       {/* Section: Ringkasan KPI */}
       <section className="space-y-2">
         <div className="flex items-center gap-2 px-0.5">
-          <span className="text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-muted-foreground">📊 Ringkasan KPI</span>
+          <h2 className="text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-muted-foreground">📊 Ringkasan KPI</h2>
           <div className="flex-1 h-px bg-border/60" />
         </div>
       <div className="grid gap-2 sm:gap-3 grid-cols-2 lg:grid-cols-4 w-full">
@@ -449,7 +449,7 @@ export default function Dashboard() {
       {/* Section: Tren & Distribusi */}
       <section className="space-y-2">
         <div className="flex items-center gap-2 px-0.5">
-          <span className="text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-muted-foreground">📈 Tren & Distribusi</span>
+          <h2 className="text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-muted-foreground">📈 Tren & Distribusi</h2>
           <div className="flex-1 h-px bg-border/60" />
         </div>
       <div className="grid gap-2 sm:gap-3 grid-cols-1 lg:grid-cols-2 w-full">
@@ -969,7 +969,7 @@ export default function Dashboard() {
       {/* Section: Analitik Bulanan */}
       <section className="space-y-2">
         <div className="flex items-center gap-2 px-0.5">
-          <span className="text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-muted-foreground">🗓️ Analitik Bulanan</span>
+          <h2 className="text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-muted-foreground">🗓️ Analitik Bulanan</h2>
           <div className="flex-1 h-px bg-border/60" />
         </div>
         <motion.div
@@ -984,7 +984,7 @@ export default function Dashboard() {
       {/* Section: Per Wilayah & Kategori */}
       <section className="space-y-2">
         <div className="flex items-center gap-2 px-0.5">
-          <span className="text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-muted-foreground">🗺️ Per Wilayah & Kategori</span>
+          <h2 className="text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-muted-foreground">🗺️ Per Wilayah & Kategori</h2>
           <div className="flex-1 h-px bg-border/60" />
         </div>
       {/* Proporsi + Tier + Ritel/Feeder + NOC Statistik */}
@@ -1483,7 +1483,7 @@ export default function Dashboard() {
       {/* Section: Operasional Harian */}
       <section className="space-y-2">
         <div className="flex items-center gap-2 px-0.5">
-          <span className="text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-muted-foreground">🛠️ Operasional Harian</span>
+          <h2 className="text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-muted-foreground">🛠️ Operasional Harian</h2>
           <div className="flex-1 h-px bg-border/60" />
         </div>
       {/* Report Shift + NOC Statistik + Recent Activity - 3 columns at bottom */}
