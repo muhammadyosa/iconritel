@@ -1450,6 +1450,17 @@ Contoh:
             </div>
             <div className="flex items-center gap-1.5">
               {isLoading && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-7 text-[10px] sm:text-xs px-2"
+                onClick={handleCopyAllPending}
+                disabled={filteredPending.length === 0}
+                title="Copy semua incident pending (format lengkap)"
+              >
+                <Copy className="h-3 w-3 mr-1" />
+                Copy
+              </Button>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" size="sm" className="h-7 text-[10px] sm:text-xs" disabled={isExportingPdf}>
