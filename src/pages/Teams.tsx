@@ -667,6 +667,7 @@ export default function Teams() {
 
         {/* ===== TAB 1: Team Stats (existing) ===== */}
         <TabsContent value="team-stats" className="space-y-4">
+          <h2 className="sr-only">Statistik Tim</h2>
           {dateFilter}
 
           {teamStatsByCategory.ritel.length === 0 && teamStatsByCategory.feeder.length === 0 ? (
@@ -1390,6 +1391,7 @@ export default function Teams() {
 
         {/* ===== TAB 2: Team NOC ===== */}
         <TabsContent value="team-noc" className="space-y-2 sm:space-y-3">
+          <h2 className="sr-only">Team NOC</h2>
           {dateFilter}
 
           {userStats.length === 0 ? (
@@ -2063,6 +2065,7 @@ export default function Teams() {
 
         {/* ===== TAB 3: List Regional Office ===== */}
         <TabsContent value="regional-office" className="space-y-4">
+          <h2 className="sr-only">Regional Office</h2>
           {dateFilter}
           <RegionalOfficeTab tickets={filteredTickets} />
         </TabsContent>

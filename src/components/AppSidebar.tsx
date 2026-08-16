@@ -205,7 +205,7 @@ export function AppSidebar() {
             {collapsed ? (
               <Tooltip delayDuration={0}>
                 <TooltipTrigger asChild>
-                  <button onClick={toggleTheme} className="w-full flex justify-center">
+                  <button onClick={toggleTheme} aria-label={theme === "dark" ? "Aktifkan mode terang" : "Aktifkan mode gelap"} className="w-full flex justify-center">
                     <div className="h-9 w-9 rounded-md flex items-center justify-center text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-foreground/10 transition-colors duration-150">
                       <span className="text-sm">{theme === "dark" ? "☀️" : "🌙"}</span>
                     </div>
@@ -218,6 +218,7 @@ export function AppSidebar() {
             ) : (
               <button
                 onClick={toggleTheme}
+                aria-label={theme === "dark" ? "Aktifkan mode terang" : "Aktifkan mode gelap"}
                 className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-md text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-foreground/10 transition-colors duration-150"
               >
                 <span className="text-sm flex-shrink-0">{theme === "dark" ? "☀️" : "🌙"}</span>
