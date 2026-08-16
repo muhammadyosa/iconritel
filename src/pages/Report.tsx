@@ -32,7 +32,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { toast } from "@/hooks/use-toast";
-import { FileText, Download, ClipboardList, Trash2, RefreshCw, Loader2, CalendarIcon, Search } from "lucide-react";
+import { FileText, Download, ClipboardList, Trash2, RefreshCw, Loader2, CalendarIcon, Search, Copy } from "lucide-react";
 import { parseLocalDateStr, toLocalDateStr } from "@/lib/dateUtils";
 import { format, parse } from "date-fns";
 import { id as idLocale } from "date-fns/locale";
@@ -1013,6 +1013,39 @@ function PendingTicketsList({ pendingTickets, isLoading, updateTicket, deleteTic
     });
   }, [pendingTickets, pendingSearchQuery, pendingSearchField, pendingRegionFilter, teamRegions]);
 
+  const getCustomerType = (ticket: Ticket) => {
+    if (ticket.category !== "FEEDER") return ticket.customerName;
+    if (ticket.constraint === "OLT DOWN") return ticket.hostname;
+    if (ticket.constraint === "PORT DOWN") {
+      return ticket.ticketResult.match(/PORT - (.*?) - DOWN/)?.[1] || "PORT";
+    }
+    if (ticket.constraint === "FAT LOSS" || ticket.constraint === "FAT BAD RX") {
+      return ticket.fatId;
+    }
+    return ticket.constraint;
+  };
+
+  const copyToClipboard = (text: string, message: string) => {
+    if (!text) return;
+    navigator.clipboard.writeText(text).then(() => {
+      toast({ title: "Tersalin", description: message, variant: "default" });
+    }).catch(() => {
+      toast({ title: "Gagal menyalin", description: "Akses clipboard ditolak", variant: "destructive" });
+    });
+  };
+
+  const formatPendingRow = (ticket: Ticket) =>
+    `🎫 ${ticket.id}, 📦 ${ticket.category}, 👨‍💼 ${ticket.serviceId}, 👥 ${ticket.serpo}, 👤 ${getCustomerType(ticket)}`;
+
+  const handleCopyAllPending = () => {
+    if (filteredPending.length === 0) {
+      toast({ title: "Tidak ada data", description: "Tidak ada incident pending untuk disalin", variant: "destructive" });
+      return;
+    }
+    const text = filteredPending.map(formatPendingRow).join("\n");
+    copyToClipboard(text, `${filteredPending.length} incident pending disalin ke clipboard`);
+  };
+
   const handleExportPendingPDF = async (period: "harian" | "mingguan" | "bulanan" | "semua") => {
     setIsExportingPdf(true);
     try {
@@ -1417,6 +1450,17 @@ Contoh:
             </div>
             <div className="flex items-center gap-1.5">
               {isLoading && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-7 text-[10px] sm:text-xs px-2"
+                onClick={handleCopyAllPending}
+                disabled={filteredPending.length === 0}
+                title="Copy semua incident pending (format lengkap)"
+              >
+                <Copy className="h-3 w-3 mr-1" />
+                Copy
+              </Button>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" size="sm" className="h-7 text-[10px] sm:text-xs" disabled={isExportingPdf}>
@@ -1519,7 +1563,30 @@ Contoh:
                         setDetailOpen(true);
                       }}
                     >
-                      <TableCell className="px-1 sm:px-1.5 py-0.5 text-[9px] sm:text-[10px] font-medium">{ticket.id}</TableCell>
+                      <TableCell className="px-1 sm:px-1.5 py-0.5 text-[9px] sm:text-[10px] font-medium">
+                        <div className="flex items-center gap-1">
+                          <span
+                            className="cursor-pointer hover:text-primary hover:underline"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              copyToClipboard(ticket.id, `Incident ID ${ticket.id} disalin`);
+                            }}
+                            title="Klik untuk copy Incident ID"
+                          >
+                            {ticket.id}
+                          </span>
+                          <button
+                            className="text-muted-foreground hover:text-primary p-0.5 rounded focus:outline-none"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              copyToClipboard(ticket.id, `Incident ID ${ticket.id} disalin`);
+                            }}
+                            title="Copy Incident ID"
+                          >
+                            <Copy className="h-3 w-3" />
+                          </button>
+                        </div>
+                      </TableCell>
                       <TableCell className="px-1 sm:px-1.5 py-0.5">
                         <div>
                           <Badge
