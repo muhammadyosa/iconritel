@@ -195,12 +195,13 @@ export function AppSidebar() {
 
         {/* Menu */}
         {!collapsed && (
-          <div className="px-3 pt-2 pb-0.5">
-            <span className="text-[10px] font-semibold uppercase tracking-wider text-sidebar-foreground/35">Menu</span>
+          <div className="px-3 pt-3 pb-1">
+            <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-sidebar-foreground/40">Menu</span>
           </div>
         )}
 
-        <nav className={`flex-1 overflow-y-auto overflow-x-hidden scrollbar-hide ${collapsed ? "px-1 py-1 space-y-0.5" : "px-1.5 space-y-px"}`}>
+        <nav className={`flex-1 overflow-y-auto overflow-x-hidden scrollbar-hide ${collapsed ? "px-1.5 py-1.5 space-y-1" : "px-2 pb-2 space-y-0.5"}`}>
+
           {visibleMenuItems.map((item) => (
             <MenuItem
               key={item.path}
