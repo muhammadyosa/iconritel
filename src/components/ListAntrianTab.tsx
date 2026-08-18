@@ -299,10 +299,10 @@ export default function ListAntrianTab() {
         {showFormat && (
           <CardContent className="px-4 pb-4 space-y-3">
             <p className="text-xs text-muted-foreground">
-              Paste data tiket dengan format (pisahkan dengan TAB):
+              Paste data tiket dengan format (pisahkan dengan TAB). Kolom <b>Jumlah</b> di akhir bersifat opsional.
             </p>
             <pre className="whitespace-pre-wrap break-words font-mono text-[11px] bg-muted/50 rounded-md p-2">
-              DURASI[TAB]ID_TIKET[TAB]TYPE[TAB]DESKRIPSI
+              DURASI[TAB]ID_TIKET[TAB]TYPE[TAB]DESKRIPSI[TAB]JUMLAH
             </pre>
 
             <div>
