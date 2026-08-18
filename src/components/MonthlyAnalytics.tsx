@@ -620,7 +620,7 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
     const isFeeder = FEEDER_CONSTRAINTS_SET.has(payload.value);
     return (
       <g transform={`translate(${x},${y})`}>
-        <text x={-8} y={-7} textAnchor="end" fontSize={12} className="select-none">
+        <text x={-8} y={-7} textAnchor="end" fontSize={12} className="select-none fill-foreground">
           {isFeeder ? "🏬" : "🏠"}
         </text>
         <text x={-8} y={7} textAnchor="end" fontSize={8} fill="hsl(var(--muted-foreground))">

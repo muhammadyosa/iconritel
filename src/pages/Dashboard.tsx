@@ -2240,7 +2240,20 @@ export default function Dashboard() {
                       <Cell key={i} fill={["hsl(217,91%,60%)", "hsl(142,71%,45%)", "hsl(38,92%,50%)", "hsl(0,84%,60%)", "hsl(262,83%,58%)", "hsl(180,70%,40%)"][i % 6]} />
                     ))}
                   </Pie>
-                  <Tooltip formatter={(value: number) => [`${value} tiket`, "Total"]} />
+                  <Tooltip
+                    formatter={(value: number) => [`${value} tiket`, "Total"]}
+                    cursor={{ fill: "hsl(var(--muted) / 0.4)" }}
+                    contentStyle={{
+                      background: "hsl(var(--popover))",
+                      color: "hsl(var(--popover-foreground))",
+                      border: "1px solid hsl(var(--border))",
+                      borderRadius: "0.5rem",
+                      boxShadow: "var(--shadow-elevated)",
+                      fontSize: 12,
+                    }}
+                    labelStyle={{ color: "hsl(var(--foreground))", fontWeight: 600 }}
+                    itemStyle={{ color: "hsl(var(--popover-foreground))" }}
+                  />
                 </PieChart>
               </ResponsiveContainer>
             </div>
