@@ -496,7 +496,10 @@ export default function Dashboard() {
                   { emoji: "🚨", label: "Critical", value: tickets.filter((t) => t.status === "Critical").length, color: "hsl(0, 84%, 60%)", status: "Critical" as const },
                   { emoji: "✅", label: "Resolved", value: tickets.filter((t) => t.status === "Resolved").length, color: "hsl(142, 71%, 45%)", status: "Resolved" as const },
                   { emoji: "⏳", label: "Pending", value: tickets.filter((t) => t.status === "Pending").length, color: "hsl(38, 92%, 50%)", status: "Pending" as const },
-                ];
+                ]
+                  // hide zero-value statuses, highest first
+                  .filter((d) => d.value > 0)
+                  .sort((a, b) => b.value - a.value);
                 const total = statusData.reduce((s, d) => s + d.value, 0) || 1;
                 const openStatus = (status: string) => {
                   setSelectedStatus(selectedStatus === status ? null : status);
