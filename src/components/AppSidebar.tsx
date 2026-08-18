@@ -239,7 +239,11 @@ export function AppSidebar() {
                 <span className="text-[13px] truncate">{theme === "dark" ? "Light Mode" : "Dark Mode"}</span>
               </button>
             )}
+            <div className="mt-1">
+              <ColorThemeSwitcher collapsed={collapsed} />
+            </div>
           </div>
+
           {!collapsed && (
             <div className="px-3 pb-2 text-center">
               <p className="text-[9px] text-sidebar-foreground/25">© RZ Corp</p>
