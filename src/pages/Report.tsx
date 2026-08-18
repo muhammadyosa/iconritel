@@ -43,6 +43,7 @@ import { z } from "zod";
 import { Ticket } from "@/types/ticket";
 import { DashboardIconnetTab } from "@/components/DashboardIconnetTab";
 import { ReportingGangguanTab } from "@/components/ReportingGangguanTab";
+import ListAntrianTab from "@/components/ListAntrianTab";
 import { useUserRole } from "@/hooks/useUserRole";
 import { StatusBadge } from "@/components/StatusBadge";
 import { TicketDetailDialog } from "@/components/TicketDetailDialog";
