@@ -317,12 +317,24 @@ export default function ListAntrianTab() {
               <p className="text-[11px] font-semibold mb-1">Hasil Output:</p>
               <pre className="whitespace-pre-wrap break-words font-mono text-[10px] sm:text-[11px] bg-muted/50 rounded-md p-2">
 {`LIST TIKET YANG BELUM DI KERJAKAN TANGGAL 19 AGUSTUS 2026
+
 TIM: SIB BELITUNG
 
 *Antrian 1*
+
 20 JAM 48 MENIT
+
 26082104043
-FTTH AKSES\tRANDA MAHENDRA PENGECEKAN BERSAMA - SIB BELITUNG FAT_TDNA10487 SBS-SUAK.TERONG-HW.MA5801-OLT-01 48575443CE4EB4AD 1`}
+
+FTTH AKSES\tRANDA MAHENDRA PENGECEKAN BERSAMA - SIB BELITUNG FAT_TDNA10487 SBS-SUAK.TERONG-HW.MA5801-OLT-01 48575443CE4EB4AD
+
+*Antrian 2*
+
+18 JAM 22 MENIT
+
+26082104021
+
+FTTH AKSES\tROY MOLIS BAD RX - SIB BELITUNG FAT_TDNA10371 SBS-PERAWAS-HW.MA5801-OLT-01 485754430F5F79AF`}
               </pre>
             </div>
 
