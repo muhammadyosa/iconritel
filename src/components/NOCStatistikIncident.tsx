@@ -144,7 +144,10 @@ export function NOCStatistikIncident({ tickets, variant }: Props) {
     const keys = Object.keys(trendData[0]).filter(k => k !== "date");
     const totals: Record<string, number> = {};
     trendData.forEach(row => keys.forEach(k => { totals[k] = (totals[k] || 0) + (row[k] || 0); }));
-    return keys.sort((a, b) => (totals[b] || 0) - (totals[a] || 0)).slice(0, 8);
+    return keys
+      .filter(k => (totals[k] || 0) > 0)
+      .sort((a, b) => (totals[b] || 0) - (totals[a] || 0))
+      .slice(0, 8);
   }, [trendData]);
 
   const chartConfig: ChartConfig = useMemo(() => {
