@@ -1170,8 +1170,8 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
                         const val = Math.round(yMax - (yMax * i) / ticks);
                         return (
                           <g key={i}>
-                            <line x1={padL} y1={y} x2={W - padR} y2={y} stroke="hsl(var(--border))" strokeWidth="1" opacity={i === ticks ? 0.6 : 0.25} />
-                            <text x={padL - 6} y={y} textAnchor="end" dominantBaseline="central" className="fill-muted-foreground" style={{ fontSize: 10 }}>{val}</text>
+                            <line x1={padL} y1={y} x2={W - padR} y2={y} stroke="hsl(var(--foreground))" strokeWidth="1" className="opacity-10 dark:opacity-20" />
+                            <text x={padL - 6} y={y} textAnchor="end" dominantBaseline="central" className="fill-foreground/80 font-semibold" style={{ fontSize: 10 }}>{val}</text>
                           </g>
                         );
                       })}
@@ -1188,7 +1188,7 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
                             <title>{`${d.name}: ${d.value.toLocaleString("id-ID")} (${pct}%)`}</title>
                             <rect x={x} y={y} width={barW} height={Math.max(h, 2)} rx={6} ry={6} fill={color} className="transition-opacity group-hover:opacity-80" />
                             <text x={x + barW / 2} y={y - 4} textAnchor="middle" className="fill-foreground font-semibold" style={{ fontSize: 10 }}>{d.value}</text>
-                            <text x={x + barW / 2} y={padT + innerH + 14} textAnchor="middle" className="fill-muted-foreground" style={{ fontSize: 9 }}>{shortLabel}</text>
+                            <text x={x + barW / 2} y={padT + innerH + 14} textAnchor="middle" className="fill-foreground font-semibold" style={{ fontSize: 9 }}>{shortLabel}</text>
                           </g>
                         );
                       })}
@@ -1242,10 +1242,7 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
                         backgroundColor: trendSeries[k] ? (trendConfig[k].color as string) : "transparent",
                       }}
                     />
-                    <span
-                      className="text-[10px] sm:text-xs font-medium"
-                      style={{ color: trendConfig[k].color as string }}
-                    >
+                    <span className={`text-[10px] sm:text-xs ${severityTextClass(getSeverity(trendConfig[k].label as string))}`}>
                       {trendConfig[k].label}
                     </span>
                   </label>
