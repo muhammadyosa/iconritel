@@ -10,6 +10,7 @@ import { useEffect, useState, useMemo, useCallback, memo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useMenuAccess } from "@/hooks/useMenuAccess";
+import { ColorThemeSwitcher } from "@/components/ColorThemeSwitcher";
 import { useDebouncedCallback } from "@/hooks/useDebouncedCallback";
 import {
   Tooltip,
