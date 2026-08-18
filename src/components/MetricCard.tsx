@@ -17,16 +17,19 @@ export function MetricCard({ title, value, icon: Icon, variant = "default" }: Me
   };
 
   return (
-    <Card className="shadow-card hover:shadow-elevated transition-shadow duration-200">
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium">{title}</CardTitle>
+    <Card className="rounded-xl border-border/70 shadow-card hover:shadow-elevated hover:-translate-y-0.5 transition-all duration-200">
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4 pb-2">
+        <CardTitle className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+          {title}
+        </CardTitle>
         <div className={`p-2 rounded-lg ${variantClasses[variant]}`}>
           <Icon className="h-4 w-4" />
         </div>
       </CardHeader>
-      <CardContent>
-        <div className="text-2xl font-bold">{value}</div>
+      <CardContent className="p-4 pt-0">
+        <div className="text-2xl font-bold tabular-nums text-foreground">{value}</div>
       </CardContent>
     </Card>
   );
 }
+
