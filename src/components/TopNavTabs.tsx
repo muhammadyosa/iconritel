@@ -167,17 +167,18 @@ export function TopNavTabs() {
           }
         }}
         className={cn(
-          "group flex items-center gap-1 border-r border-border/50 font-medium whitespace-nowrap transition-all select-none flex-shrink-0",
+          "group relative flex items-center gap-1.5 border-r border-border/40 font-medium whitespace-nowrap transition-all duration-200 select-none flex-shrink-0",
           isMobile
-            ? "pl-2.5 pr-1 py-2 text-[11px] min-h-[36px]"
-            : "pl-3 pr-1.5 py-1.5 text-xs cursor-grab",
+            ? "pl-2.5 pr-1 py-2 text-[11px] min-h-[38px]"
+            : "pl-3.5 pr-1.5 py-2 text-xs cursor-grab",
           isActive
-            ? "bg-background text-foreground border-b-2 border-b-primary"
-            : "text-muted-foreground hover:bg-accent/40 hover:text-foreground active:bg-accent/60",
+            ? "bg-card text-foreground shadow-[inset_0_-2px_0_0_hsl(var(--primary))]"
+            : "text-muted-foreground hover:bg-muted/60 hover:text-foreground active:bg-muted",
           isBeingDragged && "opacity-40",
           isDropTarget && "border-l-2 border-l-primary bg-primary/10",
-          isPinned && "bg-primary/5"
+          isPinned && !isActive && "bg-primary/[0.06]"
         )}
+
       >
         {isPinned && (
           <Pin className="h-2.5 w-2.5 text-primary/60 flex-shrink-0 -rotate-45" />
