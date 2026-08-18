@@ -590,17 +590,17 @@ export default function Dashboard() {
                               onClick={() => openStatus(d.status)}
                               className="w-full flex items-center gap-1.5 px-1 py-0.5 rounded-md hover:bg-muted/40 transition-colors text-left"
                             >
-                              <span className="w-7 text-[11px] sm:text-xs font-bold tabular-nums text-right">
+                              <span className={`w-9 text-[11px] sm:text-xs text-center shrink-0 ${statBadgeClass(d.label)}`}>
                                 {d.value.toLocaleString("id-ID")}
                               </span>
                               <span
                                 className="w-2 h-2 rounded-full shrink-0"
                                 style={{ backgroundColor: d.color }}
                               />
-                              <span className="text-[10px] sm:text-[11px] font-medium flex items-center gap-1 min-w-0">
+                              <span className={`text-[10px] sm:text-[11px] flex items-center gap-1 min-w-0 ${statTextClass(d.label)}`}>
                                 <span>{d.emoji}</span>
                                 <span className="truncate">{d.label}</span>
-                                <span className="text-muted-foreground">({pct}%)</span>
+                                <span className="text-foreground/70 font-semibold">({pct}%)</span>
                               </span>
                             </button>
                           );
@@ -658,10 +658,10 @@ export default function Dashboard() {
                       const criticalPct = Math.round((critical.value / totalReal) * 100);
                       const health =
                         criticalPct >= 30
-                          ? { label: "Kritis", color: "text-destructive", emoji: "🚨" }
+                          ? { label: "Kritis", color: "stat-critical", emoji: "🚨" }
                           : resolvedPct >= 60
-                          ? { label: "Sehat", color: "text-success", emoji: "✅" }
-                          : { label: "Perlu Perhatian", color: "text-warning", emoji: "⚠️" };
+                          ? { label: "Sehat", color: "stat-good", emoji: "✅" }
+                          : { label: "Perlu Perhatian", color: "stat-warning", emoji: "⚠️" };
 
                       return (
                         <div className="mt-2 pt-2 border-t border-border/50 space-y-1.5">
@@ -671,14 +671,14 @@ export default function Dashboard() {
                               <span>{health.label}</span>
                             </span>
                           </div>
-                          <p className="text-[10px] leading-relaxed text-muted-foreground px-1">
+                          <p className="text-[10px] leading-relaxed text-foreground/80 font-medium px-1">
                             Status dominan{" "}
                             <span className="font-semibold text-foreground">
                               {top.emoji} {top.label}
                             </span>{" "}
                             ({topPct}%). Tingkat penyelesaian{" "}
-                            <span className="font-semibold text-success">{resolvedPct}%</span> dan kritis{" "}
-                            <span className="font-semibold text-destructive">{criticalPct}%</span> dari total{" "}
+                            <span className="stat-good">{resolvedPct}%</span> dan kritis{" "}
+                            <span className="stat-critical">{criticalPct}%</span> dari total{" "}
                             <span className="font-semibold text-foreground">{totalReal.toLocaleString("id-ID")}</span> incident.
                           </p>
                           <p className="text-[9px] text-muted-foreground text-center pt-0.5">
