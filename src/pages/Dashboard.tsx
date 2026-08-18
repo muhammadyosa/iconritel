@@ -36,6 +36,7 @@ import {
 } from "@/components/ui/chart";
 import { toLocalDateStr } from "@/lib/dateUtils";
 import { isOverSlaUnresolved } from "@/lib/sla";
+import { statTextClass, statBadgeClass } from "@/lib/severity";
 import { toast } from "sonner";
 
 interface ShiftReport {
