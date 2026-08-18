@@ -176,7 +176,7 @@ export default function ListAntrianTab() {
     setGenerated(result.output);
     toast({
       title: "Format dibuat",
-      description: `${result.rows.length} tiket dari ${result.teamCount} tim berhasil disusun.`,
+      description: `${result.rows.length} tiket dari ${result.teamCount} tim berhasil disusun menjadi ${result.antrianCount} antrian.`,
     });
   };
 
