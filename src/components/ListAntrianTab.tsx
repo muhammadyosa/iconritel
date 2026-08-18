@@ -13,7 +13,7 @@ interface ParsedRow {
   description: string;
   count: string;
   olt: string;
-  serpo: string;
+  team: string;
 }
 
 const parseDurationToMinutes = (text: string): number => {
@@ -63,18 +63,28 @@ const parseLines = (raw: string): ParsedRow[] => {
         description = rest.join(" ");
       }
 
+      description = description.trim();
+
+      // trailing count still inside description (space separated)
+      const trailing = /\s(\d+)$/.exec(description);
+      if (trailing && count === "1") {
+        count = trailing[1];
+        description = description.replace(/\s\d+$/, "").trim();
+      }
+
       const oltMatch = /([A-Z0-9._-]*-OLT-\d+)/i.exec(description);
-      const serpoMatch = /SERPO\s+[A-Z0-9._-]+/i.exec(description);
+      // Team / Serpo: text between " - " and the FAT_/SPLT_ token
+      const teamMatch = /-\s+([A-Z0-9 ._/]+?)\s+(?:FAT_|SPLT_|FDT_)/i.exec(description);
 
       rows.push({
         duration,
         minutes: parseDurationToMinutes(duration),
         ticketId,
         category,
-        description: description.trim(),
+        description,
         count,
         olt: (oltMatch?.[1] || "TANPA OLT").toUpperCase(),
-        serpo: (serpoMatch?.[0] || "-").toUpperCase(),
+        team: (teamMatch?.[1] || "TANPA TIM").trim().toUpperCase(),
       });
     });
   return rows;
@@ -82,7 +92,12 @@ const parseLines = (raw: string): ParsedRow[] => {
 
 const formatDateID = (d: Date) =>
   d
-    .toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })
+    .toLocaleDateString("id-ID", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+      timeZone: "Asia/Jakarta",
+    })
     .toUpperCase();
 
 export default function ListAntrianTab() {
@@ -90,37 +105,61 @@ export default function ListAntrianTab() {
 
   const result = useMemo(() => {
     const rows = parseLines(input);
-    if (rows.length === 0) return { rows, output: "" };
+    if (rows.length === 0) return { rows, teamCount: 0, output: "" };
 
-    // Group by OLT terminasi
-    const groups = new Map<string, ParsedRow[]>();
+    // Group by TIM (serpo), then by OLT terminasi
+    const teams = new Map<string, ParsedRow[]>();
     rows.forEach((r) => {
-      const list = groups.get(r.olt) || [];
+      const list = teams.get(r.team) || [];
       list.push(r);
-      groups.set(r.olt, list);
+      teams.set(r.team, list);
     });
 
-    const ordered = Array.from(groups.values())
-      .map((list) => list.slice().sort((a, b) => b.minutes - a.minutes))
-      .sort((a, b) => b[0].minutes - a[0].minutes);
+    const orderedTeams = Array.from(teams.entries()).sort(
+      (a, b) =>
+        Math.max(...b[1].map((r) => r.minutes)) - Math.max(...a[1].map((r) => r.minutes))
+    );
 
-    const tim = rows.find((r) => r.serpo !== "-")?.serpo || "-";
+    const tanggal = formatDateID(new Date());
+    const blocks: string[] = [];
 
-    const lines: string[] = [
-      `LIST TIKET YANG BELUM DI KERJAKAN TANGGAL ${formatDateID(new Date())}`,
-      "",
-      `TIM: ${tim}`,
-      "",
-    ];
-
-    ordered.forEach((list, i) => {
-      lines.push(`*Antrian ${i + 1}*`, "");
-      list.forEach((r) => {
-        lines.push(r.duration, "", r.ticketId, "", `${r.category}\t${r.description} ${r.count}`, "");
+    orderedTeams.forEach(([team, teamRows]) => {
+      const groups = new Map<string, ParsedRow[]>();
+      teamRows.forEach((r) => {
+        const list = groups.get(r.olt) || [];
+        list.push(r);
+        groups.set(r.olt, list);
       });
+
+      const ordered = Array.from(groups.values())
+        .map((list) => list.slice().sort((a, b) => b.minutes - a.minutes))
+        .sort((a, b) => b[0].minutes - a[0].minutes);
+
+      const lines: string[] = [
+        `LIST TIKET YANG BELUM DI KERJAKAN TANGGAL ${tanggal}`,
+        "",
+        `TIM: ${team}`,
+        "",
+      ];
+
+      ordered.forEach((list, i) => {
+        lines.push(`*Antrian ${i + 1}*`, "");
+        list.forEach((r) => {
+          lines.push(
+            r.duration,
+            "",
+            r.ticketId,
+            "",
+            `${r.category}\t${r.description} ${r.count}`,
+            ""
+          );
+        });
+      });
+
+      blocks.push(lines.join("\n").trimEnd());
     });
 
-    return { rows, output: lines.join("\n").trimEnd() };
+    return { rows, teamCount: orderedTeams.length, output: blocks.join("\n\n") };
   }, [input]);
 
   const handleCopy = async () => {
@@ -160,7 +199,7 @@ export default function ListAntrianTab() {
             className="font-mono text-[11px] sm:text-xs"
           />
           <p className="text-[10px] sm:text-xs text-muted-foreground">
-            Tiket dengan OLT terminasi yang sama digabung jadi satu antrian dan diurutkan dari durasi terlama.
+            Tiket dipisah per TIM/SERPO, lalu OLT terminasi yang sama digabung jadi satu antrian dan diurutkan dari durasi terlama.
           </p>
         </CardContent>
       </Card>
@@ -171,7 +210,7 @@ export default function ListAntrianTab() {
             <CardTitle className="text-sm sm:text-base">
               📋 Hasil List Antrian
               <span className="ml-2 text-[10px] sm:text-xs font-normal text-muted-foreground">
-                {result.rows.length} tiket
+                {result.rows.length} tiket · {result.teamCount} tim
               </span>
             </CardTitle>
             <Button size="sm" className="h-8 text-xs" onClick={handleCopy} disabled={!result.output}>
