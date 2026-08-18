@@ -185,16 +185,16 @@ function AppLayout() {
   return (
     <SidebarProvider>
       <SwipeHandler />
-      <div className="flex min-h-dvh w-full overflow-x-hidden">
+      <div className="flex min-h-dvh w-full overflow-x-hidden app-surface">
         <AppSidebar />
         <SidebarFloatingTrigger />
         <div className="flex-1 flex flex-col min-w-0">
-          <header className="sticky top-0 z-10 h-12 sm:h-14 border-b bg-background/95 backdrop-blur-md supports-[backdrop-filter]:bg-background/60 transition-shadow duration-200">
-            <div className="flex h-12 sm:h-14 items-center px-2 sm:px-4 gap-2 sm:gap-3 justify-between">
+          <header className="sticky top-0 z-20 border-b border-border/60 bg-background/80 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60">
+            <div className="flex h-14 sm:h-16 items-center px-2 sm:px-4 lg:px-6 gap-2 sm:gap-3 justify-between">
               <div className="flex items-center gap-2 sm:gap-3 min-w-0">
                 {/* Spacer for mobile hamburger button */}
                 <div className="w-8 md:hidden flex-shrink-0" />
-                <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
+                <div className="flex items-center gap-2 sm:gap-2.5 min-w-0">
                   <img
                     src={danantaraLight}
                     alt="Danantara Indonesia"
@@ -209,7 +209,7 @@ function AppLayout() {
                     loading="eager"
                     className="h-5 xs:h-6 sm:h-7 md:h-8 w-auto flex-shrink-0 object-contain hidden dark:block"
                   />
-                  <div className="h-5 sm:h-6 w-px bg-border/70 flex-shrink-0" />
+                  <div className="h-6 sm:h-7 w-px bg-border flex-shrink-0" />
                   <img
                     src={plnIconPlusLogo}
                     alt="PLN Icon Plus"
@@ -224,13 +224,16 @@ function AppLayout() {
             </div>
           </header>
           <TopNavTabs />
-          <main className="flex-1 p-2 sm:p-4 md:p-6 overflow-x-hidden overflow-y-auto scroll-smooth">
-            <TabbedContent />
+          <main className="flex-1 overflow-x-hidden overflow-y-auto scroll-smooth">
+            <div className="content-container p-3 sm:p-5 lg:p-6">
+              <TabbedContent />
+            </div>
           </main>
           <ScrollToTop />
         </div>
       </div>
     </SidebarProvider>
+
   );
 }
 
