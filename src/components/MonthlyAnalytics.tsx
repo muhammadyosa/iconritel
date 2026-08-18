@@ -1281,17 +1281,17 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
                     margin={{ top: 20, right: 20, left: 5, bottom: 5 }}
                     onClick={handleTrendDotClick}
                   >
-                    <CartesianGrid strokeDasharray="4 6" vertical={false} stroke="hsl(var(--border))" strokeOpacity={0.5} />
+                    <CartesianGrid strokeDasharray="4 6" vertical={false} stroke="hsl(var(--foreground))" strokeOpacity={0.12} />
                     <XAxis
                       dataKey="day"
-                      tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }}
+                      tick={{ fontSize: 10, fill: "hsl(var(--foreground))", fontWeight: 600 }}
                       tickLine={false}
                       axisLine={false}
                       interval={dailyTrend.length > 14 ? 3 : dailyTrend.length > 7 ? 1 : 0}
                       dy={6}
                     />
                     <YAxis
-                      tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }}
+                      tick={{ fontSize: 10, fill: "hsl(var(--foreground))", fontWeight: 600 }}
                       width={32}
                       tickLine={false}
                       axisLine={false}

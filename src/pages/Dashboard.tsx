@@ -889,16 +889,16 @@ export default function Dashboard() {
                           <stop offset="100%" stopColor="hsl(262, 83%, 58%)" stopOpacity={0} />
                         </linearGradient>
                       </defs>
-                      <CartesianGrid strokeDasharray="3 3" className="stroke-muted" vertical={false} />
+                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--foreground))" strokeOpacity={0.12} className="dark:opacity-[1.6]" vertical={false} />
                       <XAxis
                         dataKey="date"
-                        tick={{ fontSize: 9, fill: "hsl(var(--muted-foreground))" }}
+                        tick={{ fontSize: 9, fill: "hsl(var(--foreground))", fontWeight: 600 }}
                         tickLine={false}
                         axisLine={false}
                         interval={numDays > 14 ? 3 : numDays > 7 ? 1 : 0}
                       />
                       <YAxis
-                        tick={{ fontSize: 9, fill: "hsl(var(--muted-foreground))" }}
+                        tick={{ fontSize: 9, fill: "hsl(var(--foreground))", fontWeight: 600 }}
                         tickLine={false}
                         axisLine={false}
                         allowDecimals={false}
