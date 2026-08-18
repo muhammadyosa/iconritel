@@ -148,7 +148,19 @@ const ChartTooltipContent = React.forwardRef<
       return null;
     }
 
-    const nestLabel = payload.length === 1 && indicator !== "dot";
+    // Only show categories with a value > 0, sorted from highest to lowest
+    const visiblePayload = payload
+      .filter((item) => {
+        const v = typeof item.value === "number" ? item.value : Number(item.value);
+        return Number.isFinite(v) && v > 0;
+      })
+      .sort((a, b) => Number(b.value) - Number(a.value));
+
+    if (!visiblePayload.length) {
+      return null;
+    }
+
+    const nestLabel = visiblePayload.length === 1 && indicator !== "dot";
 
     return (
       <div
@@ -160,7 +172,7 @@ const ChartTooltipContent = React.forwardRef<
       >
         {!nestLabel ? tooltipLabel : null}
         <div className="grid gap-1.5">
-          {payload.map((item, index) => {
+          {visiblePayload.map((item, index) => {
             const key = `${nameKey || item.name || item.dataKey || "value"}`;
             const itemConfig = getPayloadConfigFromPayload(config, item, key);
             const indicatorColor = color || item.payload.fill || item.color;
