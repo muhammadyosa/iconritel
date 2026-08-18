@@ -1212,11 +1212,6 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
                       );
                     })}
                   </div>
-
-                        </button>
-                      );
-                    })}
-                  </div>
                 </div>
               );
             })()}
