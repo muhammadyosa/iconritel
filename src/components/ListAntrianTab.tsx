@@ -82,7 +82,8 @@ const parseLines = (raw: string): ParsedRow[] => {
 
       // Team/SERPO extraction:
       // - Proaktif/distribusi: nama tim ada di segmen terakhir setelah " - "
-      // - Akses: nama tim ada sebelum FAT_/SPLT_/FDT_
+      // - Akses: nama tim dimulai dari prefix tim (SIB/TRA/SERPO/INTERNAL/GSP/...)
+      //   sampai sebelum FAT_/SPLT_/FDT_
       let team = "";
       const isProaktif = /\[PROACTIVE|UNDER/i.test(description);
       if (isProaktif) {
@@ -91,9 +92,16 @@ const parseLines = (raw: string): ParsedRow[] => {
         if (lastPart && !/-OLT-\d+/i.test(lastPart)) team = lastPart;
       }
       if (!team) {
+        const prefixMatch = /\b(?:SIB|TRA|SERPO|INTERNAL|GSP|MITRA|PT)\b[\s\S]*?(?=\s+(?:FAT_|SPLT_|FDT_))/i.exec(
+          description
+        );
+        team = prefixMatch?.[0] || "";
+      }
+      if (!team) {
         const teamMatch = /-\s+([A-Z0-9 ._/]+?)\s+(?:FAT_|SPLT_|FDT_)/i.exec(description);
         team = teamMatch?.[1] || "";
       }
+
 
       rows.push({
         duration,
