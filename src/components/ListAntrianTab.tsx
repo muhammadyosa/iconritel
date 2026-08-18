@@ -147,7 +147,6 @@ export default function ListAntrianTab() {
 
       const lines: string[] = [
         `LIST TIKET YANG BELUM DI KERJAKAN TANGGAL ${tanggal}`,
-        "",
         `TIM: ${team}`,
         "",
       ];
