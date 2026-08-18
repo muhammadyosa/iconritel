@@ -13,6 +13,7 @@ interface ParsedRow {
   description: string;
   count: string;
   olt: string;
+  terminasi: string;
   team: string;
 }
 
@@ -30,6 +31,12 @@ const parseDurationToMinutes = (text: string): number => {
 const splitCells = (line: string): string[] => {
   const cells = line.includes("\t") ? line.split("\t") : line.split(/\s{2,}/);
   return cells.map((c) => c.trim()).filter((c) => c.length > 0);
+};
+
+const extractTerminasi = (olt: string): string => {
+  // Group by site/location: e.g. SBS-TANJUNG.PANDAN-HW.MA5801-OLT-01 -> SBS-TANJUNG.PANDAN
+  const match = /^(.*)-[^-]+-OLT-\d+$/i.exec(olt);
+  return match ? match[1].toUpperCase() : olt.toUpperCase();
 };
 
 const parseLines = (raw: string): ParsedRow[] => {
@@ -73,8 +80,10 @@ const parseLines = (raw: string): ParsedRow[] => {
       }
 
       const oltMatch = /([A-Z0-9._-]*-OLT-\d+)/i.exec(description);
-      // Team / Serpo: text between " - " and the FAT_/SPLT_ token
+      // Team / Serpo: text between " - " and the FAT_/SPLT_/FDT_ token
       const teamMatch = /-\s+([A-Z0-9 ._/]+?)\s+(?:FAT_|SPLT_|FDT_)/i.exec(description);
+
+      const olt = (oltMatch?.[1] || "TANPA OLT").toUpperCase();
 
       rows.push({
         duration,
@@ -83,7 +92,8 @@ const parseLines = (raw: string): ParsedRow[] => {
         category,
         description,
         count,
-        olt: (oltMatch?.[1] || "TANPA OLT").toUpperCase(),
+        olt,
+        terminasi: extractTerminasi(olt),
         team: (teamMatch?.[1] || "TANPA TIM").trim().toUpperCase(),
       });
     });
@@ -107,7 +117,7 @@ export default function ListAntrianTab() {
     const rows = parseLines(input);
     if (rows.length === 0) return { rows, teamCount: 0, output: "" };
 
-    // Group by TIM (serpo), then by OLT terminasi
+    // Group by TIM (serpo), then by terminasi (site/location)
     const teams = new Map<string, ParsedRow[]>();
     rows.forEach((r) => {
       const list = teams.get(r.team) || [];
@@ -126,9 +136,9 @@ export default function ListAntrianTab() {
     orderedTeams.forEach(([team, teamRows]) => {
       const groups = new Map<string, ParsedRow[]>();
       teamRows.forEach((r) => {
-        const list = groups.get(r.olt) || [];
+        const list = groups.get(r.terminasi) || [];
         list.push(r);
-        groups.set(r.olt, list);
+        groups.set(r.terminasi, list);
       });
 
       const ordered = Array.from(groups.values())
@@ -144,15 +154,9 @@ export default function ListAntrianTab() {
 
       ordered.forEach((list, i) => {
         lines.push(`*Antrian ${i + 1}*`, "");
-        list.forEach((r) => {
-          lines.push(
-            r.duration,
-            "",
-            r.ticketId,
-            "",
-            `${r.category}\t${r.description} ${r.count}`,
-            ""
-          );
+        list.forEach((r, idx) => {
+          lines.push(r.duration, r.ticketId, `${r.category}\t${r.description} ${r.count}`);
+          if (idx < list.length - 1) lines.push("");
         });
       });
 
@@ -199,7 +203,7 @@ export default function ListAntrianTab() {
             className="font-mono text-[11px] sm:text-xs"
           />
           <p className="text-[10px] sm:text-xs text-muted-foreground">
-            Tiket dipisah per TIM/SERPO, lalu OLT terminasi yang sama digabung jadi satu antrian dan diurutkan dari durasi terlama.
+            Tiket dipisah per TIM/SERPO, lalu terminasi OLT yang sama digabung jadi satu antrian dan diurutkan dari durasi terlama.
           </p>
         </CardContent>
       </Card>
