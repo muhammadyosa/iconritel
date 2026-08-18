@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Copy, ListOrdered, Trash2, Info, Wand2 } from "lucide-react";
@@ -34,7 +34,6 @@ const splitCells = (line: string): string[] => {
 };
 
 const extractTerminasi = (olt: string): string => {
-  // Group by site/location: e.g. SBS-TANJUNG.PANDAN-HW.MA5801-OLT-01 -> SBS-TANJUNG.PANDAN
   const match = /^(.*)-[^-]+-OLT-\d+$/i.exec(olt);
   return match ? match[1].toUpperCase() : olt.toUpperCase();
 };
@@ -72,7 +71,6 @@ const parseLines = (raw: string): ParsedRow[] => {
 
       description = description.trim();
 
-      // trailing count still inside description (space separated)
       const trailing = /\s(\d+)$/.exec(description);
       if (trailing && count === "1") {
         count = trailing[1];
@@ -80,7 +78,6 @@ const parseLines = (raw: string): ParsedRow[] => {
       }
 
       const oltMatch = /([A-Z0-9._-]*-OLT-\d+)/i.exec(description);
-      // Team / Serpo: text between " - " and the FAT_/SPLT_/FDT_ token
       const teamMatch = /-\s+([A-Z0-9 ._/]+?)\s+(?:FAT_|SPLT_|FDT_)/i.exec(description);
 
       const olt = (oltMatch?.[1] || "TANPA OLT").toUpperCase();
@@ -113,13 +110,12 @@ const formatDateID = (d: Date) =>
 export default function ListAntrianTab() {
   const [input, setInput] = useState("");
   const [generated, setGenerated] = useState("");
-  const [showFormat, setShowFormat] = useState(true);
+  const [showFormat, setShowFormat] = useState(false);
 
   const result = useMemo(() => {
     const rows = parseLines(input);
     if (rows.length === 0) return { rows, teamCount: 0, output: "" };
 
-    // Group by TIM (serpo), then by terminasi (site/location)
     const teams = new Map<string, ParsedRow[]>();
     rows.forEach((r) => {
       const list = teams.get(r.team) || [];
@@ -197,138 +193,113 @@ export default function ListAntrianTab() {
   };
 
   return (
-    <div className="space-y-3 sm:space-y-4">
+    <div className="space-y-4">
       <h2 className="sr-only">List Antrian</h2>
 
-      {/* Penjelasan format yang didukung */}
-      <Card className="border-primary/30 bg-primary/[0.03]">
-        <CardHeader className="pb-2 pt-3 px-3 sm:px-6">
-          <div className="flex items-center justify-between gap-2 flex-wrap">
-            <CardTitle className="text-sm sm:text-base flex items-center gap-2">
-              <Info className="h-4 w-4 text-primary" />
-              📖 Format yang Didukung
-            </CardTitle>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-7 text-xs"
-              onClick={() => setShowFormat((v) => !v)}
-            >
-              {showFormat ? "Sembunyikan" : "Tampilkan"}
-            </Button>
-          </div>
-        </CardHeader>
-        {showFormat && (
-          <CardContent className="px-3 sm:px-6 pb-4 space-y-3">
-            <p className="text-[11px] sm:text-xs text-muted-foreground">
-              Tempel data langsung dari Excel / export sistem. Satu baris = satu tiket, kolom dipisah
-              <span className="font-medium text-foreground"> Tab</span> (atau minimal 2 spasi).
-            </p>
+      <div className="flex items-center gap-3">
+        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+          <ListOrdered className="h-5 w-5 text-primary" />
+        </div>
+        <div>
+          <h3 className="text-base font-semibold">List Antrian</h3>
+          <p className="text-xs text-muted-foreground">Susun tiket pending per TIM/SERPO dan terminasi OLT.</p>
+        </div>
+      </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
-              {[
-                { k: "1️⃣ Durasi", v: "Contoh: 11 JAM 55 MENIT / 1 HARI 2 JAM" },
-                { k: "2️⃣ Incident ID", v: "Contoh: 26082104120" },
-                { k: "3️⃣ Kategori", v: "Contoh: FTTH AKSES" },
-                { k: "4️⃣ Deskripsi", v: "Nama pelanggan + kendala - TIM/SERPO + FAT/SPLT + HOSTNAME OLT" },
-                { k: "5️⃣ Jumlah", v: "Angka di kolom terakhir, contoh: 1 (opsional)" },
-              ].map((row) => (
-                <div key={row.k} className="rounded-md border bg-background/70 px-2 py-1.5">
-                  <p className="text-[11px] font-semibold">{row.k}</p>
-                  <p className="text-[10px] sm:text-[11px] text-muted-foreground">{row.v}</p>
-                </div>
-              ))}
-            </div>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+        <Card className="flex flex-col">
+          <div className="flex items-center gap-2 px-4 py-3 border-b">
+            <span className="rounded bg-primary/10 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-primary">Input</span>
+            <span className="text-sm font-medium">Data Tiket</span>
+          </div>
+          <CardContent className="flex-1 p-3">
+            <Textarea
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder="Paste data tiket dengan format (pisahkan dengan TAB):\nDURASI[TAB]ID_TIKET[TAB]TYPE[TAB]DESKRIPSI"
+              className="min-h-[260px] flex-1 resize-none font-mono text-[11px] sm:text-xs bg-muted/40"
+            />
+          </CardContent>
+        </Card>
+
+        <Card className="flex flex-col">
+          <div className="flex items-center gap-2 px-4 py-3 border-b">
+            <span className="rounded bg-blue-500/10 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-blue-500">Hasil</span>
+            <span className="text-sm font-medium">Format List Antrian</span>
+          </div>
+          <CardContent className="flex-1 p-3">
+            {generated ? (
+              <pre className="whitespace-pre-wrap break-words font-mono text-[11px] sm:text-xs bg-muted/40 rounded-md p-3 h-[260px] overflow-y-auto">
+                {generated}
+              </pre>
+            ) : (
+              <div className="h-[260px] flex flex-col items-center justify-center text-center text-muted-foreground px-4">
+                <p className="text-sm">Hasil format akan muncul di sini...</p>
+                <p className="text-xs mt-1">Tempel data tiket lalu klik Generate Format.</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="flex flex-wrap items-center gap-2">
+        <Button size="sm" className="h-9 text-xs" onClick={handleGenerate} disabled={!input.trim()}>
+          <Wand2 className="h-3.5 w-3.5 mr-1.5" /> Generate Format
+        </Button>
+        <Button variant="outline" size="sm" className="h-9 text-xs" onClick={handleClear} disabled={!input && !generated}>
+          <Trash2 className="h-3.5 w-3.5 mr-1.5" /> Clear
+        </Button>
+        <Button variant="secondary" size="sm" className="h-9 text-xs ml-auto" onClick={handleCopy} disabled={!generated}>
+          <Copy className="h-3.5 w-3.5 mr-1.5" /> Copy
+        </Button>
+      </div>
+
+      <Card className="border-primary/20 bg-primary/[0.03]">
+        <button
+          onClick={() => setShowFormat((v) => !v)}
+          className="flex w-full items-center justify-between gap-2 px-4 py-3 text-left"
+        >
+          <div className="flex items-center gap-2">
+            <Info className="h-4 w-4 text-primary" />
+            <span className="text-sm font-medium">Format Input yang Didukung</span>
+          </div>
+          <span className="text-xs text-muted-foreground">{showFormat ? "Sembunyikan" : "Tampilkan"}</span>
+        </button>
+        {showFormat && (
+          <CardContent className="px-4 pb-4 space-y-3">
+            <p className="text-xs text-muted-foreground">
+              Paste data tiket dengan format (pisahkan dengan TAB):
+            </p>
+            <pre className="whitespace-pre-wrap break-words font-mono text-[11px] bg-muted/50 rounded-md p-2">
+              DURASI[TAB]ID_TIKET[TAB]TYPE[TAB]DESKRIPSI
+            </pre>
 
             <div>
-              <p className="text-[11px] font-semibold mb-1">✅ Contoh baris valid</p>
+              <p className="text-[11px] font-semibold mb-1">Contoh Input:</p>
               <pre className="whitespace-pre-wrap break-words font-mono text-[10px] sm:text-[11px] bg-muted/50 rounded-md p-2">
-{`11 JAM 55 MENIT\t26082104120\tFTTH AKSES\tMERI BULET LINK LOSS - SERPO KOBA SPLT_TBLA10241 SBS-PERMIS-FH.AN6001.G16-OLT-01 FHTT9D0CC218\t1`}
+{`3 JAM 56 MENIT  26012107781  FTTH AKSES   RESTI LINK LOSS - SIB PESAMARAN SPLT_GOTA176...
+5 JAM 53 MENIT  26012107738  FTTH DISTRIBUSI (PROAKTIVE NOC RETAIL) SPLT_BDLA180...`}
               </pre>
             </div>
 
             <div>
-              <p className="text-[11px] font-semibold mb-1">📤 Contoh hasil</p>
+              <p className="text-[11px] font-semibold mb-1">Hasil Output:</p>
               <pre className="whitespace-pre-wrap break-words font-mono text-[10px] sm:text-[11px] bg-muted/50 rounded-md p-2">
 {`LIST TIKET YANG BELUM DI KERJAKAN TANGGAL 19 AGUSTUS 2026
-TIM: SERPO KOBA
+TIM: SIB BELITUNG
 
 *Antrian 1*
-
-16 JAM 5 MENIT
-26082104040
-FTTH AKSES\tDESI APRIANI LINK LOSS - SERPO KOBA ... -OLT-01 1`}
+20 JAM 48 MENIT
+26082104043
+FTTH AKSES\tRANDA MAHENDRA PENGECEKAN BERSAMA - SIB BELITUNG FAT_TDNA10487 SBS-SUAK.TERONG-HW.MA5801-OLT-01 48575443CE4EB4AD 1`}
               </pre>
             </div>
 
-            <ul className="text-[10px] sm:text-[11px] text-muted-foreground list-disc pl-4 space-y-0.5">
-              <li>Tiket dikelompokkan per <b>TIM/SERPO</b>, lalu per <b>terminasi OLT</b> yang sama.</li>
-              <li>Urutan antrian & tiket mengikuti <b>durasi terlama</b>.</li>
-              <li>Baris tanpa durasi atau kurang dari 3 kolom otomatis dilewati.</li>
-            </ul>
+            <p className="text-[11px] text-muted-foreground">
+              Tiket dikelompokkan per <b>TIM/SERPO</b>, lalu per <b>terminasi OLT</b> yang sama, diurutkan dari durasi terlama.
+            </p>
           </CardContent>
         )}
-      </Card>
-
-      <Card>
-        <CardHeader className="pb-3 pt-4 px-3 sm:px-6">
-          <div className="flex items-center justify-between gap-2 flex-wrap">
-            <CardTitle className="text-sm sm:text-base flex items-center gap-2">
-              <ListOrdered className="h-4 w-4 text-primary" />
-              📑 Input Data Tiket
-            </CardTitle>
-            <div className="flex items-center gap-2">
-              <Button size="sm" className="h-8 text-xs" onClick={handleGenerate} disabled={!input.trim()}>
-                <Wand2 className="h-3.5 w-3.5 mr-1" /> Generate Format
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                className="h-8 text-xs"
-                onClick={handleClear}
-                disabled={!input && !generated}
-              >
-                <Trash2 className="h-3.5 w-3.5 mr-1" /> Clear
-              </Button>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent className="px-3 sm:px-6 pb-4 space-y-2">
-          <Textarea
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            rows={10}
-            placeholder={"Tempel data dari Excel di sini, contoh:\n11 JAM 55 MENIT\t26082104120\tFTTH AKSES\tMERI BULET LINK LOSS - SERPO KOBA SPLT_TBLA10241 SBS-PERMIS-FH.AN6001.G16-OLT-01 FHTT9D0CC218\t1"}
-            className="font-mono text-[11px] sm:text-xs"
-          />
-          <p className="text-[10px] sm:text-xs text-muted-foreground">
-            Terdeteksi {result.rows.length} tiket · {result.teamCount} tim. Klik <b>Generate Format</b> untuk menyusun antrian.
-          </p>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader className="pb-3 pt-4 px-3 sm:px-6">
-          <div className="flex items-center justify-between gap-2 flex-wrap">
-            <CardTitle className="text-sm sm:text-base">
-              📋 Hasil List Antrian
-            </CardTitle>
-            <Button size="sm" className="h-8 text-xs" onClick={handleCopy} disabled={!generated}>
-              <Copy className="h-3.5 w-3.5 mr-1" /> Copy
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent className="px-3 sm:px-6 pb-4">
-          {generated ? (
-            <pre className="whitespace-pre-wrap break-words font-mono text-[11px] sm:text-xs bg-muted/40 rounded-md p-3 max-h-[60vh] overflow-y-auto">
-              {generated}
-            </pre>
-          ) : (
-            <p className="text-xs text-muted-foreground py-6 text-center">
-              Belum ada hasil. Tempel data lalu klik <b>Generate Format</b>.
-            </p>
-          )}
-        </CardContent>
       </Card>
     </div>
   );
