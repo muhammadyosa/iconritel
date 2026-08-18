@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/chart";
 import { toLocalDateStr, parseLocalDateStr } from "@/lib/dateUtils";
 import { classifySla, isSlaOkResolved, isSlaBreachedResolved, SLA_THRESHOLD_MS } from "@/lib/sla";
+import { getSeverity, severityTextClass, severityBadgeClass, severityColor } from "@/lib/severity";
 
 interface MonthlyAnalyticsProps {
   tickets: Ticket[];
@@ -1169,8 +1170,8 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
                         const val = Math.round(yMax - (yMax * i) / ticks);
                         return (
                           <g key={i}>
-                            <line x1={padL} y1={y} x2={W - padR} y2={y} stroke="hsl(var(--border))" strokeWidth="1" opacity={i === ticks ? 0.6 : 0.25} />
-                            <text x={padL - 6} y={y} textAnchor="end" dominantBaseline="central" className="fill-muted-foreground" style={{ fontSize: 10 }}>{val}</text>
+                            <line x1={padL} y1={y} x2={W - padR} y2={y} stroke="hsl(var(--foreground))" strokeWidth="1" className="opacity-10 dark:opacity-20" />
+                            <text x={padL - 6} y={y} textAnchor="end" dominantBaseline="central" className="fill-foreground/80 font-semibold" style={{ fontSize: 10 }}>{val}</text>
                           </g>
                         );
                       })}
@@ -1187,7 +1188,7 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
                             <title>{`${d.name}: ${d.value.toLocaleString("id-ID")} (${pct}%)`}</title>
                             <rect x={x} y={y} width={barW} height={Math.max(h, 2)} rx={6} ry={6} fill={color} className="transition-opacity group-hover:opacity-80" />
                             <text x={x + barW / 2} y={y - 4} textAnchor="middle" className="fill-foreground font-semibold" style={{ fontSize: 10 }}>{d.value}</text>
-                            <text x={x + barW / 2} y={padT + innerH + 14} textAnchor="middle" className="fill-muted-foreground" style={{ fontSize: 9 }}>{shortLabel}</text>
+                            <text x={x + barW / 2} y={padT + innerH + 14} textAnchor="middle" className="fill-foreground font-semibold" style={{ fontSize: 9 }}>{shortLabel}</text>
                           </g>
                         );
                       })}
@@ -1198,6 +1199,7 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
                     {categoryData.map((d, i) => {
                       const pct = ((d.value / total) * 100).toFixed(1);
                       const color = colorFor(d.name, i);
+                      const sev = getSeverity(d.name, d.value, maxValue);
                       return (
                         <button
                           key={d.name}
@@ -1206,13 +1208,14 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
                           className="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-muted/60 hover:border-primary/30 transition-colors text-left min-w-0 w-full border border-border/40"
                         >
                           <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: color }} />
-                          <span className="text-[10px] sm:text-[11px] font-medium truncate flex-1">{d.name}</span>
-                          <span className="text-[10px] sm:text-[11px] font-bold tabular-nums shrink-0">{d.value}</span>
-                          <span className="text-[9px] text-muted-foreground tabular-nums shrink-0">{pct}%</span>
+                          <span className={`text-[10px] sm:text-[11px] truncate flex-1 ${severityTextClass(sev)}`}>{d.name}</span>
+                          <span className={`text-[10px] sm:text-[11px] shrink-0 tabular-nums ${severityBadgeClass(sev)}`}>{d.value}</span>
+                          <span className="text-[9px] font-semibold text-foreground/80 tabular-nums shrink-0">{pct}%</span>
                         </button>
                       );
                     })}
                   </div>
+
                 </div>
               );
             })()}
@@ -1239,10 +1242,7 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
                         backgroundColor: trendSeries[k] ? (trendConfig[k].color as string) : "transparent",
                       }}
                     />
-                    <span
-                      className="text-[10px] sm:text-xs font-medium"
-                      style={{ color: trendConfig[k].color as string }}
-                    >
+                    <span className={`text-[10px] sm:text-xs ${severityTextClass(getSeverity(trendConfig[k].label as string))}`}>
                       {trendConfig[k].label}
                     </span>
                   </label>
@@ -1281,17 +1281,17 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
                     margin={{ top: 20, right: 20, left: 5, bottom: 5 }}
                     onClick={handleTrendDotClick}
                   >
-                    <CartesianGrid strokeDasharray="4 6" vertical={false} stroke="hsl(var(--border))" strokeOpacity={0.5} />
+                    <CartesianGrid strokeDasharray="4 6" vertical={false} stroke="hsl(var(--foreground))" strokeOpacity={0.12} />
                     <XAxis
                       dataKey="day"
-                      tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }}
+                      tick={{ fontSize: 10, fill: "hsl(var(--foreground))", fontWeight: 600 }}
                       tickLine={false}
                       axisLine={false}
                       interval={dailyTrend.length > 14 ? 3 : dailyTrend.length > 7 ? 1 : 0}
                       dy={6}
                     />
                     <YAxis
-                      tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }}
+                      tick={{ fontSize: 10, fill: "hsl(var(--foreground))", fontWeight: 600 }}
                       width={32}
                       tickLine={false}
                       axisLine={false}

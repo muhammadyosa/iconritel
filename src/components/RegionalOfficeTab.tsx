@@ -254,8 +254,8 @@ export default function RegionalOfficeTab({ tickets }: RegionalOfficeTabProps) {
                   barGap={2}
                 >
                   <CartesianGrid strokeDasharray="3 3" vertical={false} opacity={0.15} />
-                  <XAxis type="category" dataKey="region" tick={{ fontSize: 8 }} interval={0} height={50} angle={-35} textAnchor="end" />
-                  <YAxis type="number" tick={{ fontSize: 9 }} width={35} />
+                  <XAxis type="category" dataKey="region" tick={{ fontSize: 8, fill: "hsl(var(--foreground))", fontWeight: 600 }} interval={0} height={50} angle={-35} textAnchor="end" />
+                  <YAxis type="number" tick={{ fontSize: 9, fill: "hsl(var(--foreground))", fontWeight: 600 }} width={35} />
                   <ChartTooltip content={<ChartTooltipContent />} />
                   <Legend wrapperStyle={{ fontSize: 10 }} />
                   <Bar dataKey="critical" fill="hsl(var(--destructive))" name="Critical" radius={[4, 4, 0, 0]} />
