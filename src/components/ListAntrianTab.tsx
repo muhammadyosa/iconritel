@@ -247,7 +247,7 @@ export default function ListAntrianTab() {
             <Textarea
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="Paste data tiket dengan format (pisahkan dengan TAB):\nDURASI[TAB]ID_TIKET[TAB]TYPE[TAB]DESKRIPSI"
+              placeholder="Paste data tiket dengan format (pisahkan dengan TAB):\nDURASI[TAB]ID_TIKET[TAB]TYPE[TAB]DESKRIPSI[TAB]JUMLAH (opsional)"
               className="min-h-[260px] flex-1 resize-none font-mono text-[11px] sm:text-xs bg-muted/40"
             />
           </CardContent>
