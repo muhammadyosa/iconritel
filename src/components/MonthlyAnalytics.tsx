@@ -1198,6 +1198,7 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
                     {categoryData.map((d, i) => {
                       const pct = ((d.value / total) * 100).toFixed(1);
                       const color = colorFor(d.name, i);
+                      const sev = getSeverity(d.name, d.value, maxValue);
                       return (
                         <button
                           key={d.name}
@@ -1206,13 +1207,14 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
                           className="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-muted/60 hover:border-primary/30 transition-colors text-left min-w-0 w-full border border-border/40"
                         >
                           <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: color }} />
-                          <span className="text-[10px] sm:text-[11px] font-medium truncate flex-1">{d.name}</span>
-                          <span className="text-[10px] sm:text-[11px] font-bold tabular-nums shrink-0">{d.value}</span>
-                          <span className="text-[9px] text-muted-foreground tabular-nums shrink-0">{pct}%</span>
+                          <span className={`text-[10px] sm:text-[11px] truncate flex-1 ${severityTextClass(sev)}`}>{d.name}</span>
+                          <span className={`text-[10px] sm:text-[11px] shrink-0 tabular-nums ${severityBadgeClass(sev)}`}>{d.value}</span>
+                          <span className="text-[9px] font-semibold text-foreground/80 tabular-nums shrink-0">{pct}%</span>
                         </button>
                       );
                     })}
                   </div>
+
                 </div>
               );
             })()}
