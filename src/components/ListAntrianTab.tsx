@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Copy, ListOrdered, Trash2 } from "lucide-react";
+import { Copy, ListOrdered, Trash2, Info, Wand2 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
 interface ParsedRow {
