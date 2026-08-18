@@ -114,7 +114,7 @@ export default function ListAntrianTab() {
 
   const result = useMemo(() => {
     const rows = parseLines(input);
-    if (rows.length === 0) return { rows, teamCount: 0, output: "" };
+    if (rows.length === 0) return { rows, teamCount: 0, antrianCount: 0, output: "" };
 
     const teams = new Map<string, ParsedRow[]>();
     rows.forEach((r) => {
