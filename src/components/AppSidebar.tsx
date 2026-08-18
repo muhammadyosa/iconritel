@@ -165,17 +165,20 @@ export function AppSidebar() {
       className={`${collapsed ? "w-[52px]" : "w-56"} transition-[width] duration-200 ease-out will-change-[width]`}
       collapsible="icon"
     >
-      <SidebarContent className="flex flex-col overflow-x-hidden bg-sidebar-background">
+      <SidebarContent className="flex flex-col overflow-x-hidden bg-gradient-sidebar border-r border-sidebar-border">
         {/* Logo */}
-        <div className={`flex-shrink-0 border-b border-sidebar-foreground/10 ${collapsed ? "py-3 px-1.5" : "p-3"}`}>
+        <div className={`flex-shrink-0 border-b border-sidebar-border/70 ${collapsed ? "py-3 px-1.5" : "p-3"}`}>
           {!collapsed ? (
             <div className="flex items-center gap-2.5">
-              <img src={iconnetLogo} alt="Iconnet" className="h-8 w-8 object-contain flex-shrink-0" />
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-sidebar-foreground/10 flex-shrink-0">
+                <img src={iconnetLogo} alt="Iconnet" className="h-6 w-6 object-contain" />
+              </div>
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-bold text-sidebar-foreground truncate">NOC RITEL</p>
+                <p className="text-sm font-bold text-sidebar-foreground truncate tracking-tight">NOC RITEL</p>
                 <p className="text-[10px] text-sidebar-foreground/50">Iconnet</p>
               </div>
             </div>
+
           ) : (
             <Tooltip delayDuration={0}>
               <TooltipTrigger asChild>
