@@ -906,8 +906,13 @@ UPDATE : `}
             }}
           />
         </TabsContent>
+
+        <TabsContent value="list-antrian" className="space-y-4">
+          <ListAntrianTab />
+        </TabsContent>
       </Tabs>
     </div>
+
   );
 };
 
