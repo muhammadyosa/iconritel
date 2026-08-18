@@ -231,7 +231,7 @@ export function TopNavTabs() {
   };
 
   return (
-    <div className="border-b bg-muted/30">
+    <div className="border-b border-border/60 bg-muted/40 backdrop-blur-sm">
       <div
         ref={scrollRef}
         className="flex items-stretch overflow-x-auto scrollbar-none"
