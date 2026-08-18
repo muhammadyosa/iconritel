@@ -129,7 +129,7 @@ export default function ListAntrianTab() {
     );
 
     const tanggal = formatDateID(new Date());
-    const blocks: string[] = [];
+    const blocks: string[][] = [];
 
     orderedTeams.forEach(([team, teamRows]) => {
       const groups = new Map<string, ParsedRow[]>();
@@ -143,25 +143,24 @@ export default function ListAntrianTab() {
         .map((list) => list.slice().sort((a, b) => b.minutes - a.minutes))
         .sort((a, b) => b[0].minutes - a[0].minutes);
 
-      const lines: string[] = [
+      const segments: string[] = [
         `LIST TIKET YANG BELUM DI KERJAKAN TANGGAL ${tanggal}`,
         `TIM: ${team}`,
-        "",
       ];
 
       ordered.forEach((list, i) => {
-        lines.push(`*Antrian ${i + 1}*`, "");
-        list.forEach((r, idx) => {
-          lines.push(r.duration, r.ticketId, `${r.category}\t${r.description} ${r.count}`);
-          if (idx < list.length - 1) lines.push("");
+        segments.push(`*Antrian ${i + 1}*`);
+        list.forEach((r) => {
+          segments.push(r.duration, r.ticketId, `${r.category}\t${r.description}`);
         });
-        if (i < ordered.length - 1) lines.push("");
       });
 
-      blocks.push(lines.join("\n").trimEnd());
+      blocks.push(segments);
     });
 
-    return { rows, teamCount: orderedTeams.length, output: blocks.join("\n\n") };
+    const totalAntrian = blocks.reduce((sum, b) => sum + b.filter((s) => s.startsWith("*Antrian")).length, 0);
+
+    return { rows, teamCount: orderedTeams.length, antrianCount: totalAntrian, output: blocks.map((b) => b.join("\n\n")).join("\n\n") };
   }, [input]);
 
   const handleGenerate = () => {
