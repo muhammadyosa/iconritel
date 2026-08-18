@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Copy, ListOrdered, Trash2, Info, Wand2 } from "lucide-react";
+import { Copy, ListOrdered, Trash2, Info, Wand2, BarChart3, Clock, Users } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
 interface ParsedRow {
@@ -114,7 +114,7 @@ export default function ListAntrianTab() {
 
   const result = useMemo(() => {
     const rows = parseLines(input);
-    if (rows.length === 0) return { rows, teamCount: 0, output: "" };
+    if (rows.length === 0) return { rows, teamCount: 0, antrianCount: 0, output: "" };
 
     const teams = new Map<string, ParsedRow[]>();
     rows.forEach((r) => {
@@ -129,7 +129,7 @@ export default function ListAntrianTab() {
     );
 
     const tanggal = formatDateID(new Date());
-    const blocks: string[] = [];
+    const blocks: string[][] = [];
 
     orderedTeams.forEach(([team, teamRows]) => {
       const groups = new Map<string, ParsedRow[]>();
@@ -143,25 +143,24 @@ export default function ListAntrianTab() {
         .map((list) => list.slice().sort((a, b) => b.minutes - a.minutes))
         .sort((a, b) => b[0].minutes - a[0].minutes);
 
-      const lines: string[] = [
+      const segments: string[] = [
         `LIST TIKET YANG BELUM DI KERJAKAN TANGGAL ${tanggal}`,
         `TIM: ${team}`,
-        "",
       ];
 
       ordered.forEach((list, i) => {
-        lines.push(`*Antrian ${i + 1}*`, "");
-        list.forEach((r, idx) => {
-          lines.push(r.duration, r.ticketId, `${r.category}\t${r.description} ${r.count}`);
-          if (idx < list.length - 1) lines.push("");
+        segments.push(`*Antrian ${i + 1}*`);
+        list.forEach((r) => {
+          segments.push(r.duration, r.ticketId, `${r.category}\t${r.description}`);
         });
-        if (i < ordered.length - 1) lines.push("");
       });
 
-      blocks.push(lines.join("\n").trimEnd());
+      blocks.push(segments);
     });
 
-    return { rows, teamCount: orderedTeams.length, output: blocks.join("\n\n") };
+    const totalAntrian = blocks.reduce((sum, b) => sum + b.filter((s) => s.startsWith("*Antrian")).length, 0);
+
+    return { rows, teamCount: orderedTeams.length, antrianCount: totalAntrian, output: blocks.map((b) => b.join("\n\n")).join("\n\n") };
   }, [input]);
 
   const handleGenerate = () => {
@@ -177,7 +176,7 @@ export default function ListAntrianTab() {
     setGenerated(result.output);
     toast({
       title: "Format dibuat",
-      description: `${result.rows.length} tiket dari ${result.teamCount} tim berhasil disusun.`,
+      description: `${result.rows.length} tiket dari ${result.teamCount} tim berhasil disusun menjadi ${result.antrianCount} antrian.`,
     });
   };
 
@@ -206,6 +205,38 @@ export default function ListAntrianTab() {
         </div>
       </div>
 
+      {result.rows.length > 0 && (
+        <div className="grid grid-cols-3 gap-2">
+          <div className="flex items-center gap-2 rounded-lg border bg-card p-2.5">
+            <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary/10">
+              <BarChart3 className="h-3.5 w-3.5 text-primary" />
+            </div>
+            <div>
+              <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Tiket</p>
+              <p className="text-sm font-semibold leading-none">{result.rows.length}</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 rounded-lg border bg-card p-2.5">
+            <div className="flex h-7 w-7 items-center justify-center rounded-md bg-blue-500/10">
+              <Users className="h-3.5 w-3.5 text-blue-500" />
+            </div>
+            <div>
+              <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Tim</p>
+              <p className="text-sm font-semibold leading-none">{result.teamCount}</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 rounded-lg border bg-card p-2.5">
+            <div className="flex h-7 w-7 items-center justify-center rounded-md bg-amber-500/10">
+              <Clock className="h-3.5 w-3.5 text-amber-500" />
+            </div>
+            <div>
+              <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Antrian</p>
+              <p className="text-sm font-semibold leading-none">{result.antrianCount}</p>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
         <Card className="flex flex-col">
           <div className="flex items-center gap-2 px-4 py-3 border-b">
@@ -216,7 +247,7 @@ export default function ListAntrianTab() {
             <Textarea
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="Paste data tiket dengan format (pisahkan dengan TAB):\nDURASI[TAB]ID_TIKET[TAB]TYPE[TAB]DESKRIPSI"
+              placeholder="Paste data tiket dengan format (pisahkan dengan TAB):\nDURASI[TAB]ID_TIKET[TAB]TYPE[TAB]DESKRIPSI[TAB]JUMLAH (opsional)"
               className="min-h-[260px] flex-1 resize-none font-mono text-[11px] sm:text-xs bg-muted/40"
             />
           </CardContent>
@@ -268,10 +299,10 @@ export default function ListAntrianTab() {
         {showFormat && (
           <CardContent className="px-4 pb-4 space-y-3">
             <p className="text-xs text-muted-foreground">
-              Paste data tiket dengan format (pisahkan dengan TAB):
+              Paste data tiket dengan format (pisahkan dengan TAB). Kolom <b>Jumlah</b> di akhir bersifat opsional.
             </p>
             <pre className="whitespace-pre-wrap break-words font-mono text-[11px] bg-muted/50 rounded-md p-2">
-              DURASI[TAB]ID_TIKET[TAB]TYPE[TAB]DESKRIPSI
+              DURASI[TAB]ID_TIKET[TAB]TYPE[TAB]DESKRIPSI[TAB]JUMLAH
             </pre>
 
             <div>
@@ -286,12 +317,24 @@ export default function ListAntrianTab() {
               <p className="text-[11px] font-semibold mb-1">Hasil Output:</p>
               <pre className="whitespace-pre-wrap break-words font-mono text-[10px] sm:text-[11px] bg-muted/50 rounded-md p-2">
 {`LIST TIKET YANG BELUM DI KERJAKAN TANGGAL 19 AGUSTUS 2026
+
 TIM: SIB BELITUNG
 
 *Antrian 1*
+
 20 JAM 48 MENIT
+
 26082104043
-FTTH AKSES\tRANDA MAHENDRA PENGECEKAN BERSAMA - SIB BELITUNG FAT_TDNA10487 SBS-SUAK.TERONG-HW.MA5801-OLT-01 48575443CE4EB4AD 1`}
+
+FTTH AKSES\tRANDA MAHENDRA PENGECEKAN BERSAMA - SIB BELITUNG FAT_TDNA10487 SBS-SUAK.TERONG-HW.MA5801-OLT-01 48575443CE4EB4AD
+
+*Antrian 2*
+
+18 JAM 22 MENIT
+
+26082104021
+
+FTTH AKSES\tROY MOLIS BAD RX - SIB BELITUNG FAT_TDNA10371 SBS-PERAWAS-HW.MA5801-OLT-01 485754430F5F79AF`}
               </pre>
             </div>
 
