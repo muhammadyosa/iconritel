@@ -158,6 +158,7 @@ export default function ListAntrianTab() {
           lines.push(r.duration, r.ticketId, `${r.category}\t${r.description} ${r.count}`);
           if (idx < list.length - 1) lines.push("");
         });
+        if (i < ordered.length - 1) lines.push("");
       });
 
       blocks.push(lines.join("\n").trimEnd());
