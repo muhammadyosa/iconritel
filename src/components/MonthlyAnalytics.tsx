@@ -229,6 +229,7 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
     });
     return Array.from(map.entries())
       .map(([name, value]) => ({ name, value }))
+      .filter((d) => d.value > 0)
       .sort((a, b) => b.value - a.value);
   }, [categoryFilteredTickets]);
 
