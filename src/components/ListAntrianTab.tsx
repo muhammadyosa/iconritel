@@ -205,7 +205,37 @@ export default function ListAntrianTab() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+      {result.rows.length > 0 && (
+        <div className="grid grid-cols-3 gap-2">
+          <div className="flex items-center gap-2 rounded-lg border bg-card p-2.5">
+            <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary/10">
+              <BarChart3 className="h-3.5 w-3.5 text-primary" />
+            </div>
+            <div>
+              <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Tiket</p>
+              <p className="text-sm font-semibold leading-none">{result.rows.length}</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 rounded-lg border bg-card p-2.5">
+            <div className="flex h-7 w-7 items-center justify-center rounded-md bg-blue-500/10">
+              <Users className="h-3.5 w-3.5 text-blue-500" />
+            </div>
+            <div>
+              <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Tim</p>
+              <p className="text-sm font-semibold leading-none">{result.teamCount}</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 rounded-lg border bg-card p-2.5">
+            <div className="flex h-7 w-7 items-center justify-center rounded-md bg-amber-500/10">
+              <Clock className="h-3.5 w-3.5 text-amber-500" />
+            </div>
+            <div>
+              <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Antrian</p>
+              <p className="text-sm font-semibold leading-none">{result.antrianCount}</p>
+            </div>
+          </div>
+        </div>
+      )}
         <Card className="flex flex-col">
           <div className="flex items-center gap-2 px-4 py-3 border-b">
             <span className="rounded bg-primary/10 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-primary">Input</span>
