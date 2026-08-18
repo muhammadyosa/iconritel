@@ -82,7 +82,8 @@ const parseLines = (raw: string): ParsedRow[] => {
 
       // Team/SERPO extraction:
       // - Proaktif/distribusi: nama tim ada di segmen terakhir setelah " - "
-      // - Akses: nama tim ada sebelum FAT_/SPLT_/FDT_
+      // - Akses: nama tim dimulai dari prefix tim (SIB/TRA/SERPO/INTERNAL/GSP/...)
+      //   sampai sebelum FAT_/SPLT_/FDT_
       let team = "";
       const isProaktif = /\[PROACTIVE|UNDER/i.test(description);
       if (isProaktif) {
@@ -91,9 +92,16 @@ const parseLines = (raw: string): ParsedRow[] => {
         if (lastPart && !/-OLT-\d+/i.test(lastPart)) team = lastPart;
       }
       if (!team) {
+        const prefixMatch = /\b(?:SIB|TRA|SERPO|INTERNAL|GSP|MITRA|PT)\b[\s\S]*?(?=\s+(?:FAT_|SPLT_|FDT_))/i.exec(
+          description
+        );
+        team = prefixMatch?.[0] || "";
+      }
+      if (!team) {
         const teamMatch = /-\s+([A-Z0-9 ._/]+?)\s+(?:FAT_|SPLT_|FDT_)/i.exec(description);
         team = teamMatch?.[1] || "";
       }
+
 
       rows.push({
         duration,
@@ -143,7 +151,8 @@ export default function ListAntrianTab() {
     );
 
     const tanggal = formatDateID(new Date());
-    const blocks: string[][] = [];
+    const blocks: string[] = [];
+    let totalAntrian = 0;
 
     orderedTeams.forEach(([team, teamRows]) => {
       const groups = new Map<string, ParsedRow[]>();
@@ -157,24 +166,24 @@ export default function ListAntrianTab() {
         .map((list) => list.slice().sort((a, b) => b.minutes - a.minutes))
         .sort((a, b) => b[0].minutes - a[0].minutes);
 
-      const segments: string[] = [
-        `LIST TIKET YANG BELUM DI KERJAKAN TANGGAL ${tanggal}`,
-        `TIM: ${team}`,
-      ];
+      totalAntrian += ordered.length;
 
-      ordered.forEach((list, i) => {
-        segments.push(`*Antrian ${i + 1}*`);
-        list.forEach((r) => {
-          segments.push(r.duration, r.ticketId, `${r.category}\t${r.description}`);
-        });
+      const antrianBlocks = ordered.map((list, i) => {
+        const tickets = list.map((r) => [r.duration, r.ticketId, `${r.category}\t${r.description}`].join("\n"));
+        return [`*Antrian ${i + 1}*`, ...tickets].join("\n\n");
       });
 
-      blocks.push(segments);
+      blocks.push(
+        [
+          `LIST TIKET YANG BELUM DI KERJAKAN TANGGAL ${tanggal}`,
+          `TIM: ${team}`,
+          "",
+          antrianBlocks.join("\n\n"),
+        ].join("\n")
+      );
     });
 
-    const totalAntrian = blocks.reduce((sum, b) => sum + b.filter((s) => s.startsWith("*Antrian")).length, 0);
-
-    return { rows, teamCount: orderedTeams.length, antrianCount: totalAntrian, output: blocks.map((b) => b.join("\n\n")).join("\n\n") };
+    return { rows, teamCount: orderedTeams.length, antrianCount: totalAntrian, output: blocks.join("\n\n\n") };
   }, [input]);
 
   const handleGenerate = () => {
