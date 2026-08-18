@@ -239,7 +239,29 @@ All colors MUST be HSL.
   .text-gradient {
     @apply bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent;
   }
+
+  /* Ambient app surface */
+  .app-surface {
+    background-image: var(--gradient-surface);
+    background-repeat: no-repeat;
+  }
+
+  /* Section heading eyebrow */
+  .eyebrow {
+    @apply text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground;
+  }
+
+  /* Content max width for large screens */
+  .content-container {
+    @apply mx-auto w-full max-w-[1600px];
+  }
+
+  /* Elevated interactive surface */
+  .surface-hover {
+    @apply transition-all duration-200 hover:border-primary/30 hover:shadow-elevated;
+  }
 }
+
 
 /* Custom scrollbar for desktop */
 @media (min-width: 768px) {
