@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/chart";
 import { toLocalDateStr, parseLocalDateStr } from "@/lib/dateUtils";
 import { classifySla, isSlaOkResolved, isSlaBreachedResolved, SLA_THRESHOLD_MS } from "@/lib/sla";
+import { getSeverity, severityTextClass, severityBadgeClass, severityColor } from "@/lib/severity";
 
 interface MonthlyAnalyticsProps {
   tickets: Ticket[];
