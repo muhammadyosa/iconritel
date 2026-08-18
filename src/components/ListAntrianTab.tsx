@@ -78,9 +78,22 @@ const parseLines = (raw: string): ParsedRow[] => {
       }
 
       const oltMatch = /([A-Z0-9._-]*-OLT-\d+)/i.exec(description);
-      const teamMatch = /-\s+([A-Z0-9 ._/]+?)\s+(?:FAT_|SPLT_|FDT_)/i.exec(description);
-
       const olt = (oltMatch?.[1] || "TANPA OLT").toUpperCase();
+
+      // Team/SERPO extraction:
+      // - Proaktif/distribusi: nama tim ada di segmen terakhir setelah " - "
+      // - Akses: nama tim ada sebelum FAT_/SPLT_/FDT_
+      let team = "";
+      const isProaktif = /\[PROACTIVE|UNDER/i.test(description);
+      if (isProaktif) {
+        const parts = description.split(/\s+-\s+/).map((p) => p.trim()).filter(Boolean);
+        const lastPart = parts[parts.length - 1] || "";
+        if (lastPart && !/-OLT-\d+/i.test(lastPart)) team = lastPart;
+      }
+      if (!team) {
+        const teamMatch = /-\s+([A-Z0-9 ._/]+?)\s+(?:FAT_|SPLT_|FDT_)/i.exec(description);
+        team = teamMatch?.[1] || "";
+      }
 
       rows.push({
         duration,
@@ -91,8 +104,9 @@ const parseLines = (raw: string): ParsedRow[] => {
         count,
         olt,
         terminasi: extractTerminasi(olt),
-        team: (teamMatch?.[1] || "TANPA TIM").trim().toUpperCase(),
+        team: (team || "TANPA TIM").trim().toUpperCase(),
       });
+
     });
   return rows;
 };
