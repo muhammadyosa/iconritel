@@ -528,6 +528,7 @@ Dibuat: ${new Date(r.createdAt).toLocaleString("id-ID")}
             </TabsTrigger>
             <TabsTrigger value="dashboard-iconnet" className="text-[11px] sm:text-sm px-2.5 sm:px-3 py-1.5 sm:py-2 whitespace-nowrap">📡 Iconnet</TabsTrigger>
             <TabsTrigger value="reporting-gangguan" className="text-[11px] sm:text-sm px-2.5 sm:px-3 py-1.5 sm:py-2 whitespace-nowrap">📊 Reporting Gangguan</TabsTrigger>
+            <TabsTrigger value="list-antrian" className="text-[11px] sm:text-sm px-2.5 sm:px-3 py-1.5 sm:py-2 whitespace-nowrap">📑 List Antrian</TabsTrigger>
           </TabsList>
         </div>
 
