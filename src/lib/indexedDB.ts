@@ -4,6 +4,7 @@ import { FAT } from "@/types/fat";
 import { FDT } from "@/types/fdt";
 import { AKV } from "@/types/akv";
 import { RegionalTeamRecord } from "@/types/regionalTeam";
+import { emitDataSync } from "./dataSyncEvents";
 
 const DB_NAME = "NOC_Database";
 const STORE_NAME = "excel_data";
@@ -72,7 +73,10 @@ export async function saveExcelData(data: ExcelRecord[]): Promise<void> {
     const store = transaction.objectStore(STORE_NAME);
     const request = store.put(data, "excel_records");
 
-    request.onsuccess = () => resolve();
+    request.onsuccess = () => {
+      emitDataSync("excel");
+      resolve();
+    };
     request.onerror = () => reject(request.error);
   });
 }
@@ -105,7 +109,10 @@ export async function clearExcelData(): Promise<void> {
     const store = transaction.objectStore(STORE_NAME);
     const request = store.delete("excel_records");
 
-    request.onsuccess = () => resolve();
+    request.onsuccess = () => {
+      emitDataSync("excel");
+      resolve();
+    };
     request.onerror = () => reject(request.error);
   });
 }
@@ -118,7 +125,10 @@ export async function saveOLTData(data: OLT[]): Promise<void> {
     const store = transaction.objectStore(OLT_STORE_NAME);
     const request = store.put(data, "olt_records");
 
-    request.onsuccess = () => resolve();
+    request.onsuccess = () => {
+      emitDataSync("olt");
+      resolve();
+    };
     request.onerror = () => reject(request.error);
   });
 }
@@ -151,7 +161,10 @@ export async function clearOLTData(): Promise<void> {
     const store = transaction.objectStore(OLT_STORE_NAME);
     const request = store.delete("olt_records");
 
-    request.onsuccess = () => resolve();
+    request.onsuccess = () => {
+      emitDataSync("olt");
+      resolve();
+    };
     request.onerror = () => reject(request.error);
   });
 }
@@ -301,7 +314,10 @@ export async function saveRegionalTeamData(data: RegionalTeamRecord[]): Promise<
     const transaction = db.transaction([REGIONAL_TEAM_STORE_NAME], "readwrite");
     const store = transaction.objectStore(REGIONAL_TEAM_STORE_NAME);
     const request = store.put(data, "regional_team_records");
-    request.onsuccess = () => resolve();
+    request.onsuccess = () => {
+      emitDataSync("regional");
+      resolve();
+    };
     request.onerror = () => reject(request.error);
   });
 }
@@ -330,7 +346,10 @@ export async function clearRegionalTeamData(): Promise<void> {
     const transaction = db.transaction([REGIONAL_TEAM_STORE_NAME], "readwrite");
     const store = transaction.objectStore(REGIONAL_TEAM_STORE_NAME);
     const request = store.delete("regional_team_records");
-    request.onsuccess = () => resolve();
+    request.onsuccess = () => {
+      emitDataSync("regional");
+      resolve();
+    };
     request.onerror = () => reject(request.error);
   });
 }
@@ -360,6 +379,10 @@ export async function clearListData(): Promise<void> {
     clearStore(AKV_STORE_NAME, "akv_records"),
     clearStore(REGIONAL_TEAM_STORE_NAME, "regional_team_records"),
   ]);
+
+  emitDataSync("excel");
+  emitDataSync("olt");
+  emitDataSync("regional");
 }
 
 // Clear all data from all stores including localStorage
