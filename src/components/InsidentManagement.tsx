@@ -17,7 +17,7 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
-import { useCloudTickets } from "@/hooks/useCloudTickets";
+import { useCloudTickets } from "@/contexts/DataSyncContext";
 import { Ticket } from "@/types/ticket";
 import { supabase } from "@/integrations/supabase/client";
 

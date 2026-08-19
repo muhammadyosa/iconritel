@@ -35,7 +35,7 @@ import {
 } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useTickets } from "@/hooks/useTickets";
-import { useCloudTickets } from "@/hooks/useCloudTickets";
+import { useCloudTickets } from "@/contexts/DataSyncContext";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useAuth } from "@/contexts/AuthContext";
 import {

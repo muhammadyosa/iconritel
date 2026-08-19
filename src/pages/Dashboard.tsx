@@ -2,7 +2,7 @@ import { Activity, AlertTriangle, Zap, Server, Calendar, Clock, User, ExternalLi
 import { DashboardSkeleton } from "@/components/PageSkeleton";
 import { RecentActivity } from "@/components/RecentActivity";
 import { MonthlyAnalytics } from "@/components/MonthlyAnalytics";
-import { useCloudTickets } from "@/hooks/useCloudTickets";
+import { useCloudTickets } from "@/contexts/DataSyncContext";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useTicketHistory } from "@/hooks/useTicketHistory";
 import { useShiftReportHistory } from "@/hooks/useShiftReportHistory";
