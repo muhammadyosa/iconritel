@@ -653,10 +653,10 @@ export default function Dashboard() {
                       const sorted = [...periodData].sort((a, b) => b.value - a.value);
                       const top = sorted[0];
                       const topPct = Math.round((top.value / totalReal) * 100);
-                      const resolved = periodData.find((d) => d.status === "Resolved")!;
-                      const critical = periodData.find((d) => d.status === "Critical")!;
-                      const resolvedPct = Math.round((resolved.value / totalReal) * 100);
-                      const criticalPct = Math.round((critical.value / totalReal) * 100);
+                       const resolvedValue = periodData.find((d) => d.status === "Resolved")?.value ?? 0;
+                       const criticalValue = periodData.find((d) => d.status === "Critical")?.value ?? 0;
+                       const resolvedPct = Math.round((resolvedValue / totalReal) * 100);
+                       const criticalPct = Math.round((criticalValue / totalReal) * 100);
                       const health =
                         criticalPct >= 30
                           ? { label: "Kritis", color: "stat-critical", emoji: "🚨" }
