@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/card";
 import { toast } from "@/hooks/use-toast";
 import type * as XLSXType from "xlsx";
-import { loadOLTData } from "@/lib/indexedDB";
+import { useDataSync } from "@/contexts/DataSyncContext";
 import { sanitizeForCSV } from "@/lib/validation";
 import { Link } from "react-router-dom";
 import { OLT } from "@/types/olt";
