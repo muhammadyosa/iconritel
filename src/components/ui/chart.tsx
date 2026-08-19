@@ -152,10 +152,10 @@ const ChartTooltipContent = React.forwardRef<
     // Only show categories with a value > 0, sorted from highest to lowest
     const visiblePayload = payload
       .filter((item) => {
-        const v = typeof item.value === "number" ? item.value : Number(item.value);
+        const v = typeof item?.value === "number" ? item.value : Number(item?.value);
         return Number.isFinite(v) && v > 0;
       })
-      .sort((a, b) => Number(b.value) - Number(a.value));
+      .sort((a, b) => Number(b?.value) - Number(a?.value));
 
     if (!visiblePayload.length) {
       return null;
