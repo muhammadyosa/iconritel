@@ -618,18 +618,21 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
 
   // Custom Y-axis tick with emoji-style for category chart
   const CustomCategoryTick = ({ x, y, payload }: any) => {
-    const isFeeder = FEEDER_CONSTRAINTS_SET.has(payload.value);
+    const label = String(payload?.value ?? "");
+    if (!label) return null;
+    const isFeeder = FEEDER_CONSTRAINTS_SET.has(label);
     return (
       <g transform={`translate(${x},${y})`}>
         <text x={-8} y={-7} textAnchor="end" fontSize={12} className="select-none fill-foreground">
           {isFeeder ? "🏬" : "🏠"}
         </text>
         <text x={-8} y={7} textAnchor="end" fontSize={8} fill="hsl(var(--muted-foreground))">
-          {payload.value.length > 14 ? payload.value.slice(0, 14) + "…" : payload.value}
+          {label.length > 14 ? label.slice(0, 14) + "…" : label}
         </text>
       </g>
     );
   };
+
 
   // Apply KPI filters to a base list — used both inside the dialog and the drill list
   const applyKpiFilters = useCallback((list: Ticket[], categoriesSet: Set<string>) => {
