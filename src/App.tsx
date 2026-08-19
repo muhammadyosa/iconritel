@@ -22,6 +22,9 @@ import { useSwipeToOpenSidebar } from "@/hooks/useSwipeSidebar";
 import { TopNavTabs } from "@/components/TopNavTabs";
 import { TabProvider, useOpenTabs, pathMap } from "@/contexts/TabContext";
 import { NetworkStatus } from "@/components/NetworkStatus";
+import { DataSyncProvider } from "@/contexts/DataSyncContext";
+import { SyncStatusIndicator } from "@/components/SyncStatusIndicator";
+import { GitHubKeyButton } from "@/components/GitHubKeyButton";
 import plnIconPlusLogo from "@/assets/pln-icon-plus.png";
 import danantaraLight from "@/assets/danantara-light.png";
 import danantaraDark from "@/assets/danantara-dark.svg";
@@ -220,7 +223,10 @@ function AppLayout() {
                 </div>
               </div>
 
-              <UserMenu />
+              <div className="flex items-center gap-1 sm:gap-2">
+                <SyncStatusIndicator />
+                <UserMenu />
+              </div>
             </div>
           </header>
           <TopNavTabs />
@@ -230,6 +236,7 @@ function AppLayout() {
             </div>
           </main>
           <ScrollToTop />
+          <GitHubKeyButton />
         </div>
       </div>
     </SidebarProvider>
@@ -248,11 +255,13 @@ const App = () => {
               <Sonner position="top-right" />
               <BrowserRouter>
                 <NetworkStatus />
-                <TicketNotificationProvider>
-                  <TabProvider>
-                    <AppLayout />
-                  </TabProvider>
-                </TicketNotificationProvider>
+                <DataSyncProvider>
+                  <TicketNotificationProvider>
+                    <TabProvider>
+                      <AppLayout />
+                    </TabProvider>
+                  </TicketNotificationProvider>
+                </DataSyncProvider>
               </BrowserRouter>
             </AuthProvider>
           </TooltipProvider>
