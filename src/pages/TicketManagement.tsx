@@ -59,8 +59,8 @@ import { useActivityLog } from "@/hooks/useActivityLog";
 import { Link } from "react-router-dom";
 
 export default function TicketManagement() {
-  // Local Excel data from IndexedDB
-  const { excelData, isLoadingExcel } = useTickets();
+  // Master customer data from the shared sync context (live across all menus)
+  const { excelData, isInitialLoading: isLoadingExcel } = useDataSync();
 
   // FAT data from IndexedDB — used as accurate source for Hostname OLT & ID FAT search
   const [fatData, setFatData] = useState<FAT[]>([]);
