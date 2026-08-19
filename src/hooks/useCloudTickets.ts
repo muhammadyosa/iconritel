@@ -130,7 +130,12 @@ function ticketToDb(ticket: Ticket): DbTicketInsert {
   };
 }
 
-export function useCloudTickets() {
+/**
+ * Raw implementation. Call this ONCE, from `DataSyncProvider`.
+ * Components should use `useCloudTickets()` from `@/contexts/DataSyncContext`,
+ * which shares that single instance so every menu stays in sync.
+ */
+export function useCloudTicketsInternal() {
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const profilesMapRef = useRef<Map<string, ProfileData>>(new Map());
