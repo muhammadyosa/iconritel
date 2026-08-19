@@ -34,8 +34,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { useTickets } from "@/hooks/useTickets";
-import { useCloudTickets } from "@/hooks/useCloudTickets";
+import { useCloudTickets, useDataSync } from "@/contexts/DataSyncContext";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useAuth } from "@/contexts/AuthContext";
 import {
@@ -59,8 +58,8 @@ import { useActivityLog } from "@/hooks/useActivityLog";
 import { Link } from "react-router-dom";
 
 export default function TicketManagement() {
-  // Local Excel data from IndexedDB
-  const { excelData, isLoadingExcel } = useTickets();
+  // Master customer data from the shared sync context (live across all menus)
+  const { excelData, isInitialLoading: isLoadingExcel } = useDataSync();
 
   // FAT data from IndexedDB — used as accurate source for Hostname OLT & ID FAT search
   const [fatData, setFatData] = useState<FAT[]>([]);
