@@ -72,7 +72,6 @@ export default function Dashboard() {
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedMetric, setSelectedMetric] = useState<string | null>(null);
-  const [oltData, setOltData] = useState<OLT[]>([]);
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
   const [filterDialogOpen, setFilterDialogOpen] = useState(false);
   const [filterDialogTitle, setFilterDialogTitle] = useState("");
