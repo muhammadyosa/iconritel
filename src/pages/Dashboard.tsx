@@ -146,14 +146,9 @@ export default function Dashboard() {
     setFilterDialogOpen(true);
   };
 
-  // Load OLT data
-  useEffect(() => {
-    loadOLTData().then(setOltData).catch((error) => {
-      if (import.meta.env.DEV) {
-        console.error("Error loading OLT data:", error);
-      }
-    });
-  }, []);
+  // OLT data comes from the shared sync context, so a Master Data import in
+  // another menu updates these KPIs immediately.
+  const { oltData } = useDataSync();
 
   // Load Regional Team data (and refresh whenever admin uploads a new file)
   useEffect(() => {
