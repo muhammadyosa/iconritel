@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/card";
 import { toast } from "@/hooks/use-toast";
 import type * as XLSXType from "xlsx";
-import { useDataSync } from "@/contexts/DataSyncContext";
+import { loadOLTData } from "@/lib/indexedDB";
 import { sanitizeForCSV } from "@/lib/validation";
 import { Link } from "react-router-dom";
 import { OLT } from "@/types/olt";
@@ -37,10 +37,19 @@ const OLT_FIELDS = [
 ];
 
 const OLTDeviceList = () => {
-  // Shared global state: an import from any menu updates this list instantly.
-  const { oltData, isInitialLoading: isLoading } = useDataSync();
+  const [oltData, setOltData] = useState<OLT[]>([]);
   const [searchField, setSearchField] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    loadOLTData()
+      .then((data) => {
+        setOltData(data);
+        setIsLoading(false);
+      })
+      .catch(() => setIsLoading(false));
+  }, []);
 
   const buildExportData = () => {
     return filteredData.map((olt) => ({

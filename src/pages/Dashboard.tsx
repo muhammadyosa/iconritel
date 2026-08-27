@@ -2,7 +2,7 @@ import { Activity, AlertTriangle, Zap, Server, Calendar, Clock, User, ExternalLi
 import { DashboardSkeleton } from "@/components/PageSkeleton";
 import { RecentActivity } from "@/components/RecentActivity";
 import { MonthlyAnalytics } from "@/components/MonthlyAnalytics";
-import { useCloudTickets } from "@/contexts/DataSyncContext";
+import { useCloudTickets } from "@/hooks/useCloudTickets";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useTicketHistory } from "@/hooks/useTicketHistory";
 import { useShiftReportHistory } from "@/hooks/useShiftReportHistory";
@@ -14,7 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { StatusBadge } from "@/components/StatusBadge";
 import { useState, useEffect, useMemo } from "react";
 import { OLT } from "@/types/olt";
-import { useDataSync } from "@/contexts/DataSyncContext";
+import { loadOLTData } from "@/lib/indexedDB";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -72,6 +72,7 @@ export default function Dashboard() {
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedMetric, setSelectedMetric] = useState<string | null>(null);
+  const [oltData, setOltData] = useState<OLT[]>([]);
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
   const [filterDialogOpen, setFilterDialogOpen] = useState(false);
   const [filterDialogTitle, setFilterDialogTitle] = useState("");
@@ -145,9 +146,14 @@ export default function Dashboard() {
     setFilterDialogOpen(true);
   };
 
-  // OLT data comes from the shared sync context, so a Master Data import in
-  // another menu updates these KPIs immediately.
-  const { oltData } = useDataSync();
+  // Load OLT data
+  useEffect(() => {
+    loadOLTData().then(setOltData).catch((error) => {
+      if (import.meta.env.DEV) {
+        console.error("Error loading OLT data:", error);
+      }
+    });
+  }, []);
 
   // Load Regional Team data (and refresh whenever admin uploads a new file)
   useEffect(() => {

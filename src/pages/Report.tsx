@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { useCloudTickets } from "@/contexts/DataSyncContext";
+import { useCloudTickets } from "@/hooks/useCloudTickets";
 import { loadDefaultRegionalTeamData, subscribeRegionalTeamUpdates } from "@/lib/defaultRegionalData";
 import { RegionalTeamRecord } from "@/types/regionalTeam";
 import { useRealtimeDate } from "@/hooks/useRealtimeDate";
