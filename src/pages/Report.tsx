@@ -1084,7 +1084,7 @@ function PendingTicketsList({ pendingTickets, isLoading, updateTicket, deleteTic
 
     const blocks: string[] = [];
     groups.forEach((tickets, tim) => {
-      const header = `*LIST TIKET PENDING [JANJIAN USER] TANGGAL ${tanggal}*\n\nTIM : ${tim}`;
+      const header = `*LIST TIKET PENDING [JANJIAN USER] TANGGAL ${tanggal}*\nTIM : ${tim}`;
       const body = tickets
         .map((t) => {
           const detail = (t.ticketResult || `${t.constraint} - ${t.hostname} - ${t.serpo}`).trim();
@@ -1092,7 +1092,8 @@ function PendingTicketsList({ pendingTickets, isLoading, updateTicket, deleteTic
           return `ID Incident: ${t.id}\n${line}`;
         })
         .join("\n\n");
-      blocks.push(`${header}\n\n${body}`);
+      blocks.push(`${header}\n${body}`);
+
     });
 
     const text = blocks.join("\n\n");
