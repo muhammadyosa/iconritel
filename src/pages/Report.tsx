@@ -1510,13 +1510,25 @@ Contoh:
                 variant="outline"
                 size="sm"
                 className="h-7 text-[10px] sm:text-xs px-2"
-                onClick={handleCopyAllPending}
+                onClick={handleCopySimplePending}
                 disabled={filteredPending.length === 0}
-                title="Copy semua incident pending (format lengkap)"
+                title="Copy data incident pending"
               >
                 <Copy className="h-3 w-3 mr-1" />
                 Copy
               </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-7 text-[10px] sm:text-xs px-2"
+                onClick={handleCopyAllPending}
+                disabled={filteredPending.length === 0}
+                title="Blast format list tiket pending"
+              >
+                <Send className="h-3 w-3 mr-1" />
+                BLAST
+              </Button>
+
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" size="sm" className="h-7 text-[10px] sm:text-xs" disabled={isExportingPdf}>
