@@ -1054,9 +1054,37 @@ function PendingTicketsList({ pendingTickets, isLoading, updateTicket, deleteTic
       toast({ title: "Tidak ada data", description: "Tidak ada incident pending untuk disalin", variant: "destructive" });
       return;
     }
-    const text = filteredPending.map(formatPendingRow).join("\n");
-    copyToClipboard(text, `${filteredPending.length} incident pending disalin ke clipboard`);
+
+    const bulan = ["JANUARI","FEBRUARI","MARET","APRIL","MEI","JUNI","JULI","AGUSTUS","SEPTEMBER","OKTOBER","NOVEMBER","DESEMBER"];
+    const now = new Date();
+    const tanggal = `${now.getDate()} ${bulan[now.getMonth()]} ${now.getFullYear()}`;
+
+    // Group by TIM (serpo), preserving order of appearance
+    const groups = new Map<string, Ticket[]>();
+    filteredPending.forEach((t) => {
+      const tim = (t.serpo || "TANPA TIM").toUpperCase().trim();
+      if (!groups.has(tim)) groups.set(tim, []);
+      groups.get(tim)!.push(t);
+    });
+
+    const blocks: string[] = [];
+    groups.forEach((tickets, tim) => {
+      const header = `*LIST TIKET PENDING [JANJIAN USER] TANGGAL ${tanggal}*\nTIM : ${tim}`;
+      const body = tickets
+        .map((t) => {
+          const detail = (t.ticketResult || `${t.constraint} - ${t.hostname} - ${t.serpo}`).trim();
+          const kategori = (t.category || "").toUpperCase().trim();
+          const line = kategori ? `${kategori} - ${detail}` : detail;
+          return `ID Incident: ${t.id}\n${line}`;
+        })
+        .join("\n\n");
+      blocks.push(`${header}\n${body}`);
+    });
+
+    const text = blocks.join("\n\n");
+    copyToClipboard(text, `${filteredPending.length} incident pending disalin (format list tiket pending)`);
   };
+
 
   const handleExportPendingPDF = async (period: "harian" | "mingguan" | "bulanan" | "semua") => {
     setIsExportingPdf(true);
