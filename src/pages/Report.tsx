@@ -1049,7 +1049,17 @@ function PendingTicketsList({ pendingTickets, isLoading, updateTicket, deleteTic
   const formatPendingRow = (ticket: Ticket) =>
     `🎫 ${ticket.id}, 📦 ${ticket.category}, 👨‍💼 ${ticket.serviceId}, 👥 ${ticket.serpo}, 👤 ${getCustomerType(ticket)}`;
 
+  const handleCopySimplePending = () => {
+    if (filteredPending.length === 0) {
+      toast({ title: "Tidak ada data", description: "Tidak ada incident pending untuk disalin", variant: "destructive" });
+      return;
+    }
+    const text = filteredPending.map(formatPendingRow).join("\n");
+    copyToClipboard(text, `${filteredPending.length} incident pending disalin`);
+  };
+
   const handleCopyAllPending = () => {
+
     if (filteredPending.length === 0) {
       toast({ title: "Tidak ada data", description: "Tidak ada incident pending untuk disalin", variant: "destructive" });
       return;
