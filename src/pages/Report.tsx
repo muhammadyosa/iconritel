@@ -32,7 +32,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { toast } from "@/hooks/use-toast";
-import { FileText, Download, ClipboardList, Trash2, RefreshCw, Loader2, CalendarIcon, Search, Copy } from "lucide-react";
+import { FileText, Download, ClipboardList, Trash2, RefreshCw, Loader2, CalendarIcon, Search, Copy, Send } from "lucide-react";
 import { parseLocalDateStr, toLocalDateStr } from "@/lib/dateUtils";
 import { format, parse } from "date-fns";
 import { id as idLocale } from "date-fns/locale";
@@ -1049,7 +1049,17 @@ function PendingTicketsList({ pendingTickets, isLoading, updateTicket, deleteTic
   const formatPendingRow = (ticket: Ticket) =>
     `🎫 ${ticket.id}, 📦 ${ticket.category}, 👨‍💼 ${ticket.serviceId}, 👥 ${ticket.serpo}, 👤 ${getCustomerType(ticket)}`;
 
+  const handleCopySimplePending = () => {
+    if (filteredPending.length === 0) {
+      toast({ title: "Tidak ada data", description: "Tidak ada incident pending untuk disalin", variant: "destructive" });
+      return;
+    }
+    const text = filteredPending.map(formatPendingRow).join("\n");
+    copyToClipboard(text, `${filteredPending.length} incident pending disalin`);
+  };
+
   const handleCopyAllPending = () => {
+
     if (filteredPending.length === 0) {
       toast({ title: "Tidak ada data", description: "Tidak ada incident pending untuk disalin", variant: "destructive" });
       return;
@@ -1510,13 +1520,25 @@ Contoh:
                 variant="outline"
                 size="sm"
                 className="h-7 text-[10px] sm:text-xs px-2"
-                onClick={handleCopyAllPending}
+                onClick={handleCopySimplePending}
                 disabled={filteredPending.length === 0}
-                title="Copy semua incident pending (format lengkap)"
+                title="Copy data incident pending"
               >
                 <Copy className="h-3 w-3 mr-1" />
                 Copy
               </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-7 text-[10px] sm:text-xs px-2"
+                onClick={handleCopyAllPending}
+                disabled={filteredPending.length === 0}
+                title="Blast format list tiket pending"
+              >
+                <Send className="h-3 w-3 mr-1" />
+                BLAST
+              </Button>
+
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" size="sm" className="h-7 text-[10px] sm:text-xs" disabled={isExportingPdf}>
