@@ -1067,21 +1067,36 @@ function PendingTicketsList({ pendingTickets, isLoading, updateTicket, deleteTic
       groups.get(tim)!.push(t);
     });
 
+    const getFtthCategory = (t: Ticket) => {
+      const c = (t.constraint || "").toUpperCase().trim();
+      if (c === "FAT LOSS" || c === "FAT BAD RX") return "FTTH DISTRIBUSI";
+      if (
+        c.startsWith("PORT") ||
+        c.startsWith("OLT") ||
+        c.startsWith("UPE") ||
+        c.startsWith("LINK DOWN") ||
+        c.startsWith("LINK BAD RX") ||
+        c === "INTERMITTENT UPE/OLT" ||
+        c === "CABLE PROBLEM (FEEDER)"
+      ) return "FTTH FEEDER";
+      return "FTTH AKSES";
+    };
+
     const blocks: string[] = [];
     groups.forEach((tickets, tim) => {
-      const header = `*LIST TIKET PENDING [JANJIAN USER] TANGGAL ${tanggal}*\nTIM : ${tim}`;
+      const header = `*LIST TIKET PENDING [JANJIAN USER] TANGGAL ${tanggal}*\n\nTIM : ${tim}`;
       const body = tickets
         .map((t) => {
           const detail = (t.ticketResult || `${t.constraint} - ${t.hostname} - ${t.serpo}`).trim();
-          const kategori = (t.category || "").toUpperCase().trim();
-          const line = kategori ? `${kategori} - ${detail}` : detail;
+          const line = `${getFtthCategory(t)} - ${detail}`;
           return `ID Incident: ${t.id}\n${line}`;
         })
         .join("\n\n");
-      blocks.push(`${header}\n${body}`);
+      blocks.push(`${header}\n\n${body}`);
     });
 
     const text = blocks.join("\n\n");
+
     copyToClipboard(text, `${filteredPending.length} incident pending disalin (format list tiket pending)`);
   };
 
