@@ -326,6 +326,14 @@ export function ReportManagement() {
         </Card>
       </div>
 
+      {/* Auto-delete notice */}
+      <div className="flex items-center gap-2 rounded-lg border border-amber-500/20 bg-amber-500/10 px-3 py-2 text-xs text-amber-700 dark:text-amber-400">
+        <span>🗑️</span>
+        <span>
+          Report shift otomatis terhapus <strong>3 hari</strong> setelah dibuat.
+        </span>
+      </div>
+
       {/* Actions Bar */}
       <div className="flex flex-wrap items-center gap-3">
         <Select value={shiftFilter} onValueChange={setShiftFilter}>
