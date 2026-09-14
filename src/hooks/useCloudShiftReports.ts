@@ -26,14 +26,30 @@ export interface ShiftReportInput {
   notes: string;
 }
 
+// Report shift otomatis terhapus 3 hari setelah dibuat
+const AUTO_DELETE_MS = 3 * 24 * 60 * 60 * 1000;
+
 export function useCloudShiftReports() {
   const [reports, setReports] = useState<CloudShiftReport[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Delete shift reports older than 3 days
+  const cleanupOldReports = useCallback(async () => {
+    try {
+      const cutoff = new Date(Date.now() - AUTO_DELETE_MS).toISOString();
+      await supabase.from("shift_reports").delete().lt("created_at", cutoff);
+    } catch (error) {
+      if (import.meta.env.DEV) {
+        console.error("Error cleaning up old shift reports:", error);
+      }
+    }
+  }, []);
 
   // Fetch all shift reports
   const fetchReports = useCallback(async () => {
     try {
       setIsLoading(true);
+      await cleanupOldReports();
       const { data, error } = await supabase
         .from("shift_reports")
         .select("*")
