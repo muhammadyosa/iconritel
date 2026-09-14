@@ -26,14 +26,30 @@ export interface ShiftReportInput {
   notes: string;
 }
 
+// Report shift otomatis terhapus 3 hari setelah dibuat
+const AUTO_DELETE_MS = 3 * 24 * 60 * 60 * 1000;
+
 export function useCloudShiftReports() {
   const [reports, setReports] = useState<CloudShiftReport[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Delete shift reports older than 3 days
+  const cleanupOldReports = useCallback(async () => {
+    try {
+      const cutoff = new Date(Date.now() - AUTO_DELETE_MS).toISOString();
+      await supabase.from("shift_reports").delete().lt("created_at", cutoff);
+    } catch (error) {
+      if (import.meta.env.DEV) {
+        console.error("Error cleaning up old shift reports:", error);
+      }
+    }
+  }, []);
 
   // Fetch all shift reports
   const fetchReports = useCallback(async () => {
     try {
       setIsLoading(true);
+      await cleanupOldReports();
       const { data, error } = await supabase
         .from("shift_reports")
         .select("*")
@@ -53,7 +69,7 @@ export function useCloudShiftReports() {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [cleanupOldReports]);
 
   // Add a new shift report
   const addReport = useCallback(async (input: ShiftReportInput): Promise<boolean> => {
@@ -219,10 +235,22 @@ export function useCloudShiftReports() {
       )
       .subscribe();
 
+    // Periodic auto-delete check every 30 minutes
+    const cleanupInterval = setInterval(() => {
+      cleanupOldReports().then(() => {
+        setReports((prev) =>
+          prev.filter(
+            (r) => Date.now() - new Date(r.created_at).getTime() < AUTO_DELETE_MS
+          )
+        );
+      });
+    }, 30 * 60 * 1000);
+
     return () => {
+      clearInterval(cleanupInterval);
       supabase.removeChannel(channel);
     };
-  }, [fetchReports]);
+  }, [fetchReports, cleanupOldReports]);
 
   // Convert CloudShiftReport to format compatible with ShiftReportCard
   const getFormattedReports = useCallback(() => {
