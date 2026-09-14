@@ -235,10 +235,22 @@ export function useCloudShiftReports() {
       )
       .subscribe();
 
+    // Periodic auto-delete check every 30 minutes
+    const cleanupInterval = setInterval(() => {
+      cleanupOldReports().then(() => {
+        setReports((prev) =>
+          prev.filter(
+            (r) => Date.now() - new Date(r.created_at).getTime() < AUTO_DELETE_MS
+          )
+        );
+      });
+    }, 30 * 60 * 1000);
+
     return () => {
+      clearInterval(cleanupInterval);
       supabase.removeChannel(channel);
     };
-  }, [fetchReports]);
+  }, [fetchReports, cleanupOldReports]);
 
   // Convert CloudShiftReport to format compatible with ShiftReportCard
   const getFormattedReports = useCallback(() => {
