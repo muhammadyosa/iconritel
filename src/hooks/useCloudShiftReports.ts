@@ -69,7 +69,7 @@ export function useCloudShiftReports() {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [cleanupOldReports]);
 
   // Add a new shift report
   const addReport = useCallback(async (input: ShiftReportInput): Promise<boolean> => {
