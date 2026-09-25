@@ -1,4 +1,4 @@
-export type AppRoleName = "admin" | "noc" | "reviewer" | "intern";
+export type AppRoleName = "admin" | "noc" | "superior" | "reviewer" | "cs" | "intern";
 
 export interface MenuDef {
   title: string;
@@ -29,7 +29,9 @@ const ALL_PATHS = ALL_MENUS.map((m) => m.path);
 export const ROLE_DEFAULT_PATHS: Record<AppRoleName, string[]> = {
   admin: ALL_PATHS,
   noc: ALL_PATHS,
-  reviewer: ALL_PATHS.filter((p) => p !== "/auto-config"),
+  superior: ALL_PATHS.filter((p) => p !== "/notes"),
+  reviewer: ["/", "/tickets", "/teams", "/akv", "/fat", "/fdt", "/olt", "/upe", "/bng", "/report", "/settings"],
+  cs: ["/", "/tickets", "/teams", "/report", "/settings"],
   intern: ["/", "/tickets", "/teams", "/report", "/settings"],
 };
 
