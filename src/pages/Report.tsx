@@ -45,6 +45,7 @@ import { DashboardIconnetTab } from "@/components/DashboardIconnetTab";
 import { ReportingGangguanTab } from "@/components/ReportingGangguanTab";
 import ListAntrianTab from "@/components/ListAntrianTab";
 import { useUserRole } from "@/hooks/useUserRole";
+import { canSeeTab, firstAllowedTab, REPORT_TABS } from "@/lib/rolePermissions";
 import { StatusBadge } from "@/components/StatusBadge";
 import { TicketDetailDialog } from "@/components/TicketDetailDialog";
 import {
@@ -124,7 +125,7 @@ const Report = () => {
   const pendingCount = pendingCloudTickets.length;
 
   // User role for permission-based UI
-  const { isAdmin } = useUserRole();
+  const { isAdmin, role } = useUserRole();
   
   // Regional data for Reporting Gangguan
   const [reportRegionalData, setReportRegionalData] = useState<RegionalTeamRecord[]>([]);
@@ -514,11 +515,16 @@ Dibuat: ${new Date(r.createdAt).toLocaleString("id-ID")}
         </p>
       </div>
 
-      <Tabs defaultValue="shift" className="w-full">
+      <Tabs key={role} defaultValue={firstAllowedTab(REPORT_TABS, role, ["shift","sla","pending","dashboard-iconnet","reporting-gangguan","list-antrian"])} className="w-full">
         <div className="overflow-x-auto scrollbar-hide -mx-2 px-2 sm:mx-0 sm:px-0">
           <TabsList className="inline-flex w-auto min-w-full sm:min-w-0 gap-1 h-auto flex-wrap sm:flex-nowrap p-1">
+            {canSeeTab(REPORT_TABS, role, "shift") && (
             <TabsTrigger value="shift" className="text-[11px] sm:text-sm px-2.5 sm:px-3 py-1.5 sm:py-2 whitespace-nowrap">🗣️ Report Shift</TabsTrigger>
+            )}
+            {canSeeTab(REPORT_TABS, role, "sla") && (
             <TabsTrigger value="sla" className="text-[11px] sm:text-sm px-2.5 sm:px-3 py-1.5 sm:py-2 whitespace-nowrap">⏰ SLA 7 JAM</TabsTrigger>
+            )}
+            {canSeeTab(REPORT_TABS, role, "pending") && (
             <TabsTrigger value="pending" className="text-[11px] sm:text-sm px-2.5 sm:px-3 py-1.5 sm:py-2 whitespace-nowrap relative">
               📋 Pending
               {pendingCount > 0 && (
@@ -527,9 +533,16 @@ Dibuat: ${new Date(r.createdAt).toLocaleString("id-ID")}
                 </span>
               )}
             </TabsTrigger>
+            )}
+            {canSeeTab(REPORT_TABS, role, "dashboard-iconnet") && (
             <TabsTrigger value="dashboard-iconnet" className="text-[11px] sm:text-sm px-2.5 sm:px-3 py-1.5 sm:py-2 whitespace-nowrap">📡 Iconnet</TabsTrigger>
+            )}
+            {canSeeTab(REPORT_TABS, role, "reporting-gangguan") && (
             <TabsTrigger value="reporting-gangguan" className="text-[11px] sm:text-sm px-2.5 sm:px-3 py-1.5 sm:py-2 whitespace-nowrap">📊 Reporting Gangguan</TabsTrigger>
+            )}
+            {canSeeTab(REPORT_TABS, role, "list-antrian") && (
             <TabsTrigger value="list-antrian" className="text-[11px] sm:text-sm px-2.5 sm:px-3 py-1.5 sm:py-2 whitespace-nowrap">📑 List Antrian</TabsTrigger>
+            )}
           </TabsList>
         </div>
 

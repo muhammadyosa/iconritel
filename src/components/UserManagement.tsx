@@ -42,16 +42,18 @@ interface UserWithRole {
   created_at: string;
   last_online: string | null;
   is_approved: boolean;
-  role: "admin" | "noc" | "reviewer" | "intern";
+  role: "admin" | "noc" | "superior" | "reviewer" | "cs" | "intern";
   lastAction?: UserActivity;
 }
 
-type AppRoleValue = "admin" | "noc" | "reviewer" | "intern";
+type AppRoleValue = "admin" | "noc" | "superior" | "reviewer" | "cs" | "intern";
 
 const ROLE_META: Record<AppRoleValue, { emoji: string; label: string }> = {
   admin: { emoji: "🕵️", label: "Admin" },
   noc: { emoji: "🧑‍💼", label: "NOC" },
+  superior: { emoji: "👨‍💼", label: "Superior" },
   reviewer: { emoji: "👨‍💻", label: "Reviewer" },
+  cs: { emoji: "🧑‍💻", label: "CS" },
   intern: { emoji: "🧑‍🏫", label: "Intern" },
 };
 
@@ -113,7 +115,7 @@ export function UserManagement() {
           created_at: profile.created_at,
           last_online: profile.last_online as string | null,
           is_approved: (profile as any).is_approved ?? false,
-          role: (userRole?.role as "admin" | "noc" | "reviewer" | "intern") || "noc",
+          role: (userRole?.role as "admin" | "noc" | "superior" | "reviewer" | "cs" | "intern") || "noc",
           lastAction: latestActivityMap.get(profile.user_id),
         };
       });
@@ -135,7 +137,7 @@ export function UserManagement() {
     }
   }, [isAdmin]);
 
-  const handleRoleChange = async (userId: string, newRole: "admin" | "noc" | "reviewer" | "intern") => {
+  const handleRoleChange = async (userId: string, newRole: "admin" | "noc" | "superior" | "reviewer" | "cs" | "intern") => {
     setUpdatingUserId(userId);
     try {
       // Get current role for logging
@@ -430,7 +432,7 @@ export function UserManagement() {
     }
   };
 
-  const roleOrder = { admin: 0, noc: 1, reviewer: 2, intern: 3 };
+  const roleOrder = { admin: 0, superior: 1, noc: 2, reviewer: 3, cs: 4, intern: 5 };
 
   // Filter users by search query
   const filteredUsers = users.filter((u) => {

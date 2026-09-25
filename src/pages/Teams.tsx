@@ -57,6 +57,8 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import RegionalOfficeTab from "@/components/RegionalOfficeTab";
+import { useUserRole } from "@/hooks/useUserRole";
+import { canSeeTab, TEAM_TABS } from "@/lib/rolePermissions";
 import type { DateRange } from "react-day-picker";
 
 const NOC_CATEGORY_COLORS = [
@@ -109,6 +111,7 @@ export default function Teams() {
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
   const [periodPreset, setPeriodPreset] = useState<string>("all");
   const [activeTab, setActiveTab] = useState("team-stats");
+  const { role } = useUserRole();
   const [selectedUser, setSelectedUser] = useState<string | null>(null);
   const [statsSheetTeam, setStatsSheetTeam] = useState<{ team: string; category: "ritel" | "feeder" } | null>(null);
   const [statusSheet, setStatusSheet] = useState<{ category: "ritel" | "feeder"; status: "Resolved" | "Pending" | "Critical" } | null>(null);
@@ -655,9 +658,11 @@ export default function Teams() {
               <TabsTrigger value="team-stats" className="text-[11px] sm:text-sm px-2.5 sm:px-3 py-1.5 sm:py-2 whitespace-nowrap">
                 👥 Team Ritel/Serpo
               </TabsTrigger>
+              {canSeeTab(TEAM_TABS, role, "team-noc") && (
               <TabsTrigger value="team-noc" className="text-[11px] sm:text-sm px-2.5 sm:px-3 py-1.5 sm:py-2 whitespace-nowrap">
                 💻 Team NOC
               </TabsTrigger>
+              )}
               <TabsTrigger value="regional-office" className="text-[11px] sm:text-sm px-2.5 sm:px-3 py-1.5 sm:py-2 whitespace-nowrap">
                 🗺 Regional Office
               </TabsTrigger>

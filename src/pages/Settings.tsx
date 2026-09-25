@@ -28,6 +28,7 @@ import { importMultiSheetExcel, getExcelSheets, ImportResult } from "@/lib/multi
 import { saveExcelData, saveOLTData, saveFATData, openDB, clearListData, saveFDTData, saveAKVData, loadExcelData, loadOLTData, loadFATData, loadFDTData, loadAKVData, saveRegionalTeamData, loadRegionalTeamData, clearRegionalTeamData } from "@/lib/indexedDB";
 import { emitRegionalTeamUpdated } from "@/lib/defaultRegionalData";
 import { useUserRole } from "@/hooks/useUserRole";
+import { canSeeTab, firstAllowedTab, SETTINGS_TABS } from "@/lib/rolePermissions";
 import { UserManagement } from "@/components/UserManagement";
 import { InsidentManagement } from "@/components/InsidentManagement";
 import { ReportManagement } from "@/components/ReportManagement";
@@ -125,7 +126,7 @@ async function loadBNGData(): Promise<any[]> {
 }
 
 export default function Settings() {
-  const { isAdmin } = useUserRole();
+  const { isAdmin, role } = useUserRole();
   const { user, profile } = useAuth();
   const [file, setFile] = useState<File | null>(null);
   // Info upload LOKAL (per device) — disimpan di localStorage, bukan Supabase
@@ -593,12 +594,14 @@ export default function Settings() {
         </div>
       </div>
 
-      <Tabs defaultValue="import" className="space-y-6">
+      <Tabs key={role} defaultValue={firstAllowedTab(SETTINGS_TABS, role, ["import","history","info"])} className="space-y-6">
         <div className="overflow-x-auto scrollbar-hide -mx-2 px-2 sm:mx-0 sm:px-0">
           <TabsList className={`inline-flex w-auto min-w-full sm:min-w-0 gap-1 h-auto flex-wrap sm:flex-nowrap p-1`}>
+            {canSeeTab(SETTINGS_TABS, role, "import") && (
             <TabsTrigger value="import" className="text-[11px] sm:text-sm px-2.5 sm:px-3 py-1.5 sm:py-2 whitespace-nowrap">
               📥 Import
             </TabsTrigger>
+            )}
             {isAdmin && (
               <TabsTrigger value="incidents" className="text-[11px] sm:text-sm px-2.5 sm:px-3 py-1.5 sm:py-2 whitespace-nowrap">
                 📋 Insident
@@ -609,9 +612,11 @@ export default function Settings() {
                 🗣️ Report
               </TabsTrigger>
             )}
+            {canSeeTab(SETTINGS_TABS, role, "history") && (
             <TabsTrigger value="history" className="text-[11px] sm:text-sm px-2.5 sm:px-3 py-1.5 sm:py-2 whitespace-nowrap">
               📊 History
             </TabsTrigger>
+            )}
             {isAdmin && (
               <TabsTrigger value="team-noc" className="text-[11px] sm:text-sm px-2.5 sm:px-3 py-1.5 sm:py-2 whitespace-nowrap">
                 👥 Team NOC
@@ -627,9 +632,11 @@ export default function Settings() {
                 🧾 Audit History
               </TabsTrigger>
             )}
+            {canSeeTab(SETTINGS_TABS, role, "info") && (
             <TabsTrigger value="info" className="text-[11px] sm:text-sm px-2.5 sm:px-3 py-1.5 sm:py-2 whitespace-nowrap">
               📌 Info
             </TabsTrigger>
+            )}
           </TabsList>
         </div>
 
