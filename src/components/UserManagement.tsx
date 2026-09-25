@@ -57,6 +57,33 @@ const ROLE_META: Record<AppRoleValue, { emoji: string; label: string }> = {
   intern: { emoji: "🧑‍🏫", label: "Intern" },
 };
 
+
+const FULL = "Full Akses";
+const ROLE_LEGEND: { role: AppRoleValue; desc: string; items: [string, string][] }[] = [
+  { role: "admin", desc: "Akses penuh ke seluruh menu & pengaturan.", items: [
+    ["🖥️ Dashboard", FULL], ["🎫 Incident Management", FULL], ["👥 List Team", FULL], ["🗂️ List AKV User", FULL],
+    ["📍 List FAT", FULL], ["📦 List FDT", FULL], ["📟 List OLT", FULL], ["🔗 List UPE", FULL], ["🛰 List BNG", FULL],
+    ["💻 List Config", FULL], ["📖 List Note NOC", FULL], ["📝 Report", FULL], ["🛠 Settings", FULL] ] },
+  { role: "superior", desc: "Akses penuh operasional, Report terbatas.", items: [
+    ["🖥️ Dashboard", FULL], ["🎫 Incident Management", FULL], ["👥 List Team", FULL], ["🗂️ List AKV User", FULL],
+    ["📍 List FAT", FULL], ["📦 List FDT", FULL], ["📟 List OLT", FULL], ["🔗 List UPE", FULL], ["🛰 List BNG", FULL],
+    ["💻 List Config", FULL], ["📝 Report", "🗣️ Report Shift · 📋 Pending · 📊 Reporting Gangguan"], ["🛠 Settings", "📥 Import · 📊 History · 📌 Info"] ] },
+  { role: "noc", desc: "Akses penuh operasional NOC.", items: [
+    ["🖥️ Dashboard", FULL], ["🎫 Incident Management", FULL], ["👥 List Team", FULL], ["🗂️ List AKV User", FULL],
+    ["📍 List FAT", FULL], ["📦 List FDT", FULL], ["📟 List OLT", FULL], ["🔗 List UPE", FULL], ["🛰 List BNG", FULL],
+    ["💻 List Config", FULL], ["📖 List Note NOC", FULL], ["📝 Report", FULL], ["🛠 Settings", "📥 Import · 📊 History · 📌 Info"] ] },
+  { role: "reviewer", desc: "Pemantauan data & inventori, Settings view only.", items: [
+    ["🖥️ Dashboard", FULL], ["🎫 Incident Management", "📋 List Incident · 📢 List Over SLA"], ["👥 List Team", "👥 Team Ritel/Serpo · 🗺 Regional Office"],
+    ["🗂️ List AKV User", FULL], ["📍 List FAT", FULL], ["📦 List FDT", FULL], ["📟 List OLT", FULL], ["🔗 List UPE", FULL], ["🛰 List BNG", FULL],
+    ["📝 Report", "🗣️ Report Shift · 📊 Reporting Gangguan"], ["🛠 Settings", "📥 Import · 📊 History · 📌 Info — View Only"] ] },
+  { role: "cs", desc: "Monitoring incident & tim untuk Customer Service.", items: [
+    ["🖥️ Dashboard", FULL], ["🎫 Incident Management", "📋 List Incident · 📢 List Over SLA"], ["👥 List Team", "👥 Team Ritel/Serpo · 🗺 Regional Office"],
+    ["📝 Report", "🗣️ Report Shift · 📊 Reporting Gangguan"], ["🛠 Settings", "📥 Import · 📊 History · 📌 Info"] ] },
+  { role: "intern", desc: "Akses dasar untuk pembelajaran.", items: [
+    ["🖥️ Dashboard", FULL], ["🎫 Incident Management", "📋 List Incident"], ["👥 List Team", "👥 Team Ritel/Serpo · 🗺 Regional Office"],
+    ["📝 Report", "🗣️ Report Shift · ⏰ SLA 7 JAM · 📊 Reporting Gangguan"], ["🛠 Settings", "📥 Import · 📌 Info"] ] },
+];
+
 export function UserManagement() {
   const { isAdmin } = useUserRole();
   const { user: currentAuthUser } = useAuth();
@@ -881,60 +908,35 @@ export function UserManagement() {
         )}
 
         {/* Role Legend */}
-        <div className="mt-6 p-4 bg-muted/50 rounded-lg space-y-4">
-          <p className="text-xs font-semibold text-muted-foreground">Keterangan Role & Akses:</p>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            {/* Admin */}
-            <div className="space-y-1.5 p-3 rounded-md border bg-card">
-              <Badge variant="default" className="mb-1">
-                <span className="mr-1">🕵️</span> Admin
-              </Badge>
-              <div className="flex flex-wrap gap-1">
-                {["🖥️ Dashboard","🎫 Incident","👥 Team","🗂️ AKV","📍 FAT","📦 FDT","📟 OLT","🔗 UPE","🛰 BNG","📖 Configure","📝 Report","🛠 Settings"].map(m => (
-                  <span key={m} className="text-[10px] bg-primary/10 text-primary rounded px-1.5 py-0.5">{m}</span>
-                ))}
+        <div className="mt-6 p-3 sm:p-4 bg-muted/40 rounded-xl border space-y-3">
+          <div className="flex items-center justify-between gap-2 flex-wrap">
+            <p className="text-sm font-bold">🔐 Keterangan Role & Akses</p>
+            <p className="text-[10px] text-muted-foreground">Akses default per role · dapat dikustom per user</p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
+            {ROLE_LEGEND.map((r) => (
+              <div key={r.role} className="rounded-lg border bg-card p-3 space-y-2 shadow-xs">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="inline-flex items-center gap-1.5 text-sm font-bold">
+                    <span>{ROLE_META[r.role].emoji}</span>{ROLE_META[r.role].label}
+                  </span>
+                  <span className="text-[10px] font-semibold rounded-full bg-primary/10 text-primary px-2 py-0.5">
+                    {r.items.length} menu
+                  </span>
+                </div>
+                <p className="text-[10px] text-muted-foreground leading-snug">{r.desc}</p>
+                <ul className="divide-y divide-border/60">
+                  {r.items.map(([menu, access]) => (
+                    <li key={menu} className="flex items-start justify-between gap-2 py-1 text-[11px]">
+                      <span className="font-semibold whitespace-nowrap">{menu}</span>
+                      <span className={`text-right ${access === "Full Akses" ? "text-primary font-semibold" : "text-muted-foreground"}`}>
+                        {access}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
               </div>
-              <p className="text-[10px] text-muted-foreground">🛠 Settings: Full Akses</p>
-            </div>
-
-            {/* NOC */}
-            <div className="space-y-1.5 p-3 rounded-md border bg-card">
-              <Badge variant="secondary" className="mb-1">
-                <span className="mr-1">🧑‍💼</span> NOC
-              </Badge>
-              <div className="flex flex-wrap gap-1">
-                {["🖥️ Dashboard","🎫 Incident","👥 Team","🗂️ AKV","📍 FAT","📦 FDT","📟 OLT","🔗 UPE","🛰 BNG","📖 Configure","📝 Report","🛠 Settings"].map(m => (
-                  <span key={m} className="text-[10px] bg-secondary/50 text-secondary-foreground rounded px-1.5 py-0.5">{m}</span>
-                ))}
-              </div>
-              <p className="text-[10px] text-muted-foreground">🛠 Settings: 📥 Import · 📊 History · 📌 Info</p>
-            </div>
-
-            {/* Intern */}
-            <div className="space-y-1.5 p-3 rounded-md border bg-card">
-              <Badge variant="outline" className="mb-1 border-emerald-500/50 text-emerald-600">
-                <span className="mr-1">🧑‍🏫</span> Intern
-              </Badge>
-              <div className="flex flex-wrap gap-1">
-                {["🖥️ Dashboard","🎫 Incident","👥 Team","🗂️ AKV","📝 Report","🛠 Settings"].map(m => (
-                  <span key={m} className="text-[10px] bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 rounded px-1.5 py-0.5">{m}</span>
-                ))}
-              </div>
-              <p className="text-[10px] text-muted-foreground">🛠 Settings: 📥 Import · 📌 Info</p>
-            </div>
-
-            {/* Reviewer */}
-            <div className="space-y-1.5 p-3 rounded-md border bg-card">
-              <Badge variant="outline" className="mb-1 border-amber-500/50 text-amber-600">
-                <span className="mr-1">👨‍💻</span> Reviewer
-              </Badge>
-              <div className="flex flex-wrap gap-1">
-                {["🖥️ Dashboard","🎫 Incident","👥 Team","🗂️ AKV","📍 FAT","📦 FDT","📟 OLT","🔗 UPE","🛰 BNG","📖 Configure","📝 Report","🛠 Settings"].map(m => (
-                  <span key={m} className="text-[10px] bg-amber-500/10 text-amber-700 dark:text-amber-400 rounded px-1.5 py-0.5">{m}</span>
-                ))}
-              </div>
-              <p className="text-[10px] text-muted-foreground">🛠 Settings: 📥 Import · 📊 History · 📌 Info — <span className="font-medium">View Only</span></p>
-            </div>
+            ))}
           </div>
         </div>
 
