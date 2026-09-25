@@ -37,6 +37,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { useTickets } from "@/hooks/useTickets";
 import { useCloudTickets } from "@/hooks/useCloudTickets";
 import { useUserRole } from "@/hooks/useUserRole";
+import { canSeeTab, firstAllowedTab, TICKET_TABS } from "@/lib/rolePermissions";
 import { useAuth } from "@/contexts/AuthContext";
 import {
   Ticket,
@@ -83,7 +84,7 @@ export default function TicketManagement() {
   } = useCloudTickets();
 
   // User role for permission-based UI
-  const { isAdmin, isReviewer } = useUserRole();
+  const { isAdmin, isReviewer, role } = useUserRole();
   
   // Get current user for tracking who created tickets
   const { user, profile } = useAuth();
@@ -769,12 +770,18 @@ export default function TicketManagement() {
         </DialogContent>
       </Dialog>
 
-      <Tabs defaultValue="preview-data" className="w-full">
+      <Tabs key={role} defaultValue={firstAllowedTab(TICKET_TABS, role, ["preview-data","daftar-ticket","over-sla"])} className="w-full">
         <div className="overflow-x-auto scrollbar-hide -mx-2 px-2 sm:mx-0 sm:px-0">
           <TabsList className="inline-flex w-auto min-w-full sm:min-w-0 gap-1 h-auto flex-wrap sm:flex-nowrap p-1">
+            {canSeeTab(TICKET_TABS, role, "preview-data") && (
             <TabsTrigger value="preview-data" className="text-[11px] sm:text-sm px-2.5 sm:px-3 py-1.5 sm:py-2 whitespace-nowrap">📋 Preview Data</TabsTrigger>
+            )}
+            {canSeeTab(TICKET_TABS, role, "daftar-ticket") && (
             <TabsTrigger value="daftar-ticket" className="text-[11px] sm:text-sm px-2.5 sm:px-3 py-1.5 sm:py-2 whitespace-nowrap">📑 List Incident</TabsTrigger>
+            )}
+            {canSeeTab(TICKET_TABS, role, "over-sla") && (
             <TabsTrigger value="over-sla" className="text-[11px] sm:text-sm px-2.5 sm:px-3 py-1.5 sm:py-2 whitespace-nowrap">📢 List Over SLA</TabsTrigger>
+            )}
           </TabsList>
         </div>
 
