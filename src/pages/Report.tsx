@@ -1101,17 +1101,43 @@ function PendingTicketsList({ pendingTickets, isLoading, updateTicket, deleteTic
       return "FTTH AKSES";
     };
 
-    // Give every incident its own complete block so it can be shared independently.
-    const text = filteredPending.map((t) => {
+    // Group by TIM so incidents with the same team share one header block,
+    // ordered by oldest pending time first (longest pending on top).
+    const pendingTime = (t: Ticket) => {
+      const d = new Date(t.pendingAt || t.createdISO || t.createdAt || "");
+      return isNaN(d.getTime()) ? new Date(0) : d;
+    };
+
+    const groups = new Map<string, Ticket[]>();
+    filteredPending.forEach((t) => {
       const tim = (t.serpo || "TANPA TIM").toUpperCase().trim();
-      const detail = t.category === "FEEDER"
-        ? (t.ticketResult || [t.constraint, t.hostname, t.serpo].filter(Boolean).join(" - ")).trim()
-        : [
-            [t.customerName, t.constraint].filter(Boolean).join(" "),
-            [t.serpo, t.fatId, t.hostname, t.snOnt].filter(Boolean).join(" "),
-          ].filter(Boolean).join(" - ").toUpperCase();
-      return `*LIST TIKET PENDING [JANJIAN USER] TANGGAL ${tanggal}*\n\nTIM : ${tim}\n\nID Incident: ${t.id}\n\n${getFtthCategory(t)} - ${detail}`;
-    }).join("\n\n\n");
+      const list = groups.get(tim) ?? [];
+      list.push(t);
+      groups.set(tim, list);
+    });
+
+    const blocks = Array.from(groups.entries()).map(([tim, list]) => {
+      list.sort((a, b) => pendingTime(a).getTime() - pendingTime(b).getTime());
+      const entries = list.map((t) => {
+        const detail = t.category === "FEEDER"
+          ? (t.ticketResult || [t.constraint, t.hostname, t.serpo].filter(Boolean).join(" - ")).trim()
+          : [
+              [t.customerName, t.constraint].filter(Boolean).join(" "),
+              [t.serpo, t.fatId, t.hostname, t.snOnt].filter(Boolean).join(" "),
+            ].filter(Boolean).join(" - ").toUpperCase();
+        return `ID Incident: ${t.id}\n\n${getFtthCategory(t)} - ${detail}`;
+      });
+      return `*LIST TIKET PENDING [JANJIAN USER] TANGGAL ${tanggal}*\n\nTIM : ${tim}\n\n${entries.join("\n\n\n")}`;
+    });
+
+    // Tim blocks ordered by their oldest pending ticket (longest pending first).
+    blocks.sort((a, b) => 0);
+    const sortedGroups = Array.from(groups.entries())
+      .map(([tim, list]) => ({ tim, oldest: Math.min(...list.map((t) => pendingTime(t).getTime())) }))
+      .sort((a, b) => a.oldest - b.oldest)
+      .map(({ tim }) => blocks.find((b) => b.startsWith(`*LIST TIKET PENDING [JANJIAN USER] TANGGAL ${tanggal}*\n\nTIM : ${tim}\n\n`))!);
+
+    const text = sortedGroups.join("\n\n\n");
 
     copyToClipboard(text, `${filteredPending.length} incident pending disalin (format list tiket pending)`);
   };
