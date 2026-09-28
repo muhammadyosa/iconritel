@@ -99,5 +99,7 @@ export function searchAll(term: string, allowed: string[], limit = 5): CategoryR
     scored.sort((a, b) => b.score - a.score);
     out.push({ category: c, total: scored.length, hits: scored.slice(0, limit) });
   }
-  return out.sort((a, b) => (b.hits[0]?.score ?? 0) - (a.hits[0]?.score ?? 0));
+  // Urutan kategori hasil sesuai standar aplikasi (Team dulu setelah Incident, lalu AKV→BNG).
+  const ORDER: SearchCategory[] = ["team", "akv", "fat", "fdt", "olt", "upe", "bng"];
+  return out.sort((a, b) => ORDER.indexOf(a.category.id) - ORDER.indexOf(b.category.id));
 }
