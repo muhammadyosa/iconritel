@@ -1367,6 +1367,13 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
             )}
           </CardContent>
         </Card>
+
+        {reportShiftSlot && (
+          <div className="flex-1 min-h-0 flex flex-col [&>*]:min-w-0">
+            {reportShiftSlot}
+          </div>
+        )}
+        </div>
       </div>
 
 
