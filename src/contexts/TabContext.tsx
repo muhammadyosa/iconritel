@@ -50,7 +50,11 @@ export const useOpenTabs = () => useContext(TabContext);
 function loadTabs(): OpenTab[] {
   try {
     const raw = sessionStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : [];
+    const stored = raw ? JSON.parse(raw) : [];
+    if (!Array.isArray(stored)) return [];
+    return stored.map((tab: OpenTab) => pathMap[tab.path]
+      ? { ...tab, title: pathMap[tab.path].title, emoji: pathMap[tab.path].emoji }
+      : tab);
   } catch { return []; }
 }
 
