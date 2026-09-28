@@ -137,7 +137,14 @@ export default function RegionalOfficeTab({ tickets, initialSearch = "" }: Regio
 
   const filteredData = regionalData.filter((r) => {
     if (!searchQuery) return true;
-    return r.region.toLowerCase().includes(searchQuery.toLowerCase());
+    const q = searchQuery.toLowerCase();
+    if (r.region.toLowerCase().includes(q)) return true;
+    return r.teams.some((t) =>
+      t.serpoName.toLowerCase().includes(q) ||
+      t.mitraName.toLowerCase().includes(q) ||
+      t.teamMember.toLowerCase().includes(q) ||
+      t.hostnames.some((h) => h.toLowerCase().includes(q))
+    );
   });
 
   const totalHostnames = regionalData.reduce((s, r) => s + r.totalHostnames, 0);
