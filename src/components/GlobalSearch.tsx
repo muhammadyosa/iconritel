@@ -130,7 +130,7 @@ export function GlobalSearch() {
             autoFocus
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            placeholder="Cari Service ID, customer, hostname, FAT ID, IP, Incident ID…"
+            placeholder="Cari Service ID, customer, hostname, FAT ID, IP, nama team, Incident ID…"
             className="h-12 flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
             aria-label="Kata kunci pencarian global"
           />
@@ -144,7 +144,7 @@ export function GlobalSearch() {
         <CommandList className="max-h-[70vh] sm:max-h-[60vh]">
           {!searching && (
             <p className="px-4 pt-3 pb-1 text-xs text-muted-foreground">
-              Ketik minimal 2 karakter untuk mencari di AKV, FAT, FDT, OLT, UPE, BNG & Incident.
+              Ketik minimal 2 karakter untuk mencari di AKV, FAT, FDT, OLT, UPE, BNG, Team & Incident.
             </p>
           )}
           {nothing && (
