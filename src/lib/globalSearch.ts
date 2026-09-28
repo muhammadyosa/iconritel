@@ -1,6 +1,6 @@
 import { openDB } from "@/lib/indexedDB";
 
-export type SearchCategory = "akv" | "fat" | "fdt" | "olt" | "upe" | "bng";
+export type SearchCategory = "akv" | "fat" | "fdt" | "olt" | "upe" | "bng" | "team";
 
 interface FieldDef { key: string; label: string; primary?: boolean }
 
@@ -27,6 +27,8 @@ export const SEARCH_CATEGORIES: CategoryDef[] = [
     fields: [{ key: "hostnameUPE", label: "Hostname UPE", primary: true }, { key: "hostnameOLT", label: "Hostname OLT", primary: true }] },
   { id: "bng", title: "List BNG", emoji: "🛰", path: "/bng", store: "bng_data", recordKey: "bng_records",
     fields: [{ key: "hostnameBng", label: "Hostname BNG", primary: true }, { key: "ipBng", label: "IP BNG", primary: true }, { key: "hostnameOlt", label: "Hostname OLT" }, { key: "upe", label: "UPE" }, { key: "portUpe", label: "Port UPE" }, { key: "npe", label: "NPE" }, { key: "vlan", label: "VLAN" }, { key: "hostnameRadius", label: "Hostname Radius" }, { key: "ipRadius", label: "IP Radius" }, { key: "kotaKabupaten", label: "Kota/Kab" }] },
+  { id: "team", title: "Team", emoji: "👥", path: "/teams", store: "regional_team_data", recordKey: "regional_team_records",
+    fields: [{ key: "serpoName", label: "Nama Team", primary: true }, { key: "mitraName", label: "Mitra", primary: true }, { key: "teamMember", label: "Anggota", primary: true }, { key: "region", label: "Region" }, { key: "serpoType", label: "Tipe" }, { key: "hostnames", label: "Hostname" }] },
 ];
 
 type Rec = Record<string, unknown>;
