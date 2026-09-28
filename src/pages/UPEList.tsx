@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useUrlSearchPrefill } from "@/hooks/useUrlSearchPrefill";
 import { Download, Server, FileText, Info, FileDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -60,6 +61,7 @@ const UPEList = () => {
   const [upeData, setUpeData] = useState<UPE[]>([]);
   const [searchField, setSearchField] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState("");
+  useUrlSearchPrefill(setSearchQuery, setSearchField);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
