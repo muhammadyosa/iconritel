@@ -786,7 +786,7 @@ export function RecentActivity({ variant = "card" }: { variant?: "card" | "popov
                   </span>
                 )}
               </span>
-              <span className="hidden sm:inline text-xs">♻ Activity</span>
+              <span className="hidden sm:inline text-xs">♻️ Activity</span>
               {counts.all > 0 && (
                 <Badge className="h-4 min-w-4 px-1 rounded-full bg-primary text-primary-foreground text-[9px] font-bold">
                   {counts.all}
