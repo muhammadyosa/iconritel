@@ -27,6 +27,8 @@ interface MonthlyAnalyticsProps {
   tickets: Ticket[];
   getTrendChartData?: (days: number) => Array<{ day: string; isoDate: string; dayNum: number; total: number; resolved: number; slaOk: number }>;
   getCategoryData?: (filter: string, customDate?: string) => Array<{ name: string; value: number }>;
+  /** Rendered under the Daily Trends card to fill the column with no leftover space */
+  reportShiftSlot?: React.ReactNode;
 }
 
 const CATEGORY_COLORS: Record<string, string> = {
@@ -50,7 +52,7 @@ const FALLBACK_COLORS = [
   "hsl(340, 75%, 55%)", "hsl(30, 80%, 50%)",
 ];
 
-export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: getCategoryDataFromHistory }: MonthlyAnalyticsProps) {
+export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: getCategoryDataFromHistory, reportShiftSlot }: MonthlyAnalyticsProps) {
   const [selectedMonth, setSelectedMonth] = useState(() => {
     const now = new Date();
     return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
@@ -1225,6 +1227,8 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
           </CardContent>
         </Card>
 
+        {/* Daily Trend + Report Shift slot — right column, fills the row with no leftover space */}
+        <div className="flex flex-col gap-2 sm:gap-3 min-w-0">
         {/* Daily Trend */}
         <Card className="overflow-hidden border">
           <CardHeader className="py-2 px-3 sm:px-4 border-b bg-muted/20">
@@ -1363,6 +1367,13 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
             )}
           </CardContent>
         </Card>
+
+        {reportShiftSlot && (
+          <div className="flex-1 min-h-0 flex flex-col [&>*]:min-w-0">
+            {reportShiftSlot}
+          </div>
+        )}
+        </div>
       </div>
 
 
