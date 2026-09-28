@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useUrlSearchPrefill } from "@/hooks/useUrlSearchPrefill";
 import { Download, Network, FileText, Info, FileDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -76,6 +77,7 @@ const BNGList = () => {
   const [bngData, setBngData] = useState<BNG[]>([]);
   const [searchField, setSearchField] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState("");
+  useUrlSearchPrefill(setSearchQuery, setSearchField);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
