@@ -25,6 +25,7 @@ import { NetworkStatus } from "@/components/NetworkStatus";
 import { MobileBottomNav } from "@/components/MobileBottomNav";
 import { GlobalSearch } from "@/components/GlobalSearch";
 import { RecentActivity } from "@/components/RecentActivity";
+import { FeatureUpdates } from "@/components/FeatureUpdates";
 import plnIconPlusLogo from "@/assets/pln-icon-plus.png";
 import danantaraLight from "@/assets/danantara-light.png";
 import danantaraDark from "@/assets/danantara-dark.svg";
@@ -226,6 +227,7 @@ function AppLayout() {
               <div className="flex items-center gap-2">
                 <GlobalSearch />
                 <RecentActivity variant="popover" />
+                <FeatureUpdates />
                 <UserMenu />
               </div>
             </div>
