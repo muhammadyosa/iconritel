@@ -1227,6 +1227,8 @@ export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: 
           </CardContent>
         </Card>
 
+        {/* Daily Trend + Report Shift slot — right column, fills the row with no leftover space */}
+        <div className="flex flex-col gap-2 sm:gap-3 min-w-0">
         {/* Daily Trend */}
         <Card className="overflow-hidden border">
           <CardHeader className="py-2 px-3 sm:px-4 border-b bg-muted/20">
