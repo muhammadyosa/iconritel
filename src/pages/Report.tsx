@@ -1101,17 +1101,40 @@ function PendingTicketsList({ pendingTickets, isLoading, updateTicket, deleteTic
       return "FTTH AKSES";
     };
 
-    // Give every incident its own complete block so it can be shared independently.
-    const text = filteredPending.map((t) => {
+    // Group by TIM so incidents with the same team share one header block.
+    // Teams are ordered by their oldest pending ticket (longest pending first),
+    // and tickets inside each block likewise oldest pending first.
+    const pendingTime = (t: Ticket) => {
+      const d = new Date(t.pendingAt || t.createdISO || t.createdAt || "");
+      return isNaN(d.getTime()) ? 0 : d.getTime();
+    };
+
+    const groups = new Map<string, Ticket[]>();
+    filteredPending.forEach((t) => {
       const tim = (t.serpo || "TANPA TIM").toUpperCase().trim();
-      const detail = t.category === "FEEDER"
-        ? (t.ticketResult || [t.constraint, t.hostname, t.serpo].filter(Boolean).join(" - ")).trim()
-        : [
-            [t.customerName, t.constraint].filter(Boolean).join(" "),
-            [t.serpo, t.fatId, t.hostname, t.snOnt].filter(Boolean).join(" "),
-          ].filter(Boolean).join(" - ").toUpperCase();
-      return `*LIST TIKET PENDING [JANJIAN USER] TANGGAL ${tanggal}*\n\nTIM : ${tim}\n\nID Incident: ${t.id}\n\n${getFtthCategory(t)} - ${detail}`;
-    }).join("\n\n\n");
+      const list = groups.get(tim) ?? [];
+      list.push(t);
+      groups.set(tim, list);
+    });
+
+    const sortedGroups = Array.from(groups.entries())
+      .map(([tim, list]) => ({ tim, list: list.slice().sort((a, b) => pendingTime(a) - pendingTime(b)) }))
+      .sort((a, b) => pendingTime(a.list[0]) - pendingTime(b.list[0]));
+
+    const text = sortedGroups
+      .map(({ tim, list }) => {
+        const entries = list.map((t) => {
+          const detail = t.category === "FEEDER"
+            ? (t.ticketResult || [t.constraint, t.hostname, t.serpo].filter(Boolean).join(" - ")).trim()
+            : [
+                [t.customerName, t.constraint].filter(Boolean).join(" "),
+                [t.serpo, t.fatId, t.hostname, t.snOnt].filter(Boolean).join(" "),
+              ].filter(Boolean).join(" - ").toUpperCase();
+          return `ID Incident: ${t.id}\n\n${getFtthCategory(t)} - ${detail}`;
+        });
+        return `*LIST TIKET PENDING [JANJIAN USER] TANGGAL ${tanggal}*\n\nTIM : ${tim}\n\n${entries.join("\n\n\n")}`;
+      })
+      .join("\n\n\n");
 
     copyToClipboard(text, `${filteredPending.length} incident pending disalin (format list tiket pending)`);
   };
