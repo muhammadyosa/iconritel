@@ -51,13 +51,12 @@ export function FeatureUpdates() {
       <PopoverTrigger asChild>
         <Button
           variant="outline"
-          size="sm"
-          className="relative h-9 rounded-full gap-2 px-3 text-muted-foreground"
+          size="icon"
+          className="relative h-9 w-9 rounded-full text-muted-foreground"
           aria-label="Pengumuman pembaruan fitur"
           title="Pembaruan fitur"
         >
           <span aria-hidden="true" className="text-base leading-none">📢</span>
-          <span className="hidden lg:inline text-xs">Pembaruan</span>
           {seen !== null && seen !== LATEST_UPDATE && (
             <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-primary ring-2 ring-background" aria-label="Pembaruan belum dibaca" />
           )}
