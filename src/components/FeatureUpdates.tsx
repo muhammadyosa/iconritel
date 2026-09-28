@@ -50,9 +50,9 @@ export function FeatureUpdates() {
     <Popover open={open} onOpenChange={onOpenChange}>
       <PopoverTrigger asChild>
         <Button
-          variant="outline"
+          variant="ghost"
           size="icon"
-          className="relative h-9 w-9 rounded-full text-muted-foreground"
+          className="relative h-9 w-9 rounded-full text-muted-foreground hover:bg-transparent"
           aria-label="Pengumuman pembaruan fitur"
           title="Pembaruan fitur"
         >
