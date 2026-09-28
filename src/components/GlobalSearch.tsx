@@ -111,12 +111,11 @@ export function GlobalSearch() {
         variant="outline"
         size="sm"
         onClick={() => setOpen(true)}
-        className="h-9 gap-2 text-muted-foreground"
+        className="h-9 rounded-full gap-2 px-3 sm:px-4 text-muted-foreground"
         aria-label="Cari (Ctrl+K)"
       >
         <Search className="h-4 w-4" />
         <span className="hidden lg:inline text-xs">Cari…</span>
-        <kbd className="hidden lg:inline rounded border border-border bg-muted px-1.5 text-[10px]">Ctrl K</kbd>
       </Button>
       <CommandDialog
         open={open}

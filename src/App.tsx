@@ -24,6 +24,7 @@ import { TabProvider, useOpenTabs, pathMap } from "@/contexts/TabContext";
 import { NetworkStatus } from "@/components/NetworkStatus";
 import { MobileBottomNav } from "@/components/MobileBottomNav";
 import { GlobalSearch } from "@/components/GlobalSearch";
+import { RecentActivity } from "@/components/RecentActivity";
 import plnIconPlusLogo from "@/assets/pln-icon-plus.png";
 import danantaraLight from "@/assets/danantara-light.png";
 import danantaraDark from "@/assets/danantara-dark.svg";
@@ -224,6 +225,7 @@ function AppLayout() {
 
               <div className="flex items-center gap-2">
                 <GlobalSearch />
+                <RecentActivity variant="popover" />
                 <UserMenu />
               </div>
             </div>
