@@ -12,6 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { useMenuAccess } from "@/hooks/useMenuAccess";
 import { ALL_MENUS } from "@/lib/menuAccess";
+import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
 interface Hit {
@@ -84,7 +85,7 @@ export function GlobalSearch() {
           {hits.length > 0 && (
             <CommandGroup heading="Incident">
               {hits.map((h) => (
-                <CommandItem key={h.ticket_id} value={`inc ${h.ticket_id} ${h.customer_name}`} onSelect={() => go(`/tickets?q=${encodeURIComponent(h.ticket_id)}`)}>
+                <CommandItem key={h.ticket_id} value={`inc ${h.ticket_id} ${h.customer_name}`} onSelect={() => { navigator.clipboard?.writeText(h.ticket_id).catch(() => {}); toast.success(`Incident ID ${h.ticket_id} disalin`); go("/tickets"); }}>
                   <span className="font-mono text-xs mr-2">{h.ticket_id}</span>
                   <span className="truncate">{h.customer_name}</span>
                   <span className="ml-auto text-[10px] text-muted-foreground">{h.status} · {h.serpo}</span>
