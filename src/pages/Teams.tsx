@@ -1,4 +1,5 @@
 import { Users, Eye, CalendarIcon, X, Monitor, TrendingUp, TrendingDown, ArrowRight, ChevronDown, ChevronUp, Trophy, Medal } from "lucide-react";
+import { useSearchParams } from "react-router-dom";
 import { TeamsSkeleton } from "@/components/PageSkeleton";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -110,7 +111,9 @@ export default function Teams() {
   const [selectedTeam, setSelectedTeam] = useState<string | null>(null);
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
   const [periodPreset, setPeriodPreset] = useState<string>("all");
-  const [activeTab, setActiveTab] = useState("team-stats");
+  const [searchParams] = useSearchParams();
+  const prefillQuery = searchParams.get("q") ?? "";
+  const [activeTab, setActiveTab] = useState(prefillQuery ? "regional-office" : "team-stats");
   const { role } = useUserRole();
   const [selectedUser, setSelectedUser] = useState<string | null>(null);
   const [statsSheetTeam, setStatsSheetTeam] = useState<{ team: string; category: "ritel" | "feeder" } | null>(null);
@@ -2072,7 +2075,7 @@ export default function Teams() {
         <TabsContent value="regional-office" className="space-y-4">
           <h2 className="sr-only">Regional Office</h2>
           {dateFilter}
-          <RegionalOfficeTab tickets={filteredTickets} />
+          <RegionalOfficeTab tickets={filteredTickets} initialSearch={prefillQuery} />
         </TabsContent>
       </Tabs>
 

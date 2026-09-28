@@ -31,6 +31,7 @@ import { motion, AnimatePresence } from "framer-motion";
 
 interface RegionalOfficeTabProps {
   tickets: Ticket[];
+  initialSearch?: string;
 }
 
 interface RegionalData {
@@ -62,10 +63,10 @@ const PIE_COLORS = [
   "hsl(55, 80%, 45%)",
 ];
 
-export default function RegionalOfficeTab({ tickets }: RegionalOfficeTabProps) {
+export default function RegionalOfficeTab({ tickets, initialSearch = "" }: RegionalOfficeTabProps) {
   const [teamData, setTeamData] = useState<RegionalTeamRecord[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState(initialSearch);
   const [selectedRegion, setSelectedRegion] = useState<RegionalData | null>(null);
   const [selectedTeam, setSelectedTeam] = useState<RegionalTeamRecord | null>(null);
   const [selectedIncident, setSelectedIncident] = useState<Ticket | null>(null);
