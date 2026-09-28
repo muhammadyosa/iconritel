@@ -22,6 +22,7 @@ export const SAFE_PROTECTED_PATHS = new Set<string>([
   "/upe",
   "/bng",
   "/notes",
+  "/auto-config",
   "/report",
   "/settings",
   "/install",
