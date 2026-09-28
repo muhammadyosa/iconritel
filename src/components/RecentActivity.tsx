@@ -13,6 +13,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { StatusBadge } from "@/components/StatusBadge";
 import { Ticket } from "@/types/ticket";
 import { Separator } from "@/components/ui/separator";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { toast } from "sonner";
 
 interface UserOnlineInfo {
@@ -94,7 +95,7 @@ function getActionFromStatus(status: string): RecentItem["action"] {
   }
 }
 
-export function RecentActivity() {
+export function RecentActivity({ variant = "card" }: { variant?: "card" | "popover" }) {
   const [items, setItems] = useState<RecentItem[]>([]);
   const [userProfiles, setUserProfiles] = useState<Map<string, UserOnlineInfo>>(new Map());
   const [loading, setLoading] = useState(true);
@@ -108,6 +109,7 @@ export function RecentActivity() {
   const [copiedField, setCopiedField] = useState<string | null>(null);
   const [realtimeStatus, setRealtimeStatus] = useState<"connecting" | "live" | "polling" | "offline">("connecting");
   const [lastSyncAt, setLastSyncAt] = useState<Date | null>(null);
+  const [open, setOpen] = useState(false);
 
   const copyToClipboard = useCallback((text: string, fieldName: string) => {
     navigator.clipboard.writeText(text).then(() => {
@@ -376,8 +378,7 @@ export function RecentActivity() {
     }
   }, []);
 
-  return (
-    <>
+  const feed = (
       <Card className="overflow-hidden border h-full">
         <CardHeader className="py-2.5 px-3 sm:px-4 border-b bg-muted/20 space-y-2">
           <div className="flex items-center justify-between">
@@ -592,7 +593,10 @@ export function RecentActivity() {
           )}
         </CardContent>
       </Card>
+  );
 
+  const dialogs = (
+    <>
       {/* Incident Detail Dialog */}
       <Dialog open={ticketDialogOpen} onOpenChange={setTicketDialogOpen}>
         <DialogContent className="max-w-md">
@@ -759,6 +763,55 @@ export function RecentActivity() {
           ) : null}
         </DialogContent>
       </Dialog>
+    </>
+  );
+
+  if (variant === "popover") {
+    return (
+      <>
+        <Popover open={open} onOpenChange={setOpen}>
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-9 rounded-full gap-2 px-3 text-muted-foreground"
+              aria-label="Recent Activity"
+            >
+              <span className="relative flex h-4 w-4 items-center justify-center">
+                <Activity className="h-4 w-4 text-primary" />
+                {realtimeStatus === "live" && (
+                  <span className="absolute -top-1 -right-1 flex h-1.5 w-1.5">
+                    <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75 animate-ping" />
+                    <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                  </span>
+                )}
+              </span>
+              <span className="hidden sm:inline text-xs">Aktivitas</span>
+              {counts.all > 0 && (
+                <Badge className="h-4 min-w-4 px-1 rounded-full bg-primary text-primary-foreground text-[9px] font-bold">
+                  {counts.all}
+                </Badge>
+              )}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent
+            align="end"
+            sideOffset={8}
+            className="w-[92vw] max-w-[420px] p-0 overflow-hidden shadow-lg"
+            onOpenAutoFocus={(e) => e.preventDefault()}
+          >
+            {feed}
+          </PopoverContent>
+        </Popover>
+        {dialogs}
+      </>
+    );
+  }
+
+  return (
+    <>
+      {feed}
+      {dialogs}
     </>
   );
 }
