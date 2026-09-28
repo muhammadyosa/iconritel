@@ -1121,6 +1121,9 @@ function PendingTicketsList({ pendingTickets, isLoading, updateTicket, deleteTic
       .map(([tim, list]) => ({ tim, list: list.slice().sort((a, b) => pendingTime(a) - pendingTime(b)) }))
       .sort((a, b) => pendingTime(a.list[0]) - pendingTime(b.list[0]));
 
+    // Compact format: header, blank line, then TIM / ID / detail lines adjacent
+    // within each block; blocks separated by one blank line. Teams ordered by
+    // oldest pending first, tickets inside each block likewise.
     const text = sortedGroups
       .map(({ tim, list }) => {
         const entries = list.map((t) => {
@@ -1130,11 +1133,11 @@ function PendingTicketsList({ pendingTickets, isLoading, updateTicket, deleteTic
                 [t.customerName, t.constraint].filter(Boolean).join(" "),
                 [t.serpo, t.fatId, t.hostname, t.snOnt].filter(Boolean).join(" "),
               ].filter(Boolean).join(" - ").toUpperCase();
-          return `ID Incident: ${t.id}\n\n${getFtthCategory(t)} - ${detail}`;
+          return `ID Incident: ${t.id}\n${getFtthCategory(t)} - ${detail}`;
         });
-        return `*LIST TIKET PENDING [JANJIAN USER] TANGGAL ${tanggal}*\n\nTIM : ${tim}\n\n${entries.join("\n\n\n")}`;
+        return `*LIST TIKET PENDING [JANJIAN USER] TANGGAL ${tanggal}*\n\nTIM : ${tim}\n${entries.join("\n\n")}`;
       })
-      .join("\n\n\n");
+      .join("\n\n");
 
     copyToClipboard(text, `${filteredPending.length} incident pending disalin (format list tiket pending)`);
   };
