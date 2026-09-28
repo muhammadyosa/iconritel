@@ -1078,8 +1078,13 @@ function PendingTicketsList({ pendingTickets, isLoading, updateTicket, deleteTic
     }
 
     const bulan = ["JANUARI","FEBRUARI","MARET","APRIL","MEI","JUNI","JULI","AGUSTUS","SEPTEMBER","OKTOBER","NOVEMBER","DESEMBER"];
-    const now = new Date();
-    const tanggal = `${now.getDate()} ${bulan[now.getMonth()]} ${now.getFullYear()}`;
+    const jakartaParts = new Intl.DateTimeFormat("en-US", {
+      timeZone: "Asia/Jakarta", day: "numeric", month: "numeric", year: "numeric",
+    }).formatToParts(new Date());
+    const day = jakartaParts.find((part) => part.type === "day")?.value ?? "";
+    const month = Number(jakartaParts.find((part) => part.type === "month")?.value ?? "1");
+    const year = jakartaParts.find((part) => part.type === "year")?.value ?? "";
+    const tanggal = `${day} ${bulan[month - 1]} ${year}`;
 
     const getFtthCategory = (t: Ticket) => {
       const c = (t.constraint || "").toUpperCase().trim();
