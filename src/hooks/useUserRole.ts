@@ -1,61 +1,42 @@
-import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 
 export type AppRole = "admin" | "noc" | "superior" | "reviewer" | "cs" | "intern";
 
+/**
+ * Role user aktif. Memakai cache React Query bersama sehingga banyak komponen
+ * yang memanggil hook ini hanya memicu SATU request ke database.
+ */
 export function useUserRole() {
   const { user } = useAuth();
-  const [role, setRole] = useState<AppRole>("noc");
-  const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    async function fetchRole() {
-      if (!user) {
-        setRole("noc");
-        setIsLoading(false);
-        return;
+  const { data, isLoading } = useQuery({
+    queryKey: ["user-role", user?.id ?? null],
+    enabled: !!user,
+    staleTime: 5 * 60 * 1000,
+    queryFn: async (): Promise<AppRole> => {
+      const { data, error } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", user!.id)
+        .maybeSingle();
+      if (error) {
+        if (import.meta.env.DEV) console.error("Error fetching user role:", error);
+        return "noc";
       }
+      return ((data?.role as AppRole) || "noc");
+    },
+  });
 
-      try {
-        const { data, error } = await supabase
-          .from("user_roles")
-          .select("role")
-          .eq("user_id", user.id)
-          .maybeSingle();
-
-        if (error) {
-          if (import.meta.env.DEV) {
-            console.error("Error fetching user role:", error);
-          }
-          setRole("noc");
-        } else {
-          setRole((data?.role as AppRole) || "noc");
-        }
-      } catch (error) {
-        if (import.meta.env.DEV) {
-          console.error("Error fetching user role:", error);
-        }
-        setRole("noc");
-      } finally {
-        setIsLoading(false);
-      }
-    }
-
-    fetchRole();
-  }, [user]);
-
-  const isAdmin = role === "admin";
-  const isNOC = role === "noc";
-  const isReviewer = role === "reviewer";
-  const isIntern = role === "intern";
+  const role: AppRole = data ?? "noc";
 
   return {
     role,
-    isAdmin,
-    isNOC,
-    isReviewer,
-    isIntern,
-    isLoading,
+    isAdmin: role === "admin",
+    isNOC: role === "noc",
+    isReviewer: role === "reviewer",
+    isIntern: role === "intern",
+    isLoading: !!user && isLoading,
   };
 }

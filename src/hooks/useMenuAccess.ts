@@ -1,8 +1,39 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect } from "react";
+import { useQuery, useQueryClient, type QueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserRole } from "@/hooks/useUserRole";
 import { getDefaultPaths } from "@/lib/menuAccess";
+
+// Satu channel realtime bersama untuk semua pemakai hook (ref-counted),
+// mencegah channel ganda dengan nama sama.
+const channels = new Map<string, { count: number; remove: () => void }>();
+
+function subscribe(userId: string, qc: QueryClient) {
+  const existing = channels.get(userId);
+  if (existing) {
+    existing.count++;
+  } else {
+    const channel = supabase
+      .channel(`menu-access-${userId}`)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "user_menu_access", filter: `user_id=eq.${userId}` },
+        () => qc.invalidateQueries({ queryKey: ["menu-access", userId] })
+      )
+      .subscribe();
+    channels.set(userId, { count: 1, remove: () => supabase.removeChannel(channel) });
+  }
+  return () => {
+    const entry = channels.get(userId);
+    if (!entry) return;
+    entry.count--;
+    if (entry.count <= 0) {
+      entry.remove();
+      channels.delete(userId);
+    }
+  };
+}
 
 /**
  * Akses menu efektif user aktif:
@@ -11,54 +42,36 @@ import { getDefaultPaths } from "@/lib/menuAccess";
  */
 export function useMenuAccess() {
   const { user } = useAuth();
+  const qc = useQueryClient();
   const { role, isLoading: isRoleLoading } = useUserRole();
-  const [customPaths, setCustomPaths] = useState<string[] | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
 
-  const fetchAccess = useCallback(async () => {
-    if (!user) {
-      setCustomPaths(null);
-      setIsLoading(false);
-      return;
-    }
-    const { data, error } = await supabase
-      .from("user_menu_access")
-      .select("path")
-      .eq("user_id", user.id);
-
-    if (error || !data || data.length === 0) {
-      setCustomPaths(null);
-    } else {
-      setCustomPaths(data.map((r) => r.path));
-    }
-    setIsLoading(false);
-  }, [user]);
-
-  useEffect(() => {
-    setIsLoading(true);
-    fetchAccess();
-  }, [fetchAccess]);
+  const { data: customPaths, isLoading, refetch } = useQuery({
+    queryKey: ["menu-access", user?.id ?? null],
+    enabled: !!user,
+    staleTime: 5 * 60 * 1000,
+    queryFn: async (): Promise<string[] | null> => {
+      const { data, error } = await supabase
+        .from("user_menu_access")
+        .select("path")
+        .eq("user_id", user!.id);
+      if (error || !data || data.length === 0) return null;
+      return data.map((r) => r.path);
+    },
+  });
 
   useEffect(() => {
     if (!user) return;
-    const channel = supabase
-      .channel(`menu-access-${user.id}`)
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "user_menu_access", filter: `user_id=eq.${user.id}` },
-        () => { fetchAccess(); }
-      )
-      .subscribe();
-    return () => { supabase.removeChannel(channel); };
-  }, [user, fetchAccess]);
+    return subscribe(user.id, qc);
+  }, [user, qc]);
 
   const allowedPaths = customPaths ?? getDefaultPaths(role);
+  const canAccess = useCallback((path: string) => allowedPaths.includes(path), [allowedPaths]);
 
   return {
     allowedPaths,
-    hasCustomAccess: customPaths !== null,
-    canAccess: (path: string) => allowedPaths.includes(path),
-    isLoading: isLoading || isRoleLoading,
-    refresh: fetchAccess,
+    hasCustomAccess: customPaths != null,
+    canAccess,
+    isLoading: (!!user && isLoading) || isRoleLoading,
+    refresh: refetch,
   };
 }
