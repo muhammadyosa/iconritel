@@ -27,6 +27,8 @@ interface MonthlyAnalyticsProps {
   tickets: Ticket[];
   getTrendChartData?: (days: number) => Array<{ day: string; isoDate: string; dayNum: number; total: number; resolved: number; slaOk: number }>;
   getCategoryData?: (filter: string, customDate?: string) => Array<{ name: string; value: number }>;
+  /** Rendered under the Daily Trends card to fill the column with no leftover space */
+  reportShiftSlot?: React.ReactNode;
 }
 
 const CATEGORY_COLORS: Record<string, string> = {
@@ -50,7 +52,7 @@ const FALLBACK_COLORS = [
   "hsl(340, 75%, 55%)", "hsl(30, 80%, 50%)",
 ];
 
-export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: getCategoryDataFromHistory }: MonthlyAnalyticsProps) {
+export function MonthlyAnalytics({ tickets, getTrendChartData, getCategoryData: getCategoryDataFromHistory, reportShiftSlot }: MonthlyAnalyticsProps) {
   const [selectedMonth, setSelectedMonth] = useState(() => {
     const now = new Date();
     return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
