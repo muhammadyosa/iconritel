@@ -109,7 +109,7 @@ export function FeatureUpdates() {
       <PopoverContent align="end" sideOffset={8} className="w-[min(94vw,440px)] p-0 overflow-hidden">
         <div className="relative border-b px-4 py-3.5">
           <div className="flex items-center gap-2 pr-8">
-            <Sparkles className="h-4.5 w-4.5 h-5 w-5 text-primary flex-shrink-0" aria-hidden="true" />
+            <Sparkles className="h-5 w-5 text-primary flex-shrink-0" aria-hidden="true" />
             <h2 className="font-semibold text-base leading-none">Apa yang Baru</h2>
             <span className="rounded-full border bg-muted/60 px-2 py-0.5 text-[11px] font-semibold text-muted-foreground leading-none">
               {LATEST_VERSION}
