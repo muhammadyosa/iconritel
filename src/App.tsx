@@ -22,6 +22,8 @@ import { useSwipeToOpenSidebar } from "@/hooks/useSwipeSidebar";
 import { TopNavTabs } from "@/components/TopNavTabs";
 import { TabProvider, useOpenTabs, pathMap } from "@/contexts/TabContext";
 import { NetworkStatus } from "@/components/NetworkStatus";
+import { MobileBottomNav } from "@/components/MobileBottomNav";
+import { GlobalSearch } from "@/components/GlobalSearch";
 import plnIconPlusLogo from "@/assets/pln-icon-plus.png";
 import danantaraLight from "@/assets/danantara-light.png";
 import danantaraDark from "@/assets/danantara-dark.svg";
@@ -220,16 +222,20 @@ function AppLayout() {
                 </div>
               </div>
 
-              <UserMenu />
+              <div className="flex items-center gap-2">
+                <GlobalSearch />
+                <UserMenu />
+              </div>
             </div>
           </header>
           <TopNavTabs />
           <main className="flex-1 overflow-x-hidden overflow-y-auto scroll-smooth">
-            <div className="content-container p-3 sm:p-5 lg:p-6">
+            <div className="content-container p-3 sm:p-5 lg:p-6 pb-20 md:pb-6">
               <TabbedContent />
             </div>
           </main>
           <ScrollToTop />
+          <MobileBottomNav />
         </div>
       </div>
     </SidebarProvider>
