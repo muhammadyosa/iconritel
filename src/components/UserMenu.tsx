@@ -23,10 +23,10 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { LogOut } from "lucide-react";
+import { LogOut, UserRound } from "lucide-react";
 import { toast } from "sonner";
 
-export function UserMenu() {
+export function UserMenu({ variant = "header" }: { variant?: "header" | "bottom" }) {
   const navigate = useNavigate();
   const { user, profile, signOut } = useAuth();
   const { role, isAdmin, isReviewer, isIntern } = useUserRole();
@@ -64,16 +64,23 @@ export function UserMenu() {
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" className="relative h-9 w-9 rounded-full">
+          <Button variant="ghost" aria-label="Menu akun pengguna" className={variant === "bottom" ? "relative flex h-full w-full flex-col gap-0.5 rounded-none p-0 text-muted-foreground" : "relative h-9 w-9 rounded-full"}>
+            {variant === "bottom" ? (
+              <>
+                <UserRound className="h-5 w-5" />
+                <span className="text-[10px] font-medium">User</span>
+              </>
+            ) : (
             <Avatar className="h-9 w-9">
               <AvatarImage src={avatarUrl} alt={displayName} />
               <AvatarFallback className="bg-primary text-primary-foreground text-xs">
                 {initials}
               </AvatarFallback>
             </Avatar>
+            )}
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent className="w-56" align="end" forceMount>
+        <DropdownMenuContent className="w-56 max-w-[calc(100vw-1rem)]" align="end" side={variant === "bottom" ? "top" : "bottom"} sideOffset={8} forceMount>
           <DropdownMenuLabel className="font-normal">
             <div className="flex flex-col space-y-1">
               <p className="text-sm font-medium leading-none">{displayName}</p>
