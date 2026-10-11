@@ -2,7 +2,8 @@
 
 - [x] Fix GitHub deployment dependency installation and validate workflow syntax locally.
 - [x] Re-run the CI-equivalent steps locally on Node 22 (npm ci + npm run build + verify dist/index.html) — all passed; repo synced at the fixed commit.
-- [ ] Confirm a successful GitHub Actions deployment — blocked on access to the repository's Actions run and Pages settings.
+- [x] Stop failed GitHub runs when Pages is not enabled (skip with notice)
+- [ ] Enable GitHub Pages (Settings > Pages > Source: GitHub Actions) — needs the repo owner
 
 - [x] Put Menu in the third mobile navigation slot and User in the fifth, restore header logos, and retain Report in the drawer.
 
