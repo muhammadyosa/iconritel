@@ -23,7 +23,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { LogOut, UserRound } from "lucide-react";
+import { LogOut } from "lucide-react";
 import { toast } from "sonner";
 
 export function UserMenu({ variant = "header" }: { variant?: "header" | "bottom" }) {
@@ -65,19 +65,13 @@ export function UserMenu({ variant = "header" }: { variant?: "header" | "bottom"
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" aria-label="Menu akun pengguna" className={variant === "bottom" ? "relative flex h-full w-full flex-col gap-0.5 rounded-none p-0 text-muted-foreground" : "relative h-9 w-9 rounded-full"}>
-            {variant === "bottom" ? (
-              <>
-                <UserRound className="h-5 w-5" />
-                <span className="text-[10px] font-medium">User</span>
-              </>
-            ) : (
-            <Avatar className="h-9 w-9">
+            <Avatar className={variant === "bottom" ? "h-7 w-7" : "h-9 w-9"}>
               <AvatarImage src={avatarUrl} alt={displayName} />
               <AvatarFallback className="bg-primary text-primary-foreground text-xs">
                 {initials}
               </AvatarFallback>
             </Avatar>
-            )}
+            {variant === "bottom" && <span className="text-[10px] font-medium">User</span>}
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-56 max-w-[calc(100vw-1rem)]" align="end" side={variant === "bottom" ? "top" : "bottom"} sideOffset={8} forceMount>
