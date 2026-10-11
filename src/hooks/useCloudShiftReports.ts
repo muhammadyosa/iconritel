@@ -37,7 +37,10 @@ export function useCloudShiftReports() {
   const cleanupOldReports = useCallback(async () => {
     try {
       const cutoff = new Date(Date.now() - AUTO_DELETE_MS).toISOString();
-      await supabase.from("shift_reports").delete().lt("created_at", cutoff);
+      // Physical delete only succeeds for admins (RLS); everyone else gets
+      // the same result via the >= cutoff filter in fetchReports.
+      const { error } = await supabase.from("shift_reports").delete().lt("created_at", cutoff);
+      if (error && import.meta.env.DEV) console.error("Error cleaning up old shift reports:", error);
     } catch (error) {
       if (import.meta.env.DEV) {
         console.error("Error cleaning up old shift reports:", error);
@@ -45,14 +48,16 @@ export function useCloudShiftReports() {
     }
   }, []);
 
-  // Fetch all shift reports
+  // Fetch shift reports from the last 3 days (older ones are auto-deleted/hidden for all roles)
   const fetchReports = useCallback(async () => {
     try {
       setIsLoading(true);
       await cleanupOldReports();
+      const cutoff = new Date(Date.now() - AUTO_DELETE_MS).toISOString();
       const { data, error } = await supabase
         .from("shift_reports")
         .select("*")
+        .gte("created_at", cutoff)
         .order("created_at", { ascending: false });
 
       if (error) throw error;

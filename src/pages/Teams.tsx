@@ -114,6 +114,10 @@ export default function Teams() {
   const [searchParams] = useSearchParams();
   const prefillQuery = searchParams.get("q") ?? "";
   const [activeTab, setActiveTab] = useState(prefillQuery ? "regional-office" : "team-stats");
+  // Page stays mounted across tab navigations; react to new ?q= from Global Search.
+  useEffect(() => {
+    if (prefillQuery) setActiveTab("regional-office");
+  }, [prefillQuery]);
   const { role } = useUserRole();
   const [selectedUser, setSelectedUser] = useState<string | null>(null);
   const [statsSheetTeam, setStatsSheetTeam] = useState<{ team: string; category: "ritel" | "feeder" } | null>(null);

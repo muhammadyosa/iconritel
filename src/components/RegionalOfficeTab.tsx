@@ -67,6 +67,9 @@ export default function RegionalOfficeTab({ tickets, initialSearch = "" }: Regio
   const [teamData, setTeamData] = useState<RegionalTeamRecord[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState(initialSearch);
+  useEffect(() => {
+    if (initialSearch) setSearchQuery(initialSearch);
+  }, [initialSearch]);
   const [selectedRegion, setSelectedRegion] = useState<RegionalData | null>(null);
   const [selectedTeam, setSelectedTeam] = useState<RegionalTeamRecord | null>(null);
   const [selectedIncident, setSelectedIncident] = useState<Ticket | null>(null);
