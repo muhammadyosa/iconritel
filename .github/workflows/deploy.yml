@@ -17,36 +17,58 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    outputs:
+      pages_enabled: ${{ steps.pages_check.outputs.enabled }}
     steps:
+      - name: Check GitHub Pages is enabled
+        id: pages_check
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh api "repos/${{ github.repository }}/pages" --silent 2>/dev/null; then
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "::notice title=GitHub Pages belum aktif::Aktifkan di Settings > Pages > Source: GitHub Actions. Deploy dilewati tanpa error."
+          fi
+
       - name: Checkout
-        uses: actions/checkout@v4
-      
+        if: steps.pages_check.outputs.enabled == 'true'
+        uses: actions/checkout@v5
+
       - name: Setup Node
-        uses: actions/setup-node@v4
+        if: steps.pages_check.outputs.enabled == 'true'
+        uses: actions/setup-node@v5
         with:
           node-version: 22
           cache: npm
 
       - name: Configure GitHub Pages
+        if: steps.pages_check.outputs.enabled == 'true'
         uses: actions/configure-pages@v5
-      
+
       - name: Install dependencies
+        if: steps.pages_check.outputs.enabled == 'true'
         run: npm ci
-      
+
       - name: Build
+        if: steps.pages_check.outputs.enabled == 'true'
         run: npm run build
         env:
           VITE_GITHUB_REPO: ${{ github.repository }}
 
       - name: Verify deployment output
+        if: steps.pages_check.outputs.enabled == 'true'
         run: test -s dist/index.html
-      
+
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+        if: steps.pages_check.outputs.enabled == 'true'
+        uses: actions/upload-pages-artifact@v4
         with:
           path: ./dist
 
   deploy:
+    if: needs.build.outputs.pages_enabled == 'true'
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
