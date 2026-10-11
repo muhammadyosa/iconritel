@@ -195,9 +195,7 @@ function AppLayout() {
         <div className="flex-1 flex flex-col min-w-0">
           <header className="sticky top-0 z-20 border-b border-border/60 bg-background/80 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60">
             <div className="flex h-14 sm:h-16 items-center px-2 sm:px-4 lg:px-6 gap-2 sm:gap-3 justify-between">
-              <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-                {/* Spacer for mobile hamburger button */}
-                <div className="w-8 md:hidden flex-shrink-0" />
+              <div className="hidden md:flex items-center gap-2 sm:gap-3 min-w-0">
                 <div className="flex items-center gap-2 sm:gap-2.5 min-w-0">
                   <img
                     src={danantaraLight}
@@ -224,7 +222,7 @@ function AppLayout() {
                 </div>
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex w-full md:w-auto items-center justify-between md:justify-start gap-2 shrink-0">
                 <GlobalSearch />
                 <RecentActivity variant="popover" />
                 <FeatureUpdates />

@@ -81,9 +81,11 @@ const MenuItem = memo(function MenuItem({
   showBadge: boolean;
   badgeCount: number;
 }) {
+  const { isMobile, setOpenMobile } = useSidebar();
   const link = (
     <NavLink
       to={item.path}
+      onClick={() => { if (isMobile) setOpenMobile(false); }}
       className={({ isActive }) =>
         `group relative flex items-center rounded-lg transition-all duration-200 ${
           collapsed
