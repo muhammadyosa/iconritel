@@ -1,5 +1,8 @@
 # Current tasks
 
+- [x] Fix GitHub deployment dependency installation and validate workflow syntax locally.
+- [ ] Confirm a successful GitHub Actions deployment — blocked on access to the repository's Actions run and Pages settings.
+
 - [x] Put Menu in the third mobile navigation slot and User in the fifth, restore header logos, and retain Report in the drawer.
 
 - [x] Remove the three upper-left mobile elements, space header actions without overlap, and use one bottom Menu button.
