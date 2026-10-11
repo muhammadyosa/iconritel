@@ -4,6 +4,7 @@ import { useSidebar } from "@/components/ui/sidebar";
 import { useMenuAccess } from "@/hooks/useMenuAccess";
 import { ALL_MENUS } from "@/lib/menuAccess";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 const PRIORITY = ["/", "/tickets", "/report", "/teams", "/settings"];
 const SHORT: Record<string, string> = {
@@ -21,8 +22,10 @@ export function MobileBottomNav() {
 
   const items = PRIORITY.filter((p) => allowedPaths.includes(p))
     .slice(0, 4)
-    .map((p) => ALL_MENUS.find((m) => m.path === p)!)
-    .filter(Boolean);
+    .flatMap((p) => {
+      const menu = ALL_MENUS.find((m) => m.path === p);
+      return menu ? [menu] : [];
+    });
 
   return (
     <nav
@@ -49,15 +52,16 @@ export function MobileBottomNav() {
         ))}
         {Array.from({ length: 4 - items.length }).map((_, i) => <li key={`e${i}`} />)}
         <li>
-          <button
+          <Button
+            variant="ghost"
             type="button"
             onClick={() => setOpenMobile(true)}
-            className="flex h-full w-full flex-col items-center justify-center gap-0.5 text-[10px] font-medium text-muted-foreground active:scale-95"
+            className="flex h-full w-full rounded-none p-0 flex-col items-center justify-center gap-0.5 text-[10px] font-medium text-muted-foreground active:scale-95"
             aria-label="Buka semua menu"
           >
             <Menu className="h-5 w-5" />
             <span>Menu</span>
-          </button>
+          </Button>
         </li>
       </ul>
     </nav>
