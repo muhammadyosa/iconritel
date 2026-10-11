@@ -195,21 +195,21 @@ function AppLayout() {
         <div className="flex-1 flex flex-col min-w-0">
           <header className="sticky top-0 z-20 border-b border-border/60 bg-background/80 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60">
             <div className="flex h-14 sm:h-16 items-center px-2 sm:px-4 lg:px-6 gap-2 sm:gap-3 justify-between">
-              <div className="hidden md:flex items-center gap-2 sm:gap-3 min-w-0">
-                <div className="flex items-center gap-2 sm:gap-2.5 min-w-0">
+              <div className="flex flex-1 md:flex-none items-center gap-2 sm:gap-3 min-w-0">
+                <div className="flex w-full md:w-auto items-center gap-1.5 sm:gap-2.5 min-w-0">
                   <img
                     src={danantaraLight}
                     alt="Danantara Indonesia"
                     decoding="async"
                     loading="eager"
-                    className="h-5 xs:h-6 sm:h-7 md:h-8 w-auto flex-shrink-0 object-contain block dark:hidden"
+                    className="h-5 sm:h-7 md:h-8 w-auto min-w-0 max-w-[55%] md:max-w-none md:shrink-0 object-contain block dark:hidden"
                   />
                   <img
                     src={danantaraDark}
                     alt="Danantara Indonesia"
                     decoding="async"
                     loading="eager"
-                    className="h-5 xs:h-6 sm:h-7 md:h-8 w-auto flex-shrink-0 object-contain hidden dark:block"
+                    className="h-5 sm:h-7 md:h-8 w-auto min-w-0 max-w-[55%] md:max-w-none md:shrink-0 object-contain hidden dark:block"
                   />
                   <div className="h-6 sm:h-7 w-px bg-border flex-shrink-0" />
                   <img
@@ -217,16 +217,16 @@ function AppLayout() {
                     alt="PLN Icon Plus"
                     decoding="async"
                     loading="eager"
-                    className="h-6 xs:h-7 sm:h-8 md:h-9 w-auto flex-shrink-0 object-contain"
+                    className="h-6 sm:h-8 md:h-9 w-auto min-w-0 max-w-[35%] md:max-w-none md:shrink-0 object-contain"
                   />
                 </div>
               </div>
 
-              <div className="flex w-full md:w-auto items-center justify-between md:justify-start gap-2 shrink-0">
+              <div className="flex items-center gap-1 md:gap-2 shrink-0">
                 <GlobalSearch />
                 <RecentActivity variant="popover" />
                 <FeatureUpdates />
-                <UserMenu />
+                <div className="hidden md:block"><UserMenu /></div>
               </div>
             </div>
           </header>

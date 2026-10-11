@@ -5,8 +5,9 @@ import { useMenuAccess } from "@/hooks/useMenuAccess";
 import { ALL_MENUS } from "@/lib/menuAccess";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { UserMenu } from "@/components/UserMenu";
 
-const PRIORITY = ["/", "/tickets", "/report", "/teams", "/settings"];
+const SLOTS = ["/", "/tickets", "menu", "/teams", "user"];
 const SHORT: Record<string, string> = {
   "/": "Dashboard",
   "/tickets": "Incident",
@@ -20,20 +21,31 @@ export function MobileBottomNav() {
   const { allowedPaths } = useMenuAccess();
   const { setOpenMobile } = useSidebar();
 
-  const items = PRIORITY.filter((p) => allowedPaths.includes(p))
-    .slice(0, 4)
-    .flatMap((p) => {
-      const menu = ALL_MENUS.find((m) => m.path === p);
-      return menu ? [menu] : [];
-    });
-
   return (
     <nav
       aria-label="Navigasi utama"
       className="md:hidden fixed bottom-0 inset-x-0 z-30 border-t border-border/60 bg-background/90 backdrop-blur-xl supports-[backdrop-filter]:bg-background/75 pb-[env(safe-area-inset-bottom)]"
     >
       <ul className="grid grid-cols-5 h-14">
-        {items.map((m) => (
+        {SLOTS.map((slot) => {
+          if (slot === "user") return <li key={slot}><UserMenu variant="bottom" /></li>;
+          if (slot === "menu") return (
+            <li key={slot}>
+              <Button
+                variant="ghost"
+                type="button"
+                onClick={() => setOpenMobile(true)}
+                className="flex h-full w-full rounded-none p-0 flex-col items-center justify-center gap-0.5 text-[10px] font-medium text-muted-foreground active:scale-95"
+                aria-label="Buka semua menu"
+              >
+                <Menu className="h-5 w-5" />
+                <span>Menu</span>
+              </Button>
+            </li>
+          );
+          const m = ALL_MENUS.find((menu) => menu.path === slot);
+          if (!m || !allowedPaths.includes(slot)) return <li key={slot} />;
+          return (
           <li key={m.path}>
             <NavLink
               to={m.path}
@@ -49,20 +61,8 @@ export function MobileBottomNav() {
               <span>{SHORT[m.path] ?? m.title}</span>
             </NavLink>
           </li>
-        ))}
-        {Array.from({ length: 4 - items.length }).map((_, i) => <li key={`e${i}`} />)}
-        <li>
-          <Button
-            variant="ghost"
-            type="button"
-            onClick={() => setOpenMobile(true)}
-            className="flex h-full w-full rounded-none p-0 flex-col items-center justify-center gap-0.5 text-[10px] font-medium text-muted-foreground active:scale-95"
-            aria-label="Buka semua menu"
-          >
-            <Menu className="h-5 w-5" />
-            <span>Menu</span>
-          </Button>
-        </li>
+          );
+        })}
       </ul>
     </nav>
   );

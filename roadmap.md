@@ -1,5 +1,7 @@
 # Current tasks
 
+- [x] Put Menu in the third mobile navigation slot and User in the fifth, restore header logos, and retain Report in the drawer.
+
 - [x] Remove the three upper-left mobile elements, space header actions without overlap, and use one bottom Menu button.
 
 - [x] Show feature/function update announcements beside Activity in the header.
