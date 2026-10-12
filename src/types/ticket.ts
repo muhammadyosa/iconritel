@@ -49,23 +49,25 @@ export const RITEL_CONSTRAINTS = [
 ];
 
 // FEEDER Constraints - masuk bucket FEEDER (PROACTIVE NOC RETAIL)
+// Urut rapi per kelompok perangkat (FAT → PORT → OLT → UPE → LINK → TRAFFIC → LAINNYA),
+// masing-masing DOWN sebelum BAD RX, dan varian SEGMEN setelah induknya.
 export const FEEDER_CONSTRAINTS = [
-  "FAT BAD RX",
   "FAT LOSS",
+  "FAT BAD RX",
   "PORT DOWN",
   "PORT BAD RX",
   "OLT DOWN",
   "OLT BAD RX",
+  "OLT BAD RX SEGMEN",
   "UPE DOWN",
   "UPE BAD RX",
+  "UPE BAD RX SEGMEN",
   "LINK DOWN",
   "LINK BAD RX",
-  "INTERMITTENT UPE/OLT",
-  "CABLE PROBLEM (FEEDER)",
   "FULL TRAFFIC SEGMENT",
   "FULL TRAFFIC",
-  "OLT BAD RX SEGMEN",
-  "UPE BAD RX SEGMEN",
+  "INTERMITTENT UPE/OLT",
+  "CABLE PROBLEM (FEEDER)",
 ];
 
 export const ALL_CONSTRAINTS = [...RITEL_CONSTRAINTS, ...FEEDER_CONSTRAINTS];
