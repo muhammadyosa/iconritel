@@ -62,11 +62,52 @@ export const FEEDER_CONSTRAINTS = [
   "LINK BAD RX",
   "INTERMITTENT UPE/OLT",
   "CABLE PROBLEM (FEEDER)",
+  "FULL TRAFFIC SEGMENT",
+  "FULL TRAFFIC",
 ];
 
 export const ALL_CONSTRAINTS = [...RITEL_CONSTRAINTS, ...FEEDER_CONSTRAINTS];
 
 export const FEEDER_CONSTRAINTS_SET = new Set(FEEDER_CONSTRAINTS);
+
+export interface TrafficDetails {
+  destination: string;
+  impactHostname: string;
+  impactPort: string;
+  linkHostname: string;
+}
+
+export const emptyTrafficDetails = (): TrafficDetails => ({
+  destination: "", impactHostname: "", impactPort: "", linkHostname: "",
+});
+
+/** Restore traffic-specific inputs from the persisted incident result, without schema changes. */
+export function parseTrafficDetails(constraint: string, result: string, hostname: string, serpo: string): TrafficDetails {
+  const details = emptyTrafficDetails();
+  if (constraint === "FULL TRAFFIC") {
+    const prefix = `[PROAKTIF NOC RETAIL] FULL TRAFFIC - UNDER OLT - ${hostname} - TO - `;
+    const suffix = ` - ${serpo}`;
+    if (result.startsWith(prefix) && result.endsWith(suffix)) details.destination = result.slice(prefix.length, -suffix.length);
+  }
+  if (constraint === "FULL TRAFFIC SEGMENT") {
+    const prefix = `[PROACTIVE NOC RETAIL] FULL TRAFFIC SEGMENT - ${hostname} TO `;
+    const suffix = `): DOWN - ${serpo}`;
+    if (result.startsWith(prefix) && result.endsWith(suffix)) {
+      const body = result.slice(prefix.length, -suffix.length);
+      const impactAt = body.indexOf(" IMPACT ");
+      const linkAt = body.lastIndexOf("(LINK TO ");
+      if (impactAt >= 0 && linkAt > impactAt) {
+        details.destination = body.slice(0, impactAt);
+        const impact = body.slice(impactAt + 8, linkAt);
+        const spaceAt = impact.indexOf(" ");
+        details.impactHostname = spaceAt < 0 ? impact : impact.slice(0, spaceAt);
+        details.impactPort = spaceAt < 0 ? "" : impact.slice(spaceAt + 1);
+        details.linkHostname = body.slice(linkAt + 9);
+      }
+    }
+  }
+  return details;
+}
 
 // Generate ticket result format based on constraint
 export function generateTicketFormat(
@@ -77,7 +118,8 @@ export function generateTicketFormat(
   hostname: string,
   snOnt: string,
   portText?: string,
-  forceFeeder?: boolean
+  forceFeeder?: boolean,
+  traffic: TrafficDetails = emptyTrafficDetails()
 ): string {
   // Manual FEEDER override: when user picks FEEDER tim with a custom (manual) constraint
   // that is not in the predefined FEEDER_CONSTRAINTS list, build PROACTIVE NOC RETAIL format.
@@ -90,6 +132,13 @@ export function generateTicketFormat(
   }
 
   // FEEDER Format
+  if (constraint === "FULL TRAFFIC SEGMENT") {
+    return `[PROACTIVE NOC RETAIL] FULL TRAFFIC SEGMENT - ${hostname || "[UPE]"} TO ${traffic.destination.trim() || "[NPE]"} IMPACT ${traffic.impactHostname.trim() || "[UPE IMPACT]"} ${traffic.impactPort.trim() || "[PORT]"}(LINK TO ${traffic.linkHostname.trim() || "[UPE LINK TUJUAN]"}): DOWN - ${serpo}`;
+  }
+  if (constraint === "FULL TRAFFIC") {
+    return `[PROAKTIF NOC RETAIL] FULL TRAFFIC - UNDER OLT - ${hostname || "[OLT/UPE]"} - TO - ${traffic.destination.trim() || "[OLT/UPE TUJUAN]"} - ${serpo}`;
+  }
+
   if (constraint === "FAT BAD RX") {
     return `[PROACTIVE NOC RETAIL] FAT BAD RX - ${fatId} - UNDER - ${hostname} - ${serpo}`;
   }
