@@ -44,6 +44,8 @@ const CATEGORY_COLORS: Record<string, string> = {
   "CABLE PROBLEM": "hsl(260, 50%, 55%)",
   "INTERMITTENT": "hsl(315, 60%, 50%)",
   "FAT BAD RX": "hsl(15, 85%, 55%)",
+  "FULL TRAFFIC": "hsl(210, 80%, 50%)",
+  "FULL TRAFFIC SEGMENT": "hsl(230, 75%, 55%)",
   "CABLE PROBLEM (FEEDER)": "hsl(190, 70%, 45%)",
 };
 const FALLBACK_COLORS = [
