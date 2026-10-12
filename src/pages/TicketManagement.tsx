@@ -1154,14 +1154,21 @@ export default function TicketManagement() {
                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                         <div>
                           <Label>{manualFormData.constraint === "FULL TRAFFIC SEGMENT" ? "Hostname UPE Asal" : manualFormData.constraint === "FULL TRAFFIC" ? "Hostname OLT/UPE Asal" : "Hostname OLT"}</Label>
-                          <ExcelRecordCombobox
+                          {manualFormData.constraint === "FULL TRAFFIC" || manualFormData.constraint === "FULL TRAFFIC SEGMENT" ? (
+                            <Input
+                              aria-label="Hostname Asal"
+                              value={manualFormData.hostname}
+                              onChange={(e) => setManualFormData((p) => ({ ...p, hostname: e.target.value }))}
+                              placeholder="Hostname OLT/UPE Asal"
+                            />
+                          ) : <ExcelRecordCombobox
                             value={manualFormData.hostname}
                             onChange={(v) => setManualFormData((p) => ({ ...p, hostname: v }))}
                             onPick={(r) => setManualFormData((p) => ({ ...p, hostname: String(r.hostname ?? "") }))}
                             records={fatRecords}
                             field="hostname"
                             placeholder="Cari Hostname OLT dari Data FAT"
-                          />
+                          />}
                         </div>
                         <div>
                           <Label>ID FAT</Label>
