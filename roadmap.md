@@ -1,5 +1,7 @@
 # Current tasks
 
+- [ ] Add OLT BAD RX SEGMEN and UPE BAD RX SEGMEN FEEDER constraints, destination fields, edit restoration, and verify supplied examples.
+
 - [x] Add FULL TRAFFIC SEGMENT and FULL TRAFFIC FEEDER options, creation/edit fields, and verify example output.
 
 - [x] Fix GitHub deployment dependency installation and validate workflow syntax locally.
