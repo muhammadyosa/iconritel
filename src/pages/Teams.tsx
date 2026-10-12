@@ -2079,7 +2079,7 @@ export default function Teams() {
         <TabsContent value="regional-office" className="space-y-4">
           <h2 className="sr-only">Regional Office</h2>
           {dateFilter}
-          <RegionalOfficeTab tickets={filteredTickets} initialSearch={prefillQuery} />
+          <RegionalOfficeTab tickets={tickets} initialSearch={prefillQuery} />
         </TabsContent>
       </Tabs>
 
