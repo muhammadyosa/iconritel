@@ -1,5 +1,6 @@
 # Current tasks
 
+- [x] Reorder the FEEDER constraint list by device group (FAT, PORT, OLT, UPE, LINK, traffic, other) and verify the dropdown order.
 - [x] Add OLT BAD RX SEGMEN and UPE BAD RX SEGMEN FEEDER constraints, destination fields, edit restoration, and verify supplied examples.
 
 - [x] Add FULL TRAFFIC SEGMENT and FULL TRAFFIC FEEDER options, creation/edit fields, and verify example output.
