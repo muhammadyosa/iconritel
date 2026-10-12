@@ -9,10 +9,11 @@ interface Props {
 }
 
 export function TrafficConstraintFields({ constraint, value, onChange }: Props) {
-  if (constraint !== "FULL TRAFFIC" && constraint !== "FULL TRAFFIC SEGMENT") return null;
+  const badRxSegment = constraint === "OLT BAD RX SEGMEN" || constraint === "UPE BAD RX SEGMEN";
+  if (constraint !== "FULL TRAFFIC" && constraint !== "FULL TRAFFIC SEGMENT" && !badRxSegment) return null;
   const segment = constraint === "FULL TRAFFIC SEGMENT";
   const fields: { key: keyof TrafficDetails; label: string; placeholder: string }[] = [
-    { key: "destination", label: segment ? "Hostname NPE Tujuan" : "Hostname OLT/UPE Tujuan", placeholder: segment ? "Hostname NPE" : "Hostname OLT/UPE" },
+    { key: "destination", label: badRxSegment ? "Hostname UPE Tujuan" : segment ? "Hostname NPE Tujuan" : "Hostname OLT/UPE Tujuan", placeholder: badRxSegment ? "Hostname UPE/NPE" : segment ? "Hostname NPE" : "Hostname OLT/UPE" },
     ...(segment ? [
       { key: "impactHostname" as const, label: "Hostname UPE Impact", placeholder: "Hostname UPE terdampak" },
       { key: "impactPort" as const, label: "Port Impact", placeholder: "TE0 0 2" },
