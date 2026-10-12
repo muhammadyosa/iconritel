@@ -122,9 +122,9 @@ export function TicketDetailDialog({
         editData.fatId,
         editData.hostname,
         editData.snOnt,
-        undefined,
-        false,
-        traffic
+                       undefined,
+                       false,
+                       traffic
       );
 
       await updateTicket(ticket.id, {
