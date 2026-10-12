@@ -64,6 +64,8 @@ export const FEEDER_CONSTRAINTS = [
   "CABLE PROBLEM (FEEDER)",
   "FULL TRAFFIC SEGMENT",
   "FULL TRAFFIC",
+  "OLT BAD RX SEGMEN",
+  "UPE BAD RX SEGMEN",
 ];
 
 export const ALL_CONSTRAINTS = [...RITEL_CONSTRAINTS, ...FEEDER_CONSTRAINTS];
@@ -84,6 +86,11 @@ export const emptyTrafficDetails = (): TrafficDetails => ({
 /** Restore traffic-specific inputs from the persisted incident result, without schema changes. */
 export function parseTrafficDetails(constraint: string, result: string, hostname: string, serpo: string): TrafficDetails {
   const details = emptyTrafficDetails();
+  if (constraint === "OLT BAD RX SEGMEN" || constraint === "UPE BAD RX SEGMEN") {
+    const prefix = `[PROAKTIF NOC RETAIL] ${constraint} - ${hostname} - TO - `;
+    const suffix = ` - ${serpo}`;
+    if (result.startsWith(prefix) && result.endsWith(suffix)) details.destination = result.slice(prefix.length, -suffix.length);
+  }
   if (constraint === "FULL TRAFFIC") {
     const prefix = `[PROAKTIF NOC RETAIL] FULL TRAFFIC - UNDER OLT - ${hostname} - TO - `;
     const suffix = ` - ${serpo}`;
@@ -132,6 +139,10 @@ export function generateTicketFormat(
   }
 
   // FEEDER Format
+  if (constraint === "OLT BAD RX SEGMEN" || constraint === "UPE BAD RX SEGMEN") {
+    const sourcePlaceholder = constraint === "OLT BAD RX SEGMEN" ? "[OLT]" : "[UPE]";
+    return `[PROAKTIF NOC RETAIL] ${constraint} - ${hostname.trim() || sourcePlaceholder} - TO - ${traffic.destination.trim() || "[UPE TUJUAN]"} - ${serpo}`;
+  }
   if (constraint === "FULL TRAFFIC SEGMENT") {
     return `[PROACTIVE NOC RETAIL] FULL TRAFFIC SEGMENT - ${hostname || "[UPE]"} TO ${traffic.destination.trim() || "[NPE]"} IMPACT ${traffic.impactHostname.trim() || "[UPE IMPACT]"} ${traffic.impactPort.trim() || "[PORT]"}(LINK TO ${traffic.linkHostname.trim() || "[UPE LINK TUJUAN]"}): DOWN - ${serpo}`;
   }

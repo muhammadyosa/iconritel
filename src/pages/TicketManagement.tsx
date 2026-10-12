@@ -1153,8 +1153,8 @@ export default function TicketManagement() {
                       </div>
                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                         <div>
-                          <Label>{manualFormData.constraint === "FULL TRAFFIC SEGMENT" ? "Hostname UPE Asal" : manualFormData.constraint === "FULL TRAFFIC" ? "Hostname OLT/UPE Asal" : "Hostname OLT"}</Label>
-                          {manualFormData.constraint === "FULL TRAFFIC" || manualFormData.constraint === "FULL TRAFFIC SEGMENT" ? (
+                          <Label>{manualFormData.constraint === "FULL TRAFFIC SEGMENT" || manualFormData.constraint === "UPE BAD RX SEGMEN" ? "Hostname UPE Asal" : manualFormData.constraint === "OLT BAD RX SEGMEN" ? "Hostname OLT Asal" : manualFormData.constraint === "FULL TRAFFIC" ? "Hostname OLT/UPE Asal" : "Hostname OLT"}</Label>
+                          {manualFormData.constraint === "FULL TRAFFIC" || manualFormData.constraint === "FULL TRAFFIC SEGMENT" || manualFormData.constraint === "OLT BAD RX SEGMEN" || manualFormData.constraint === "UPE BAD RX SEGMEN" ? (
                             <Input
                               aria-label="Hostname Asal"
                               value={manualFormData.hostname}

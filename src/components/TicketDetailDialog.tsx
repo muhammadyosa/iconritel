@@ -197,7 +197,7 @@ export function TicketDetailDialog({
                   />
                 </div>
                 <div>
-                  <Label className="text-xs">{editData.constraint === "FULL TRAFFIC SEGMENT" ? "Hostname UPE Asal" : editData.constraint === "FULL TRAFFIC" ? "Hostname OLT/UPE Asal" : "Hostname OLT"}</Label>
+                  <Label className="text-xs">{editData.constraint === "FULL TRAFFIC SEGMENT" || editData.constraint === "UPE BAD RX SEGMEN" ? "Hostname UPE Asal" : editData.constraint === "OLT BAD RX SEGMEN" ? "Hostname OLT Asal" : editData.constraint === "FULL TRAFFIC" ? "Hostname OLT/UPE Asal" : "Hostname OLT"}</Label>
                   <Input
                     value={editData.hostname}
                     onChange={(e) => setEditData({ ...editData, hostname: e.target.value })}
