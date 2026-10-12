@@ -31,7 +31,8 @@ import {
 } from "@/components/ui/select";
 import { StatusBadge } from "@/components/StatusBadge";
 import { TicketStatusHistory } from "@/components/TicketStatusHistory";
-import { Ticket, ALL_CONSTRAINTS, FEEDER_CONSTRAINTS_SET, generateTicketFormat } from "@/types/ticket";
+import { Ticket, ALL_CONSTRAINTS, FEEDER_CONSTRAINTS_SET, generateTicketFormat, parseTrafficDetails } from "@/types/ticket";
+import { TrafficConstraintFields } from "@/components/TrafficConstraintFields";
 import { toast } from "sonner";
 import { ActivityAction } from "@/hooks/useActivityLog";
 
@@ -60,6 +61,7 @@ export function TicketDetailDialog({
   open: controlledOpen,
   onOpenChange,
 }: TicketDetailDialogProps) {
+  const [traffic, setTraffic] = useState(() => parseTrafficDetails(ticket.constraint, ticket.ticketResult, ticket.hostname, ticket.serpo));
   const [isEditing, setIsEditing] = useState(false);
   const [pendingDialogOpen, setPendingDialogOpen] = useState(false);
   const [pendingReasonInput, setPendingReasonInput] = useState("");
@@ -102,6 +104,7 @@ export function TicketDetailDialog({
       serpo: ticket.serpo,
       constraint: ticket.constraint,
     });
+    setTraffic(parseTrafficDetails(ticket.constraint, ticket.ticketResult, ticket.hostname, ticket.serpo));
     setIsEditing(true);
   };
 
@@ -118,7 +121,10 @@ export function TicketDetailDialog({
         editData.serpo,
         editData.fatId,
         editData.hostname,
-        editData.snOnt
+        editData.snOnt,
+        undefined,
+        false,
+        traffic
       );
 
       await updateTicket(ticket.id, {
@@ -191,7 +197,7 @@ export function TicketDetailDialog({
                   />
                 </div>
                 <div>
-                  <Label className="text-xs">Hostname OLT</Label>
+                  <Label className="text-xs">{editData.constraint === "FULL TRAFFIC SEGMENT" ? "Hostname UPE Asal" : editData.constraint === "FULL TRAFFIC" ? "Hostname OLT/UPE Asal" : "Hostname OLT"}</Label>
                   <Input
                     value={editData.hostname}
                     onChange={(e) => setEditData({ ...editData, hostname: e.target.value })}
@@ -253,6 +259,8 @@ export function TicketDetailDialog({
                 </Select>
               </div>
               
+              <TrafficConstraintFields constraint={editData.constraint} value={traffic} onChange={setTraffic} />
+
               {/* Preview format */}
               {editData.constraint && editData.serpo && (
                 <div className="p-3 bg-accent/50 rounded-lg space-y-1">
@@ -264,7 +272,10 @@ export function TicketDetailDialog({
                       editData.serpo,
                       editData.fatId,
                       editData.hostname,
-                      editData.snOnt
+                      editData.snOnt,
+        undefined,
+        false,
+        traffic
                     )}
                   </p>
                 </div>

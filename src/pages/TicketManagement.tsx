@@ -44,10 +44,12 @@ import {
   ALL_CONSTRAINTS,
   FEEDER_CONSTRAINTS_SET,
   generateTicketFormat,
+  emptyTrafficDetails,
   ExcelRecord,
 } from "@/types/ticket";
 import { StatusBadge } from "@/components/StatusBadge";
 import { HighlightText } from "@/components/HighlightText";
+import { TrafficConstraintFields } from "@/components/TrafficConstraintFields";
 import { TicketDetailDialog } from "@/components/TicketDetailDialog";
 import { DurationCell } from "@/components/DurationCell";
 import { RegionBadge } from "@/components/RegionBadge";
@@ -121,6 +123,8 @@ export default function TicketManagement() {
     constraint: "",
     portText: "",
   });
+  const [autoTraffic, setAutoTraffic] = useState(emptyTrafficDetails);
+  const [manualTraffic, setManualTraffic] = useState(emptyTrafficDetails);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingTicket, setEditingTicket] = useState<Ticket | null>(null);
   const [isManualFormOpen, setIsManualFormOpen] = useState(false);
@@ -430,7 +434,8 @@ export default function TicketManagement() {
       String(selectedRecord.hostname || ""),
       String(selectedRecord.sn || ""),
       formData.portText || undefined,
-      isAutoFeederOverride
+      isAutoFeederOverride,
+      autoTraffic
     );
     
     const ticket: Ticket = {
@@ -456,6 +461,7 @@ export default function TicketManagement() {
       logActivity("create_ticket", `Incident ${ticket.id} - ${ticket.customerName}`);
       toast.success(`Incident ${category} berhasil dibuat & disimpan ke Cloud`);
       setIsFormOpen(false);
+      setAutoTraffic(emptyTrafficDetails());
       setFormData({ ticketId: "", serpo: "", constraint: "", portText: "" });
       setSelectedRecord(null);
     } catch (error) {
@@ -521,7 +527,8 @@ export default function TicketManagement() {
       manualFormData.hostname.trim(),
       manualFormData.snOnt.trim(),
       manualFormData.portText || undefined,
-      isManualFeederOverride
+      isManualFeederOverride,
+      manualTraffic
     );
     
     const ticket: Ticket = {
@@ -547,6 +554,7 @@ export default function TicketManagement() {
       logActivity("create_ticket", `Incident manual ${ticket.id} - ${ticket.customerName}`);
       toast.success(`Incident ${category} berhasil dibuat & disimpan ke Cloud`);
       setIsManualFormOpen(false);
+      setManualTraffic(emptyTrafficDetails());
       setManualFormData({
         ticketId: "",
         serviceId: "",
@@ -716,6 +724,8 @@ export default function TicketManagement() {
               )}
             </div>
             
+            <TrafficConstraintFields constraint={formData.constraint} value={autoTraffic} onChange={setAutoTraffic} />
+
             {/* Extra input: PORT info, or second UPE hostname for LINK constraints */}
             {(formData.constraint === "PORT DOWN" || formData.constraint === "PORT BAD RX" || formData.constraint === "LINK DOWN" || formData.constraint === "LINK BAD RX" || formData.constraint === "INTERMITTENT UPE/OLT") && (
               <div>
@@ -740,7 +750,7 @@ export default function TicketManagement() {
                 <p className="text-xs font-semibold text-muted-foreground">
                   Preview Format Incident:
                 </p>
-                <p className="text-sm font-mono">
+                <p className="text-sm font-mono whitespace-pre-wrap break-all">
                   {generateTicketFormat(
                     formData.constraint,
                     String(selectedRecord.customer || ""),
@@ -749,7 +759,8 @@ export default function TicketManagement() {
                     String(selectedRecord.hostname || ""),
                     String(selectedRecord.sn || ""),
                     formData.portText || undefined,
-                    autoSerpoTypeOverride === "FEEDER"
+                    autoSerpoTypeOverride === "FEEDER",
+                    autoTraffic
                   )}
                 </p>
               </div>
@@ -1142,7 +1153,7 @@ export default function TicketManagement() {
                       </div>
                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                         <div>
-                          <Label>Hostname OLT</Label>
+                          <Label>{manualFormData.constraint === "FULL TRAFFIC SEGMENT" ? "Hostname UPE Asal" : manualFormData.constraint === "FULL TRAFFIC" ? "Hostname OLT/UPE Asal" : "Hostname OLT"}</Label>
                           <ExcelRecordCombobox
                             value={manualFormData.hostname}
                             onChange={(v) => setManualFormData((p) => ({ ...p, hostname: v }))}
@@ -1227,6 +1238,8 @@ export default function TicketManagement() {
                         )}
                       </div>
                       
+                      <TrafficConstraintFields constraint={manualFormData.constraint} value={manualTraffic} onChange={setManualTraffic} />
+
                       {(manualFormData.constraint === "PORT DOWN" || manualFormData.constraint === "PORT BAD RX" || manualFormData.constraint === "LINK DOWN" || manualFormData.constraint === "LINK BAD RX" || manualFormData.constraint === "INTERMITTENT UPE/OLT") && (
                         <div>
                           <Label>
@@ -1258,7 +1271,8 @@ export default function TicketManagement() {
                               manualFormData.hostname.trim(),
                               manualFormData.snOnt.trim(),
                               manualFormData.portText || undefined,
-                              manualSerpoTypeOverride === "FEEDER"
+                              manualSerpoTypeOverride === "FEEDER",
+                              manualTraffic
                             )}
                           </p>
                         </div>
