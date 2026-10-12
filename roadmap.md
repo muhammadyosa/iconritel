@@ -1,5 +1,7 @@
 # Current tasks
 
+- [ ] Add FULL TRAFFIC SEGMENT and FULL TRAFFIC FEEDER options, creation/edit fields, and verify example output.
+
 - [x] Fix GitHub deployment dependency installation and validate workflow syntax locally.
 - [x] Re-run the CI-equivalent steps locally on Node 22 (npm ci + npm run build + verify dist/index.html) — all passed; repo synced at the fixed commit.
 - [x] Stop failed GitHub runs when Pages is not enabled (skip with notice)
