@@ -1,5 +1,7 @@
 # Current tasks
 
+- [x] Align Status Distribution chart, summary, and details with live incidents for Today, This Week, This Month, and All; verified actual counts, percentages, and details in the signed-in UI, with boundary and live-change regression tests in UTC and WIB.
+
 - [x] Reorder the FEEDER constraint list by device group (FAT, PORT, OLT, UPE, LINK, traffic, other) and verify the dropdown order.
 - [x] Add OLT BAD RX SEGMEN and UPE BAD RX SEGMEN FEEDER constraints, destination fields, edit restoration, and verify supplied examples.
 

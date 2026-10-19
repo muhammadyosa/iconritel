@@ -4,6 +4,8 @@ import { MonthlyAnalytics } from "@/components/MonthlyAnalytics";
 import { useCloudTickets } from "@/hooks/useCloudTickets";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useTicketHistory } from "@/hooks/useTicketHistory";
+import { useRealtimeDate } from "@/hooks/useRealtimeDate";
+import { countIncidentStatuses, filterStatusPeriod, type StatusPeriod } from "@/lib/statusDistribution";
 import { useShiftReportHistory } from "@/hooks/useShiftReportHistory";
 import { useCloudShiftReports } from "@/hooks/useCloudShiftReports";
 import { FEEDER_CONSTRAINTS_SET, Ticket, ALL_CONSTRAINTS } from "@/types/ticket";
@@ -80,7 +82,7 @@ export default function Dashboard() {
   const [selectedConstraint, setSelectedConstraint] = useState<string>("all");
   const [inlineSelectedTicket, setInlineSelectedTicket] = useState<Ticket | null>(null);
   const [trendFilter, setTrendFilter] = useState<string>("month");
-  const [statusAnalysisPeriod, setStatusAnalysisPeriod] = useState<"today" | "week" | "month" | "all">("month");
+  const [statusAnalysisPeriod, setStatusAnalysisPeriod] = useState<StatusPeriod>("month");
   const [trendCustomDate, setTrendCustomDate] = useState<string>(() => toLocalDateStr(new Date()));
   const [trendSeries, setTrendSeries] = useState<{ ritel: boolean; feeder: boolean; created: boolean }>({ ritel: true, feeder: true, created: false });
   const [previousDialogState, setPreviousDialogState] = useState<{
@@ -231,7 +233,17 @@ export default function Dashboard() {
   const totalIncidents = tickets.length;
   const resolvedCount = useMemo(() => tickets.filter(t => t.status === "Resolved").length, [tickets]);
   const resolutionRate = totalIncidents > 0 ? Math.round((resolvedCount / totalIncidents) * 100) : 0;
-  const todayStr = useMemo(() => toLocalDateStr(new Date()), []);
+  const todayStr = useRealtimeDate();
+  const statusPeriodTickets = useMemo(
+    () => filterStatusPeriod(tickets, statusAnalysisPeriod),
+    [tickets, statusAnalysisPeriod, todayStr],
+  );
+  const statusCounts = useMemo(() => countIncidentStatuses(statusPeriodTickets), [statusPeriodTickets]);
+  // Keep an open status drill-down synchronized with the same live scope.
+  useEffect(() => {
+    if (!filterDialogOpen || !filterDialogTitle.startsWith("⚙️ Incident dengan Status:")) return;
+    setFilterDialogTickets(statusPeriodTickets.filter(t => t.status === selectedStatus));
+  }, [statusPeriodTickets, selectedStatus, filterDialogOpen, filterDialogTitle]);
   const todayCreated = useMemo(() => tickets.filter(t => toLocalDateStr(new Date(t.createdISO)) === todayStr).length, [tickets, todayStr]);
   const todayResolved = useMemo(() => tickets.filter(t => t.status === "Resolved" && t.resolvedAt && toLocalDateStr(new Date(t.resolvedAt)) === todayStr).length, [tickets, todayStr]);
   const overSLA = useMemo(() => tickets.filter(isOverSlaUnresolved).length, [tickets]);
@@ -710,17 +722,18 @@ export default function Dashboard() {
                     { key: "month" as const, label: "Bulan Ini" },
                     { key: "all" as const, label: "Semua" },
                   ].map((opt) => (
-                    <button
+                    <Button variant="ghost" size="sm"
                       key={opt.key}
                       onClick={() => setStatusAnalysisPeriod(opt.key)}
-                      className={`text-[9px] px-1.5 py-0.5 rounded transition-colors ${
+                      aria-pressed={statusAnalysisPeriod === opt.key}
+                      className={`h-auto text-[9px] px-1.5 py-0.5 rounded transition-colors ${
                         statusAnalysisPeriod === opt.key
                           ? "bg-primary text-primary-foreground font-semibold"
                           : "text-muted-foreground hover:text-foreground"
                       }`}
                     >
                       {opt.label}
-                    </button>
+                    </Button>
                   ))}
                 </div>
               </div>
@@ -728,18 +741,18 @@ export default function Dashboard() {
             <CardContent className="p-2 sm:p-2.5">
               {(() => {
                 const statusData = [
-                  { emoji: "⚙️", label: "Progres", value: tickets.filter((t) => t.status === "On Progress").length, color: "hsl(217, 91%, 60%)", status: "On Progress" as const },
-                  { emoji: "🚨", label: "Critical", value: tickets.filter((t) => t.status === "Critical").length, color: "hsl(0, 84%, 60%)", status: "Critical" as const },
-                  { emoji: "✅", label: "Resolved", value: tickets.filter((t) => t.status === "Resolved").length, color: "hsl(142, 71%, 45%)", status: "Resolved" as const },
-                  { emoji: "⏳", label: "Pending", value: tickets.filter((t) => t.status === "Pending").length, color: "hsl(38, 92%, 50%)", status: "Pending" as const },
+                  { emoji: "⚙️", label: "Progres", value: statusCounts["On Progress"], color: "hsl(var(--primary))", status: "On Progress" as const },
+                  { emoji: "🚨", label: "Critical", value: statusCounts["Critical"], color: "hsl(var(--destructive))", status: "Critical" as const },
+                  { emoji: "✅", label: "Resolved", value: statusCounts["Resolved"], color: "hsl(var(--success))", status: "Resolved" as const },
+                  { emoji: "⏳", label: "Pending", value: statusCounts["Pending"], color: "hsl(var(--warning))", status: "Pending" as const },
                 ]
                   // hide zero-value statuses, highest first
                   .filter((d) => d.value > 0)
                   .sort((a, b) => b.value - a.value);
-                const total = statusData.reduce((s, d) => s + d.value, 0) || 1;
+                const total = statusPeriodTickets.length;
                 const openStatus = (status: string) => {
-                  setSelectedStatus(selectedStatus === status ? null : status);
-                  const filtered = tickets.filter((t) => t.status === status);
+                  setSelectedStatus(status);
+                  const filtered = statusPeriodTickets.filter((t) => t.status === status);
                   setPreviousDialogState(null);
                   setShowOltList(false);
                   setFilterDialogTickets(filtered);
@@ -821,10 +834,10 @@ export default function Dashboard() {
                         {statusData.map((d) => {
                           const pct = Math.round((d.value / total) * 100);
                           return (
-                            <button
+                            <Button variant="ghost" size="sm"
                               key={d.label}
                               onClick={() => openStatus(d.status)}
-                              className="w-full flex items-center gap-1.5 px-1 py-0.5 rounded-md hover:bg-muted/40 transition-colors text-left"
+                              className="h-auto w-full justify-start flex items-center gap-1.5 px-1 py-0.5 rounded-md hover:bg-muted/40 transition-colors text-left"
                             >
                               <span className={`w-9 text-[11px] sm:text-xs text-center shrink-0 ${statBadgeClass(d.label)}`}>
                                 {d.value.toLocaleString("id-ID")}
@@ -838,43 +851,14 @@ export default function Dashboard() {
                                 <span className="truncate">{d.label}</span>
                                 <span className="text-foreground/70 font-semibold">({pct}%)</span>
                               </span>
-                            </button>
+                            </Button>
                           );
                         })}
                       </div>
                     </div>
                     {(() => {
-                      // Filter tickets by selected period for the analysis section
-                      const now = new Date();
-                      const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
-                      const startOfWeek = startOfDay - ((now.getDay() + 6) % 7) * 86400000; // Monday
-                      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
-                      const periodStart =
-                        statusAnalysisPeriod === "today"
-                          ? startOfDay
-                          : statusAnalysisPeriod === "week"
-                          ? startOfWeek
-                          : statusAnalysisPeriod === "month"
-                          ? startOfMonth
-                          : 0;
-                      const periodTickets =
-                        statusAnalysisPeriod === "all"
-                          ? tickets
-                          : tickets.filter((t) => {
-                              const ts = t.createdISO ? new Date(t.createdISO).getTime() : NaN;
-                              return !isNaN(ts) && ts >= periodStart;
-                            });
-                      const periodCounts = {
-                        "On Progress": periodTickets.filter((t) => t.status === "On Progress").length,
-                        Critical: periodTickets.filter((t) => t.status === "Critical").length,
-                        Resolved: periodTickets.filter((t) => t.status === "Resolved").length,
-                        Pending: periodTickets.filter((t) => t.status === "Pending").length,
-                      };
-                      const periodData = statusData.map((d) => ({
-                        ...d,
-                        value: periodCounts[d.status as keyof typeof periodCounts],
-                      }));
-                      const totalReal = periodData.reduce((s, d) => s + d.value, 0);
+                      const periodData = statusData;
+                      const totalReal = total;
                       if (totalReal === 0) {
                         return (
                           <div className="mt-2 pt-2 border-t border-border/50 space-y-1.5">
