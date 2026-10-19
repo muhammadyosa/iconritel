@@ -5,3 +5,5 @@
 - GitHub Pages CI uses Node 22 and npm ci with a synchronized public-registry package-lock.json; the workflow first checks that Pages is enabled and skips build/deploy with a notice otherwise, so a missing Pages setup never produces failed runs.
 
 - Traffic-specific incident inputs share TrafficConstraintFields and serialize through the canonical ticket formatter; restore them from ticketResult when editing to preserve existing storage schema.
+
+- Dashboard Status Distribution uses the shared statusDistribution calendar filter and current incident counts for chart, summary, and drill-down; one scope prevents discrepancies across views.
