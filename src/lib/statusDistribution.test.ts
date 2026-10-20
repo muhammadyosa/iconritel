@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { countIncidentStatuses, filterStatusPeriod } from "./statusDistribution";
+import { countIncidentStatuses, filterStatusPeriod, summarizeIncidentStatuses } from "./statusDistribution";
 import type { Ticket } from "@/types/ticket";
 
 const now = new Date(2026, 9, 21, 9, 24); // Wednesday; week starts Monday October 19.
@@ -27,12 +27,33 @@ describe("live Status Distribution", () => {
   it("Semua preserves every current incident without a date restriction", () => {
     expect(filterStatusPeriod(tickets, "all", now)).toEqual(tickets);
   });
-  it("recalculates all four statuses after live updates, inserts, and deletes", () => {
-    const scope = filterStatusPeriod(tickets, "month", now);
-    expect(countIncidentStatuses(scope)).toEqual({ "On Progress": 1, Critical: 1, Resolved: 2, Pending: 1 });
-    const updated = scope.filter(t => t.id !== "sunday").map(t => t.id === "monday" ? { ...t, status: "Resolved" as const } : t);
-    updated.push(incident("new", now, "Pending"));
-    expect(countIncidentStatuses(updated)).toEqual({ "On Progress": 0, Critical: 1, Resolved: 3, Pending: 1 });
+  it("keeps counts, total, percentages, dominant status, and resolution rate aligned to the live list", () => {
+    const initial = [
+      incident("critical", now, "Critical"),
+      incident("progress", now, "On Progress"),
+      incident("resolved", now, "Resolved"),
+      incident("pending", now, "Pending"),
+    ];
+    expect(summarizeIncidentStatuses(initial)).toMatchObject({
+      counts: { "On Progress": 1, Critical: 1, Resolved: 1, Pending: 1 },
+      total: 4,
+      percentages: { "On Progress": 25, Critical: 25, Resolved: 25, Pending: 25 },
+      dominantStatus: "On Progress",
+      resolutionRate: 25,
+    });
+
+    const currentList = initial
+      .filter((ticket) => ticket.id !== "pending")
+      .map((ticket) => ticket.id === "progress" ? { ...ticket, status: "Resolved" as const } : ticket);
+    currentList.push(incident("new", now, "Pending"));
+    expect(summarizeIncidentStatuses(currentList)).toMatchObject({
+      counts: { "On Progress": 0, Critical: 1, Resolved: 2, Pending: 1 },
+      total: 4,
+      percentages: { "On Progress": 0, Critical: 25, Resolved: 50, Pending: 25 },
+      dominantStatus: "Resolved",
+      resolutionRate: 50,
+    });
+    expect(countIncidentStatuses(currentList)).toEqual(summarizeIncidentStatuses(currentList).counts);
   });
   it("rolls calendar filters forward after midnight, month and year changes", () => {
     const boundary = [incident("old", new Date(2026, 11, 31, 23, 59)), incident("new", new Date(2027, 0, 1))];

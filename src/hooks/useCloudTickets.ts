@@ -253,8 +253,13 @@ export function useCloudTickets() {
               prev.map((t) => (t.id === updatedTicket.id ? updatedTicket : t))
             );
           } else if (payload.eventType === "DELETE") {
-            const deletedTicketId = (payload.old as { ticket_id: string }).ticket_id;
-            setTickets((prev) => prev.filter((t) => t.id !== deletedTicketId));
+            const deletedTicketId = (payload.old as { ticket_id?: string }).ticket_id;
+            if (deletedTicketId) {
+              setTickets((prev) => prev.filter((t) => t.id !== deletedTicketId));
+            } else {
+              // Realtime DELETE may expose only the database UUID, not the app's ticket_id.
+              void fetchTickets();
+            }
           }
         }
       )
@@ -523,7 +528,8 @@ export function useCloudTickets() {
         .eq("ticket_id" as never, id) as unknown as Promise<{ error: Error | null }>);
 
       if (error) throw error;
-      // Realtime will handle updating the list
+      // Reflect the successful delete immediately; realtime also reconciles other clients.
+      setTickets((prev) => prev.filter((ticket) => ticket.id !== id));
     } catch (error) {
       if (import.meta.env.DEV) {
         console.error("Error deleting ticket:", error);
