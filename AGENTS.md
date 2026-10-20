@@ -6,4 +6,4 @@
 
 - Traffic-specific incident inputs share TrafficConstraintFields and serialize through the canonical ticket formatter; restore them from ticketResult when editing to preserve existing storage schema.
 
-- Dashboard Status Distribution uses the shared statusDistribution calendar filter and current incident counts for chart, summary, and drill-down; one scope prevents discrepancies across views.
+- Dashboard Status Distribution derives chart, total, percentages, summary, and drill-down from the filtered shared live incident list; reconcile realtime deletes by refetch when the payload omits the app incident ID, because the database may expose only its UUID.

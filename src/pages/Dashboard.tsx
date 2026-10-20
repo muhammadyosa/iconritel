@@ -5,7 +5,7 @@ import { useCloudTickets } from "@/hooks/useCloudTickets";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useTicketHistory } from "@/hooks/useTicketHistory";
 import { useRealtimeDate } from "@/hooks/useRealtimeDate";
-import { countIncidentStatuses, filterStatusPeriod, type StatusPeriod } from "@/lib/statusDistribution";
+import { filterStatusPeriod, summarizeIncidentStatuses, type StatusPeriod } from "@/lib/statusDistribution";
 import { useShiftReportHistory } from "@/hooks/useShiftReportHistory";
 import { useCloudShiftReports } from "@/hooks/useCloudShiftReports";
 import { FEEDER_CONSTRAINTS_SET, Ticket, ALL_CONSTRAINTS } from "@/types/ticket";
@@ -238,7 +238,8 @@ export default function Dashboard() {
     () => filterStatusPeriod(tickets, statusAnalysisPeriod),
     [tickets, statusAnalysisPeriod, todayStr],
   );
-  const statusCounts = useMemo(() => countIncidentStatuses(statusPeriodTickets), [statusPeriodTickets]);
+  const statusSummary = useMemo(() => summarizeIncidentStatuses(statusPeriodTickets), [statusPeriodTickets]);
+  const statusCounts = statusSummary.counts;
   // Keep an open status drill-down synchronized with the same live scope.
   useEffect(() => {
     if (!filterDialogOpen || !filterDialogTitle.startsWith("⚙️ Incident dengan Status:")) return;
@@ -749,7 +750,7 @@ export default function Dashboard() {
                   // hide zero-value statuses, highest first
                   .filter((d) => d.value > 0)
                   .sort((a, b) => b.value - a.value);
-                const total = statusPeriodTickets.length;
+                const total = statusSummary.total;
                 const openStatus = (status: string) => {
                   setSelectedStatus(status);
                   const filtered = statusPeriodTickets.filter((t) => t.status === status);
@@ -809,7 +810,7 @@ export default function Dashboard() {
                              />
                            ))}
                            {statusData.map((d, i) => {
-                             const pct = d.value / total;
+                             const pct = statusSummary.percentages[d.status] / 100;
                              if (pct <= 0) return null;
                              return (
                                <path
@@ -832,7 +833,7 @@ export default function Dashboard() {
                       {/* Legend list — narrow, number on left */}
                       <div className="shrink-0 w-[150px] sm:w-[170px] space-y-0.5">
                         {statusData.map((d) => {
-                          const pct = Math.round((d.value / total) * 100);
+                          const pct = statusSummary.percentages[d.status];
                           return (
                             <Button variant="ghost" size="sm"
                               key={d.label}
@@ -870,12 +871,10 @@ export default function Dashboard() {
                       }
 
                       const sorted = [...periodData].sort((a, b) => b.value - a.value);
-                      const top = sorted[0];
-                      const topPct = Math.round((top.value / totalReal) * 100);
-                       const resolvedValue = periodData.find((d) => d.status === "Resolved")?.value ?? 0;
-                       const criticalValue = periodData.find((d) => d.status === "Critical")?.value ?? 0;
-                       const resolvedPct = Math.round((resolvedValue / totalReal) * 100);
-                       const criticalPct = Math.round((criticalValue / totalReal) * 100);
+                      const top = sorted.find((d) => d.status === statusSummary.dominantStatus) ?? sorted[0];
+                      const topPct = statusSummary.percentages[top.status];
+                       const resolvedPct = statusSummary.percentages.Resolved;
+                       const criticalPct = statusSummary.percentages.Critical;
                       const health =
                         criticalPct >= 30
                           ? { label: "Kritis", color: "stat-critical", emoji: "🚨" }

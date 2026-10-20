@@ -27,3 +27,23 @@ export function countIncidentStatuses(tickets: StatusIncident[]) {
   for (const ticket of tickets) counts[ticket.status] += 1;
   return counts;
 }
+
+export function summarizeIncidentStatuses(tickets: StatusIncident[]) {
+  const counts = countIncidentStatuses(tickets);
+  const total = tickets.length;
+  const statuses: Ticket["status"][] = ["On Progress", "Critical", "Resolved", "Pending"];
+  const percentages = Object.fromEntries(
+    statuses.map((status) => [status, total > 0 ? Math.round((counts[status] / total) * 100) : 0]),
+  ) as Record<Ticket["status"], number>;
+  const dominantStatus = total === 0
+    ? null
+    : statuses.reduce((dominant, status) => counts[status] > counts[dominant] ? status : dominant);
+
+  return {
+    counts,
+    total,
+    percentages,
+    dominantStatus,
+    resolutionRate: percentages.Resolved,
+  };
+}
