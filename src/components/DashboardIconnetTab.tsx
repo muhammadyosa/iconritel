@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/select";
 import { Copy, Trash2 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import { buildIconnetOutput } from "@/lib/iconnetOutput";
 
 const SHIFT_OPTIONS = [
   { value: "07.00", label: "07.00" },
@@ -52,14 +53,6 @@ interface DashboardData {
   lampungGangguan: string;
 }
 
-const formatDateForDisplay = (dateString: string) => {
-  if (!dateString) return "-";
-  const date = new Date(dateString);
-  const day = date.getDate();
-  const month = date.getMonth() + 1;
-  const year = date.getFullYear();
-  return `${day}/${month}/${year}`;
-};
 
 export function DashboardIconnetTab() {
   // Realtime date hook
@@ -126,33 +119,7 @@ export function DashboardIconnetTab() {
     setData(prev => ({ ...prev, [field]: value }));
   };
 
-  const generateOutput = () => {
-    const formatValue = (val: string) => val.trim() || "-";
-    const hariLabel = data.retailSbsHari ? HARI_OPTIONS.find(o => o.value === data.retailSbsHari)?.label.replace(" Hari", "") || "-" : "-";
-    
-    return `*Ticket Open Incident All pukul ${formatValue(data.resumeAllTime)}*
-Gangguan Retail SBS Tanggal ${formatDateForDisplay(data.resumeAllDate)}
-Dengan Penyebaran :
-* Sumsel = ${formatValue(data.sumselAll)}
-* Bangka Belitung = ${formatValue(data.bangkaBelitungAll)}
-* Bengkulu = ${formatValue(data.bengkuluAll)}
-* Jambi = ${formatValue(data.jambiAll)}
-* Lampung = ${formatValue(data.lampungAll)}
-Posisi NOC Ritel SBU = ${formatValue(data.posisiNocRitel)}
-Posisi Tiket Outbond, Back office, Noc pusat, CM ritel dll = ${formatValue(data.posisiTiketOutbond)}
-Total Tiket = ${formatValue(data.totalTiket)}
-=================================
-*Ticket Gangguan Over SLA Pukul ${formatValue(data.resumeGangguanTime)}*
-Retail SBS = ${hariLabel} hari
-Gangguan Retail SBS Tanggal ${formatDateForDisplay(data.resumeGangguanDate)}
-Total gangguan = ${formatValue(data.totalGangguan)}
-Dengan Penyebaran : 
-* Sumsel = ${formatValue(data.sumselGangguan)}
-* Bangka Belitung = ${formatValue(data.bangkaBelitungGangguan)}
-* Bengkulu = ${formatValue(data.bengkuluGangguan)}
-* Jambi = ${formatValue(data.jambiGangguan)}
-* Lampung = ${formatValue(data.lampungGangguan)}`;
-  };
+  const generateOutput = () => buildIconnetOutput(data);
 
   const handleCopy = () => {
     const output = generateOutput();
