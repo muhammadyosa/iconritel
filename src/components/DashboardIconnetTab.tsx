@@ -53,7 +53,6 @@ interface DashboardData {
   lampungGangguan: string;
 }
 
-
 export function DashboardIconnetTab() {
   // Realtime date hook
   const realtimeDate = useRealtimeDate();
