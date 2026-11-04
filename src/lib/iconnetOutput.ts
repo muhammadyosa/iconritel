@@ -1,6 +1,6 @@
 // Canonical text layout for the 📡 Iconnet Preview Output / clipboard copy.
-// Headings keep literal asterisks, every line is separated by a blank line,
-// and empty figures stay as "-".
+// Headings keep literal asterisks, lines inside a block sit directly under each
+// other, and a blank line separates each block. Empty figures stay as "-".
 
 export interface IconnetOutputData {
   resumeAllTime: string;
@@ -48,25 +48,29 @@ export const buildIconnetOutput = (data: IconnetOutputData) => {
   return [
     `*All Ticket Open Incident Pukul ${formatIconnetValue(data.resumeAllTime)}*`,
     `Gangguan Retail SBS Tanggal ${formatIconnetDate(data.resumeAllDate)}`,
+    "",
     "Dengan Penyebaran :",
     `* Sumsel = ${formatIconnetValue(data.sumselAll)}`,
     `* Bangka Belitung = ${formatIconnetValue(data.bangkaBelitungAll)}`,
     `* Bengkulu = ${formatIconnetValue(data.bengkuluAll)}`,
     `* Jambi = ${formatIconnetValue(data.jambiAll)}`,
     `* Lampung = ${formatIconnetValue(data.lampungAll)}`,
+    "",
     `Posisi NOC Ritel SBU = ${formatIconnetValue(data.posisiNocRitel)}`,
     `Posisi Tiket Outbond, Back Office, NOC Pusat, CM Ritel Dll = ${formatIconnetValue(data.posisiTiketOutbond)}`,
     `Total Tiket = ${formatIconnetValue(data.totalTiket)}`,
+    "",
     "=================================",
     `*Ticket Gangguan Over SLA Pukul ${formatIconnetValue(data.resumeGangguanTime)}*`,
     `*Retail SBS = ${hariLabel} Hari*`,
     `Gangguan Retail SBS Tanggal ${formatIconnetDate(data.resumeGangguanDate)}`,
     `Total gangguan = ${formatIconnetValue(data.totalGangguan)}`,
+    "",
     "Dengan Penyebaran : ",
     `* Sumsel = ${formatIconnetValue(data.sumselGangguan)}`,
     `* Bangka Belitung = ${formatIconnetValue(data.bangkaBelitungGangguan)}`,
     `* Bengkulu = ${formatIconnetValue(data.bengkuluGangguan)}`,
     `* Jambi = ${formatIconnetValue(data.jambiGangguan)}`,
     `* Lampung = ${formatIconnetValue(data.lampungGangguan)}`,
-  ].join("\n\n");
+  ].join("\n");
 };
