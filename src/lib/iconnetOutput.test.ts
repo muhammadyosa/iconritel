@@ -23,7 +23,40 @@ const base: IconnetOutputData = {
   lampungGangguan: "",
 };
 
+const expectedEmpty = [
+  "*All Ticket Open Incident Pukul 15.00*",
+  "Gangguan Retail SBS Tanggal 4/11/2026",
+  "",
+  "Dengan Penyebaran :",
+  "* Sumsel = -",
+  "* Bangka Belitung = -",
+  "* Bengkulu = -",
+  "* Jambi = -",
+  "* Lampung = -",
+  "",
+  "Posisi NOC Ritel SBU = -",
+  "Posisi Tiket Outbond, Back Office, NOC Pusat, CM Ritel Dll = -",
+  "Total Tiket = -",
+  "",
+  "=================================",
+  "*Ticket Gangguan Over SLA Pukul 15.00*",
+  "*Retail SBS = - Hari*",
+  "Gangguan Retail SBS Tanggal 4/11/2026",
+  "Total gangguan = -",
+  "",
+  "Dengan Penyebaran : ",
+  "* Sumsel = -",
+  "* Bangka Belitung = -",
+  "* Bengkulu = -",
+  "* Jambi = -",
+  "* Lampung = -",
+].join("\n");
+
 describe("Iconnet preview output format", () => {
+  it("matches the requested layout exactly", () => {
+    expect(buildIconnetOutput(base)).toBe(expectedEmpty);
+  });
+
   it("uses the requested headings with literal asterisks", () => {
     const out = buildIconnetOutput(base);
     expect(out).toContain("*All Ticket Open Incident Pukul 15.00*");
@@ -40,13 +73,6 @@ describe("Iconnet preview output format", () => {
     expect(buildIconnetOutput(base)).toContain(
       "Posisi Tiket Outbond, Back Office, NOC Pusat, CM Ritel Dll = -",
     );
-  });
-
-  it("separates every line with a blank line and keeps the section divider", () => {
-    const out = buildIconnetOutput(base);
-    expect(out.split("\n\n")).toHaveLength(22);
-    expect(out).toContain("\n\n=================================\n\n");
-    expect(out).toContain("Dengan Penyebaran :\n\n* Sumsel = -");
   });
 
   it("keeps dates as D/M/YYYY without leading zeros and filled values", () => {
