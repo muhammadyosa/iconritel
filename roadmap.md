@@ -2,6 +2,8 @@
 
 - [x] Add 🔭 SURVEILLANCE in Report with queue extraction, ICRM estimates, editable output, copy/reset, and desktop/mobile verification; eight rule tests and authenticated Generate/Edit/Copy/Reset checks passed.
 
+- [x] Make every page tab bar wrap instead of scrolling horizontally so no tab is hidden; verified all tabs visible at 1110px on Report, Incident Management, and Settings, plus Generate/Copy on 🔭 SURVEILLANCE.
+
 - [x] Keep Status Distribution counts, percentages, chart, summary, and drill-down synchronized with the live List Incident data for all calendar filters, including inserts, status changes, and deletes.
 
 - [x] Align Status Distribution chart, summary, and details with live incidents for Today, This Week, This Month, and All; verified actual counts, percentages, and details in the signed-in UI, with boundary and live-change regression tests in UTC and WIB.

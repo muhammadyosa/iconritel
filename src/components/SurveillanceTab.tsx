@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Copy, Pencil, RotateCcw, Wand2, Check, Telescope } from "lucide-react";
+import { Copy, Pencil, RotateCcw, Wand2, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -38,7 +38,7 @@ export function SurveillanceTab() {
   return (
     <section aria-label="SURVEILLANCE" className="space-y-3 min-w-0">
       <div className="flex items-center justify-between flex-wrap gap-2 border-b pb-3">
-        <h2 className="flex items-center gap-2 text-base font-semibold"><Telescope className="h-5 w-5 text-primary" />🔭 SURVEILLANCE</h2>
+        <h2 className="flex items-center gap-2 text-base font-semibold">🔭 SURVEILLANCE</h2>
         {count > 0 && <span className="text-xs text-muted-foreground">{count} Incident</span>}
       </div>
 

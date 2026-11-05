@@ -9,3 +9,4 @@
 - Dashboard Status Distribution derives chart, total, percentages, summary, and drill-down from the filtered shared live incident list; reconcile realtime deletes by refetch when the payload omits the app incident ID, because the database may expose only its UUID.
 
 - Surveillance is a client-side Report tool with a pure queue parser/formatter and editable text output; it reuses existing Report tab gating and never writes incident data.
+- Page tab bars wrap to a new row at every width (no `sm:flex-nowrap` on TabsList) — the horizontal scroll wrapper hides its scrollbar, so a non-wrapping bar pushes the last tab out of view with no way to reach it.
