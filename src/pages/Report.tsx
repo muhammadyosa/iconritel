@@ -44,6 +44,7 @@ import { Ticket } from "@/types/ticket";
 import { DashboardIconnetTab } from "@/components/DashboardIconnetTab";
 import { ReportingGangguanTab } from "@/components/ReportingGangguanTab";
 import ListAntrianTab from "@/components/ListAntrianTab";
+import { SurveillanceTab } from "@/components/SurveillanceTab";
 import { useUserRole } from "@/hooks/useUserRole";
 import { canSeeTab, firstAllowedTab, REPORT_TABS } from "@/lib/rolePermissions";
 import { StatusBadge } from "@/components/StatusBadge";
@@ -515,7 +516,7 @@ Dibuat: ${new Date(r.createdAt).toLocaleString("id-ID")}
         </p>
       </div>
 
-      <Tabs key={role} defaultValue={firstAllowedTab(REPORT_TABS, role, ["shift","sla","pending","dashboard-iconnet","reporting-gangguan","list-antrian"])} className="w-full">
+      <Tabs key={role} defaultValue={firstAllowedTab(REPORT_TABS, role, ["shift","sla","pending","dashboard-iconnet","reporting-gangguan","list-antrian","surveillance"])} className="w-full">
         <div className="overflow-x-auto scrollbar-hide -mx-2 px-2 sm:mx-0 sm:px-0">
           <TabsList className="inline-flex w-auto min-w-full sm:min-w-0 gap-1 h-auto flex-wrap sm:flex-nowrap p-1">
             {canSeeTab(REPORT_TABS, role, "shift") && (
@@ -542,6 +543,9 @@ Dibuat: ${new Date(r.createdAt).toLocaleString("id-ID")}
             )}
             {canSeeTab(REPORT_TABS, role, "list-antrian") && (
             <TabsTrigger value="list-antrian" className="text-[11px] sm:text-sm px-2.5 sm:px-3 py-1.5 sm:py-2 whitespace-nowrap">📑 List Antrian</TabsTrigger>
+            )}
+            {canSeeTab(REPORT_TABS, role, "surveillance") && (
+            <TabsTrigger value="surveillance" className="text-[11px] sm:text-sm px-2.5 sm:px-3 py-1.5 sm:py-2 whitespace-nowrap">🔭 SURVEILLANCE</TabsTrigger>
             )}
           </TabsList>
         </div>
@@ -924,6 +928,11 @@ UPDATE : `}
         <TabsContent value="list-antrian" className="space-y-4">
           <ListAntrianTab />
         </TabsContent>
+        {canSeeTab(REPORT_TABS, role, "surveillance") && (
+        <TabsContent value="surveillance" className="space-y-4">
+          <SurveillanceTab />
+        </TabsContent>
+        )}
       </Tabs>
     </div>
 
