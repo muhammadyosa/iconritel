@@ -1,6 +1,6 @@
 # Current tasks
 
-- [ ] Add 🔭 SURVEILLANCE in Report with queue extraction, ICRM estimates, editable output, copy/reset, and desktop/mobile verification.
+- [x] Add 🔭 SURVEILLANCE in Report with queue extraction, ICRM estimates, editable output, copy/reset, and desktop/mobile verification; eight rule tests and authenticated Generate/Edit/Copy/Reset checks passed.
 
 - [x] Keep Status Distribution counts, percentages, chart, summary, and drill-down synchronized with the live List Incident data for all calendar filters, including inserts, status changes, and deletes.
 
