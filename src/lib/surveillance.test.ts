@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parseSurveillance, surveillanceDeparture } from "./surveillance";
+import { formatSurveillance, parseSurveillance, surveillanceDeparture } from "./surveillance";
 
 describe("Surveillance incident extraction", () => {
   const names = ["TANSYA SAPTA ALMEGA", "YAHYA ISMAWAN PEGAWAI PLN", "ANGGUN KHARISMA", "WAHYUDI"];

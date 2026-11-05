@@ -74,7 +74,7 @@ export function parseSurveillance(raw: string): { incidents: SurveillanceInciden
 export function formatSurveillance(incidents: SurveillanceIncident[]): string {
   return incidents.map((incident) => [
     `Nama User : ${incident.customerName}`,
-    `Tim : Antrian ke - ${incident.queue}`,
+    `Tim : Antrian ke ${incident.queue}`,
     `Id Insiden : ${incident.incidentId}`,
     `Estimasi Berangkat (jam): ${incident.departure}`,
     `Estimasi Penyelesaian (jam): ${incident.completion}`,
