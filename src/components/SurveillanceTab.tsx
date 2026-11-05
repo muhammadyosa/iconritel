@@ -1,10 +1,22 @@
 import { useState } from "react";
-import { Copy, Pencil, RotateCcw, Wand2, Check } from "lucide-react";
+import { ChevronDown, Copy, Pencil, RotateCcw, Wand2, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/hooks/use-toast";
 import { formatSurveillance, parseSurveillance } from "@/lib/surveillance";
+
+const EXAMPLE_INPUT = `ANTRIAN 1
+21 JAM 10 MENIT
+26112100416
+FTTH AKSES TANSYA SAPTA ALMEGA LINK LOSS - SERPO MUKO MUKO FAT_123 SBS-MUKO-RC-OLT-04
+
+ANTRIAN 2
+26112100542
+FTTH AKSES YAHYA ISMAWAN PEGAWAI PLN BAD RX - SERPO SUNGAI PENUH`;
+
+const EXAMPLE_OUTPUT = formatSurveillance(parseSurveillance(EXAMPLE_INPUT).incidents);
 
 export function SurveillanceTab() {
   const [input, setInput] = useState("");

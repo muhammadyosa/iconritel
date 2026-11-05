@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parseSurveillance, surveillanceDeparture } from "./surveillance";
+import { formatSurveillance, parseSurveillance, surveillanceDeparture } from "./surveillance";
 
 describe("Surveillance incident extraction", () => {
   const names = ["TANSYA SAPTA ALMEGA", "YAHYA ISMAWAN PEGAWAI PLN", "ANGGUN KHARISMA", "WAHYUDI"];
@@ -32,6 +32,12 @@ describe("Surveillance incident extraction", () => {
     const result = parseSurveillance("TIM: A\nANTRIAN 1\n26112100416\nFTTH AKSES TANSYA FAT_123\n26112100542\nFTTH AKSES YAHYA SN ONT 123\nTIM: B\nANTRIAN 1\n26112100668\nFTTH AKSES ANGGUN SBS-MUKO-RC-OLT-04");
     expect(result.incidents.map((incident) => incident.queue)).toEqual([1, 1, 1]);
     expect(result.incidents.map((incident) => incident.customerName)).toEqual(["TANSYA", "YAHYA", "ANGGUN"]);
+  });
+  it("formats ICRM output with 'Antrian ke 1' and a blank line between incidents", () => {
+    const result = parseSurveillance("ANTRIAN 1\n21 JAM 10 MENIT\n26112100416\nFTTH AKSES TANSYA LINK LOSS\nANTRIAN 2\n26112100542\nFTTH AKSES YAHYA BAD RX");
+    expect(formatSurveillance(result.incidents)).toBe(
+      "Nama User : TANSYA\nTim : Antrian ke 1\nId Insiden : 26112100416\nEstimasi Berangkat (jam): 08:00\nEstimasi Penyelesaian (jam): 2 jam\n\nNama User : YAHYA\nTim : Antrian ke 2\nId Insiden : 26112100542\nEstimasi Berangkat (jam): 10:00\nEstimasi Penyelesaian (jam): 2 jam",
+    );
   });
   it("reports incomplete rows instead of inventing incident data", () => {
     const result = parseSurveillance("ANTRIAN 1\nFTTH AKSES TANSYA LINK LOSS");
