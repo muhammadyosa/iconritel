@@ -33,6 +33,12 @@ describe("Surveillance incident extraction", () => {
     expect(result.incidents.map((incident) => incident.queue)).toEqual([1, 1, 1]);
     expect(result.incidents.map((incident) => incident.customerName)).toEqual(["TANSYA", "YAHYA", "ANGGUN"]);
   });
+  it("formats ICRM output with 'Antrian ke 1' and a blank line between incidents", () => {
+    const result = parseSurveillance("ANTRIAN 1\n21 JAM 10 MENIT\n26112100416\nFTTH AKSES TANSYA LINK LOSS\nANTRIAN 2\n26112100542\nFTTH AKSES YAHYA BAD RX");
+    expect(formatSurveillance(result.incidents)).toBe(
+      "Nama User : TANSYA\nTim : Antrian ke 1\nId Insiden : 26112100416\nEstimasi Berangkat (jam): 08:00\nEstimasi Penyelesaian (jam): 2 jam\n\nNama User : YAHYA\nTim : Antrian ke 2\nId Insiden : 26112100542\nEstimasi Berangkat (jam): 10:00\nEstimasi Penyelesaian (jam): 2 jam",
+    );
+  });
   it("reports incomplete rows instead of inventing incident data", () => {
     const result = parseSurveillance("ANTRIAN 1\nFTTH AKSES TANSYA LINK LOSS");
     expect(result.incidents).toEqual([]);
