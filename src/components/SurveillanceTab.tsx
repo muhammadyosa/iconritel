@@ -54,6 +54,42 @@ export function SurveillanceTab() {
         {count > 0 && <span className="text-xs text-muted-foreground">{count} Incident</span>}
       </div>
 
+      <Collapsible>
+        <CollapsibleTrigger asChild>
+          <Button variant="outline" size="sm" className="w-full justify-between group">
+            <span>📋 Format Input yang Didukung</span>
+            <ChevronDown className="h-3.5 w-3.5 transition-transform group-data-[state=open]:rotate-180" />
+          </Button>
+        </CollapsibleTrigger>
+        <CollapsibleContent className="mt-2 space-y-3 rounded-md border bg-muted/30 p-3 text-xs">
+          <ul className="list-disc pl-4 space-y-1 text-muted-foreground">
+            <li>Setiap antrian diawali baris <span className="font-mono text-foreground">ANTRIAN 1</span>, <span className="font-mono text-foreground">ANTRIAN 2</span>, dst. Satu antrian boleh berisi beberapa incident.</li>
+            <li>ID Incident berupa angka minimal 6 digit, boleh dengan label <span className="font-mono text-foreground">ID INSIDEN :</span>.</li>
+            <li>Durasi gangguan (mis. <span className="font-mono text-foreground">21 JAM 10 MENIT</span>) opsional — boleh ditulis atau dilewati.</li>
+            <li>Deskripsi tiket diawali <span className="font-mono text-foreground">FTTH AKSES</span> diikuti nama user; detail teknis (FAT, OLT, SN ONT, SERPO) otomatis dipotong.</li>
+            <li>Estimasi berangkat dihitung otomatis: Antrian 1 = 08:00, setiap antrian berikutnya +2 jam.</li>
+          </ul>
+          <div className="space-y-1">
+            <div className="flex items-center justify-between gap-2">
+              <p className="font-medium">Contoh Input</p>
+              <Button size="sm" variant="secondary" className="h-7 text-xs" onClick={async () => {
+                try {
+                  await navigator.clipboard.writeText(EXAMPLE_INPUT);
+                  toast({ title: "Tersalin", description: "Contoh input disalin ke clipboard." });
+                } catch {
+                  toast({ title: "Gagal menyalin", description: "Izinkan akses clipboard atau salin contoh secara manual.", variant: "destructive" });
+                }
+              }}><Copy className="mr-1 h-3 w-3" />Copy Example</Button>
+            </div>
+            <pre className="whitespace-pre-wrap rounded bg-background p-2 font-mono text-[11px] leading-relaxed border">{EXAMPLE_INPUT}</pre>
+          </div>
+          <div className="space-y-1">
+            <p className="font-medium">Contoh Hasil Output</p>
+            <pre className="whitespace-pre-wrap rounded bg-background p-2 font-mono text-[11px] leading-relaxed border">{EXAMPLE_OUTPUT}</pre>
+          </div>
+        </CollapsibleContent>
+      </Collapsible>
+
       <div className="grid min-w-0 grid-cols-1 lg:grid-cols-2 gap-3">
         <div className="min-w-0 space-y-2">
           <Label htmlFor="surveillance-input" className="text-xs">Data Antrian</Label>
