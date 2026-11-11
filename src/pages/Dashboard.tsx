@@ -1,6 +1,7 @@
 import { Activity, AlertTriangle, Zap, Server, Calendar, Clock, User, ExternalLink, TrendingUp, BarChart3, FileText, History, RefreshCw, Loader2 } from "lucide-react";
 import { DashboardSkeleton } from "@/components/PageSkeleton";
 import { MonthlyAnalytics } from "@/components/MonthlyAnalytics";
+import { NocPerformancePanel } from "@/components/noc/NocPerformancePanel";
 import { useCloudTickets } from "@/hooks/useCloudTickets";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useTicketHistory } from "@/hooks/useTicketHistory";
@@ -1206,6 +1207,7 @@ export default function Dashboard() {
           reportShiftSlot={reportShiftBlock} 
         />
         </motion.div>
+        <NocPerformancePanel variant="incident" />
       </section>
 
 

@@ -116,6 +116,75 @@ export type Database = {
         }
         Relationships: []
       }
+      incident_archive: {
+        Row: {
+          archived_at: string
+          category: string | null
+          constraint_type: string | null
+          created_at: string
+          created_by_name: string | null
+          created_by_user_id: string | null
+          customer_name: string | null
+          hostname: string | null
+          id: string
+          reopen_count: number
+          resolution_minutes: number | null
+          resolved_at: string | null
+          resolved_by_name: string | null
+          resolved_by_user_id: string | null
+          serpo: string | null
+          service_id: string | null
+          status: string
+          ticket_id: string
+          ticket_result: string | null
+          updated_at: string
+        }
+        Insert: {
+          archived_at?: string
+          category?: string | null
+          constraint_type?: string | null
+          created_at: string
+          created_by_name?: string | null
+          created_by_user_id?: string | null
+          customer_name?: string | null
+          hostname?: string | null
+          id?: string
+          reopen_count?: number
+          resolution_minutes?: number | null
+          resolved_at?: string | null
+          resolved_by_name?: string | null
+          resolved_by_user_id?: string | null
+          serpo?: string | null
+          service_id?: string | null
+          status: string
+          ticket_id: string
+          ticket_result?: string | null
+          updated_at?: string
+        }
+        Update: {
+          archived_at?: string
+          category?: string | null
+          constraint_type?: string | null
+          created_at?: string
+          created_by_name?: string | null
+          created_by_user_id?: string | null
+          customer_name?: string | null
+          hostname?: string | null
+          id?: string
+          reopen_count?: number
+          resolution_minutes?: number | null
+          resolved_at?: string | null
+          resolved_by_name?: string | null
+          resolved_by_user_id?: string | null
+          serpo?: string | null
+          service_id?: string | null
+          status?: string
+          ticket_id?: string
+          ticket_result?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       master_data_uploads: {
         Row: {
           created_at: string

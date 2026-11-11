@@ -58,6 +58,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import RegionalOfficeTab from "@/components/RegionalOfficeTab";
+import { NocPerformancePanel } from "@/components/noc/NocPerformancePanel";
 import { useUserRole } from "@/hooks/useUserRole";
 import { canSeeTab, TEAM_TABS } from "@/lib/rolePermissions";
 import type { DateRange } from "react-day-picker";
@@ -1404,6 +1405,7 @@ export default function Teams() {
         {/* ===== TAB 2: Team NOC ===== */}
         <TabsContent value="team-noc" className="space-y-2 sm:space-y-3">
           <h2 className="sr-only">Team NOC</h2>
+          <NocPerformancePanel variant="team" />
           {dateFilter}
 
           {userStats.length === 0 ? (
