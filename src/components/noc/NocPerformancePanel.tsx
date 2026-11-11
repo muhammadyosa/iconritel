@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from "@/components/ui/chart";
+import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent, type ChartConfig } from "@/components/ui/chart";
 import { Bar, BarChart, CartesianGrid, Line, LineChart, LabelList, ComposedChart, XAxis, YAxis } from "recharts";
 import { FileDown, Loader2 } from "lucide-react";
 import { toast } from "sonner";
@@ -22,7 +22,7 @@ const cfg: ChartConfig = {
   created: { label: "Created", color: "hsl(var(--primary))" },
   resolved: { label: "Resolved", color: "hsl(var(--success))" },
   onProgress: { label: "On Progress", color: "hsl(var(--warning))" },
-  handled: { label: "Handled", color: "hsl(var(--accent-foreground))" },
+  handled: { label: "Handled", color: "hsl(var(--chart-4))" },
   backlog: { label: "Backlog", color: "hsl(var(--destructive))" },
   slaPct: { label: "SLA %", color: "hsl(var(--warning))" },
   avgHours: { label: "Avg jam", color: "hsl(var(--warning))" },
