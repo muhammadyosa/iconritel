@@ -20,6 +20,8 @@ export interface ArchivedIncident {
   resolvedByUserId: string | null;
   resolvedByName: string | null;
   reopenCount: number;
+  customer?: string;
+  hostname?: string;
 }
 
 export interface HandlingEvent { ticketId: string; userId: string | null; userName: string | null; at: string }

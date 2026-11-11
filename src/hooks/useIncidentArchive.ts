@@ -27,7 +27,7 @@ export function useIncidentArchive(from: Date, to: Date) {
       const f = from.toISOString(), t = to.toISOString();
       const [rows, events] = await Promise.all([
         pageAll((a, b) => supabase.from("incident_archive")
-          .select("ticket_id, constraint_type, category, serpo, status, ticket_result, created_at, created_by_user_id, created_by_name, resolved_at, resolved_by_user_id, resolved_by_name, reopen_count")
+          .select("ticket_id, constraint_type, category, serpo, status, ticket_result, created_at, created_by_user_id, created_by_name, resolved_at, resolved_by_user_id, resolved_by_name, reopen_count, customer_name, hostname")
           .lte("created_at", t)
           .or(`resolved_at.is.null,resolved_at.gte.${f},status.neq.Resolved`)
           .order("created_at", { ascending: true }).range(a, b)),
@@ -41,7 +41,7 @@ export function useIncidentArchive(from: Date, to: Date) {
         status: r.status, description: r.ticket_result || "", createdAt: r.created_at,
         createdByUserId: r.created_by_user_id, createdByName: r.created_by_name,
         resolvedAt: r.resolved_at, resolvedByUserId: r.resolved_by_user_id, resolvedByName: r.resolved_by_name,
-        reopenCount: r.reopen_count,
+        reopenCount: r.reopen_count, customer: r.customer_name || "", hostname: r.hostname || "",
       }));
       const handling: HandlingEvent[] = events.map((e) => ({ ticketId: e.ticket_id, userId: e.changed_by_user_id, userName: e.changed_by_name, at: e.created_at }));
       return { incidents, handling };
