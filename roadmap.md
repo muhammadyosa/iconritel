@@ -26,4 +26,4 @@
 - [x] Rename Activity to ♻️ Activity and the FDT, UPE, BNG list headings and tabs.
 - [x] Format each BLAST Incident Pending as an individual dated ticket block with its team and full incident details.
 - [x] Connect Google Search Console in the new workspace.
-- [ ] Analitik Bulanan + Team NOC performance system (uploaded brief) — awaiting decision on archiving old incident details.
+- [x] Analitik Incident + Team NOC performance (KPI, charts, ranking, user detail, PDF) on a permanent incident archive; 6 rule tests and signed-in UI/PDF check passed.
