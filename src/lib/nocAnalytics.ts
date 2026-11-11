@@ -119,12 +119,12 @@ export function trendIndicator(cur: Kpis, prev: Kpis): TrendLabel {
   return score >= 1 ? "Improving" : score <= -1 ? "Needs Attention" : "Stable";
 }
 
-export interface Bucket { key: string; label: string; start: Date; end: Date; created: number; resolved: number; backlog: number; slaPct: number | null; avgHours: number }
+export interface Bucket { key: string; label: string; start: Date; end: Date; created: number; resolved: number; onProgress: number; backlog: number; slaPct: number | null; avgHours: number }
 
 function bucketStats(list: ArchivedIncident[], key: string, label: string, start: Date, end: Date, now: Date): Bucket {
   const p: Period = { kind: "custom", start, end, label };
   const k = computeKpis(list, p, now);
-  return { key, label, start, end, created: k.created, resolved: k.resolved, backlog: k.outstanding, slaPct: k.slaPct, avgHours: Math.round((k.avgResolutionMs / 3600000) * 10) / 10 };
+  return { key, label, start, end, created: k.created, resolved: k.resolved, onProgress: k.onProgress, backlog: k.outstanding, slaPct: k.slaPct, avgHours: Math.round((k.avgResolutionMs / 3600000) * 10) / 10 };
 }
 
 export function dailyBuckets(list: ArchivedIncident[], p: Period, now = new Date()): Bucket[] {
@@ -159,6 +159,12 @@ export function monthlyBuckets(list: ArchivedIncident[], p: Period, now = new Da
     out.push(bucketStats(list, m.toISOString(), m.toLocaleDateString("id-ID", { month: "short", year: "2-digit" }), start, mEnd > p.end ? p.end : mEnd, now));
   }
   return out;
+}
+
+/** Users sorted by total productivity (created + handled + resolved), ties by resolved. */
+export function productivityRanking(users: UserPerformance[]) {
+  return users.map((u) => ({ name: u.name, created: u.created, handled: u.handled, resolved: u.resolved, total: u.created + u.handled + u.resolved }))
+    .filter((u) => u.total > 0).sort((a, b) => b.total - a.total || b.resolved - a.resolved);
 }
 
 export function topCategories(list: ArchivedIncident[], p: Period, limit = 8) {
