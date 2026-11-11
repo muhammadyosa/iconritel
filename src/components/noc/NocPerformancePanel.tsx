@@ -143,17 +143,21 @@ export function NocPerformancePanel({ variant }: { variant: "incident" | "team" 
           <>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
               {kpiCards.map((k) => (
-                <div key={k.t} className="rounded-lg border p-2 bg-card">
-                  <p className="text-[10px] text-muted-foreground">{k.t}</p>
-                  <p className={`text-lg font-bold tabular-nums ${k.c}`}>{k.v}</p>
+                <div key={k.t} className="rounded-xl border bg-card p-2.5 shadow-sm transition-shadow hover:shadow-md">
+                  <p className="text-[9px] uppercase tracking-wider text-muted-foreground">{k.t}</p>
+                  <p className={`text-xl font-bold tabular-nums leading-tight ${k.c}`}>{k.v}</p>
                   <p className="text-[9px] text-muted-foreground truncate">{k.s}</p>
                 </div>
               ))}
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-              <ChartCard title="Created vs Resolved & Backlog (harian)">
+              <ChartCard title="Created vs Resolved & Backlog" extra={
+                <div className="flex gap-1">{(["daily", "weekly", "monthly"] as const).map((g) => (
+                  <Button key={g} size="sm" variant={trendGrain === g ? "secondary" : "ghost"} className="h-6 px-2 text-[10px]" aria-pressed={trendGrain === g} onClick={() => setTrendGrain(g)}>{g === "daily" ? "Harian" : g === "weekly" ? "Mingguan" : "Bulanan"}</Button>
+                ))}</div>
+              }>
                 <ChartContainer config={cfg} className="h-[220px] w-full">
-                  <ComposedChart data={a.daily}><CartesianGrid strokeDasharray="3 3" className="stroke-muted/30" /><XAxis dataKey="label" tick={{ fontSize: 9 }} /><YAxis allowDecimals={false} tick={{ fontSize: 9 }} /><ChartTooltip content={<ChartTooltipContent />} />
+                  <ComposedChart data={trendGrain === "monthly" ? a.monthly : trendGrain === "weekly" ? a.weekly : a.daily}><CartesianGrid strokeDasharray="3 3" className="stroke-muted/30" /><XAxis dataKey="label" tick={{ fontSize: 9 }} /><YAxis allowDecimals={false} tick={{ fontSize: 9 }} /><ChartTooltip content={<ChartTooltipContent />} />
                     <Bar dataKey="created" fill="var(--color-created)" /><Bar dataKey="resolved" fill="var(--color-resolved)" /><Line dataKey="backlog" stroke="var(--color-backlog)" dot={false} strokeWidth={2} /></ComposedChart>
                 </ChartContainer>
               </ChartCard>
@@ -204,28 +208,36 @@ export function NocPerformancePanel({ variant }: { variant: "incident" | "team" 
               <SelectContent><SelectItem value="score">Skor performa</SelectItem><SelectItem value="resolved">Resolved</SelectItem><SelectItem value="sla">SLA</SelectItem><SelectItem value="duration">Durasi tercepat</SelectItem><SelectItem value="rate">Resolution Rate</SelectItem></SelectContent></Select>
           }>
             <p className="text-[10px] text-muted-foreground mb-1">Skor: 40% SLA, 25% kecepatan, 20% resolution rate, 15% beban kerja. Klik nama untuk detail.</p>
-            <div className="overflow-x-auto"><div className="min-w-[860px]">
+            <div className="overflow-x-auto"><div className="min-w-[620px]">
               <Table>
-                <TableHeader><TableRow>{["#", "Nama User", "Tim", "Created", "Handled", "Resolved", "Avg Durasi", "SLA", "Outstanding", "Rate", "Kategori"].map((h) => <TableHead key={h} className="text-[10px]">{h}</TableHead>)}</TableRow></TableHeader>
+                <TableHeader><TableRow>{["#", "Nama User", "Created", "Handled", "Resolved", "Outstanding", "Rate", "Kategori"].map((h) => <TableHead key={h} className="h-8 text-[10px] uppercase tracking-wide">{h}</TableHead>)}</TableRow></TableHeader>
                 <TableBody>
-                  {teamUsers.length === 0 ? <TableRow><TableCell colSpan={11} className="text-center text-xs text-muted-foreground py-6">Belum ada data pada periode ini</TableCell></TableRow> :
-                    teamUsers.map((u, i) => (
-                      <TableRow key={u.key}>
-                        <TableCell className="text-xs">{i + 1}</TableCell>
-                        <TableCell><Button variant="link" className="h-auto p-0 text-xs font-semibold" onClick={() => setDetail(u)}>{u.name}</Button></TableCell>
-                        <TableCell className="text-[10px] max-w-[140px] truncate">{u.teams.join(", ") || "-"}</TableCell>
-                        <TableCell className="text-xs">{u.created}</TableCell><TableCell className="text-xs">{u.handled}</TableCell>
-                        <TableCell className="text-xs text-success font-semibold">{u.resolved}</TableCell>
-                        <TableCell className="text-xs">{formatDuration(u.avgResolutionMs)}</TableCell>
-                        <TableCell className="text-xs">{u.slaPct === null ? "—" : `${u.slaPct}%`}</TableCell>
-                        <TableCell className="text-xs text-destructive">{u.outstanding}</TableCell>
-                        <TableCell className="text-xs">{u.resolutionRate}%</TableCell>
-                        <TableCell><Badge variant="outline" className={`text-[9px] whitespace-nowrap ${tierClass[u.tier]}`}>{u.tier} · {u.score}</Badge></TableCell>
-                      </TableRow>
-                    ))}
+                  {teamUsers.length === 0 ? <TableRow><TableCell colSpan={8} className="text-center text-xs text-muted-foreground py-6">Belum ada data pada periode ini</TableCell></TableRow> :
+                    teamUsers.map((u, i) => {
+                      const max = Math.max(u.created, u.handled, u.resolved, 1);
+                      return (
+                      <TableRow key={u.key} className="hover:bg-muted/30">
+                        <TableCell className="py-1.5 w-8"><span className={`inline-flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold ${i < 3 ? "bg-primary/15 text-primary" : "text-muted-foreground"}`}>{i + 1}</span></TableCell>
+                        <TableCell className="py-1.5 min-w-[160px]">
+                          <Button variant="link" className="h-auto p-0 text-xs font-semibold" onClick={() => setDetail(u)}>{u.name}</Button>
+                          <div className="mt-1 space-y-0.5" aria-label={`Created ${u.created}, Handled ${u.handled}, Resolved ${u.resolved}`}>
+                            {([["bg-primary", u.created], ["bg-warning", u.handled], ["bg-success", u.resolved]] as const).map(([c, v], k) => (
+                              <div key={k} className="h-1 rounded-full bg-muted overflow-hidden"><div className={`h-full rounded-full ${c}`} style={{ width: `${(v / max) * 100}%` }} /></div>
+                            ))}
+                          </div>
+                        </TableCell>
+                        <TableCell className="py-1.5 text-xs tabular-nums text-primary">{u.created}</TableCell>
+                        <TableCell className="py-1.5 text-xs tabular-nums text-warning">{u.handled}</TableCell>
+                        <TableCell className="py-1.5 text-xs tabular-nums text-success font-semibold">{u.resolved}</TableCell>
+                        <TableCell className="py-1.5 text-xs tabular-nums text-destructive">{u.outstanding}</TableCell>
+                        <TableCell className="py-1.5 text-xs tabular-nums">{u.resolutionRate}%</TableCell>
+                        <TableCell className="py-1.5"><Badge variant="outline" className={`text-[9px] whitespace-nowrap ${tierClass[u.tier]}`}>{u.tier} · {u.score}</Badge></TableCell>
+                      </TableRow>);
+                    })}
                 </TableBody>
               </Table>
             </div></div>
+            <div className="flex gap-3 mt-1 text-[9px] text-muted-foreground"><span className="flex items-center gap-1"><i className="h-1.5 w-3 rounded-full bg-primary" />Created</span><span className="flex items-center gap-1"><i className="h-1.5 w-3 rounded-full bg-warning" />Handled</span><span className="flex items-center gap-1"><i className="h-1.5 w-3 rounded-full bg-success" />Resolved</span></div>
           </ChartCard>
         )}
       </CardContent>
@@ -252,14 +264,26 @@ export function NocPerformancePanel({ variant }: { variant: "incident" | "team" 
                     <Line dataKey="created" stroke="var(--color-created)" dot={false} /><Line dataKey="handled" stroke="var(--color-handled)" dot={false} /><Line dataKey="resolved" stroke="var(--color-resolved)" dot={false} /></ComposedChart>
                 </ChartContainer>
                 <h4 className="text-xs font-semibold">✅ Incident yang diselesaikan ({detail.resolvedIncidents.length})</h4>
-                <div className="space-y-1 max-h-[200px] overflow-auto">
-                  {detail.resolvedIncidents.map((i) => (
-                    <div key={i.ticketId} className="rounded border p-1.5 text-[10px] flex justify-between gap-2">
-                      <span className="truncate"><b>{i.ticketId}</b> · {i.constraint}{i.reopenCount ? ` · dibuka ulang ${i.reopenCount}x` : ""}</span>
-                      <span className="shrink-0 text-muted-foreground">{new Date(i.resolvedAt!).toLocaleString("id-ID")} · {formatDuration(durationMs(i))}</span>
-                    </div>
-                  ))}
-                </div>
+                <div className="max-h-[240px] overflow-auto rounded border"><div className="min-w-[760px]">
+                  <Table>
+                    <TableHeader className="sticky top-0 bg-muted z-10"><TableRow>{["ID Incident", "Type", "Customer", "Status", "Create By", "Created At", "Resolved By", "Resolved At", "Durasi"].map((h) => <TableHead key={h} className="h-7 px-2 text-[9px] uppercase whitespace-nowrap">{h}</TableHead>)}</TableRow></TableHeader>
+                    <TableBody>
+                      {detail.resolvedIncidents.map((i) => (
+                        <TableRow key={i.ticketId}>
+                          <TableCell className="px-2 py-1 text-[10px] font-semibold whitespace-nowrap">{i.ticketId}{i.reopenCount ? <span className="text-warning"> ↻{i.reopenCount}</span> : null}</TableCell>
+                          <TableCell className="px-2 py-1 text-[10px] whitespace-nowrap">{i.constraint || "-"}</TableCell>
+                          <TableCell className="px-2 py-1 text-[10px] max-w-[160px] truncate" title={i.customer || i.hostname}>{i.customer || i.hostname || "-"}</TableCell>
+                          <TableCell className="px-2 py-1 text-[10px]">{i.status}</TableCell>
+                          <TableCell className="px-2 py-1 text-[10px] whitespace-nowrap">{i.createdByName || "-"}</TableCell>
+                          <TableCell className="px-2 py-1 text-[10px] whitespace-nowrap">{new Date(i.createdAt).toLocaleString("id-ID")}</TableCell>
+                          <TableCell className="px-2 py-1 text-[10px] whitespace-nowrap">{i.resolvedByName || "-"}</TableCell>
+                          <TableCell className="px-2 py-1 text-[10px] whitespace-nowrap">{i.resolvedAt ? new Date(i.resolvedAt).toLocaleString("id-ID") : "-"}</TableCell>
+                          <TableCell className="px-2 py-1 text-[10px] whitespace-nowrap">{formatDuration(durationMs(i))}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div></div>
                 <h4 className="text-xs font-semibold">♻️ Riwayat aktivitas penanganan</h4>
                 <div className="space-y-1 max-h-[160px] overflow-auto">
                   {activity.length === 0 ? <p className="text-[10px] text-muted-foreground">Belum ada aktivitas tercatat.</p> : activity.map((e, idx) => (
@@ -277,8 +301,8 @@ export function NocPerformancePanel({ variant }: { variant: "incident" | "team" 
 
 function ChartCard({ title, extra, children }: { title: string; extra?: React.ReactNode; children: React.ReactNode }) {
   return (
-    <div className="rounded-lg border p-2">
-      <div className="flex flex-wrap items-center justify-between gap-2 mb-1"><h4 className="text-[11px] font-semibold">{title}</h4>{extra}</div>
+    <div className="rounded-xl border bg-card p-2.5">
+      <div className="flex flex-wrap items-center justify-between gap-2 mb-1.5"><h4 className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{title}</h4>{extra}</div>
       {children}
     </div>
   );
