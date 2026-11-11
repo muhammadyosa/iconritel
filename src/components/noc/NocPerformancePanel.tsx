@@ -6,14 +6,14 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from "@/components/ui/chart";
-import { Bar, BarChart, CartesianGrid, Line, ComposedChart, XAxis, YAxis } from "recharts";
+import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent, type ChartConfig } from "@/components/ui/chart";
+import { Bar, BarChart, CartesianGrid, Line, LineChart, LabelList, ComposedChart, XAxis, YAxis } from "recharts";
 import { FileDown, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { toLocalDateStr, parseLocalDateStr } from "@/lib/dateUtils";
 import { useIncidentArchive, periodFetchRange } from "@/hooks/useIncidentArchive";
 import {
-  buildPeriod, previousPeriod, computeKpis, trendIndicator, dailyBuckets, weeklyBuckets, monthlyBuckets,
+  buildPeriod, previousPeriod, computeKpis, trendIndicator, dailyBuckets, weeklyBuckets, monthlyBuckets, productivityRanking,
   topCategories, rankUsers, formatDuration, durationMs, type PeriodKind, type UserPerformance, type TrendLabel,
 } from "@/lib/nocAnalytics";
 import { exportNocPdf } from "./nocPdf";
@@ -21,6 +21,8 @@ import { exportNocPdf } from "./nocPdf";
 const cfg: ChartConfig = {
   created: { label: "Created", color: "hsl(var(--primary))" },
   resolved: { label: "Resolved", color: "hsl(var(--success))" },
+  onProgress: { label: "On Progress", color: "hsl(var(--warning))" },
+  handled: { label: "Handled", color: "hsl(var(--chart-4))" },
   backlog: { label: "Backlog", color: "hsl(var(--destructive))" },
   slaPct: { label: "SLA %", color: "hsl(var(--warning))" },
   avgHours: { label: "Avg jam", color: "hsl(var(--warning))" },
@@ -65,7 +67,7 @@ export function NocPerformancePanel({ variant }: { variant: "incident" | "team" 
       kpis, prevKpis, trend: trendIndicator(kpis, prevKpis), users,
       prevUsers: rankUsers(incidents, handling, prev, now),
       daily: dailyBuckets(incidents, period, now), weekly: weeklyBuckets(incidents, period, now),
-      monthly: monthlyBuckets(incidents, period, now), categories: topCategories(incidents, period),
+      monthly: monthlyBuckets(incidents, period, now), categories: topCategories(incidents, period), productivity: productivityRanking(users),
     };
   }, [incidents, handling, period, prev]);
 
@@ -172,6 +174,27 @@ export function NocPerformancePanel({ variant }: { variant: "incident" | "team" 
                   <ComposedChart data={a.monthly}><CartesianGrid strokeDasharray="3 3" className="stroke-muted/30" /><XAxis dataKey="label" tick={{ fontSize: 9 }} /><YAxis yAxisId="l" allowDecimals={false} tick={{ fontSize: 9 }} /><YAxis yAxisId="r" orientation="right" tick={{ fontSize: 9 }} /><ChartTooltip content={<ChartTooltipContent />} />
                     <Bar yAxisId="l" dataKey="created" fill="var(--color-created)" /><Bar yAxisId="l" dataKey="resolved" fill="var(--color-resolved)" /><Bar yAxisId="l" dataKey="backlog" fill="var(--color-backlog)" /><Line yAxisId="r" dataKey="avgHours" stroke="var(--color-avgHours)" strokeWidth={2} /></ComposedChart>
                 </ChartContainer>
+              </ChartCard>
+              <ChartCard title="📈 Rekap Progress Incident" extra={
+                <div className="flex gap-1">{(["daily", "weekly", "monthly"] as const).map((g) => (
+                  <Button key={g} size="sm" variant={trendGrain === g ? "secondary" : "ghost"} className="h-6 px-2 text-[10px]" aria-pressed={trendGrain === g} onClick={() => setTrendGrain(g)}>{g === "daily" ? "Harian" : g === "weekly" ? "Mingguan" : "Bulanan"}</Button>
+                ))}</div>
+              }>
+                <ChartContainer config={cfg} className="h-[240px] w-full">
+                  <LineChart data={trendGrain === "monthly" ? a.monthly : trendGrain === "weekly" ? a.weekly : a.daily}><CartesianGrid strokeDasharray="3 3" className="stroke-muted/30" /><XAxis dataKey="label" tick={{ fontSize: 9 }} /><YAxis allowDecimals={false} tick={{ fontSize: 9 }} /><ChartTooltip content={<ChartTooltipContent />} /><ChartLegend content={<ChartLegendContent />} />
+                    <Line type="monotone" dataKey="created" stroke="var(--color-created)" strokeWidth={2} dot={{ r: 2 }} activeDot={{ r: 4 }} />
+                    <Line type="monotone" dataKey="onProgress" stroke="var(--color-onProgress)" strokeWidth={2} dot={{ r: 2 }} activeDot={{ r: 4 }} />
+                    <Line type="monotone" dataKey="resolved" stroke="var(--color-resolved)" strokeWidth={2} dot={{ r: 2 }} activeDot={{ r: 4 }} /></LineChart>
+                </ChartContainer>
+              </ChartCard>
+              <ChartCard title="👥 Rekap Produktivitas NOC" extra={<Badge variant="outline" className="text-[10px]">{period.label}</Badge>}>
+                {a.productivity.length === 0 ? <p className="text-xs text-muted-foreground text-center py-10">Belum ada data pada periode ini</p> : (
+                <ChartContainer config={cfg} className="w-full" style={{ height: Math.max(200, a.productivity.length * 34 + 50) }}>
+                  <BarChart data={a.productivity} layout="vertical" margin={{ left: 8, right: 24 }}><CartesianGrid strokeDasharray="3 3" className="stroke-muted/30" horizontal={false} /><XAxis type="number" allowDecimals={false} tick={{ fontSize: 9 }} /><YAxis type="category" dataKey="name" width={100} tick={{ fontSize: 9 }} /><ChartTooltip content={<ChartTooltipContent />} /><ChartLegend content={<ChartLegendContent />} />
+                    <Bar dataKey="created" fill="var(--color-created)" radius={[0, 3, 3, 0]}><LabelList dataKey="created" position="right" className="fill-foreground" fontSize={9} /></Bar>
+                    <Bar dataKey="handled" fill="var(--color-handled)" radius={[0, 3, 3, 0]}><LabelList dataKey="handled" position="right" className="fill-foreground" fontSize={9} /></Bar>
+                    <Bar dataKey="resolved" fill="var(--color-resolved)" radius={[0, 3, 3, 0]}><LabelList dataKey="resolved" position="right" className="fill-foreground" fontSize={9} /></Bar></BarChart>
+                </ChartContainer>)}
               </ChartCard>
               <ChartCard title="Kategori incident terbanyak">
                 <ChartContainer config={{ value: { label: "Incident", color: "hsl(var(--primary))" } }} className="h-[220px] w-full">
