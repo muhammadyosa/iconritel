@@ -54,3 +54,11 @@ describe("rankUsers", () => {
     expect(rows.find((r) => r.key === "u1")?.created).toBe(2);
   });
 });
+
+import { productivityRanking as _pr } from "./nocAnalytics";
+describe("productivityRanking", () => {
+  it("sorts by created+handled+resolved and drops idle users", () => {
+    const u = (name: string, c: number, h: number, r: number) => ({ name, created: c, handled: h, resolved: r } as never);
+    expect(_pr([u("A", 1, 0, 1), u("B", 2, 2, 2), u("C", 0, 0, 0)]).map((x) => x.name)).toEqual(["B", "A"]);
+  });
+});
