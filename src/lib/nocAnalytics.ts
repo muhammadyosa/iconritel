@@ -119,12 +119,12 @@ export function trendIndicator(cur: Kpis, prev: Kpis): TrendLabel {
   return score >= 1 ? "Improving" : score <= -1 ? "Needs Attention" : "Stable";
 }
 
-export interface Bucket { key: string; label: string; start: Date; end: Date; created: number; resolved: number; onProgress: number; backlog: number; slaPct: number | null; avgHours: number }
+export interface Bucket { key: string; label: string; start: Date; end: Date; created: number; resolved: number; progress: number; backlog: number; slaPct: number | null; avgHours: number }
 
 function bucketStats(list: ArchivedIncident[], key: string, label: string, start: Date, end: Date, now: Date): Bucket {
   const p: Period = { kind: "custom", start, end, label };
   const k = computeKpis(list, p, now);
-  return { key, label, start, end, created: k.created, resolved: k.resolved, onProgress: k.onProgress, backlog: k.outstanding, slaPct: k.slaPct, avgHours: Math.round((k.avgResolutionMs / 3600000) * 10) / 10 };
+  return { key, label, start, end, created: k.created, resolved: k.resolved, progress: k.onProgress, backlog: k.outstanding, slaPct: k.slaPct, avgHours: Math.round((k.avgResolutionMs / 3600000) * 10) / 10 };
 }
 
 export function dailyBuckets(list: ArchivedIncident[], p: Period, now = new Date()): Bucket[] {
@@ -174,28 +174,38 @@ export function topCategories(list: ArchivedIncident[], p: Period, limit = 8) {
 }
 
 // ---------- User ranking ----------
-export type PerformanceTier = "Top Performer" | "High Performance" | "Average" | "Needs Improvement";
+export type PerformanceTier = "Excellent" | "Very Good" | "Good" | "Average" | "Needs Improvement";
 export interface UserPerformance {
   key: string; name: string; teams: string[];
   created: number; handled: number; resolved: number; outstanding: number;
-  avgResolutionMs: number; slaPct: number | null; resolutionRate: number; score: number; tier: PerformanceTier;
-  resolvedIncidents: ArchivedIncident[];
+  avgResolutionMs: number; slaPct: number | null; resolutionRate: number;
+  createdScore: number; resolvedScore: number; score: number; tier: PerformanceTier;
+  createdIncidents: ArchivedIncident[]; resolvedIncidents: ArchivedIncident[];
 }
 
 export const UNASSIGNED = "Unassigned";
 const keyOf = (id: string | null, name: string | null) => id || (name?.trim().toLowerCase() || "unassigned");
 
+export function performanceTier(score: number): PerformanceTier {
+  if (score >= 90) return "Excellent";
+  if (score >= 80) return "Very Good";
+  if (score >= 70) return "Good";
+  if (score >= 60) return "Average";
+  return "Needs Improvement";
+}
+
 /**
  * Resolver identity = resolvedByUserId (fallback name, else Unassigned). Each incident counts once
  * per user even if reopened. Handled = distinct incidents with a recorded non-creation status change.
- * Score (0–100): 40% SLA, 25% speed vs 24h SLA, 20% resolution rate, 15% workload share.
+ * Score (0–100): Created and Resolved are each normalized against the highest user count in the
+ * same period, then weighted 50% each. Handled remains informational and never affects the score.
  */
 export function rankUsers(list: ArchivedIncident[], events: HandlingEvent[], p: Period, now = new Date()): UserPerformance[] {
-  type Acc = { name: string; teams: Set<string>; created: Set<string>; handled: Set<string>; resolved: Map<string, ArchivedIncident>; outstanding: Set<string> };
+  type Acc = { name: string; teams: Set<string>; created: Map<string, ArchivedIncident>; handled: Set<string>; resolved: Map<string, ArchivedIncident>; outstanding: Set<string> };
   const map = new Map<string, Acc>();
   const get = (key: string, name: string) => {
     let a = map.get(key);
-    if (!a) { a = { name, teams: new Set(), created: new Set(), handled: new Set(), resolved: new Map(), outstanding: new Set() }; map.set(key, a); }
+    if (!a) { a = { name, teams: new Set(), created: new Map(), handled: new Set(), resolved: new Map(), outstanding: new Set() }; map.set(key, a); }
     if (name && a.name === UNASSIGNED && key !== "unassigned") a.name = name;
     return a;
   };
@@ -203,7 +213,7 @@ export function rankUsers(list: ArchivedIncident[], events: HandlingEvent[], p: 
   list.forEach((i) => {
     if (isCreatedIn(i, p) && (i.createdByUserId || i.createdByName)) {
       const a = get(keyOf(i.createdByUserId, i.createdByName), i.createdByName?.trim() || UNASSIGNED);
-      a.created.add(i.ticketId);
+      a.created.set(i.ticketId, i);
       if (isOutstandingAt(i, endRef)) a.outstanding.add(i.ticketId);
       if (i.serpo) a.teams.add(i.serpo);
     }
@@ -218,29 +228,30 @@ export function rankUsers(list: ArchivedIncident[], events: HandlingEvent[], p: 
     get(keyOf(e.userId, e.userName), e.userName?.trim() || UNASSIGNED).handled.add(e.ticketId);
   });
   const rows = [...map.entries()].map(([key, a]) => {
+    const created = [...a.created.values()];
     const res = [...a.resolved.values()];
     const durs = res.map(durationMs);
     const ok = durs.filter((d) => d <= SLA_THRESHOLD_MS).length;
-    const workload = new Set([...a.created, ...a.handled, ...a.resolved.keys()]).size;
+    const workload = new Set([...a.created.keys(), ...a.handled, ...a.resolved.keys()]).size;
     return {
       key, name: a.name, teams: [...a.teams].slice(0, 5),
-      created: a.created.size, handled: a.handled.size, resolved: res.length, outstanding: a.outstanding.size,
+      created: created.length, handled: a.handled.size, resolved: res.length, outstanding: a.outstanding.size,
       avgResolutionMs: durs.length ? durs.reduce((x, y) => x + y, 0) / durs.length : 0,
       slaPct: res.length ? Math.round((ok / res.length) * 100) : null,
       resolutionRate: workload ? Math.round((res.length / workload) * 100) : 0,
-      workload, resolvedIncidents: res,
+      createdIncidents: created, resolvedIncidents: res,
     };
   });
-  const maxLoad = Math.max(1, ...rows.map((r) => r.workload));
+  const maxCreated = Math.max(1, ...rows.map((r) => r.created));
+  const maxResolved = Math.max(1, ...rows.map((r) => r.resolved));
   return rows
-    .map(({ workload, ...r }) => {
-      const sla = r.slaPct ?? 0;
-      const speed = r.resolved ? Math.max(0, 100 - (r.avgResolutionMs / SLA_THRESHOLD_MS) * 100) : 0;
-      const score = Math.round(0.4 * sla + 0.25 * speed + 0.2 * Math.min(100, r.resolutionRate) + 0.15 * (workload / maxLoad) * 100);
-      const tier: PerformanceTier = score >= 80 ? "Top Performer" : score >= 65 ? "High Performance" : score >= 45 ? "Average" : "Needs Improvement";
-      return { ...r, score, tier };
+    .map((r) => {
+      const createdScore = Math.round((r.created / maxCreated) * 100);
+      const resolvedScore = Math.round((r.resolved / maxResolved) * 100);
+      const score = Math.round(createdScore * 0.5 + resolvedScore * 0.5);
+      return { ...r, createdScore, resolvedScore, score, tier: performanceTier(score) };
     })
-    .sort((a, b) => b.score - a.score || b.resolved - a.resolved);
+    .sort((a, b) => b.score - a.score || b.resolved - a.resolved || b.created - a.created || a.name.localeCompare(b.name));
 }
 
 export function formatDuration(ms: number): string {
