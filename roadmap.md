@@ -1,5 +1,7 @@
 # Current tasks
 
+- [ ] Update NOC user ranking to normalized 50% Created + 50% Resolved scoring, new performance categories, score-only ordering, detailed user history, and consistent real-data charts; verify rules and signed-in desktop/mobile UI.
+
 - [x] Add 🔭 SURVEILLANCE in Report with queue extraction, ICRM estimates, editable output, copy/reset, and desktop/mobile verification; eight rule tests and authenticated Generate/Edit/Copy/Reset checks passed.
 
 - [x] Make every page tab bar wrap instead of scrolling horizontally so no tab is hidden; verified all tabs visible at 1110px on Report, Incident Management, and Settings, plus Generate/Copy on 🔭 SURVEILLANCE.
