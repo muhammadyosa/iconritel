@@ -262,27 +262,37 @@ export function NocPerformancePanel({ variant }: { variant: "incident" | "team" 
             const prevU = a.prevUsers.find((u) => u.key === detail.key);
             const userTrendLabel: TrendLabel = !prevU ? "Stable" : detail.score - prevU.score >= 5 ? "Improving" : prevU.score - detail.score >= 5 ? "Needs Attention" : "Stable";
             const activity = handling.filter((e) => (e.userId || e.userName?.trim().toLowerCase() || "unassigned") === detail.key).slice(-30).reverse();
+            const history = [...detail.createdIncidents, ...detail.resolvedIncidents]
+              .filter((i, index, list) => list.findIndex((x) => x.ticketId === i.ticketId) === index)
+              .sort((x, y) => new Date(y.resolvedAt || y.createdAt).getTime() - new Date(x.resolvedAt || x.createdAt).getTime());
             return (
               <>
                 <DialogHeader><DialogTitle className="flex flex-wrap items-center gap-2 text-sm">👤 {detail.name}
                   <Badge variant="outline" className={`text-[10px] ${tierClass[detail.tier]}`}>{detail.tier} · {detail.score}</Badge>
                   <Badge variant="outline" className={`text-[10px] ${trendClass[userTrendLabel]}`}>{userTrendLabel}</Badge></DialogTitle></DialogHeader>
                 <p className="text-xs text-muted-foreground">Tim: {detail.teams.join(", ") || "-"} · {period.label}</p>
-                <div className="grid grid-cols-3 sm:grid-cols-6 gap-1.5">
-                  {[["Created", detail.created], ["Handled", detail.handled], ["Resolved", detail.resolved], ["Avg", formatDuration(detail.avgResolutionMs)], ["SLA", detail.slaPct === null ? "—" : `${detail.slaPct}%`], ["Outstanding", detail.outstanding]].map(([l, v]) => (
+                <div className="grid grid-cols-3 gap-1.5">
+                  <div className="rounded-lg border bg-primary/5 p-2 text-center"><p className="text-[9px] uppercase text-muted-foreground">Created</p><p className="text-lg font-bold text-primary">{detail.created}</p><p className="text-[10px]">Nilai: <b>{detail.createdScore}/100</b></p><p className="text-[9px] text-muted-foreground">Bobot 50%</p></div>
+                  <div className="rounded-lg border bg-success/5 p-2 text-center"><p className="text-[9px] uppercase text-muted-foreground">Resolved</p><p className="text-lg font-bold text-success">{detail.resolved}</p><p className="text-[10px]">Nilai: <b>{detail.resolvedScore}/100</b></p><p className="text-[9px] text-muted-foreground">Bobot 50%</p></div>
+                  <div className="rounded-lg border bg-accent/10 p-2 text-center"><p className="text-[9px] uppercase text-muted-foreground">Skor Akhir</p><p className="text-lg font-bold">{detail.score}/100</p><p className="text-[10px] font-semibold">{detail.tier}</p><p className="text-[9px] text-muted-foreground">Created 50% + Resolved 50%</p></div>
+                </div>
+                <p className="text-[10px] text-muted-foreground">Skor = (Nilai Created × 50%) + (Nilai Resolved × 50%). Normalisasi memakai nilai tertinggi user pada periode yang sama.</p>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
+                  {[["Handled", detail.handled], ["Avg Resolution", formatDuration(detail.avgResolutionMs)], ["SLA", detail.slaPct === null ? "—" : `${detail.slaPct}%`], ["Outstanding", detail.outstanding]].map(([l, v]) => (
                     <div key={l as string} className="rounded border p-1.5 text-center"><p className="text-[9px] text-muted-foreground">{l}</p><p className="text-sm font-bold">{v}</p></div>
                   ))}
                 </div>
-                <ChartContainer config={{ created: cfg.created, handled: { label: "Handled", color: "hsl(var(--warning))" }, resolved: cfg.resolved }} className="h-[180px] w-full">
-                  <ComposedChart data={userTrend(detail, kind === "year" ? "monthly" : "daily")}><XAxis dataKey="label" tick={{ fontSize: 9 }} /><YAxis allowDecimals={false} tick={{ fontSize: 9 }} /><ChartTooltip content={<ChartTooltipContent />} />
+                <h4 className="text-xs font-semibold">📈 Tren Produktivitas</h4>
+                <ChartContainer config={{ created: cfg.created, handled: { label: "Handled", color: "hsl(var(--warning))" }, resolved: cfg.resolved }} className="h-[200px] w-full">
+                  <ComposedChart data={userTrend(detail, kind === "year" ? "monthly" : "daily")}><CartesianGrid strokeDasharray="3 3" className="stroke-muted/30" /><XAxis dataKey="label" tick={{ fontSize: 9 }} /><YAxis allowDecimals={false} tick={{ fontSize: 9 }} /><ChartTooltip content={<ChartTooltipContent />} /><ChartLegend content={<ChartLegendContent />} />
                     <Line dataKey="created" stroke="var(--color-created)" dot={false} /><Line dataKey="handled" stroke="var(--color-handled)" dot={false} /><Line dataKey="resolved" stroke="var(--color-resolved)" dot={false} /></ComposedChart>
                 </ChartContainer>
-                <h4 className="text-xs font-semibold">✅ Incident yang diselesaikan ({detail.resolvedIncidents.length})</h4>
-                <div className="max-h-[240px] overflow-auto rounded border"><div className="min-w-[760px]">
+                <h4 className="text-xs font-semibold">📋 Riwayat Incident ({history.length})</h4>
+                <div className="max-h-[260px] overflow-auto rounded border"><div className="min-w-[860px]">
                   <Table>
                     <TableHeader className="sticky top-0 bg-muted z-10"><TableRow>{["ID Incident", "Type", "Customer", "Status", "Create By", "Created At", "Resolved By", "Resolved At", "Durasi"].map((h) => <TableHead key={h} className="h-7 px-2 text-[9px] uppercase whitespace-nowrap">{h}</TableHead>)}</TableRow></TableHeader>
                     <TableBody>
-                      {detail.resolvedIncidents.map((i) => (
+                      {history.length === 0 ? <TableRow><TableCell colSpan={9} className="text-center text-xs text-muted-foreground py-6">Belum ada riwayat incident pada periode ini.</TableCell></TableRow> : history.map((i) => (
                         <TableRow key={i.ticketId}>
                           <TableCell className="px-2 py-1 text-[10px] font-semibold whitespace-nowrap">{i.ticketId}{i.reopenCount ? <span className="text-warning"> ↻{i.reopenCount}</span> : null}</TableCell>
                           <TableCell className="px-2 py-1 text-[10px] whitespace-nowrap">{i.constraint || "-"}</TableCell>
