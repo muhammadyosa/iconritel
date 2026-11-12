@@ -44,7 +44,6 @@ export function NocPerformancePanel({ variant }: { variant: "incident" | "team" 
   const [kind, setKind] = useState<PeriodKind>("month");
   const [anchor, setAnchor] = useState(() => toLocalDateStr(new Date()));
   const [customEnd, setCustomEnd] = useState(() => toLocalDateStr(new Date()));
-  const [sort, setSort] = useState<SortKey>("score");
   const [userFilter, setUserFilter] = useState("all");
   const [teamFilter, setTeamFilter] = useState("");
   const [trendGrain, setTrendGrain] = useState<"daily" | "weekly" | "monthly">("daily");
@@ -73,10 +72,8 @@ export function NocPerformancePanel({ variant }: { variant: "incident" | "team" 
 
   const teamUsers = useMemo(() => {
     const q = teamFilter.trim().toUpperCase();
-    const list = a.users.filter((u) => (userFilter === "all" || u.key === userFilter) && (!q || u.teams.some((t) => t.toUpperCase().includes(q))));
-    const val = (u: UserPerformance) => sort === "resolved" ? u.resolved : sort === "sla" ? (u.slaPct ?? -1) : sort === "rate" ? u.resolutionRate : sort === "duration" ? -(u.avgResolutionMs || Infinity) : u.score;
-    return [...list].sort((x, y) => val(y) - val(x));
-  }, [a.users, sort, userFilter, teamFilter]);
+    return a.users.filter((u) => (userFilter === "all" || u.key === userFilter) && (!q || u.teams.some((t) => t.toUpperCase().includes(q))));
+  }, [a.users, userFilter, teamFilter]);
 
   const delta = (c: number, p: number) => (p ? `${c >= p ? "+" : ""}${Math.round(((c - p) / p) * 100)}% vs sebelumnya` : "vs sebelumnya: -");
 
@@ -266,7 +263,7 @@ export function NocPerformancePanel({ variant }: { variant: "incident" | "team" 
       </CardContent>
 
       <Dialog open={!!detail} onOpenChange={(o) => !o && setDetail(null)}>
-        <DialogContent className="max-w-2xl max-h-[85vh] overflow-auto">
+        <DialogContent className="w-[calc(100vw-1rem)] max-w-4xl max-h-[90vh] overflow-auto p-3 sm:p-6">
           {detail && (() => {
             const prevU = a.prevUsers.find((u) => u.key === detail.key);
             const userTrendLabel: TrendLabel = !prevU ? "Stable" : detail.score - prevU.score >= 5 ? "Improving" : prevU.score - detail.score >= 5 ? "Needs Attention" : "Stable";
