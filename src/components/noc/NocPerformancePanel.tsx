@@ -3,12 +3,17 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { format } from "date-fns";
+import { id as localeId } from "date-fns/locale";
+import type { DateRange } from "react-day-picker";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent, type ChartConfig } from "@/components/ui/chart";
 import { Bar, BarChart, CartesianGrid, Line, LineChart, LabelList, ComposedChart, XAxis, YAxis } from "recharts";
-import { FileDown, Loader2 } from "lucide-react";
+import { CalendarIcon, FileDown, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { toLocalDateStr, parseLocalDateStr } from "@/lib/dateUtils";
 import { useIncidentArchive, periodFetchRange } from "@/hooks/useIncidentArchive";
@@ -49,6 +54,20 @@ export function NocPerformancePanel({ variant }: { variant: "incident" | "team" 
   const [trendGrain, setTrendGrain] = useState<"daily" | "weekly" | "monthly">("daily");
   const [detail, setDetail] = useState<UserPerformance | null>(null);
   const [exporting, setExporting] = useState(false);
+  const [customRange, setCustomRange] = useState<DateRange | undefined>(() => ({
+    from: parseLocalDateStr(anchor), to: parseLocalDateStr(customEnd),
+  }));
+
+  const selectCustomRange = (range: DateRange | undefined) => {
+    setCustomRange(range);
+    // Match Ranking User NOC: clearing uses its seven-day fallback;
+    // selecting only a start applies that single day immediately.
+    const fallback = new Date();
+    fallback.setDate(fallback.getDate() - 7);
+    const from = range?.from ?? fallback;
+    setAnchor(toLocalDateStr(from));
+    setCustomEnd(toLocalDateStr(range?.to ?? from));
+  };
 
   const period = useMemo(() => buildPeriod(kind, parseLocalDateStr(anchor), parseLocalDateStr(customEnd)), [kind, anchor, customEnd]);
   const prev = useMemo(() => previousPeriod(period), [period]);
@@ -106,8 +125,36 @@ export function NocPerformancePanel({ variant }: { variant: "incident" | "team" 
           {k === "week" ? "Mingguan" : k === "month" ? "Bulanan" : k === "year" ? "Tahunan" : "Custom"}
         </Button>
       ))}
-      <Input type="date" aria-label="Tanggal periode" value={anchor} onChange={(e) => e.target.value && setAnchor(e.target.value)} className="h-7 w-[140px] text-[11px]" />
-      {kind === "custom" && <Input type="date" aria-label="Tanggal akhir" value={customEnd} onChange={(e) => e.target.value && setCustomEnd(e.target.value)} className="h-7 w-[140px] text-[11px]" />}
+      {variant === "team" && kind === "custom" ? (
+        <div className="flex items-center gap-1.5 flex-wrap">
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button size="sm" variant="default" className="h-6 text-[10px] px-2.5 gap-1">
+                <CalendarIcon className="h-3 w-3" />
+                {customRange?.from
+                  ? customRange.to && customRange.to.getTime() !== customRange.from.getTime()
+                    ? `${format(customRange.from, "dd MMM", { locale: localeId })} - ${format(customRange.to, "dd MMM", { locale: localeId })}`
+                    : format(customRange.from, "dd MMM yyyy", { locale: localeId })
+                  : "Pilih Tanggal"}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+              <Calendar mode="range" selected={customRange} onSelect={selectCustomRange}
+                disabled={(date) => date > new Date()} numberOfMonths={1} initialFocus
+                className="p-3 pointer-events-auto" />
+            </PopoverContent>
+          </Popover>
+        </div>
+      ) : (
+        <>
+          <Input type="date" aria-label="Tanggal periode" value={anchor} onChange={(e) => {
+            if (!e.target.value) return;
+            setAnchor(e.target.value);
+            if (variant === "team") setCustomRange({ from: parseLocalDateStr(e.target.value), to: parseLocalDateStr(customEnd) });
+          }} className="h-7 w-[140px] text-[11px]" />
+          {kind === "custom" && <Input type="date" aria-label="Tanggal akhir" value={customEnd} onChange={(e) => e.target.value && setCustomEnd(e.target.value)} className="h-7 w-[140px] text-[11px]" />}
+        </>
+      )}
       <Button size="sm" variant="outline" className="h-7 text-[11px] ml-auto" onClick={doExport} disabled={exporting || isLoading}>
         {exporting ? <Loader2 className="h-3 w-3 mr-1 animate-spin" /> : <FileDown className="h-3 w-3 mr-1" />} Export PDF
       </Button>
