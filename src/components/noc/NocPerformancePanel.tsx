@@ -224,7 +224,7 @@ export function NocPerformancePanel({ variant }: { variant: "incident" | "team" 
 
         <ChartCard title="Ranking User NOC" extra={<Badge variant="outline" className="text-[10px]">Created 50% + Resolved 50%</Badge>}>
           <p className="text-[10px] text-muted-foreground mb-1">Nilai tiap indikator = jumlah user ÷ jumlah tertinggi periode ini × 100. Diurutkan dari skor tertinggi; klik nama untuk detail.</p>
-          <div className="overflow-x-auto"><div className="min-w-[580px]">
+          <div className="hidden sm:block overflow-x-auto"><div className="min-w-[580px]">
             <Table>
               <TableHeader><TableRow>{["#", "Nama User", "Created", "Resolved", "Outstanding", "Rate", "Kategori"].map((h) => <TableHead key={h} className="h-8 text-[10px] uppercase tracking-wide">{h}</TableHead>)}</TableRow></TableHeader>
               <TableBody>
