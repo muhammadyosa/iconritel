@@ -119,12 +119,12 @@ export function trendIndicator(cur: Kpis, prev: Kpis): TrendLabel {
   return score >= 1 ? "Improving" : score <= -1 ? "Needs Attention" : "Stable";
 }
 
-export interface Bucket { key: string; label: string; start: Date; end: Date; created: number; resolved: number; onProgress: number; backlog: number; slaPct: number | null; avgHours: number }
+export interface Bucket { key: string; label: string; start: Date; end: Date; created: number; resolved: number; progress: number; backlog: number; slaPct: number | null; avgHours: number }
 
 function bucketStats(list: ArchivedIncident[], key: string, label: string, start: Date, end: Date, now: Date): Bucket {
   const p: Period = { kind: "custom", start, end, label };
   const k = computeKpis(list, p, now);
-  return { key, label, start, end, created: k.created, resolved: k.resolved, onProgress: k.onProgress, backlog: k.outstanding, slaPct: k.slaPct, avgHours: Math.round((k.avgResolutionMs / 3600000) * 10) / 10 };
+  return { key, label, start, end, created: k.created, resolved: k.resolved, progress: k.onProgress, backlog: k.outstanding, slaPct: k.slaPct, avgHours: Math.round((k.avgResolutionMs / 3600000) * 10) / 10 };
 }
 
 export function dailyBuckets(list: ArchivedIncident[], p: Period, now = new Date()): Bucket[] {

@@ -21,7 +21,7 @@ import { exportNocPdf } from "./nocPdf";
 const cfg: ChartConfig = {
   created: { label: "Created", color: "hsl(var(--primary))" },
   resolved: { label: "Resolved", color: "hsl(var(--success))" },
-  onProgress: { label: "On Progress", color: "hsl(var(--warning))" },
+  progress: { label: "On Progress", color: "hsl(var(--warning))" },
   handled: { label: "Handled", color: "hsl(var(--chart-4))" },
   backlog: { label: "Backlog", color: "hsl(var(--destructive))" },
   slaPct: { label: "SLA %", color: "hsl(var(--warning))" },
@@ -180,7 +180,7 @@ export function NocPerformancePanel({ variant }: { variant: "incident" | "team" 
                 <ChartContainer config={cfg} className="h-[240px] w-full">
                   <LineChart data={trendGrain === "monthly" ? a.monthly : trendGrain === "weekly" ? a.weekly : a.daily}><CartesianGrid strokeDasharray="3 3" className="stroke-muted/30" /><XAxis dataKey="label" tick={{ fontSize: 9 }} /><YAxis allowDecimals={false} tick={{ fontSize: 9 }} /><ChartTooltip content={<ChartTooltipContent />} /><ChartLegend content={<ChartLegendContent />} />
                     <Line type="monotone" dataKey="created" stroke="var(--color-created)" strokeWidth={2} dot={{ r: 2 }} activeDot={{ r: 4 }} />
-                    <Line type="monotone" dataKey="onProgress" stroke="var(--color-onProgress)" strokeWidth={2} dot={{ r: 2 }} activeDot={{ r: 4 }} />
+                    <Line type="monotone" dataKey="progress" stroke="var(--color-progress)" strokeWidth={2} dot={{ r: 2 }} activeDot={{ r: 4 }} />
                     <Line type="monotone" dataKey="resolved" stroke="var(--color-resolved)" strokeWidth={2} dot={{ r: 2 }} activeDot={{ r: 4 }} /></LineChart>
                 </ChartContainer>
               </ChartCard>
