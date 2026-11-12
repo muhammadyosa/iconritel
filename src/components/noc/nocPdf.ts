@@ -77,8 +77,8 @@ export async function exportNocPdf(d: PdfInput) {
   table(["Kategori", "Jumlah", "%"], d.categories.map((c) => [c.name, c.value, k.created ? `${Math.round((c.value / k.created) * 100)}%` : "-"]));
 
   section("5–6. Team Performance, Ranking User NOC & Top 5 Performer");
-  table(["#", "User", "Tim", "Created", "Handled", "Resolved", "Avg", "SLA", "Outst.", "Rate", "Skor", "Kategori"],
-    d.users.map((u, i) => [i + 1, u.name, u.teams.join(", ") || "-", u.created, u.handled, u.resolved, formatDuration(u.avgResolutionMs), u.slaPct === null ? "-" : `${u.slaPct}%`, u.outstanding, `${u.resolutionRate}%`, u.score, u.tier]));
+  table(["#", "User", "Tim", "Created", "Resolved", "Avg", "SLA", "Outst.", "Rate", "Skor", "Kategori"],
+    d.users.map((u, i) => [i + 1, u.name, u.teams.join(", ") || "-", u.created, u.resolved, formatDuration(u.avgResolutionMs), u.slaPct === null ? "-" : `${u.slaPct}%`, u.outstanding, `${u.resolutionRate}%`, u.score, u.tier]));
   table(["Top 5", "User", "Resolved", "SLA", "Skor"], d.users.slice(0, 5).map((u, i) => [i + 1, u.name, u.resolved, u.slaPct === null ? "-" : `${u.slaPct}%`, u.score]));
 
   section("7. Daftar Incident");

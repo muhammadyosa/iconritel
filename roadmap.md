@@ -1,6 +1,6 @@
 # Current tasks
 
-- [ ] Update NOC user ranking to normalized 50% Created + 50% Resolved scoring, new performance categories, score-only ordering, detailed user history, and consistent real-data charts; verify rules and signed-in desktop/mobile UI.
+- [x] Update NOC user ranking to normalized 50% Created + 50% Resolved scoring, new performance categories, score-only ordering, detailed user history, and consistent real-data charts; 13 rule tests and signed-in desktop/mobile UI checks passed.
 
 - [x] Add 🔭 SURVEILLANCE in Report with queue extraction, ICRM estimates, editable output, copy/reset, and desktop/mobile verification; eight rule tests and authenticated Generate/Edit/Copy/Reset checks passed.
 
