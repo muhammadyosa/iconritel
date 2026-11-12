@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { buildPeriod, computeKpis, previousPeriod, rankUsers, weeklyBuckets, type ArchivedIncident } from "./nocAnalytics";
+import { buildPeriod, computeKpis, performanceTier, previousPeriod, rankUsers, weeklyBuckets, type ArchivedIncident } from "./nocAnalytics";
 
 const inc = (o: Partial<ArchivedIncident>): ArchivedIncident => ({
   ticketId: "T", constraint: "LINK LOSS", category: "RITEL", serpo: "SERPO A", status: "On Progress", description: "",

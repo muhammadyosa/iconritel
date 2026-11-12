@@ -174,12 +174,13 @@ export function topCategories(list: ArchivedIncident[], p: Period, limit = 8) {
 }
 
 // ---------- User ranking ----------
-export type PerformanceTier = "Top Performer" | "High Performance" | "Average" | "Needs Improvement";
+export type PerformanceTier = "Excellent" | "Very Good" | "Good" | "Average" | "Needs Improvement";
 export interface UserPerformance {
   key: string; name: string; teams: string[];
   created: number; handled: number; resolved: number; outstanding: number;
-  avgResolutionMs: number; slaPct: number | null; resolutionRate: number; score: number; tier: PerformanceTier;
-  resolvedIncidents: ArchivedIncident[];
+  avgResolutionMs: number; slaPct: number | null; resolutionRate: number;
+  createdScore: number; resolvedScore: number; score: number; tier: PerformanceTier;
+  createdIncidents: ArchivedIncident[]; resolvedIncidents: ArchivedIncident[];
 }
 
 export const UNASSIGNED = "Unassigned";
