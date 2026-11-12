@@ -33,12 +33,12 @@ const trendClass: Record<TrendLabel, string> = {
   "Needs Attention": "bg-destructive/10 text-destructive border-destructive/30",
 };
 const tierClass: Record<UserPerformance["tier"], string> = {
-  "Top Performer": "bg-success/15 text-success border-success/30",
-  "High Performance": "bg-primary/10 text-primary border-primary/30",
+  Excellent: "bg-success/15 text-success border-success/30",
+  "Very Good": "bg-primary/10 text-primary border-primary/30",
+  Good: "bg-accent/15 text-accent-foreground border-accent/30",
   Average: "bg-warning/10 text-warning border-warning/30",
   "Needs Improvement": "bg-destructive/10 text-destructive border-destructive/30",
 };
-type SortKey = "score" | "resolved" | "sla" | "duration" | "rate";
 
 export function NocPerformancePanel({ variant }: { variant: "incident" | "team" }) {
   const [kind, setKind] = useState<PeriodKind>("month");

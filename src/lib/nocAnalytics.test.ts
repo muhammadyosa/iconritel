@@ -39,7 +39,52 @@ describe("nocAnalytics period rules", () => {
   });
 });
 
+describe("performanceTier", () => {
+  it("marks scores 90–100 as Excellent", () => {
+    expect(performanceTier(90)).toBe("Excellent");
+    expect(performanceTier(100)).toBe("Excellent");
+  });
+  it("marks scores 80–89 as Very Good", () => {
+    expect(performanceTier(80)).toBe("Very Good");
+    expect(performanceTier(89)).toBe("Very Good");
+  });
+  it("marks scores 70–79 as Good", () => {
+    expect(performanceTier(70)).toBe("Good");
+    expect(performanceTier(79)).toBe("Good");
+  });
+  it("marks scores 60–69 as Average", () => {
+    expect(performanceTier(60)).toBe("Average");
+    expect(performanceTier(69)).toBe("Average");
+  });
+  it("marks scores below 60 as Needs Improvement", () => {
+    expect(performanceTier(59)).toBe("Needs Improvement");
+    expect(performanceTier(0)).toBe("Needs Improvement");
+  });
+});
+
 describe("rankUsers", () => {
+  it("normalizes Created and Resolved to 0–100 and weights each indicator 50%", () => {
+    const nov = buildPeriod("month", new Date(2026, 10, 1));
+    const created = [
+      ["C1", "u1", "Ani"], ["C2", "u1", "Ani"], ["C3", "u1", "Ani"], ["C4", "u1", "Ani"],
+      ["C5", "u2", "Budi"], ["C6", "u2", "Budi"], ["C7", "u3", "Citra"],
+    ].map(([ticketId, createdByUserId, createdByName]) => inc({ ticketId, createdByUserId, createdByName }));
+    const resolved = [
+      inc({ ticketId: "R1", createdAt: new Date(2026, 9, 30).toISOString(), status: "Resolved", resolvedAt: new Date(2026, 10, 4).toISOString(), resolvedByUserId: "u1", resolvedByName: "Ani" }),
+      inc({ ticketId: "R2", createdAt: new Date(2026, 9, 30).toISOString(), status: "Resolved", resolvedAt: new Date(2026, 10, 5).toISOString(), resolvedByUserId: "u1", resolvedByName: "Ani" }),
+      inc({ ticketId: "R3", createdAt: new Date(2026, 9, 30).toISOString(), status: "Resolved", resolvedAt: new Date(2026, 10, 6).toISOString(), resolvedByUserId: "u2", resolvedByName: "Budi" }),
+    ];
+    const rows = rankUsers([...created, ...resolved], [], nov, now);
+    const ani = rows.find((r) => r.key === "u1")!;
+    const budi = rows.find((r) => r.key === "u2")!;
+    const citra = rows.find((r) => r.key === "u3")!;
+    expect([ani.createdScore, ani.resolvedScore, ani.score]).toEqual([100, 100, 100]);
+    expect([budi.createdScore, budi.resolvedScore, budi.score]).toEqual([50, 50, 50]);
+    expect([citra.createdScore, citra.resolvedScore, citra.score]).toEqual([25, 0, 13]);
+    expect(rows.map((r) => r.key)).toEqual(["u1", "u2", "u3"]);
+    expect(ani.createdIncidents).toHaveLength(4);
+    expect(ani.resolvedIncidents).toHaveLength(2);
+  });
   it("credits the resolver, counts reopened incidents once, and marks empty resolvers Unassigned", () => {
     const nov = buildPeriod("month", new Date(2026, 10, 1));
     const list = [
