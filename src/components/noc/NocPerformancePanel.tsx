@@ -222,44 +222,38 @@ export function NocPerformancePanel({ variant }: { variant: "incident" | "team" 
           </ChartContainer>
         </ChartCard>
 
-        {variant === "team" && (
-          <ChartCard title="Ranking User NOC" extra={
-            <Select value={sort} onValueChange={(v) => setSort(v as SortKey)}><SelectTrigger className="h-7 w-[150px] text-[11px]" aria-label="Urutkan ranking"><SelectValue /></SelectTrigger>
-              <SelectContent><SelectItem value="score">Skor performa</SelectItem><SelectItem value="resolved">Resolved</SelectItem><SelectItem value="sla">SLA</SelectItem><SelectItem value="duration">Durasi tercepat</SelectItem><SelectItem value="rate">Resolution Rate</SelectItem></SelectContent></Select>
-          }>
-            <p className="text-[10px] text-muted-foreground mb-1">Skor: 40% SLA, 25% kecepatan, 20% resolution rate, 15% beban kerja. Klik nama untuk detail.</p>
-            <div className="overflow-x-auto"><div className="min-w-[620px]">
-              <Table>
-                <TableHeader><TableRow>{["#", "Nama User", "Created", "Handled", "Resolved", "Outstanding", "Rate", "Kategori"].map((h) => <TableHead key={h} className="h-8 text-[10px] uppercase tracking-wide">{h}</TableHead>)}</TableRow></TableHeader>
-                <TableBody>
-                  {teamUsers.length === 0 ? <TableRow><TableCell colSpan={8} className="text-center text-xs text-muted-foreground py-6">Belum ada data pada periode ini</TableCell></TableRow> :
-                    teamUsers.map((u, i) => {
-                      const max = Math.max(u.created, u.handled, u.resolved, 1);
-                      return (
-                      <TableRow key={u.key} className="hover:bg-muted/30">
-                        <TableCell className="py-1.5 w-8"><span className={`inline-flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold ${i < 3 ? "bg-primary/15 text-primary" : "text-muted-foreground"}`}>{i + 1}</span></TableCell>
-                        <TableCell className="py-1.5 min-w-[160px]">
-                          <Button variant="link" className="h-auto p-0 text-xs font-semibold" onClick={() => setDetail(u)}>{u.name}</Button>
-                          <div className="mt-1 space-y-0.5" aria-label={`Created ${u.created}, Handled ${u.handled}, Resolved ${u.resolved}`}>
-                            {([["bg-primary", u.created], ["bg-warning", u.handled], ["bg-success", u.resolved]] as const).map(([c, v], k) => (
-                              <div key={k} className="h-1 rounded-full bg-muted overflow-hidden"><div className={`h-full rounded-full ${c}`} style={{ width: `${(v / max) * 100}%` }} /></div>
-                            ))}
-                          </div>
-                        </TableCell>
-                        <TableCell className="py-1.5 text-xs tabular-nums text-primary">{u.created}</TableCell>
-                        <TableCell className="py-1.5 text-xs tabular-nums text-warning">{u.handled}</TableCell>
-                        <TableCell className="py-1.5 text-xs tabular-nums text-success font-semibold">{u.resolved}</TableCell>
-                        <TableCell className="py-1.5 text-xs tabular-nums text-destructive">{u.outstanding}</TableCell>
-                        <TableCell className="py-1.5 text-xs tabular-nums">{u.resolutionRate}%</TableCell>
-                        <TableCell className="py-1.5"><Badge variant="outline" className={`text-[9px] whitespace-nowrap ${tierClass[u.tier]}`}>{u.tier} · {u.score}</Badge></TableCell>
-                      </TableRow>);
-                    })}
-                </TableBody>
-              </Table>
-            </div></div>
-            <div className="flex gap-3 mt-1 text-[9px] text-muted-foreground"><span className="flex items-center gap-1"><i className="h-1.5 w-3 rounded-full bg-primary" />Created</span><span className="flex items-center gap-1"><i className="h-1.5 w-3 rounded-full bg-warning" />Handled</span><span className="flex items-center gap-1"><i className="h-1.5 w-3 rounded-full bg-success" />Resolved</span></div>
-          </ChartCard>
-        )}
+        <ChartCard title="Ranking User NOC" extra={<Badge variant="outline" className="text-[10px]">Created 50% + Resolved 50%</Badge>}>
+          <p className="text-[10px] text-muted-foreground mb-1">Nilai tiap indikator = jumlah user ÷ jumlah tertinggi periode ini × 100. Diurutkan dari skor tertinggi; klik nama untuk detail.</p>
+          <div className="overflow-x-auto"><div className="min-w-[580px]">
+            <Table>
+              <TableHeader><TableRow>{["#", "Nama User", "Created", "Resolved", "Outstanding", "Rate", "Kategori"].map((h) => <TableHead key={h} className="h-8 text-[10px] uppercase tracking-wide">{h}</TableHead>)}</TableRow></TableHeader>
+              <TableBody>
+                {teamUsers.length === 0 ? <TableRow><TableCell colSpan={7} className="text-center text-xs text-muted-foreground py-6">Belum ada data pada periode ini</TableCell></TableRow> :
+                  teamUsers.map((u, i) => {
+                    const max = Math.max(u.created, u.handled, u.resolved, 1);
+                    return (
+                    <TableRow key={u.key} className="hover:bg-muted/30">
+                      <TableCell className="py-1.5 w-8"><span className={`inline-flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold ${i < 3 ? "bg-primary/15 text-primary" : "text-muted-foreground"}`}>{i + 1}</span></TableCell>
+                      <TableCell className="py-1.5 min-w-[160px]">
+                        <Button variant="link" className="h-auto p-0 text-xs font-semibold" onClick={() => setDetail(u)}>{u.name}</Button>
+                        <div className="mt-1 space-y-0.5" aria-label={`Created ${u.created}, Handled ${u.handled}, Resolved ${u.resolved}`}>
+                          {([["bg-primary", u.created], ["bg-warning", u.handled], ["bg-success", u.resolved]] as const).map(([c, v], k) => (
+                            <div key={k} className="h-1 rounded-full bg-muted overflow-hidden"><div className={`h-full rounded-full ${c}`} style={{ width: `${(v / max) * 100}%` }} /></div>
+                          ))}
+                        </div>
+                      </TableCell>
+                      <TableCell className="py-1.5 text-xs tabular-nums text-primary">{u.created}</TableCell>
+                      <TableCell className="py-1.5 text-xs tabular-nums text-success font-semibold">{u.resolved}</TableCell>
+                      <TableCell className="py-1.5 text-xs tabular-nums text-destructive">{u.outstanding}</TableCell>
+                      <TableCell className="py-1.5 text-xs tabular-nums">{u.resolutionRate}%</TableCell>
+                      <TableCell className="py-1.5"><Badge variant="outline" className={`text-[9px] whitespace-nowrap ${tierClass[u.tier]}`}>{u.tier} · {u.score}</Badge></TableCell>
+                    </TableRow>);
+                  })}
+              </TableBody>
+            </Table>
+          </div></div>
+          <div className="flex gap-3 mt-1 text-[9px] text-muted-foreground"><span className="flex items-center gap-1"><i className="h-1.5 w-3 rounded-full bg-primary" />Created</span><span className="flex items-center gap-1"><i className="h-1.5 w-3 rounded-full bg-warning" />Handled</span><span className="flex items-center gap-1"><i className="h-1.5 w-3 rounded-full bg-success" />Resolved</span></div>
+        </ChartCard>
       </CardContent>
 
       <Dialog open={!!detail} onOpenChange={(o) => !o && setDetail(null)}>
