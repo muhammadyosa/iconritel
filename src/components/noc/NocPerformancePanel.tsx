@@ -252,6 +252,33 @@ export function NocPerformancePanel({ variant }: { variant: "incident" | "team" 
               </TableBody>
             </Table>
           </div></div>
+          <div className="sm:hidden space-y-2">
+            {teamUsers.length === 0 ? <p className="text-center text-xs text-muted-foreground py-6">Belum ada data pada periode ini</p> : teamUsers.map((u, i) => {
+              const max = Math.max(u.created, u.handled, u.resolved, 1);
+              return (
+                <article key={u.key} className="rounded-lg border bg-card p-2.5 space-y-2">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span className={`inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-bold ${i < 3 ? "bg-primary/15 text-primary" : "text-muted-foreground"}`}>{i + 1}</span>
+                      <Button variant="link" className="h-auto min-w-0 p-0 text-xs font-semibold whitespace-normal text-left" onClick={() => setDetail(u)}>{u.name}</Button>
+                    </div>
+                    <Badge variant="outline" className={`text-[9px] whitespace-nowrap ${tierClass[u.tier]}`}>{u.tier} · {u.score}</Badge>
+                  </div>
+                  <div className="space-y-0.5" aria-label={`Created ${u.created}, Handled ${u.handled}, Resolved ${u.resolved}`}>
+                    {([["bg-primary", u.created], ["bg-warning", u.handled], ["bg-success", u.resolved]] as const).map(([c, v], k) => (
+                      <div key={k} className="h-1 rounded-full bg-muted overflow-hidden"><div className={`h-full rounded-full ${c}`} style={{ width: `${(v / max) * 100}%` }} /></div>
+                    ))}
+                  </div>
+                  <dl className="grid grid-cols-4 gap-1 text-center">
+                    <div className="rounded bg-primary/5 p-1.5"><dt className="text-[8px] uppercase text-muted-foreground">Created</dt><dd className="text-xs font-semibold text-primary">{u.created}</dd></div>
+                    <div className="rounded bg-success/5 p-1.5"><dt className="text-[8px] uppercase text-muted-foreground">Resolved</dt><dd className="text-xs font-semibold text-success">{u.resolved}</dd></div>
+                    <div className="rounded bg-destructive/5 p-1.5"><dt className="text-[8px] uppercase text-muted-foreground">Outstanding</dt><dd className="text-xs font-semibold text-destructive">{u.outstanding}</dd></div>
+                    <div className="rounded bg-muted/50 p-1.5"><dt className="text-[8px] uppercase text-muted-foreground">Rate</dt><dd className="text-xs font-semibold">{u.resolutionRate}%</dd></div>
+                  </dl>
+                </article>
+              );
+            })}
+          </div>
           <div className="flex gap-3 mt-1 text-[9px] text-muted-foreground"><span className="flex items-center gap-1"><i className="h-1.5 w-3 rounded-full bg-primary" />Created</span><span className="flex items-center gap-1"><i className="h-1.5 w-3 rounded-full bg-warning" />Handled</span><span className="flex items-center gap-1"><i className="h-1.5 w-3 rounded-full bg-success" />Resolved</span></div>
         </ChartCard>
       </CardContent>
