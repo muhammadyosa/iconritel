@@ -1,5 +1,7 @@
 # Current tasks
 
+- [ ] Match the Team NOC custom date filter to the existing Ranking User NOC calendar without changing analytics or other filters; verify real-data desktop/mobile interaction.
+
 - [x] Update NOC user ranking to normalized 50% Created + 50% Resolved scoring, new performance categories, score-only ordering, detailed user history, and consistent real-data charts; 13 rule tests and signed-in desktop/mobile UI checks passed.
 
 - [x] Add 🔭 SURVEILLANCE in Report with queue extraction, ICRM estimates, editable output, copy/reset, and desktop/mobile verification; eight rule tests and authenticated Generate/Edit/Copy/Reset checks passed.
