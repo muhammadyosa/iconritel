@@ -1,5 +1,3 @@
-import { RITEL_CONSTRAINTS } from "@/types/ticket";
-
 export interface SurveillanceIncident {
   queue: number;
   customerName: string;
@@ -8,33 +6,59 @@ export interface SurveillanceIncident {
   completion: string;
 }
 
-export function surveillanceDeparture(queue: number): string {
-  const hour = (8 + (queue - 1) * 2) % 24;
-  return `${String(hour).padStart(2, "0")}:00`;
+export interface SurveillanceQueueSetting {
+  departure?: string;
+  completionHours?: number;
 }
 
-function extractCustomer(description: string): string {
-  const technicalPatterns = [
-    /\/\/|\s+[-–—]\s+/,
-    /\b(?:LINK\s+LOSS|LINK\s+DOWN|FAT(?:\b|_)|FDT(?:\b|_)|SPLT(?:\b|_)|OLT\b|SN\s*ONT\b|HOSTNAME\b|SERPO\b)/i,
-    /\b[A-Z0-9._-]*-(?:OLT|UPE|NPE|BNG)-\d+\b/i,
-    /\b\d+\s*(?:HARI|JAM|MENIT)\b/i,
-    ...RITEL_CONSTRAINTS.map((constraint) => new RegExp(`\\b${constraint.replace(/ /g, "\\s+")}\\b`, "i")),
-  ];
-  const end = technicalPatterns.reduce((index, pattern) => {
-    const match = pattern.exec(description);
-    return match ? Math.min(index, match.index) : index;
-  }, description.length);
-  return description.slice(0, end).replace(/^[\s:*\-–—]+|[\s:*\-–—]+$/g, "").trim();
+export interface SurveillanceOptions {
+  startTime?: string;
+  intervalHours?: number;
+  completionHours?: number;
+  queueSettings?: Record<number, SurveillanceQueueSetting>;
+}
+
+const DEFAULT_START_TIME = "08:00";
+const DEFAULT_INTERVAL_HOURS = 2;
+const DEFAULT_COMPLETION_HOURS = 4;
+const CATEGORY_PATTERN = /\bFTTH\s+(?:AKSES|DISTRIBUSI|BACKBONE|FEEDER)\b\s*[:\-–]?\s*/i;
+
+function startMinutes(value: string): number {
+  const match = /^(\d{1,2}):(\d{2})$/.exec(value);
+  if (!match) return 8 * 60;
+  const hours = Number(match[1]);
+  const minutes = Number(match[2]);
+  if (hours > 23 || minutes > 59) return 8 * 60;
+  return hours * 60 + minutes;
+}
+
+function completionLabel(hours: number | undefined): string {
+  const value = hours !== undefined && Number.isFinite(hours) && hours > 0 ? hours : DEFAULT_COMPLETION_HOURS;
+  return `${new Intl.NumberFormat("id-ID", { maximumFractionDigits: 2 }).format(value)} jam`;
+}
+
+export function surveillanceDeparture(
+  queue: number,
+  startTime = DEFAULT_START_TIME,
+  intervalHours = DEFAULT_INTERVAL_HOURS,
+): string {
+  const interval = Number.isFinite(intervalHours) ? Math.max(0, intervalHours) : DEFAULT_INTERVAL_HOURS;
+  const elapsed = Math.max(0, queue - 1) * interval * 60;
+  const totalMinutes = ((startMinutes(startTime) + Math.round(elapsed)) % 1440 + 1440) % 1440;
+  return `${String(Math.floor(totalMinutes / 60)).padStart(2, "0")}:${String(totalMinutes % 60).padStart(2, "0")}`;
 }
 
 /** Read the queue report as a stream: one queue may contain several incidents. */
-export function parseSurveillance(raw: string): { incidents: SurveillanceIncident[]; warnings: string[] } {
+export function parseSurveillance(
+  raw: string,
+  options: SurveillanceOptions = {},
+): { incidents: SurveillanceIncident[]; warnings: string[] } {
   const incidents: SurveillanceIncident[] = [];
   const warnings: string[] = [];
   let queue: number | undefined;
   let incidentId = "";
   const lines = raw.replace(/\r\n?/g, "\n").split("\n");
+
   for (let index = 0; index < lines.length; index++) {
     const line = lines[index].trim();
     if (!line) continue;
@@ -43,6 +67,7 @@ export function parseSurveillance(raw: string): { incidents: SurveillanceInciden
       incidentId = "";
       continue;
     }
+
     const queueMatch = /\bANTRIAN\s*(?:KE\s*)?[-–:]?\s*(\d+)\b/i.exec(line);
     if (queueMatch) {
       queue = Number(queueMatch[1]);
@@ -52,29 +77,41 @@ export function parseSurveillance(raw: string): { incidents: SurveillanceInciden
         queue = undefined;
       }
     }
-    const category = /\bFTTH\s+AKSES\b\s*[:\-–]?\s*/i.exec(line);
+
+    const category = CATEGORY_PATTERN.exec(line);
     const prefix = category ? line.slice(0, category.index) : line;
     const idMatch = /\b(?:ID\s*(?:INSIDEN|INCIDENT)|(?:INSIDEN|INCIDENT|INSIDENT)(?:\s*ID)?)\s*[:#-]?\s*(\d+)\b/i.exec(prefix)
       ?? /^\s*\*?(\d{6,})\*?\s*$/.exec(prefix)
       ?? /(?:^|\s)(\d{6,})(?=\s|$)/.exec(prefix);
     if (idMatch) incidentId = idMatch[1];
     if (!category) continue;
-    const name = extractCustomer(line.slice(category.index + category[0].length));
-    if (!queue || !incidentId || !name) {
-      warnings.push(`Baris ${index + 1}: ${!queue ? "nomor antrian" : !incidentId ? "ID incident" : "nama user"} tidak ditemukan.`);
+
+    // Everything after the FTTH category is ticket content and must remain intact.
+    const customerName = line.slice(category.index + category[0].length).trim();
+    if (!queue || !incidentId || !customerName) {
+      warnings.push(`Baris ${index + 1}: ${!queue ? "nomor antrian" : !incidentId ? "ID incident" : "deskripsi tiket"} tidak ditemukan.`);
       incidentId = "";
       continue;
     }
-    incidents.push({ queue, customerName: name, incidentId, departure: surveillanceDeparture(queue), completion: "2 jam" });
+
+    const setting = options.queueSettings?.[queue];
+    incidents.push({
+      queue,
+      customerName,
+      incidentId,
+      departure: setting?.departure || surveillanceDeparture(queue, options.startTime, options.intervalHours),
+      completion: completionLabel(setting?.completionHours ?? options.completionHours),
+    });
     incidentId = "";
   }
+
   return { incidents, warnings };
 }
 
 export function formatSurveillance(incidents: SurveillanceIncident[]): string {
   return incidents.map((incident) => [
     `Nama User : ${incident.customerName}`,
-    `Tim : Antrian ke ${incident.queue}`,
+    `Tim : Antrian ke - ${incident.queue}`,
     `Id Insiden : ${incident.incidentId}`,
     `Estimasi Berangkat (jam): ${incident.departure}`,
     `Estimasi Penyelesaian (jam): ${incident.completion}`,
