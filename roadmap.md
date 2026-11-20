@@ -1,6 +1,7 @@
 # Current tasks
 
-- [ ] Match the Team NOC custom date filter to the existing Ranking User NOC calendar without changing analytics or other filters; verify real-data desktop/mobile interaction.
+- [x] Match Team NOC Custom to the existing Ranking User NOC calendar with direct range selection, identical sizing and dropdown; desktop calendar and real-data ranking verified, 13 analytics tests passed.
+- [ ] Complete range-change/mobile browser verification for Team NOC Custom; blocked by the preview remaining in route loading on subsequent checks (no runtime error reported).
 
 - [x] Update NOC user ranking to normalized 50% Created + 50% Resolved scoring, new performance categories, score-only ordering, detailed user history, and consistent real-data charts; 13 rule tests and signed-in desktop/mobile UI checks passed.
 
