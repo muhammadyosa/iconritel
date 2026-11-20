@@ -13,16 +13,25 @@ import {
   type SurveillanceQueueSetting,
 } from "@/lib/surveillance";
 
-const EXAMPLE_INPUT = `20/11/2026
-TIM: SERPO ARGA MAKMUR
+const EXAMPLE_INPUT = `TIM: FTTH AKSES
+ANTRIAN 1
+12 JAM 22 MENIT
+26112100416
+FTTH AKSES TANSYA SAPTA ALMEGA LINK LOSS - SERPO MUKO MUKO FAT_123 SBS-MUKO-RC-OLT-04 SN ONT 48575443
+
+ANTRIAN 2
+26112100542
+FTTH AKSES YAHYA ISMAWAN PEGAWAI PLN BAD RX - SERPO SUNGAI PENUH
+
+TIM: FTTH FEEDER
 ANTRIAN 1
 12 JAM 22 MENIT
 26112101200
-FTTH AKSES [PROACTIVE NOC RETAIL] FAT LOSS - SPLT_TUBA015 - UNDER - SBS-LEBONG.LEBONG-MA5800-OLT-01 - SERPO ARGA MAKMUR
+FTTH FEEDER [PROACTIVE NOC RETAIL] FAT LOSS - SPLT_TUBA015 - UNDER - SBS-LEBONG.LEBONG-MA5800-OLT-01 - SERPO ARGA MAKMUR
 
 ANTRIAN 2
-26112101201
-FTTH FEEDER [PROACTIVE NOC RETAIL] OLT BAD RX SEGMEN - SBS-MUKO.MUKO-RC-OLT-04 - TO - SBS-PONDOK.SUGUH-NE8000-UPE-01 - SERPO MUKO MUKO`;
+26112101251
+FTTH FEEDER [PROACTIVE NOC RETAIL] OLT DOWN UNDER - SBS-ARGA.MAKMUR-RC-OLT-01 - SERPO ARGA MAKMUR`;
 
 const EXAMPLE_OUTPUT = formatSurveillance(parseSurveillance(EXAMPLE_INPUT).incidents);
 
@@ -36,28 +45,87 @@ function positiveNumber(value: string, fallback: number): number {
   return Number.isFinite(number) && number > 0 ? number : fallback;
 }
 
+interface CategoryScheduleProps {
+  id: string;
+  title: string;
+  description: string;
+  startTime: string;
+  intervalHours: string;
+  completionHours: string;
+  onStartTimeChange: (value: string) => void;
+  onIntervalChange: (value: string) => void;
+  onCompletionChange: (value: string) => void;
+}
+
+function CategorySchedule({
+  id,
+  title,
+  description,
+  startTime,
+  intervalHours,
+  completionHours,
+  onStartTimeChange,
+  onIntervalChange,
+  onCompletionChange,
+}: CategoryScheduleProps) {
+  return (
+    <div className="space-y-2 rounded border bg-background p-2.5">
+      <div>
+        <p className="text-xs font-medium">{title}</p>
+        <p className="text-[10px] text-muted-foreground">{description}</p>
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+        <div className="space-y-1">
+          <Label htmlFor={`${id}-start`} className="text-[10px] text-muted-foreground">Mulai Berangkat</Label>
+          <Input id={`${id}-start`} type="time" value={startTime} onChange={(event) => onStartTimeChange(event.target.value)} className="h-8 px-2 text-xs" />
+        </div>
+        <div className="space-y-1">
+          <Label htmlFor={`${id}-interval`} className="text-[10px] text-muted-foreground">Interval (jam)</Label>
+          <Input id={`${id}-interval`} type="number" min="0" max="24" step="0.5" value={intervalHours} onChange={(event) => onIntervalChange(event.target.value)} className="h-8 px-2 text-xs" />
+        </div>
+        <div className="space-y-1">
+          <Label htmlFor={`${id}-completion`} className="text-[10px] text-muted-foreground">Penyelesaian (jam)</Label>
+          <Input id={`${id}-completion`} type="number" min="0.5" max="72" step="0.5" value={completionHours} onChange={(event) => onCompletionChange(event.target.value)} className="h-8 px-2 text-xs" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function SurveillanceTab() {
   const [input, setInput] = useState("");
   const [output, setOutput] = useState("");
   const [editing, setEditing] = useState(false);
   const [warnings, setWarnings] = useState<string[]>([]);
   const [count, setCount] = useState(0);
-  const [startTime, setStartTime] = useState("08:00");
-  const [intervalHours, setIntervalHours] = useState("2");
-  const [completionHours, setCompletionHours] = useState("4");
+  const [accessStartTime, setAccessStartTime] = useState("08:00");
+  const [accessIntervalHours, setAccessIntervalHours] = useState("2");
+  const [accessCompletionHours, setAccessCompletionHours] = useState("2");
+  const [infrastructureStartTime, setInfrastructureStartTime] = useState("08:00");
+  const [infrastructureIntervalHours, setInfrastructureIntervalHours] = useState("4");
+  const [infrastructureCompletionHours, setInfrastructureCompletionHours] = useState("4");
   const [queueSettings, setQueueSettings] = useState<Record<number, SurveillanceQueueSetting>>({});
 
-  const intervalValue = nonNegativeNumber(intervalHours, 2);
-  const completionValue = positiveNumber(completionHours, 4);
+  const accessIntervalValue = nonNegativeNumber(accessIntervalHours, 2);
+  const accessCompletionValue = positiveNumber(accessCompletionHours, 2);
+  const infrastructureIntervalValue = nonNegativeNumber(infrastructureIntervalHours, 4);
+  const infrastructureCompletionValue = positiveNumber(infrastructureCompletionHours, 4);
   const queueNumbers = useMemo(() => Array.from(
     new Set(parseSurveillance(input).incidents.map((incident) => incident.queue)),
   ).sort((a, b) => a - b), [input]);
 
   const generate = () => {
     const result = parseSurveillance(input, {
-      startTime,
-      intervalHours: intervalValue,
-      completionHours: completionValue,
+      access: {
+        startTime: accessStartTime,
+        intervalHours: accessIntervalValue,
+        completionHours: accessCompletionValue,
+      },
+      infrastructure: {
+        startTime: infrastructureStartTime,
+        intervalHours: infrastructureIntervalValue,
+        completionHours: infrastructureCompletionValue,
+      },
       queueSettings,
     });
     setWarnings(result.warnings);
@@ -97,9 +165,12 @@ export function SurveillanceTab() {
     setWarnings([]);
     setCount(0);
     setEditing(false);
-    setStartTime("08:00");
-    setIntervalHours("2");
-    setCompletionHours("4");
+    setAccessStartTime("08:00");
+    setAccessIntervalHours("2");
+    setAccessCompletionHours("2");
+    setInfrastructureStartTime("08:00");
+    setInfrastructureIntervalHours("4");
+    setInfrastructureCompletionHours("4");
     setQueueSettings({});
   };
 
@@ -119,16 +190,15 @@ export function SurveillanceTab() {
         </CollapsibleTrigger>
         <CollapsibleContent className="mt-2 space-y-3 rounded-md border bg-muted/30 p-3 text-xs">
           <ul className="list-disc pl-4 space-y-1 text-muted-foreground">
-            <li>Tanggal laporan dan <span className="font-mono text-foreground">TIM:</span> boleh disertakan. Setiap antrian diawali <span className="font-mono text-foreground">ANTRIAN 1</span>, <span className="font-mono text-foreground">ANTRIAN 2</span>, dst.</li>
-            <li>ID Incident berupa angka minimal 6 digit dan selalu dipasangkan dengan antrian tempat ID tersebut ditulis.</li>
+            <li>Tanggal laporan dan <span className="font-mono text-foreground">TIM:</span> boleh disertakan. Nomor antrian dan ID Incident selalu mengikuti pasangan pada input.</li>
             <li>Durasi gangguan seperti <span className="font-mono text-foreground">12 JAM 22 MENIT</span> bersifat opsional dan diabaikan.</li>
-            <li>Kategori yang didukung: <span className="font-mono text-foreground">FTTH AKSES</span>, <span className="font-mono text-foreground">FTTH DISTRIBUSI</span>, <span className="font-mono text-foreground">FTTH BACKBONE</span>, dan <span className="font-mono text-foreground">FTTH FEEDER</span>.</li>
-            <li>Seluruh deskripsi setelah kategori dipertahankan, termasuk label proactive, jenis gangguan, lokasi, OLT, SERPO, dan informasi teknis lainnya.</li>
-            <li>Estimasi penyelesaian default 4 jam. Keberangkatan dimulai 08:00 dengan interval default 2 jam dan dapat diatur per antrian.</li>
+            <li><span className="font-mono text-foreground">FTTH AKSES</span>: hanya nama pelanggan sebelum LINK LOSS atau informasi teknis; penyelesaian 2 jam dan interval keberangkatan 2 jam mulai 08:00.</li>
+            <li><span className="font-mono text-foreground">FTTH FEEDER</span>, <span className="font-mono text-foreground">FTTH BACKBONE</span>, dan <span className="font-mono text-foreground">FTTH DISTRIBUSI</span>: seluruh deskripsi dipertahankan; penyelesaian 4 jam dan interval keberangkatan 4 jam mulai 08:00.</li>
+            <li>Kategori dan estimasi dikenali otomatis. Pengaturan dapat disesuaikan per kategori, dengan override waktu berangkat per antrian.</li>
           </ul>
           <div className="space-y-1">
             <div className="flex items-center justify-between gap-2">
-              <p className="font-medium">Contoh Input</p>
+              <p className="font-medium">Contoh Input — FTTH AKSES dan FEEDER</p>
               <Button size="sm" variant="secondary" className="h-7 text-xs" onClick={async () => {
                 try {
                   await navigator.clipboard.writeText(EXAMPLE_INPUT);
@@ -150,60 +220,53 @@ export function SurveillanceTab() {
       <div className="space-y-3 rounded-md border bg-muted/20 p-3">
         <div className="flex items-center gap-2 text-xs font-medium">
           <Settings2 className="h-3.5 w-3.5 text-muted-foreground" />
-          Pengaturan Estimasi
+          Pengaturan Estimasi Otomatis per Kategori
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <div className="space-y-1.5">
-            <Label htmlFor="surveillance-start" className="text-[11px]">Mulai Berangkat</Label>
-            <Input id="surveillance-start" type="time" value={startTime} onChange={(event) => setStartTime(event.target.value)} className="h-8 text-xs" />
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="surveillance-interval" className="text-[11px]">Interval Antar Antrian (jam)</Label>
-            <Input id="surveillance-interval" type="number" min="0" max="24" step="0.5" value={intervalHours} onChange={(event) => setIntervalHours(event.target.value)} className="h-8 text-xs" />
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="surveillance-completion" className="text-[11px]">Penyelesaian Default (jam)</Label>
-            <Input id="surveillance-completion" type="number" min="0.5" max="72" step="0.5" value={completionHours} onChange={(event) => setCompletionHours(event.target.value)} className="h-8 text-xs" />
-          </div>
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-2">
+          <CategorySchedule
+            id="surveillance-access"
+            title="FTTH AKSES"
+            description="Nama pelanggan saja · default 2 jam"
+            startTime={accessStartTime}
+            intervalHours={accessIntervalHours}
+            completionHours={accessCompletionHours}
+            onStartTimeChange={setAccessStartTime}
+            onIntervalChange={setAccessIntervalHours}
+            onCompletionChange={setAccessCompletionHours}
+          />
+          <CategorySchedule
+            id="surveillance-infrastructure"
+            title="FTTH FEEDER / BACKBONE / DISTRIBUSI"
+            description="Deskripsi lengkap · default 4 jam"
+            startTime={infrastructureStartTime}
+            intervalHours={infrastructureIntervalHours}
+            completionHours={infrastructureCompletionHours}
+            onStartTimeChange={setInfrastructureStartTime}
+            onIntervalChange={setInfrastructureIntervalHours}
+            onCompletionChange={setInfrastructureCompletionHours}
+          />
         </div>
 
         {queueNumbers.length > 0 && (
           <div className="space-y-2 border-t pt-3">
-            <p className="text-[11px] text-muted-foreground">Penyesuaian per antrian · klik Generate setelah mengubah pengaturan.</p>
+            <p className="text-[11px] text-muted-foreground">Override waktu berangkat per antrian · kosongkan untuk kembali ke jadwal otomatis.</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-2">
-              {queueNumbers.map((queue) => {
-                const setting = queueSettings[queue];
-                return (
-                  <div key={queue} className="grid grid-cols-2 gap-2 rounded border bg-background p-2">
-                    <p className="col-span-2 text-xs font-medium">Antrian ke - {queue}</p>
-                    <div className="space-y-1">
-                      <Label htmlFor={`surveillance-queue-${queue}-departure`} className="text-[10px] text-muted-foreground">Berangkat</Label>
-                      <Input
-                        id={`surveillance-queue-${queue}-departure`}
-                        type="time"
-                        value={setting?.departure ?? surveillanceDeparture(queue, startTime, intervalValue)}
-                        onChange={(event) => updateQueueSetting(queue, { departure: event.target.value })}
-                        className="h-8 px-2 text-xs"
-                      />
-                    </div>
-                    <div className="space-y-1">
-                      <Label htmlFor={`surveillance-queue-${queue}-completion`} className="text-[10px] text-muted-foreground">Penyelesaian (jam)</Label>
-                      <Input
-                        id={`surveillance-queue-${queue}-completion`}
-                        type="number"
-                        min="0.5"
-                        max="72"
-                        step="0.5"
-                        value={setting?.completionHours ?? completionValue}
-                        onChange={(event) => updateQueueSetting(queue, {
-                          completionHours: event.target.value === "" ? undefined : positiveNumber(event.target.value, completionValue),
-                        })}
-                        className="h-8 px-2 text-xs"
-                      />
-                    </div>
-                  </div>
-                );
-              })}
+              {queueNumbers.map((queue) => (
+                <div key={queue} className="space-y-1.5 rounded border bg-background p-2">
+                  <p className="text-xs font-medium">Antrian ke - {queue}</p>
+                  <Label htmlFor={`surveillance-queue-${queue}-departure`} className="text-[10px] text-muted-foreground">Override Berangkat</Label>
+                  <Input
+                    id={`surveillance-queue-${queue}-departure`}
+                    type="time"
+                    value={queueSettings[queue]?.departure ?? ""}
+                    onChange={(event) => updateQueueSetting(queue, { departure: event.target.value || undefined })}
+                    className="h-8 px-2 text-xs"
+                  />
+                  <p className="text-[10px] leading-relaxed text-muted-foreground">
+                    Otomatis: AKSES {surveillanceDeparture(queue, accessStartTime, accessIntervalValue)} · kategori lain {surveillanceDeparture(queue, infrastructureStartTime, infrastructureIntervalValue)}
+                  </p>
+                </div>
+              ))}
             </div>
           </div>
         )}
@@ -213,7 +276,7 @@ export function SurveillanceTab() {
         <div className="min-w-0 space-y-2">
           <Label htmlFor="surveillance-input" className="text-xs">Data Tiket / Antrian</Label>
           <Textarea id="surveillance-input" value={input} onChange={(event) => setInput(event.target.value)}
-            placeholder={"20/11/2026\nTIM: SERPO ARGA MAKMUR\nANTRIAN 1\n12 JAM 22 MENIT\n26112101200\nFTTH AKSES [PROACTIVE NOC RETAIL] ..."} spellCheck={false}
+            placeholder={"TIM: FTTH AKSES\nANTRIAN 1\n12 JAM 22 MENIT\n26112100416\nFTTH AKSES TANSYA SAPTA ALMEGA LINK LOSS ..."} spellCheck={false}
             className="min-h-[300px] lg:min-h-[420px] font-mono text-xs bg-muted/30" />
         </div>
         <div className="min-w-0 space-y-2">
