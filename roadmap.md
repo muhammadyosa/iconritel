@@ -5,7 +5,7 @@
 
 - [x] Update NOC user ranking to normalized 50% Created + 50% Resolved scoring, new performance categories, score-only ordering, detailed user history, and consistent real-data charts; 13 rule tests and signed-in desktop/mobile UI checks passed.
 
-- [ ] Differentiate 🔭 SURVEILLANCE parsing and schedules for FTTH AKSES (customer-only, 2-hour completion/interval) versus FEEDER/BACKBONE/DISTRIBUSI (full description, 4-hour completion/interval), with category-specific settings and updated examples.
+- [x] Differentiate 🔭 SURVEILLANCE parsing and schedules for FTTH AKSES (customer-only, 2-hour completion/interval) versus FEEDER/BACKBONE/DISTRIBUSI (full description, 4-hour completion/interval), with category-specific settings and updated examples; 11 rule tests and authenticated exact-example, override, Edit/Copy/Reset, and responsive checks passed.
 
 - [x] Make every page tab bar wrap instead of scrolling horizontally so no tab is hidden; verified all tabs visible at 1110px on Report, Incident Management, and Settings, plus Generate/Copy on 🔭 SURVEILLANCE.
 
