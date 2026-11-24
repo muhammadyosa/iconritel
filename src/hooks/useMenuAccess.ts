@@ -64,7 +64,9 @@ export function useMenuAccess() {
     return subscribe(user.id, qc);
   }, [user, qc]);
 
-  const allowedPaths = customPaths ?? getDefaultPaths(role);
+  // Eviden NOC selalu tersedia: privasinya dijaga server per laporan.
+  const base = customPaths ?? getDefaultPaths(role);
+  const allowedPaths = base.includes("/eviden") ? base : [...base, "/eviden"];
   const canAccess = useCallback((path: string) => allowedPaths.includes(path), [allowedPaths]);
 
   return {

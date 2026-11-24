@@ -12,3 +12,4 @@
 - Page tab bars wrap to a new row at every width (no `sm:flex-nowrap` on TabsList) — the horizontal scroll wrapper hides its scrollbar, so a non-wrapping bar pushes the last tab out of view with no way to reach it.
 
 - Incident analytics read the permanent `incident_archive` table (filled by a trigger on tickets) through pure rules in `src/lib/nocAnalytics.ts` — live tickets are auto-deleted after resolution, so analytics must never depend on the live list.
+- Eviden NOC data is read/written only through SECURITY DEFINER `eviden_*` RPCs that mask the sender; never grant recipients direct table reads, because RLS cannot hide the sender column.

@@ -26,6 +26,7 @@ import { MobileBottomNav } from "@/components/MobileBottomNav";
 import { GlobalSearch } from "@/components/GlobalSearch";
 import { RecentActivity } from "@/components/RecentActivity";
 import { FeatureUpdates } from "@/components/FeatureUpdates";
+import { EvidenNotifications } from "@/components/eviden/EvidenNotifications";
 import plnIconPlusLogo from "@/assets/pln-icon-plus.png";
 import danantaraLight from "@/assets/danantara-light.png";
 import danantaraDark from "@/assets/danantara-dark.svg";
@@ -44,6 +45,7 @@ const AKVList = React.lazy(() => import("./pages/AKVList"));
 const ListNote = React.lazy(() => import("./pages/ListNote"));
 const AutoConfig = React.lazy(() => import("./pages/AutoConfig"));
 const Report = React.lazy(() => import("./pages/Report"));
+const EvidenNoc = React.lazy(() => import("./pages/EvidenNoc"));
 const Settings = React.lazy(() => import("./pages/Settings"));
 const Install = React.lazy(() => import("./pages/Install"));
 const Login = React.lazy(() => import("./pages/Login"));
@@ -81,6 +83,7 @@ const pageComponents: Record<string, React.LazyExoticComponent<React.ComponentTy
   "/notes": ListNote,
   "/auto-config": AutoConfig,
   "/report": Report,
+  "/eviden": EvidenNoc,
   "/settings": Settings,
 };
 
@@ -225,6 +228,7 @@ function AppLayout() {
               <div className="flex items-center gap-1 md:gap-2 shrink-0">
                 <GlobalSearch />
                 <RecentActivity variant="popover" />
+                <EvidenNotifications />
                 <FeatureUpdates />
                 <div className="hidden md:block"><UserMenu /></div>
               </div>

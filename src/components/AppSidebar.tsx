@@ -31,6 +31,7 @@ const menuItems = [
   { title: "List Config", path: "/auto-config", emoji: "💻" },
   { title: "List Note NOC", path: "/notes", emoji: "📖" },
   { title: "Report", path: "/report", emoji: "📝" },
+  { title: "Eviden NOC", path: "/eviden", emoji: "🔍" },
   { title: "Settings", path: "/settings", emoji: "🛠" },
 ] as const;
 

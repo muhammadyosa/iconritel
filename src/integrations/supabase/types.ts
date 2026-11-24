@@ -215,6 +215,249 @@ export type Database = {
         }
         Relationships: []
       }
+      noc_evaluation_activity_logs: {
+        Row: {
+          action: string
+          actor_kind: string
+          actor_name: string | null
+          actor_user_id: string | null
+          created_at: string
+          evaluation_id: string
+          from_status: string | null
+          id: string
+          note: string | null
+          to_status: string | null
+        }
+        Insert: {
+          action: string
+          actor_kind: string
+          actor_name?: string | null
+          actor_user_id?: string | null
+          created_at?: string
+          evaluation_id: string
+          from_status?: string | null
+          id?: string
+          note?: string | null
+          to_status?: string | null
+        }
+        Update: {
+          action?: string
+          actor_kind?: string
+          actor_name?: string | null
+          actor_user_id?: string | null
+          created_at?: string
+          evaluation_id?: string
+          from_status?: string | null
+          id?: string
+          note?: string | null
+          to_status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "noc_evaluation_activity_logs_evaluation_id_fkey"
+            columns: ["evaluation_id"]
+            isOneToOne: false
+            referencedRelation: "noc_evaluations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      noc_evaluation_answers: {
+        Row: {
+          created_at: string
+          evaluation_id: string
+          id: string
+          reason: string
+          revision_number: number
+          submitted_by: string
+          submitted_by_name: string | null
+        }
+        Insert: {
+          created_at?: string
+          evaluation_id: string
+          id?: string
+          reason: string
+          revision_number: number
+          submitted_by: string
+          submitted_by_name?: string | null
+        }
+        Update: {
+          created_at?: string
+          evaluation_id?: string
+          id?: string
+          reason?: string
+          revision_number?: number
+          submitted_by?: string
+          submitted_by_name?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "noc_evaluation_answers_evaluation_id_fkey"
+            columns: ["evaluation_id"]
+            isOneToOne: false
+            referencedRelation: "noc_evaluations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      noc_evaluation_attachments: {
+        Row: {
+          answer_id: string | null
+          attachment_type: string
+          created_at: string
+          evaluation_id: string
+          file_name: string | null
+          file_path: string
+          file_size: number
+          id: string
+          mime_type: string
+          uploaded_by: string
+        }
+        Insert: {
+          answer_id?: string | null
+          attachment_type: string
+          created_at?: string
+          evaluation_id: string
+          file_name?: string | null
+          file_path: string
+          file_size: number
+          id?: string
+          mime_type: string
+          uploaded_by: string
+        }
+        Update: {
+          answer_id?: string | null
+          attachment_type?: string
+          created_at?: string
+          evaluation_id?: string
+          file_name?: string | null
+          file_path?: string
+          file_size?: number
+          id?: string
+          mime_type?: string
+          uploaded_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "noc_evaluation_attachments_answer_id_fkey"
+            columns: ["answer_id"]
+            isOneToOne: false
+            referencedRelation: "noc_evaluation_answers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "noc_evaluation_attachments_evaluation_id_fkey"
+            columns: ["evaluation_id"]
+            isOneToOne: false
+            referencedRelation: "noc_evaluations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      noc_evaluation_notifications: {
+        Row: {
+          created_at: string
+          evaluation_code: string
+          evaluation_id: string
+          id: string
+          link: string
+          read_at: string | null
+          summary: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          evaluation_code: string
+          evaluation_id: string
+          id?: string
+          link: string
+          read_at?: string | null
+          summary?: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          evaluation_code?: string
+          evaluation_id?: string
+          id?: string
+          link?: string
+          read_at?: string | null
+          summary?: string | null
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "noc_evaluation_notifications_evaluation_id_fkey"
+            columns: ["evaluation_id"]
+            isOneToOne: false
+            referencedRelation: "noc_evaluations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      noc_evaluations: {
+        Row: {
+          answered_at: string | null
+          closed_at: string | null
+          code: string
+          created_at: string
+          customer_information: string
+          id: string
+          opened_at: string | null
+          problem: string
+          recipient_name: string | null
+          recipient_team: string | null
+          recipient_user_id: string
+          sender_name: string | null
+          sender_user_id: string
+          sent_at: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          answered_at?: string | null
+          closed_at?: string | null
+          code?: string
+          created_at?: string
+          customer_information: string
+          id?: string
+          opened_at?: string | null
+          problem: string
+          recipient_name?: string | null
+          recipient_team?: string | null
+          recipient_user_id: string
+          sender_name?: string | null
+          sender_user_id: string
+          sent_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          answered_at?: string | null
+          closed_at?: string | null
+          code?: string
+          created_at?: string
+          customer_information?: string
+          id?: string
+          opened_at?: string | null
+          problem?: string
+          recipient_name?: string | null
+          recipient_team?: string | null
+          recipient_user_id?: string
+          sender_name?: string | null
+          sender_user_id?: string
+          sent_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       notes: {
         Row: {
           content: string
@@ -532,6 +775,103 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      eviden_answer: {
+        Args: { _files: Json; _id: string; _reason: string }
+        Returns: number
+      }
+      eviden_close: { Args: { _id: string; _note: string }; Returns: undefined }
+      eviden_create: {
+        Args: {
+          _customer_information: string
+          _problem: string
+          _recipient: string
+        }
+        Returns: string
+      }
+      eviden_discard_draft: { Args: { _id: string }; Returns: undefined }
+      eviden_display_name: { Args: { _uid: string }; Returns: string }
+      eviden_get: { Args: { _id: string }; Returns: Json }
+      eviden_list: {
+        Args: never
+        Returns: {
+          answer_count: number
+          answered_at: string
+          closed_at: string
+          code: string
+          created_at: string
+          customer_information: string
+          id: string
+          opened_at: string
+          problem: string
+          recipient_name: string
+          recipient_team: string
+          recipient_user_id: string
+          sender_name: string
+          sent_at: string
+          status: string
+          viewer_kind: string
+        }[]
+      }
+      eviden_log: {
+        Args: {
+          _action: string
+          _e: Database["public"]["Tables"]["noc_evaluations"]["Row"]
+          _from: string
+          _kind: string
+          _note: string
+          _to: string
+        }
+        Returns: undefined
+      }
+      eviden_notify: {
+        Args: {
+          _e: Database["public"]["Tables"]["noc_evaluations"]["Row"]
+          _title: string
+          _type: string
+          _uid: string
+        }
+        Returns: undefined
+      }
+      eviden_notify_admins: {
+        Args: {
+          _e: Database["public"]["Tables"]["noc_evaluations"]["Row"]
+          _skip: string
+          _title: string
+          _type: string
+        }
+        Returns: undefined
+      }
+      eviden_open: { Args: { _id: string }; Returns: undefined }
+      eviden_recipients: {
+        Args: never
+        Returns: {
+          display_name: string
+          email: string
+          team: string
+          user_id: string
+        }[]
+      }
+      eviden_register_files: {
+        Args: {
+          _answer: string
+          _e: Database["public"]["Tables"]["noc_evaluations"]["Row"]
+          _files: Json
+          _type: string
+        }
+        Returns: number
+      }
+      eviden_request_revision: {
+        Args: { _id: string; _note: string }
+        Returns: undefined
+      }
+      eviden_send: { Args: { _files: Json; _id: string }; Returns: Json }
+      eviden_start: { Args: { _id: string }; Returns: undefined }
+      eviden_storage_can_read: { Args: { _name: string }; Returns: boolean }
+      eviden_storage_can_upload: { Args: { _name: string }; Returns: boolean }
+      eviden_viewer_kind: {
+        Args: { _e: Database["public"]["Tables"]["noc_evaluations"]["Row"] }
+        Returns: string
+      }
       get_user_role: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["app_role"]
