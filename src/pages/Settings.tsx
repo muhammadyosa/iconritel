@@ -35,6 +35,7 @@ import { ReportManagement } from "@/components/ReportManagement";
 import { TicketHistoryExport } from "@/components/TicketHistoryExport";
 import { TeamNOCManagement } from "@/components/TeamNOCManagement";
 import AuditHistory from "@/pages/AuditHistory";
+import { EvidenDataManagement } from "@/components/eviden/EvidenDataManagement";
 
 const UPE_STORE_NAME = "upe_data";
 const BNG_STORE_NAME = "bng_data";
@@ -630,6 +631,11 @@ export default function Settings() {
             {isAdmin && (
               <TabsTrigger value="audit" className="text-[11px] sm:text-sm px-2.5 sm:px-3 py-1.5 sm:py-2 whitespace-nowrap">
                 🧾 Audit History
+              </TabsTrigger>
+            )}
+            {isAdmin && (
+              <TabsTrigger value="data-management" className="text-[11px] sm:text-sm px-2.5 sm:px-3 py-1.5 sm:py-2 whitespace-nowrap">
+                🗑️ Data Management
               </TabsTrigger>
             )}
             {canSeeTab(SETTINGS_TABS, role, "info") && (
@@ -1289,6 +1295,12 @@ export default function Settings() {
         {isAdmin && (
           <TabsContent value="team-noc" className="space-y-6">
             <TeamNOCManagement />
+          </TabsContent>
+        )}
+
+        {isAdmin && (
+          <TabsContent value="data-management" className="space-y-6">
+            <EvidenDataManagement />
           </TabsContent>
         )}
 

@@ -25,7 +25,7 @@ function ReadBox({ label, text }: { label: string; text: string }) {
   );
 }
 
-export function EvaluationDetail({ id, onClose }: { id: string | null; onClose: () => void }) {
+export function EvaluationDetail({ id, onClose, readOnly = false }: { id: string | null; onClose: () => void; readOnly?: boolean }) {
   const { data: d, isLoading, refetch } = useEvidenDetail(id);
   const invalidate = useInvalidateEviden();
   const [reason, setReason] = useState("");
@@ -38,12 +38,12 @@ export function EvaluationDetail({ id, onClose }: { id: string | null; onClose: 
 
   useEffect(() => { setReason(""); setFiles([]); started.current = false; }, [id]);
   useEffect(() => {
-    if (d?.is_recipient && d.status === "SENT") supabase.rpc("eviden_open", { _id: d.id }).then(() => { refetch(); invalidate(); });
+    if (!readOnly && d?.is_recipient && d.status === "SENT") supabase.rpc("eviden_open", { _id: d.id }).then(() => { refetch(); invalidate(); });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [d?.id, d?.status, d?.is_recipient]);
+  }, [d?.id, d?.status, d?.is_recipient, readOnly]);
 
-  const canAnswer = !!d?.is_recipient && PENDING_STATUSES.includes(d.status as EvidenStatus);
-  const canManage = !!d && (d.viewer_kind === "admin" || d.is_sender);
+  const canAnswer = !readOnly && !!d?.is_recipient && PENDING_STATUSES.includes(d.status as EvidenStatus);
+  const canManage = !readOnly && !!d && (d.viewer_kind === "admin" || d.is_sender);
 
   const markStarted = () => {
     if (!d || started.current || !canAnswer || d.status === "IN PROGRESS") return;

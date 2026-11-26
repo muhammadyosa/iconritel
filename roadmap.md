@@ -1,5 +1,7 @@
 # Current tasks
 
+- [ ] Add admin-only Settings Data Management for Eviden NOC: filtered selection, detail, controlled bulk deletion, private-file cleanup, durable audit, and end-to-end verification.
+
 - [x] Match Team NOC Custom to the existing Ranking User NOC calendar with direct range selection, identical sizing and dropdown; desktop calendar and real-data ranking verified, 13 analytics tests passed.
 - [ ] Complete range-change/mobile browser verification for Team NOC Custom; blocked by the preview remaining in route loading on subsequent checks (no runtime error reported).
 

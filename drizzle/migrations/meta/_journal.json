@@ -29,6 +29,20 @@
       "when": 1795548040434,
       "tag": "0003_eviden_noc",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1795664786612,
+      "tag": "0004_eviden_admin_data_management",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1795664911826,
+      "tag": "0005_eviden_deletion_concurrency_audit_guard",
+      "breakpoints": true
     }
   ]
 }

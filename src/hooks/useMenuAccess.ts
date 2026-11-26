@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { useQuery, useQueryClient, type QueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -65,8 +65,10 @@ export function useMenuAccess() {
   }, [user, qc]);
 
   // Eviden NOC selalu tersedia: privasinya dijaga server per laporan.
-  const base = customPaths ?? getDefaultPaths(role);
-  const allowedPaths = base.includes("/eviden") ? base : [...base, "/eviden"];
+  const allowedPaths = useMemo(() => {
+    const base = customPaths ?? getDefaultPaths(role);
+    return base.includes("/eviden") ? base : [...base, "/eviden"];
+  }, [customPaths, role]);
   const canAccess = useCallback((path: string) => allowedPaths.includes(path), [allowedPaths]);
 
   return {

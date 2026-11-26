@@ -408,6 +408,7 @@ export type Database = {
           code: string
           created_at: string
           customer_information: string
+          deletion_batch_id: string | null
           id: string
           opened_at: string | null
           problem: string
@@ -426,6 +427,7 @@ export type Database = {
           code?: string
           created_at?: string
           customer_information: string
+          deletion_batch_id?: string | null
           id?: string
           opened_at?: string | null
           problem: string
@@ -444,6 +446,7 @@ export type Database = {
           code?: string
           created_at?: string
           customer_information?: string
+          deletion_batch_id?: string | null
           id?: string
           opened_at?: string | null
           problem?: string
@@ -775,6 +778,21 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      eviden_admin_list: {
+        Args: {
+          _direction?: string
+          _from?: string
+          _ids_only?: boolean
+          _page?: number
+          _search?: string
+          _size?: number
+          _sort?: string
+          _status?: string
+          _team?: string
+          _to?: string
+        }
+        Returns: Json
+      }
       eviden_answer: {
         Args: { _files: Json; _id: string; _reason: string }
         Returns: number
@@ -786,6 +804,18 @@ export type Database = {
           _problem: string
           _recipient: string
         }
+        Returns: string
+      }
+      eviden_delete_finalize: {
+        Args: { _actor: string; _batch: string }
+        Returns: number
+      }
+      eviden_delete_manifest: {
+        Args: { _actor: string; _batch: string }
+        Returns: Json
+      }
+      eviden_delete_prepare: {
+        Args: { _actor: string; _ids: string[] }
         Returns: string
       }
       eviden_discard_draft: { Args: { _id: string }; Returns: undefined }
